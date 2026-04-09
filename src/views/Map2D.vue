@@ -202,16 +202,23 @@ const getSnapPoint = (start: Point, current: Point): Point => {
     }
   }
   
+  let minDistance = 10
+  let nearestPoint: Point | null = null
+  
   if (minAngleDiff < 10) {
     const length = Math.hypot(dx, dy)
     
     const snapAngleRad = nearestSnapAngle * Math.PI / 180
-    snappedX = start.x + length * Math.cos(snapAngleRad)
-    snappedY = start.y + length * Math.sin(snapAngleRad)
+    const snappedXTemp = start.x + length * Math.cos(snapAngleRad)
+    const snappedYTemp = start.y + length * Math.sin(snapAngleRad)
+    
+    const distToMouse = Math.hypot(snappedXTemp - current.x, snappedYTemp - current.y)
+    if (distToMouse < minDistance) {
+      snappedX = snappedXTemp
+      snappedY = snappedYTemp
+      minDistance = distToMouse
+    }
   }
-  
-  let nearestPoint: Point | null = null
-  let minDistance = 10
   
   for (const point of tempWallPoints.value) {
     const dist = Math.hypot(current.x - point.x, current.y - point.y)
@@ -232,7 +239,7 @@ const getSnapPoint = (start: Point, current: Point): Point => {
 const drawWrapper = () => {
   const canvas = canvasRef.value
   if (canvas) {
-    draw(canvas, walls.value, doors.value, windows.value, tempWallPoints.value, hoverPoint.value, currentTool.value)
+    draw(canvas, walls.value, doors.value, windows.value, tempWallPoints.value, hoverPoint.value, currentTool.value, getNearestWall)
   }
 }
 

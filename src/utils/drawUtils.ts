@@ -95,7 +95,8 @@ export const draw = (
   windows: Window[],
   tempWallPoints: Point[],
   hoverPoint: Point | null,
-  currentTool: string
+  currentTool: string,
+  getNearestWall: (point: Point) => { wall: Wall; pointOnWall: Point; angle: number } | null
 ) => {
   if (!canvasRef) return
   const ctx = canvasRef.getContext('2d')
@@ -160,7 +161,14 @@ export const draw = (
   })
 
   if (hoverPoint && currentTool !== 'wall') {
-    // 这里需要传入 getNearestWall 函数，或者将逻辑移到这里
-    // 暂时保留占位
+    const nearestWall = getNearestWall(hoverPoint)
+    if (nearestWall) {
+      const { pointOnWall, angle } = nearestWall
+      if (currentTool === 'door') {
+        drawPreviewEntity(ctx, pointOnWall.x, pointOnWall.y, doorWidth, angle, '#e67e22', 'door')
+      } else if (currentTool === 'window') {
+        drawPreviewEntity(ctx, pointOnWall.x, pointOnWall.y, windowWidth, angle, '#3498db', 'window')
+      }
+    }
   }
 }
