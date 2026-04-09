@@ -387,10 +387,14 @@ export default defineComponent({
         
         if (tempWallPoints.value.length > 0) {
           const last = tempWallPoints.value[tempWallPoints.value.length - 1]
+          // 计算磁吸点
           const snapped = getSnapPoint(last, clickPoint)
+          // 计算磁吸点与上一个点的距离
           const dist = Math.hypot(snapped.x - last.x, snapped.y - last.y)
           
+          // 如果距离小于10px，认为是闭合折线
           if (dist < 10) {
+            // 如果折线点数量大于1，保存为完整墙体
             if (tempWallPoints.value.length > 1) {
               const newWall: Wall = {
                 id: Date.now().toString(),
@@ -404,12 +408,15 @@ export default defineComponent({
             return
           }
           
+          // 使用磁吸后的点
           clickPoint = snapped
         }
         
+        // 添加点击点到折线
         tempWallPoints.value.push(clickPoint)
         lastPoint.value = clickPoint
       } else {
+        // 门和窗户模式：查找最近的墙
         const nearest = getNearestWall({ x, y })
         if (nearest) {
           if (currentTool.value === 'door') {
@@ -450,16 +457,20 @@ export default defineComponent({
       if (currentTool.value === 'wall') {
         if (tempWallPoints.value.length > 0) {
           const last = tempWallPoints.value[tempWallPoints.value.length - 1]
+          // 计算鼠标到上一个点的距离
           const dist = Math.hypot(x - last.x, y - last.y)
           
+          // 如果距离小于阈值，吸附到上一个点（闭合折线）
           if (dist < snapThreshold) {
             hoverPoint.value = { ...last }
           } else {
+            // 否则计算磁吸点
             const snappedPoint = getSnapPoint(last, { x, y })
             hoverPoint.value = snappedPoint
           }
         }
       } else {
+        // 门和窗户模式：查找最近的墙
         const nearest = getNearestWall({ x, y })
         if (nearest) {
           hoverPoint.value = nearest.pointOnWall
@@ -472,35 +483,45 @@ export default defineComponent({
     }
     
     const getSnapPoint = (start: Point, current: Point): Point => {
+      // 计算从起点到当前鼠标位置的向量
       const dx = current.x - start.x
       const dy = current.y - start.y
+      // 计算向量角度（弧度），atan2返回-π到π之间的值
       const angle = Math.atan2(dy, dx)
+      // 将弧度转换为角度（-180°到180°）
       const angleDeg = angle * 180 / Math.PI
       
       let snappedX = current.x
       let snappedY = current.y
       
-      if (Math.abs(angleDeg) < 15 || Math.abs(Math.abs(angleDeg) - 180) < 15) {
-        snappedY = start.y
-      } else if (Math.abs(angleDeg - 90) < 15 || Math.abs(angleDeg + 90) < 15) {
-        snappedX = start.x
-      } else if (Math.abs(Math.abs(angleDeg) - 45) < 15 || Math.abs(Math.abs(angleDeg) - 135) < 15) {
-        const absDx = Math.abs(dx)
-        const absDy = Math.abs(dy)
-        const target = Math.max(absDx, absDy)
-        if (dx >= 0 && dy >= 0) {
-          snappedX = start.x + target
-          snappedY = start.y + target
-        } else if (dx >= 0 && dy < 0) {
-          snappedX = start.x + target
-          snappedY = start.y - target
-        } else if (dx < 0 && dy >= 0) {
-          snappedX = start.x - target
-          snappedY = start.y + target
-        } else {
-          snappedX = start.x - target
-          snappedY = start.y - target
+      // 定义磁吸角度白名单（水平、垂直、45度对角线）
+      const snapAngles = [0, 45, 90, 135, 180, -135, -90, -45]
+      
+      // 查找最接近的磁吸角度
+      let nearestSnapAngle = 0
+      let minAngleDiff = 180
+      
+      for (const snapAngle of snapAngles) {
+        // 计算角度差（考虑角度的周期性）
+        let diff = Math.abs(angleDeg - snapAngle)
+        if (diff > 180) {
+          diff = 360 - diff
         }
+        
+        if (diff < minAngleDiff) {
+          minAngleDiff = diff
+          nearestSnapAngle = snapAngle
+        }
+      }
+      
+      // 如果角度差小于15度，执行磁吸
+      if (minAngleDiff < 15) {
+        const length = Math.hypot(dx, dy)
+        
+        // 根据最接近的磁吸角度计算 snapped 坐标
+        const snapAngleRad = nearestSnapAngle * Math.PI / 180
+        snappedX = start.x + length * Math.cos(snapAngleRad)
+        snappedY = start.y + length * Math.sin(snapAngleRad)
       }
       
       return { x: Math.round(snappedX), y: Math.round(snappedY) }
