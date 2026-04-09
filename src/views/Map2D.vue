@@ -62,6 +62,8 @@ const tempWallPoints = ref<Point[]>([])
 const hoverPoint = ref<Point | null>(null)
 const lastPoint = ref<Point | null>(null)
 const history = ref<Wall[][]>([])
+const xAxisSnappedY = ref<number | null>(null)
+const yAxisSnappedX = ref<number | null>(null)
 
 interface NearestWallResult {
   wall: Wall
@@ -239,8 +241,8 @@ const getSnapPoint = (start: Point, current: Point): Point => {
   // yAxisSnappedX: 命中的x坐标值（垂直对齐，即x值与某个点一致）
   // xAxisDistance: 命中x轴对齐的最小距离
   // yAxisDistance: 命中y轴对齐的最小距离
-  let xAxisSnappedY: number | null = null
-  let yAxisSnappedX: number | null = null
+  let xAxisSnappedYVal: number | null = null
+  let yAxisSnappedXVal: number | null = null
   let xAxisDistance = Infinity
   let yAxisDistance = Infinity
   
@@ -249,16 +251,20 @@ const getSnapPoint = (start: Point, current: Point): Point => {
       const distToXAxis = Math.abs(current.y - point.y)
       if (distToXAxis < 10 && distToXAxis < xAxisDistance) {
         xAxisDistance = distToXAxis
-        xAxisSnappedY = point.y
+        xAxisSnappedYVal = point.y
       }
       
       const distToYAxis = Math.abs(current.x - point.x)
       if (distToYAxis < 10 && distToYAxis < yAxisDistance) {
         yAxisDistance = distToYAxis
-        yAxisSnappedX = point.x
+        yAxisSnappedXVal = point.x
       }
     }
   }
+  
+  // 更新ref值用于绘制参考线
+  xAxisSnappedY.value = xAxisSnappedYVal
+  yAxisSnappedX.value = yAxisSnappedXVal
   
   // 二、按照优先级依次尝试命中
   
@@ -268,57 +274,57 @@ const getSnapPoint = (start: Point, current: Point): Point => {
     snappedY = pointSnapped.y
   }
   // 2. 第二优先级：角度+轴对齐组合（计算交点）
-  else if (angleSnapped && (xAxisSnappedY !== null || yAxisSnappedX !== null)) {
+  else if (angleSnapped && (xAxisSnappedY.value !== null || yAxisSnappedX.value !== null)) {
     const angleRad = nearestSnapAngle * Math.PI / 180
     const k = Math.tan(angleRad)
     const b = angleSnapped.y - k * angleSnapped.x
     
-    if (xAxisSnappedY !== null && yAxisSnappedX !== null) {
+    if (xAxisSnappedYVal !== null && yAxisSnappedXVal !== null) {
       // 同时命中x和y轴，计算角度线与两条轴对齐线的交点，选择更近的
-      // 交点1：角度线与 x = yAxisSnappedX 的交点
-      const intersect1Y = k * yAxisSnappedX + b
-      const dist1 = Math.hypot(yAxisSnappedX - current.x, intersect1Y - current.y)
+      // 交点1：角度线与 x = yAxisSnappedXVal 的交点
+      const intersect1Y = k * yAxisSnappedXVal + b
+      const dist1 = Math.hypot(yAxisSnappedXVal - current.x, intersect1Y - current.y)
       
-      // 交点2：角度线与 y = xAxisSnappedY 的交点
+      // 交点2：角度线与 y = xAxisSnappedYVal 的交点
       let intersect2X
       if (Math.abs(angleRad - Math.PI / 2) < 0.01 || Math.abs(angleRad + Math.PI / 2) < 0.01) {
         intersect2X = angleSnapped.x
       } else {
-        intersect2X = (xAxisSnappedY - b) / k
+        intersect2X = (xAxisSnappedYVal - b) / k
       }
-      const dist2 = Math.hypot(intersect2X - current.x, xAxisSnappedY - current.y)
+      const dist2 = Math.hypot(intersect2X - current.x, xAxisSnappedYVal - current.y)
       
       if (dist1 <= dist2) {
-        snappedX = yAxisSnappedX
+        snappedX = yAxisSnappedXVal
         snappedY = intersect1Y
       } else {
         snappedX = intersect2X
-        snappedY = xAxisSnappedY
+        snappedY = xAxisSnappedYVal
       }
-    } else if (yAxisSnappedX !== null) {
+    } else if (yAxisSnappedXVal !== null) {
       console.log(1)
-      // 命中y轴对齐：交点是 (yAxisSnappedX, k * yAxisSnappedX + b)
+      // 命中y轴对齐：交点是 (yAxisSnappedXVal, k * yAxisSnappedXVal + b)
       // 处理垂直线情况（90度或-90度）
       if (Math.abs(angleRad - Math.PI / 2) < 0.01 || Math.abs(angleRad + Math.PI / 2) < 0.01) {
-        snappedX = yAxisSnappedX
+        snappedX = yAxisSnappedXVal
         snappedY = angleSnapped.y
       } else {
-        snappedX = yAxisSnappedX
-        snappedY = k * yAxisSnappedX + b
+        snappedX = yAxisSnappedXVal
+        snappedY = k * yAxisSnappedXVal + b
       }
-    } else if (xAxisSnappedY !== null) {
-      // 命中x轴对齐：交点是 ((xAxisSnappedY - b) / k, xAxisSnappedY)
+    } else if (xAxisSnappedYVal !== null) {
+      // 命中x轴对齐：交点是 ((xAxisSnappedYVal - b) / k, xAxisSnappedYVal)
       // 处理水平线情况（0度或180度，k=0）和垂直线情况（90度或-90度）
       if (Math.abs(angleRad - Math.PI / 2) < 0.01 || Math.abs(angleRad + Math.PI / 2) < 0.01) {
         // 垂直线：x保持不变
         snappedX = current.x
       } else if (Math.abs(angleRad) < 0.01 || Math.abs(angleRad - Math.PI) < 0.01 || Math.abs(angleRad + Math.PI) < 0.01) {
-        // 水平线：y保持为xAxisSnappedY，x使用angleSnapped.x
+        // 水平线：y保持为xAxisSnappedYVal，x使用angleSnapped.x
         snappedX = angleSnapped.x
       } else {
-        snappedX = (xAxisSnappedY - b) / k
+        snappedX = (xAxisSnappedYVal - b) / k
       }
-      snappedY = xAxisSnappedY
+      snappedY = xAxisSnappedYVal
     }
   }
   // 3. 第三优先级：单独角度磁吸
@@ -327,20 +333,20 @@ const getSnapPoint = (start: Point, current: Point): Point => {
     snappedY = angleSnapped.y
   }
   // 4. 第四优先级：单独轴对齐磁吸
-  else if (xAxisSnappedY !== null && yAxisSnappedX !== null) {
+  else if (xAxisSnappedYVal !== null && yAxisSnappedXVal !== null) {
     if (xAxisDistance <= yAxisDistance) {
-      snappedX = yAxisSnappedX
-      snappedY = xAxisSnappedY
+      snappedX = yAxisSnappedXVal
+      snappedY = xAxisSnappedYVal
     } else {
-      snappedX = yAxisSnappedX
-      snappedY = xAxisSnappedY
+      snappedX = yAxisSnappedXVal
+      snappedY = xAxisSnappedYVal
     }
-  } else if (yAxisSnappedX !== null) {
-    snappedX = yAxisSnappedX
+  } else if (yAxisSnappedXVal !== null) {
+    snappedX = yAxisSnappedXVal
     snappedY = current.y
-  } else if (xAxisSnappedY !== null) {
+  } else if (xAxisSnappedYVal !== null) {
     snappedX = current.x
-    snappedY = xAxisSnappedY
+    snappedY = xAxisSnappedYVal
   }
   
   return { x: Math.round(snappedX), y: Math.round(snappedY) }
@@ -349,7 +355,7 @@ const getSnapPoint = (start: Point, current: Point): Point => {
 const drawWrapper = () => {
   const canvas = canvasRef.value
   if (canvas) {
-    draw(canvas, walls.value, doors.value, windows.value, tempWallPoints.value, hoverPoint.value, currentTool.value, getNearestWall)
+    draw(canvas, walls.value, doors.value, windows.value, tempWallPoints.value, hoverPoint.value, currentTool.value, getNearestWall, xAxisSnappedY.value, yAxisSnappedX.value)
   }
 }
 

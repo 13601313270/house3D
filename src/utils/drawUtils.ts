@@ -96,7 +96,9 @@ export const draw = (
   tempWallPoints: Point[],
   hoverPoint: Point | null,
   currentTool: string,
-  getNearestWall: (point: Point) => { wall: Wall; pointOnWall: Point; angle: number } | null
+  getNearestWall: (point: Point) => { wall: Wall; pointOnWall: Point; angle: number } | null,
+  xAxisSnappedY: number | null,
+  yAxisSnappedX: number | null
 ) => {
   if (!canvasRef) return
   const ctx = canvasRef.getContext('2d')
@@ -169,6 +171,29 @@ export const draw = (
       } else if (currentTool === 'window') {
         drawPreviewEntity(ctx, pointOnWall.x, pointOnWall.y, windowWidth, angle, '#3498db', 'window')
       }
+    }
+  }
+
+  // 绘制轴对齐参考线
+  if (hoverPoint) {
+    ctx.strokeStyle = '#999'
+    ctx.lineWidth = 1
+    ctx.setLineDash([5, 5])
+    
+    // 垂直线（y轴对齐）
+    if (yAxisSnappedX !== null) {
+      ctx.beginPath()
+      ctx.moveTo(yAxisSnappedX, 0)
+      ctx.lineTo(yAxisSnappedX, canvasHeight)
+      ctx.stroke()
+    }
+    
+    // 水平线（x轴对齐）
+    if (xAxisSnappedY !== null) {
+      ctx.beginPath()
+      ctx.moveTo(0, xAxisSnappedY)
+      ctx.lineTo(canvasWidth, xAxisSnappedY)
+      ctx.stroke()
     }
   }
 }
