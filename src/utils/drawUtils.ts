@@ -6,6 +6,28 @@ export const snapThreshold = 20
 export const doorWidth = 90
 export const windowWidth = 120
 
+export const calculateAngle = (p1: Point, p2: Point, p3: Point): { angle: number; isConvex: boolean } | null => {
+  const v1x = p1.x - p2.x
+  const v1y = p1.y - p2.y
+  const v2x = p3.x - p2.x
+  const v2y = p3.y - p2.y
+  
+  const dot = v1x * v2x + v1y * v2y
+  const len1 = Math.hypot(v1x, v1y)
+  const len2 = Math.hypot(v2x, v2y)
+  
+  if (len1 === 0 || len2 === 0) return null
+  
+  const cosAngle = dot / (len1 * len2)
+  const angle = Math.acos(Math.max(-1, Math.min(1, cosAngle))) * 180 / Math.PI
+  
+  // 计算叉积判断凹凸性
+  const cross = v1x * v2y - v1y * v2x
+  const isConvex = cross > 0
+  
+  return { angle, isConvex }
+}
+
 export const drawPoint = (
   ctx: CanvasRenderingContext2D,
   x: number,
@@ -146,11 +168,42 @@ export const draw = (
         const midX = (point.x + prev.x) / 2
         const midY = (point.y + prev.y) / 2
         ctx.fillText(`${dist}px`, midX, midY - 5)
+        
+        // 绘制角度标记
+        if (index > 1) {
+          const prev2 = tempWallPoints[index - 2]
+          const angleResult = calculateAngle(prev2, prev, point)
+          if (angleResult !== null) {
+            const { angle, isConvex } = angleResult
+            const angleText = `${Math.round(angle)}°`
+            // 计算角度文本位置：在夹角内侧
+            // 如果夹角太小（< 30度），显示在外侧；否则显示在内侧
+            const offset = angle < 30 ? 15 : -15
+            const angleX = prev.x - 10
+            const angleY = prev.y + offset
+            ctx.fillText(angleText, angleX, angleY)
+          }
+        }
       }
     })
 
     if (hoverPoint) {
       drawPoint(ctx, hoverPoint.x, hoverPoint.y, '#42b983')
+      // 绘制最后一个转角的角度标记
+      if (tempWallPoints.length > 1) {
+        const last = tempWallPoints[tempWallPoints.length - 1]
+        const angleResult = calculateAngle(tempWallPoints[tempWallPoints.length - 2], last, hoverPoint)
+        if (angleResult !== null) {
+          const { angle } = angleResult
+          const angleText = `${Math.round(angle)}°`
+          // 计算角度文本位置：在夹角内侧
+          // 如果夹角太小（< 30度），显示在外侧；否则显示在内侧
+          const offset = angle < 30 ? 15 : -15
+          const angleX = last.x - 10
+          const angleY = last.y + offset
+          ctx.fillText(angleText, angleX, angleY)
+        }
+      }
     }
   }
 
