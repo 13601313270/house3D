@@ -494,8 +494,30 @@ export default defineComponent({
       let snappedX = current.x
       let snappedY = current.y
       
-      // 定义磁吸角度白名单（水平、垂直、45度对角线）
+      // 定义基础磁吸角度白名单（水平、垂直、45度对角线）
       const snapAngles = [0, 45, 90, 135, 180, -135, -90, -45]
+      
+      // 如果有前一段墙，添加垂直的两个角度
+      if (tempWallPoints.value.length > 1) {
+        const prev = tempWallPoints.value[tempWallPoints.value.length - 2]
+        const last = tempWallPoints.value[tempWallPoints.value.length - 1]
+        const prevDx = last.x - prev.x
+        const prevDy = last.y - prev.y
+        const prevAngle = Math.atan2(prevDy, prevDx)
+        const prevAngleDeg = prevAngle * 180 / Math.PI
+        
+        // 添加前一段墙的两个垂直角度，并归一化到 -180° 到 180° 区间
+        let perpendicularAngle1 = prevAngleDeg + 90
+        let perpendicularAngle2 = prevAngleDeg - 90
+        
+        // 归一化角度到 -180° 到 180° 区间
+        if (perpendicularAngle1 > 180) perpendicularAngle1 -= 360
+        if (perpendicularAngle1 < -180) perpendicularAngle1 += 360
+        if (perpendicularAngle2 > 180) perpendicularAngle2 -= 360
+        if (perpendicularAngle2 < -180) perpendicularAngle2 += 360
+        
+        snapAngles.push(perpendicularAngle1, perpendicularAngle2)
+      }
       
       // 查找最接近的磁吸角度
       let nearestSnapAngle = 0
@@ -514,14 +536,34 @@ export default defineComponent({
         }
       }
       
-      // 如果角度差小于15度，执行磁吸
-      if (minAngleDiff < 15) {
+      // 如果角度差小于10度，执行磁吸
+      if (minAngleDiff < 10) {
         const length = Math.hypot(dx, dy)
         
         // 根据最接近的磁吸角度计算 snapped 坐标
         const snapAngleRad = nearestSnapAngle * Math.PI / 180
         snappedX = start.x + length * Math.cos(snapAngleRad)
         snappedY = start.y + length * Math.sin(snapAngleRad)
+      }
+      
+      // 第二种磁吸逻辑：磁吸到已绘制的点上
+      // 检查是否接近 tempWallPoints 中的任何点（除了当前正在绘制的起点）
+      let nearestPoint: Point | null = null
+      let minDistance = 10  // 磁吸距离阈值
+      
+      for (const point of tempWallPoints.value) {
+        const dist = Math.hypot(current.x - point.x, current.y - point.y)
+        // 只有距离小于当前最小距离且不是起点本身时才更新
+        if (dist < minDistance && (point.x !== start.x || point.y !== start.y)) {
+          minDistance = dist
+          nearestPoint = point
+        }
+      }
+      
+      // 如果找到了最近的点且距离足够近，使用该点
+      if (nearestPoint) {
+        snappedX = nearestPoint.x
+        snappedY = nearestPoint.y
       }
       
       return { x: Math.round(snappedX), y: Math.round(snappedY) }
