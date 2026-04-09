@@ -202,35 +202,145 @@ const getSnapPoint = (start: Point, current: Point): Point => {
     }
   }
   
-  let minDistance = 10
-  let nearestPoint: Point | null = null
+  // 一、计算三组磁吸数据
+  
+  // 1. 计算角度磁吸数据
+  let angleSnapped: Point | null = null
+  let angleDistance = Infinity
   
   if (minAngleDiff < 10) {
     const length = Math.hypot(dx, dy)
-    
     const snapAngleRad = nearestSnapAngle * Math.PI / 180
     const snappedXTemp = start.x + length * Math.cos(snapAngleRad)
     const snappedYTemp = start.y + length * Math.sin(snapAngleRad)
-    
     const distToMouse = Math.hypot(snappedXTemp - current.x, snappedYTemp - current.y)
-    if (distToMouse < minDistance) {
-      snappedX = snappedXTemp
-      snappedY = snappedYTemp
-      minDistance = distToMouse
+    if (distToMouse < 10) {
+      angleSnapped = { x: snappedXTemp, y: snappedYTemp }
+      angleDistance = distToMouse
     }
   }
+  
+  // 2. 计算点磁吸数据
+  let pointSnapped: Point | null = null
+  let pointDistance = Infinity
   
   for (const point of tempWallPoints.value) {
     const dist = Math.hypot(current.x - point.x, current.y - point.y)
-    if (dist < minDistance && (point.x !== start.x || point.y !== start.y)) {
-      minDistance = dist
-      nearestPoint = point
+    if (dist < 10 && (point.x !== start.x || point.y !== start.y)) {
+      if (dist < pointDistance) {
+        pointDistance = dist
+        pointSnapped = { x: point.x, y: point.y }
+      }
     }
   }
   
-  if (nearestPoint) {
-    snappedX = nearestPoint.x
-    snappedY = nearestPoint.y
+  // 3. 计算轴对齐磁吸数据
+  // xAxisSnappedY: 命中的y坐标值（水平对齐，即y值与某个点一致）
+  // yAxisSnappedX: 命中的x坐标值（垂直对齐，即x值与某个点一致）
+  // xAxisDistance: 命中x轴对齐的最小距离
+  // yAxisDistance: 命中y轴对齐的最小距离
+  let xAxisSnappedY: number | null = null
+  let yAxisSnappedX: number | null = null
+  let xAxisDistance = Infinity
+  let yAxisDistance = Infinity
+  
+  for (const point of tempWallPoints.value) {
+    if (point.x !== start.x || point.y !== start.y) {
+      const distToXAxis = Math.abs(current.y - point.y)
+      if (distToXAxis < 10 && distToXAxis < xAxisDistance) {
+        xAxisDistance = distToXAxis
+        xAxisSnappedY = point.y
+      }
+      
+      const distToYAxis = Math.abs(current.x - point.x)
+      if (distToYAxis < 10 && distToYAxis < yAxisDistance) {
+        yAxisDistance = distToYAxis
+        yAxisSnappedX = point.x
+      }
+    }
+  }
+  
+  // 二、按照优先级依次尝试命中
+  
+  // 1. 最高优先级：点磁吸
+  if (pointSnapped) {
+    snappedX = pointSnapped.x
+    snappedY = pointSnapped.y
+  }
+  // 2. 第二优先级：角度+轴对齐组合（计算交点）
+  else if (angleSnapped && (xAxisSnappedY !== null || yAxisSnappedX !== null)) {
+    const angleRad = nearestSnapAngle * Math.PI / 180
+    const k = Math.tan(angleRad)
+    const b = angleSnapped.y - k * angleSnapped.x
+    
+    if (xAxisSnappedY !== null && yAxisSnappedX !== null) {
+      // 同时命中x和y轴，计算角度线与两条轴对齐线的交点，选择更近的
+      // 交点1：角度线与 x = yAxisSnappedX 的交点
+      const intersect1Y = k * yAxisSnappedX + b
+      const dist1 = Math.hypot(yAxisSnappedX - current.x, intersect1Y - current.y)
+      
+      // 交点2：角度线与 y = xAxisSnappedY 的交点
+      let intersect2X
+      if (Math.abs(angleRad - Math.PI / 2) < 0.01 || Math.abs(angleRad + Math.PI / 2) < 0.01) {
+        intersect2X = angleSnapped.x
+      } else {
+        intersect2X = (xAxisSnappedY - b) / k
+      }
+      const dist2 = Math.hypot(intersect2X - current.x, xAxisSnappedY - current.y)
+      
+      if (dist1 <= dist2) {
+        snappedX = yAxisSnappedX
+        snappedY = intersect1Y
+      } else {
+        snappedX = intersect2X
+        snappedY = xAxisSnappedY
+      }
+    } else if (yAxisSnappedX !== null) {
+      console.log(1)
+      // 命中y轴对齐：交点是 (yAxisSnappedX, k * yAxisSnappedX + b)
+      // 处理垂直线情况（90度或-90度）
+      if (Math.abs(angleRad - Math.PI / 2) < 0.01 || Math.abs(angleRad + Math.PI / 2) < 0.01) {
+        snappedX = yAxisSnappedX
+        snappedY = angleSnapped.y
+      } else {
+        snappedX = yAxisSnappedX
+        snappedY = k * yAxisSnappedX + b
+      }
+    } else if (xAxisSnappedY !== null) {
+      // 命中x轴对齐：交点是 ((xAxisSnappedY - b) / k, xAxisSnappedY)
+      // 处理水平线情况（0度或180度，k=0）和垂直线情况（90度或-90度）
+      if (Math.abs(angleRad - Math.PI / 2) < 0.01 || Math.abs(angleRad + Math.PI / 2) < 0.01) {
+        // 垂直线：x保持不变
+        snappedX = current.x
+      } else if (Math.abs(angleRad) < 0.01 || Math.abs(angleRad - Math.PI) < 0.01 || Math.abs(angleRad + Math.PI) < 0.01) {
+        // 水平线：y保持为xAxisSnappedY，x使用angleSnapped.x
+        snappedX = angleSnapped.x
+      } else {
+        snappedX = (xAxisSnappedY - b) / k
+      }
+      snappedY = xAxisSnappedY
+    }
+  }
+  // 3. 第三优先级：单独角度磁吸
+  else if (angleSnapped) {
+    snappedX = angleSnapped.x
+    snappedY = angleSnapped.y
+  }
+  // 4. 第四优先级：单独轴对齐磁吸
+  else if (xAxisSnappedY !== null && yAxisSnappedX !== null) {
+    if (xAxisDistance <= yAxisDistance) {
+      snappedX = yAxisSnappedX
+      snappedY = xAxisSnappedY
+    } else {
+      snappedX = yAxisSnappedX
+      snappedY = xAxisSnappedY
+    }
+  } else if (yAxisSnappedX !== null) {
+    snappedX = yAxisSnappedX
+    snappedY = current.y
+  } else if (xAxisSnappedY !== null) {
+    snappedX = current.x
+    snappedY = xAxisSnappedY
   }
   
   return { x: Math.round(snappedX), y: Math.round(snappedY) }
