@@ -120,7 +120,9 @@ export const draw = (
   currentTool: string,
   getNearestWall: (point: Point) => { wall: Wall; pointOnWall: Point; angle: number } | null,
   xAxisSnappedY: number | null,
-  yAxisSnappedX: number | null
+  yAxisSnappedX: number | null,
+  draggedPointIndex: number | null,
+  draggedWallIndex: number | null
 ) => {
   if (!canvasRef) return
   const ctx = canvasRef.getContext('2d')
@@ -143,6 +145,19 @@ export const draw = (
       ctx.lineTo(wall.points[i].x, wall.points[i].y)
     }
     ctx.stroke()
+    
+    // 绘制墙上的点
+    wall.points.forEach((point, pointIndex) => {
+      const isDragged = draggedWallIndex !== null && draggedWallIndex === walls.indexOf(wall) && pointIndex === draggedPointIndex
+      drawPoint(ctx, point.x, point.y, isDragged ? '#1890ff' : '#333')
+      if (isDragged) {
+        ctx.strokeStyle = '#1890ff'
+        ctx.lineWidth = 2
+        ctx.beginPath()
+        ctx.arc(point.x, point.y, 12, 0, Math.PI * 2)
+        ctx.stroke()
+      }
+    })
   })
 
   if (currentTool === 'wall' && tempWallPoints.length > 0) {
@@ -159,10 +174,18 @@ export const draw = (
     ctx.stroke()
 
     tempWallPoints.forEach((point, index) => {
-      drawPoint(ctx, point.x, point.y, '#42b983')
+      const isDragged = index === draggedPointIndex
+      drawPoint(ctx, point.x, point.y, isDragged ? '#1890ff' : '#42b983')
+      if (isDragged) {
+        ctx.strokeStyle = '#1890ff'
+        ctx.lineWidth = 2
+        ctx.beginPath()
+        ctx.arc(point.x, point.y, 12, 0, Math.PI * 2)
+        ctx.stroke()
+      }
       if (index > 0) {
         const prev = tempWallPoints[index - 1]
-        ctx.fillStyle = '#42b983'
+        ctx.fillStyle = isDragged ? '#1890ff' : '#42b983'
         ctx.font = '12px Arial'
         const dist = Math.round(Math.hypot(point.x - prev.x, point.y - prev.y))
         const midX = (point.x + prev.x) / 2

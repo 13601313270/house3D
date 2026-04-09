@@ -367,7 +367,9 @@ const getSnapPoint = (start: Point, current: Point): Point => {
 const drawWrapper = () => {
   const canvas = canvasRef.value
   if (canvas) {
-    draw(canvas, walls.value, doors.value, windows.value, tempWallPoints.value, hoverPoint.value, currentTool.value, getNearestWall, xAxisSnappedY.value, yAxisSnappedX.value)
+    const draggedPointIdx = draggedPoint.value ? draggedPoint.value.pointIndex : null
+    const draggedWallIdx = draggedPoint.value ? draggedPoint.value.wallIndex : null
+    draw(canvas, walls.value, doors.value, windows.value, tempWallPoints.value, hoverPoint.value, currentTool.value, getNearestWall, xAxisSnappedY.value, yAxisSnappedX.value, draggedPointIdx, draggedWallIdx)
   }
 }
 
