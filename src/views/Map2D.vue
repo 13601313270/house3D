@@ -361,14 +361,12 @@ export default defineComponent({
       const y = e.clientY - rect.top
       
       if (currentTool.value === 'wall') {
-        const point = { x, y }
+        let clickPoint = { x, y }
         
-        if (tempWallPoints.value.length === 0) {
-          tempWallPoints.value.push(point)
-          lastPoint.value = point
-        } else {
+        if (tempWallPoints.value.length > 0) {
           const last = tempWallPoints.value[tempWallPoints.value.length - 1]
-          const dist = Math.hypot(x - last.x, y - last.y)
+          const snapped = getSnapPoint(last, clickPoint)
+          const dist = Math.hypot(snapped.x - last.x, snapped.y - last.y)
           
           if (dist < 10) {
             if (tempWallPoints.value.length > 1) {
@@ -384,9 +382,11 @@ export default defineComponent({
             return
           }
           
-          tempWallPoints.value.push(point)
-          lastPoint.value = point
+          clickPoint = snapped
         }
+        
+        tempWallPoints.value.push(clickPoint)
+        lastPoint.value = clickPoint
       } else {
         const nearest = getNearestWall({ x, y })
         if (nearest) {
