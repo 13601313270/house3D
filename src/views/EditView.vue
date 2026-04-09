@@ -111,7 +111,7 @@ onMounted(() => {
   }
 
   glbloader.load(
-    './woodenHouse/未命名.gltf', // 你的材质文件路径，通常和 .obj 放在同一目录
+    'https://video-obj.oss-cn-beijing.aliyuncs.com/woodenHouse/index.gltf', // 你的材质文件路径，通常和 .obj 放在同一目录
     (materials: any) => {
       initScene(materials.scene)
       // // 关键步骤：预加载所有材质，让纹理图片准备好
