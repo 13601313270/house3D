@@ -107,6 +107,28 @@ export default defineComponent({
           ctx.canvas.height = canvasHeight
           draw()
         }
+        
+        const handleKeyDown = (e: KeyboardEvent) => {
+          if (e.key === 'Escape') {
+            if (tempWallPoints.value.length > 1) {
+              const newWall: Wall = {
+                id: Date.now().toString(),
+                points: [...tempWallPoints.value]
+              }
+              walls.value.push(newWall)
+              history.value.push(JSON.parse(JSON.stringify(walls.value)))
+              tempWallPoints.value = []
+              lastPoint.value = null
+            }
+            draw()
+          }
+        }
+        
+        window.addEventListener('keydown', handleKeyDown)
+        
+        return () => {
+          window.removeEventListener('keydown', handleKeyDown)
+        }
       }
     })
     
@@ -478,27 +500,6 @@ export default defineComponent({
         } else {
           snappedX = start.x - target
           snappedY = start.y - target
-        }
-      }
-      
-      if (tempWallPoints.value.length > 1) {
-        const prev = tempWallPoints.value[tempWallPoints.value.length - 2]
-        const last = tempWallPoints.value[tempWallPoints.value.length - 1]
-        const prevDx = last.x - prev.x
-        const prevDy = last.y - prev.y
-        const prevAngle = Math.atan2(prevDy, prevDx)
-        const prevAngleDeg = prevAngle * 180 / Math.PI
-        
-        const currAngle = Math.atan2(snappedY - last.y, snappedX - last.x)
-        const currAngleDeg = currAngle * 180 / Math.PI
-        
-        const angleDiff = Math.abs(Math.abs(currAngleDeg) - Math.abs(prevAngleDeg))
-        
-        if (Math.abs(angleDiff - 90) < 15) {
-          const length = Math.hypot(snappedX - last.x, snappedY - last.y)
-          const newAngle = prevAngle + Math.PI / 2
-          snappedX = last.x + length * Math.cos(newAngle)
-          snappedY = last.y + length * Math.sin(newAngle)
         }
       }
       
