@@ -351,14 +351,14 @@ onMounted(() => {
     }, { passive: false });
 
     canvas3D2.addEventListener('mousedown', (e) => {
-      if (e.button === 2) {
+      if (e.button === 0) {
         camera2AngelStartX = camera2AngleX;
         camera2AngelStartY = camera2AngleY;
         canvas2IsMouseAngel = true;
         canvas2LastMouseX = e.clientX;
         canvas2LastMouseY = e.clientY;
         e.preventDefault();
-      } else if (e.button === 0) {
+      } else if (e.button === 2) {
         camera2PositionStartX = camera2.position.x;
         camera2PositionStartZ = camera2.position.z;
         canvas2IsMouseMove = true;
@@ -389,9 +389,9 @@ onMounted(() => {
     });
 
     canvas3D2.addEventListener('mouseup', (e) => {
-      if (e.button === 2) {
+      if (e.button === 0) {
         canvas2IsMouseAngel = false;
-      } else if (e.button === 0) {
+      } else if (e.button === 2) {
         canvas2IsMouseMove = false;
       }
     });
