@@ -181,6 +181,7 @@ export const draw = (
             const offset = angle < 30 ? 15 : -15
             const angleX = prev.x - 10
             const angleY = prev.y + offset
+            ctx.fillStyle = '#42b983'
             ctx.fillText(angleText, angleX, angleY)
           }
         }

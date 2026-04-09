@@ -28,13 +28,22 @@
       <button @click="undo" type="button">
         撤销
       </button>
+      <button 
+        :class="{ active: currentTool === 'drag' }" 
+        @click="currentTool = 'drag'"
+        type="button"
+      >
+        拖拽
+      </button>
     </div>
     
     <div class="canvas-container">
       <canvas 
         ref="canvasRef" 
         @click="handleCanvasClick"
+        @mousedown="handleMouseDown"
         @mousemove="handleMouseMove"
+        @mouseup="handleMouseUp"
         class="drawing-canvas"
       />
     </div>
@@ -54,7 +63,7 @@ import { Point, Wall, Door, Window } from '../types/map2d'
 import { draw, drawPoint, drawEntity, drawPreviewEntity, canvasWidth, canvasHeight, snapThreshold, doorWidth, windowWidth } from '../utils/drawUtils'
 
 const canvasRef = ref<HTMLCanvasElement | null>(null)
-const currentTool = ref<'wall' | 'door' | 'window'>('wall')
+const currentTool = ref<'wall' | 'door' | 'window' | 'drag'>('wall')
 const walls = ref<Wall[]>([])
 const doors = ref<Door[]>([])
 const windows = ref<Window[]>([])
@@ -64,6 +73,9 @@ const lastPoint = ref<Point | null>(null)
 const history = ref<Wall[][]>([])
 const xAxisSnappedY = ref<number | null>(null)
 const yAxisSnappedX = ref<number | null>(null)
+const draggedPoint = ref<{ wallIndex: number; pointIndex: number } | null>(null)
+const dragOffset = ref<Point | null>(null)
+const prevTool = ref<'wall' | 'door' | 'window' | 'drag'>('wall')
 
 interface NearestWallResult {
   wall: Wall
@@ -371,15 +383,18 @@ onMounted(() => {
     
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
-        if (tempWallPoints.value.length > 1) {
-          const newWall: Wall = {
-            id: Date.now().toString(),
-            points: [...tempWallPoints.value]
+        if (tempWallPoints.value.length > 0) {
+          if (tempWallPoints.value.length > 1) {
+            const newWall: Wall = {
+              id: Date.now().toString(),
+              points: [...tempWallPoints.value]
+            }
+            walls.value.push(newWall)
+            history.value.push(JSON.parse(JSON.stringify(walls.value)))
           }
-          walls.value.push(newWall)
-          history.value.push(JSON.parse(JSON.stringify(walls.value)))
           tempWallPoints.value = []
           lastPoint.value = null
+          hoverPoint.value = null
         }
         drawWrapper()
       }
@@ -400,6 +415,11 @@ const handleCanvasClick = (e: MouseEvent) => {
   const rect = canvas.getBoundingClientRect()
   const x = e.clientX - rect.left
   const y = e.clientY - rect.top
+  
+  // 如果当前是拖拽模式，不执行任何操作
+  if (currentTool.value === 'drag') {
+    return
+  }
   
   if (currentTool.value === 'wall') {
     let clickPoint = { x, y }
@@ -458,6 +478,24 @@ const handleCanvasClick = (e: MouseEvent) => {
   drawWrapper()
 }
 
+const clearDrawing = () => {
+  if (confirm('确定要清空所有绘制内容吗？')) {
+    walls.value = []
+    doors.value = []
+    windows.value = []
+    tempWallPoints.value = []
+    history.value = []
+    drawWrapper()
+  }
+}
+
+const undo = () => {
+  if (history.value.length > 0) {
+    walls.value = history.value.pop() || []
+    drawWrapper()
+  }
+}
+
 const handleMouseMove = (e: MouseEvent) => {
   const canvas = canvasRef.value
   if (!canvas) return
@@ -465,6 +503,27 @@ const handleMouseMove = (e: MouseEvent) => {
   const rect = canvas.getBoundingClientRect()
   const x = e.clientX - rect.left
   const y = e.clientY - rect.top
+  
+  // 如果正在拖拽，处理拖拽逻辑（即使当前工具不是 drag）
+  if (draggedPoint.value !== null) {
+    const snapped = getSnapPoint({ x: 0, y: 0 }, { x: x + (dragOffset.value?.x || 0), y: y + (dragOffset.value?.y || 0) })
+    const newX = snapped.x - (dragOffset.value?.x || 0)
+    const newY = snapped.y - (dragOffset.value?.y || 0)
+    
+    if (draggedPoint.value.wallIndex === -1) {
+      tempWallPoints.value[draggedPoint.value.pointIndex] = { x: newX, y: newY }
+    } else {
+      walls.value[draggedPoint.value.wallIndex].points[draggedPoint.value.pointIndex] = { x: newX, y: newY }
+    }
+    drawWrapper()
+    return
+  }
+  
+  // 如果当前是拖拽模式，处理拖拽逻辑
+  if (currentTool.value === 'drag') {
+    drawWrapper()
+    return
+  }
   
   if (currentTool.value === 'wall') {
     if (tempWallPoints.value.length > 0) {
@@ -490,20 +549,50 @@ const handleMouseMove = (e: MouseEvent) => {
   drawWrapper()
 }
 
-const clearDrawing = () => {
-  if (confirm('确定要清空所有绘制内容吗？')) {
-    walls.value = []
-    doors.value = []
-    windows.value = []
-    tempWallPoints.value = []
-    history.value = []
-    drawWrapper()
+const handleMouseDown = (e: MouseEvent) => {
+  const canvas = canvasRef.value
+  if (!canvas) return
+  
+  const rect = canvas.getBoundingClientRect()
+  const x = e.clientX - rect.left
+  const y = e.clientY - rect.top
+  
+  // 只有在拖拽模式下才能拖拽点
+  if (currentTool.value === 'drag') {
+    // 检查临时折线上的点
+    for (let i = 0; i < tempWallPoints.value.length; i++) {
+      const point = tempWallPoints.value[i]
+      const dist = Math.hypot(x - point.x, y - point.y)
+      if (dist < 10) {
+        draggedPoint.value = { wallIndex: -1, pointIndex: i }
+        dragOffset.value = { x: point.x - x, y: point.y - y }
+        prevTool.value = currentTool.value
+        drawWrapper()
+        return
+      }
+    }
+    
+    // 检查已绘制的墙上的点
+    walls.value.forEach((wall, wallIndex) => {
+      wall.points.forEach((point, pointIndex) => {
+        const dist = Math.hypot(x - point.x, y - point.y)
+        if (dist < 10) {
+          draggedPoint.value = { wallIndex, pointIndex }
+          dragOffset.value = { x: point.x - x, y: point.y - y }
+          prevTool.value = currentTool.value
+          drawWrapper()
+        }
+      })
+    })
   }
 }
 
-const undo = () => {
-  if (history.value.length > 0) {
-    walls.value = history.value.pop() || []
+const handleMouseUp = () => {
+  if (draggedPoint.value !== null) {
+    history.value.push(JSON.parse(JSON.stringify(walls.value)))
+    draggedPoint.value = null
+    dragOffset.value = null
+    currentTool.value = prevTool.value
     drawWrapper()
   }
 }
