@@ -19,7 +19,12 @@ const routes: Array<RouteRecordRaw> = [
     path: '/edit',
     name: 'edit',
     component: () => import(/* webpackChunkName: "edit" */ '../views/EditView.vue')
-  }
+  },
+  {
+    path: '/map2d',
+    name: 'map2d',
+    component: () => import(/* webpackChunkName: "map2d" */ '../views/Map2D.vue')
+  },
 ]
 
 const router = createRouter({
