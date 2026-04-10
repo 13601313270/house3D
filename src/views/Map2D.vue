@@ -1,25 +1,13 @@
 <template>
   <div class="map2d-container">
     <div class="toolbar">
-      <button 
-        :class="{ active: currentTool === 'wall' }" 
-        @click="currentTool = 'wall'"
-        type="button"
-      >
+      <button :class="{ active: currentTool === 'wall' }" @click="currentTool = 'wall'" type="button">
         墙面
       </button>
-      <button 
-        :class="{ active: currentTool === 'door' }" 
-        @click="currentTool = 'door'"
-        type="button"
-      >
+      <button :class="{ active: currentTool === 'door' }" @click="currentTool = 'door'" type="button">
         门
       </button>
-      <button 
-        :class="{ active: currentTool === 'window' }" 
-        @click="currentTool = 'window'"
-        type="button"
-      >
+      <button :class="{ active: currentTool === 'window' }" @click="currentTool = 'window'" type="button">
         窗户
       </button>
       <button @click="clearDrawing" type="button">
@@ -28,26 +16,16 @@
       <button @click="undo" type="button">
         撤销
       </button>
-      <button 
-        :class="{ active: currentTool === 'drag' }" 
-        @click="currentTool = 'drag'"
-        type="button"
-      >
+      <button :class="{ active: currentTool === 'drag' }" @click="currentTool = 'drag'" type="button">
         拖拽
       </button>
     </div>
-    
+
     <div class="canvas-container">
-      <canvas 
-        ref="canvasRef" 
-        @click="handleCanvasClick"
-        @mousedown="handleMouseDown"
-        @mousemove="handleMouseMove"
-        @mouseup="handleMouseUp"
-        class="drawing-canvas"
-      />
+      <canvas ref="canvasRef" @click="handleCanvasClick" @mousedown="handleMouseDown" @mousemove="handleMouseMove"
+        @mouseup="handleMouseUp" class="drawing-canvas" />
     </div>
-    
+
     <div class="info-panel">
       <div>当前模式: {{ currentTool }}</div>
       <div>墙面数量: {{ walls.length }}</div>
@@ -88,14 +66,14 @@ const getNearestWall = (point: Point): NearestWallResult | null => {
   let nearestPoint: Point | null = null
   let minDistance = Infinity
   let nearestAngle = 0
-  
+
   walls.value.forEach((wall) => {
     for (let i = 0; i < wall.points.length - 1; i++) {
       const p1 = wall.points[i]
       const p2 = wall.points[i + 1]
-      
+
       const distance = pointToLineDistance(point, p1, p2)
-      
+
       if (distance < minDistance) {
         minDistance = distance
         nearestWall = wall
@@ -104,11 +82,11 @@ const getNearestWall = (point: Point): NearestWallResult | null => {
       }
     }
   })
-  
+
   if (nearestPoint && minDistance < snapThreshold && nearestWall) {
     return { wall: nearestWall, pointOnWall: nearestPoint, angle: nearestAngle }
   }
-  
+
   return null
 }
 
@@ -117,17 +95,17 @@ const pointToLineDistance = (p: Point, a: Point, b: Point) => {
   const B = p.y - a.y
   const C = b.x - a.x
   const D = b.y - a.y
-  
+
   const dot = A * C + B * D
   const lenSq = C * C + D * D
   let param = -1
-  
+
   if (lenSq !== 0) {
     param = dot / lenSq
   }
-  
+
   let xx, yy
-  
+
   if (param < 0) {
     xx = a.x
     yy = a.y
@@ -138,10 +116,10 @@ const pointToLineDistance = (p: Point, a: Point, b: Point) => {
     xx = a.x + param * C
     yy = a.y + param * D
   }
-  
+
   const dx = p.x - xx
   const dy = p.y - yy
-  
+
   return Math.sqrt(dx * dx + dy * dy)
 }
 
@@ -150,15 +128,15 @@ const getClosestPointOnLine = (p: Point, a: Point, b: Point) => {
   const B = p.y - a.y
   const C = b.x - a.x
   const D = b.y - a.y
-  
+
   const dot = A * C + B * D
   const lenSq = C * C + D * D
   let param = -1
-  
+
   if (lenSq !== 0) {
     param = dot / lenSq
   }
-  
+
   if (param < 0) {
     return { x: a.x, y: a.y }
   } else if (param > 1) {
@@ -175,7 +153,7 @@ const getSnapPoint = (startPoints: Point[], current: Point, allPoints: Point[] =
   // 找到距离 current 最近的 start 点
   let nearestStart: Point | null = null
   let minDistance = Infinity
-  
+
   for (const start of startPoints) {
     const dist = Math.hypot(current.x - start.x, current.y - start.y)
     if (dist < minDistance) {
@@ -183,21 +161,20 @@ const getSnapPoint = (startPoints: Point[], current: Point, allPoints: Point[] =
       nearestStart = start
     }
   }
-  
+
   if (!nearestStart) {
     return { x: current.x, y: current.y }
   }
-  
+
   const dx = current.x - nearestStart.x
   const dy = current.y - nearestStart.y
-  const angle = Math.atan2(dy, dx)
-  const angleDeg = angle * 180 / Math.PI
-  
+  const angleDeg = Math.atan2(dy, dx) * 180 / Math.PI
+
   let snappedX = current.x
   let snappedY = current.y
-  
+
   const snapAngles = [0, 45, 90, 135, 180, -135, -90, -45]
-  
+
   if (tempWallPoints.value.length > 1) {
     const prev = tempWallPoints.value[tempWallPoints.value.length - 2]
     const last = tempWallPoints.value[tempWallPoints.value.length - 1]
@@ -205,39 +182,39 @@ const getSnapPoint = (startPoints: Point[], current: Point, allPoints: Point[] =
     const prevDy = last.y - prev.y
     const prevAngle = Math.atan2(prevDy, prevDx)
     const prevAngleDeg = prevAngle * 180 / Math.PI
-    
+
     let perpendicularAngle1 = prevAngleDeg + 90
     let perpendicularAngle2 = prevAngleDeg - 90
-    
+
     if (perpendicularAngle1 > 180) perpendicularAngle1 -= 360
     if (perpendicularAngle1 < -180) perpendicularAngle1 += 360
     if (perpendicularAngle2 > 180) perpendicularAngle2 -= 360
     if (perpendicularAngle2 < -180) perpendicularAngle2 += 360
-    
+
     snapAngles.push(perpendicularAngle1, perpendicularAngle2)
   }
-  
+
   let nearestSnapAngle = 0
   let minAngleDiff = 180
-  
+
   for (const snapAngle of snapAngles) {
     let diff = Math.abs(angleDeg - snapAngle)
     if (diff > 180) {
       diff = 360 - diff
     }
-    
+
     if (diff < minAngleDiff) {
       minAngleDiff = diff
       nearestSnapAngle = snapAngle
     }
   }
-  
+
   // 一、计算三组磁吸数据
-  
+
   // 1. 计算角度磁吸数据
   let angleSnapped: Point | null = null
   let angleDistance = Infinity
-  
+
   if (minAngleDiff < 10) {
     const length = Math.hypot(dx, dy)
     const snapAngleRad = nearestSnapAngle * Math.PI / 180
@@ -249,21 +226,22 @@ const getSnapPoint = (startPoints: Point[], current: Point, allPoints: Point[] =
       angleDistance = distToMouse
     }
   }
-  
+
   // 2. 计算点磁吸数据
   let pointSnapped: Point | null = null
   let pointDistance = Infinity
-  
+
   for (const point of allPoints) {
     const dist = Math.hypot(current.x - point.x, current.y - point.y)
-    if (dist < 10 && (point.x !== nearestStart.x || point.y !== nearestStart.y)) {
+    // 排除与 nearestStart 完全重合的点
+    if (dist < 10 && !(point.x === nearestStart.x && point.y === nearestStart.y)) {
       if (dist < pointDistance) {
         pointDistance = dist
         pointSnapped = { x: point.x, y: point.y }
       }
     }
   }
-  
+
   // 3. 计算轴对齐磁吸数据
   // xAxisSnappedY: 命中的y坐标值（水平对齐，即y值与某个点一致）
   // yAxisSnappedX: 命中的x坐标值（垂直对齐，即x值与某个点一致）
@@ -273,29 +251,27 @@ const getSnapPoint = (startPoints: Point[], current: Point, allPoints: Point[] =
   let yAxisSnappedXVal: number | null = null
   let xAxisDistance = Infinity
   let yAxisDistance = Infinity
-  
+
   for (const point of allPoints) {
-    if (point.x !== nearestStart.x || point.y !== nearestStart.y) {
-      const distToXAxis = Math.abs(current.y - point.y)
-      if (distToXAxis < 10 && distToXAxis < xAxisDistance) {
-        xAxisDistance = distToXAxis
-        xAxisSnappedYVal = point.y
-      }
-      
-      const distToYAxis = Math.abs(current.x - point.x)
-      if (distToYAxis < 10 && distToYAxis < yAxisDistance) {
-        yAxisDistance = distToYAxis
-        yAxisSnappedXVal = point.x
-      }
+    const distToXAxis = Math.abs(current.y - point.y)
+    if (distToXAxis < 10 && distToXAxis < xAxisDistance) {
+      xAxisDistance = distToXAxis
+      xAxisSnappedYVal = point.y
+    }
+
+    const distToYAxis = Math.abs(current.x - point.x)
+    if (distToYAxis < 10 && distToYAxis < yAxisDistance) {
+      yAxisDistance = distToYAxis
+      yAxisSnappedXVal = point.x
     }
   }
-  
+
   // 更新ref值用于绘制参考线
   xAxisSnappedY.value = xAxisSnappedYVal
   yAxisSnappedX.value = yAxisSnappedXVal
-  
+
   // 二、按照优先级依次尝试命中
-  
+
   // 1. 最高优先级：点磁吸
   if (pointSnapped) {
     snappedX = pointSnapped.x
@@ -306,13 +282,14 @@ const getSnapPoint = (startPoints: Point[], current: Point, allPoints: Point[] =
     const angleRad = nearestSnapAngle * Math.PI / 180
     const k = Math.tan(angleRad)
     const b = angleSnapped.y - k * angleSnapped.x
-    
+
     if (xAxisSnappedYVal !== null && yAxisSnappedXVal !== null) {
+      console.log(11.1)
       // 同时命中x和y轴，计算角度线与两条轴对齐线的交点，选择更近的
       // 交点1：角度线与 x = yAxisSnappedXVal 的交点
       const intersect1Y = k * yAxisSnappedXVal + b
       const dist1 = Math.hypot(yAxisSnappedXVal - current.x, intersect1Y - current.y)
-      
+
       // 交点2：角度线与 y = xAxisSnappedYVal 的交点
       let intersect2X
       if (Math.abs(angleRad - Math.PI / 2) < 0.01 || Math.abs(angleRad + Math.PI / 2) < 0.01) {
@@ -321,7 +298,7 @@ const getSnapPoint = (startPoints: Point[], current: Point, allPoints: Point[] =
         intersect2X = (xAxisSnappedYVal - b) / k
       }
       const dist2 = Math.hypot(intersect2X - current.x, xAxisSnappedYVal - current.y)
-      
+
       if (dist1 <= dist2) {
         snappedX = yAxisSnappedXVal
         snappedY = intersect1Y
@@ -357,18 +334,15 @@ const getSnapPoint = (startPoints: Point[], current: Point, allPoints: Point[] =
   }
   // 3. 第三优先级：单独角度磁吸
   else if (angleSnapped) {
+    console.log(12)
     snappedX = angleSnapped.x
     snappedY = angleSnapped.y
   }
   // 4. 第四优先级：单独轴对齐磁吸
   else if (xAxisSnappedYVal !== null && yAxisSnappedXVal !== null) {
-    if (xAxisDistance <= yAxisDistance) {
-      snappedX = yAxisSnappedXVal
-      snappedY = xAxisSnappedYVal
-    } else {
-      snappedX = yAxisSnappedXVal
-      snappedY = xAxisSnappedYVal
-    }
+    console.log(13)
+    snappedX = yAxisSnappedXVal
+    snappedY = xAxisSnappedYVal
   } else if (yAxisSnappedXVal !== null) {
     snappedX = yAxisSnappedXVal
     snappedY = current.y
@@ -376,7 +350,7 @@ const getSnapPoint = (startPoints: Point[], current: Point, allPoints: Point[] =
     snappedX = current.x
     snappedY = xAxisSnappedYVal
   }
-  
+
   return { x: Math.round(snappedX), y: Math.round(snappedY) }
 }
 
@@ -398,7 +372,7 @@ onMounted(() => {
       ctx.canvas.height = canvasHeight
       drawWrapper()
     }
-    
+
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         if (tempWallPoints.value.length > 0) {
@@ -417,9 +391,9 @@ onMounted(() => {
         drawWrapper()
       }
     }
-    
+
     window.addEventListener('keydown', handleKeyDown)
-    
+
     return () => {
       window.removeEventListener('keydown', handleKeyDown)
     }
@@ -429,19 +403,19 @@ onMounted(() => {
 const handleCanvasClick = (e: MouseEvent) => {
   const canvas = canvasRef.value
   if (!canvas) return
-  
+
   const rect = canvas.getBoundingClientRect()
   const x = e.clientX - rect.left
   const y = e.clientY - rect.top
-  
+
   // 如果当前是拖拽模式，不执行任何操作
   if (currentTool.value === 'drag') {
     return
   }
-  
+
   if (currentTool.value === 'wall') {
     let clickPoint = { x, y }
-    
+
     if (tempWallPoints.value.length > 0) {
       const last = tempWallPoints.value[tempWallPoints.value.length - 1]
       // 收集所有点（包括临时折线和已绘制的墙上的点）
@@ -453,7 +427,7 @@ const handleCanvasClick = (e: MouseEvent) => {
       })
       const snapped = getSnapPoint([last], clickPoint, allPoints)
       const dist = Math.hypot(snapped.x - last.x, snapped.y - last.y)
-      
+
       if (dist < 10) {
         if (tempWallPoints.value.length > 1) {
           const newWall: Wall = {
@@ -467,10 +441,10 @@ const handleCanvasClick = (e: MouseEvent) => {
         }
         return
       }
-      
+
       clickPoint = snapped
     }
-    
+
     tempWallPoints.value.push(clickPoint)
     lastPoint.value = clickPoint
   } else {
@@ -499,7 +473,7 @@ const handleCanvasClick = (e: MouseEvent) => {
       }
     }
   }
-  
+
   drawWrapper()
 }
 
@@ -524,18 +498,18 @@ const undo = () => {
 const handleMouseMove = (e: MouseEvent) => {
   const canvas = canvasRef.value
   if (!canvas) return
-  
+
   const rect = canvas.getBoundingClientRect()
   const x = e.clientX - rect.left
   const y = e.clientY - rect.top
-  
+
   // 如果正在拖拽，处理拖拽逻辑（即使当前工具不是 drag）
   if (draggedPoint.value !== null) {
     // 计算拖拽点的原始位置
     let originalPoint: Point
     let prevPoint: Point | null = null
     let nextPoint: Point | null = null
-    
+
     if (draggedPoint.value.wallIndex === -1) {
       originalPoint = tempWallPoints.value[draggedPoint.value.pointIndex]
       // 获取临时折线上的前后点
@@ -556,7 +530,7 @@ const handleMouseMove = (e: MouseEvent) => {
         nextPoint = wall.points[draggedPoint.value.pointIndex + 1]
       }
     }
-    
+
     // 收集所有点（包括临时折线和已绘制的墙上的点）
     const allPoints = [...tempWallPoints.value]
     walls.value.forEach((wall, wallIdx) => {
@@ -568,7 +542,7 @@ const handleMouseMove = (e: MouseEvent) => {
         allPoints.push(point)
       })
     })
-    
+
     // 构建 startPoints 数组（拖拽点两侧的点）
     const startPoints: Point[] = []
     if (prevPoint) {
@@ -577,23 +551,23 @@ const handleMouseMove = (e: MouseEvent) => {
     if (nextPoint) {
       startPoints.push(nextPoint)
     }
-    
+
     // 如果没有两侧点，使用原始点
     if (startPoints.length === 0) {
       startPoints.push(originalPoint)
     }
-    
+
     // 计算鼠标相对于原始位置的偏移量
     const dx = x - (originalPoint.x - (dragOffset.value?.x || 0))
     const dy = y - (originalPoint.y - (dragOffset.value?.y || 0))
-    
+
     // 对偏移量进行磁吸计算
     const snapped = getSnapPoint(startPoints, { x: originalPoint.x + dx, y: originalPoint.y + dy }, allPoints)
-    
+
     // 计算新位置（相对于原始位置的偏移量）
     const newX = snapped.x
     const newY = snapped.y
-    
+
     if (draggedPoint.value.wallIndex === -1) {
       tempWallPoints.value[draggedPoint.value.pointIndex] = { x: newX, y: newY }
     } else {
@@ -602,18 +576,18 @@ const handleMouseMove = (e: MouseEvent) => {
     drawWrapper()
     return
   }
-  
+
   // 如果当前是拖拽模式，处理拖拽逻辑
   if (currentTool.value === 'drag') {
     drawWrapper()
     return
   }
-  
+
   if (currentTool.value === 'wall') {
     if (tempWallPoints.value.length > 0) {
       const last = tempWallPoints.value[tempWallPoints.value.length - 1]
       const dist = Math.hypot(x - last.x, y - last.y)
-      
+
       if (dist < snapThreshold) {
         hoverPoint.value = { ...last }
       } else {
@@ -636,18 +610,18 @@ const handleMouseMove = (e: MouseEvent) => {
       hoverPoint.value = null
     }
   }
-  
+
   drawWrapper()
 }
 
 const handleMouseDown = (e: MouseEvent) => {
   const canvas = canvasRef.value
   if (!canvas) return
-  
+
   const rect = canvas.getBoundingClientRect()
   const x = e.clientX - rect.left
   const y = e.clientY - rect.top
-  
+
   // 只有在拖拽模式下才能拖拽点
   if (currentTool.value === 'drag') {
     // 检查临时折线上的点
@@ -662,7 +636,7 @@ const handleMouseDown = (e: MouseEvent) => {
         return
       }
     }
-    
+
     // 检查已绘制的墙上的点
     walls.value.forEach((wall, wallIndex) => {
       wall.points.forEach((point, pointIndex) => {
