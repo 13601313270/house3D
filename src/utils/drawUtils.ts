@@ -1,4 +1,5 @@
 import { Wall, Door, Window, Point } from '../types/map2d'
+import { createShapeFromPoints } from './createShapeFromPoints'
 
 export const canvasWidth = 800
 export const canvasHeight = 600
@@ -139,11 +140,14 @@ export const draw = (
 
   walls.forEach((wall) => {
     if (wall.points.length < 2) return
+    const outlinePoints = createShapeFromPoints(wall.points, 10)
+
     ctx.beginPath()
-    ctx.moveTo(wall.points[0].x, wall.points[0].y)
-    for (let i = 1; i < wall.points.length; i++) {
-      ctx.lineTo(wall.points[i].x, wall.points[i].y)
+    ctx.moveTo(outlinePoints[0].x, outlinePoints[0].y)
+    for (let i = 1; i < outlinePoints.length; i++) {
+      ctx.lineTo(outlinePoints[i].x, outlinePoints[i].y)
     }
+    ctx.closePath()
     ctx.stroke()
     
     // 绘制墙上的点
