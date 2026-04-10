@@ -171,7 +171,7 @@ const getClosestPointOnLine = (p: Point, a: Point, b: Point) => {
   }
 }
 
-const getSnapPoint = (start: Point, current: Point): Point => {
+const getSnapPoint = (start: Point, current: Point, allPoints: Point[] = []): Point => {
   const dx = current.x - start.x
   const dy = current.y - start.y
   const angle = Math.atan2(dy, dx)
@@ -238,7 +238,7 @@ const getSnapPoint = (start: Point, current: Point): Point => {
   let pointSnapped: Point | null = null
   let pointDistance = Infinity
   
-  for (const point of tempWallPoints.value) {
+  for (const point of allPoints) {
     const dist = Math.hypot(current.x - point.x, current.y - point.y)
     if (dist < 10 && (point.x !== start.x || point.y !== start.y)) {
       if (dist < pointDistance) {
@@ -258,7 +258,7 @@ const getSnapPoint = (start: Point, current: Point): Point => {
   let xAxisDistance = Infinity
   let yAxisDistance = Infinity
   
-  for (const point of tempWallPoints.value) {
+  for (const point of allPoints) {
     if (point.x !== start.x || point.y !== start.y) {
       const distToXAxis = Math.abs(current.y - point.y)
       if (distToXAxis < 10 && distToXAxis < xAxisDistance) {
@@ -428,7 +428,14 @@ const handleCanvasClick = (e: MouseEvent) => {
     
     if (tempWallPoints.value.length > 0) {
       const last = tempWallPoints.value[tempWallPoints.value.length - 1]
-      const snapped = getSnapPoint(last, clickPoint)
+      // 收集所有点（包括临时折线和已绘制的墙上的点）
+      const allPoints = [...tempWallPoints.value]
+      walls.value.forEach(wall => {
+        wall.points.forEach(point => {
+          allPoints.push(point)
+        })
+      })
+      const snapped = getSnapPoint(last, clickPoint, allPoints)
       const dist = Math.hypot(snapped.x - last.x, snapped.y - last.y)
       
       if (dist < 10) {
@@ -508,9 +515,36 @@ const handleMouseMove = (e: MouseEvent) => {
   
   // 如果正在拖拽，处理拖拽逻辑（即使当前工具不是 drag）
   if (draggedPoint.value !== null) {
-    const snapped = getSnapPoint({ x: 0, y: 0 }, { x: x + (dragOffset.value?.x || 0), y: y + (dragOffset.value?.y || 0) })
-    const newX = snapped.x - (dragOffset.value?.x || 0)
-    const newY = snapped.y - (dragOffset.value?.y || 0)
+    // 计算拖拽点的原始位置
+    let originalPoint: Point
+    if (draggedPoint.value.wallIndex === -1) {
+      originalPoint = tempWallPoints.value[draggedPoint.value.pointIndex]
+    } else {
+      originalPoint = walls.value[draggedPoint.value.wallIndex].points[draggedPoint.value.pointIndex]
+    }
+    
+    // 收集所有点（包括临时折线和已绘制的墙上的点）
+    const allPoints = [...tempWallPoints.value]
+    walls.value.forEach((wall, wallIdx) => {
+      wall.points.forEach((point, pointIdx) => {
+        // 排除正在拖拽的点
+        if (draggedPoint.value && draggedPoint.value.wallIndex === wallIdx && draggedPoint.value.pointIndex === pointIdx) {
+          return
+        }
+        allPoints.push(point)
+      })
+    })
+    
+    // 计算鼠标相对于原始位置的偏移量
+    const dx = x - (originalPoint.x - (dragOffset.value?.x || 0))
+    const dy = y - (originalPoint.y - (dragOffset.value?.y || 0))
+    
+    // 对偏移量进行磁吸计算
+    const snapped = getSnapPoint(originalPoint, { x: originalPoint.x + dx, y: originalPoint.y + dy }, allPoints)
+    
+    // 计算新位置（相对于原始位置的偏移量）
+    const newX = snapped.x
+    const newY = snapped.y
     
     if (draggedPoint.value.wallIndex === -1) {
       tempWallPoints.value[draggedPoint.value.pointIndex] = { x: newX, y: newY }
@@ -535,7 +569,14 @@ const handleMouseMove = (e: MouseEvent) => {
       if (dist < snapThreshold) {
         hoverPoint.value = { ...last }
       } else {
-        const snappedPoint = getSnapPoint(last, { x, y })
+        // 收集所有点（包括临时折线和已绘制的墙上的点）
+        const allPoints = [...tempWallPoints.value]
+        walls.value.forEach(wall => {
+          wall.points.forEach(point => {
+            allPoints.push(point)
+          })
+        })
+        const snappedPoint = getSnapPoint(last, { x, y }, allPoints)
         hoverPoint.value = snappedPoint
       }
     }
