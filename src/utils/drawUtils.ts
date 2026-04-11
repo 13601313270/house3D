@@ -1,5 +1,6 @@
 import { Wall, Door, Window, Point } from '../types/map2d'
-import { createShapeFromPoints } from './createShapeFromPoints'
+// @ts-ignore
+import Offset from 'polygon-offset'
 
 export const canvasWidth = 800
 export const canvasHeight = 600
@@ -140,16 +141,19 @@ export const draw = (
 
   walls.forEach((wall) => {
     if (wall.points.length < 2) return
-    const outlinePoints = createShapeFromPoints(wall.points, 10)
 
-    ctx.beginPath()
-    ctx.moveTo(outlinePoints[0].x, outlinePoints[0].y)
-    for (let i = 1; i < outlinePoints.length; i++) {
-      ctx.lineTo(outlinePoints[i].x, outlinePoints[i].y)
+    const offset = new Offset();
+    const points: [number, number][] = wall.points.map((point) => [point.x, point.y]);
+    const margined: [number, number][][] = offset.data(points).arcSegments(5).offsetLine(10);
+    for (let i = 0; i < margined.length; i++) {
+      ctx.beginPath()
+      ctx.moveTo(margined[i][0][0], margined[i][0][1])
+      for (let j = 1; j < margined[i].length; j++) {
+        ctx.lineTo(margined[i][j][0], margined[i][j][1])
+      }
+      ctx.closePath()
+      ctx.stroke()
     }
-    ctx.closePath()
-    ctx.stroke()
-    
     // 绘制墙上的点
     wall.points.forEach((point, pointIndex) => {
       const isDragged = draggedWallIndex !== null && draggedWallIndex === walls.indexOf(wall) && pointIndex === draggedPointIndex
