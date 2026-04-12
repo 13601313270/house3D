@@ -1,6 +1,9 @@
 import { Wall, Door, Window, Point } from '../types/map2d'
 // @ts-ignore
 import Offset from 'polygon-offset'
+import { createShapeFromPoints } from './createShapeFromPoints'
+// @ts-ignore
+import { union } from 'martinez-polygon-clipping';
 
 export const canvasWidth = 800
 export const canvasHeight = 600
@@ -13,20 +16,20 @@ export const calculateAngle = (p1: Point, p2: Point, p3: Point): { angle: number
   const v1y = p1.y - p2.y
   const v2x = p3.x - p2.x
   const v2y = p3.y - p2.y
-  
+
   const dot = v1x * v2x + v1y * v2y
   const len1 = Math.hypot(v1x, v1y)
   const len2 = Math.hypot(v2x, v2y)
-  
+
   if (len1 === 0 || len2 === 0) return null
-  
+
   const cosAngle = dot / (len1 * len2)
   const angle = Math.acos(Math.max(-1, Math.min(1, cosAngle))) * 180 / Math.PI
-  
+
   // 计算叉积判断凹凸性
   const cross = v1x * v2y - v1y * v2x
   const isConvex = cross > 0
-  
+
   return { angle, isConvex }
 }
 
@@ -138,22 +141,15 @@ export const draw = (
   ctx.strokeStyle = '#333'
   ctx.lineWidth = 2
   ctx.setLineDash([])
+  let margineds: [number, number][][] = []
+  const outlinePointsArray: [number, number][][][] = []
 
   walls.forEach((wall) => {
     if (wall.points.length < 2) return
-
-    const offset = new Offset();
-    const points: [number, number][] = wall.points.map((point) => [point.x, point.y]);
-    const margined: [number, number][][] = offset.data(points).arcSegments(5).offsetLine(10);
-    for (let i = 0; i < margined.length; i++) {
-      ctx.beginPath()
-      ctx.moveTo(margined[i][0][0], margined[i][0][1])
-      for (let j = 1; j < margined[i].length; j++) {
-        ctx.lineTo(margined[i][j][0], margined[i][j][1])
-      }
-      ctx.closePath()
-      ctx.stroke()
-    }
+    const outlinePoints = createShapeFromPoints(wall.points, 10)
+    outlinePoints.push(outlinePoints[0]);// 闭合起来
+    outlinePointsArray.push([outlinePoints])
+    margineds = union(margineds, [outlinePoints])
     // 绘制墙上的点
     wall.points.forEach((point, pointIndex) => {
       const isDragged = draggedWallIndex !== null && draggedWallIndex === walls.indexOf(wall) && pointIndex === draggedPointIndex
@@ -167,6 +163,15 @@ export const draw = (
       }
     })
   })
+  for (let i = 0; i < margineds.length; i++) {
+    ctx.beginPath()
+    ctx.moveTo(margineds[i][0][0], margineds[i][0][1])
+    for (let j = 1; j < margineds[i].length; j++) {
+      ctx.lineTo(margineds[i][j][0], margineds[i][j][1])
+    }
+    ctx.closePath()
+    ctx.stroke()
+  }
 
   if (currentTool === 'wall' && tempWallPoints.length > 0) {
     ctx.strokeStyle = '#42b983'
@@ -199,7 +204,7 @@ export const draw = (
         const midX = (point.x + prev.x) / 2
         const midY = (point.y + prev.y) / 2
         ctx.fillText(`${dist}px`, midX, midY - 5)
-        
+
         // 绘制角度标记
         if (index > 1) {
           const prev2 = tempWallPoints[index - 2]
@@ -264,7 +269,7 @@ export const draw = (
     ctx.strokeStyle = '#999'
     ctx.lineWidth = 1
     ctx.setLineDash([5, 5])
-    
+
     // 垂直线（y轴对齐）
     if (yAxisSnappedX !== null) {
       ctx.beginPath()
@@ -272,7 +277,7 @@ export const draw = (
       ctx.lineTo(yAxisSnappedX, canvasHeight)
       ctx.stroke()
     }
-    
+
     // 水平线（x轴对齐）
     if (xAxisSnappedY !== null) {
       ctx.beginPath()
