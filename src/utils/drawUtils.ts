@@ -135,7 +135,8 @@ export const draw = (
   wallThickness: number = 20,
   panOffset: Point = { x: 0, y: 0 },
   canvasWidth: number = 800,
-  canvasHeight: number = 600
+  canvasHeight: number = 600,
+  zoomLevel: number = 1
 ) => {
   if (!canvasRef) return
   const ctx = canvasRef.getContext('2d')
@@ -146,12 +147,11 @@ export const draw = (
   ctx.fillStyle = '#f5f5f5'
   ctx.fillRect(0, 0, canvasWidth, canvasHeight)
 
-  ctx.strokeStyle = '#333'
-  ctx.lineWidth = 2
-  ctx.setLineDash([])
   const margineds: Geometry | null = createShapeFromPoints(ctx, walls, wallThickness);
+  
+  ctx.strokeStyle = '#333'
   ctx.lineWidth = 3
-  ctx.strokeStyle = 'black';
+  ctx.setLineDash([])
   ctx.beginPath();
 
   for (const poly of margineds || []) {
@@ -159,8 +159,8 @@ export const draw = (
       const ring = poly[i] as any
       for (let j = 0; j < ring.length; j++) {
         if (ring[j] === null) continue
-        const screenX = ring[j][0] + panOffset.x
-        const screenY = ring[j][1] + panOffset.y
+        const screenX = ring[j][0] * zoomLevel + panOffset.x
+        const screenY = ring[j][1] * zoomLevel + panOffset.y
         if (j === 0) {
           // @ts-ignore
           ctx.moveTo(screenX, screenY);
@@ -177,15 +177,15 @@ export const draw = (
   walls.forEach((wall) => {
     if (wall.points.length < 2) return
     wall.points.forEach((point, pointIndex) => {
-      const screenX = point.x + panOffset.x
-      const screenY = point.y + panOffset.y
+      const screenX = point.x * zoomLevel + panOffset.x
+      const screenY = point.y * zoomLevel + panOffset.y
       const isDragged = draggedWallIndex !== null && draggedWallIndex === walls.indexOf(wall) && pointIndex === draggedPointIndex
       drawPoint(ctx, screenX, screenY, isDragged ? '#1890ff' : '#333')
       if (isDragged) {
         ctx.strokeStyle = '#1890ff'
         ctx.lineWidth = 2
         ctx.beginPath()
-        ctx.arc(screenX, screenY, 12, 0, Math.PI * 2)
+        ctx.arc(screenX, screenY, 12 * zoomLevel, 0, Math.PI * 2)
         ctx.stroke()
       }
     })
@@ -195,31 +195,31 @@ export const draw = (
     ctx.strokeStyle = '#42b983'
     ctx.setLineDash([5, 5])
     ctx.beginPath()
-    ctx.moveTo(tempWallPoints[0].x + panOffset.x, tempWallPoints[0].y + panOffset.y)
+    ctx.moveTo(tempWallPoints[0].x * zoomLevel + panOffset.x, tempWallPoints[0].y * zoomLevel + panOffset.y)
     for (let i = 1; i < tempWallPoints.length; i++) {
-      ctx.lineTo(tempWallPoints[i].x + panOffset.x, tempWallPoints[i].y + panOffset.y)
+      ctx.lineTo(tempWallPoints[i].x * zoomLevel + panOffset.x, tempWallPoints[i].y * zoomLevel + panOffset.y)
     }
     if (hoverPoint) {
-      ctx.lineTo(hoverPoint.x + panOffset.x, hoverPoint.y + panOffset.y)
+      ctx.lineTo(hoverPoint.x * zoomLevel + panOffset.x, hoverPoint.y * zoomLevel + panOffset.y)
     }
     ctx.stroke()
 
     tempWallPoints.forEach((point, index) => {
-      const screenX = point.x + panOffset.x
-      const screenY = point.y + panOffset.y
+      const screenX = point.x * zoomLevel + panOffset.x
+      const screenY = point.y * zoomLevel + panOffset.y
       const isDragged = index === draggedPointIndex
       drawPoint(ctx, screenX, screenY, isDragged ? '#1890ff' : '#42b983')
       if (isDragged) {
         ctx.strokeStyle = '#1890ff'
         ctx.lineWidth = 2
         ctx.beginPath()
-        ctx.arc(screenX, screenY, 12, 0, Math.PI * 2)
+        ctx.arc(screenX, screenY, 12 * zoomLevel, 0, Math.PI * 2)
         ctx.stroke()
       }
       if (index > 0) {
         const prev = tempWallPoints[index - 1]
-        const prevScreenX = prev.x + panOffset.x
-        const prevScreenY = prev.y + panOffset.y
+        const prevScreenX = prev.x * zoomLevel + panOffset.x
+        const prevScreenY = prev.y * zoomLevel + panOffset.y
         ctx.fillStyle = isDragged ? '#1890ff' : '#42b983'
         ctx.font = '12px Arial'
         const dist = Math.round(Math.hypot(point.x - prev.x, point.y - prev.y))
@@ -230,11 +230,11 @@ export const draw = (
         // 绘制角度标记
         if (index > 1) {
           const prev2 = tempWallPoints[index - 2]
-          const prev2ScreenX = prev2.x + panOffset.x
-          const prev2ScreenY = prev2.y + panOffset.y
+          const prev2ScreenX = prev2.x * zoomLevel + panOffset.x
+          const prev2ScreenY = prev2.y * zoomLevel + panOffset.y
           const angleResult = calculateAngle({ x: prev2ScreenX, y: prev2ScreenY }, { x: prevScreenX, y: prevScreenY }, { x: screenX, y: screenY })
           if (angleResult !== null) {
-            const { angle, isConvex } = angleResult
+            const { angle } = angleResult
             const angleText = `${Math.round(angle)}°`
             // 计算角度文本位置：在夹角内侧
             // 如果夹角太小（< 30度），显示在外侧；否则显示在内侧
@@ -249,14 +249,14 @@ export const draw = (
     })
 
     if (hoverPoint) {
-      const hoverScreenX = hoverPoint.x + panOffset.x
-      const hoverScreenY = hoverPoint.y + panOffset.y
+      const hoverScreenX = hoverPoint.x * zoomLevel + panOffset.x
+      const hoverScreenY = hoverPoint.y * zoomLevel + panOffset.y
       drawPoint(ctx, hoverScreenX, hoverScreenY, '#42b983')
       // 绘制最后一个转角的角度标记
       if (tempWallPoints.length > 1) {
         const last = tempWallPoints[tempWallPoints.length - 1]
-        const lastScreenX = last.x + panOffset.x
-        const lastScreenY = last.y + panOffset.y
+        const lastScreenX = last.x * zoomLevel + panOffset.x
+        const lastScreenY = last.y * zoomLevel + panOffset.y
         const angleResult = calculateAngle({ x: lastScreenX, y: lastScreenY }, { x: lastScreenX, y: lastScreenY }, { x: hoverScreenX, y: hoverScreenY })
         if (angleResult !== null) {
           const { angle } = angleResult
@@ -273,68 +273,68 @@ export const draw = (
   }
 
   doors.forEach((door) => {
-    const screenX = door.x + panOffset.x
-    const screenY = door.y + panOffset.y
-    drawEntity(ctx, screenX, screenY, door.width, door.angle, '#e67e22', 'door', wallThickness)
+    const screenX = door.x * zoomLevel + panOffset.x
+    const screenY = door.y * zoomLevel + panOffset.y
+    drawEntity(ctx, screenX, screenY, door.width * zoomLevel, door.angle, '#e67e22', 'door', wallThickness * zoomLevel)
   })
 
   windows.forEach((win) => {
-    const screenX = win.x + panOffset.x
-    const screenY = win.y + panOffset.y
-    drawEntity(ctx, screenX, screenY, win.width, win.angle, '#3498db', 'window', wallThickness)
+    const screenX = win.x * zoomLevel + panOffset.x
+    const screenY = win.y * zoomLevel + panOffset.y
+    drawEntity(ctx, screenX, screenY, win.width * zoomLevel, win.angle, '#3498db', 'window', wallThickness * zoomLevel)
   })
 
   doors.forEach((door) => {
-    const screenX = door.x + panOffset.x
-    const screenY = door.y + panOffset.y
+    const screenX = door.x * zoomLevel + panOffset.x
+    const screenY = door.y * zoomLevel + panOffset.y
     ctx.fillStyle = '#fff'
     ctx.strokeStyle = '#e67e22'
     ctx.lineWidth = 2
     ctx.beginPath()
-    ctx.arc(screenX, screenY, 6, 0, Math.PI * 2)
+    ctx.arc(screenX, screenY, 6 * zoomLevel, 0, Math.PI * 2)
     ctx.fill()
     ctx.stroke()
   })
 
   windows.forEach((win) => {
-    const screenX = win.x + panOffset.x
-    const screenY = win.y + panOffset.y
+    const screenX = win.x * zoomLevel + panOffset.x
+    const screenY = win.y * zoomLevel + panOffset.y
     ctx.fillStyle = '#fff'
     ctx.strokeStyle = '#3498db'
     ctx.lineWidth = 2
     ctx.beginPath()
-    ctx.arc(screenX, screenY, 6, 0, Math.PI * 2)
+    ctx.arc(screenX, screenY, 6 * zoomLevel, 0, Math.PI * 2)
     ctx.fill()
     ctx.stroke()
   })
 
   if (hoverPoint && currentTool !== 'wall') {
-    const hoverScreenX = hoverPoint.x + panOffset.x
-    const hoverScreenY = hoverPoint.y + panOffset.y
+    const hoverScreenX = hoverPoint.x * zoomLevel + panOffset.x
+    const hoverScreenY = hoverPoint.y * zoomLevel + panOffset.y
     const nearestWall = getNearestWall(hoverPoint)
     if (nearestWall) {
       const { pointOnWall, angle } = nearestWall
-      const wallScreenX = pointOnWall.x + panOffset.x
-      const wallScreenY = pointOnWall.y + panOffset.y
+      const wallScreenX = pointOnWall.x * zoomLevel + panOffset.x
+      const wallScreenY = pointOnWall.y * zoomLevel + panOffset.y
       if (currentTool === 'door') {
-        drawPreviewEntity(ctx, wallScreenX, wallScreenY, doorWidth, angle, '#e67e22', 'door', wallThickness)
+        drawPreviewEntity(ctx, wallScreenX, wallScreenY, doorWidth * zoomLevel, angle, '#e67e22', 'door', wallThickness * zoomLevel)
       } else if (currentTool === 'window') {
-        drawPreviewEntity(ctx, wallScreenX, wallScreenY, windowWidth, angle, '#3498db', 'window', wallThickness)
+        drawPreviewEntity(ctx, wallScreenX, wallScreenY, windowWidth * zoomLevel, angle, '#3498db', 'window', wallThickness * zoomLevel)
       }
     }
   }
 
   // 绘制轴对齐参考线
   if (hoverPoint) {
-    const hoverScreenX = hoverPoint.x + panOffset.x
-    const hoverScreenY = hoverPoint.y + panOffset.y
+    const hoverScreenX = hoverPoint.x * zoomLevel + panOffset.x
+    const hoverScreenY = hoverPoint.y * zoomLevel + panOffset.y
     ctx.strokeStyle = '#999'
     ctx.lineWidth = 1
     ctx.setLineDash([5, 5])
 
     // 垂直线（y轴对齐）
     if (yAxisSnappedX !== null) {
-      const screenX = yAxisSnappedX + panOffset.x
+      const screenX = yAxisSnappedX * zoomLevel + panOffset.x
       ctx.beginPath()
       ctx.moveTo(screenX, 0)
       ctx.lineTo(screenX, canvasHeight)
@@ -343,7 +343,7 @@ export const draw = (
 
     // 水平线（x轴对齐）
     if (xAxisSnappedY !== null) {
-      const screenY = xAxisSnappedY + panOffset.y
+      const screenY = xAxisSnappedY * zoomLevel + panOffset.y
       ctx.beginPath()
       ctx.moveTo(0, screenY)
       ctx.lineTo(canvasWidth, screenY)

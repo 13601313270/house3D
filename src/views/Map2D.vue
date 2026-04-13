@@ -79,6 +79,8 @@ const splitPosition = ref(0.5)
 const isSplitting = ref(false)
 const canvasSize = ref({ width: 0, height: 0 })
 const canvas3DSize = ref({ width: 0, height: 0 })
+const zoomLevel = ref(1)
+const isZooming = ref(false)
 let panStartScreenX = 0
 let panStartScreenY = 0
 
@@ -473,7 +475,8 @@ const drawWrapper = () => {
       wallThickness,
       panOffset.value,
       canvasSize.value.width,
-      canvasSize.value.height
+      canvasSize.value.height,
+      zoomLevel.value
     )
   }
 }
@@ -631,8 +634,8 @@ const handleCanvasClick = (e: MouseEvent) => {
   const rect = canvas.getBoundingClientRect()
   const screenX = Math.round(e.clientX - rect.left)
   const screenY = Math.round(e.clientY - rect.top)
-  const x = screenX - panOffset.value.x
-  const y = screenY - panOffset.value.y
+  const x = (screenX - panOffset.value.x) / zoomLevel.value
+  const y = (screenY - panOffset.value.y) / zoomLevel.value
 
   // 如果当前是拖拽模式，不执行任何操作
   if (currentTool.value === 'drag') {
@@ -654,7 +657,7 @@ const handleCanvasClick = (e: MouseEvent) => {
       const snapped = getSnapPoint([last], clickPoint, allPoints)
       const dist = Math.hypot(snapped.x - last.x, snapped.y - last.y)
 
-      if (dist < 10) {
+      if (dist < 10 * zoomLevel.value) {
         if (tempWallPoints.value.length > 1) {
           const newWall: Wall = {
             id: Date.now().toString(),
@@ -728,8 +731,8 @@ const handleMouseMove = (e: MouseEvent) => {
   const rect = canvas.getBoundingClientRect()
   const screenX = e.clientX - rect.left
   const screenY = e.clientY - rect.top
-  const x = screenX - panOffset.value.x
-  const y = screenY - panOffset.value.y
+  const x = (screenX - panOffset.value.x) / zoomLevel.value
+  const y = (screenY - panOffset.value.y) / zoomLevel.value
 
   // 如果正在拖拽，处理拖拽逻辑（即使当前工具不是 drag）
   if (draggedPoint.value !== null) {
@@ -874,8 +877,8 @@ const handleMouseDown = (e: MouseEvent) => {
   const rect = canvas.getBoundingClientRect()
   const screenX = e.clientX - rect.left
   const screenY = e.clientY - rect.top
-  const x = screenX - panOffset.value.x
-  const y = screenY - panOffset.value.y
+  const x = (screenX - panOffset.value.x) / zoomLevel.value
+  const y = (screenY - panOffset.value.y) / zoomLevel.value
 
   // 只有在拖拽模式下才能拖拽点
   if (currentTool.value === 'drag') {
@@ -883,7 +886,7 @@ const handleMouseDown = (e: MouseEvent) => {
     for (let i = 0; i < tempWallPoints.value.length; i++) {
       const point = tempWallPoints.value[i]
       const dist = Math.hypot(x - point.x, y - point.y)
-      if (dist < wallThickness) {
+      if (dist < wallThickness * zoomLevel.value) {
         draggedPoint.value = { type: 'wall', wallIndex: -1, pointIndex: i }
         dragOffset.value = { x: point.x - x, y: point.y - y }
         prevTool.value = currentTool.value
@@ -896,7 +899,7 @@ const handleMouseDown = (e: MouseEvent) => {
     walls.value.forEach((wall, wallIndex) => {
       wall.points.forEach((point, pointIndex) => {
         const dist = Math.hypot(x - point.x, y - point.y)
-        if (dist < wallThickness) {
+        if (dist < wallThickness * zoomLevel.value) {
           draggedPoint.value = { type: 'wall', wallIndex, pointIndex }
           dragOffset.value = { x: point.x - x, y: point.y - y }
           prevTool.value = currentTool.value
@@ -908,7 +911,7 @@ const handleMouseDown = (e: MouseEvent) => {
     // 检查门
     doors.value.forEach((door, doorIndex) => {
       const dist = Math.hypot(x - door.x, y - door.y)
-      if (dist < wallThickness) {
+      if (dist < wallThickness * zoomLevel.value) {
         draggedPoint.value = { type: 'door', doorIndex }
         dragOffset.value = { x: door.x - x, y: door.y - y }
         prevTool.value = currentTool.value
@@ -919,7 +922,7 @@ const handleMouseDown = (e: MouseEvent) => {
     // 检查窗户
     windows.value.forEach((windowItem, windowIndex) => {
       const dist = Math.hypot(x - windowItem.x, y - windowItem.y)
-      if (dist < wallThickness) {
+      if (dist < wallThickness * zoomLevel.value) {
         draggedPoint.value = { type: 'window', windowIndex }
         dragOffset.value = { x: windowItem.x - x, y: windowItem.y - y }
         prevTool.value = currentTool.value
@@ -998,12 +1001,45 @@ const handleMouseUpSplit = () => {
 onMounted(() => {
   window.addEventListener('mousemove', handleMouseMoveSplit)
   window.addEventListener('mouseup', handleMouseUpSplit)
+  
+  const canvas = canvasRef.value
+  if (canvas) {
+    canvas.addEventListener('wheel', handleWheel)
+  }
 })
 
 onUnmounted(() => {
   window.removeEventListener('mousemove', handleMouseMoveSplit)
   window.removeEventListener('mouseup', handleMouseUpSplit)
+  
+  const canvas = canvasRef.value
+  if (canvas) {
+    canvas.removeEventListener('wheel', handleWheel)
+  }
 })
+
+const handleWheel = (e: WheelEvent) => {
+  e.preventDefault()
+  
+  const canvas = canvasRef.value
+  if (!canvas) return
+  
+  const rect = canvas.getBoundingClientRect()
+  const mouseX = e.clientX - rect.left
+  const mouseY = e.clientY - rect.top
+  
+  const zoomFactor = e.deltaY < 0 ? 1.1 : 0.9
+  const newZoomLevel = Math.max(0.1, Math.min(5, zoomLevel.value * zoomFactor))
+  
+  const zoomRatio = newZoomLevel / zoomLevel.value
+  const newPanX = mouseX - (mouseX - panOffset.value.x) * zoomRatio
+  const newPanY = mouseY - (mouseY - panOffset.value.y) * zoomRatio
+  
+  zoomLevel.value = newZoomLevel
+  panOffset.value = { x: newPanX, y: newPanY }
+  
+  drawWrapper()
+}
 </script>
 
 <style scoped>
