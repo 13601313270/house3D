@@ -16,6 +16,13 @@
       <button @click="undo" type="button">
         撤销
       </button>
+      <button @click="saveDrawing" type="button">
+        保存
+      </button>
+      <button @click="loadDrawing" type="button">
+        加载
+      </button>
+      <input type="file" id="fileInput" ref="fileInputRef" accept=".json" style="display: none" @change="handleFileChange" />
       <button :class="{ active: currentTool === 'drag' }" @click="currentTool = 'drag'" type="button">
         拖拽
       </button>
@@ -24,13 +31,6 @@
     <div class="canvas-container">
       <canvas ref="canvasRef" @click="handleCanvasClick" @mousedown="handleMouseDown" @mousemove="handleMouseMove"
         @mouseup="handleMouseUp" class="drawing-canvas" />
-    </div>
-
-    <div class="info-panel">
-      <div>当前模式: {{ currentTool }}</div>
-      <div>墙面数量: {{ walls.length }}</div>
-      <div>门数量: {{ doors.length }}</div>
-      <div>窗户数量: {{ windows.length }}</div>
     </div>
   </div>
 </template>
@@ -434,6 +434,52 @@ onMounted(() => {
     }
   }
 })
+
+const fileInputRef = ref<HTMLInputElement | null>(null)
+
+const saveDrawing = () => {
+  const data = {
+    walls: walls.value,
+    doors: doors.value,
+    windows: windows.value,
+    panOffset: panOffset.value
+  }
+  const json = JSON.stringify(data, null, 2)
+  const blob = new Blob([json], { type: 'application/json' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = 'floor-plan.json'
+  a.click()
+  URL.revokeObjectURL(url)
+}
+
+const loadDrawing = () => {
+  fileInputRef.value?.click()
+}
+
+const handleFileChange = (e: Event) => {
+  const input = e.target as HTMLInputElement
+  const file = input.files?.[0]
+  if (!file) return
+
+  const reader = new FileReader()
+  reader.onload = (event) => {
+    try {
+      const data = JSON.parse(event.target?.result as string)
+      walls.value = data.walls || []
+      doors.value = data.doors || []
+      windows.value = data.windows || []
+      panOffset.value = data.panOffset || { x: 0, y: 0 }
+      history.value = []
+      drawWrapper()
+    } catch (error) {
+      alert('文件格式错误')
+    }
+  }
+  reader.readAsText(file)
+  input.value = ''
+}
 
 const handleCanvasClick = (e: MouseEvent) => {
   const canvas = canvasRef.value
