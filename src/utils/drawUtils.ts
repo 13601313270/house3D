@@ -9,6 +9,7 @@ export const canvasHeight = 600
 export const snapThreshold = 20
 export const doorWidth = 90
 export const windowWidth = 120
+export const wallThickness = 10;// 墙体厚度
 
 export const calculateAngle = (p1: Point, p2: Point, p3: Point): { angle: number; isConvex: boolean } | null => {
   const v1x = p1.x - p2.x
@@ -51,7 +52,8 @@ export const drawEntity = (
   width: number,
   angle: number,
   color: string,
-  type: 'door' | 'window'
+  type: 'door' | 'window',
+  thickness: number = 10
 ) => {
   ctx.save()
   ctx.translate(x, y)
@@ -62,12 +64,12 @@ export const drawEntity = (
   ctx.lineWidth = 3
 
   if (type === 'door') {
-    ctx.fillRect(-width / 2, -3, width, 6)
+    ctx.fillRect(-width / 2, -thickness / 2, width, thickness)
     ctx.beginPath()
     ctx.arc(0, 0, width / 2, -Math.PI / 4, Math.PI / 4)
     ctx.stroke()
   } else {
-    ctx.fillRect(-width / 2, -3, width, 6)
+    ctx.fillRect(-width / 2, -thickness / 2, width, thickness)
     ctx.setLineDash([5, 5])
     ctx.stroke()
   }
@@ -82,7 +84,8 @@ export const drawPreviewEntity = (
   width: number,
   angle: number,
   color: string,
-  type: 'door' | 'window'
+  type: 'door' | 'window',
+  thickness: number = 10
 ) => {
   ctx.save()
   ctx.translate(x, y)
@@ -94,19 +97,19 @@ export const drawPreviewEntity = (
 
   if (type === 'door') {
     ctx.beginPath()
-    ctx.moveTo(-width / 2, -10)
-    ctx.lineTo(-width / 2, 10)
-    ctx.lineTo(0, 20)
-    ctx.lineTo(width / 2, 10)
-    ctx.lineTo(width / 2, -10)
+    ctx.moveTo(-width / 2, -thickness)
+    ctx.lineTo(-width / 2, thickness)
+    ctx.lineTo(0, thickness * 2)
+    ctx.lineTo(width / 2, thickness)
+    ctx.lineTo(width / 2, -thickness)
     ctx.closePath()
     ctx.stroke()
   } else {
     ctx.beginPath()
-    ctx.moveTo(-width / 2, -5)
-    ctx.lineTo(-width / 2, 5)
-    ctx.lineTo(width / 2, 5)
-    ctx.lineTo(width / 2, -5)
+    ctx.moveTo(-width / 2, -thickness / 2)
+    ctx.lineTo(-width / 2, thickness / 2)
+    ctx.lineTo(width / 2, thickness / 2)
+    ctx.lineTo(width / 2, -thickness / 2)
     ctx.closePath()
     ctx.stroke()
   }
@@ -126,7 +129,10 @@ export const draw = (
   xAxisSnappedY: number | null,
   yAxisSnappedX: number | null,
   draggedPointIndex: number | null,
-  draggedWallIndex: number | null
+  draggedWallIndex: number | null,
+  draggedDoorIndex: number | null,
+  draggedWindowIndex: number | null,
+  wallThickness: number = 20
 ) => {
   if (!canvasRef) return
   const ctx = canvasRef.getContext('2d')
@@ -140,7 +146,7 @@ export const draw = (
   ctx.strokeStyle = '#333'
   ctx.lineWidth = 2
   ctx.setLineDash([])
-  const margineds: Geometry | null = createShapeFromPoints(ctx, walls, 20);
+  const margineds: Geometry | null = createShapeFromPoints(ctx, walls, wallThickness);
   ctx.lineWidth = 3
   ctx.strokeStyle = 'black';
   ctx.beginPath();
@@ -251,11 +257,11 @@ export const draw = (
   }
 
   doors.forEach((door) => {
-    drawEntity(ctx, door.x, door.y, door.width, door.angle, '#e67e22', 'door')
+    drawEntity(ctx, door.x, door.y, door.width, door.angle, '#e67e22', 'door', wallThickness)
   })
 
   windows.forEach((win) => {
-    drawEntity(ctx, win.x, win.y, win.width, win.angle, '#3498db', 'window')
+    drawEntity(ctx, win.x, win.y, win.width, win.angle, '#3498db', 'window', wallThickness)
   })
 
   if (hoverPoint && currentTool !== 'wall') {
@@ -263,9 +269,9 @@ export const draw = (
     if (nearestWall) {
       const { pointOnWall, angle } = nearestWall
       if (currentTool === 'door') {
-        drawPreviewEntity(ctx, pointOnWall.x, pointOnWall.y, doorWidth, angle, '#e67e22', 'door')
+        drawPreviewEntity(ctx, pointOnWall.x, pointOnWall.y, doorWidth, angle, '#e67e22', 'door', wallThickness)
       } else if (currentTool === 'window') {
-        drawPreviewEntity(ctx, pointOnWall.x, pointOnWall.y, windowWidth, angle, '#3498db', 'window')
+        drawPreviewEntity(ctx, pointOnWall.x, pointOnWall.y, windowWidth, angle, '#3498db', 'window', wallThickness)
       }
     }
   }

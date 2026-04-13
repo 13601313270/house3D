@@ -38,7 +38,7 @@
 <script lang="ts" setup>
 import { ref, onMounted } from 'vue'
 import { Point, Wall, Door, Window } from '../types/map2d'
-import { draw, drawPoint, drawEntity, drawPreviewEntity, canvasWidth, canvasHeight, snapThreshold, doorWidth, windowWidth } from '../utils/drawUtils'
+import { draw, drawPoint, drawEntity, drawPreviewEntity, canvasWidth, canvasHeight, snapThreshold, doorWidth, windowWidth, wallThickness } from '../utils/drawUtils'
 
 const canvasRef = ref<HTMLCanvasElement | null>(null)
 const currentTool = ref<'wall' | 'door' | 'window' | 'drag'>('wall')
@@ -51,7 +51,7 @@ const lastPoint = ref<Point | null>(null)
 const history = ref<Wall[][]>([])
 const xAxisSnappedY = ref<number | null>(null)
 const yAxisSnappedX = ref<number | null>(null)
-const draggedPoint = ref<{ wallIndex: number; pointIndex: number } | null>(null)
+const draggedPoint = ref<{ type: 'wall'; wallIndex: number; pointIndex: number } | { type: 'door'; doorIndex: number } | { type: 'window'; windowIndex: number } | null>(null)
 const dragOffset = ref<Point | null>(null)
 const prevTool = ref<'wall' | 'door' | 'window' | 'drag'>('wall')
 
@@ -356,8 +356,22 @@ const getSnapPoint = (startPoints: Point[], current: Point, allPoints: Point[] =
 const drawWrapper = () => {
   const canvas = canvasRef.value
   if (canvas) {
-    const draggedPointIdx = draggedPoint.value ? draggedPoint.value.pointIndex : null
-    const draggedWallIdx = draggedPoint.value ? draggedPoint.value.wallIndex : null
+    let draggedPointIdx: number | null = null
+    let draggedWallIdx: number | null = null
+    let draggedDoorIdx: number | null = null
+    let draggedWindowIdx: number | null = null
+    
+    if (draggedPoint.value) {
+      if (draggedPoint.value.type === 'wall') {
+        draggedPointIdx = draggedPoint.value.pointIndex
+        draggedWallIdx = draggedPoint.value.wallIndex
+      } else if (draggedPoint.value.type === 'door') {
+        draggedDoorIdx = draggedPoint.value.doorIndex
+      } else if (draggedPoint.value.type === 'window') {
+        draggedWindowIdx = draggedPoint.value.windowIndex
+      }
+    }
+    
     draw(
       canvas,
       walls.value,
@@ -370,7 +384,10 @@ const drawWrapper = () => {
       xAxisSnappedY.value,
       yAxisSnappedX.value,
       draggedPointIdx,
-      draggedWallIdx
+      draggedWallIdx,
+      draggedDoorIdx,
+      draggedWindowIdx,
+      wallThickness
     )
   }
 }
@@ -517,73 +534,85 @@ const handleMouseMove = (e: MouseEvent) => {
 
   // 如果正在拖拽，处理拖拽逻辑（即使当前工具不是 drag）
   if (draggedPoint.value !== null) {
-    // 计算拖拽点的原始位置
-    let originalPoint: Point
+    const dragged = draggedPoint.value
+    let originalPoint: Point = { x: 0, y: 0 }
     let prevPoint: Point | null = null
     let nextPoint: Point | null = null
 
-    if (draggedPoint.value.wallIndex === -1) {
-      originalPoint = tempWallPoints.value[draggedPoint.value.pointIndex]
-      // 获取临时折线上的前后点
-      if (draggedPoint.value.pointIndex > 0) {
-        prevPoint = tempWallPoints.value[draggedPoint.value.pointIndex - 1]
+    if (dragged.type === 'wall') {
+      if (dragged.wallIndex === -1) {
+        originalPoint = tempWallPoints.value[dragged.pointIndex]
+        if (dragged.pointIndex > 0) {
+          prevPoint = tempWallPoints.value[dragged.pointIndex - 1]
+        }
+        if (dragged.pointIndex < tempWallPoints.value.length - 1) {
+          nextPoint = tempWallPoints.value[dragged.pointIndex + 1]
+        }
+      } else {
+        originalPoint = walls.value[dragged.wallIndex].points[dragged.pointIndex]
+        const wall = walls.value[dragged.wallIndex]
+        if (dragged.pointIndex > 0) {
+          prevPoint = wall.points[dragged.pointIndex - 1]
+        }
+        if (dragged.pointIndex < wall.points.length - 1) {
+          nextPoint = wall.points[dragged.pointIndex + 1]
+        }
       }
-      if (draggedPoint.value.pointIndex < tempWallPoints.value.length - 1) {
-        nextPoint = tempWallPoints.value[draggedPoint.value.pointIndex + 1]
-      }
-    } else {
-      originalPoint = walls.value[draggedPoint.value.wallIndex].points[draggedPoint.value.pointIndex]
-      // 获取墙上的前后点
-      const wall = walls.value[draggedPoint.value.wallIndex]
-      if (draggedPoint.value.pointIndex > 0) {
-        prevPoint = wall.points[draggedPoint.value.pointIndex - 1]
-      }
-      if (draggedPoint.value.pointIndex < wall.points.length - 1) {
-        nextPoint = wall.points[draggedPoint.value.pointIndex + 1]
-      }
+    } else if (dragged.type === 'door') {
+      originalPoint = { x: doors.value[dragged.doorIndex].x, y: doors.value[dragged.doorIndex].y }
+    } else if (dragged.type === 'window') {
+      originalPoint = { x: windows.value[dragged.windowIndex].x, y: windows.value[dragged.windowIndex].y }
     }
 
-    // 收集所有点（包括临时折线和已绘制的墙上的点）
     const allPoints = [...tempWallPoints.value]
-    walls.value.forEach((wall, wallIdx) => {
-      wall.points.forEach((point, pointIdx) => {
-        // 排除正在拖拽的点
-        if (draggedPoint.value && draggedPoint.value.wallIndex === wallIdx && draggedPoint.value.pointIndex === pointIdx) {
-          return
-        }
+    walls.value.forEach((wall) => {
+      wall.points.forEach(point => {
         allPoints.push(point)
       })
     })
+    doors.value.forEach((door, doorIdx) => {
+      if (dragged.type !== 'door' || doorIdx !== dragged.doorIndex) {
+        allPoints.push({ x: door.x, y: door.y })
+      }
+    })
+    windows.value.forEach((win, winIdx) => {
+      if (dragged.type !== 'window' || winIdx !== dragged.windowIndex) {
+        allPoints.push({ x: win.x, y: win.y })
+      }
+    })
 
-    // 构建 startPoints 数组（拖拽点两侧的点）
     const startPoints: Point[] = []
-    if (prevPoint) {
-      startPoints.push(prevPoint)
-    }
-    if (nextPoint) {
-      startPoints.push(nextPoint)
-    }
+    if (prevPoint) startPoints.push(prevPoint)
+    if (nextPoint) startPoints.push(nextPoint)
+    if (startPoints.length === 0) startPoints.push(originalPoint)
 
-    // 如果没有两侧点，使用原始点
-    if (startPoints.length === 0) {
-      startPoints.push(originalPoint)
-    }
-
-    // 计算鼠标相对于原始位置的偏移量
     const dx = x - (originalPoint.x - (dragOffset.value?.x || 0))
     const dy = y - (originalPoint.y - (dragOffset.value?.y || 0))
 
-    // 对偏移量进行磁吸计算
     const snapped = getSnapPoint(startPoints, { x: originalPoint.x + dx, y: originalPoint.y + dy }, allPoints)
-
-    // 计算新位置（相对于原始位置的偏移量）
     const newX = snapped.x
     const newY = snapped.y
 
-    if (draggedPoint.value.wallIndex === -1) {
-      tempWallPoints.value[draggedPoint.value.pointIndex] = { x: newX, y: newY }
-    } else {
-      walls.value[draggedPoint.value.wallIndex].points[draggedPoint.value.pointIndex] = { x: newX, y: newY }
+    if (dragged.type === 'wall') {
+      if (dragged.wallIndex === -1) {
+        tempWallPoints.value[dragged.pointIndex] = { x: newX, y: newY }
+      } else {
+        walls.value[dragged.wallIndex].points[dragged.pointIndex] = { x: newX, y: newY }
+      }
+    } else if (dragged.type === 'door') {
+      const nearest = getNearestWall({ x: newX, y: newY })
+      if (nearest) {
+        doors.value[dragged.doorIndex].x = nearest.pointOnWall.x
+        doors.value[dragged.doorIndex].y = nearest.pointOnWall.y
+        doors.value[dragged.doorIndex].angle = nearest.angle
+      }
+    } else if (dragged.type === 'window') {
+      const nearest = getNearestWall({ x: newX, y: newY })
+      if (nearest) {
+        windows.value[dragged.windowIndex].x = nearest.pointOnWall.x
+        windows.value[dragged.windowIndex].y = nearest.pointOnWall.y
+        windows.value[dragged.windowIndex].angle = nearest.angle
+      }
     }
     drawWrapper()
     return
@@ -641,7 +670,7 @@ const handleMouseDown = (e: MouseEvent) => {
       const point = tempWallPoints.value[i]
       const dist = Math.hypot(x - point.x, y - point.y)
       if (dist < 10) {
-        draggedPoint.value = { wallIndex: -1, pointIndex: i }
+        draggedPoint.value = { type: 'wall', wallIndex: -1, pointIndex: i }
         dragOffset.value = { x: point.x - x, y: point.y - y }
         prevTool.value = currentTool.value
         drawWrapper()
@@ -654,12 +683,34 @@ const handleMouseDown = (e: MouseEvent) => {
       wall.points.forEach((point, pointIndex) => {
         const dist = Math.hypot(x - point.x, y - point.y)
         if (dist < 10) {
-          draggedPoint.value = { wallIndex, pointIndex }
+          draggedPoint.value = { type: 'wall', wallIndex, pointIndex }
           dragOffset.value = { x: point.x - x, y: point.y - y }
           prevTool.value = currentTool.value
           drawWrapper()
         }
       })
+    })
+
+    // 检查门
+    doors.value.forEach((door, doorIndex) => {
+      const dist = Math.hypot(x - door.x, y - door.y)
+      if (dist < 10) {
+        draggedPoint.value = { type: 'door', doorIndex }
+        dragOffset.value = { x: door.x - x, y: door.y - y }
+        prevTool.value = currentTool.value
+        drawWrapper()
+      }
+    })
+
+    // 检查窗户
+    windows.value.forEach((windowItem, windowIndex) => {
+      const dist = Math.hypot(x - windowItem.x, y - windowItem.y)
+      if (dist < 10) {
+        draggedPoint.value = { type: 'window', windowIndex }
+        dragOffset.value = { x: windowItem.x - x, y: windowItem.y - y }
+        prevTool.value = currentTool.value
+        drawWrapper()
+      }
     })
   }
 }
