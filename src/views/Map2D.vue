@@ -528,7 +528,8 @@ const saveDrawing = () => {
     walls: walls.value,
     doors: doors.value,
     windows: windows.value,
-    panOffset: panOffset.value
+    panOffset: panOffset.value,
+    zoomLevel: zoomLevel.value
   }
   const json = JSON.stringify(data, null, 2)
   const blob = new Blob([json], { type: 'application/json' })
@@ -557,6 +558,7 @@ const handleFileChange = (e: Event) => {
       doors.value = data.doors || []
       windows.value = data.windows || []
       panOffset.value = data.panOffset || { x: 0, y: 0 }
+      zoomLevel.value = data.zoomLevel || 1
       history.value = []
       drawWrapper()
     } catch (error) {
@@ -576,8 +578,8 @@ const handleContextMenu = (e: MouseEvent) => {
   const rect = canvas.getBoundingClientRect()
   const screenX = Math.round(e.clientX - rect.left)
   const screenY = Math.round(e.clientY - rect.top)
-  const x = screenX - panOffset.value.x
-  const y = screenY - panOffset.value.y
+  const x = (screenX - panOffset.value.x) / zoomLevel.value
+  const y = (screenY - panOffset.value.y) / zoomLevel.value
 
   // 检查是否点击了门
   for (let i = 0; i < doors.value.length; i++) {
