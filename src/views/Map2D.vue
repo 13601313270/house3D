@@ -440,8 +440,10 @@ const handleCanvasClick = (e: MouseEvent) => {
   if (!canvas) return
 
   const rect = canvas.getBoundingClientRect()
-  const x = Math.round(e.clientX - rect.left)
-  const y = Math.round(e.clientY - rect.top)
+  const screenX = Math.round(e.clientX - rect.left)
+  const screenY = Math.round(e.clientY - rect.top)
+  const x = screenX - panOffset.value.x
+  const y = screenY - panOffset.value.y
 
   // 如果当前是拖拽模式，不执行任何操作
   if (currentTool.value === 'drag') {
