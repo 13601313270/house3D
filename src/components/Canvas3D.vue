@@ -7,6 +7,8 @@
 import { ref, onMounted, onUnmounted, watch } from 'vue'
 import * as THREE from 'three'
 import { Wall, Door, Window } from '../types/map2d'
+import { createShapeFromPoints } from '@/utils/createShapeFromPoints'
+import { Geometry } from 'martinez-polygon-clipping'
 
 interface DrawingData {
   walls: Wall[]
@@ -64,38 +66,77 @@ const initThree = () => {
 const renderWalls = () => {
   if (!scene) return
 
-  props.data.walls.forEach((wall) => {
-    if (wall.points.length < 2) return
-    console.log(11111, wall.points)
+  const margineds: Geometry | null = createShapeFromPoints(props.data.walls, 10);
+  if (!margineds) return
 
-    const points = wall.points.map((p) => new THREE.Vector2(p.x, p.y))
-    const shape = new THREE.Shape(points)
+  console.log('margineds', margineds)
+  for (const poly of margineds || []) {
+    for (let i = 0; i < poly.length; i++) {
+      const ring = poly[i] as any
+      const points = []; // wall.points.map((p) => new THREE.Vector2(p.x, p.y))
+      for (let j = 0; j < ring.length; j++) {
+        if (ring[j] === null) continue
+        points.push(new THREE.Vector2(ring[j][0], ring[j][1]))
+      }
 
-    const extrudeSettings = {
-      steps: 1,
-      depth: 20,
-      bevelEnabled: true,
-      bevelThickness: 2,
-      bevelSize: 2,
-      bevelSegments: 1
+      const shape = new THREE.Shape(points)
+
+      const extrudeSettings = {
+        steps: 1,
+        depth: 20,
+        bevelEnabled: true,
+        bevelThickness: 2,
+        bevelSize: 2,
+        bevelSegments: 1
+      }
+
+      const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings)
+      const material = new THREE.MeshStandardMaterial({ color: 0xe0e0e0, side: THREE.DoubleSide })
+      const wallMesh = new THREE.Mesh(geometry, material)
+      wallMesh.position.set(0, 10, 0)
+      wallMesh.castShadow = true
+      wallMesh.receiveShadow = true
+      scene!.add(wallMesh)
     }
+  }
+  resize();
 
-    const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings)
-    const material = new THREE.MeshStandardMaterial({ color: 0xe0e0e0, side: THREE.DoubleSide })
-    const wallMesh = new THREE.Mesh(geometry, material)
-    wallMesh.position.set(0, 10, 0)
-    wallMesh.castShadow = true
-    wallMesh.receiveShadow = true
-    scene!.add(wallMesh)
 
-    wall.points.forEach((point) => {
-      const pointGeometry = new THREE.SphereGeometry(3, 8, 8)
-      const pointMaterial = new THREE.MeshBasicMaterial({ color: 0x1890ff })
-      const pointMesh = new THREE.Mesh(pointGeometry, pointMaterial)
-      pointMesh.position.set(point.x, 0, point.y)
-      scene!.add(pointMesh)
-    })
-  })
+
+  // props.data.walls.forEach((wall) => {
+  //   if (wall.points.length < 2) return
+  //   console.log(11111, wall.points)
+
+
+
+  //   const points = wall.points.map((p) => new THREE.Vector2(p.x, p.y))
+  //   const shape = new THREE.Shape(points)
+
+  //   const extrudeSettings = {
+  //     steps: 1,
+  //     depth: 20,
+  //     bevelEnabled: true,
+  //     bevelThickness: 2,
+  //     bevelSize: 2,
+  //     bevelSegments: 1
+  //   }
+
+  //   const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings)
+  //   const material = new THREE.MeshStandardMaterial({ color: 0xe0e0e0, side: THREE.DoubleSide })
+  //   const wallMesh = new THREE.Mesh(geometry, material)
+  //   wallMesh.position.set(0, 10, 0)
+  //   wallMesh.castShadow = true
+  //   wallMesh.receiveShadow = true
+  //   scene!.add(wallMesh)
+
+  //   wall.points.forEach((point) => {
+  //     const pointGeometry = new THREE.SphereGeometry(3, 8, 8)
+  //     const pointMaterial = new THREE.MeshBasicMaterial({ color: 0x1890ff })
+  //     const pointMesh = new THREE.Mesh(pointGeometry, pointMaterial)
+  //     pointMesh.position.set(point.x, 0, point.y)
+  //     scene!.add(pointMesh)
+  //   })
+  // })
 }
 
 const renderDoors = () => {
