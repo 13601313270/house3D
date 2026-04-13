@@ -30,7 +30,10 @@
 
     <div class="canvas-container">
       <canvas ref="canvasRef" @click="handleCanvasClick" @mousedown="handleMouseDown" @mousemove="handleMouseMove"
-        @mouseup="handleMouseUp" class="drawing-canvas" />
+        @mouseup="handleMouseUp" @contextmenu="handleContextMenu" class="drawing-canvas" />
+      <div v-if="contextMenu?.visible" class="context-menu" :style="{ top: contextMenu.y + 'px', left: contextMenu.x + 'px' }">
+        <button @click="deleteContextMenuEntity">删除</button>
+      </div>
     </div>
   </div>
 </template>
@@ -59,6 +62,8 @@ const isPanning = ref(false)
 const panStart = ref<Point | null>(null)
 let panStartScreenX = 0
 let panStartScreenY = 0
+
+const contextMenu = ref<{ visible: boolean; x: number; y: number; type: 'door' | 'window'; index: number } | null>(null)
 
 interface NearestWallResult {
   wall: Wall
@@ -481,6 +486,66 @@ const handleFileChange = (e: Event) => {
   input.value = ''
 }
 
+const handleContextMenu = (e: MouseEvent) => {
+  e.preventDefault()
+  
+  const canvas = canvasRef.value
+  if (!canvas) return
+
+  const rect = canvas.getBoundingClientRect()
+  const screenX = Math.round(e.clientX - rect.left)
+  const screenY = Math.round(e.clientY - rect.top)
+  const x = screenX - panOffset.value.x
+  const y = screenY - panOffset.value.y
+
+  // 检查是否点击了门
+  for (let i = 0; i < doors.value.length; i++) {
+    const door = doors.value[i]
+    const dist = Math.hypot(x - door.x, y - door.y)
+    if (dist < 10) {
+      contextMenu.value = {
+        visible: true,
+        x: e.clientX,
+        y: e.clientY,
+        type: 'door',
+        index: i
+      }
+      return
+    }
+  }
+
+  // 检查是否点击了窗户
+  for (let i = 0; i < windows.value.length; i++) {
+    const windowItem = windows.value[i]
+    const dist = Math.hypot(x - windowItem.x, y - windowItem.y)
+    if (dist < 10) {
+      contextMenu.value = {
+        visible: true,
+        x: e.clientX,
+        y: e.clientY,
+        type: 'window',
+        index: i
+      }
+      return
+    }
+  }
+
+  contextMenu.value = null
+}
+
+const deleteContextMenuEntity = () => {
+  if (!contextMenu.value) return
+
+  if (contextMenu.value.type === 'door') {
+    doors.value.splice(contextMenu.value.index, 1)
+  } else if (contextMenu.value.type === 'window') {
+    windows.value.splice(contextMenu.value.index, 1)
+  }
+
+  contextMenu.value = null
+  drawWrapper()
+}
+
 const handleCanvasClick = (e: MouseEvent) => {
   const canvas = canvasRef.value
   if (!canvas) return
@@ -873,5 +938,31 @@ const handleMouseUp = () => {
 
 .info-panel div {
   margin: 5px 0;
+}
+
+.context-menu {
+  position: absolute;
+  background: white;
+  border: 1px solid #d9d9d9;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  padding: 5px 0;
+  z-index: 1000;
+}
+
+.context-menu button {
+  display: block;
+  width: 100%;
+  padding: 8px 16px;
+  border: none;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  font-size: 14px;
+  color: #ff4d4f;
+}
+
+.context-menu button:hover {
+  background: #f5f5f5;
 }
 </style>
