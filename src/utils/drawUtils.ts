@@ -147,7 +147,7 @@ export const draw = (
   ctx.fillStyle = '#f5f5f5'
   ctx.fillRect(0, 0, canvasWidth, canvasHeight)
 
-  const margineds: Geometry | null = createShapeFromPoints(ctx, walls, wallThickness);
+  const margineds: Geometry | null = createShapeFromPoints(walls, wallThickness);
   
   ctx.strokeStyle = '#333'
   ctx.lineWidth = 3

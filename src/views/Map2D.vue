@@ -106,7 +106,7 @@ const updateCanvasSize = (skipPanelWidthUpdate = false) => {
       const canvasRect = canvasContainer.getBoundingClientRect()
       const width = Math.floor(canvasRect.width)
       const height = Math.floor(canvasRect.height)
-      console.log('===width---', width)
+      // console.log('===width---', width)
 
       if (width > 0 && height > 0) {
         canvas.width = width

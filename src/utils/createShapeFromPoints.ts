@@ -10,7 +10,7 @@ import { Point, Wall } from "@/types/map2d";
 
 const cache = new Map<string, [number, number][][]>();
 
-export function createShapeFromPoints(ctx: CanvasRenderingContext2D, wallList: Wall[], radius = 1): Geometry | null {
+export function createShapeFromPoints(wallList: Wall[], radius = 1): Geometry | null {
   const key = `${wallList.map((item) => item.points.map((point) => `${point.x},${point.y}`).join(',')).join(',')}-${radius}`
   // if (cache.has(key)) return cache.get(key) || []
   const left: Point[] = [];
@@ -90,7 +90,7 @@ export function createShapeFromPoints(ctx: CanvasRenderingContext2D, wallList: W
         // 如果这个点，之前存在过相同坐标的另一个点
         const prevSamePoint = points.points.find((item, index) => index < i && item.x === curr.x && item.y === curr.y);
         if (prevSamePoint) {
-          console.log('prevSamePoint', points.points, curr)
+          // console.log('prevSamePoint', points.points, curr)
           const offsetLPoint: [number, number] = [
             curr.x + Lvector[0] * radius + vector[0] * radius,
             curr.y + Lvector[1] * radius + vector[1] * radius
@@ -109,7 +109,7 @@ export function createShapeFromPoints(ctx: CanvasRenderingContext2D, wallList: W
               [curr.x, curr.y]
             ]])
           }
-          console.log('offsetLPoint', [curr.x, curr.y], point2, offsetLPoint, offsetRPoint, point3)
+          // console.log('offsetLPoint', [curr.x, curr.y], point2, offsetLPoint, offsetRPoint, point3)
         }
       }
       prev = curr;
