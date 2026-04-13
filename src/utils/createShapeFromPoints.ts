@@ -1,21 +1,21 @@
-import * as THREE from 'three';
 /**
  * 线拉伸成平面
  * @param { {x: number, y: number}[] } points 点
  * @param { number } radius 拉伸半径(宽度)
  * @returns { THREE.Vector2[] }
  */
-export function createShapeFromPoints(points: Array<{
-  x: number,
-  y: number,
-}>, radius = 1): [number, number][] {
-  const left: [number, number][] = [];
-  const right: [number, number][] = [];
 
-  for (let i = 0, len = points.length; i < len; i++) {
-    let prev = points[i - 1] || {};
-    const curr = points[i];
-    const next = points[i + 1] || {};
+import { Point, Wall } from "@/types/map2d";
+
+export function createShapeFromPoints(points_: Wall[], radius = 1): Point[] {
+  const left: Point[] = [];
+  const right: Point[] = [];
+  const points = points_[0];
+
+  for (let i = 0, len = points.points.length; i < len; i++) {
+    let prev = points.points[i - 1] || {};
+    const curr = points.points[i];
+    const next = points.points[i + 1] || {};
 
     let v1 = [curr.x - prev.x, curr.y - prev.y];
     let v2 = [next.x - curr.x, next.y - curr.y];
@@ -40,19 +40,21 @@ export function createShapeFromPoints(points: Array<{
     const Rvector = rotateVector(vector, Math.PI / 2);
     const deflection = vectorAngleCosHalf(v1, v2);
 
-    left.push([
-      (+(curr.x + Lvector[0] * (radius / deflection)).toFixed(2)),
-      (+(curr.y + Lvector[1] * (radius / deflection)).toFixed(2)),
-    ]);
-    right.unshift([
-      (+(curr.x + Rvector[0] * (radius / deflection)).toFixed(2)),
-      (+(curr.y + Rvector[1] * (radius / deflection)).toFixed(2)),
-    ]);
+    left.push({
+      x: (+(curr.x + Lvector[0] * (radius / deflection)).toFixed(2)),
+      y: (+(curr.y + Lvector[1] * (radius / deflection)).toFixed(2)),
+    });
+    right.unshift({
+      x: (+(curr.x + Rvector[0] * (radius / deflection)).toFixed(2)),
+      y: (+(curr.y + Rvector[1] * (radius / deflection)).toFixed(2)),
+    });
 
     prev = curr;
   }
 
-  return left.concat(right);
+  const allPoint = left.concat(right);
+  allPoint.push(allPoint[0]);
+  return allPoint;
 }
 
 /**

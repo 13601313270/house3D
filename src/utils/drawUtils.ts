@@ -142,15 +142,24 @@ export const draw = (
   ctx.lineWidth = 2
   ctx.setLineDash([])
   let margineds: [number, number][][] = []
-  const outlinePointsArray: [number, number][][][] = []
 
   walls.forEach((wall) => {
     if (wall.points.length < 2) return
-    const outlinePoints = createShapeFromPoints(wall.points, 10)
-    outlinePoints.push(outlinePoints[0]);// 闭合起来
-    outlinePointsArray.push([outlinePoints])
+    const outlinePoints = createShapeFromPoints([wall], 10).map((item) => [item.x, item.y])
     margineds = union(margineds, [outlinePoints])
-    // 绘制墙上的点
+  })
+  for (let i = 0; i < margineds.length; i++) {
+    ctx.beginPath()
+    ctx.moveTo(margineds[i][0][0], margineds[i][0][1])
+    for (let j = 1; j < margineds[i].length; j++) {
+      ctx.lineTo(margineds[i][j][0], margineds[i][j][1])
+    }
+    ctx.closePath()
+    ctx.stroke()
+  }
+  // 绘制墙上的点
+  walls.forEach((wall) => {
+    if (wall.points.length < 2) return
     wall.points.forEach((point, pointIndex) => {
       const isDragged = draggedWallIndex !== null && draggedWallIndex === walls.indexOf(wall) && pointIndex === draggedPointIndex
       drawPoint(ctx, point.x, point.y, isDragged ? '#1890ff' : '#333')
@@ -162,16 +171,7 @@ export const draw = (
         ctx.stroke()
       }
     })
-  })
-  for (let i = 0; i < margineds.length; i++) {
-    ctx.beginPath()
-    ctx.moveTo(margineds[i][0][0], margineds[i][0][1])
-    for (let j = 1; j < margineds[i].length; j++) {
-      ctx.lineTo(margineds[i][j][0], margineds[i][j][1])
-    }
-    ctx.closePath()
-    ctx.stroke()
-  }
+  });
 
   if (currentTool === 'wall' && tempWallPoints.length > 0) {
     ctx.strokeStyle = '#42b983'
