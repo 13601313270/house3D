@@ -1,49 +1,64 @@
 <template>
   <div class="map2d-container">
-    <div class="toolbar">
-      <button :class="{ active: currentTool === 'wall' }" @click="currentTool = 'wall'" type="button">
-        墙面
-      </button>
-      <button :class="{ active: currentTool === 'door' }" @click="currentTool = 'door'" type="button">
-        门
-      </button>
-      <button :class="{ active: currentTool === 'window' }" @click="currentTool = 'window'" type="button">
-        窗户
-      </button>
-      <button @click="clearDrawing" type="button">
-        清空
-      </button>
-      <button @click="undo" type="button">
-        撤销
-      </button>
-      <button @click="saveDrawing" type="button">
-        保存
-      </button>
-      <button @click="loadDrawing" type="button">
-        加载
-      </button>
-      <input type="file" id="fileInput" ref="fileInputRef" accept=".json" style="display: none" @change="handleFileChange" />
-      <button :class="{ active: currentTool === 'drag' }" @click="currentTool = 'drag'" type="button">
-        拖拽
-      </button>
+    <div class="left-panel">
+      <div class="toolbar">
+        <button :class="{ active: currentTool === 'wall' }" @click="currentTool = 'wall'" type="button">
+          墙面
+        </button>
+        <button :class="{ active: currentTool === 'door' }" @click="currentTool = 'door'" type="button">
+          门
+        </button>
+        <button :class="{ active: currentTool === 'window' }" @click="currentTool = 'window'" type="button">
+          窗户
+        </button>
+        <button @click="clearDrawing" type="button">
+          清空
+        </button>
+        <button @click="undo" type="button">
+          撤销
+        </button>
+        <button @click="saveDrawing" type="button">
+          保存
+        </button>
+        <button @click="loadDrawing" type="button">
+          加载
+        </button>
+        <input type="file" id="fileInput" ref="fileInputRef" accept=".json" style="display: none"
+          @change="handleFileChange" />
+        <button :class="{ active: currentTool === 'drag' }" @click="currentTool = 'drag'" type="button">
+          拖拽
+        </button>
+      </div>
+
+      <div class="canvas-container">
+        <canvas ref="canvasRef" @click="handleCanvasClick" @mousedown="handleMouseDown" @mousemove="handleMouseMove"
+          @mouseup="handleMouseUp" @contextmenu="handleContextMenu" class="drawing-canvas"
+          :style="{ display: isSplitting ? 'none' : 'block' }" />
+        <div v-if="contextMenu?.visible" class="context-menu"
+          :style="{ top: contextMenu.y + 'px', left: contextMenu.x + 'px' }">
+          <button @click="deleteContextMenuEntity">删除</button>
+        </div>
+      </div>
     </div>
 
-    <div class="canvas-container">
-      <canvas ref="canvasRef" @click="handleCanvasClick" @mousedown="handleMouseDown" @mousemove="handleMouseMove"
-        @mouseup="handleMouseUp" @contextmenu="handleContextMenu" class="drawing-canvas" />
-      <div v-if="contextMenu?.visible" class="context-menu" :style="{ top: contextMenu.y + 'px', left: contextMenu.x + 'px' }">
-        <button @click="deleteContextMenuEntity">删除</button>
+    <div class="split-bar" @mousedown="startSplit" title="拖动调整左右比例"></div>
+
+    <div class="right-panel">
+      <div class="preview-label">3D 预览区域</div>
+      <div class="canvas-3d-container">
+        <canvas ref="canvas3DRef" class="drawing-canvas-3d" />
       </div>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { Point, Wall, Door, Window } from '../types/map2d'
 import { draw, drawPoint, drawEntity, drawPreviewEntity, canvasWidth, canvasHeight, snapThreshold, doorWidth, windowWidth, wallThickness } from '../utils/drawUtils'
 
 const canvasRef = ref<HTMLCanvasElement | null>(null)
+const canvas3DRef = ref<HTMLCanvasElement | null>(null)
 const currentTool = ref<'wall' | 'door' | 'window' | 'drag'>('wall')
 const walls = ref<Wall[]>([])
 const doors = ref<Door[]>([])
@@ -60,8 +75,63 @@ const prevTool = ref<'wall' | 'door' | 'window' | 'drag'>('wall')
 const panOffset = ref<Point>({ x: 0, y: 0 })
 const isPanning = ref(false)
 const panStart = ref<Point | null>(null)
+const splitPosition = ref(0.5)
+const isSplitting = ref(false)
+const canvasSize = ref({ width: 0, height: 0 })
+const canvas3DSize = ref({ width: 0, height: 0 })
 let panStartScreenX = 0
 let panStartScreenY = 0
+
+const updateCanvasSize = (skipPanelWidthUpdate = false) => {
+  const container = document.querySelector('.map2d-container')
+  if (!container) return
+
+  const containerRect = container.getBoundingClientRect()
+  const containerWidth = containerRect.width
+  const containerHeight = containerRect.height
+
+  if (!skipPanelWidthUpdate) {
+    const leftPanel = document.querySelector('.left-panel') as HTMLElement
+    const rightPanel = document.querySelector('.right-panel') as HTMLElement
+    if (leftPanel && rightPanel) {
+      leftPanel.style.width = (splitPosition.value * 100) + '%'
+      rightPanel.style.width = ((1 - splitPosition.value) * 100) + '%'
+    }
+  }
+
+  const canvas = canvasRef.value
+  if (canvas) {
+    const canvasContainer = document.querySelector('.canvas-container')
+    if (canvasContainer) {
+      const canvasRect = canvasContainer.getBoundingClientRect()
+      const width = Math.floor(canvasRect.width)
+      const height = Math.floor(canvasRect.height)
+      console.log('===width---', width)
+
+      if (width > 0 && height > 0) {
+        canvas.width = width
+        canvas.height = height
+        canvasSize.value = { width, height }
+      }
+    }
+  }
+
+  const canvas3D = canvas3DRef.value
+  if (canvas3D) {
+    const canvas3DContainer = document.querySelector('.canvas-3d-container')
+    if (canvas3DContainer) {
+      const canvas3DRect = canvas3DContainer.getBoundingClientRect()
+      const width = Math.floor(canvas3DRect.width)
+      const height = Math.floor(canvas3DRect.height)
+
+      if (width > 0 && height > 0) {
+        canvas3D.width = width
+        canvas3D.height = height
+        canvas3DSize.value = { width, height }
+      }
+    }
+  }
+}
 
 const contextMenu = ref<{ visible: boolean; x: number; y: number; type: 'door' | 'window'; index: number } | null>(null)
 
@@ -370,7 +440,7 @@ const drawWrapper = () => {
     let draggedWallIdx: number | null = null
     let draggedDoorIdx: number | null = null
     let draggedWindowIdx: number | null = null
-    
+
     if (draggedPoint.value) {
       if (draggedPoint.value.type === 'wall') {
         draggedPointIdx = draggedPoint.value.pointIndex
@@ -381,7 +451,7 @@ const drawWrapper = () => {
         draggedWindowIdx = draggedPoint.value.windowIndex
       }
     }
-    
+
     draw(
       canvas,
       walls.value,
@@ -398,7 +468,9 @@ const drawWrapper = () => {
       draggedDoorIdx,
       draggedWindowIdx,
       wallThickness,
-      panOffset.value
+      panOffset.value,
+      canvasSize.value.width,
+      canvasSize.value.height
     )
   }
 }
@@ -412,6 +484,9 @@ onMounted(() => {
       ctx.canvas.height = canvasHeight
       drawWrapper()
     }
+
+    window.addEventListener('resize', () => updateCanvasSize(true))
+    updateCanvasSize()
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
@@ -488,7 +563,7 @@ const handleFileChange = (e: Event) => {
 
 const handleContextMenu = (e: MouseEvent) => {
   e.preventDefault()
-  
+
   const canvas = canvasRef.value
   if (!canvas) return
 
@@ -875,22 +950,69 @@ const handleMouseUp = () => {
     drawWrapper()
   }
 }
+
+const startSplit = (e: MouseEvent) => {
+  isSplitting.value = true
+  document.body.style.cursor = 'col-resize'
+  e.preventDefault()
+}
+
+const handleMouseMoveSplit = (e: MouseEvent) => {
+  if (!isSplitting.value) return
+
+  const container = document.querySelector('.map2d-container')
+  if (!container) return
+
+  const rect = container.getBoundingClientRect()
+  const containerWidth = rect.width
+  const newSplitPosition = (e.clientX - rect.left) / containerWidth
+
+  const minRatio = 0.2
+  const maxRatio = 0.8
+
+  let finalRatio: number
+  if (newSplitPosition < minRatio) finalRatio = minRatio
+  else if (newSplitPosition > maxRatio) finalRatio = maxRatio
+  else finalRatio = newSplitPosition
+
+  splitPosition.value = finalRatio
+
+  const leftPanel = document.querySelector('.left-panel') as HTMLElement
+  const rightPanel = document.querySelector('.right-panel') as HTMLElement
+  if (leftPanel && rightPanel) {
+    leftPanel.style.width = (finalRatio * 100) + '%'
+    rightPanel.style.width = ((1 - finalRatio) * 100) + '%'
+  }
+
+}
+
+const handleMouseUpSplit = () => {
+  isSplitting.value = false
+  document.body.style.cursor = 'default'
+  updateCanvasSize(true)
+}
+
+onMounted(() => {
+  window.addEventListener('mousemove', handleMouseMoveSplit)
+  window.addEventListener('mouseup', handleMouseUpSplit)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('mousemove', handleMouseMoveSplit)
+  window.removeEventListener('mouseup', handleMouseUpSplit)
+})
 </script>
 
 <style scoped>
 .map2d-container {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 20px;
-  background: #f0f2f5;
-  min-height: 100vh;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
 }
 
 .toolbar {
   display: flex;
-  gap: 10px;
-  margin-bottom: 20px;
   padding: 15px;
   background: white;
   border-radius: 8px;
@@ -917,7 +1039,10 @@ const handleMouseUp = () => {
 }
 
 .canvas-container {
-  margin-bottom: 20px;
+  flex-grow: 1;
+  width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 .drawing-canvas {
@@ -925,19 +1050,65 @@ const handleMouseUp = () => {
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   cursor: crosshair;
+  width: 100%;
+  height: 100%;
 }
 
-.info-panel {
-  padding: 15px;
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  font-size: 14px;
+.left-panel {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.right-panel {
+  height: 100%;
+  padding: 20px;
+  background: #f0f2f5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.split-bar {
+  width: 4px;
+  background: #d9d9d9;
+  cursor: col-resize;
+  transition: background 0.2s;
+  z-index: 100;
+}
+
+.split-bar:hover {
+  background: #1890ff;
+}
+
+.left-panel,
+.right-panel {
+  transition: width 0.1s ease;
+}
+
+.preview-label {
+  margin-bottom: 20px;
+  font-size: 16px;
   color: #666;
 }
 
-.info-panel div {
-  margin: 5px 0;
+.canvas-3d-container {
+  width: 100%;
+  height: 600px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.drawing-canvas-3d {
+  width: 100%;
+  height: 100%;
+  border-radius: 8px;
 }
 
 .context-menu {

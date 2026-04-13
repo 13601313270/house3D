@@ -133,7 +133,9 @@ export const draw = (
   draggedDoorIndex: number | null,
   draggedWindowIndex: number | null,
   wallThickness: number = 20,
-  panOffset: Point = { x: 0, y: 0 }
+  panOffset: Point = { x: 0, y: 0 },
+  canvasWidth: number = 800,
+  canvasHeight: number = 600
 ) => {
   if (!canvasRef) return
   const ctx = canvasRef.getContext('2d')
