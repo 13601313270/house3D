@@ -669,7 +669,7 @@ const handleMouseDown = (e: MouseEvent) => {
     for (let i = 0; i < tempWallPoints.value.length; i++) {
       const point = tempWallPoints.value[i]
       const dist = Math.hypot(x - point.x, y - point.y)
-      if (dist < 10) {
+      if (dist < wallThickness) {
         draggedPoint.value = { type: 'wall', wallIndex: -1, pointIndex: i }
         dragOffset.value = { x: point.x - x, y: point.y - y }
         prevTool.value = currentTool.value
@@ -682,7 +682,7 @@ const handleMouseDown = (e: MouseEvent) => {
     walls.value.forEach((wall, wallIndex) => {
       wall.points.forEach((point, pointIndex) => {
         const dist = Math.hypot(x - point.x, y - point.y)
-        if (dist < 10) {
+        if (dist < wallThickness) {
           draggedPoint.value = { type: 'wall', wallIndex, pointIndex }
           dragOffset.value = { x: point.x - x, y: point.y - y }
           prevTool.value = currentTool.value
@@ -694,7 +694,7 @@ const handleMouseDown = (e: MouseEvent) => {
     // 检查门
     doors.value.forEach((door, doorIndex) => {
       const dist = Math.hypot(x - door.x, y - door.y)
-      if (dist < 10) {
+      if (dist < wallThickness) {
         draggedPoint.value = { type: 'door', doorIndex }
         dragOffset.value = { x: door.x - x, y: door.y - y }
         prevTool.value = currentTool.value
@@ -705,7 +705,7 @@ const handleMouseDown = (e: MouseEvent) => {
     // 检查窗户
     windows.value.forEach((windowItem, windowIndex) => {
       const dist = Math.hypot(x - windowItem.x, y - windowItem.y)
-      if (dist < 10) {
+      if (dist < wallThickness) {
         draggedPoint.value = { type: 'window', windowIndex }
         dragOffset.value = { x: windowItem.x - x, y: windowItem.y - y }
         prevTool.value = currentTool.value

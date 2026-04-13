@@ -264,6 +264,26 @@ export const draw = (
     drawEntity(ctx, win.x, win.y, win.width, win.angle, '#3498db', 'window', wallThickness)
   })
 
+  doors.forEach((door) => {
+    ctx.fillStyle = '#fff'
+    ctx.strokeStyle = '#e67e22'
+    ctx.lineWidth = 2
+    ctx.beginPath()
+    ctx.arc(door.x, door.y, 6, 0, Math.PI * 2)
+    ctx.fill()
+    ctx.stroke()
+  })
+
+  windows.forEach((win) => {
+    ctx.fillStyle = '#fff'
+    ctx.strokeStyle = '#3498db'
+    ctx.lineWidth = 2
+    ctx.beginPath()
+    ctx.arc(win.x, win.y, 6, 0, Math.PI * 2)
+    ctx.fill()
+    ctx.stroke()
+  })
+
   if (hoverPoint && currentTool !== 'wall') {
     const nearestWall = getNearestWall(hoverPoint)
     if (nearestWall) {
