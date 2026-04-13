@@ -300,9 +300,11 @@ const getSnapPoint = (startPoints: Point[], current: Point, allPoints: Point[] =
       const dist2 = Math.hypot(intersect2X - current.x, xAxisSnappedYVal - current.y)
 
       if (dist1 <= dist2) {
+        console.log('角度2222-5-2', snappedX)
         snappedX = yAxisSnappedXVal
         snappedY = intersect1Y
       } else {
+        console.log('角度2222-5-3', snappedX, intersect2X)
         snappedX = intersect2X
         snappedY = xAxisSnappedYVal
       }
@@ -334,7 +336,6 @@ const getSnapPoint = (startPoints: Point[], current: Point, allPoints: Point[] =
   }
   // 3. 第三优先级：单独角度磁吸
   else if (angleSnapped) {
-    console.log(12)
     snappedX = angleSnapped.x
     snappedY = angleSnapped.y
   }
@@ -359,7 +360,20 @@ const drawWrapper = () => {
   if (canvas) {
     const draggedPointIdx = draggedPoint.value ? draggedPoint.value.pointIndex : null
     const draggedWallIdx = draggedPoint.value ? draggedPoint.value.wallIndex : null
-    draw(canvas, walls.value, doors.value, windows.value, tempWallPoints.value, hoverPoint.value, currentTool.value, getNearestWall, xAxisSnappedY.value, yAxisSnappedX.value, draggedPointIdx, draggedWallIdx)
+    draw(
+      canvas,
+      walls.value,
+      doors.value,
+      windows.value,
+      tempWallPoints.value,
+      hoverPoint.value,
+      currentTool.value,
+      getNearestWall,
+      xAxisSnappedY.value,
+      yAxisSnappedX.value,
+      draggedPointIdx,
+      draggedWallIdx
+    )
   }
 }
 
