@@ -38,7 +38,144 @@ const initThree = () => {
 
   camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 10000)
   camera.position.set(0, 800, 1200)
-  camera.lookAt(0, 0, 0)
+  camera.lookAt(0, 0, 0);
+
+  (() => {
+    let maxCamera1Radius = 1000;
+    let camera1Radius = 800; // 摄像机距离
+    let canvas2IsMouseAngel = false;
+    let canvas2IsMouseMove = false;
+    let canvas2LastMouseX = 0;
+    let canvas2LastMouseY = 0;
+
+    let camera2AngleY = 0; // 摄像机垂直移动
+    let camera2AngleX = 0; // 摄像机横移
+    let camera2AngelStartX = 0;
+    let camera2AngelStartY = 0;
+    let camera2PositionStartX = 0;
+    let camera2PositionStartZ = 0;
+
+    let canvas1IsMouseAngel = false;
+    let canvas1IsMouseMove = false;
+    let canvas1LastMouseX = 0;
+    let canvas1LastMouseY = 0;
+    let camera1AngleY = Math.PI / 4;
+    let camera1AngleX = 0;
+    let camera1AngelStartX = 0;
+    let camera1AngelStartY = 0;
+    let camera1TargetPositionStartX = 0;
+    let camera1TargetPositionStartY = 0;
+    let camera1TargetPositionStartZ = 0;
+    let camera1TargetPositionX = 0;
+    let camera1TargetPositionY = 0;
+    let camera1TargetPositionZ = 0;
+
+    function updateCameraAngel() {
+      const camera1X = camera1Radius * Math.sin(camera1AngleX) * Math.cos(camera1AngleY) * -1;
+      const camera1Y = camera1Radius * Math.sin(camera1AngleY);
+      const camera1Z = camera1Radius * Math.cos(camera1AngleX) * Math.cos(camera1AngleY);
+
+      const camera2X = camera1Radius * Math.sin(camera2AngleX) * Math.cos(camera2AngleY) * -1;
+      const camera2Y = camera1Radius * Math.sin(camera2AngleY);
+      const camera2Z = camera1Radius * Math.cos(camera2AngleX) * Math.cos(camera2AngleY);
+
+      console.log('camera1X', camera1X, camera1Y, camera1Z)
+      if (camera) {
+        camera.position.set(
+          camera1TargetPositionX + camera1X, // 镜头左右摇摆
+          camera1TargetPositionY + camera1Y,
+          camera1TargetPositionZ + camera1Z
+        );
+        camera.lookAt(
+          camera1TargetPositionX,
+          camera1TargetPositionY,
+          camera1TargetPositionZ
+        );
+      }
+      // if (camera) {
+      //   camera.lookAt(
+      //     camera.position.x - camera2X,
+      //     camera.position.y - camera2Y,
+      //     camera.position.z - camera2Z,
+      //   );
+      // }
+      // camera2Cube.position.set(
+      //   camera2.position.x,
+      //   camera2.position.y,
+      //   camera2.position.z
+      // );
+      // camera2Cube.rotation.set(
+      //   camera2.rotation.x,
+      //   camera2.rotation.y,
+      //   camera2.rotation.z
+      // );
+    }
+
+    updateCameraAngel();
+
+    const container = containerRef.value
+    if (!container) return
+
+    container.addEventListener('mousedown', (e) => {
+      if (e.button === 2) {
+        // 旋转
+        camera1AngelStartX = camera1AngleX;
+        camera1AngelStartY = camera1AngleY;
+        canvas1IsMouseAngel = true;
+        canvas1LastMouseX = e.clientX;
+        canvas1LastMouseY = e.clientY;
+        e.preventDefault();
+      } else if (e.button === 0) {
+        // 移动
+        camera1TargetPositionStartX = camera1TargetPositionX;
+        camera1TargetPositionStartY = camera1TargetPositionY;
+        camera1TargetPositionStartZ = camera1TargetPositionZ;
+        canvas1IsMouseMove = true;
+        canvas1LastMouseX = e.clientX;
+        canvas1LastMouseY = e.clientY;
+        e.preventDefault();
+      }
+    })
+    container.addEventListener('mousemove', (e) => {
+      if (canvas1IsMouseAngel) {
+        // 镜头旋转
+        const delta2DDiffX = e.clientX - canvas1LastMouseX;
+        const delta2DDiffY = e.clientY - canvas1LastMouseY;
+        camera1AngleX = camera1AngelStartX + delta2DDiffX * 0.01;
+        camera1AngleY = camera1AngelStartY + delta2DDiffY * 0.01;
+        camera1AngleY = Math.max(-Math.PI / 2 + 0.05, Math.min(Math.PI / 2 - 0.05, camera1AngleY)); // 因为camera，是采用控制position和lookat的逻辑，所以在angleY==Math.PI/2的定点的时候，无法控制方向，所以这里限制一下，只允许angleY在[-Math.PI/2+0.05, Math.PI/2-0.05]之间
+        updateCameraAngel()
+      } else if (canvas1IsMouseMove) {
+        const deltaX = e.clientX - canvas1LastMouseX;
+        const deltaY = e.clientY - canvas1LastMouseY;
+        const sensitivity = 1;
+
+        camera1TargetPositionX = camera1TargetPositionStartX - (deltaX * Math.cos(camera1AngleX) - deltaY * Math.sin(camera1AngleX)) * sensitivity;
+        camera1TargetPositionZ = camera1TargetPositionStartZ - (deltaX * Math.sin(camera1AngleX) + deltaY * Math.cos(camera1AngleX)) * sensitivity;
+        updateCameraAngel()
+      }
+    })
+    container.addEventListener('mouseup', (e) => {
+      if (e.button === 2) {
+        canvas1IsMouseAngel = false;
+      } else if (e.button === 0) {
+        canvas1IsMouseMove = false;
+      }
+    });
+
+    container.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      const zoomSpeed = 0.001;
+      const delta = e.deltaY * zoomSpeed;
+      const newRadius = Math.max(5, Math.min(maxCamera1Radius, camera1Radius * (1 + delta)));
+      camera1Radius = newRadius;
+      updateCameraAngel();
+    }, { passive: false });
+
+    container.addEventListener('contextmenu', (e) => {
+      e.preventDefault();
+    });
+  })();
 
   const ambientLight = new THREE.AmbientLight(0xffffff, 0.6)
   scene.add(ambientLight)
@@ -55,12 +192,6 @@ const initThree = () => {
   if (container) {
     container.appendChild(renderer.domElement)
   }
-
-  const gridHelper = new THREE.GridHelper(1000, 50, 0xcccccc, 0xeeeeee)
-  scene.add(gridHelper)
-
-  const axesHelper = new THREE.AxesHelper(100)
-  scene.add(axesHelper)
 }
 
 const renderWalls = () => {
@@ -76,39 +207,34 @@ const renderWalls = () => {
       const points = []; // wall.points.map((p) => new THREE.Vector2(p.x, p.y))
       for (let j = 0; j < ring.length; j++) {
         if (ring[j] === null) continue
-        points.push(new THREE.Vector2(ring[j][0], ring[j][1]))
+        points.push(new THREE.Vector2(ring[j][0], ring[j][1] * -1))
       }
 
       const shape = new THREE.Shape(points)
 
       const extrudeSettings = {
         steps: 1,
-        depth: 20,
+        depth: 200,
         bevelEnabled: true,
-        bevelThickness: 2,
-        bevelSize: 2,
-        bevelSegments: 1
+        // bevelThickness: 2,
+        // bevelSize: 2,
+        // bevelSegments: 1
       }
 
       const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings)
+      geometry.rotateX(-Math.PI / 2);   // 将 XY 平面旋转成 XZ 平面
       const material = new THREE.MeshStandardMaterial({ color: 0xe0e0e0, side: THREE.DoubleSide })
       const wallMesh = new THREE.Mesh(geometry, material)
-      wallMesh.position.set(0, 10, 0)
+      wallMesh.position.set(0, 0, 0)
       wallMesh.castShadow = true
       wallMesh.receiveShadow = true
       scene!.add(wallMesh)
     }
   }
   resize();
-
-
-
   // props.data.walls.forEach((wall) => {
   //   if (wall.points.length < 2) return
   //   console.log(11111, wall.points)
-
-
-
   //   const points = wall.points.map((p) => new THREE.Vector2(p.x, p.y))
   //   const shape = new THREE.Shape(points)
 

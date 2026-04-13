@@ -995,19 +995,20 @@ const handleMouseMoveSplit = (e: MouseEvent) => {
     leftPanel.style.width = (finalRatio * 100) + '%'
     rightPanel.style.width = ((1 - finalRatio) * 100) + '%'
   }
-
 }
 
 const handleMouseUpSplit = () => {
-  isSplitting.value = false
-  document.body.style.cursor = 'default'
-  updateCanvasSize(true)
+  if (isSplitting.value) {
+    isSplitting.value = false
+    document.body.style.cursor = 'default'
+    updateCanvasSize(true)
+  }
 }
 
 onMounted(() => {
   window.addEventListener('mousemove', handleMouseMoveSplit)
   window.addEventListener('mouseup', handleMouseUpSplit)
-  
+
   const canvas = canvasRef.value
   if (canvas) {
     canvas.addEventListener('wheel', handleWheel)
@@ -1017,7 +1018,7 @@ onMounted(() => {
 onUnmounted(() => {
   window.removeEventListener('mousemove', handleMouseMoveSplit)
   window.removeEventListener('mouseup', handleMouseUpSplit)
-  
+
   const canvas = canvasRef.value
   if (canvas) {
     canvas.removeEventListener('wheel', handleWheel)
@@ -1026,24 +1027,24 @@ onUnmounted(() => {
 
 const handleWheel = (e: WheelEvent) => {
   e.preventDefault()
-  
+
   const canvas = canvasRef.value
   if (!canvas) return
-  
+
   const rect = canvas.getBoundingClientRect()
   const mouseX = e.clientX - rect.left
   const mouseY = e.clientY - rect.top
-  
+
   const zoomFactor = e.deltaY < 0 ? 1.1 : 0.9
   const newZoomLevel = Math.max(0.1, Math.min(5, zoomLevel.value * zoomFactor))
-  
+
   const zoomRatio = newZoomLevel / zoomLevel.value
   const newPanX = mouseX - (mouseX - panOffset.value.x) * zoomRatio
   const newPanY = mouseY - (mouseY - panOffset.value.y) * zoomRatio
-  
+
   zoomLevel.value = newZoomLevel
   panOffset.value = { x: newPanX, y: newPanY }
-  
+
   drawWrapper()
 }
 </script>
