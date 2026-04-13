@@ -36,14 +36,15 @@ export function createShapeFromPoints(points_: Wall[], radius = 1): [number, num
     v1 = [v1[0] / modelV1, v1[1] / modelV1];
     v2 = [v2[0] / modelV2, v2[1] / modelV2];
     // 方向和的单位向量
-    let vector: any = [v1[0] + v2[0], v1[1] + v2[1]];
+    let vector: [number, number] = [v1[0] + v2[0], v1[1] + v2[1]];
     const modelVector = Math.sqrt(vector[0] ** 2 + vector[1] ** 2);
     vector = [vector[0] / modelVector, vector[1] / modelVector];
 
     // 扩散点的方向和转角处的角度偏移
-    const Lvector = rotateVector(vector, -Math.PI / 2);
-    const Rvector = rotateVector(vector, Math.PI / 2);
+    const Lvector: [number, number] = rotateVector(vector, -Math.PI / 2);
+    const Rvector: [number, number] = rotateVector(vector, Math.PI / 2);
     const deflection = vectorAngleCosHalf(v1, v2);
+    console.log('center点', curr.x, curr.y)
     console.log('left点', (+(curr.x + Lvector[0] * (radius / deflection)).toFixed(2)), (+(curr.y + Lvector[1] * (radius / deflection)).toFixed(2)))
     console.log('right点', (+(curr.x + Rvector[0] * (radius / deflection)).toFixed(2)), (+(curr.y + Rvector[1] * (radius / deflection)).toFixed(2)))
     left.push({
@@ -59,7 +60,23 @@ export function createShapeFromPoints(points_: Wall[], radius = 1): [number, num
       const point2: [number, number] = [left[left.length - 1].x, left[left.length - 1].y]
       const point3: [number, number] = [right[0].x, right[0].y]
       const point4: [number, number] = [right[1].x, right[1].y]
+      console.log('点区域', [point1, point2, point3, point4])
       margineds = union(margineds, [[point1, point2, point3, point4, point1]])
+
+      // 如果这个点，之前存在过相同坐标的另一个点
+      // const prevSamePoint = points.points.find((item, index) => index < i && item.x === curr.x && item.y === curr.y);
+      // if (prevSamePoint) {
+      //   const offsetLPoint: [number, number] = [
+      //     curr.x + Lvector[0] * radius + vector[0] * radius,
+      //     curr.y + Lvector[1] * radius + vector[1] * radius
+      //   ];
+      //   const offsetRPoint: [number, number] = [
+      //     curr.x + Rvector[0] * radius + vector[0] * radius,
+      //     curr.y + Rvector[1] * radius + vector[1] * radius
+      //   ];
+      //   margineds = union(margineds, [[[curr.x, curr.y], point2, offsetLPoint, offsetRPoint, point3, [curr.x, curr.y]]])
+      //   console.log('offsetLPoint', [curr.x, curr.y], point2, offsetLPoint, offsetRPoint, point3)
+      // }
     }
     prev = curr;
   }
@@ -100,8 +117,8 @@ export function vectorAngleCosHalf(a, b) {
  * @param { number } angle
  * @returns { [number, number] }
  */
-// @ts-ignore
-export function rotateVector([x1, y1], angle) {
+
+export function rotateVector([x1, y1]: [number, number], angle: number): [number, number] {
   const x2 = x1 * Math.cos(angle) - y1 * Math.sin(angle);
   const y2 = y1 * Math.cos(angle) + x1 * Math.sin(angle);
 
