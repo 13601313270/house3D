@@ -295,7 +295,7 @@ const getSnapPoint = (startPoints: Point[], current: Point, allPoints: Point[] =
       if (Math.abs(angleRad - Math.PI / 2) < 0.01 || Math.abs(angleRad + Math.PI / 2) < 0.01) {
         intersect2X = angleSnapped.x
       } else if (Math.abs(angleRad) < 0.01 || Math.abs(angleRad - Math.PI) < 0.01 || Math.abs(angleRad + Math.PI) < 0.01) {
-        intersect2X = angleSnapped.x
+        intersect2X = xAxisSnappedYVal
       } else {
         intersect2X = (xAxisSnappedYVal - b) / k
       }
@@ -419,8 +419,8 @@ const handleCanvasClick = (e: MouseEvent) => {
   if (!canvas) return
 
   const rect = canvas.getBoundingClientRect()
-  const x = e.clientX - rect.left
-  const y = e.clientY - rect.top
+  const x = Math.round(e.clientX - rect.left)
+  const y = Math.round(e.clientY - rect.top)
 
   // 如果当前是拖拽模式，不执行任何操作
   if (currentTool.value === 'drag') {
