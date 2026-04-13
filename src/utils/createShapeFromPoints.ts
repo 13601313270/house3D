@@ -4,13 +4,18 @@
  * @param { number } radius 拉伸半径(宽度)
  * @returns { THREE.Vector2[] }
  */
-
+// @ts-ignore
+import { union } from 'martinez-polygon-clipping';
 import { Point, Wall } from "@/types/map2d";
 
-export function createShapeFromPoints(points_: Wall[], radius = 1): Point[] {
+export function createShapeFromPoints(points_: Wall[], radius = 1): [number, number][][] {
   const left: Point[] = [];
   const right: Point[] = [];
   const points = points_[0];
+
+  console.log('========点========')
+
+  let margineds: [number, number][][] = []
 
   for (let i = 0, len = points.points.length; i < len; i++) {
     let prev = points.points[i - 1] || {};
@@ -39,7 +44,8 @@ export function createShapeFromPoints(points_: Wall[], radius = 1): Point[] {
     const Lvector = rotateVector(vector, -Math.PI / 2);
     const Rvector = rotateVector(vector, Math.PI / 2);
     const deflection = vectorAngleCosHalf(v1, v2);
-
+    console.log('left点', (+(curr.x + Lvector[0] * (radius / deflection)).toFixed(2)), (+(curr.y + Lvector[1] * (radius / deflection)).toFixed(2)))
+    console.log('right点', (+(curr.x + Rvector[0] * (radius / deflection)).toFixed(2)), (+(curr.y + Rvector[1] * (radius / deflection)).toFixed(2)))
     left.push({
       x: (+(curr.x + Lvector[0] * (radius / deflection)).toFixed(2)),
       y: (+(curr.y + Lvector[1] * (radius / deflection)).toFixed(2)),
@@ -48,13 +54,20 @@ export function createShapeFromPoints(points_: Wall[], radius = 1): Point[] {
       x: (+(curr.x + Rvector[0] * (radius / deflection)).toFixed(2)),
       y: (+(curr.y + Rvector[1] * (radius / deflection)).toFixed(2)),
     });
-
+    if (i !== 0) {
+      const point1: [number, number] = [left[left.length - 2].x, left[left.length - 2].y]
+      const point2: [number, number] = [left[left.length - 1].x, left[left.length - 1].y]
+      const point3: [number, number] = [right[0].x, right[0].y]
+      const point4: [number, number] = [right[1].x, right[1].y]
+      margineds = union(margineds, [[point1, point2, point3, point4, point1]])
+    }
     prev = curr;
   }
-
-  const allPoint = left.concat(right);
-  allPoint.push(allPoint[0]);
-  return allPoint;
+  // const allPoint = left.concat(right);
+  // allPoint.push(allPoint[0]);
+  // console.log('last result', margineds, [allPoint.map((item) => ([item.x, item.y] as [number, number]))]);
+  return margineds;
+  // return [allPoint.map((item) => ([item.x, item.y] as [number, number]))];
 }
 
 /**

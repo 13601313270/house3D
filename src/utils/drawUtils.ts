@@ -144,8 +144,8 @@ export const draw = (
   let margineds: [number, number][][] = []
   walls.forEach((wall) => {
     if (wall.points.length < 2) return
-    const outlinePoints = createShapeFromPoints([wall], 10).map((item) => ([item.x, item.y] as [number, number]))
-    margineds = union(margineds, [outlinePoints])
+    const outlinePoints = createShapeFromPoints([wall], 10)
+    margineds = union(margineds, outlinePoints)
   })
   for (let i = 0; i < margineds.length; i++) {
     ctx.beginPath()
