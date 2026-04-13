@@ -44,18 +44,16 @@
     <div class="split-bar" @mousedown="startSplit" title="拖动调整左右比例"></div>
 
     <div class="right-panel">
-      <div class="preview-label">3D 预览区域</div>
-      <div class="canvas-3d-container">
-        <canvas ref="canvas3DRef" class="drawing-canvas-3d" />
-      </div>
+      <Canvas3D :data="drawingData" />
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { Point, Wall, Door, Window } from '../types/map2d'
 import { draw, drawPoint, drawEntity, drawPreviewEntity, canvasWidth, canvasHeight, snapThreshold, doorWidth, windowWidth, wallThickness } from '../utils/drawUtils'
+import Canvas3D from '../components/Canvas3D.vue'
 
 const canvasRef = ref<HTMLCanvasElement | null>(null)
 const canvas3DRef = ref<HTMLCanvasElement | null>(null)
@@ -137,6 +135,12 @@ const updateCanvasSize = (skipPanelWidthUpdate = false) => {
     drawWrapper()
   }, 30)
 }
+
+const drawingData = computed(() => ({
+  walls: walls.value,
+  doors: doors.value,
+  windows: windows.value
+}))
 
 const contextMenu = ref<{ visible: boolean; x: number; y: number; type: 'door' | 'window'; index: number } | null>(null)
 
