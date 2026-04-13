@@ -142,10 +142,9 @@ export const draw = (
   ctx.lineWidth = 2
   ctx.setLineDash([])
   let margineds: [number, number][][] = []
-
   walls.forEach((wall) => {
     if (wall.points.length < 2) return
-    const outlinePoints = createShapeFromPoints([wall], 10).map((item) => [item.x, item.y])
+    const outlinePoints = createShapeFromPoints([wall], 10).map((item) => ([item.x, item.y] as [number, number]))
     margineds = union(margineds, [outlinePoints])
   })
   for (let i = 0; i < margineds.length; i++) {
