@@ -141,12 +141,7 @@ export const draw = (
   ctx.strokeStyle = '#333'
   ctx.lineWidth = 2
   ctx.setLineDash([])
-  let margineds: [number, number][][] = []
-  walls.forEach((wall) => {
-    if (wall.points.length < 2) return
-    const outlinePoints = createShapeFromPoints([wall], 10)
-    margineds = union(margineds, outlinePoints)
-  })
+  let margineds: [number, number][][] = createShapeFromPoints(walls, 10);
   for (let i = 0; i < margineds.length; i++) {
     ctx.beginPath()
     ctx.moveTo(margineds[i][0][0], margineds[i][0][1])

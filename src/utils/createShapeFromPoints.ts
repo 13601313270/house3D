@@ -8,83 +8,83 @@
 import { union } from 'martinez-polygon-clipping';
 import { Point, Wall } from "@/types/map2d";
 
-export function createShapeFromPoints(points_: Wall[], radius = 1): [number, number][][] {
+export function createShapeFromPoints(wallList: Wall[], radius = 1): [number, number][][] {
   const left: Point[] = [];
   const right: Point[] = [];
-  const points = points_[0];
-
-  console.log('========点========')
-
   let margineds: [number, number][][] = []
+  for (let i = 0; i < wallList.length; i++) {
+    const points = wallList[i];
+    if (points.points.length < 2) return []
+    console.log('========点========')
+    for (let j = 0, len = points.points.length; j < len; j++) {
+      let prev = points.points[j - 1] || {};
+      const curr = points.points[j];
+      const next = points.points[j + 1] || {};
 
-  for (let i = 0, len = points.points.length; i < len; i++) {
-    let prev = points.points[i - 1] || {};
-    const curr = points.points[i];
-    const next = points.points[i + 1] || {};
+      let v1 = [curr.x - prev.x, curr.y - prev.y];
+      let v2 = [next.x - curr.x, next.y - curr.y];
+      if (!prev.x && prev.x !== 0) {
+        v1 = [...v2];
+      } else if (!next.x && next.x !== 0) {
+        v2 = [...v1];
+      }
 
-    let v1 = [curr.x - prev.x, curr.y - prev.y];
-    let v2 = [next.x - curr.x, next.y - curr.y];
-    if (!prev.x && prev.x !== 0) {
-      v1 = [...v2];
-    } else if (!next.x && next.x !== 0) {
-      v2 = [...v1];
+      const modelV1 = Math.sqrt(v1[0] ** 2 + v1[1] ** 2);
+      const modelV2 = Math.sqrt(v2[0] ** 2 + v2[1] ** 2);
+      // 单位向量
+      v1 = [v1[0] / modelV1, v1[1] / modelV1];
+      v2 = [v2[0] / modelV2, v2[1] / modelV2];
+      // 方向和的单位向量
+      let vector: [number, number] = [v1[0] + v2[0], v1[1] + v2[1]];
+      const modelVector = Math.sqrt(vector[0] ** 2 + vector[1] ** 2);
+      vector = [vector[0] / modelVector, vector[1] / modelVector];
+
+      // 扩散点的方向和转角处的角度偏移
+      const Lvector: [number, number] = rotateVector(vector, -Math.PI / 2);
+      const Rvector: [number, number] = rotateVector(vector, Math.PI / 2);
+      const deflection = vectorAngleCosHalf(v1, v2);
+      console.log('center点', curr.x, curr.y)
+      console.log('left点', (+(curr.x + Lvector[0] * (radius / deflection)).toFixed(2)), (+(curr.y + Lvector[1] * (radius / deflection)).toFixed(2)))
+      console.log('right点', (+(curr.x + Rvector[0] * (radius / deflection)).toFixed(2)), (+(curr.y + Rvector[1] * (radius / deflection)).toFixed(2)))
+      left.push({
+        x: (+(curr.x + Lvector[0] * (radius / deflection)).toFixed(2)),
+        y: (+(curr.y + Lvector[1] * (radius / deflection)).toFixed(2)),
+      });
+      right.unshift({
+        x: (+(curr.x + Rvector[0] * (radius / deflection)).toFixed(2)),
+        y: (+(curr.y + Rvector[1] * (radius / deflection)).toFixed(2)),
+      });
+      if (j !== 0) {
+        const point1: [number, number] = [left[left.length - 2].x, left[left.length - 2].y]
+        const point2: [number, number] = [left[left.length - 1].x, left[left.length - 1].y]
+        const point3: [number, number] = [right[0].x, right[0].y]
+        const point4: [number, number] = [right[1].x, right[1].y]
+        console.log('点区域', [point1, point2, point3, point4])
+        margineds = union(margineds, [[point1, point2, point3, point4, point1]])
+
+        // 如果这个点，之前存在过相同坐标的另一个点
+        // const prevSamePoint = points.points.find((item, index) => index < i && item.x === curr.x && item.y === curr.y);
+        // if (prevSamePoint) {
+        //   const offsetLPoint: [number, number] = [
+        //     curr.x + Lvector[0] * radius + vector[0] * radius,
+        //     curr.y + Lvector[1] * radius + vector[1] * radius
+        //   ];
+        //   const offsetRPoint: [number, number] = [
+        //     curr.x + Rvector[0] * radius + vector[0] * radius,
+        //     curr.y + Rvector[1] * radius + vector[1] * radius
+        //   ];
+        //   margineds = union(margineds, [[[curr.x, curr.y], point2, offsetLPoint, offsetRPoint, point3, [curr.x, curr.y]]])
+        //   console.log('offsetLPoint', [curr.x, curr.y], point2, offsetLPoint, offsetRPoint, point3)
+        // }
+      }
+      prev = curr;
     }
-
-    const modelV1 = Math.sqrt(v1[0] ** 2 + v1[1] ** 2);
-    const modelV2 = Math.sqrt(v2[0] ** 2 + v2[1] ** 2);
-    // 单位向量
-    v1 = [v1[0] / modelV1, v1[1] / modelV1];
-    v2 = [v2[0] / modelV2, v2[1] / modelV2];
-    // 方向和的单位向量
-    let vector: [number, number] = [v1[0] + v2[0], v1[1] + v2[1]];
-    const modelVector = Math.sqrt(vector[0] ** 2 + vector[1] ** 2);
-    vector = [vector[0] / modelVector, vector[1] / modelVector];
-
-    // 扩散点的方向和转角处的角度偏移
-    const Lvector: [number, number] = rotateVector(vector, -Math.PI / 2);
-    const Rvector: [number, number] = rotateVector(vector, Math.PI / 2);
-    const deflection = vectorAngleCosHalf(v1, v2);
-    console.log('center点', curr.x, curr.y)
-    console.log('left点', (+(curr.x + Lvector[0] * (radius / deflection)).toFixed(2)), (+(curr.y + Lvector[1] * (radius / deflection)).toFixed(2)))
-    console.log('right点', (+(curr.x + Rvector[0] * (radius / deflection)).toFixed(2)), (+(curr.y + Rvector[1] * (radius / deflection)).toFixed(2)))
-    left.push({
-      x: (+(curr.x + Lvector[0] * (radius / deflection)).toFixed(2)),
-      y: (+(curr.y + Lvector[1] * (radius / deflection)).toFixed(2)),
-    });
-    right.unshift({
-      x: (+(curr.x + Rvector[0] * (radius / deflection)).toFixed(2)),
-      y: (+(curr.y + Rvector[1] * (radius / deflection)).toFixed(2)),
-    });
-    if (i !== 0) {
-      const point1: [number, number] = [left[left.length - 2].x, left[left.length - 2].y]
-      const point2: [number, number] = [left[left.length - 1].x, left[left.length - 1].y]
-      const point3: [number, number] = [right[0].x, right[0].y]
-      const point4: [number, number] = [right[1].x, right[1].y]
-      console.log('点区域', [point1, point2, point3, point4])
-      margineds = union(margineds, [[point1, point2, point3, point4, point1]])
-
-      // 如果这个点，之前存在过相同坐标的另一个点
-      // const prevSamePoint = points.points.find((item, index) => index < i && item.x === curr.x && item.y === curr.y);
-      // if (prevSamePoint) {
-      //   const offsetLPoint: [number, number] = [
-      //     curr.x + Lvector[0] * radius + vector[0] * radius,
-      //     curr.y + Lvector[1] * radius + vector[1] * radius
-      //   ];
-      //   const offsetRPoint: [number, number] = [
-      //     curr.x + Rvector[0] * radius + vector[0] * radius,
-      //     curr.y + Rvector[1] * radius + vector[1] * radius
-      //   ];
-      //   margineds = union(margineds, [[[curr.x, curr.y], point2, offsetLPoint, offsetRPoint, point3, [curr.x, curr.y]]])
-      //   console.log('offsetLPoint', [curr.x, curr.y], point2, offsetLPoint, offsetRPoint, point3)
-      // }
-    }
-    prev = curr;
+    // const allPoint = left.concat(right);
+    // allPoint.push(allPoint[0]);
+    // console.log('last result', margineds, [allPoint.map((item) => ([item.x, item.y] as [number, number]))]);
+    // return [allPoint.map((item) => ([item.x, item.y] as [number, number]))];
   }
-  // const allPoint = left.concat(right);
-  // allPoint.push(allPoint[0]);
-  // console.log('last result', margineds, [allPoint.map((item) => ([item.x, item.y] as [number, number]))]);
   return margineds;
-  // return [allPoint.map((item) => ([item.x, item.y] as [number, number]))];
 }
 
 /**
