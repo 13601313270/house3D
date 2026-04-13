@@ -294,17 +294,17 @@ const getSnapPoint = (startPoints: Point[], current: Point, allPoints: Point[] =
       let intersect2X
       if (Math.abs(angleRad - Math.PI / 2) < 0.01 || Math.abs(angleRad + Math.PI / 2) < 0.01) {
         intersect2X = angleSnapped.x
+      } else if (Math.abs(angleRad) < 0.01 || Math.abs(angleRad - Math.PI) < 0.01 || Math.abs(angleRad + Math.PI) < 0.01) {
+        intersect2X = angleSnapped.x
       } else {
         intersect2X = (xAxisSnappedYVal - b) / k
       }
       const dist2 = Math.hypot(intersect2X - current.x, xAxisSnappedYVal - current.y)
 
       if (dist1 <= dist2) {
-        console.log('角度2222-5-2', snappedX)
         snappedX = yAxisSnappedXVal
         snappedY = intersect1Y
       } else {
-        console.log('角度2222-5-3', snappedX, intersect2X)
         snappedX = intersect2X
         snappedY = xAxisSnappedYVal
       }
