@@ -54,6 +54,11 @@ const yAxisSnappedX = ref<number | null>(null)
 const draggedPoint = ref<{ type: 'wall'; wallIndex: number; pointIndex: number } | { type: 'door'; doorIndex: number } | { type: 'window'; windowIndex: number } | null>(null)
 const dragOffset = ref<Point | null>(null)
 const prevTool = ref<'wall' | 'door' | 'window' | 'drag'>('wall')
+const panOffset = ref<Point>({ x: 0, y: 0 })
+const isPanning = ref(false)
+const panStart = ref<Point | null>(null)
+let panStartScreenX = 0
+let panStartScreenY = 0
 
 interface NearestWallResult {
   wall: Wall
@@ -387,7 +392,8 @@ const drawWrapper = () => {
       draggedWallIdx,
       draggedDoorIdx,
       draggedWindowIdx,
-      wallThickness
+      wallThickness,
+      panOffset.value
     )
   }
 }
@@ -529,8 +535,10 @@ const handleMouseMove = (e: MouseEvent) => {
   if (!canvas) return
 
   const rect = canvas.getBoundingClientRect()
-  const x = e.clientX - rect.left
-  const y = e.clientY - rect.top
+  const screenX = e.clientX - rect.left
+  const screenY = e.clientY - rect.top
+  const x = screenX - panOffset.value.x
+  const y = screenY - panOffset.value.y
 
   // 如果正在拖拽，处理拖拽逻辑（即使当前工具不是 drag）
   if (draggedPoint.value !== null) {
@@ -586,10 +594,10 @@ const handleMouseMove = (e: MouseEvent) => {
     if (nextPoint) startPoints.push(nextPoint)
     if (startPoints.length === 0) startPoints.push(originalPoint)
 
-    const dx = x - (originalPoint.x - (dragOffset.value?.x || 0))
-    const dy = y - (originalPoint.y - (dragOffset.value?.y || 0))
+    const targetX = x - (dragOffset.value?.x || 0)
+    const targetY = y - (dragOffset.value?.y || 0)
 
-    const snapped = getSnapPoint(startPoints, { x: originalPoint.x + dx, y: originalPoint.y + dy }, allPoints)
+    const snapped = getSnapPoint(startPoints, { x: targetX, y: targetY }, allPoints)
     const newX = snapped.x
     const newY = snapped.y
 
@@ -614,6 +622,19 @@ const handleMouseMove = (e: MouseEvent) => {
         windows.value[dragged.windowIndex].angle = nearest.angle
       }
     }
+    drawWrapper()
+    return
+  }
+
+  // 如果正在平移画布
+  if (isPanning.value && panStart.value) {
+    const dx = screenX - panStartScreenX
+    const dy = screenY - panStartScreenY
+    panOffset.value.x += dx
+    panOffset.value.y += dy
+    panStart.value = { x, y }
+    panStartScreenX = screenX
+    panStartScreenY = screenY
     drawWrapper()
     return
   }
@@ -660,8 +681,10 @@ const handleMouseDown = (e: MouseEvent) => {
   if (!canvas) return
 
   const rect = canvas.getBoundingClientRect()
-  const x = e.clientX - rect.left
-  const y = e.clientY - rect.top
+  const screenX = e.clientX - rect.left
+  const screenY = e.clientY - rect.top
+  const x = screenX - panOffset.value.x
+  const y = screenY - panOffset.value.y
 
   // 只有在拖拽模式下才能拖拽点
   if (currentTool.value === 'drag') {
@@ -712,6 +735,15 @@ const handleMouseDown = (e: MouseEvent) => {
         drawWrapper()
       }
     })
+
+    // 如果没有拖拽到任何点，开始平移
+    if (!draggedPoint.value) {
+      isPanning.value = true
+      panStart.value = { x, y }
+      panStartScreenX = screenX
+      panStartScreenY = screenY
+      prevTool.value = currentTool.value
+    }
   }
 }
 
@@ -720,6 +752,12 @@ const handleMouseUp = () => {
     history.value.push(JSON.parse(JSON.stringify(walls.value)))
     draggedPoint.value = null
     dragOffset.value = null
+    currentTool.value = prevTool.value
+    drawWrapper()
+  }
+  if (isPanning.value) {
+    isPanning.value = false
+    panStart.value = null
     currentTool.value = prevTool.value
     drawWrapper()
   }
