@@ -5,17 +5,22 @@
  * @returns { THREE.Vector2[] }
  */
 // @ts-ignore
-import { union } from 'martinez-polygon-clipping';
+import { Geometry, union } from 'martinez-polygon-clipping';
 import { Point, Wall } from "@/types/map2d";
 
-export function createShapeFromPoints(wallList: Wall[], radius = 1): [number, number][][] {
+const cache = new Map<string, [number, number][][]>();
+
+export function createShapeFromPoints(ctx: CanvasRenderingContext2D, wallList: Wall[], radius = 1): Geometry | null {
+  const key = `${wallList.map((item) => item.points.map((point) => `${point.x},${point.y}`).join(',')).join(',')}-${radius}`
+  // if (cache.has(key)) return cache.get(key) || []
   const left: Point[] = [];
   const right: Point[] = [];
-  let margineds: [number, number][][] = []
+  let margineds: Geometry | null = null;
+  // console.log('========线========')
   for (let i = 0; i < wallList.length; i++) {
     const points = wallList[i];
     if (points.points.length < 2) return []
-    console.log('========点========')
+    // console.log('========点========')
     for (let j = 0, len = points.points.length; j < len; j++) {
       let prev = points.points[j - 1] || {};
       const curr = points.points[j];
@@ -43,9 +48,9 @@ export function createShapeFromPoints(wallList: Wall[], radius = 1): [number, nu
       const Lvector: [number, number] = rotateVector(vector, -Math.PI / 2);
       const Rvector: [number, number] = rotateVector(vector, Math.PI / 2);
       const deflection = vectorAngleCosHalf(v1, v2);
-      console.log('center点', curr.x, curr.y)
-      console.log('left点', (+(curr.x + Lvector[0] * (radius / deflection)).toFixed(2)), (+(curr.y + Lvector[1] * (radius / deflection)).toFixed(2)))
-      console.log('right点', (+(curr.x + Rvector[0] * (radius / deflection)).toFixed(2)), (+(curr.y + Rvector[1] * (radius / deflection)).toFixed(2)))
+      // console.log('center点', curr.x, curr.y)
+      // console.log('left点', (+(curr.x + Lvector[0] * (radius / deflection)).toFixed(2)), (+(curr.y + Lvector[1] * (radius / deflection)).toFixed(2)))
+      // console.log('right点', (+(curr.x + Rvector[0] * (radius / deflection)).toFixed(2)), (+(curr.y + Rvector[1] * (radius / deflection)).toFixed(2)))
       left.push({
         x: (+(curr.x + Lvector[0] * (radius / deflection)).toFixed(2)),
         y: (+(curr.y + Lvector[1] * (radius / deflection)).toFixed(2)),
@@ -55,27 +60,57 @@ export function createShapeFromPoints(wallList: Wall[], radius = 1): [number, nu
         y: (+(curr.y + Rvector[1] * (radius / deflection)).toFixed(2)),
       });
       if (j !== 0) {
-        const point1: [number, number] = [left[left.length - 2].x, left[left.length - 2].y]
-        const point2: [number, number] = [left[left.length - 1].x, left[left.length - 1].y]
-        const point3: [number, number] = [right[0].x, right[0].y]
-        const point4: [number, number] = [right[1].x, right[1].y]
-        console.log('点区域', [point1, point2, point3, point4])
-        margineds = union(margineds, [[point1, point2, point3, point4, point1]])
-
+        const point1: [number, number] = [
+          Math.round(left[left.length - 2].x),
+          Math.round(left[left.length - 2].y)
+        ]
+        // console.log('point2额外伸长', Lvector[0], Lvector[1], v1[0], v1[1])
+        const point2: [number, number] = [
+          Math.round(left[left.length - 1].x) + (v1[0] * radius * 0.005),
+          Math.round(left[left.length - 1].y) + (v1[1] * radius * 0.005)
+        ]
+        const point3: [number, number] = [
+          Math.round(right[0].x) + (v1[0] * radius * 0.005),
+          Math.round(right[0].y) + (v1[1] * radius * 0.005)
+        ]
+        const point4: [number, number] = [
+          Math.round(right[1].x),
+          Math.round(right[1].y)
+        ]
+        try {
+          if (margineds) {
+            margineds = union(margineds, [[point1, point2, point3, point4, point1]])
+          } else {
+            margineds = [[point1, point2, point3, point4, point1]];
+          }
+        } catch (error) {
+          console.log('error', error)
+          continue;
+        }
         // 如果这个点，之前存在过相同坐标的另一个点
-        // const prevSamePoint = points.points.find((item, index) => index < i && item.x === curr.x && item.y === curr.y);
-        // if (prevSamePoint) {
-        //   const offsetLPoint: [number, number] = [
-        //     curr.x + Lvector[0] * radius + vector[0] * radius,
-        //     curr.y + Lvector[1] * radius + vector[1] * radius
-        //   ];
-        //   const offsetRPoint: [number, number] = [
-        //     curr.x + Rvector[0] * radius + vector[0] * radius,
-        //     curr.y + Rvector[1] * radius + vector[1] * radius
-        //   ];
-        //   margineds = union(margineds, [[[curr.x, curr.y], point2, offsetLPoint, offsetRPoint, point3, [curr.x, curr.y]]])
-        //   console.log('offsetLPoint', [curr.x, curr.y], point2, offsetLPoint, offsetRPoint, point3)
-        // }
+        const prevSamePoint = points.points.find((item, index) => index < i && item.x === curr.x && item.y === curr.y);
+        if (prevSamePoint) {
+          console.log('prevSamePoint', points.points, curr)
+          const offsetLPoint: [number, number] = [
+            curr.x + Lvector[0] * radius + vector[0] * radius,
+            curr.y + Lvector[1] * radius + vector[1] * radius
+          ];
+          const offsetRPoint: [number, number] = [
+            curr.x + Rvector[0] * radius + vector[0] * radius,
+            curr.y + Rvector[1] * radius + vector[1] * radius
+          ];
+          if (margineds) {
+            margineds = union(margineds, [[
+              [curr.x, curr.y],
+              point2,
+              offsetLPoint,
+              offsetRPoint,
+              point3,
+              [curr.x, curr.y]
+            ]])
+          }
+          console.log('offsetLPoint', [curr.x, curr.y], point2, offsetLPoint, offsetRPoint, point3)
+        }
       }
       prev = curr;
     }
@@ -84,6 +119,7 @@ export function createShapeFromPoints(wallList: Wall[], radius = 1): [number, nu
     // console.log('last result', margineds, [allPoint.map((item) => ([item.x, item.y] as [number, number]))]);
     // return [allPoint.map((item) => ([item.x, item.y] as [number, number]))];
   }
+  // cache.set(key, margineds)
   return margineds;
 }
 

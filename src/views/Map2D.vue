@@ -284,7 +284,6 @@ const getSnapPoint = (startPoints: Point[], current: Point, allPoints: Point[] =
     const b = angleSnapped.y - k * angleSnapped.x
 
     if (xAxisSnappedYVal !== null && yAxisSnappedXVal !== null) {
-      console.log(11.1)
       // 同时命中x和y轴，计算角度线与两条轴对齐线的交点，选择更近的
       // 交点1：角度线与 x = yAxisSnappedXVal 的交点
       const intersect1Y = k * yAxisSnappedXVal + b
@@ -309,7 +308,6 @@ const getSnapPoint = (startPoints: Point[], current: Point, allPoints: Point[] =
         snappedY = xAxisSnappedYVal
       }
     } else if (yAxisSnappedXVal !== null) {
-      console.log(1)
       // 命中y轴对齐：交点是 (yAxisSnappedXVal, k * yAxisSnappedXVal + b)
       // 处理垂直线情况（90度或-90度）
       if (Math.abs(angleRad - Math.PI / 2) < 0.01 || Math.abs(angleRad + Math.PI / 2) < 0.01) {

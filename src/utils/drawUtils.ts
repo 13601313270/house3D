@@ -2,8 +2,7 @@ import { Wall, Door, Window, Point } from '../types/map2d'
 // @ts-ignore
 import Offset from 'polygon-offset'
 import { createShapeFromPoints } from './createShapeFromPoints'
-// @ts-ignore
-import { union } from 'martinez-polygon-clipping';
+import { Geometry, Polygon } from 'martinez-polygon-clipping';
 
 export const canvasWidth = 800
 export const canvasHeight = 600
@@ -141,16 +140,29 @@ export const draw = (
   ctx.strokeStyle = '#333'
   ctx.lineWidth = 2
   ctx.setLineDash([])
-  let margineds: [number, number][][] = createShapeFromPoints(walls, 10);
-  for (let i = 0; i < margineds.length; i++) {
-    ctx.beginPath()
-    ctx.moveTo(margineds[i][0][0], margineds[i][0][1])
-    for (let j = 1; j < margineds[i].length; j++) {
-      ctx.lineTo(margineds[i][j][0], margineds[i][j][1])
+  const margineds: Geometry | null = createShapeFromPoints(ctx, walls, 20);
+  ctx.lineWidth = 3
+  ctx.strokeStyle = 'black';
+  ctx.beginPath();
+
+  for (const poly of margineds || []) {
+    for (let i = 0; i < poly.length; i++) {
+      const ring = poly[i];
+      for (let j = 0; j < ring.length; j++) {
+        if (ring[j] === null) continue
+        if (j === 0) {
+          // @ts-ignore
+          ctx.moveTo(ring[j][0], ring[j][1]);
+        } else {
+          // @ts-ignore
+          ctx.lineTo(ring[j][0] as number, ring[j][1] as number);
+        }
+      }
     }
-    ctx.closePath()
-    ctx.stroke()
+    ctx.closePath();
   }
+  ctx.stroke();
+  ctx.restore();
   // 绘制墙上的点
   walls.forEach((wall) => {
     if (wall.points.length < 2) return
