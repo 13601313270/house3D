@@ -131,6 +131,9 @@ const updateCanvasSize = (skipPanelWidthUpdate = false) => {
       }
     }
   }
+  setTimeout(() => {
+    drawWrapper()
+  }, 30)
 }
 
 const contextMenu = ref<{ visible: boolean; x: number; y: number; type: 'door' | 'window'; index: number } | null>(null)
@@ -1013,19 +1016,21 @@ onUnmounted(() => {
 
 .toolbar {
   display: flex;
-  padding: 15px;
+  padding: 8px;
   background: white;
-  border-radius: 8px;
+  gap: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .toolbar button {
-  padding: 10px 20px;
+  padding: 4px 8px;
   border: none;
   border-radius: 4px;
   background: #e4e6eb;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 16px;
   transition: all 0.3s;
 }
 
