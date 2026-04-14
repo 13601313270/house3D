@@ -85,10 +85,12 @@ export class WindowEntity extends EntityClass<Window> {
     return []
   }
 
-  afterBeSnapByLine(line: [Point, Point]) {
-    const p1 = line[0]
-    const p2 = line[1]
-    const nearestAngle = Math.atan2(p2.y - p1.y, p2.x - p1.x)
-    this.data.angle = nearestAngle
+  afterBeSnapByLine(obj: { type: EntityType }, line: [Point, Point]) {
+    if (obj.type !== 'wall') {
+      const p1 = line[0]
+      const p2 = line[1]
+      const nearestAngle = Math.atan2(p2.y - p1.y, p2.x - p1.x)
+      this.data.angle = nearestAngle
+    }
   }
 }

@@ -921,7 +921,7 @@ const handleMouseMove = (e: MouseEvent) => {
             }, matchHandelInfo)
             if (result) {
               if (matchLine) {
-                matchHandelObj.afterBeSnapByLine(matchLine)
+                matchHandelObj.afterBeSnapByLine({ type: api.type }, matchLine)
               }
               drawWrapper()
               return true;

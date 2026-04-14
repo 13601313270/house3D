@@ -212,6 +212,6 @@ export class WallEntity extends EntityClass<Wall> {
     return lines;
   }
 
-  afterBeSnapByLine(line: [Point, Point]) {
+  afterBeSnapByLine(obj: { type: EntityType }, line: [Point, Point]) {
   }
 }

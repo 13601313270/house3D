@@ -42,7 +42,10 @@ export abstract class EntityClass<T extends Entity> {
   abstract getMineBeSnapLines(): Array<[Point, Point]>;
 
   // 当前对象吸附到一根线后的后续处理
-  abstract afterBeSnapByLine(line: [Point, Point]): void;
+  abstract afterBeSnapByLine(
+    obj: { type: EntityType },
+    line: [Point, Point]
+  ): void;
 
   changePosition(newPosition: { x: number, y: number }) {
     this.data.x = newPosition.x
