@@ -2,8 +2,10 @@ import { Entity, HandelInfo, Point } from './map2d'
 
 export type EntityType = 'wall' | 'door' | 'window'
 
+// 磁吸点
 export type MatchSnapPoint = {
-  type: EntityType,
+  type: EntityType, // 磁吸点对象类型
+  snapFromType: 'point' | 'line' | 'axis' | string, // 磁吸点来源类型
   point: Point,
 }
 

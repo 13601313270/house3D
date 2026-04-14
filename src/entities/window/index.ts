@@ -72,6 +72,7 @@ export class WindowEntity extends EntityClass<Window> {
   getBeSnapPoints() {
     return [{
       type: this.type,
+      snapFromType: 'point',
       point: {
         x: this.data.x,
         y: this.data.y,

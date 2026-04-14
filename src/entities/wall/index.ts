@@ -196,6 +196,7 @@ export class WallEntity extends EntityClass<Wall> {
     return this.wall.points.map(v => {
       return {
         type: this.type,
+        snapFromType: 'point',
         point: v,
       }
     })

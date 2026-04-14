@@ -250,6 +250,7 @@ const getSnapPoint = (
         pointDistance = dist
         pointSnapped = {
           type: point.type,
+          snapFromType: point.snapFromType,
           point: {
             x: point.point.x, y: point.point.y
           }
@@ -264,6 +265,7 @@ const getSnapPoint = (
     // console.log('snapped---point', pointSnapped)
     return {
       type: pointSnapped.type,
+      snapFromType: pointSnapped.snapFromType,
       point: roundNumberList(pointSnapped.point)
     }
   }
@@ -424,6 +426,7 @@ const getSnapPoint = (
       }
       return {
         type: nearestStart.type,
+        snapFromType: 'line',
         point: roundNumberList({
           x: snappedX,
           y: snappedY
@@ -436,6 +439,7 @@ const getSnapPoint = (
       snappedY = angleSnapped.point.y
       return {
         type: angleSnapped.type,
+        snapFromType: 'line',
         point: roundNumberList({
           x: snappedX,
           y: snappedY
@@ -449,6 +453,7 @@ const getSnapPoint = (
     snappedY = xAxisSnappedYVal.number
     return {
       type: yAxisSnappedXVal.type,
+      snapFromType: 'axis',
       point: roundNumberList({
         x: snappedX,
         y: snappedY
@@ -460,6 +465,7 @@ const getSnapPoint = (
     snappedY = current.y
     return {
       type: yAxisSnappedXVal.type,
+      snapFromType: 'axis',
       point: roundNumberList({
         x: snappedX,
         y: snappedY
@@ -471,6 +477,7 @@ const getSnapPoint = (
     snappedY = xAxisSnappedYVal.number
     return {
       type: xAxisSnappedYVal.type,
+      snapFromType: 'axis',
       point: roundNumberList({
         x: snappedX,
         y: snappedY
@@ -738,10 +745,11 @@ const handleCanvasClick = (e: MouseEvent) => {
           allPoints.push(point)
         })
       })
-      let snapped = getSnapPoint([{ type: 'wall', point: last }], clickPoint, allPoints.map(v => ({ type: 'wall', point: v })))
+      let snapped = getSnapPoint([{ type: 'wall', snapFromType: 'point', point: last }], clickPoint, allPoints.map(v => ({ type: 'wall', snapFromType: 'point', point: v })))
       if (snapped === null) {
         snapped = {
           type: 'wall',
+          snapFromType: 'point',
           point: clickPoint
         }
       }
@@ -892,6 +900,7 @@ const handleMouseMove = (e: MouseEvent) => {
             matchHandelObj.onUpdateHandelInfoChange(
               {
                 type: api.type,
+                snapFromType: 'point',
                 point: {
                   x: snapped.point.x,
                   y: snapped.point.y
@@ -920,6 +929,7 @@ const handleMouseMove = (e: MouseEvent) => {
           if (nearestPoint && minDistance < snapThreshold) {
             matchHandelObj.onUpdateHandelInfoChange({
               type: api.type,
+              snapFromType: 'line',
               point: {
                 x: nearestPoint.x,
                 y: nearestPoint.y
@@ -1004,10 +1014,11 @@ const handleMouseMove = (e: MouseEvent) => {
             allPoints.push(point)
           })
         })
-        let snappedPoint = getSnapPoint([{ type: 'wall', point: last }], { x, y }, allPoints.map(v => ({ type: 'wall', point: v })))
+        let snappedPoint = getSnapPoint([{ type: 'wall', snapFromType: 'point', point: last }], { x, y }, allPoints.map(v => ({ type: 'wall', snapFromType: 'point', point: v })))
         if (snappedPoint === null) {
           snappedPoint = {
             type: 'wall',
+            snapFromType: 'point',
             point: { x, y }
           }
         }
