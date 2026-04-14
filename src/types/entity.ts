@@ -2,6 +2,11 @@ import { Entity, HandelInfo, Point } from './map2d'
 
 export type EntityType = 'wall' | 'door' | 'window'
 
+export type MatchSnapPoint = {
+  type: EntityType,
+  point: Point,
+}
+
 export abstract class EntityClass<T extends Entity> {
   abstract type: EntityType
   data: T
@@ -24,18 +29,12 @@ export abstract class EntityClass<T extends Entity> {
 
   // 具柄的新的值
   abstract onUpdateHandelInfoChange(
-    newPosition: {
-      type: EntityType,
-      point: Point,
-    },
+    newPosition: MatchSnapPoint,
     matchHandelInfo: HandelInfo,
   ): void;
 
   // 可以被对齐参考点（注意是被对齐，提供个其他拖动磁吸的参考点）
-  abstract getBeSnapPoints(): Array<{
-    type: EntityType,
-    point: Point,
-  }>;
+  abstract getBeSnapPoints(): Array<MatchSnapPoint>;
 
   // 可以被对齐的参考线（注意是被对齐，提供个其他拖动磁吸的参考线）
   abstract getBeSnapLines(): Array<[Point, Point]>;

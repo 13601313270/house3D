@@ -65,7 +65,7 @@ import { Wall } from '@/entities/wall/index.d'
 import { Door } from '@/entities/door/index.d'
 import { Window } from '@/entities/window/index.d'
 import { DoorEntity, WallEntity, WindowEntity } from '@/entities'
-import { EntityClass, EntityType } from '@/types/entity'
+import { EntityClass, EntityType, MatchSnapPoint } from '@/types/entity'
 import { HandelInfo } from '@/types/map2d'
 import pointToLineDistance from '@/utils/pointToLineDistance'
 
@@ -222,24 +222,12 @@ const getClosestPointOnLine = (p: Point, a: Point, b: Point) => {
 }
 
 const getSnapPoint = (
-  startPoints: Array<{
-    type: EntityType,
-    point: Point
-  }>, // 这里的点会计算角度磁吸
+  startPoints: Array<MatchSnapPoint>, // 这里的点会计算角度磁吸
   current: Point,
-  allPoints: Array<{
-    type: EntityType,
-    point: Point,
-  }> = [], // 点磁吸和轴磁吸
-): {
-  type: EntityType,
-  point: Point
-} | null => {
+  allPoints: Array<MatchSnapPoint> = [], // 点磁吸和轴磁吸
+): MatchSnapPoint | null => {
   // 找到距离 current 最近的 start 点
-  let nearestStart: {
-    type: EntityType,
-    point: Point
-  } | null = null
+  let nearestStart: MatchSnapPoint | null = null
   let minDistance = Infinity
 
   for (const start of startPoints) {
@@ -251,10 +239,7 @@ const getSnapPoint = (
   }
   // 一、计算三组磁吸数据
   // 计算点磁吸数据
-  let pointSnapped: {
-    type: EntityType,
-    point: Point
-  } | null = null
+  let pointSnapped: MatchSnapPoint | null = null
   let pointDistance = Infinity
 
   for (const point of allPoints) {

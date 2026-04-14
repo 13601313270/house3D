@@ -1,5 +1,5 @@
 import { Point, Entity, HandelInfo } from '@/types/map2d'
-import { EntityClass, EntityType } from '@/types/entity'
+import { EntityClass, EntityType, MatchSnapPoint } from '@/types/entity'
 import { Wall } from './index.d'
 import { drawPoint } from '@/utils/drawPoint'
 import { createShapeFromPoints } from '@/utils/createShapeFromPoints'
@@ -180,7 +180,7 @@ export class WallEntity extends EntityClass<Wall> {
   }
 
   onUpdateHandelInfoChange(
-    newPosition: { type: EntityType, point: Point },
+    newPosition: MatchSnapPoint,
     matchHandelInfo: HandelInfo
   ) {
     if (matchHandelInfo.info.pointIndex > -1) {

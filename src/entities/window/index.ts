@@ -1,5 +1,5 @@
 import { Point, Entity, HandelInfo } from '@/types/map2d'
-import { EntityClass, EntityType } from '@/types/entity'
+import { EntityClass, EntityType, MatchSnapPoint } from '@/types/entity'
 import { Window } from './index.d'
 
 export class WindowEntity extends EntityClass<Window> {
@@ -63,8 +63,7 @@ export class WindowEntity extends EntityClass<Window> {
   }
 
   onUpdateHandelInfoChange(
-    newPosition: { type: EntityType, point: Point },
-    matchHandelInfo: HandelInfo,
+    newPosition: MatchSnapPoint,
   ) {
     this.data.x = newPosition.point.x
     this.data.y = newPosition.point.y

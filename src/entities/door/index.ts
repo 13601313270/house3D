@@ -1,6 +1,6 @@
 import { HandelInfo, Point } from '@/types/map2d'
 import { Door } from './index.d'
-import { EntityClass, EntityType } from '@/types/entity'
+import { EntityClass, EntityType, MatchSnapPoint } from '@/types/entity'
 
 export class DoorEntity extends EntityClass<Door> {
   type: EntityType = 'door'
@@ -67,7 +67,7 @@ export class DoorEntity extends EntityClass<Door> {
     return null;
   }
 
-  onUpdateHandelInfoChange(newPosition: { type: EntityType, point: Point }, matchHandelInfo: HandelInfo) {
+  onUpdateHandelInfoChange(newPosition: MatchSnapPoint, matchHandelInfo: HandelInfo) {
     console.log('newPosition', newPosition)
     if (newPosition.type === 'wall') {
       this.changePosition(newPosition.point)
