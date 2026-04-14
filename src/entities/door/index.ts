@@ -1,8 +1,9 @@
 import { HandelInfo, Point } from '@/types/map2d'
 import { Door } from './index.d'
-import { EntityClass } from '@/types/entity'
+import { EntityClass, EntityType } from '@/types/entity'
 
 export class DoorEntity extends EntityClass<Door> {
+  type: EntityType = 'door'
   id: string
   wellId: string
   width: number
@@ -59,6 +60,7 @@ export class DoorEntity extends EntityClass<Door> {
     const dist = Math.hypot(x - this.data.x, y - this.data.y)
     if (dist < this.width * zoomLevel) {
       return {
+        type: this.type,
         id: this.data.id,
       }
     }
@@ -66,8 +68,8 @@ export class DoorEntity extends EntityClass<Door> {
   }
 
   onUpdateHandelInfoChange(matchHandelInfo: HandelInfo, newPosition: { x: number, y: number }) {
-    this.data.x = newPosition.x
-    this.data.y = newPosition.y
+    console.log('onUpdateHandelInfoChange', matchHandelInfo)
+    this.changePosition(newPosition)
   }
 
   getBeSnapPoints(): Point[] {

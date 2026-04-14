@@ -52,6 +52,7 @@ export class WindowEntity extends EntityClass<Window> {
     if (dist < this.width * zoomLevel) {
       return {
         id: this.data.id,
+        type: this.type,
       }
     }
     return null;

@@ -1,8 +1,9 @@
 import { Entity, HandelInfo, Point } from './map2d'
 
-export type EntityType = 'wall' | 'door' | 'window' | 'bed' | string
+export type EntityType = 'wall' | 'door' | 'window'
 
-export abstract class EntityClass<T> {
+export abstract class EntityClass<T extends Entity> {
+  abstract type: EntityType
   data: T
 
   constructor(data: T) {
@@ -32,4 +33,9 @@ export abstract class EntityClass<T> {
 
   // 当前对象吸附到一根线后的后续处理
   abstract afterBeSnapByLine(line: [Point, Point]): void;
+
+  changePosition(newPosition: { x: number, y: number }) {
+    this.data.x = newPosition.x
+    this.data.y = newPosition.y
+  }
 }

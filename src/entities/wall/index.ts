@@ -171,6 +171,7 @@ export class WallEntity extends EntityClass<Wall> {
         // drawWrapper()
         return {
           id: this.data.id,
+          type: this.type,
           info: { pointIndex: i }
         }
       }
