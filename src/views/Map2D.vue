@@ -37,7 +37,13 @@
           :style="{ display: isSplitting ? 'none' : 'block' }" />
         <div v-if="contextMenu?.visible" class="context-menu"
           :style="{ top: contextMenu.y + 'px', left: contextMenu.x + 'px' }">
-          <button @click="deleteContextMenuEntity">删除</button>
+          <div v-if="contextMenu.type === 'wall-point'">
+            <label>
+              墙体厚度：
+              <input type="number" v-model.number="contextMenu.thickness" @change="updateWallThickness" />
+            </label>
+          </div>
+          <button v-else @click="deleteContextMenuEntity">删除</button>
         </div>
       </div>
     </div>
@@ -58,7 +64,7 @@ import Canvas3D from '../components/Canvas3D.vue'
 
 const canvasRef = ref<HTMLCanvasElement | null>(null)
 const canvas3DRef = ref<HTMLCanvasElement | null>(null)
-const currentTool = ref<'wall' | 'door' | 'window' | 'drag'>('wall')
+const currentTool = ref<'wall' | 'door' | 'window' | 'drag'>('drag')
 const walls = ref<Wall[]>([])
 const doors = ref<Door[]>([])
 const windows = ref<Window[]>([])
@@ -144,7 +150,7 @@ const drawingData = computed(() => ({
   windows: windows.value
 }))
 
-const contextMenu = ref<{ visible: boolean; x: number; y: number; type: 'door' | 'window'; index: number } | null>(null)
+const contextMenu = ref<{ visible: boolean; x: number; y: number; type: 'door' | 'window' | 'wall-point'; index?: number; wallIndex?: number; pointIndex?: number; thickness?: number } | null>(null)
 
 interface NearestWallResult {
   wall: Wall
@@ -585,6 +591,27 @@ const handleContextMenu = (e: MouseEvent) => {
   const x = (screenX - panOffset.value.x) / zoomLevel.value
   const y = (screenY - panOffset.value.y) / zoomLevel.value
 
+  // 检查是否点击了墙上的点
+  for (let i = 0; i < walls.value.length; i++) {
+    const wall = walls.value[i]
+    for (let j = 0; j < wall.points.length; j++) {
+      const point = wall.points[j]
+      const dist = Math.hypot(x - point.x, y - point.y)
+      if (dist < 10) {
+        contextMenu.value = {
+          visible: true,
+          x: e.clientX,
+          y: e.clientY,
+          type: 'wall-point',
+          wallIndex: i,
+          pointIndex: j,
+          thickness: wall.thickness || 2
+        }
+        return
+      }
+    }
+  }
+
   // 检查是否点击了门
   for (let i = 0; i < doors.value.length; i++) {
     const door = doors.value[i]
@@ -624,13 +651,21 @@ const deleteContextMenuEntity = () => {
   if (!contextMenu.value) return
 
   if (contextMenu.value.type === 'door') {
-    doors.value.splice(contextMenu.value.index, 1)
+    doors.value.splice(contextMenu.value.index!, 1)
   } else if (contextMenu.value.type === 'window') {
-    windows.value.splice(contextMenu.value.index, 1)
+    windows.value.splice(contextMenu.value.index!, 1)
   }
 
   contextMenu.value = null
   drawWrapper()
+}
+
+const updateWallThickness = () => {
+  if (contextMenu.value?.type === 'wall-point' && contextMenu.value.wallIndex !== undefined && contextMenu.value.thickness !== undefined) {
+    walls.value[contextMenu.value.wallIndex].thickness = contextMenu.value.thickness
+    contextMenu.value = null
+    drawWrapper()
+  }
 }
 
 const handleCanvasClick = (e: MouseEvent) => {
@@ -642,6 +677,12 @@ const handleCanvasClick = (e: MouseEvent) => {
   const screenY = Math.round(e.clientY - rect.top)
   const x = (screenX - panOffset.value.x) / zoomLevel.value
   const y = (screenY - panOffset.value.y) / zoomLevel.value
+
+  // 点击空白处隐藏 context menu
+  if (contextMenu.value) {
+    contextMenu.value = null
+    return
+  }
 
   // 如果当前是拖拽模式，不执行任何操作
   if (currentTool.value === 'drag') {
