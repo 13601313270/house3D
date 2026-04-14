@@ -177,7 +177,10 @@ export class WallEntity extends EntityClass {
     return null
   }
 
-  onUpdateHandelInfoChange(matchHandelInfo: HandelInfo, newPosition: { x: number, y: number }) {
+  onUpdateHandelInfoChange(
+    matchHandelInfo: HandelInfo,
+    newPosition: { x: number, y: number }
+  ) {
     if (matchHandelInfo.info.pointIndex > -1) {
       this.wall.points[matchHandelInfo.info.pointIndex] = newPosition
     }

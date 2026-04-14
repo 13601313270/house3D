@@ -252,7 +252,11 @@ const getClosestPointOnLine = (p: Point, a: Point, b: Point) => {
   }
 }
 
-const getSnapPoint = (startPoints: Point[], current: Point, allPoints: Point[] = []): Point => {
+const getSnapPoint = (
+  startPoints: Point[], // 这里的点会计算角度磁吸
+  current: Point,
+  allPoints: Point[] = [], // 点磁吸和轴磁吸
+): Point => {
   // 找到距离 current 最近的 start 点
   let nearestStart: Point | null = null
   let minDistance = Infinity
@@ -795,7 +799,6 @@ const handleMouseMove = (e: MouseEvent) => {
 
   // 如果正在拖拽，处理拖拽逻辑（即使当前工具不是 drag）
   if (matchHandelObj && matchHandelInfo) {
-    matchHandelObj.onUpdateHandelInfoChange(matchHandelInfo, { x, y })
     // const dragged = draggedPoint.value
     // let originalPoint: Point = { x: 0, y: 0 }
     // let prevPoint: Point | null = null
@@ -852,6 +855,9 @@ const handleMouseMove = (e: MouseEvent) => {
     // const targetY = y - (dragOffset.value?.y || 0)
 
     // const snapped = getSnapPoint(startPoints, { x: targetX, y: targetY }, allPoints)
+
+
+    matchHandelObj.onUpdateHandelInfoChange(matchHandelInfo, { x, y })
     // const newX = snapped.x
     // const newY = snapped.y
     // if (dragged.type === 'wall') {
