@@ -12,46 +12,6 @@ export const snapThreshold = 20
 export const doorWidth = 90
 export const windowWidth = 120
 
-export const drawPreviewEntity = (
-  ctx: CanvasRenderingContext2D,
-  x: number,
-  y: number,
-  width: number,
-  angle: number,
-  color: string,
-  type: 'door' | 'window',
-  thickness: number = 10
-) => {
-  ctx.save()
-  ctx.translate(x, y)
-  ctx.rotate(angle)
-
-  ctx.strokeStyle = color
-  ctx.lineWidth = 2
-  ctx.setLineDash([8, 4])
-
-  if (type === 'door') {
-    ctx.beginPath()
-    ctx.moveTo(-width / 2, -thickness)
-    ctx.lineTo(-width / 2, thickness)
-    ctx.lineTo(0, thickness * 2)
-    ctx.lineTo(width / 2, thickness)
-    ctx.lineTo(width / 2, -thickness)
-    ctx.closePath()
-    ctx.stroke()
-  } else {
-    ctx.beginPath()
-    ctx.moveTo(-width / 2, -thickness / 2)
-    ctx.lineTo(-width / 2, thickness / 2)
-    ctx.lineTo(width / 2, thickness / 2)
-    ctx.lineTo(width / 2, -thickness / 2)
-    ctx.closePath()
-    ctx.stroke()
-  }
-
-  ctx.restore()
-}
-
 export const draw = (
   canvasRef: HTMLCanvasElement | null,
   walls: Wall[],
@@ -92,7 +52,8 @@ export const draw = (
   )
   doors.forEach((door) => {
     const doorApi = new DoorEntity(door)
-    doorApi.draw2D(ctx, panOffset, zoomLevel)
+    const wallThickness = walls.find((wall) => wall.id === door.wallId)?.thickness || 0;
+    doorApi.draw2D(ctx, panOffset, wallThickness, zoomLevel)
   })
 
   windows.forEach((win) => {
@@ -100,43 +61,36 @@ export const draw = (
     windowApi.draw2D(ctx, panOffset, zoomLevel)
   })
 
-  doors.forEach((door) => {
-    const screenX = door.x * zoomLevel + panOffset.x
-    const screenY = door.y * zoomLevel + panOffset.y
-    ctx.fillStyle = '#fff'
-    ctx.strokeStyle = '#e67e22'
-    ctx.lineWidth = 2
-    ctx.beginPath()
-    ctx.arc(screenX, screenY, 6 * zoomLevel, 0, Math.PI * 2)
-    ctx.fill()
-    ctx.stroke()
-  })
-
-  windows.forEach((win) => {
-    const screenX = win.x * zoomLevel + panOffset.x
-    const screenY = win.y * zoomLevel + panOffset.y
-    ctx.fillStyle = '#fff'
-    ctx.strokeStyle = '#3498db'
-    ctx.lineWidth = 2
-    ctx.beginPath()
-    ctx.arc(screenX, screenY, 6 * zoomLevel, 0, Math.PI * 2)
-    ctx.fill()
-    ctx.stroke()
-  })
-
   if (hoverPoint && currentTool !== 'wall') {
-    const hoverScreenX = hoverPoint.x * zoomLevel + panOffset.x
-    const hoverScreenY = hoverPoint.y * zoomLevel + panOffset.y
     const nearestWall = getNearestWall(hoverPoint)
     if (nearestWall) {
       const { pointOnWall, angle } = nearestWall
       const wallScreenX = pointOnWall.x * zoomLevel + panOffset.x
       const wallScreenY = pointOnWall.y * zoomLevel + panOffset.y
       const wallThickness = nearestWall.wall.thickness || 0;
+      // 鼠标悬浮
       if (currentTool === 'door') {
-        drawPreviewEntity(ctx, wallScreenX, wallScreenY, doorWidth * zoomLevel, angle, '#e67e22', 'door', wallThickness * zoomLevel)
+        const door = {
+          id: '123',
+          wallId: nearestWall.wall.id,
+          x: wallScreenX,
+          y: wallScreenY,
+          width: doorWidth,
+          angle,
+        }
+        const doorApi = new DoorEntity(door)
+        doorApi.draw2D(ctx, panOffset, wallThickness, zoomLevel)
       } else if (currentTool === 'window') {
-        drawPreviewEntity(ctx, wallScreenX, wallScreenY, windowWidth * zoomLevel, angle, '#3498db', 'window', wallThickness * zoomLevel)
+        const window = {
+          id: '123',
+          wallId: nearestWall.wall.id,
+          x: wallScreenX,
+          y: wallScreenY,
+          width: windowWidth,
+          angle,
+        }
+        const windowApi = new WindowEntity(window)
+        windowApi.draw2D(ctx, panOffset, zoomLevel)
       }
     }
   }
