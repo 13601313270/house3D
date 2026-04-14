@@ -32,7 +32,7 @@ export abstract class EntityClass<T extends Entity> {
   // 具柄的新的值
   abstract inSceneSnapPointArea(
     newPosition: MatchSnapPoint,
-    matchHandelInfo: HandelInfo,
+    dragHandelInfo: HandelInfo,
   ): boolean;
 
   // 本对象可以被其他对象对齐参考点（注意是被对齐，提供个其他拖动磁吸的参考点）

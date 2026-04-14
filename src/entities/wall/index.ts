@@ -179,10 +179,11 @@ export class WallEntity extends EntityClass<Wall> {
 
   inSceneSnapPointArea(
     newPosition: MatchSnapPoint,
-    matchHandelInfo: HandelInfo
+    dragHandelInfo: HandelInfo
   ) {
-    if (matchHandelInfo.info.pointIndex > -1) {
-      this.wall.points[matchHandelInfo.info.pointIndex] = newPosition.point
+    if (dragHandelInfo.info.pointIndex > -1) {
+      console.log('MatchSnapPoint', newPosition.point)
+      this.wall.points[dragHandelInfo.info.pointIndex] = newPosition.point
       return true
     }
     return false
@@ -193,7 +194,7 @@ export class WallEntity extends EntityClass<Wall> {
   }
 
   getMineBeSnapPoints() {
-    return this.wall.points.map(v => {
+    return this.wall.points.map((v) => {
       return {
         objType: this.type,
         snapFromType: 'point',

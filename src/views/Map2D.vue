@@ -883,10 +883,7 @@ const handleMouseMove = (e: MouseEvent) => {
               {
                 objType: api.type,
                 snapFromType: 'point',
-                point: {
-                  x: snapped.point.x,
-                  y: snapped.point.y
-                }
+                point: snapped.point
               },
               matchHandelInfo,
             )
@@ -914,10 +911,7 @@ const handleMouseMove = (e: MouseEvent) => {
             const result = matchHandelObj.inSceneSnapPointArea({
               objType: api.type,
               snapFromType: 'line',
-              point: {
-                x: nearestPoint.x,
-                y: nearestPoint.y
-              }
+              point: nearestPoint
             }, matchHandelInfo)
             if (result) {
               if (matchLine) {
