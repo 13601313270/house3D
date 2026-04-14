@@ -93,7 +93,7 @@ const isSplitting = ref(false)
 const canvasSize = ref({ width: 0, height: 0 })
 const canvas3DSize = ref({ width: 0, height: 0 })
 const zoomLevel = ref(1)
-const wallThickness = ref<number>(2)
+const wallThickness = ref<number>(20)
 let panStartScreenX = 0
 let panStartScreenY = 0
 
