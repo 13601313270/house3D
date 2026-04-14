@@ -2,12 +2,15 @@ import { Entity, HandelInfo, Point, PointWithIndex } from './map2d'
 
 export type EntityType = 'wall' | 'door' | 'window'
 
+export type allSnapFromType = 'point' | 'line' | 'axis'
 // 磁吸点
-export type MatchSnapPoint = {
+export type OrigionSnapPoint = {
   objType: EntityType, // 磁吸点对象类型
   snapFromType: 'point', // 磁吸点来源类型
   point: PointWithIndex,
-} | {
+}
+// 磁吸点(扩展)，通过其他计算延伸出来的磁吸，比如贴边，贴发现
+export type MatchSnapPoint = OrigionSnapPoint | {
   objType: EntityType, // 磁吸点对象类型
   snapFromType: 'line' | 'axis' | string, // 磁吸点来源类型
   point: Point,
@@ -43,7 +46,7 @@ export abstract class EntityClass<T extends Entity> {
   ): boolean;
 
   // 本对象可以被其他对象对齐参考点（注意是被对齐，提供个其他拖动磁吸的参考点）
-  abstract getMineBeSnapPoints(): Array<MatchSnapPoint>;
+  abstract getMineBeSnapPoints(): Array<OrigionSnapPoint>;
 
   // 本对象可以被其他对象对齐的参考线（注意是被对齐，提供个其他拖动磁吸的参考线）
   abstract getMineBeSnapLines(): Array<[Point, Point]>;

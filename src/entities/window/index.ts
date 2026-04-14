@@ -1,5 +1,5 @@
 import { Point, Entity, HandelInfo } from '@/types/map2d'
-import { EntityClass, EntityType, MatchSnapPoint } from '@/types/entity'
+import { allSnapFromType, EntityClass, EntityType, MatchSnapPoint } from '@/types/entity'
 import { Window } from './index.d'
 
 export class WindowEntity extends EntityClass<Window> {
@@ -76,9 +76,10 @@ export class WindowEntity extends EntityClass<Window> {
   }
 
   getMineBeSnapPoints() {
+    const key: allSnapFromType = 'point';
     return [{
       objType: this.type,
-      snapFromType: 'point',
+      snapFromType: key,
       point: {
         index: 0,
         x: this.data.x,
@@ -92,7 +93,7 @@ export class WindowEntity extends EntityClass<Window> {
   }
 
   afterBeSnapByLine(obj: { type: EntityType }, line: [Point, Point]) {
-    if (obj.type !== 'wall') {
+    if (obj.type === 'wall') {
       const p1 = line[0]
       const p2 = line[1]
       const nearestAngle = Math.atan2(p2.y - p1.y, p2.x - p1.x)

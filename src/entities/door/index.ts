@@ -1,6 +1,6 @@
 import { HandelInfo, Point } from '@/types/map2d'
 import { Door } from './index.d'
-import { EntityClass, EntityType, MatchSnapPoint } from '@/types/entity'
+import { allSnapFromType, EntityClass, EntityType, MatchSnapPoint } from '@/types/entity'
 
 export class DoorEntity extends EntityClass<Door> {
   type: EntityType = 'door'
@@ -72,7 +72,7 @@ export class DoorEntity extends EntityClass<Door> {
     this.changePosition({ x, y })
   }
 
-  inSceneSnapPointArea(newPosition: MatchSnapPoint, matchHandelInfo: HandelInfo) {
+  inSceneSnapPointArea(newPosition: MatchSnapPoint) {
     if (newPosition.objType === 'wall' && newPosition.snapFromType === 'line') {
       this.changePosition(newPosition.point)
       return true
@@ -81,9 +81,10 @@ export class DoorEntity extends EntityClass<Door> {
   }
 
   getMineBeSnapPoints() {
+    const key: allSnapFromType = 'point';
     return [{
       objType: this.type,
-      snapFromType: 'point',
+      snapFromType: key,
       point: {
         index: 0,
         x: this.data.x,
@@ -97,10 +98,11 @@ export class DoorEntity extends EntityClass<Door> {
   }
 
   afterBeSnapByLine(obj: { type: EntityType }, line: [Point, Point]) {
-    if (obj.type !== 'wall') {
+    if (obj.type === 'wall') {
       const p1 = line[0]
       const p2 = line[1]
       const nearestAngle = Math.atan2(p2.y - p1.y, p2.x - p1.x)
+      console.log('after', obj.type, line, nearestAngle)
       this.data.angle = nearestAngle
     }
   }

@@ -1,5 +1,5 @@
 import { Point, Entity, HandelInfo, PointWithIndex } from '@/types/map2d'
-import { EntityClass, EntityType, MatchSnapPoint } from '@/types/entity'
+import { allSnapFromType, EntityClass, EntityType, MatchSnapPoint } from '@/types/entity'
 import { Wall } from './index.d'
 import { drawPoint } from '@/utils/drawPoint'
 import { createShapeFromPoints } from '@/utils/createShapeFromPoints'
@@ -187,17 +187,21 @@ export class WallEntity extends EntityClass<Wall> {
     newPosition: MatchSnapPoint,
     dragHandelInfo: HandelInfo
   ) {
-    // 暂时没有考虑磁吸到边的情况，因为暂时无法排除自己
-    // console.log('MatchSnapPoint-3', newPosition.point, dragHandelInfo.index)
-    this.wall.points[dragHandelInfo.index] = newPosition.point
-    return true
+    if (newPosition.snapFromType === 'point') {
+      // 暂时没有考虑好怎么写磁吸到边的情况，因为暂时无法排除自己，所以只命中point磁吸
+      // console.log('MatchSnapPoint-3', newPosition.point, dragHandelInfo.index)
+      this.wall.points[dragHandelInfo.index] = newPosition.point
+      return true
+    }
+    return false;
   }
 
   getMineBeSnapPoints() {
+    const key: allSnapFromType = 'point';
     return this.wall.points.map((v, index: number) => {
       return {
         objType: this.type,
-        snapFromType: 'point',
+        snapFromType: key,
         point: { ...v, index },
       }
     })

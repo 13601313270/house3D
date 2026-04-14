@@ -251,16 +251,14 @@ const getSnapPoint = (
         pointSnapped = {
           objType: point.objType,
           snapFromType: point.snapFromType,
-          point: point.point as PointWithIndex
+          point: point.point
         }
       }
     }
   }
-  // console.log('snapped---point', current, allPoints.map((p) => p.point.x + ',' + p.point.y), nearestStart)
   // 二、按照优先级依次尝试命中
   // 1. 最高优先级：点磁吸
   if (pointSnapped) {
-    // console.log('snapped---point', pointSnapped)
     return {
       objType: pointSnapped.objType,
       snapFromType: pointSnapped.snapFromType,
@@ -886,64 +884,62 @@ const handleMouseMove = (e: MouseEvent) => {
     // const targetY = y - (dragOffset.value?.y || 0)
     function temp(api: EntityClass<any>): boolean {
       if (matchHandelObj && matchHandelInfo) {
-        const beMatchPoints = api.getMineBeSnapPoints()
+        let beMatchPoints = api.getMineBeSnapPoints()
+        // 排出掉和自己磁吸
+        beMatchPoints = beMatchPoints.filter(v => {
+          if (v.snapFromType === 'point') {
+            if (v.point.index === matchHandelInfo?.index) {
+              return false;
+            }
+          }
+          return true;
+        })
         if (beMatchPoints.length > 0) {
           const snapped = getSnapPoint([], { x, y }, beMatchPoints)
-          // @ts-ignore
-          if (snapped?.point?.id) {
-
-          }
           if (snapped !== null) {
-            // 排出掉和自己磁吸
-            // @ts-ignore
-            if (snapped?.point && snapped?.point?.index !== undefined && snapped?.point?.index !== matchHandelInfo.index) {
-              // @ts-ignore
-              console.log('MatchSnapPoint-1', snapped?.point?.index, matchHandelInfo.index)
-              // @ts-ignore
-              const result = matchHandelObj.inSceneSnapPointArea(
-                {
-                  objType: api.type,
-                  snapFromType: 'point',
-                  point: snapped.point
-                },
-                matchHandelInfo,
-              )
-              if (result) {
-                drawWrapper()
-                return true;
-              }
+            const result = matchHandelObj.inSceneSnapPointArea(
+              {
+                objType: api.type,
+                snapFromType: 'point',
+                point: snapped.point
+              },
+              matchHandelInfo,
+            )
+            if (result) {
+              drawWrapper()
+              return true;
             }
           }
         }
-        // const beMatchLines = api.getMineBeSnapLines()
-        // if (beMatchLines.length > 0) {
-        //   let nearestPoint: Point | null = null
-        //   let minDistance = Infinity
-        //   let matchLine = null;
-        //   for (let j = 0; j < beMatchLines.length; j++) {
-        //     const line = beMatchLines[j]
-        //     const distance = pointToLineDistance({ x, y }, line[0], line[1])
-        //     if (distance < minDistance) {
-        //       matchLine = line
-        //       minDistance = distance
-        //       nearestPoint = getClosestPointOnLine({ x, y }, line[0], line[1])
-        //     }
-        //   }
-        //   if (nearestPoint && minDistance < snapThreshold) {
-        //     const result = matchHandelObj.inSceneSnapPointArea({
-        //       objType: api.type,
-        //       snapFromType: 'line',
-        //       point: nearestPoint
-        //     }, matchHandelInfo)
-        //     if (result) {
-        //       if (matchLine) {
-        //         matchHandelObj.afterBeSnapByLine({ type: api.type }, matchLine)
-        //       }
-        //       drawWrapper()
-        //       return true;
-        //     }
-        //   }
-        // }
+        const beMatchLines = api.getMineBeSnapLines()
+        if (beMatchLines.length > 0) {
+          let nearestPoint: Point | null = null
+          let minDistance = Infinity
+          let matchLine = null;
+          for (let j = 0; j < beMatchLines.length; j++) {
+            const line = beMatchLines[j]
+            const distance = pointToLineDistance({ x, y }, line[0], line[1])
+            if (distance < minDistance) {
+              matchLine = line
+              minDistance = distance
+              nearestPoint = getClosestPointOnLine({ x, y }, line[0], line[1])
+            }
+          }
+          if (nearestPoint && minDistance < snapThreshold) {
+            const result = matchHandelObj.inSceneSnapPointArea({
+              objType: api.type,
+              snapFromType: 'line',
+              point: nearestPoint
+            }, matchHandelInfo)
+            if (result) {
+              if (matchLine) {
+                matchHandelObj.afterBeSnapByLine({ type: api.type }, matchLine)
+              }
+              drawWrapper()
+              return true;
+            }
+          }
+        }
       }
       return false;
     }
