@@ -60,6 +60,7 @@ export class WindowEntity extends EntityClass {
   }
 
   onUpdateHandelInfoChange(matchHandelInfo: HandelInfo, newPosition: { x: number, y: number }) {
+    console.log('newPosition-window', newPosition)
     this.window.x = newPosition.x
     this.window.y = newPosition.y
   }

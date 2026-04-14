@@ -182,6 +182,7 @@ export class WallEntity extends EntityClass {
     matchHandelInfo: HandelInfo,
     newPosition: { x: number, y: number }
   ) {
+    console.log('newPosition-wall', newPosition)
     if (matchHandelInfo.info.pointIndex > -1) {
       this.wall.points[matchHandelInfo.info.pointIndex] = newPosition
     }

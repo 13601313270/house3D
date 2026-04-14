@@ -62,6 +62,7 @@ export class DoorEntity extends EntityClass {
   }
 
   onUpdateHandelInfoChange(matchHandelInfo: HandelInfo, newPosition: { x: number, y: number }) {
+    console.log('newPosition-door', newPosition)
     this.door.x = newPosition.x
     this.door.y = newPosition.y
   }

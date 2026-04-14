@@ -837,55 +837,118 @@ const handleMouseMove = (e: MouseEvent) => {
     // const targetX = x - (dragOffset.value?.x || 0)
     // const targetY = y - (dragOffset.value?.y || 0)
 
+    function temp(obj: EntityClass) {
+      // const wall = obj as Wall
+      if (matchHandelObj && matchHandelInfo) {
+        const api = obj
+        const beMatchPoints = api.getBeSnapPoints()
+        if (beMatchPoints.length > 0) {
+          const snapped = getSnapPoint([], { x, y }, beMatchPoints)
+          if (snapped !== null) {
+            matchHandelObj.onUpdateHandelInfoChange(
+              matchHandelInfo,
+              {
+                x: snapped.x,
+                y: snapped.y
+              }
+            )
+            drawWrapper()
+            return;
+          }
+        }
+        const beMatchLines = api.getBeSnapLines()
+        if (beMatchLines.length > 0) {
+          let nearestPoint: Point | null = null
+          let minDistance = Infinity
+          for (let j = 0; j < beMatchLines.length; j++) {
+            const line = beMatchLines[j]
+            const distance = pointToLineDistance({ x, y }, line[0], line[1])
+            if (distance < minDistance) {
+              minDistance = distance
+              nearestPoint = getClosestPointOnLine({ x, y }, line[0], line[1])
+            }
+          }
+          console.log('beMatchLines', nearestPoint, minDistance)
+          if (nearestPoint && minDistance < snapThreshold) {
+            matchHandelObj.onUpdateHandelInfoChange(matchHandelInfo, nearestPoint)
+            drawWrapper()
+            return;
+          }
+          // let snapped = getSnapPoint([], { x, y }, beMatchLines)
+          // if (snapped !== null) {
+          //   console.log('snapped', x, snapped.x)
+          //   matchHandelObj.onUpdateHandelInfoChange(
+          //     matchHandelInfo,
+          //     {
+          //       x: snapped.x,
+          //       y: snapped.y
+          //     }
+          //   )
+          //   drawWrapper()
+          //   return;
+          // }
+        }
+      }
+    }
+
     for (let i = 0; i < walls.value.length; i++) {
       const wall = walls.value[i]
       const api = new WallEntity(wall)
       const beMatchPoints = api.getBeSnapPoints()
-      if (beMatchPoints.length > 0) {
-        const snapped = getSnapPoint([], { x, y }, beMatchPoints)
-        if (snapped !== null) {
-          matchHandelObj.onUpdateHandelInfoChange(
-            matchHandelInfo,
-            {
-              x: snapped.x,
-              y: snapped.y
+      function temp(): boolean {
+        if (matchHandelObj && matchHandelInfo) {
+          if (beMatchPoints.length > 0) {
+            const snapped = getSnapPoint([], { x, y }, beMatchPoints)
+            if (snapped !== null) {
+              console.log('snapped', snapped)
+              matchHandelObj.onUpdateHandelInfoChange(
+                matchHandelInfo,
+                {
+                  x: snapped.x,
+                  y: snapped.y
+                }
+              )
+              drawWrapper()
+              return true;
             }
-          )
-          drawWrapper()
-          return;
-        }
-      }
-      const beMatchLines = api.getBeSnapLines()
-      if (beMatchLines.length > 0) {
-        let nearestPoint: Point | null = null
-        let minDistance = Infinity
-        for (let j = 0; j < beMatchLines.length; j++) {
-          const line = beMatchLines[j]
-          const distance = pointToLineDistance({ x, y }, line[0], line[1])
-          if (distance < minDistance) {
-            minDistance = distance
-            nearestPoint = getClosestPointOnLine({ x, y }, line[0], line[1])
           }
+          // const beMatchLines = api.getBeSnapLines()
+          // if (beMatchLines.length > 0) {
+          //   let nearestPoint: Point | null = null
+          //   let minDistance = Infinity
+          //   for (let j = 0; j < beMatchLines.length; j++) {
+          //     const line = beMatchLines[j]
+          //     const distance = pointToLineDistance({ x, y }, line[0], line[1])
+          //     if (distance < minDistance) {
+          //       minDistance = distance
+          //       nearestPoint = getClosestPointOnLine({ x, y }, line[0], line[1])
+          //     }
+          //   }
+          //   console.log('beMatchLines', nearestPoint, minDistance)
+          //   if (nearestPoint && minDistance < snapThreshold) {
+          //     matchHandelObj.onUpdateHandelInfoChange(matchHandelInfo, nearestPoint)
+          //     drawWrapper()
+          //     return true;
+          //   }
+          //   // let snapped = getSnapPoint([], { x, y }, beMatchLines)
+          //   // if (snapped !== null) {
+          //   //   console.log('snapped', x, snapped.x)
+          //   //   matchHandelObj.onUpdateHandelInfoChange(
+          //   //     matchHandelInfo,
+          //   //     {
+          //   //       x: snapped.x,
+          //   //       y: snapped.y
+          //   //     }
+          //   //   )
+          //   //   drawWrapper()
+          //   //   return;
+          //   // }
+          // }
         }
-        console.log('beMatchLines', nearestPoint, minDistance)
-        if (nearestPoint && minDistance < snapThreshold) {
-          matchHandelObj.onUpdateHandelInfoChange(matchHandelInfo, nearestPoint)
-          drawWrapper()
-          return;
-        }
-        // let snapped = getSnapPoint([], { x, y }, beMatchLines)
-        // if (snapped !== null) {
-        //   console.log('snapped', x, snapped.x)
-        //   matchHandelObj.onUpdateHandelInfoChange(
-        //     matchHandelInfo,
-        //     {
-        //       x: snapped.x,
-        //       y: snapped.y
-        //     }
-        //   )
-        //   drawWrapper()
-        //   return;
-        // }
+        return false;
+      }
+      if (temp()) {
+        return;
       }
     }
     // const snapped = getSnapPoint(startPoints, { x: targetX, y: targetY }, allPoints)
