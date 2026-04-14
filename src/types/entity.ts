@@ -23,13 +23,6 @@ export abstract class EntityClass<T extends Entity> {
   constructor(data: T) {
     this.data = data
   }
-  // abstract draw2D(
-  //   ctx: CanvasRenderingContext2D,
-  //   panOffset: Point,
-  //   canvasWidth: number,
-  //   canvasHeight: number,
-  //   zoomLevel: number
-  // ): void
 
   abstract draw3D(scene: any): void
 

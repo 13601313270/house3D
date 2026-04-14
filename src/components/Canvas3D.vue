@@ -271,10 +271,12 @@ const renderDoors = () => {
   if (!scene) return
 
   props.data.doors.forEach((door) => {
-    const geometry = new THREE.CylinderGeometry(3, 3, 20, 8)
+    const wallThickness = props.data.walls.find((wall) => wall.id === door.wallId)?.thickness || 0;
+    const geometry = new THREE.BoxGeometry(door.width, door.width, wallThickness + 1);// 额外增加1保证，门框比强款一点
     const material = new THREE.MeshStandardMaterial({ color: 0xe67e22 })
     const doorMesh = new THREE.Mesh(geometry, material)
     doorMesh.position.set(door.x, 10, door.y)
+    doorMesh.rotateY(door.angle * -1);
     scene!.add(doorMesh)
   })
 }

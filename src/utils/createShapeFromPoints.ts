@@ -12,7 +12,7 @@ import { Wall } from '@/entities/wall/index.d';
 const cache = new Map<string, [number, number][][]>();
 
 export function createShapeFromPoints(wallList: Wall[]): Geometry | null {
-  const key = `${wallList.map((item) => item.points.map((point: Point) => `${point.x},${point.y}`).join(',')).join(',')}`
+  // const key = `${wallList.map((item) => item.points.map((point: Point) => `${point.x},${point.y}`).join(',')).join(',')}`
   // if (cache.has(key)) return cache.get(key) || []
   const left: Point[] = [];
   const right: Point[] = [];
@@ -20,7 +20,7 @@ export function createShapeFromPoints(wallList: Wall[]): Geometry | null {
   // console.log('========线========')
   for (let i = 0; i < wallList.length; i++) {
     const wallitem = wallList[i];
-    const radius = wallitem.thickness;
+    const radius = wallitem.thickness / 2;
     if (wallitem.points.length < 2) return []
     // console.log('========点========')
     for (let j = 0, len = wallitem.points.length; j < len; j++) {
