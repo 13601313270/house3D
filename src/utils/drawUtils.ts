@@ -9,7 +9,6 @@ export const canvasHeight = 600
 export const snapThreshold = 20
 export const doorWidth = 90
 export const windowWidth = 120
-export const wallThickness = 10;// 墙体厚度
 
 export const calculateAngle = (p1: Point, p2: Point, p3: Point): { angle: number; isConvex: boolean } | null => {
   const v1x = p1.x - p2.x
@@ -132,7 +131,7 @@ export const draw = (
   draggedWallIndex: number | null,
   draggedDoorIndex: number | null,
   draggedWindowIndex: number | null,
-  wallThickness: number = 20,
+  wallThickness: number = 2,
   panOffset: Point = { x: 0, y: 0 },
   canvasWidth: number = 800,
   canvasHeight: number = 600,
