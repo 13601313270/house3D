@@ -58,9 +58,12 @@
 
 <script lang="ts" setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
-import { Point, Wall, Door, Window } from '../types'
+import { Point } from '../types'
 import { draw, canvasWidth, canvasHeight, snapThreshold, doorWidth, windowWidth } from '../utils/drawUtils'
 import Canvas3D from '../components/Canvas3D.vue'
+import { Wall } from '@/entities/wall/index.d'
+import { Door } from '@/entities/door/index.d'
+import { Window } from '@/entities/window/index.d'
 
 const canvasRef = ref<HTMLCanvasElement | null>(null)
 const canvas3DRef = ref<HTMLCanvasElement | null>(null)
