@@ -39,7 +39,8 @@ module.exports = {
     'no-useless-return': 'off',
     'prefer-promise-reject-errors': 'off',
     '@typescript-eslint/no-explicit-any': 'off',
-    'quote-props': 'off'
+    'quote-props': 'off',
+    'comma-spacing': 'off'
   },
   env: {
     'vue/setup-compiler-macros': true

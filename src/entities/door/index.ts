@@ -1,17 +1,15 @@
-import { Point, Entity } from '@/types/map2d'
+import { HandelInfo, Point } from '@/types/map2d'
 import { Door } from './index.d'
+import { EntityClass } from '@/types/entity'
 
-export class DoorEntity implements Entity {
+export class DoorEntity extends EntityClass {
   id: string
-  x: number
-  y: number
   door: Door
 
   constructor(door: Door) {
+    super(door.id, door.x, door.y)
     this.door = door
     this.id = door.id
-    this.x = door.x
-    this.y = door.y
   }
 
   draw2D(
@@ -51,5 +49,20 @@ export class DoorEntity implements Entity {
 
   draw3D(scene: any): void {
     // 实现门的3D绘制逻辑
+  }
+
+  matchHandelInfo(x: number, y: number, zoomLevel: number) {
+    const dist = Math.hypot(x - this.door.x, y - this.door.y)
+    if (dist < this.door.width * zoomLevel) {
+      return {
+        id: this.id,
+      }
+    }
+    return null;
+  }
+
+  onUpdateHandelInfoChange(matchHandelInfo: HandelInfo, newPosition: { x: number, y: number }) {
+    this.door.x = newPosition.x
+    this.door.y = newPosition.y
   }
 }

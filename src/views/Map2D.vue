@@ -58,12 +58,15 @@
 
 <script lang="ts" setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
-import { Point } from '../types'
+import { Entity, Point } from '../types'
 import { draw, canvasWidth, canvasHeight, snapThreshold, doorWidth, windowWidth } from '../utils/drawUtils'
 import Canvas3D from '../components/Canvas3D.vue'
 import { Wall } from '@/entities/wall/index.d'
 import { Door } from '@/entities/door/index.d'
 import { Window } from '@/entities/window/index.d'
+import { DoorEntity, WallEntity, WindowEntity } from '@/entities'
+import { EntityClass } from '@/types/entity'
+import { HandelInfo } from '@/types/map2d'
 
 const canvasRef = ref<HTMLCanvasElement | null>(null)
 const canvas3DRef = ref<HTMLCanvasElement | null>(null)
@@ -742,7 +745,7 @@ const handleCanvasClick = (e: MouseEvent) => {
           x: nearest.pointOnWall.x,
           y: nearest.pointOnWall.y,
           width: doorWidth,
-          angle: nearest.angle
+          angle: nearest.angle,
         }
         doors.value.push(door)
       } else if (currentTool.value === 'window') {
@@ -752,7 +755,7 @@ const handleCanvasClick = (e: MouseEvent) => {
           x: nearest.pointOnWall.x,
           y: nearest.pointOnWall.y,
           width: windowWidth,
-          angle: nearest.angle
+          angle: nearest.angle,
         }
         windows.value.push(windowItem)
       }
@@ -791,87 +794,88 @@ const handleMouseMove = (e: MouseEvent) => {
   const y = (screenY - panOffset.value.y) / zoomLevel.value
 
   // 如果正在拖拽，处理拖拽逻辑（即使当前工具不是 drag）
-  if (draggedPoint.value !== null) {
-    const dragged = draggedPoint.value
-    let originalPoint: Point = { x: 0, y: 0 }
-    let prevPoint: Point | null = null
-    let nextPoint: Point | null = null
+  if (matchHandelObj && matchHandelInfo) {
+    matchHandelObj.onUpdateHandelInfoChange(matchHandelInfo, { x, y })
+    // const dragged = draggedPoint.value
+    // let originalPoint: Point = { x: 0, y: 0 }
+    // let prevPoint: Point | null = null
+    // let nextPoint: Point | null = null
 
-    if (dragged.type === 'wall') {
-      if (dragged.wallIndex === -1) {
-        originalPoint = tempWallPoints.value[dragged.pointIndex]
-        if (dragged.pointIndex > 0) {
-          prevPoint = tempWallPoints.value[dragged.pointIndex - 1]
-        }
-        if (dragged.pointIndex < tempWallPoints.value.length - 1) {
-          nextPoint = tempWallPoints.value[dragged.pointIndex + 1]
-        }
-      } else {
-        originalPoint = walls.value[dragged.wallIndex].points[dragged.pointIndex]
-        const wall = walls.value[dragged.wallIndex]
-        if (dragged.pointIndex > 0) {
-          prevPoint = wall.points[dragged.pointIndex - 1]
-        }
-        if (dragged.pointIndex < wall.points.length - 1) {
-          nextPoint = wall.points[dragged.pointIndex + 1]
-        }
-      }
-    } else if (dragged.type === 'door') {
-      originalPoint = { x: doors.value[dragged.doorIndex].x, y: doors.value[dragged.doorIndex].y }
-    } else if (dragged.type === 'window') {
-      originalPoint = { x: windows.value[dragged.windowIndex].x, y: windows.value[dragged.windowIndex].y }
-    }
+    // if (dragged.type === 'wall') {
+    //   if (dragged.wallIndex === -1) {
+    //     originalPoint = tempWallPoints.value[dragged.pointIndex]
+    //     if (dragged.pointIndex > 0) {
+    //       prevPoint = tempWallPoints.value[dragged.pointIndex - 1]
+    //     }
+    //     if (dragged.pointIndex < tempWallPoints.value.length - 1) {
+    //       nextPoint = tempWallPoints.value[dragged.pointIndex + 1]
+    //     }
+    //   } else {
+    //     originalPoint = walls.value[dragged.wallIndex].points[dragged.pointIndex]
+    //     const wall = walls.value[dragged.wallIndex]
+    //     if (dragged.pointIndex > 0) {
+    //       prevPoint = wall.points[dragged.pointIndex - 1]
+    //     }
+    //     if (dragged.pointIndex < wall.points.length - 1) {
+    //       nextPoint = wall.points[dragged.pointIndex + 1]
+    //     }
+    //   }
+    // } else if (dragged.type === 'door') {
+    //   originalPoint = { x: doors.value[dragged.doorIndex].x, y: doors.value[dragged.doorIndex].y }
+    // } else if (dragged.type === 'window') {
+    //   originalPoint = { x: windows.value[dragged.windowIndex].x, y: windows.value[dragged.windowIndex].y }
+    // }
 
-    const allPoints = [...tempWallPoints.value]
-    walls.value.forEach((wall) => {
-      wall.points.forEach(point => {
-        allPoints.push(point)
-      })
-    })
-    doors.value.forEach((door, doorIdx) => {
-      if (dragged.type !== 'door' || doorIdx !== dragged.doorIndex) {
-        allPoints.push({ x: door.x, y: door.y })
-      }
-    })
-    windows.value.forEach((win, winIdx) => {
-      if (dragged.type !== 'window' || winIdx !== dragged.windowIndex) {
-        allPoints.push({ x: win.x, y: win.y })
-      }
-    })
+    // const allPoints = [...tempWallPoints.value]
+    // walls.value.forEach((wall) => {
+    //   wall.points.forEach(point => {
+    //     allPoints.push(point)
+    //   })
+    // })
+    // // doors.value.forEach((door, doorIdx) => {
+    // //   if (dragged.type !== 'door' || doorIdx !== dragged.doorIndex) {
+    // //     allPoints.push({ x: door.x, y: door.y })
+    // //   }
+    // // })
+    // // windows.value.forEach((win, winIdx) => {
+    // //   if (dragged.type !== 'window' || winIdx !== dragged.windowIndex) {
+    // //     allPoints.push({ x: win.x, y: win.y })
+    // //   }
+    // // })
 
-    const startPoints: Point[] = []
-    if (prevPoint) startPoints.push(prevPoint)
-    if (nextPoint) startPoints.push(nextPoint)
-    if (startPoints.length === 0) startPoints.push(originalPoint)
+    // const startPoints: Point[] = []
+    // if (prevPoint) startPoints.push(prevPoint)
+    // if (nextPoint) startPoints.push(nextPoint)
+    // if (startPoints.length === 0) startPoints.push(originalPoint)
 
-    const targetX = x - (dragOffset.value?.x || 0)
-    const targetY = y - (dragOffset.value?.y || 0)
+    // const targetX = x - (dragOffset.value?.x || 0)
+    // const targetY = y - (dragOffset.value?.y || 0)
 
-    const snapped = getSnapPoint(startPoints, { x: targetX, y: targetY }, allPoints)
-    const newX = snapped.x
-    const newY = snapped.y
+    // const snapped = getSnapPoint(startPoints, { x: targetX, y: targetY }, allPoints)
+    // const newX = snapped.x
+    // const newY = snapped.y
+    // if (dragged.type === 'wall') {
 
-    if (dragged.type === 'wall') {
-      if (dragged.wallIndex === -1) {
-        tempWallPoints.value[dragged.pointIndex] = { x: newX, y: newY }
-      } else {
-        walls.value[dragged.wallIndex].points[dragged.pointIndex] = { x: newX, y: newY }
-      }
-    } else if (dragged.type === 'door') {
-      const nearest = getNearestWall({ x: newX, y: newY })
-      if (nearest) {
-        doors.value[dragged.doorIndex].x = nearest.pointOnWall.x
-        doors.value[dragged.doorIndex].y = nearest.pointOnWall.y
-        doors.value[dragged.doorIndex].angle = nearest.angle
-      }
-    } else if (dragged.type === 'window') {
-      const nearest = getNearestWall({ x: newX, y: newY })
-      if (nearest) {
-        windows.value[dragged.windowIndex].x = nearest.pointOnWall.x
-        windows.value[dragged.windowIndex].y = nearest.pointOnWall.y
-        windows.value[dragged.windowIndex].angle = nearest.angle
-      }
-    }
+    //   // if (dragged.wallIndex === -1) {
+    //   //   tempWallPoints.value[dragged.pointIndex] = { x: newX, y: newY }
+    //   // } else {
+    //   //   walls.value[dragged.wallIndex].points[dragged.pointIndex] = { x: newX, y: newY }
+    //   // }
+    // } else if (dragged.type === 'door') {
+    //   const nearest = getNearestWall({ x: newX, y: newY })
+    //   if (nearest) {
+    //     doors.value[dragged.doorIndex].x = nearest.pointOnWall.x
+    //     doors.value[dragged.doorIndex].y = nearest.pointOnWall.y
+    //     doors.value[dragged.doorIndex].angle = nearest.angle
+    //   }
+    // } else if (dragged.type === 'window') {
+    //   const nearest = getNearestWall({ x: newX, y: newY })
+    //   if (nearest) {
+    //     windows.value[dragged.windowIndex].x = nearest.pointOnWall.x
+    //     windows.value[dragged.windowIndex].y = nearest.pointOnWall.y
+    //     windows.value[dragged.windowIndex].angle = nearest.angle
+    //   }
+    // }
     drawWrapper()
     return
   }
@@ -926,6 +930,8 @@ const handleMouseMove = (e: MouseEvent) => {
   drawWrapper()
 }
 
+let matchHandelObj: EntityClass | null = null;
+let matchHandelInfo: HandelInfo | null = null;
 const handleMouseDown = (e: MouseEvent) => {
   const canvas = canvasRef.value
   if (!canvas) return
@@ -952,38 +958,62 @@ const handleMouseDown = (e: MouseEvent) => {
     }
 
     // 检查已绘制的墙上的点
-    walls.value.forEach((wall, wallIndex) => {
-      wall.points.forEach((point, pointIndex) => {
-        const dist = Math.hypot(x - point.x, y - point.y)
-        if (dist < wallThickness.value * zoomLevel.value) {
-          draggedPoint.value = { type: 'wall', wallIndex, pointIndex }
-          dragOffset.value = { x: point.x - x, y: point.y - y }
-          prevTool.value = currentTool.value
-          drawWrapper()
-        }
-      })
+    walls.value.forEach((wall) => {
+      const api = new WallEntity(wall)
+      const matchInfo = api.matchHandelInfo(x, y, zoomLevel.value)
+      if (matchInfo) {
+        matchHandelObj = api;
+        matchHandelInfo = matchInfo
+        dragOffset.value = { x: 0, y: 0 };
+      }
     })
+    // walls.value.forEach((wall, wallIndex) => {
+    //   wall.points.forEach((point, pointIndex) => {
+    //     const dist = Math.hypot(x - point.x, y - point.y)
+    //     if (dist < wallThickness.value * zoomLevel.value) {
+    //       draggedPoint.value = { type: 'wall', wallIndex, pointIndex }
+    //       dragOffset.value = { x: point.x - x, y: point.y - y }
+    //       prevTool.value = currentTool.value
+    //       drawWrapper()
+    //     }
+    //   })
+    // })
 
     // 检查门
     doors.value.forEach((door, doorIndex) => {
-      const dist = Math.hypot(x - door.x, y - door.y)
-      if (dist < wallThickness.value * zoomLevel.value) {
-        draggedPoint.value = { type: 'door', doorIndex }
-        dragOffset.value = { x: door.x - x, y: door.y - y }
-        prevTool.value = currentTool.value
-        drawWrapper()
+      const api = new DoorEntity(door)
+      const matchInfo = api.matchHandelInfo(x, y, zoomLevel.value)
+      if (matchInfo) {
+        matchHandelObj = api;
+        matchHandelInfo = matchInfo
+        dragOffset.value = { x: 0, y: 0 };
       }
+      // const dist = Math.hypot(x - door.x, y - door.y)
+      // if (dist < wallThickness.value * zoomLevel.value) {
+      //   draggedPoint.value = { type: 'door', doorIndex }
+      //   dragOffset.value = { x: door.x - x, y: door.y - y }
+      //   prevTool.value = currentTool.value
+      //   drawWrapper()
+      // }
     })
 
     // 检查窗户
     windows.value.forEach((windowItem, windowIndex) => {
-      const dist = Math.hypot(x - windowItem.x, y - windowItem.y)
-      if (dist < wallThickness.value * zoomLevel.value) {
-        draggedPoint.value = { type: 'window', windowIndex }
-        dragOffset.value = { x: windowItem.x - x, y: windowItem.y - y }
-        prevTool.value = currentTool.value
-        drawWrapper()
+      const api = new WindowEntity(windowItem)
+      const matchInfo = api.matchHandelInfo(x, y, zoomLevel.value)
+      if (matchInfo) {
+        matchHandelObj = api;
+        matchHandelInfo = matchInfo
+        dragOffset.value = { x: 0, y: 0 };
       }
+
+      // const dist = Math.hypot(x - windowItem.x, y - windowItem.y)
+      // if (dist < wallThickness.value * zoomLevel.value) {
+      //   draggedPoint.value = { type: 'window', windowIndex }
+      //   dragOffset.value = { x: windowItem.x - x, y: windowItem.y - y }
+      //   prevTool.value = currentTool.value
+      //   drawWrapper()
+      // }
     })
 
     // 如果没有拖拽到任何点，开始平移
@@ -998,6 +1028,8 @@ const handleMouseDown = (e: MouseEvent) => {
 }
 
 const handleMouseUp = () => {
+  matchHandelObj = null
+  matchHandelInfo = null
   if (draggedPoint.value !== null) {
     history.value.push(JSON.parse(JSON.stringify(walls.value)))
     draggedPoint.value = null

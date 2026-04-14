@@ -2,7 +2,7 @@ import { Point } from '../types'
 import { Wall } from '@/entities/wall/index.d'
 import { Door } from '@/entities/door/index.d'
 import { Window } from '@/entities/window/index.d'
-import { WallEntity, Walls } from '@/entities/wall/index'
+import { WallEntity } from '@/entities/wall/index'
 import { DoorEntity } from '@/entities/door'
 import { WindowEntity } from '@/entities/window'
 
@@ -39,22 +39,21 @@ export const draw = (
   ctx.fillStyle = '#f5f5f5'
   ctx.fillRect(0, 0, canvasWidth, canvasHeight)
   // 绘制墙体
-  const WallEntityApi = new Walls(walls)
-  WallEntityApi.draw2D(
-    ctx,
-    panOffset,
-    zoomLevel,
-    currentTool,
-    tempWallPoints,
-    draggedWallIndex,
-    draggedPointIndex,
-    hoverPoint,
-  )
+  // const WallEntityApi = new Walls(walls)
+  // WallEntityApi.draw2D(
+  //   ctx,
+  //   panOffset,
+  //   zoomLevel,
+  //   currentTool,
+  //   tempWallPoints,
+  //   draggedWallIndex,
+  //   draggedPointIndex,
+  //   hoverPoint,
+  // )
   walls.forEach(wall => {
     const wallApi = new WallEntity(wall)
     wallApi.draw2D(ctx, panOffset, zoomLevel, draggedWallIndex, draggedPointIndex, currentTool, tempWallPoints, hoverPoint)
   })
-
 
   doors.forEach((door) => {
     const doorApi = new DoorEntity(door)

@@ -1,19 +1,14 @@
-import { Point, Entity } from '@/types/map2d'
-import { EntityType } from '@/types/entity'
+import { Point, Entity, HandelInfo } from '@/types/map2d'
+import { EntityClass, EntityType } from '@/types/entity'
 import { Window } from './index.d'
 
-export class WindowEntity implements Entity {
-  id: string
+export class WindowEntity extends EntityClass {
   type: EntityType = 'window'
-  x: number
-  y: number
   window: Window
 
   constructor(window: Window) {
+    super(window.id, window.x, window.y)
     this.window = window
-    this.id = window.id
-    this.x = window.x
-    this.y = window.y
   }
 
   draw2D(
@@ -49,7 +44,23 @@ export class WindowEntity implements Entity {
     ctx.stroke()
   }
 
+  // 命中可拖拽具柄
+  matchHandelInfo(x: number, y: number, zoomLevel: number) {
+    const dist = Math.hypot(x - this.window.x, y - this.window.y)
+    if (dist < this.window.width * zoomLevel) {
+      return {
+        id: this.id,
+      }
+    }
+    return null;
+  }
+
   draw3D(scene: any): void {
     // 实现窗户的3D绘制逻辑
+  }
+
+  onUpdateHandelInfoChange(matchHandelInfo: HandelInfo, newPosition: { x: number, y: number }) {
+    this.window.x = newPosition.x
+    this.window.y = newPosition.y
   }
 }
