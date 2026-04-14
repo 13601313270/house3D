@@ -75,7 +75,7 @@ export class DoorEntity extends EntityClass<Door> {
     return false
   }
 
-  getBeSnapPoints() {
+  getMineBeSnapPoints() {
     return [{
       objType: this.type,
       snapFromType: 'point',
@@ -86,7 +86,7 @@ export class DoorEntity extends EntityClass<Door> {
     }]
   }
 
-  getBeSnapLines(): [Point, Point][] {
+  getMineBeSnapLines(): [Point, Point][] {
     return []
   }
 

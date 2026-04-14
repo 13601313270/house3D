@@ -35,11 +35,11 @@ export abstract class EntityClass<T extends Entity> {
     matchHandelInfo: HandelInfo,
   ): boolean;
 
-  // 可以被对齐参考点（注意是被对齐，提供个其他拖动磁吸的参考点）
-  abstract getBeSnapPoints(): Array<MatchSnapPoint>;
+  // 本对象可以被其他对象对齐参考点（注意是被对齐，提供个其他拖动磁吸的参考点）
+  abstract getMineBeSnapPoints(): Array<MatchSnapPoint>;
 
-  // 可以被对齐的参考线（注意是被对齐，提供个其他拖动磁吸的参考线）
-  abstract getBeSnapLines(): Array<[Point, Point]>;
+  // 本对象可以被其他对象对齐的参考线（注意是被对齐，提供个其他拖动磁吸的参考线）
+  abstract getMineBeSnapLines(): Array<[Point, Point]>;
 
   // 当前对象吸附到一根线后的后续处理
   abstract afterBeSnapByLine(line: [Point, Point]): void;

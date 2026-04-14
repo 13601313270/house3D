@@ -875,7 +875,7 @@ const handleMouseMove = (e: MouseEvent) => {
     // const targetY = y - (dragOffset.value?.y || 0)
     function temp(api: EntityClass<any>): boolean {
       if (matchHandelObj && matchHandelInfo) {
-        const beMatchPoints = api.getBeSnapPoints()
+        const beMatchPoints = api.getMineBeSnapPoints()
         if (beMatchPoints.length > 0) {
           const snapped = getSnapPoint([], { x, y }, beMatchPoints)
           if (snapped !== null) {
@@ -896,7 +896,7 @@ const handleMouseMove = (e: MouseEvent) => {
             }
           }
         }
-        const beMatchLines = api.getBeSnapLines()
+        const beMatchLines = api.getMineBeSnapLines()
         if (beMatchLines.length > 0) {
           let nearestPoint: Point | null = null
           let minDistance = Infinity

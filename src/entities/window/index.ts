@@ -70,7 +70,7 @@ export class WindowEntity extends EntityClass<Window> {
     return false
   }
 
-  getBeSnapPoints() {
+  getMineBeSnapPoints() {
     return [{
       objType: this.type,
       snapFromType: 'point',
@@ -81,7 +81,7 @@ export class WindowEntity extends EntityClass<Window> {
     }]
   }
 
-  getBeSnapLines(): [Point, Point][] {
+  getMineBeSnapLines(): [Point, Point][] {
     return []
   }
 

@@ -192,7 +192,7 @@ export class WallEntity extends EntityClass<Wall> {
     // this.wall.points[pointIndex] = point
   }
 
-  getBeSnapPoints() {
+  getMineBeSnapPoints() {
     return this.wall.points.map(v => {
       return {
         objType: this.type,
@@ -202,7 +202,7 @@ export class WallEntity extends EntityClass<Wall> {
     })
   }
 
-  getBeSnapLines(): Array<[Point, Point]> {
+  getMineBeSnapLines(): Array<[Point, Point]> {
     const lines: Array<[Point, Point]> = []
     for (let i = 0; i < this.wall.points.length - 1; i++) {
       const p1 = this.wall.points[i]
