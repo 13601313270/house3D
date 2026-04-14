@@ -62,12 +62,12 @@ export class WindowEntity extends EntityClass<Window> {
     // 实现窗户的3D绘制逻辑
   }
 
-  onUpdateHandelInfoChange(
-    newPosition: MatchSnapPoint,
-  ) {
-    this.data.x = newPosition.point.x
-    this.data.y = newPosition.point.y
-    return true
+  onUpdateHandelInfoChange(newPosition: MatchSnapPoint) {
+    if (newPosition.type === 'wall' && newPosition.snapFromType === 'line') {
+      this.changePosition(newPosition.point)
+      return true
+    }
+    return false
   }
 
   getBeSnapPoints() {
@@ -86,5 +86,9 @@ export class WindowEntity extends EntityClass<Window> {
   }
 
   afterBeSnapByLine(line: [Point, Point]) {
+    const p1 = line[0]
+    const p2 = line[1]
+    const nearestAngle = Math.atan2(p2.y - p1.y, p2.x - p1.x)
+    this.data.angle = nearestAngle
   }
 }
