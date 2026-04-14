@@ -62,7 +62,6 @@ export class DoorEntity extends EntityClass {
   }
 
   onUpdateHandelInfoChange(matchHandelInfo: HandelInfo, newPosition: { x: number, y: number }) {
-    console.log('newPosition-door', newPosition)
     this.door.x = newPosition.x
     this.door.y = newPosition.y
   }
@@ -73,5 +72,14 @@ export class DoorEntity extends EntityClass {
 
   getBeSnapLines(): [Point, Point][] {
     return []
+  }
+
+  afterBeSnapByLine(line: [Point, Point]) {
+    const p1 = line[0]
+    const p2 = line[1]
+    const nearestAngle = Math.atan2(p2.y - p1.y, p2.x - p1.x)
+
+    console.log('matchLine---nearestAngle', nearestAngle, this.door.angle)
+    this.door.angle = nearestAngle
   }
 }

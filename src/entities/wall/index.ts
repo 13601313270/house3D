@@ -182,7 +182,6 @@ export class WallEntity extends EntityClass {
     matchHandelInfo: HandelInfo,
     newPosition: { x: number, y: number }
   ) {
-    console.log('newPosition-wall', newPosition)
     if (matchHandelInfo.info.pointIndex > -1) {
       this.wall.points[matchHandelInfo.info.pointIndex] = newPosition
     }
@@ -204,5 +203,8 @@ export class WallEntity extends EntityClass {
       lines.push([p1, p2])
     }
     return lines;
+  }
+
+  afterBeSnapByLine(line: [Point, Point]) {
   }
 }
