@@ -27,4 +27,7 @@ export abstract class EntityClass {
 
   // 具柄的新的值
   abstract onUpdateHandelInfoChange(matchHandelInfo: HandelInfo, newPosition: { x: number, y: number }): void;
+
+  // 可以被对齐参考点（注意是被对齐，提供个其他拖动磁吸的参考点）
+  abstract getBeSnapPoints(): Point[];
 }

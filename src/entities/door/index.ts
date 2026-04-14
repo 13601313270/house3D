@@ -65,4 +65,8 @@ export class DoorEntity extends EntityClass {
     this.door.x = newPosition.x
     this.door.y = newPosition.y
   }
+
+  getBeSnapPoints(): Point[] {
+    return [this.door]
+  }
 }

@@ -63,4 +63,8 @@ export class WindowEntity extends EntityClass {
     this.window.x = newPosition.x
     this.window.y = newPosition.y
   }
+
+  getBeSnapPoints(): Point[] {
+    return [this.window]
+  }
 }

@@ -856,7 +856,6 @@ const handleMouseMove = (e: MouseEvent) => {
 
     // const snapped = getSnapPoint(startPoints, { x: targetX, y: targetY }, allPoints)
 
-
     matchHandelObj.onUpdateHandelInfoChange(matchHandelInfo, { x, y })
     // const newX = snapped.x
     // const newY = snapped.y

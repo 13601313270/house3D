@@ -189,6 +189,10 @@ export class WallEntity extends EntityClass {
     // point.x = this.x + dragOffset.value.x
     // this.wall.points[pointIndex] = point
   }
+
+  getBeSnapPoints(): Point[] {
+    return [...this.wall.points]
+  }
 }
 
 // export class Walls {
