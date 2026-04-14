@@ -39,17 +39,6 @@ export const draw = (
   ctx.fillStyle = '#f5f5f5'
   ctx.fillRect(0, 0, canvasWidth, canvasHeight)
   // 绘制墙体
-  // const WallEntityApi = new Walls(walls)
-  // WallEntityApi.draw2D(
-  //   ctx,
-  //   panOffset,
-  //   zoomLevel,
-  //   currentTool,
-  //   tempWallPoints,
-  //   draggedWallIndex,
-  //   draggedPointIndex,
-  //   hoverPoint,
-  // )
   walls.forEach(wall => {
     const wallApi = new WallEntity(wall)
     wallApi.draw2D(ctx, panOffset, zoomLevel)

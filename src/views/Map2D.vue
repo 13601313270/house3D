@@ -93,7 +93,6 @@ const isSplitting = ref(false)
 const canvasSize = ref({ width: 0, height: 0 })
 const canvas3DSize = ref({ width: 0, height: 0 })
 const zoomLevel = ref(1)
-const isZooming = ref(false)
 const wallThickness = ref<number>(2)
 let panStartScreenX = 0
 let panStartScreenY = 0
@@ -101,10 +100,6 @@ let panStartScreenY = 0
 const updateCanvasSize = (skipPanelWidthUpdate = false) => {
   const container = document.querySelector('.map2d-container')
   if (!container) return
-
-  const containerRect = container.getBoundingClientRect()
-  const containerWidth = containerRect.width
-  const containerHeight = containerRect.height
 
   if (!skipPanelWidthUpdate) {
     const leftPanel = document.querySelector('.left-panel') as HTMLElement
