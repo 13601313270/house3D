@@ -82,6 +82,7 @@ const xAxisSnappedY = ref<number | null>(null)
 const yAxisSnappedX = ref<number | null>(null)
 const draggedPoint = ref<{ type: 'wall'; wallIndex: number; pointIndex: number } | { type: 'door'; doorIndex: number } | { type: 'window'; windowIndex: number } | null>(null)
 const dragOffset = ref<Point | null>(null)
+const dragStartPoint = ref<Point | null>(null)
 const prevTool = ref<'wall' | 'door' | 'window' | 'drag'>('wall')
 const panOffset = ref<Point>({ x: 0, y: 0 })
 const isPanning = ref(false)
@@ -268,17 +269,38 @@ const getSnapPoint = (
       nearestStart = start
     }
   }
+  // 一、计算三组磁吸数据
+  // 计算点磁吸数据
+  let pointSnapped: Point | null = null
+  let pointDistance = Infinity
+
+  for (const point of allPoints) {
+    const dist = Math.hypot(current.x - point.x, current.y - point.y)
+    // 排除与 nearestStart 完全重合的点
+    if (dist < 10 && !(nearestStart && point.x === nearestStart.x && point.y === nearestStart.y)) {
+      if (dist < pointDistance) {
+        pointDistance = dist
+        pointSnapped = { x: point.x, y: point.y }
+      }
+    }
+  }
+  // console.log('snapped---point', current, allPoints.map((p) => p.x + ',' + p.y), nearestStart)
+  // 二、按照优先级依次尝试命中
+  // 1. 最高优先级：点磁吸
+  if (pointSnapped) {
+    // console.log('snapped---point', pointSnapped)
+    return roundNumberList(pointSnapped)
+  }
+
+  let snappedX = current.x
+  let snappedY = current.y
 
   if (!nearestStart) {
     return { x: current.x, y: current.y }
   }
 
-  const dx = current.x - nearestStart.x
-  const dy = current.y - nearestStart.y
-  const angleDeg = Math.atan2(dy, dx) * 180 / Math.PI
-
-  let snappedX = current.x
-  let snappedY = current.y
+  const dx222 = current.x - nearestStart.x
+  const dy222 = current.y - nearestStart.y
 
   const snapAngles = [0, 45, 90, 135, 180, -135, -90, -45]
 
@@ -300,11 +322,11 @@ const getSnapPoint = (
 
     snapAngles.push(perpendicularAngle1, perpendicularAngle2)
   }
-
-  let nearestSnapAngle = 0
+  let nearestSnapAngle = 0 // 最近的角度(startPoints里比对)
   let minAngleDiff = 180
 
   for (const snapAngle of snapAngles) {
+    const angleDeg = Math.atan2(dy222, dx222) * 180 / Math.PI
     let diff = Math.abs(angleDeg - snapAngle)
     if (diff > 180) {
       diff = 360 - diff
@@ -315,50 +337,29 @@ const getSnapPoint = (
       nearestSnapAngle = snapAngle
     }
   }
-
-  // 一、计算三组磁吸数据
-
   // 1. 计算角度磁吸数据
   let angleSnapped: Point | null = null
   let angleDistance = Infinity
 
-  if (minAngleDiff < 10) {
-    const length = Math.hypot(dx, dy)
-    const snapAngleRad = nearestSnapAngle * Math.PI / 180
-    const snappedXTemp = nearestStart.x + length * Math.cos(snapAngleRad)
-    const snappedYTemp = nearestStart.y + length * Math.sin(snapAngleRad)
-    const distToMouse = Math.hypot(snappedXTemp - current.x, snappedYTemp - current.y)
-    if (distToMouse < 10) {
-      angleSnapped = { x: snappedXTemp, y: snappedYTemp }
-      angleDistance = distToMouse
-    }
-  }
-
-  // 2. 计算点磁吸数据
-  let pointSnapped: Point | null = null
-  let pointDistance = Infinity
-
-  for (const point of allPoints) {
-    const dist = Math.hypot(current.x - point.x, current.y - point.y)
-    // 排除与 nearestStart 完全重合的点
-    if (dist < 10 && !(point.x === nearestStart.x && point.y === nearestStart.y)) {
-      if (dist < pointDistance) {
-        pointDistance = dist
-        pointSnapped = { x: point.x, y: point.y }
+  if (startPoints.length) {
+    if (minAngleDiff < 10) {
+      const length = Math.hypot(dx222, dy222)
+      const snapAngleRad = nearestSnapAngle * Math.PI / 180
+      const snappedXTemp = nearestStart.x + length * Math.cos(snapAngleRad)
+      const snappedYTemp = nearestStart.y + length * Math.sin(snapAngleRad)
+      const distToMouse = Math.hypot(snappedXTemp - current.x, snappedYTemp - current.y)
+      if (distToMouse < 10) {
+        angleSnapped = { x: snappedXTemp, y: snappedYTemp }
+        angleDistance = distToMouse
       }
     }
   }
-
+  // 2. 第二优先级：角度+轴对齐组合（计算交点）
   // 3. 计算轴对齐磁吸数据
-  // xAxisSnappedY: 命中的y坐标值（水平对齐，即y值与某个点一致）
-  // yAxisSnappedX: 命中的x坐标值（垂直对齐，即x值与某个点一致）
-  // xAxisDistance: 命中x轴对齐的最小距离
-  // yAxisDistance: 命中y轴对齐的最小距离
-  let xAxisSnappedYVal: number | null = null
-  let yAxisSnappedXVal: number | null = null
-  let xAxisDistance = Infinity
-  let yAxisDistance = Infinity
-
+  let xAxisSnappedYVal: number | null = null // 命中的y坐标值（水平对齐，即y值与某个点一致）
+  let yAxisSnappedXVal: number | null = null // 命中的x坐标值（垂直对齐，即x值与某个点一致）
+  let xAxisDistance = Infinity // 命中x轴对齐的最小距离
+  let yAxisDistance = Infinity // 命中y轴对齐的最小距离
   for (const point of allPoints) {
     const distToXAxis = Math.abs(current.y - point.y)
     if (distToXAxis < 10 && distToXAxis < xAxisDistance) {
@@ -372,20 +373,10 @@ const getSnapPoint = (
       yAxisSnappedXVal = point.x
     }
   }
-
   // 更新ref值用于绘制参考线
   xAxisSnappedY.value = xAxisSnappedYVal
   yAxisSnappedX.value = yAxisSnappedXVal
-
-  // 二、按照优先级依次尝试命中
-
-  // 1. 最高优先级：点磁吸
-  if (pointSnapped) {
-    snappedX = pointSnapped.x
-    snappedY = pointSnapped.y
-  }
-  // 2. 第二优先级：角度+轴对齐组合（计算交点）
-  else if (angleSnapped && (xAxisSnappedY.value !== null || yAxisSnappedX.value !== null)) {
+  if (startPoints.length && angleSnapped && (xAxisSnappedY.value !== null || yAxisSnappedX.value !== null)) {
     const angleRad = nearestSnapAngle * Math.PI / 180
     const k = Math.tan(angleRad)
     const b = angleSnapped.y - k * angleSnapped.x
@@ -438,26 +429,50 @@ const getSnapPoint = (
       }
       snappedY = xAxisSnappedYVal
     }
+    return roundNumberList({
+      x: snappedX,
+      y: snappedY
+    })
   }
   // 3. 第三优先级：单独角度磁吸
-  else if (angleSnapped) {
+  if (angleSnapped) {
     snappedX = angleSnapped.x
     snappedY = angleSnapped.y
+    return roundNumberList({
+      x: snappedX,
+      y: snappedY
+    })
   }
   // 4. 第四优先级：单独轴对齐磁吸
-  else if (xAxisSnappedYVal !== null && yAxisSnappedXVal !== null) {
-    console.log(13)
+  if (xAxisSnappedYVal !== null && yAxisSnappedXVal !== null) {
     snappedX = yAxisSnappedXVal
     snappedY = xAxisSnappedYVal
-  } else if (yAxisSnappedXVal !== null) {
+    return roundNumberList({
+      x: snappedX,
+      y: snappedY
+    })
+  }
+  if (yAxisSnappedXVal !== null) {
     snappedX = yAxisSnappedXVal
     snappedY = current.y
-  } else if (xAxisSnappedYVal !== null) {
+    return roundNumberList({
+      x: snappedX,
+      y: snappedY
+    })
+  }
+  if (xAxisSnappedYVal !== null) {
     snappedX = current.x
     snappedY = xAxisSnappedYVal
+    return roundNumberList({
+      x: snappedX,
+      y: snappedY
+    })
   }
+  return roundNumberList(current)
+}
 
-  return { x: Math.round(snappedX), y: Math.round(snappedY) }
+function roundNumberList(point: { x: number, y: number }) {
+  return { x: Math.round(point.x), y: Math.round(point.y) }
 }
 
 const drawWrapper = () => {
@@ -854,6 +869,25 @@ const handleMouseMove = (e: MouseEvent) => {
     // const targetX = x - (dragOffset.value?.x || 0)
     // const targetY = y - (dragOffset.value?.y || 0)
 
+    for (let i = 0; i < walls.value.length; i++) {
+      const wall = walls.value[i]
+      const api = new WallEntity(wall)
+      const beMatchPoints = api.getBeSnapPoints()
+      if (beMatchPoints.length > 0) {
+        // dragStartPoint.value
+        const snapped = getSnapPoint([], { x, y }, beMatchPoints)
+        console.log('snapped', x, snapped.x)
+        matchHandelObj.onUpdateHandelInfoChange(
+          matchHandelInfo,
+          {
+            x: snapped.x,
+            y: snapped.y
+          }
+        )
+        drawWrapper()
+        return;
+      }
+    }
     // const snapped = getSnapPoint(startPoints, { x: targetX, y: targetY }, allPoints)
 
     matchHandelObj.onUpdateHandelInfoChange(matchHandelInfo, { x, y })
@@ -882,7 +916,6 @@ const handleMouseMove = (e: MouseEvent) => {
     //   }
     // }
     drawWrapper()
-    return
   }
 
   // 如果正在平移画布
@@ -971,6 +1004,7 @@ const handleMouseDown = (e: MouseEvent) => {
         matchHandelObj = api;
         matchHandelInfo = matchInfo
         dragOffset.value = { x: 0, y: 0 };
+        dragStartPoint.value = { x, y }
         return;
       }
     }
@@ -996,6 +1030,7 @@ const handleMouseDown = (e: MouseEvent) => {
         matchHandelObj = api;
         matchHandelInfo = matchInfo
         dragOffset.value = { x: 0, y: 0 };
+        dragStartPoint.value = { x, y }
         return;
       }
       // const dist = Math.hypot(x - door.x, y - door.y)
@@ -1017,6 +1052,7 @@ const handleMouseDown = (e: MouseEvent) => {
         matchHandelObj = api;
         matchHandelInfo = matchInfo
         dragOffset.value = { x: 0, y: 0 };
+        dragStartPoint.value = { x, y }
         return;
       }
 

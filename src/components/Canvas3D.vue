@@ -202,7 +202,7 @@ const renderWalls = () => {
   const margineds: Geometry | null = createShapeFromPoints(props.data.walls);
   if (!margineds) return
 
-  console.log('margineds', margineds)
+  // console.log('margineds', margineds)
   for (const poly of margineds || []) {
     for (let i = 0; i < poly.length; i++) {
       const ring = poly[i] as any
