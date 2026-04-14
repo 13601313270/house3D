@@ -1,6 +1,6 @@
-import { Point, Entity } from '../types/map2d'
-import { EntityType } from '../types/entity'
-import { Window } from '../types/window'
+import { Point, Entity } from '@/types/map2d'
+import { EntityType } from '@/types/entity'
+import { Window } from './index.d'
 
 export class WindowEntity implements Entity {
   id: string

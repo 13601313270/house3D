@@ -1,4 +1,4 @@
-import { Point, Entity } from './map2d'
+import { Point, Entity } from '@/types/map2d'
 
 export type Wall = Entity & {
   points: Point[]

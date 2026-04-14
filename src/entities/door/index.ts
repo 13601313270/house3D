@@ -1,6 +1,6 @@
-import { Point, Entity } from '../types/map2d'
-import { EntityType } from '../types/entity'
-import { Door } from '../types/door'
+import { Point, Entity } from '@/types/map2d'
+import { EntityType } from '@/types/entity'
+import { Door } from './index.d'
 
 export class DoorEntity implements Entity {
   id: string

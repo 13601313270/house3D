@@ -1,4 +1,4 @@
-import { Entity } from './map2d'
+import { Entity } from '@/types/map2d'
 
 export type Door = Entity & {
   wallId: string

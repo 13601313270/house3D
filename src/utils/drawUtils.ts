@@ -1,4 +1,7 @@
-import { Wall, Door, Window, Point } from '../types'
+import { Point } from '../types'
+import { Wall } from '@/entities/wall/index.d'
+import { Door } from '@/entities/door/index.d'
+import { Window } from '@/entities/window/index.d'
 // @ts-ignore
 import Offset from 'polygon-offset'
 import { createShapeFromPoints } from './createShapeFromPoints'

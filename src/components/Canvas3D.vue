@@ -6,9 +6,11 @@
 <script lang="ts" setup>
 import { ref, onMounted, onUnmounted, watch } from 'vue'
 import * as THREE from 'three'
-import { Wall, Door, Window } from '../types'
 import { createShapeFromPoints } from '@/utils/createShapeFromPoints'
 import { Geometry } from 'martinez-polygon-clipping'
+import { Wall } from '@/entities/wall/index.d'
+import { Door } from '@/entities/door/index.d'
+import { Window } from '@/entities/window/index.d'
 
 interface DrawingData {
   walls: Wall[]
@@ -41,19 +43,19 @@ const initThree = () => {
   camera.lookAt(0, 0, 0);
 
   (() => {
-    let maxCamera1Radius = 1000;
+    const maxCamera1Radius = 1000;
     let camera1Radius = 800; // 摄像机距离
-    let canvas2IsMouseAngel = false;
-    let canvas2IsMouseMove = false;
-    let canvas2LastMouseX = 0;
-    let canvas2LastMouseY = 0;
+    // let canvas2IsMouseAngel = false;
+    // let canvas2IsMouseMove = false;
+    // let canvas2LastMouseX = 0;
+    // let canvas2LastMouseY = 0;
 
-    let camera2AngleY = 0; // 摄像机垂直移动
-    let camera2AngleX = 0; // 摄像机横移
-    let camera2AngelStartX = 0;
-    let camera2AngelStartY = 0;
-    let camera2PositionStartX = 0;
-    let camera2PositionStartZ = 0;
+    const camera2AngleY = 0; // 摄像机垂直移动
+    const camera2AngleX = 0; // 摄像机横移
+    // let camera2AngelStartX = 0;
+    // let camera2AngelStartY = 0;
+    // let camera2PositionStartX = 0;
+    // let camera2PositionStartZ = 0;
 
     let canvas1IsMouseAngel = false;
     let canvas1IsMouseMove = false;
@@ -67,7 +69,7 @@ const initThree = () => {
     let camera1TargetPositionStartY = 0;
     let camera1TargetPositionStartZ = 0;
     let camera1TargetPositionX = 0;
-    let camera1TargetPositionY = 0;
+    const camera1TargetPositionY = 0;
     let camera1TargetPositionZ = 0;
 
     function updateCameraAngel() {

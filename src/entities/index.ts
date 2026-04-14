@@ -1,3 +1,3 @@
-export { WallEntity } from './wallEntity'
-export { DoorEntity } from './doorEntity'
-export { WindowEntity } from './windowEntity'
+export { WallEntity } from './wall'
+export { DoorEntity } from './door'
+export { WindowEntity } from './window'
