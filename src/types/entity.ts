@@ -4,7 +4,7 @@ export type EntityType = 'wall' | 'door' | 'window'
 
 // 磁吸点
 export type MatchSnapPoint = {
-  type: EntityType, // 磁吸点对象类型
+  objType: EntityType, // 磁吸点对象类型
   snapFromType: 'point' | 'line' | 'axis' | string, // 磁吸点来源类型
   point: Point,
 }
@@ -30,7 +30,7 @@ export abstract class EntityClass<T extends Entity> {
   abstract matchHandelInfo(x: number, y: number, zoomLevel: number): HandelInfo | null;
 
   // 具柄的新的值
-  abstract onUpdateHandelInfoChange(
+  abstract inSceneSnapPointArea(
     newPosition: MatchSnapPoint,
     matchHandelInfo: HandelInfo,
   ): boolean;

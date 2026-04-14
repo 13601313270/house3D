@@ -23,8 +23,6 @@ export class WallEntity extends EntityClass<Wall> {
     ctx: CanvasRenderingContext2D,
     panOffset: Point,
     zoomLevel: number,
-    draggedWallIndex: number | null,
-    draggedPointIndex: number | null,
     currentTool: string,
     tempWallPoints: Point[],
     hoverPoint: Point | null,
@@ -61,7 +59,7 @@ export class WallEntity extends EntityClass<Wall> {
       wall.points.forEach((point: Point, pointIndex: number) => {
         const screenX = point.x * zoomLevel + panOffset.x
         const screenY = point.y * zoomLevel + panOffset.y
-        const isDragged = draggedWallIndex !== null && draggedWallIndex === [this.wall].indexOf(wall) && pointIndex === draggedPointIndex
+        const isDragged = false;// pointIndex === draggedPointIndex
         drawPoint(ctx, screenX, screenY, isDragged ? '#1890ff' : '#333')
         if (isDragged) {
           ctx.strokeStyle = '#1890ff'
@@ -89,7 +87,7 @@ export class WallEntity extends EntityClass<Wall> {
       tempWallPoints.forEach((point, index) => {
         const screenX = point.x * zoomLevel + panOffset.x
         const screenY = point.y * zoomLevel + panOffset.y
-        const isDragged = index === draggedPointIndex
+        const isDragged = false;// index === draggedPointIndex
         drawPoint(ctx, screenX, screenY, isDragged ? '#1890ff' : '#42b983')
         if (isDragged) {
           ctx.strokeStyle = '#1890ff'
@@ -179,7 +177,7 @@ export class WallEntity extends EntityClass<Wall> {
     return null
   }
 
-  onUpdateHandelInfoChange(
+  inSceneSnapPointArea(
     newPosition: MatchSnapPoint,
     matchHandelInfo: HandelInfo
   ) {
@@ -197,7 +195,7 @@ export class WallEntity extends EntityClass<Wall> {
   getBeSnapPoints() {
     return this.wall.points.map(v => {
       return {
-        type: this.type,
+        objType: this.type,
         snapFromType: 'point',
         point: v,
       }

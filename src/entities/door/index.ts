@@ -67,8 +67,8 @@ export class DoorEntity extends EntityClass<Door> {
     return null;
   }
 
-  onUpdateHandelInfoChange(newPosition: MatchSnapPoint, matchHandelInfo: HandelInfo) {
-    if (newPosition.type === 'wall' && newPosition.snapFromType === 'line') {
+  inSceneSnapPointArea(newPosition: MatchSnapPoint, matchHandelInfo: HandelInfo) {
+    if (newPosition.objType === 'wall' && newPosition.snapFromType === 'line') {
       this.changePosition(newPosition.point)
       return true
     }
@@ -77,7 +77,7 @@ export class DoorEntity extends EntityClass<Door> {
 
   getBeSnapPoints() {
     return [{
-      type: this.type,
+      objType: this.type,
       snapFromType: 'point',
       point: {
         x: this.data.x,

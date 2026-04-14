@@ -23,8 +23,6 @@ export const draw = (
   getNearestWall: (point: Point) => { wall: Wall; pointOnWall: Point; angle: number } | null,
   xAxisSnappedY: number | null,
   yAxisSnappedX: number | null,
-  draggedPointIndex: number | null,
-  draggedWallIndex: number | null,
   panOffset: Point = { x: 0, y: 0 },
   canvasWidth: number = 800,
   canvasHeight: number = 600,
@@ -52,7 +50,7 @@ export const draw = (
   // )
   walls.forEach(wall => {
     const wallApi = new WallEntity(wall)
-    wallApi.draw2D(ctx, panOffset, zoomLevel, draggedWallIndex, draggedPointIndex, currentTool, tempWallPoints, hoverPoint)
+    wallApi.draw2D(ctx, panOffset, zoomLevel, currentTool, tempWallPoints, hoverPoint)
   })
 
   doors.forEach((door) => {

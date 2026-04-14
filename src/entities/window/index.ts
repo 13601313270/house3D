@@ -62,8 +62,8 @@ export class WindowEntity extends EntityClass<Window> {
     // 实现窗户的3D绘制逻辑
   }
 
-  onUpdateHandelInfoChange(newPosition: MatchSnapPoint) {
-    if (newPosition.type === 'wall' && newPosition.snapFromType === 'line') {
+  inSceneSnapPointArea(newPosition: MatchSnapPoint) {
+    if (newPosition.objType === 'wall' && newPosition.snapFromType === 'line') {
       this.changePosition(newPosition.point)
       return true
     }
@@ -72,7 +72,7 @@ export class WindowEntity extends EntityClass<Window> {
 
   getBeSnapPoints() {
     return [{
-      type: this.type,
+      objType: this.type,
       snapFromType: 'point',
       point: {
         x: this.data.x,
