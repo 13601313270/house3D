@@ -78,8 +78,6 @@ export class DoorEntity extends EntityClass {
     const p1 = line[0]
     const p2 = line[1]
     const nearestAngle = Math.atan2(p2.y - p1.y, p2.x - p1.x)
-
-    console.log('matchLine---nearestAngle', nearestAngle, this.door.angle)
     this.door.angle = nearestAngle
   }
 }

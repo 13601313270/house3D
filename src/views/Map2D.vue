@@ -836,15 +836,13 @@ const handleMouseMove = (e: MouseEvent) => {
 
     // const targetX = x - (dragOffset.value?.x || 0)
     // const targetY = y - (dragOffset.value?.y || 0)
-
-    function temp(obj: EntityClass) {
-      // const wall = obj as Wall
+    function temp(api: EntityClass): boolean {
       if (matchHandelObj && matchHandelInfo) {
-        const api = obj
         const beMatchPoints = api.getBeSnapPoints()
         if (beMatchPoints.length > 0) {
           const snapped = getSnapPoint([], { x, y }, beMatchPoints)
           if (snapped !== null) {
+            console.log('snapped', snapped)
             matchHandelObj.onUpdateHandelInfoChange(
               matchHandelInfo,
               {
@@ -853,26 +851,30 @@ const handleMouseMove = (e: MouseEvent) => {
               }
             )
             drawWrapper()
-            return;
+            return true;
           }
         }
         const beMatchLines = api.getBeSnapLines()
         if (beMatchLines.length > 0) {
           let nearestPoint: Point | null = null
           let minDistance = Infinity
+          let matchLine = null;
           for (let j = 0; j < beMatchLines.length; j++) {
             const line = beMatchLines[j]
             const distance = pointToLineDistance({ x, y }, line[0], line[1])
             if (distance < minDistance) {
+              matchLine = line
               minDistance = distance
               nearestPoint = getClosestPointOnLine({ x, y }, line[0], line[1])
             }
           }
-          // console.log('beMatchLines', nearestPoint, minDistance)
           if (nearestPoint && minDistance < snapThreshold) {
             matchHandelObj.onUpdateHandelInfoChange(matchHandelInfo, nearestPoint)
+            if (matchLine) {
+              matchHandelObj.afterBeSnapByLine(matchLine)
+            }
             drawWrapper()
-            return;
+            return true;
           }
           // let snapped = getSnapPoint([], { x, y }, beMatchLines)
           // if (snapped !== null) {
@@ -889,70 +891,12 @@ const handleMouseMove = (e: MouseEvent) => {
           // }
         }
       }
+      return false;
     }
-
     for (let i = 0; i < walls.value.length; i++) {
       const wall = walls.value[i]
       const api = new WallEntity(wall)
-      const beMatchPoints = api.getBeSnapPoints()
-      function temp(): boolean {
-        if (matchHandelObj && matchHandelInfo) {
-          if (beMatchPoints.length > 0) {
-            const snapped = getSnapPoint([], { x, y }, beMatchPoints)
-            if (snapped !== null) {
-              console.log('snapped', snapped)
-              matchHandelObj.onUpdateHandelInfoChange(
-                matchHandelInfo,
-                {
-                  x: snapped.x,
-                  y: snapped.y
-                }
-              )
-              drawWrapper()
-              return true;
-            }
-          }
-          const beMatchLines = api.getBeSnapLines()
-          if (beMatchLines.length > 0) {
-            let nearestPoint: Point | null = null
-            let minDistance = Infinity
-            let matchLine = null;
-            for (let j = 0; j < beMatchLines.length; j++) {
-              const line = beMatchLines[j]
-              const distance = pointToLineDistance({ x, y }, line[0], line[1])
-              if (distance < minDistance) {
-                matchLine = line
-                minDistance = distance
-                nearestPoint = getClosestPointOnLine({ x, y }, line[0], line[1])
-              }
-            }
-            if (nearestPoint && minDistance < snapThreshold) {
-              matchHandelObj.onUpdateHandelInfoChange(matchHandelInfo, nearestPoint)
-              console.log('beMatchLines', matchLine)
-              if (matchLine) {
-                matchHandelObj.afterBeSnapByLine(matchLine)
-              }
-              drawWrapper()
-              return true;
-            }
-            // let snapped = getSnapPoint([], { x, y }, beMatchLines)
-            // if (snapped !== null) {
-            //   console.log('snapped', x, snapped.x)
-            //   matchHandelObj.onUpdateHandelInfoChange(
-            //     matchHandelInfo,
-            //     {
-            //       x: snapped.x,
-            //       y: snapped.y
-            //     }
-            //   )
-            //   drawWrapper()
-            //   return;
-            // }
-          }
-        }
-        return false;
-      }
-      if (temp()) {
+      if (temp(api)) {
         return;
       }
     }
