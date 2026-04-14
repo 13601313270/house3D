@@ -2,13 +2,15 @@ import { Point, Entity, HandelInfo } from '@/types/map2d'
 import { EntityClass, EntityType } from '@/types/entity'
 import { Window } from './index.d'
 
-export class WindowEntity extends EntityClass {
+export class WindowEntity extends EntityClass<Window> {
   type: EntityType = 'window'
-  window: Window
+  width: number
+  angle: number
 
   constructor(window: Window) {
-    super(window.id, window.x, window.y)
-    this.window = window
+    super(window)
+    this.width = window.width
+    this.angle = window.angle
   }
 
   draw2D(
@@ -16,20 +18,20 @@ export class WindowEntity extends EntityClass {
     panOffset: Point,
     zoomLevel: number
   ): void {
-    const screenX = this.window.x * zoomLevel + panOffset.x
-    const screenY = this.window.y * zoomLevel + panOffset.y
+    const screenX = this.data.x * zoomLevel + panOffset.x
+    const screenY = this.data.y * zoomLevel + panOffset.y
 
     const color = '#3498db'
 
     ctx.save()
     ctx.translate(screenX, screenY)
-    ctx.rotate(this.window.angle)
+    ctx.rotate(this.angle)
 
     ctx.fillStyle = color
     ctx.strokeStyle = color
     ctx.lineWidth = 3
     const thickness = 10;//
-    ctx.fillRect(-this.window.width / 2, -thickness / 2, this.window.width, thickness)
+    ctx.fillRect(-this.width / 2, -thickness / 2, this.width, thickness)
     ctx.setLineDash([5, 5])
     ctx.stroke()
     ctx.restore()
@@ -46,10 +48,10 @@ export class WindowEntity extends EntityClass {
 
   // 命中可拖拽具柄
   matchHandelInfo(x: number, y: number, zoomLevel: number) {
-    const dist = Math.hypot(x - this.window.x, y - this.window.y)
-    if (dist < this.window.width * zoomLevel) {
+    const dist = Math.hypot(x - this.data.x, y - this.data.y)
+    if (dist < this.width * zoomLevel) {
       return {
-        id: this.id,
+        id: this.data.id,
       }
     }
     return null;
@@ -60,12 +62,15 @@ export class WindowEntity extends EntityClass {
   }
 
   onUpdateHandelInfoChange(matchHandelInfo: HandelInfo, newPosition: { x: number, y: number }) {
-    this.window.x = newPosition.x
-    this.window.y = newPosition.y
+    this.data.x = newPosition.x
+    this.data.y = newPosition.y
   }
 
   getBeSnapPoints(): Point[] {
-    return [this.window]
+    return [{
+      x: this.data.x,
+      y: this.data.y,
+    }]
   }
 
   getBeSnapLines(): [Point, Point][] {

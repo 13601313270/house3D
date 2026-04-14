@@ -6,14 +6,14 @@ import { createShapeFromPoints } from '@/utils/createShapeFromPoints'
 import { calculateAngle } from '@/utils/calculateAngle'
 import pointToLineDistance from '@/utils/pointToLineDistance'
 
-export class WallEntity extends EntityClass {
+export class WallEntity extends EntityClass<Wall> {
   type: EntityType = 'wall'
   points: Point[]
   thickness: number
   wall: Wall
 
   constructor(wall: Wall) {
-    super(wall.id, wall.x, wall.y)
+    super(wall)
     this.wall = wall
     this.points = wall.points
     this.thickness = wall.thickness
@@ -170,7 +170,7 @@ export class WallEntity extends EntityClass {
         // prevTool.value = currentTool.value
         // drawWrapper()
         return {
-          id: this.id,
+          id: this.data.id,
           info: { pointIndex: i }
         }
       }

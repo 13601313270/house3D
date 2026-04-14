@@ -1,16 +1,12 @@
-import { HandelInfo, Point } from './map2d'
+import { Entity, HandelInfo, Point } from './map2d'
 
 export type EntityType = 'wall' | 'door' | 'window' | 'bed' | string
 
-export abstract class EntityClass {
-  id: string
-  x: number
-  y: number
+export abstract class EntityClass<T> {
+  data: T
 
-  constructor(id: string, x: number, y: number) {
-    this.id = id
-    this.x = x
-    this.y = y
+  constructor(data: T) {
+    this.data = data
   }
   // abstract draw2D(
   //   ctx: CanvasRenderingContext2D,

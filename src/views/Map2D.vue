@@ -836,7 +836,7 @@ const handleMouseMove = (e: MouseEvent) => {
 
     // const targetX = x - (dragOffset.value?.x || 0)
     // const targetY = y - (dragOffset.value?.y || 0)
-    function temp(api: EntityClass): boolean {
+    function temp(api: EntityClass<any>): boolean {
       if (matchHandelObj && matchHandelInfo) {
         const beMatchPoints = api.getBeSnapPoints()
         if (beMatchPoints.length > 0) {
@@ -983,7 +983,7 @@ const handleMouseMove = (e: MouseEvent) => {
   drawWrapper()
 }
 
-let matchHandelObj: EntityClass | null = null;
+let matchHandelObj: EntityClass<any> | null = null;
 let matchHandelInfo: HandelInfo | null = null;
 const handleMouseDown = (e: MouseEvent) => {
   const canvas = canvasRef.value

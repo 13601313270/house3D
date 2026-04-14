@@ -2,13 +2,17 @@ import { HandelInfo, Point } from '@/types/map2d'
 import { Door } from './index.d'
 import { EntityClass } from '@/types/entity'
 
-export class DoorEntity extends EntityClass {
+export class DoorEntity extends EntityClass<Door> {
   id: string
-  door: Door
+  wellId: string
+  width: number
+  angle: number
 
   constructor(door: Door) {
-    super(door.id, door.x, door.y)
-    this.door = door
+    super(door)
+    this.wellId = door.wallId
+    this.angle = door.angle
+    this.width = door.width
     this.id = door.id
   }
 
@@ -19,15 +23,15 @@ export class DoorEntity extends EntityClass {
     zoomLevel: number
   ): void {
     // 实现门的2D绘制逻辑
-    const screenX = this.door.x * zoomLevel + panOffset.x
-    const screenY = this.door.y * zoomLevel + panOffset.y
-    // const wallThickness = 10; // walls.find((wall) => wall.id === this.door.wallId)?.thickness || 0;
+    const screenX = this.data.x * zoomLevel + panOffset.x
+    const screenY = this.data.y * zoomLevel + panOffset.y
+    // const wallThickness = 10; // walls.find((wall) => wall.id === this.wallId)?.thickness || 0;
     const color = '#e67e22'
-    const width = this.door.width * zoomLevel;
+    const width = this.width * zoomLevel;
     const thickness = wallThickness * zoomLevel;
     ctx.save()
     ctx.translate(screenX, screenY)
-    ctx.rotate(this.door.angle)
+    ctx.rotate(this.angle)
     ctx.fillStyle = color
     ctx.strokeStyle = color
     ctx.lineWidth = 3
@@ -52,22 +56,25 @@ export class DoorEntity extends EntityClass {
   }
 
   matchHandelInfo(x: number, y: number, zoomLevel: number) {
-    const dist = Math.hypot(x - this.door.x, y - this.door.y)
-    if (dist < this.door.width * zoomLevel) {
+    const dist = Math.hypot(x - this.data.x, y - this.data.y)
+    if (dist < this.width * zoomLevel) {
       return {
-        id: this.id,
+        id: this.data.id,
       }
     }
     return null;
   }
 
   onUpdateHandelInfoChange(matchHandelInfo: HandelInfo, newPosition: { x: number, y: number }) {
-    this.door.x = newPosition.x
-    this.door.y = newPosition.y
+    this.data.x = newPosition.x
+    this.data.y = newPosition.y
   }
 
   getBeSnapPoints(): Point[] {
-    return [this.door]
+    return [{
+      x: this.data.x,
+      y: this.data.y,
+    }]
   }
 
   getBeSnapLines(): [Point, Point][] {
@@ -78,6 +85,6 @@ export class DoorEntity extends EntityClass {
     const p1 = line[0]
     const p2 = line[1]
     const nearestAngle = Math.atan2(p2.y - p1.y, p2.x - p1.x)
-    this.door.angle = nearestAngle
+    this.data.angle = nearestAngle
   }
 }
