@@ -16,6 +16,7 @@ export class WindowEntity extends EntityClass<Window> {
   draw2D(
     ctx: CanvasRenderingContext2D,
     panOffset: Point,
+    wallThickness: number,
     zoomLevel: number
   ): void {
     const screenX = this.data.x * zoomLevel + panOffset.x

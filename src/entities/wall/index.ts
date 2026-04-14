@@ -23,9 +23,6 @@ export class WallEntity extends EntityClass<Wall> {
     ctx: CanvasRenderingContext2D,
     panOffset: Point,
     zoomLevel: number,
-    currentTool: string,
-    tempWallPoints: Point[],
-    hoverPoint: Point | null,
   ): void {
     const margineds = createShapeFromPoints([this.wall]);
 

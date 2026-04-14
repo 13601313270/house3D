@@ -52,7 +52,7 @@ export const draw = (
   // )
   walls.forEach(wall => {
     const wallApi = new WallEntity(wall)
-    wallApi.draw2D(ctx, panOffset, zoomLevel, currentTool, tempWallPoints, hoverPoint)
+    wallApi.draw2D(ctx, panOffset, zoomLevel)
   })
 
   if (currentTool === 'wall' && tempWallPoints.length > 0) {
@@ -144,7 +144,8 @@ export const draw = (
 
   windows.forEach((win) => {
     const windowApi = new WindowEntity(win)
-    windowApi.draw2D(ctx, panOffset, zoomLevel)
+    const wallThickness = walls.find((wall) => wall.id === win.wallId)?.thickness || 0;
+    windowApi.draw2D(ctx, panOffset, wallThickness, zoomLevel)
   })
 
   if (hoverPoint && currentTool !== 'wall') {
@@ -176,7 +177,8 @@ export const draw = (
           angle,
         }
         const windowApi = new WindowEntity(window)
-        windowApi.draw2D(ctx, panOffset, zoomLevel)
+        const wallThickness = walls.find((wall) => wall.id === window.wallId)?.thickness || 0;
+        windowApi.draw2D(ctx, panOffset, wallThickness, zoomLevel)
       }
     }
   }
