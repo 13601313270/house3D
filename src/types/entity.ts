@@ -15,11 +15,4 @@ export abstract class Entity {
   ): void
 
   abstract draw3D(scene: any): void
-
-  abstract containsPoint(
-    x: number,
-    y: number,
-    panOffset: Point,
-    zoomLevel: number
-  ): boolean
 }

@@ -33,14 +33,4 @@ export class DoorEntity extends Entity {
   draw3D(scene: any): void {
     // 实现门的3D绘制逻辑
   }
-
-  containsPoint(
-    x: number,
-    y: number,
-    panOffset: Point,
-    zoomLevel: number
-  ): boolean {
-    // 实现点检测逻辑
-    return false
-  }
 }
