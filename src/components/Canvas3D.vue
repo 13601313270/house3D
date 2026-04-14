@@ -197,7 +197,7 @@ const initThree = () => {
 const renderWalls = () => {
   if (!scene) return
 
-  const margineds: Geometry | null = createShapeFromPoints(props.data.walls, 10);
+  const margineds: Geometry | null = createShapeFromPoints(props.data.walls);
   if (!margineds) return
 
   console.log('margineds', margineds)

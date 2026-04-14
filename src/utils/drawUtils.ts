@@ -129,9 +129,6 @@ export const draw = (
   yAxisSnappedX: number | null,
   draggedPointIndex: number | null,
   draggedWallIndex: number | null,
-  draggedDoorIndex: number | null,
-  draggedWindowIndex: number | null,
-  wallThickness: number = 2,
   panOffset: Point = { x: 0, y: 0 },
   canvasWidth: number = 800,
   canvasHeight: number = 600,
@@ -274,12 +271,14 @@ export const draw = (
   doors.forEach((door) => {
     const screenX = door.x * zoomLevel + panOffset.x
     const screenY = door.y * zoomLevel + panOffset.y
+    const wallThickness = walls.find((wall) => wall.id === door.wallId)?.thickness || 0;
     drawEntity(ctx, screenX, screenY, door.width * zoomLevel, door.angle, '#e67e22', 'door', wallThickness * zoomLevel)
   })
 
   windows.forEach((win) => {
     const screenX = win.x * zoomLevel + panOffset.x
     const screenY = win.y * zoomLevel + panOffset.y
+    const wallThickness = walls.find((wall) => wall.id === win.wallId)?.thickness || 0;
     drawEntity(ctx, screenX, screenY, win.width * zoomLevel, win.angle, '#3498db', 'window', wallThickness * zoomLevel)
   })
 
@@ -315,6 +314,7 @@ export const draw = (
       const { pointOnWall, angle } = nearestWall
       const wallScreenX = pointOnWall.x * zoomLevel + panOffset.x
       const wallScreenY = pointOnWall.y * zoomLevel + panOffset.y
+      const wallThickness = nearestWall.wall.thickness || 0;
       if (currentTool === 'door') {
         drawPreviewEntity(ctx, wallScreenX, wallScreenY, doorWidth * zoomLevel, angle, '#e67e22', 'door', wallThickness * zoomLevel)
       } else if (currentTool === 'window') {
