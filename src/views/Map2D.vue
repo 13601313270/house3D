@@ -58,8 +58,8 @@
 
 <script lang="ts" setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
-import { Point, Wall, Door, Window } from '../types/map2d'
-import { draw, drawPoint, drawEntity, drawPreviewEntity, canvasWidth, canvasHeight, snapThreshold, doorWidth, windowWidth } from '../utils/drawUtils'
+import { Point, Wall, Door, Window } from '../types'
+import { draw, canvasWidth, canvasHeight, snapThreshold, doorWidth, windowWidth } from '../utils/drawUtils'
 import Canvas3D from '../components/Canvas3D.vue'
 
 const canvasRef = ref<HTMLCanvasElement | null>(null)
@@ -164,7 +164,7 @@ const getNearestWall = (point: Point): NearestWallResult | null => {
   let minDistance = Infinity
   let nearestAngle = 0
 
-  walls.value.forEach((wall) => {
+  walls.value.forEach((wall: Wall) => {
     for (let i = 0; i < wall.points.length - 1; i++) {
       const p1 = wall.points[i]
       const p2 = wall.points[i + 1]
@@ -507,8 +507,11 @@ onMounted(() => {
       if (e.key === 'Escape') {
         if (tempWallPoints.value.length > 0) {
           if (tempWallPoints.value.length > 1) {
+            const firstPoint = tempWallPoints.value[0]
             const newWall: Wall = {
               id: Date.now().toString(),
+              x: firstPoint.x,
+              y: firstPoint.y,
               points: [...tempWallPoints.value],
               thickness: wallThickness.value
             }
@@ -709,6 +712,8 @@ const handleCanvasClick = (e: MouseEvent) => {
           const newWall: Wall = {
             id: Date.now().toString(),
             points: [...tempWallPoints.value],
+            x: snapped.x,
+            y: snapped.y,
             thickness: wallThickness.value
           }
           walls.value.push(newWall)

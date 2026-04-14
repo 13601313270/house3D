@@ -2,7 +2,7 @@ import { Point } from './map2d'
 
 export type EntityType = 'wall' | 'door' | 'window' | 'bed' | string
 
-export abstract class Entity {
+export abstract class EntityClass {
   abstract id: string
   abstract type: EntityType
 

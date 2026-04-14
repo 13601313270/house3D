@@ -6,7 +6,7 @@
 <script lang="ts" setup>
 import { ref, onMounted, onUnmounted, watch } from 'vue'
 import * as THREE from 'three'
-import { Wall, Door, Window } from '../types/map2d'
+import { Wall, Door, Window } from '../types'
 import { createShapeFromPoints } from '@/utils/createShapeFromPoints'
 import { Geometry } from 'martinez-polygon-clipping'
 

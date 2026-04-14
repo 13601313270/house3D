@@ -1,7 +1,8 @@
-import { Entity, EntityType } from '../types/entity'
-import { Point, Window } from '../types/map2d'
+import { Point, Entity } from '../types/map2d'
+import { EntityType } from '../types/entity'
+import { Window } from '../types/window'
 
-export class WindowEntity extends Entity {
+export class WindowEntity implements Entity {
   id: string
   type: EntityType = 'window'
   wallId: string
@@ -11,11 +12,10 @@ export class WindowEntity extends Entity {
   angle: number
 
   constructor(window: Window) {
-    super()
     this.id = window.id
-    this.wallId = window.wallId
     this.x = window.x
     this.y = window.y
+    this.wallId = window.wallId
     this.width = window.width
     this.angle = window.angle
   }

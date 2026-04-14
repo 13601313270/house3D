@@ -3,26 +3,8 @@ export interface Point {
   y: number
 }
 
-export interface Wall {
+export interface Entity {
   id: string
-  points: Point[]
-  thickness: number
-}
-
-export interface Door {
-  id: string
-  wallId: string
   x: number
   y: number
-  width: number
-  angle: number
-}
-
-export interface Window {
-  id: string
-  wallId: string
-  x: number
-  y: number
-  width: number
-  angle: number
 }

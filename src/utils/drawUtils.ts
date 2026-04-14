@@ -1,8 +1,7 @@
-import { Wall, Door, Window, Point } from '../types/map2d'
+import { Wall, Door, Window, Point } from '../types'
 // @ts-ignore
 import Offset from 'polygon-offset'
 import { createShapeFromPoints } from './createShapeFromPoints'
-import { Geometry, Polygon } from 'martinez-polygon-clipping';
 
 export const canvasWidth = 800
 export const canvasHeight = 600
@@ -143,7 +142,7 @@ export const draw = (
   ctx.fillStyle = '#f5f5f5'
   ctx.fillRect(0, 0, canvasWidth, canvasHeight)
 
-  const margineds: Geometry | null = createShapeFromPoints(walls);
+  const margineds = createShapeFromPoints(walls);
   
   ctx.strokeStyle = '#333'
   ctx.lineWidth = 3
@@ -172,7 +171,7 @@ export const draw = (
   // 绘制墙上的点
   walls.forEach((wall) => {
     if (wall.points.length < 2) return
-    wall.points.forEach((point, pointIndex) => {
+    wall.points.forEach((point: Point, pointIndex: number) => {
       const screenX = point.x * zoomLevel + panOffset.x
       const screenY = point.y * zoomLevel + panOffset.y
       const isDragged = draggedWallIndex !== null && draggedWallIndex === walls.indexOf(wall) && pointIndex === draggedPointIndex

@@ -1,7 +1,8 @@
-import { Entity, EntityType } from '../types/entity'
-import { Point, Door } from '../types/map2d'
+import { Point, Entity } from '../types/map2d'
+import { EntityType } from '../types/entity'
+import { Door } from '../types/door'
 
-export class DoorEntity extends Entity {
+export class DoorEntity implements Entity {
   id: string
   type: EntityType = 'door'
   wallId: string
@@ -11,11 +12,10 @@ export class DoorEntity extends Entity {
   angle: number
 
   constructor(door: Door) {
-    super()
     this.id = door.id
-    this.wallId = door.wallId
     this.x = door.x
     this.y = door.y
+    this.wallId = door.wallId
     this.width = door.width
     this.angle = door.angle
   }

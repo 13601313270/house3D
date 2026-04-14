@@ -1,17 +1,21 @@
-import { Entity, EntityType } from '../types/entity'
-import { Point, Wall } from '../types/map2d'
+import { Point, Entity } from '../types/map2d'
+import { EntityType } from '../types/entity'
+import { Wall } from '../types/wall'
 
-export class WallEntity extends Entity {
+export class WallEntity implements Entity {
   id: string
   type: EntityType = 'wall'
   points: Point[]
   thickness: number
+  x: number
+  y: number
 
   constructor(wall: Wall) {
-    super()
     this.id = wall.id
     this.points = wall.points
     this.thickness = wall.thickness
+    this.x = wall.x
+    this.y = wall.y
   }
 
   draw2D(

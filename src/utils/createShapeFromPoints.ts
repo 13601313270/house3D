@@ -6,7 +6,7 @@
  */
 // @ts-ignore
 import { Geometry, union } from 'martinez-polygon-clipping';
-import { Point, Wall } from "@/types/map2d";
+import { Point, Wall } from '@/types';
 
 const cache = new Map<string, [number, number][][]>();
 
@@ -23,9 +23,9 @@ export function createShapeFromPoints(wallList: Wall[]): Geometry | null {
     if (wallitem.points.length < 2) return []
     // console.log('========点========')
     for (let j = 0, len = wallitem.points.length; j < len; j++) {
-      let prev = wallitem.points[j - 1] || {};
+      let prev = wallitem.points[j - 1] || {} as Point;
       const curr = wallitem.points[j];
-      const next = wallitem.points[j + 1] || {};
+      const next = wallitem.points[j + 1] || {} as Point;
 
       let v1 = [curr.x - prev.x, curr.y - prev.y];
       let v2 = [next.x - curr.x, next.y - curr.y];
@@ -89,7 +89,7 @@ export function createShapeFromPoints(wallList: Wall[]): Geometry | null {
           continue;
         }
         // 如果这个点，之前存在过相同坐标的另一个点
-        const prevSamePoint = wallitem.points.find((item, index) => index < i && item.x === curr.x && item.y === curr.y);
+        const prevSamePoint = wallitem.points.find((item: Point, index: number) => index < i && item.x === curr.x && item.y === curr.y);
         if (prevSamePoint) {
           // console.log('prevSamePoint', points.points, curr)
           const offsetLPoint: [number, number] = [
@@ -144,7 +144,7 @@ export function vectorAngleCos(a: any, b: any) {
  * @returns
  */
 // @ts-ignore
-export function vectorAngleCosHalf(a, b) {
+export function vectorAngleCosHalf(a: any, b: any) {
   return Math.sqrt((1 + vectorAngleCos(a, b)) / 2);
 }
 

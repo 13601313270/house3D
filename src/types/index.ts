@@ -1,0 +1,5 @@
+export { Point, Entity } from './map2d'
+export { EntityType } from './entity'
+export { Wall } from './wall'
+export { Door } from './door'
+export { Window } from './window'
