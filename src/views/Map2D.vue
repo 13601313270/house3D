@@ -944,29 +944,31 @@ const handleMouseDown = (e: MouseEvent) => {
 
   // 只有在拖拽模式下才能拖拽点
   if (currentTool.value === 'drag') {
-    // 检查临时折线上的点
-    for (let i = 0; i < tempWallPoints.value.length; i++) {
-      const point = tempWallPoints.value[i]
-      const dist = Math.hypot(x - point.x, y - point.y)
-      if (dist < wallThickness.value * zoomLevel.value) {
-        draggedPoint.value = { type: 'wall', wallIndex: -1, pointIndex: i }
-        dragOffset.value = { x: point.x - x, y: point.y - y }
-        prevTool.value = currentTool.value
-        drawWrapper()
-        return
-      }
-    }
+    // // 检查临时折线上的点
+    // for (let i = 0; i < tempWallPoints.value.length; i++) {
+    //   const point = tempWallPoints.value[i]
+    //   const dist = Math.hypot(x - point.x, y - point.y)
+    //   if (dist < wallThickness.value * zoomLevel.value) {
+    //     draggedPoint.value = { type: 'wall', wallIndex: -1, pointIndex: i }
+    //     dragOffset.value = { x: point.x - x, y: point.y - y }
+    //     prevTool.value = currentTool.value
+    //     drawWrapper()
+    //     return
+    //   }
+    // }
 
     // 检查已绘制的墙上的点
-    walls.value.forEach((wall) => {
+    for (let i = 0; i < walls.value.length; i++) {
+      const wall = walls.value[i]
       const api = new WallEntity(wall)
       const matchInfo = api.matchHandelInfo(x, y, zoomLevel.value)
       if (matchInfo) {
         matchHandelObj = api;
         matchHandelInfo = matchInfo
         dragOffset.value = { x: 0, y: 0 };
+        return;
       }
-    })
+    }
     // walls.value.forEach((wall, wallIndex) => {
     //   wall.points.forEach((point, pointIndex) => {
     //     const dist = Math.hypot(x - point.x, y - point.y)
@@ -980,13 +982,16 @@ const handleMouseDown = (e: MouseEvent) => {
     // })
 
     // 检查门
-    doors.value.forEach((door, doorIndex) => {
+
+    for (let i = 0; i < doors.value.length; i++) {
+      const door = doors.value[i]
       const api = new DoorEntity(door)
       const matchInfo = api.matchHandelInfo(x, y, zoomLevel.value)
       if (matchInfo) {
         matchHandelObj = api;
         matchHandelInfo = matchInfo
         dragOffset.value = { x: 0, y: 0 };
+        return;
       }
       // const dist = Math.hypot(x - door.x, y - door.y)
       // if (dist < wallThickness.value * zoomLevel.value) {
@@ -995,16 +1000,19 @@ const handleMouseDown = (e: MouseEvent) => {
       //   prevTool.value = currentTool.value
       //   drawWrapper()
       // }
-    })
+    }
 
     // 检查窗户
-    windows.value.forEach((windowItem, windowIndex) => {
+
+    for (let i = 0; i < windows.value.length; i++) {
+      const windowItem = windows.value[i]
       const api = new WindowEntity(windowItem)
       const matchInfo = api.matchHandelInfo(x, y, zoomLevel.value)
       if (matchInfo) {
         matchHandelObj = api;
         matchHandelInfo = matchInfo
         dragOffset.value = { x: 0, y: 0 };
+        return;
       }
 
       // const dist = Math.hypot(x - windowItem.x, y - windowItem.y)
@@ -1014,7 +1022,7 @@ const handleMouseDown = (e: MouseEvent) => {
       //   prevTool.value = currentTool.value
       //   drawWrapper()
       // }
-    })
+    }
 
     // 如果没有拖拽到任何点，开始平移
     if (!draggedPoint.value) {
