@@ -10,21 +10,22 @@ import { Point, Wall } from "@/types/map2d";
 
 const cache = new Map<string, [number, number][][]>();
 
-export function createShapeFromPoints(wallList: Wall[], radius = 1): Geometry | null {
-  const key = `${wallList.map((item) => item.points.map((point) => `${point.x},${point.y}`).join(',')).join(',')}-${radius}`
+export function createShapeFromPoints(wallList: Wall[]): Geometry | null {
+  const key = `${wallList.map((item) => item.points.map((point) => `${point.x},${point.y}`).join(',')).join(',')}`
   // if (cache.has(key)) return cache.get(key) || []
   const left: Point[] = [];
   const right: Point[] = [];
   let margineds: Geometry | null = null;
   // console.log('========线========')
   for (let i = 0; i < wallList.length; i++) {
-    const points = wallList[i];
-    if (points.points.length < 2) return []
+    const wallitem = wallList[i];
+    const radius = wallitem.thickness;
+    if (wallitem.points.length < 2) return []
     // console.log('========点========')
-    for (let j = 0, len = points.points.length; j < len; j++) {
-      let prev = points.points[j - 1] || {};
-      const curr = points.points[j];
-      const next = points.points[j + 1] || {};
+    for (let j = 0, len = wallitem.points.length; j < len; j++) {
+      let prev = wallitem.points[j - 1] || {};
+      const curr = wallitem.points[j];
+      const next = wallitem.points[j + 1] || {};
 
       let v1 = [curr.x - prev.x, curr.y - prev.y];
       let v2 = [next.x - curr.x, next.y - curr.y];
@@ -88,7 +89,7 @@ export function createShapeFromPoints(wallList: Wall[], radius = 1): Geometry | 
           continue;
         }
         // 如果这个点，之前存在过相同坐标的另一个点
-        const prevSamePoint = points.points.find((item, index) => index < i && item.x === curr.x && item.y === curr.y);
+        const prevSamePoint = wallitem.points.find((item, index) => index < i && item.x === curr.x && item.y === curr.y);
         if (prevSamePoint) {
           // console.log('prevSamePoint', points.points, curr)
           const offsetLPoint: [number, number] = [

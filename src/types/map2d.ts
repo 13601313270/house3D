@@ -6,6 +6,7 @@ export interface Point {
 export interface Wall {
   id: string
   points: Point[]
+  thickness: number
 }
 
 export interface Door {

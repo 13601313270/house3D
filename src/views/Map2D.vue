@@ -28,6 +28,7 @@
         <button :class="{ active: currentTool === 'drag' }" @click="currentTool = 'drag'" type="button">
           拖拽
         </button>
+        <input type="number" v-model="wallThickness" placeholder="墙厚度" />
       </div>
 
       <div class="canvas-container">
@@ -505,7 +506,8 @@ onMounted(() => {
           if (tempWallPoints.value.length > 1) {
             const newWall: Wall = {
               id: Date.now().toString(),
-              points: [...tempWallPoints.value]
+              points: [...tempWallPoints.value],
+              thickness: wallThickness.value
             }
             walls.value.push(newWall)
             history.value.push(JSON.parse(JSON.stringify(walls.value)))
@@ -668,7 +670,8 @@ const handleCanvasClick = (e: MouseEvent) => {
         if (tempWallPoints.value.length > 1) {
           const newWall: Wall = {
             id: Date.now().toString(),
-            points: [...tempWallPoints.value]
+            points: [...tempWallPoints.value],
+            thickness: wallThickness.value
           }
           walls.value.push(newWall)
           history.value.push(JSON.parse(JSON.stringify(walls.value)))
