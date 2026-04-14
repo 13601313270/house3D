@@ -2,7 +2,7 @@ import { Point } from '../types'
 import { Wall } from '@/entities/wall/index.d'
 import { Door } from '@/entities/door/index.d'
 import { Window } from '@/entities/window/index.d'
-import { Walls } from '@/entities/wall/index'
+import { WallEntity, Walls } from '@/entities/wall/index'
 import { DoorEntity } from '@/entities/door'
 import { WindowEntity } from '@/entities/window'
 
@@ -50,6 +50,12 @@ export const draw = (
     draggedPointIndex,
     hoverPoint,
   )
+  walls.forEach(wall => {
+    const wallApi = new WallEntity(wall)
+    wallApi.draw2D(ctx, panOffset, zoomLevel, draggedWallIndex, draggedPointIndex, currentTool, tempWallPoints, hoverPoint)
+  })
+
+
   doors.forEach((door) => {
     const doorApi = new DoorEntity(door)
     const wallThickness = walls.find((wall) => wall.id === door.wallId)?.thickness || 0;
