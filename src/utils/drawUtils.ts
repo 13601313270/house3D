@@ -3,6 +3,7 @@ import { Wall } from '@/entities/wall/index.d'
 import { Door } from '@/entities/door/index.d'
 import { Window } from '@/entities/window/index.d'
 import { Walls } from '@/entities/wall/index'
+import { DoorEntity } from '@/entities/door'
 
 export const canvasWidth = 800
 export const canvasHeight = 600
@@ -121,10 +122,9 @@ export const draw = (
     hoverPoint,
   )
   doors.forEach((door) => {
-    const screenX = door.x * zoomLevel + panOffset.x
-    const screenY = door.y * zoomLevel + panOffset.y
-    const wallThickness = walls.find((wall) => wall.id === door.wallId)?.thickness || 0;
-    drawEntity(ctx, screenX, screenY, door.width * zoomLevel, door.angle, '#e67e22', 'door', wallThickness * zoomLevel)
+    const doorApi = new DoorEntity(door)
+    doorApi.draw2D(ctx, panOffset, zoomLevel)
+    
   })
 
   windows.forEach((win) => {
