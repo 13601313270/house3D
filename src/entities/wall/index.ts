@@ -180,11 +180,11 @@ export class WallEntity extends EntityClass<Wall> {
   }
 
   onUpdateHandelInfoChange(
-    matchHandelInfo: HandelInfo,
-    newPosition: { x: number, y: number }
+    newPosition: { type: EntityType, point: Point },
+    matchHandelInfo: HandelInfo
   ) {
     if (matchHandelInfo.info.pointIndex > -1) {
-      this.wall.points[matchHandelInfo.info.pointIndex] = newPosition
+      this.wall.points[matchHandelInfo.info.pointIndex] = newPosition.point
     }
     // const { pointIndex } = handelInfo.info as { pointIndex: number }
     // const point = this.wall.points[pointIndex]
@@ -192,8 +192,13 @@ export class WallEntity extends EntityClass<Wall> {
     // this.wall.points[pointIndex] = point
   }
 
-  getBeSnapPoints(): Point[] {
-    return [...this.wall.points]
+  getBeSnapPoints() {
+    return this.wall.points.map(v => {
+      return {
+        type: this.type,
+        point: v,
+      }
+    })
   }
 
   getBeSnapLines(): Array<[Point, Point]> {

@@ -23,10 +23,19 @@ export abstract class EntityClass<T extends Entity> {
   abstract matchHandelInfo(x: number, y: number, zoomLevel: number): HandelInfo | null;
 
   // 具柄的新的值
-  abstract onUpdateHandelInfoChange(matchHandelInfo: HandelInfo, newPosition: { x: number, y: number }): void;
+  abstract onUpdateHandelInfoChange(
+    newPosition: {
+      type: EntityType,
+      point: Point,
+    },
+    matchHandelInfo: HandelInfo,
+  ): void;
 
   // 可以被对齐参考点（注意是被对齐，提供个其他拖动磁吸的参考点）
-  abstract getBeSnapPoints(): Point[];
+  abstract getBeSnapPoints(): Array<{
+    type: EntityType,
+    point: Point,
+  }>;
 
   // 可以被对齐的参考线（注意是被对齐，提供个其他拖动磁吸的参考线）
   abstract getBeSnapLines(): Array<[Point, Point]>;

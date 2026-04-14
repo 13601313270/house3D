@@ -62,15 +62,21 @@ export class WindowEntity extends EntityClass<Window> {
     // 实现窗户的3D绘制逻辑
   }
 
-  onUpdateHandelInfoChange(matchHandelInfo: HandelInfo, newPosition: { x: number, y: number }) {
-    this.data.x = newPosition.x
-    this.data.y = newPosition.y
+  onUpdateHandelInfoChange(
+    newPosition: { type: EntityType, point: Point },
+    matchHandelInfo: HandelInfo,
+  ) {
+    this.data.x = newPosition.point.x
+    this.data.y = newPosition.point.y
   }
 
-  getBeSnapPoints(): Point[] {
+  getBeSnapPoints() {
     return [{
-      x: this.data.x,
-      y: this.data.y,
+      type: this.type,
+      point: {
+        x: this.data.x,
+        y: this.data.y,
+      },
     }]
   }
 
