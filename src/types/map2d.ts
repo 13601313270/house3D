@@ -5,9 +5,14 @@ export interface Point {
   y: number
 }
 
+export interface PointWithIndex extends Point {
+  index: number
+}
+
 export interface HandelInfo {
   id: string // 对象ID
   type: EntityType
+  index: number,// 对象内具柄index
   info?: any
 }
 

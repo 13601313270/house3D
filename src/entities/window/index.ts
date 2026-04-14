@@ -47,15 +47,20 @@ export class WindowEntity extends EntityClass<Window> {
   }
 
   // 命中可拖拽具柄
-  matchHandelInfo(x: number, y: number, zoomLevel: number) {
+  matchHandelInfo(x: number, y: number, zoomLevel: number): HandelInfo | null {
     const dist = Math.hypot(x - this.data.x, y - this.data.y)
     if (dist < this.width * zoomLevel) {
       return {
+        index: 0,
         id: this.data.id,
         type: this.type,
       }
     }
     return null;
+  }
+
+  matchHandelMoveCallback(x: number, y: number) {
+    this.changePosition({ x, y })
   }
 
   draw3D(scene: any): void {
@@ -75,6 +80,7 @@ export class WindowEntity extends EntityClass<Window> {
       objType: this.type,
       snapFromType: 'point',
       point: {
+        index: 0,
         x: this.data.x,
         y: this.data.y,
       },

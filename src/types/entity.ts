@@ -1,11 +1,15 @@
-import { Entity, HandelInfo, Point } from './map2d'
+import { Entity, HandelInfo, Point, PointWithIndex } from './map2d'
 
 export type EntityType = 'wall' | 'door' | 'window'
 
 // 磁吸点
 export type MatchSnapPoint = {
   objType: EntityType, // 磁吸点对象类型
-  snapFromType: 'point' | 'line' | 'axis' | string, // 磁吸点来源类型
+  snapFromType: 'point', // 磁吸点来源类型
+  point: PointWithIndex,
+} | {
+  objType: EntityType, // 磁吸点对象类型
+  snapFromType: 'line' | 'axis' | string, // 磁吸点来源类型
   point: Point,
 }
 
@@ -28,6 +32,9 @@ export abstract class EntityClass<T extends Entity> {
 
   // 命中可拖拽具柄
   abstract matchHandelInfo(x: number, y: number, zoomLevel: number): HandelInfo | null;
+
+  // 命中可拖拽具柄被移动移动
+  abstract matchHandelMoveCallback(x: number, y: number, matchHandelInfo: HandelInfo): void;
 
   // 具柄的新的值
   abstract inSceneSnapPointArea(

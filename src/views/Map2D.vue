@@ -66,7 +66,7 @@ import { Door } from '@/entities/door/index.d'
 import { Window } from '@/entities/window/index.d'
 import { DoorEntity, WallEntity, WindowEntity } from '@/entities'
 import { EntityClass, EntityType, MatchSnapPoint } from '@/types/entity'
-import { HandelInfo } from '@/types/map2d'
+import { HandelInfo, PointWithIndex } from '@/types/map2d'
 import pointToLineDistance from '@/utils/pointToLineDistance'
 
 const canvasRef = ref<HTMLCanvasElement | null>(null)
@@ -251,9 +251,7 @@ const getSnapPoint = (
         pointSnapped = {
           objType: point.objType,
           snapFromType: point.snapFromType,
-          point: {
-            x: point.point.x, y: point.point.y
-          }
+          point: point.point as PointWithIndex
         }
       }
     }
@@ -266,8 +264,11 @@ const getSnapPoint = (
     return {
       objType: pointSnapped.objType,
       snapFromType: pointSnapped.snapFromType,
-      point: roundNumberList(pointSnapped.point)
-    }
+      point: {
+        ...roundNumberList(pointSnapped.point),
+        index: (pointSnapped.point as PointWithIndex).index,
+      } as PointWithIndex
+    };
   }
 
   let snappedX = current.x
@@ -716,10 +717,13 @@ const handleCanvasClick = (e: MouseEvent) => {
   }
 
   if (currentTool.value === 'wall') {
-    let clickPoint = { x, y }
+    let clickPoint: Point = { x, y }
 
     if (tempWallPoints.value.length > 0) {
-      const last = tempWallPoints.value[tempWallPoints.value.length - 1]
+      const last = {
+        ...tempWallPoints.value[tempWallPoints.value.length - 1],
+        index: tempWallPoints.value.length - 1,
+      }
       // 收集所有点（包括临时折线和已绘制的墙上的点）
       const allPoints = [...tempWallPoints.value]
       walls.value.forEach(wall => {
@@ -727,7 +731,14 @@ const handleCanvasClick = (e: MouseEvent) => {
           allPoints.push(point)
         })
       })
-      let snapped = getSnapPoint([{ objType: 'wall', snapFromType: 'point', point: last }], clickPoint, allPoints.map(v => ({ objType: 'wall', snapFromType: 'point', point: v })))
+      let snapped = getSnapPoint([{ objType: 'wall', snapFromType: 'point', point: last }], clickPoint, allPoints.map((v, index) => ({
+        objType: 'wall',
+        snapFromType: 'point',
+        point: {
+          ...v,
+          index: index,
+        }
+      })))
       if (snapped === null) {
         snapped = {
           objType: 'wall',
@@ -878,50 +889,61 @@ const handleMouseMove = (e: MouseEvent) => {
         const beMatchPoints = api.getMineBeSnapPoints()
         if (beMatchPoints.length > 0) {
           const snapped = getSnapPoint([], { x, y }, beMatchPoints)
+          // @ts-ignore
+          if (snapped?.point?.id) {
+
+          }
           if (snapped !== null) {
-            const result = matchHandelObj.inSceneSnapPointArea(
-              {
-                objType: api.type,
-                snapFromType: 'point',
-                point: snapped.point
-              },
-              matchHandelInfo,
-            )
-            if (result) {
-              drawWrapper()
-              return true;
-            }
-          }
-        }
-        const beMatchLines = api.getMineBeSnapLines()
-        if (beMatchLines.length > 0) {
-          let nearestPoint: Point | null = null
-          let minDistance = Infinity
-          let matchLine = null;
-          for (let j = 0; j < beMatchLines.length; j++) {
-            const line = beMatchLines[j]
-            const distance = pointToLineDistance({ x, y }, line[0], line[1])
-            if (distance < minDistance) {
-              matchLine = line
-              minDistance = distance
-              nearestPoint = getClosestPointOnLine({ x, y }, line[0], line[1])
-            }
-          }
-          if (nearestPoint && minDistance < snapThreshold) {
-            const result = matchHandelObj.inSceneSnapPointArea({
-              objType: api.type,
-              snapFromType: 'line',
-              point: nearestPoint
-            }, matchHandelInfo)
-            if (result) {
-              if (matchLine) {
-                matchHandelObj.afterBeSnapByLine({ type: api.type }, matchLine)
+            // 排出掉和自己磁吸
+            // @ts-ignore
+            if (snapped?.point && snapped?.point?.index !== undefined && snapped?.point?.index !== matchHandelInfo.index) {
+              // @ts-ignore
+              console.log('MatchSnapPoint-1', snapped?.point?.index, matchHandelInfo.index)
+              // @ts-ignore
+              const result = matchHandelObj.inSceneSnapPointArea(
+                {
+                  objType: api.type,
+                  snapFromType: 'point',
+                  point: snapped.point
+                },
+                matchHandelInfo,
+              )
+              if (result) {
+                drawWrapper()
+                return true;
               }
-              drawWrapper()
-              return true;
             }
           }
         }
+        // const beMatchLines = api.getMineBeSnapLines()
+        // if (beMatchLines.length > 0) {
+        //   let nearestPoint: Point | null = null
+        //   let minDistance = Infinity
+        //   let matchLine = null;
+        //   for (let j = 0; j < beMatchLines.length; j++) {
+        //     const line = beMatchLines[j]
+        //     const distance = pointToLineDistance({ x, y }, line[0], line[1])
+        //     if (distance < minDistance) {
+        //       matchLine = line
+        //       minDistance = distance
+        //       nearestPoint = getClosestPointOnLine({ x, y }, line[0], line[1])
+        //     }
+        //   }
+        //   if (nearestPoint && minDistance < snapThreshold) {
+        //     const result = matchHandelObj.inSceneSnapPointArea({
+        //       objType: api.type,
+        //       snapFromType: 'line',
+        //       point: nearestPoint
+        //     }, matchHandelInfo)
+        //     if (result) {
+        //       if (matchLine) {
+        //         matchHandelObj.afterBeSnapByLine({ type: api.type }, matchLine)
+        //       }
+        //       drawWrapper()
+        //       return true;
+        //     }
+        //   }
+        // }
       }
       return false;
     }
@@ -932,7 +954,7 @@ const handleMouseMove = (e: MouseEvent) => {
         return;
       }
     }
-    matchHandelObj.changePosition({ x, y })
+    matchHandelObj.matchHandelMoveCallback(x, y, matchHandelInfo)
     // const newX = snapped.x
     // const newY = snapped.y
     // if (dragged.type === 'wall') {

@@ -60,11 +60,16 @@ export class DoorEntity extends EntityClass<Door> {
     const dist = Math.hypot(x - this.data.x, y - this.data.y)
     if (dist < this.width * zoomLevel) {
       return {
+        index: 0,
         type: this.type,
         id: this.data.id,
       }
     }
     return null;
+  }
+
+  matchHandelMoveCallback(x: number, y: number) {
+    this.changePosition({ x, y })
   }
 
   inSceneSnapPointArea(newPosition: MatchSnapPoint, matchHandelInfo: HandelInfo) {
@@ -80,6 +85,7 @@ export class DoorEntity extends EntityClass<Door> {
       objType: this.type,
       snapFromType: 'point',
       point: {
+        index: 0,
         x: this.data.x,
         y: this.data.y,
       },
