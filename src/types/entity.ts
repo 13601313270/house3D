@@ -33,7 +33,7 @@ export abstract class EntityClass<T extends Entity> {
   abstract onUpdateHandelInfoChange(
     newPosition: MatchSnapPoint,
     matchHandelInfo: HandelInfo,
-  ): void;
+  ): boolean;
 
   // 可以被对齐参考点（注意是被对齐，提供个其他拖动磁吸的参考点）
   abstract getBeSnapPoints(): Array<MatchSnapPoint>;

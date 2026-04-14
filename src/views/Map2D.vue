@@ -897,7 +897,7 @@ const handleMouseMove = (e: MouseEvent) => {
         if (beMatchPoints.length > 0) {
           const snapped = getSnapPoint([], { x, y }, beMatchPoints)
           if (snapped !== null) {
-            matchHandelObj.onUpdateHandelInfoChange(
+            const result = matchHandelObj.onUpdateHandelInfoChange(
               {
                 type: api.type,
                 snapFromType: 'point',
@@ -908,8 +908,10 @@ const handleMouseMove = (e: MouseEvent) => {
               },
               matchHandelInfo,
             )
-            drawWrapper()
-            return true;
+            if (result) {
+              drawWrapper()
+              return true;
+            }
           }
         }
         const beMatchLines = api.getBeSnapLines()
@@ -927,7 +929,7 @@ const handleMouseMove = (e: MouseEvent) => {
             }
           }
           if (nearestPoint && minDistance < snapThreshold) {
-            matchHandelObj.onUpdateHandelInfoChange({
+            const result = matchHandelObj.onUpdateHandelInfoChange({
               type: api.type,
               snapFromType: 'line',
               point: {
@@ -935,11 +937,13 @@ const handleMouseMove = (e: MouseEvent) => {
                 y: nearestPoint.y
               }
             }, matchHandelInfo)
-            if (matchLine) {
-              matchHandelObj.afterBeSnapByLine(matchLine)
+            if (result) {
+              if (matchLine) {
+                matchHandelObj.afterBeSnapByLine(matchLine)
+              }
+              drawWrapper()
+              return true;
             }
-            drawWrapper()
-            return true;
           }
         }
       }

@@ -68,10 +68,11 @@ export class DoorEntity extends EntityClass<Door> {
   }
 
   onUpdateHandelInfoChange(newPosition: MatchSnapPoint, matchHandelInfo: HandelInfo) {
-    console.log('newPosition', newPosition)
     if (newPosition.type === 'wall' && newPosition.snapFromType === 'line') {
       this.changePosition(newPosition.point)
+      return true
     }
+    return false
   }
 
   getBeSnapPoints() {

@@ -185,7 +185,9 @@ export class WallEntity extends EntityClass<Wall> {
   ) {
     if (matchHandelInfo.info.pointIndex > -1) {
       this.wall.points[matchHandelInfo.info.pointIndex] = newPosition.point
+      return true
     }
+    return false
     // const { pointIndex } = handelInfo.info as { pointIndex: number }
     // const point = this.wall.points[pointIndex]
     // point.x = this.x + dragOffset.value.x
