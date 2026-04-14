@@ -1,8 +1,9 @@
 import { Point, Entity } from '@/types/map2d'
 import { EntityType } from '@/types/entity'
 import { Wall } from './index.d'
-import { calculateAngle, drawPoint } from '@/utils/drawUtils'
+import { drawPoint } from '@/utils/drawPoint'
 import { createShapeFromPoints } from '@/utils/createShapeFromPoints'
+import { calculateAngle } from '@/utils/calculateAngle'
 
 export class WallEntity implements Entity {
   id: string
@@ -43,8 +44,6 @@ export class Walls {
   draw2D(
     ctx: CanvasRenderingContext2D,
     panOffset: Point,
-    canvasWidth: number,
-    canvasHeight: number,
     zoomLevel: number,
     currentTool: string,
     tempWallPoints: Point[],
