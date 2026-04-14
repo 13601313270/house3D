@@ -4,44 +4,13 @@ import { Door } from '@/entities/door/index.d'
 import { Window } from '@/entities/window/index.d'
 import { Walls } from '@/entities/wall/index'
 import { DoorEntity } from '@/entities/door'
+import { WindowEntity } from '@/entities/window'
 
 export const canvasWidth = 800
 export const canvasHeight = 600
 export const snapThreshold = 20
 export const doorWidth = 90
 export const windowWidth = 120
-
-export const drawEntity = (
-  ctx: CanvasRenderingContext2D,
-  x: number,
-  y: number,
-  width: number,
-  angle: number,
-  color: string,
-  type: 'door' | 'window',
-  thickness: number = 10
-) => {
-  ctx.save()
-  ctx.translate(x, y)
-  ctx.rotate(angle)
-
-  ctx.fillStyle = color
-  ctx.strokeStyle = color
-  ctx.lineWidth = 3
-
-  if (type === 'door') {
-    ctx.fillRect(-width / 2, -thickness / 2, width, thickness)
-    ctx.beginPath()
-    ctx.arc(0, 0, width / 2, -Math.PI / 4, Math.PI / 4)
-    ctx.stroke()
-  } else {
-    ctx.fillRect(-width / 2, -thickness / 2, width, thickness)
-    ctx.setLineDash([5, 5])
-    ctx.stroke()
-  }
-
-  ctx.restore()
-}
 
 export const drawPreviewEntity = (
   ctx: CanvasRenderingContext2D,
@@ -124,14 +93,11 @@ export const draw = (
   doors.forEach((door) => {
     const doorApi = new DoorEntity(door)
     doorApi.draw2D(ctx, panOffset, zoomLevel)
-    
   })
 
   windows.forEach((win) => {
-    const screenX = win.x * zoomLevel + panOffset.x
-    const screenY = win.y * zoomLevel + panOffset.y
-    const wallThickness = walls.find((wall) => wall.id === win.wallId)?.thickness || 0;
-    drawEntity(ctx, screenX, screenY, win.width * zoomLevel, win.angle, '#3498db', 'window', wallThickness * zoomLevel)
+    const windowApi = new WindowEntity(win)
+    windowApi.draw2D(ctx, panOffset, zoomLevel)
   })
 
   doors.forEach((door) => {

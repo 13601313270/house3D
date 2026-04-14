@@ -1,16 +1,10 @@
 import { Point, Entity } from '@/types/map2d'
-import { EntityType } from '@/types/entity'
 import { Door } from './index.d'
-import { drawEntity } from '@/utils/drawUtils'
 
 export class DoorEntity implements Entity {
   id: string
-  type: EntityType = 'door'
-  wallId: string
   x: number
   y: number
-  width: number
-  angle: number
   door: Door
 
   constructor(door: Door) {
@@ -18,9 +12,6 @@ export class DoorEntity implements Entity {
     this.id = door.id
     this.x = door.x
     this.y = door.y
-    this.wallId = door.wallId
-    this.width = door.width
-    this.angle = door.angle
   }
 
   draw2D(
@@ -32,7 +23,20 @@ export class DoorEntity implements Entity {
     const screenX = this.door.x * zoomLevel + panOffset.x
     const screenY = this.door.y * zoomLevel + panOffset.y
     const wallThickness = 10; // walls.find((wall) => wall.id === this.door.wallId)?.thickness || 0;
-    drawEntity(ctx, screenX, screenY, this.door.width * zoomLevel, this.door.angle, '#e67e22', 'door', wallThickness * zoomLevel)
+    const color = '#e67e22'
+    const width = this.door.width * zoomLevel;
+    const thickness = wallThickness * zoomLevel;
+    ctx.save()
+    ctx.translate(screenX, screenY)
+    ctx.rotate(this.door.angle)
+    ctx.fillStyle = color
+    ctx.strokeStyle = color
+    ctx.lineWidth = 3
+    ctx.fillRect(-width / 2, -thickness / 2, width, thickness)
+    ctx.beginPath()
+    ctx.arc(0, 0, width / 2, -Math.PI / 4, Math.PI / 4)
+    ctx.stroke()
+    ctx.restore()
   }
 
   draw3D(scene: any): void {

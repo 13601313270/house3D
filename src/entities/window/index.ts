@@ -5,29 +5,40 @@ import { Window } from './index.d'
 export class WindowEntity implements Entity {
   id: string
   type: EntityType = 'window'
-  wallId: string
   x: number
   y: number
-  width: number
-  angle: number
+  window: Window
 
   constructor(window: Window) {
+    this.window = window
     this.id = window.id
     this.x = window.x
     this.y = window.y
-    this.wallId = window.wallId
-    this.width = window.width
-    this.angle = window.angle
   }
 
   draw2D(
     ctx: CanvasRenderingContext2D,
     panOffset: Point,
-    canvasWidth: number,
-    canvasHeight: number,
     zoomLevel: number
   ): void {
-    // 实现窗户的2D绘制逻辑
+    const screenX = this.window.x * zoomLevel + panOffset.x
+    const screenY = this.window.y * zoomLevel + panOffset.y
+
+    const color = '#3498db'
+
+    ctx.save()
+    ctx.translate(screenX, screenY)
+    ctx.rotate(this.window.angle)
+
+    ctx.fillStyle = color
+    ctx.strokeStyle = color
+    ctx.lineWidth = 3
+    const thickness = 10;//
+    ctx.fillRect(-this.window.width / 2, -thickness / 2, this.window.width, thickness)
+    ctx.setLineDash([5, 5])
+    ctx.stroke()
+
+    ctx.restore()
   }
 
   draw3D(scene: any): void {
