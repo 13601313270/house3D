@@ -30,4 +30,7 @@ export abstract class EntityClass {
 
   // 可以被对齐参考点（注意是被对齐，提供个其他拖动磁吸的参考点）
   abstract getBeSnapPoints(): Point[];
+
+  // 可以被对齐的参考线（注意是被对齐，提供个其他拖动磁吸的参考线）
+  abstract getBeSnapLines(): Array<[Point, Point]>;
 }

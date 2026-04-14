@@ -69,4 +69,8 @@ export class DoorEntity extends EntityClass {
   getBeSnapPoints(): Point[] {
     return [this.door]
   }
+
+  getBeSnapLines(): [Point, Point][] {
+    return []
+  }
 }
