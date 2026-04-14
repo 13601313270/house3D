@@ -1,4 +1,5 @@
 import { HandelInfo, Point } from '@/types/map2d'
+import * as THREE from 'three'
 import { Door } from './index.d'
 import { allSnapFromType, EntityClass, EntityType, MatchSnapPoint } from '@/types/entity'
 
@@ -7,6 +8,7 @@ export class DoorEntity extends EntityClass<Door> {
   id: string
   wellId: string
   width: number
+  height: number
   angle: number
 
   constructor(door: Door) {
@@ -14,6 +16,7 @@ export class DoorEntity extends EntityClass<Door> {
     this.wellId = door.wallId
     this.angle = door.angle
     this.width = door.width
+    this.height = door.height
     this.id = door.id
   }
 
@@ -54,6 +57,14 @@ export class DoorEntity extends EntityClass<Door> {
 
   draw3D(scene: any): void {
     // 实现门的3D绘制逻辑
+    const wallThickness = 20; // props.data.walls.find((wall) => wall.id === door.wallId)?.thickness || 0;
+    // console.log('door', door)
+    const geometry = new THREE.BoxGeometry(this.width, this.height, wallThickness + 2);// 额外增加2保证，门框比强款一点
+    const material = new THREE.MeshStandardMaterial({ color: 0xe67e22 })
+    const doorMesh = new THREE.Mesh(geometry, material)
+    doorMesh.position.set(this.data.x, this.height / 2, this.data.y)
+    doorMesh.rotateY(this.angle * -1);
+    scene!.add(doorMesh)
   }
 
   matchHandelInfo(x: number, y: number, zoomLevel: number) {

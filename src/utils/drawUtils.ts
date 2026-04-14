@@ -11,8 +11,10 @@ import { calculateAngle } from './calculateAngle'
 export const canvasWidth = 800
 export const canvasHeight = 600
 export const snapThreshold = 20
-export const doorWidth = 90
+export const doorWidth = 110
+export const doorHeight = 180
 export const windowWidth = 120
+export const windowHeight = 120
 
 export const draw = (
   canvasRef: HTMLCanvasElement | null,
@@ -152,6 +154,7 @@ export const draw = (
           x: wallScreenX,
           y: wallScreenY,
           width: doorWidth,
+          height: doorHeight,
           angle,
         }
         const doorApi = new DoorEntity(door)
@@ -163,6 +166,7 @@ export const draw = (
           x: wallScreenX,
           y: wallScreenY,
           width: windowWidth,
+          height: windowHeight,
           angle,
         }
         const windowApi = new WindowEntity(window)

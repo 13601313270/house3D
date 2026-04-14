@@ -11,6 +11,7 @@ import { Geometry } from 'martinez-polygon-clipping'
 import { Wall } from '@/entities/wall/index.d'
 import { Door } from '@/entities/door/index.d'
 import { Window } from '@/entities/window/index.d'
+import { DoorEntity, WindowEntity } from '@/entities'
 
 interface DrawingData {
   walls: Wall[]
@@ -37,13 +38,12 @@ const initThree = () => {
 
   scene = new THREE.Scene()
   scene.background = new THREE.Color(0xf0f0f0)
-
-  camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 10000)
+  const maxCamera1Radius = 10000;
+  camera = new THREE.PerspectiveCamera(45, width / height, 0.1, maxCamera1Radius)
   camera.position.set(0, 800, 1200)
   camera.lookAt(0, 0, 0);
 
   (() => {
-    const maxCamera1Radius = 1000;
     let camera1Radius = 800; // 摄像机距离
     // let canvas2IsMouseAngel = false;
     // let canvas2IsMouseMove = false;
@@ -81,7 +81,6 @@ const initThree = () => {
       const camera2Y = camera1Radius * Math.sin(camera2AngleY);
       const camera2Z = camera1Radius * Math.cos(camera2AngleX) * Math.cos(camera2AngleY);
 
-      console.log('camera1X', camera1X, camera1Y, camera1Z)
       if (camera) {
         camera.position.set(
           camera1TargetPositionX + camera1X, // 镜头左右摇摆
@@ -216,7 +215,7 @@ const renderWalls = () => {
 
       const extrudeSettings = {
         steps: 1,
-        depth: 200,
+        depth: 280,
         bevelEnabled: true,
         // bevelThickness: 2,
         // bevelSize: 2,
@@ -271,13 +270,8 @@ const renderDoors = () => {
   if (!scene) return
 
   props.data.doors.forEach((door) => {
-    const wallThickness = props.data.walls.find((wall) => wall.id === door.wallId)?.thickness || 0;
-    const geometry = new THREE.BoxGeometry(door.width, door.width, wallThickness + 1);// 额外增加1保证，门框比强款一点
-    const material = new THREE.MeshStandardMaterial({ color: 0xe67e22 })
-    const doorMesh = new THREE.Mesh(geometry, material)
-    doorMesh.position.set(door.x, 10, door.y)
-    doorMesh.rotateY(door.angle * -1);
-    scene!.add(doorMesh)
+    const api = new DoorEntity(door);
+    api.draw3D(scene)
   })
 }
 
@@ -285,11 +279,14 @@ const renderWindows = () => {
   if (!scene) return
 
   props.data.windows.forEach((win) => {
-    const geometry = new THREE.CylinderGeometry(3, 3, 20, 8)
-    const material = new THREE.MeshStandardMaterial({ color: 0x3498db })
-    const winMesh = new THREE.Mesh(geometry, material)
-    winMesh.position.set(win.x, 10, win.y)
-    scene!.add(winMesh)
+    const api = new WindowEntity(win)
+    api.draw3D(scene)
+
+    // const geometry = new THREE.CylinderGeometry(3, 3, 20, 8)
+    // const material = new THREE.MeshStandardMaterial({ color: 0x3498db })
+    // const winMesh = new THREE.Mesh(geometry, material)
+    // winMesh.position.set(win.x, 10, win.y)
+    // scene!.add(winMesh)
   })
 }
 

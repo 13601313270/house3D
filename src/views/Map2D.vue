@@ -59,7 +59,7 @@
 <script lang="ts" setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { Entity, Point } from '../types'
-import { draw, canvasWidth, canvasHeight, snapThreshold, doorWidth, windowWidth } from '../utils/drawUtils'
+import { draw, canvasWidth, canvasHeight, snapThreshold, doorWidth, windowWidth, doorHeight, windowHeight } from '../utils/drawUtils'
 import Canvas3D from '../components/Canvas3D.vue'
 import { Wall } from '@/entities/wall/index.d'
 import { Door } from '@/entities/door/index.d'
@@ -773,6 +773,7 @@ const handleCanvasClick = (e: MouseEvent) => {
           x: nearest.pointOnWall.x,
           y: nearest.pointOnWall.y,
           width: doorWidth,
+          height: doorHeight,
           angle: nearest.angle,
         }
         doors.value.push(door)
@@ -783,6 +784,7 @@ const handleCanvasClick = (e: MouseEvent) => {
           x: nearest.pointOnWall.x,
           y: nearest.pointOnWall.y,
           width: windowWidth,
+          height: windowHeight,
           angle: nearest.angle,
         }
         windows.value.push(windowItem)

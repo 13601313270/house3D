@@ -1,16 +1,21 @@
 import { Point, Entity, HandelInfo } from '@/types/map2d'
 import { allSnapFromType, EntityClass, EntityType, MatchSnapPoint } from '@/types/entity'
 import { Window } from './index.d'
+import * as THREE from 'three'
 
 export class WindowEntity extends EntityClass<Window> {
   type: EntityType = 'window'
   width: number
+  height: number
   angle: number
+  color: string
 
   constructor(window: Window) {
     super(window)
     this.width = window.width
     this.angle = window.angle
+    this.height = window.height
+    this.color = '#3498db'
   }
 
   draw2D(
@@ -23,6 +28,8 @@ export class WindowEntity extends EntityClass<Window> {
     const screenY = this.data.y * zoomLevel + panOffset.y
 
     const color = '#3498db'
+    const width = this.width * zoomLevel;
+    const thickness = 20 * zoomLevel;
 
     ctx.save()
     ctx.translate(screenX, screenY)
@@ -31,15 +38,14 @@ export class WindowEntity extends EntityClass<Window> {
     ctx.fillStyle = color
     ctx.strokeStyle = color
     ctx.lineWidth = 3
-    const thickness = 10;//
-    ctx.fillRect(-this.width / 2, -thickness / 2, this.width, thickness)
+    ctx.fillRect(-width / 2, -thickness / 2, width, thickness)
     ctx.setLineDash([5, 5])
     ctx.stroke()
     ctx.restore()
 
     // 控制点
     ctx.fillStyle = '#fff'
-    ctx.strokeStyle = '#3498db'
+    ctx.strokeStyle = this.color
     ctx.lineWidth = 2
     ctx.beginPath()
     ctx.arc(screenX, screenY, 6 * zoomLevel, 0, Math.PI * 2)
@@ -65,7 +71,15 @@ export class WindowEntity extends EntityClass<Window> {
   }
 
   draw3D(scene: any): void {
-    // 实现窗户的3D绘制逻辑
+    // 实现门的3D绘制逻辑
+    const wallThickness = 20; // props.data.walls.find((wall) => wall.id === door.wallId)?.thickness || 0;
+    console.log('window', this.width, this.height)
+    const geometry = new THREE.BoxGeometry(this.width, this.height, wallThickness + 2);// 额外增加2保证，门框比强款一点
+    const material = new THREE.MeshStandardMaterial({ color: this.color })
+    const doorMesh = new THREE.Mesh(geometry, material)
+    doorMesh.position.set(this.data.x, this.height / 2 + 40, this.data.y)
+    doorMesh.rotateY(this.angle * -1);
+    scene!.add(doorMesh)
   }
 
   inSceneSnapPointArea(newPosition: MatchSnapPoint) {
