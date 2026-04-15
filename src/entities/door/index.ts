@@ -6,14 +6,16 @@ import { allSnapFromType, EntityClass, EntityType, MatchSnapPoint } from '@/type
 export class DoorEntity extends EntityClass<Door> {
   type: EntityType = 'door'
   id: string
-  wellId: string
+  wallId: string | undefined
+  wallPointId: number | undefined
   width: number
   height: number
   angle: number
 
   constructor(door: Door) {
     super(door)
-    this.wellId = door.wallId
+    this.wallId = door.wallId
+    this.wallPointId = door.wallPointId
     this.angle = door.angle
     this.width = door.width
     this.height = door.height
