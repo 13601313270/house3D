@@ -75,7 +75,7 @@ const currentTool = ref<'wall' | 'door' | 'window' | 'drag'>('drag')
 const walls = ref<Wall[]>([])
 const doors = ref<Door[]>([])
 const windows = ref<Window[]>([])
-const tempWallPoints = ref<Point[]>([])
+const tempDrawWall = ref<Wall | null>(null)
 const hoverPoint = ref<Point | null>(null)
 const lastPoint = ref<Point | null>(null)
 const history = ref<Wall[][]>([])
@@ -271,9 +271,9 @@ const getSnapPoint = (
 
   const snapAngles = [0, 45, 90, 135, 180, -135, -90, -45]
 
-  if (tempWallPoints.value.length > 1) {
-    const prev = tempWallPoints.value[tempWallPoints.value.length - 2]
-    const last = tempWallPoints.value[tempWallPoints.value.length - 1]
+  if (tempDrawWall.value?.points?.length && tempDrawWall.value.points.length > 1) {
+    const prev = tempDrawWall.value.points[tempDrawWall.value.points.length - 2]
+    const last = tempDrawWall.value.points[tempDrawWall.value.points.length - 1]
     const prevDx = last.x - prev.x
     const prevDy = last.y - prev.y
     const prevAngle = Math.atan2(prevDy, prevDx)
@@ -506,7 +506,7 @@ const drawWrapper = () => {
       walls.value,
       doors.value,
       windows.value,
-      tempWallPoints.value,
+      tempDrawWall.value?.points || [],
       hoverPoint.value,
       currentTool.value,
       getNearestWall,
@@ -535,20 +535,20 @@ onMounted(() => {
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
-        if (tempWallPoints.value.length > 0) {
-          if (tempWallPoints.value.length > 1) {
-            const firstPoint = tempWallPoints.value[0]
+        if (tempDrawWall.value?.points?.length && tempDrawWall.value.points.length > 0) {
+          if (tempDrawWall.value?.points.length > 1) {
+            const firstPoint = tempDrawWall.value.points[0]
             const newWall: Wall = {
-              id: Date.now().toString(),
+              id: tempDrawWall.value.id,
               x: firstPoint.x,
               y: firstPoint.y,
-              points: [...tempWallPoints.value],
+              points: [...tempDrawWall.value.points],
               thickness: wallThickness.value
             }
             walls.value.push(newWall)
             history.value.push(JSON.parse(JSON.stringify(walls.value)))
           }
-          tempWallPoints.value = []
+          tempDrawWall.value = null
           lastPoint.value = null
           hoverPoint.value = null
         }
@@ -702,6 +702,10 @@ const updateWallThickness = () => {
 }
 
 const handleCanvasClick = (e: MouseEvent) => {
+  // 如果当前是拖拽模式，不执行任何操作
+  if (currentTool.value === 'drag') {
+    return
+  }
   const canvas = canvasRef.value
   if (!canvas) return
 
@@ -717,68 +721,74 @@ const handleCanvasClick = (e: MouseEvent) => {
     return
   }
 
-  // 如果当前是拖拽模式，不执行任何操作
-  if (currentTool.value === 'drag') {
-    return
-  }
-
   if (currentTool.value === 'wall') {
     let clickPoint: Point = { x, y }
 
-    if (tempWallPoints.value.length > 0) {
-      const last = {
-        ...tempWallPoints.value[tempWallPoints.value.length - 1],
-        index: tempWallPoints.value.length - 1,
-      }
-      // 收集所有点（包括临时折线和已绘制的墙上的点）
-      const allPoints = [...tempWallPoints.value]
-      walls.value.forEach(wall => {
-        wall.points.forEach(point => {
-          allPoints.push(point)
+    if (tempDrawWall.value) {
+      if (tempDrawWall.value.points.length > 0) {
+        const last = {
+          ...tempDrawWall.value.points[tempDrawWall.value.points.length - 1],
+          index: tempDrawWall.value.points.length - 1,
+        }
+        // 收集所有点（包括临时折线和已绘制的墙上的点）
+        const allPoints = [...tempDrawWall.value.points]
+        walls.value.forEach(wall => {
+          wall.points.forEach(point => {
+            allPoints.push(point)
+          })
         })
-      })
-      let snapped = getSnapPoint([{
-        objType: 'wall',
-        snapFromType: 'point',
-        point: last
-      }], clickPoint, allPoints.map((v, index) => ({
-        objType: 'wall',
-        snapFromType: 'point',
-        point: {
-          ...v,
-          index: index,
-        }
-      })))
-      if (snapped === null) {
-        snapped = {
+        let snapped = getSnapPoint([{
           objType: 'wall',
+          objId: tempDrawWall.value.id,
           snapFromType: 'point',
-          point: clickPoint
-        }
-      }
-      const dist = Math.hypot(snapped.point.x - last.x, snapped.point.y - last.y)
-
-      if (dist < 10 * zoomLevel.value) {
-        if (tempWallPoints.value.length > 1) {
-          const newWall: Wall = {
-            id: Date.now().toString(),
-            points: [...tempWallPoints.value],
-            x: snapped.point.x,
-            y: snapped.point.y,
-            thickness: wallThickness.value
+          point: last
+        }], clickPoint, allPoints.map((v, index) => ({
+          objType: 'wall',
+          objId: (tempDrawWall.value as Wall).id,
+          snapFromType: 'point',
+          point: {
+            ...v,
+            index: index,
           }
-          walls.value.push(newWall)
-          history.value.push(JSON.parse(JSON.stringify(walls.value)))
-          tempWallPoints.value = []
-          lastPoint.value = null
+        })))
+        if (snapped === null) {
+          snapped = {
+            objType: 'wall',
+            objId: tempDrawWall.value.id,
+            snapFromType: 'point',
+            point: clickPoint
+          }
         }
-        return
+        const dist = Math.hypot(snapped.point.x - last.x, snapped.point.y - last.y)
+
+        if (dist < 10 * zoomLevel.value) {
+          if (tempDrawWall.value?.points?.length && tempDrawWall.value.points.length > 1) {
+            const newWall: Wall = {
+              id: Date.now().toString(),
+              points: [...tempDrawWall.value.points],
+              x: snapped.point.x,
+              y: snapped.point.y,
+              thickness: wallThickness.value
+            }
+            walls.value.push(newWall)
+            history.value.push(JSON.parse(JSON.stringify(walls.value)))
+            tempDrawWall.value.points = []
+            lastPoint.value = null
+          }
+          return
+        }
+        clickPoint = snapped.point
       }
-
-      clickPoint = snapped.point
+      tempDrawWall.value?.points?.push(clickPoint)
+    } else {
+      tempDrawWall.value = {
+        id: Date.now().toString(),
+        x: clickPoint.x,
+        y: clickPoint.y,
+        points: [clickPoint],
+        thickness: wallThickness.value
+      }
     }
-
-    tempWallPoints.value.push(clickPoint)
     lastPoint.value = clickPoint
   } else {
     const nearest = getNearestWall({ x, y })
@@ -817,7 +827,9 @@ const clearDrawing = () => {
     walls.value = []
     doors.value = []
     windows.value = []
-    tempWallPoints.value = []
+    if (tempDrawWall.value) {
+      tempDrawWall.value = null
+    }
     history.value = []
     drawWrapper()
   }
@@ -1014,15 +1026,15 @@ const handleMouseMove = (e: MouseEvent) => {
   }
 
   if (currentTool.value === 'wall') {
-    if (tempWallPoints.value.length > 0) {
-      const last = tempWallPoints.value[tempWallPoints.value.length - 1]
+    if (tempDrawWall.value && tempDrawWall.value?.points?.length && tempDrawWall.value.points.length > 0) {
+      const last = tempDrawWall.value.points[tempDrawWall.value.points.length - 1]
       const dist = Math.hypot(x - last.x, y - last.y)
 
       if (dist < snapThreshold) {
         hoverPoint.value = { ...last }
       } else {
         // 收集所有点（包括临时折线和已绘制的墙上的点）
-        const allPoints = [...tempWallPoints.value]
+        const allPoints = [...tempDrawWall.value.points]
         walls.value.forEach(wall => {
           wall.points.forEach(point => {
             allPoints.push(point)
@@ -1030,12 +1042,19 @@ const handleMouseMove = (e: MouseEvent) => {
         })
         let snappedPoint = getSnapPoint([{
           objType: 'wall',
+          objId: tempDrawWall.value.id,
           snapFromType: 'point',
           point: last
-        }], { x, y }, allPoints.map(v => ({ objType: 'wall', snapFromType: 'point', point: v })))
+        }], { x, y }, allPoints.map(v => ({
+          objType: 'wall',
+          objId: (tempDrawWall.value as Wall).id,
+          snapFromType: 'point',
+          point: v
+        })))
         if (snappedPoint === null) {
           snappedPoint = {
             objType: 'wall',
+            objId: tempDrawWall.value.id,
             snapFromType: 'point',
             point: { x, y }
           }
