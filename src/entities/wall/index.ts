@@ -5,6 +5,8 @@ import { drawPoint } from '@/utils/drawPoint'
 import { createShapeFromPoints } from '@/utils/createShapeFromPoints'
 import { calculateAngle } from '@/utils/calculateAngle'
 import pointToLineDistance from '@/utils/pointToLineDistance'
+import * as THREE from 'three'
+import { Geometry } from 'martinez-polygon-clipping'
 
 export class WallEntity extends EntityClass<Wall> {
   type: EntityType = 'wall'
@@ -70,7 +72,39 @@ export class WallEntity extends EntityClass<Wall> {
   }
 
   draw3D(scene: any): void {
-    // 实现墙体的3D绘制逻辑
+    const margineds: Geometry | null = createShapeFromPoints([this.wall]);
+    if (!margineds) return
+
+    // console.log('margineds', margineds)
+    for (const poly of margineds || []) {
+      for (let i = 0; i < poly.length; i++) {
+        const ring = poly[i] as any
+        const points = []; // wall.points.map((p) => new THREE.Vector2(p.x, p.y))
+        for (let j = 0; j < ring.length; j++) {
+          if (ring[j] === null) continue
+          points.push(new THREE.Vector2(ring[j][0], ring[j][1] * -1))
+        }
+
+        const shape = new THREE.Shape(points)
+        const extrudeSettings = {
+          steps: 1,
+          depth: 280,
+          bevelEnabled: true,
+          // bevelThickness: 2,
+          // bevelSize: 2,
+          // bevelSegments: 1
+        }
+
+        const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings)
+        geometry.rotateX(-Math.PI / 2);   // 将 XY 平面旋转成 XZ 平面
+        const material = new THREE.MeshStandardMaterial({ color: 0xe0e0e0, side: THREE.DoubleSide })
+        const wallMesh = new THREE.Mesh(geometry, material)
+        wallMesh.position.set(0, 0, 0)
+        wallMesh.castShadow = true
+        wallMesh.receiveShadow = true
+        scene!.add(wallMesh)
+      }
+    }
   }
 
   // 命中可拖拽具柄

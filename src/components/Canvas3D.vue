@@ -11,7 +11,7 @@ import { Geometry } from 'martinez-polygon-clipping'
 import { Wall } from '@/entities/wall/index.d'
 import { Door } from '@/entities/door/index.d'
 import { Window } from '@/entities/window/index.d'
-import { DoorEntity, WindowEntity } from '@/entities'
+import { DoorEntity, WallEntity, WindowEntity } from '@/entities'
 
 interface DrawingData {
   walls: Wall[]
@@ -198,41 +198,45 @@ const initThree = () => {
 const renderWalls = () => {
   if (!scene) return
 
-  const margineds: Geometry | null = createShapeFromPoints(props.data.walls);
-  if (!margineds) return
+  props.data.walls.forEach((wall) => {
+    const api = new WallEntity(wall);
+    api.draw3D(scene)
+  })
 
-  // console.log('margineds', margineds)
-  for (const poly of margineds || []) {
-    for (let i = 0; i < poly.length; i++) {
-      const ring = poly[i] as any
-      const points = []; // wall.points.map((p) => new THREE.Vector2(p.x, p.y))
-      for (let j = 0; j < ring.length; j++) {
-        if (ring[j] === null) continue
-        points.push(new THREE.Vector2(ring[j][0], ring[j][1] * -1))
-      }
+  // const margineds: Geometry | null = createShapeFromPoints(props.data.walls);
+  // if (!margineds) return
 
-      const shape = new THREE.Shape(points)
+  // // console.log('margineds', margineds)
+  // for (const poly of margineds || []) {
+  //   for (let i = 0; i < poly.length; i++) {
+  //     const ring = poly[i] as any
+  //     const points = []; // wall.points.map((p) => new THREE.Vector2(p.x, p.y))
+  //     for (let j = 0; j < ring.length; j++) {
+  //       if (ring[j] === null) continue
+  //       points.push(new THREE.Vector2(ring[j][0], ring[j][1] * -1))
+  //     }
 
-      const extrudeSettings = {
-        steps: 1,
-        depth: 280,
-        bevelEnabled: true,
-        // bevelThickness: 2,
-        // bevelSize: 2,
-        // bevelSegments: 1
-      }
+  //     const shape = new THREE.Shape(points)
 
-      const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings)
-      geometry.rotateX(-Math.PI / 2);   // 将 XY 平面旋转成 XZ 平面
-      const material = new THREE.MeshStandardMaterial({ color: 0xe0e0e0, side: THREE.DoubleSide })
-      const wallMesh = new THREE.Mesh(geometry, material)
-      wallMesh.position.set(0, 0, 0)
-      wallMesh.castShadow = true
-      wallMesh.receiveShadow = true
-      scene!.add(wallMesh)
-    }
-  }
-  resize();
+  //     const extrudeSettings = {
+  //       steps: 1,
+  //       depth: 280,
+  //       bevelEnabled: true,
+  //       // bevelThickness: 2,
+  //       // bevelSize: 2,
+  //       // bevelSegments: 1
+  //     }
+
+  //     const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings)
+  //     geometry.rotateX(-Math.PI / 2);   // 将 XY 平面旋转成 XZ 平面
+  //     const material = new THREE.MeshStandardMaterial({ color: 0xe0e0e0, side: THREE.DoubleSide })
+  //     const wallMesh = new THREE.Mesh(geometry, material)
+  //     wallMesh.position.set(0, 0, 0)
+  //     wallMesh.castShadow = true
+  //     wallMesh.receiveShadow = true
+  //     scene!.add(wallMesh)
+  //   }
+  // }
   // props.data.walls.forEach((wall) => {
   //   if (wall.points.length < 2) return
   //   console.log(11111, wall.points)
@@ -280,7 +284,8 @@ const renderWindows = () => {
 
   props.data.windows.forEach((win) => {
     const api = new WindowEntity(win)
-    api.draw3D(scene)
+    const wall: Wall | undefined = props.data.walls.find((wall) => wall.id === win.wallId);
+    api.draw3D(scene, wall)
 
     // const geometry = new THREE.CylinderGeometry(3, 3, 20, 8)
     // const material = new THREE.MeshStandardMaterial({ color: 0x3498db })
@@ -330,6 +335,7 @@ const updateScene = () => {
     renderWalls()
     renderDoors()
     renderWindows()
+    resize();
   }
 }
 

@@ -2,6 +2,8 @@ import { Point, Entity, HandelInfo } from '@/types/map2d'
 import { allSnapFromType, EntityClass, EntityType, MatchSnapPoint } from '@/types/entity'
 import { Window } from './index.d'
 import * as THREE from 'three'
+import { Brush, Evaluator, SUBTRACTION } from 'three-bvh-csg';
+import { Wall } from '../wall/index.d';
 
 export class WindowEntity extends EntityClass<Window> {
   type: EntityType = 'window'
@@ -70,11 +72,13 @@ export class WindowEntity extends EntityClass<Window> {
     this.changePosition({ x, y })
   }
 
-  draw3D(scene: any): void {
+  draw3D(scene: any, wall: Wall | undefined): void {
     // 实现门的3D绘制逻辑
     const wallThickness = 20; // props.data.walls.find((wall) => wall.id === door.wallId)?.thickness || 0;
     console.log('window', this.width, this.height)
-    const geometry = new THREE.BoxGeometry(this.width, this.height, wallThickness + 2);// 额外增加2保证，门框比强款一点
+    // const boxBrush = new Brush(wall.geometry);
+    const geometry = new THREE.BoxGeometry(this.width, this.height, wallThickness + 4);// 额外增加2保证，门框比强款一点
+    // const cylinderBrush = new Brush(geometry);
     const material = new THREE.MeshStandardMaterial({ color: this.color })
     const doorMesh = new THREE.Mesh(geometry, material)
     doorMesh.position.set(this.data.x, this.height / 2 + 40, this.data.y)

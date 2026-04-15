@@ -24,7 +24,7 @@ export abstract class EntityClass<T extends Entity> {
     this.data = data
   }
 
-  abstract draw3D(scene: any): void
+  abstract draw3D(scene: any, ...args: any[]): void
 
   // 命中可拖拽具柄
   abstract matchHandelInfo(x: number, y: number, zoomLevel: number): HandelInfo | null;
