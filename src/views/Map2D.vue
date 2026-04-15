@@ -51,6 +51,7 @@
     <div class="split-bar" @mousedown="startSplit" title="拖动调整左右比例"></div>
 
     <div class="right-panel">
+      {{ drawingData }}
       <Canvas3D :data="drawingData" />
     </div>
   </div>
@@ -797,6 +798,7 @@ const handleCanvasClick = (e: MouseEvent) => {
         const door: Door = {
           id: Date.now().toString(),
           wallId: nearest.wall.id,
+          wallPointId: -1,
           x: nearest.pointOnWall.x,
           y: nearest.pointOnWall.y,
           width: doorWidth,

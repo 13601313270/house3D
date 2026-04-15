@@ -150,6 +150,7 @@ export const draw = (
       if (currentTool === 'door') {
         const door = {
           id: '123',
+          wallPointId: -1,
           wallId: nearestWall.wall.id,
           x: wallScreenX,
           y: wallScreenY,
