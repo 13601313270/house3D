@@ -21,12 +21,19 @@ export type MatchSnapPoint = OrigionSnapPoint | {
 export abstract class EntityClass<T extends Entity> {
   abstract type: EntityType
   data: T
+  meshList: THREE.Mesh[] = []
 
   constructor(data: T) {
     this.data = data
   }
 
   abstract draw3D(...args: any[]): THREE.Mesh[]
+
+  draw3DAndCache(...args: any[]) {
+    const meshList = this.draw3D(...args)
+    this.meshList = meshList
+    return meshList
+  }
 
   // 命中可拖拽具柄
   abstract matchHandelInfo(x: number, y: number, zoomLevel: number): HandelInfo | null;

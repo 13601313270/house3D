@@ -195,12 +195,16 @@ const initThree = () => {
   }
 }
 
+let wallEntityList: WallEntity[] = []
+
 const renderWalls = () => {
   if (!scene) return
 
+  wallEntityList = [];
   props.data.walls.forEach((wall) => {
     const api = new WallEntity(wall);
-    const meshList = api.draw3D()
+    wallEntityList.push(api)
+    const meshList = api.draw3DAndCache()
     meshList.forEach(mesh => scene!.add(mesh))
   })
 
@@ -276,7 +280,12 @@ const renderDoors = () => {
 
   props.data.doors.forEach((door) => {
     const api = new DoorEntity(door);
-    const meshList = api.draw3D()
+
+    const wall = props.data.walls.find((wall) => wall.id === door.wallId);
+
+    const findWall = wallEntityList.find((entity) => entity.data.id === door.wallId)
+
+    const meshList = api.draw3DAndCache(findWall)
     meshList.forEach(mesh => scene!.add(mesh))
   })
 }
@@ -287,7 +296,7 @@ const renderWindows = () => {
   props.data.windows.forEach((win) => {
     const api = new WindowEntity(win)
     const wall: Wall | undefined = props.data.walls.find((wall) => wall.id === win.wallId);
-    const meshList = api.draw3D()
+    const meshList = api.draw3DAndCache()
     meshList.forEach(mesh => scene!.add(mesh))
 
     // const geometry = new THREE.CylinderGeometry(3, 3, 20, 8)

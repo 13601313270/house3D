@@ -1,7 +1,10 @@
 import { HandelInfo, Point } from '@/types/map2d'
 import * as THREE from 'three'
 import { Door } from './index.d'
+import { Brush, Evaluator, SUBTRACTION } from 'three-bvh-csg';
 import { allSnapFromType, EntityClass, EntityType, MatchSnapPoint } from '@/types/entity'
+import { Wall } from '../wall/index.d'
+import { WallEntity } from '../wall'
 
 export class DoorEntity extends EntityClass<Door> {
   type: EntityType = 'door'
@@ -57,17 +60,34 @@ export class DoorEntity extends EntityClass<Door> {
     ctx.stroke()
   }
 
-  draw3D() {
+  draw3D(wall: WallEntity) {
     // 实现门的3D绘制逻辑
-    const wallThickness = 20; // props.data.walls.find((wall) => wall.id === door.wallId)?.thickness || 0;
-    console.log('doorPointId-get', this.data.wallPointId)
+    const wallThickness = wall.data.thickness;
+    console.log('doorPointId-get', wall, this.data.wallPointId)
     const geometry = new THREE.BoxGeometry(this.width, this.height, wallThickness + 2);// 额外增加2保证，门框比强款一点
     const material = new THREE.MeshStandardMaterial({ color: 0xe67e22 })
-    const doorMesh = new THREE.Mesh(geometry, material)
-    doorMesh.position.set(this.data.x, this.height / 2, this.data.y)
-    doorMesh.rotateY(this.angle * -1);
-    // scene!.add(doorMesh)
-    return [doorMesh]
+    if (this.data.wallPointId > -1) {
+      const wallMesh = wall.meshList[this.data.wallPointId];
+      const cylinderBrush = new Brush(geometry);
+      const boxBrush = new Brush(wallMesh.geometry);
+      // 3. 执行布尔运算 (立方体减去圆柱体)
+      const evaluator = new Evaluator();
+      // 注意：这里 SUBTRACTION 的顺序很重要：主体减去洞模型
+      const resultGeometry = evaluator.evaluate(boxBrush, cylinderBrush, SUBTRACTION);
+
+      // 4. 创建最终的网格
+      const material = new THREE.MeshStandardMaterial({ color: 0x00aaff, side: THREE.DoubleSide });
+      const resultMesh = new THREE.Mesh(resultGeometry.geometry, material);
+
+      resultMesh.position.set(this.data.x, this.height / 2, this.data.y)
+      resultMesh.rotateY(this.angle * -1);
+      return [resultMesh]
+    } else {
+      const doorMesh = new THREE.Mesh(geometry, material)
+      doorMesh.position.set(this.data.x, this.height / 2, this.data.y)
+      doorMesh.rotateY(this.angle * -1);
+      return [doorMesh]
+    }
   }
 
   matchHandelInfo(x: number, y: number, zoomLevel: number) {
