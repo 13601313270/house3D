@@ -63,27 +63,46 @@ export class DoorEntity extends EntityClass<Door> {
   draw3D(wall: WallEntity) {
     // 实现门的3D绘制逻辑
     const wallThickness = wall.data.thickness;
-    console.log('doorPointId-get', wall, this.data.wallPointId)
-    const geometry = new THREE.BoxGeometry(this.width, this.height, wallThickness + 2);// 额外增加2保证，门框比强款一点
+    console.log('doorPointId-get', wall, wall.points)
+    const geometry = new THREE.BoxGeometry(
+      this.width * 1,
+      this.height * 1,
+      wallThickness + 2
+    );// 额外增加2保证，门框比强款一点
     const material = new THREE.MeshStandardMaterial({ color: 0xe67e22 })
-    if (this.data.wallPointId > -1) {
+    const doorMesh = new THREE.Mesh(geometry, material)
+    if (this.data.wallPointId > -1 && wall.meshList[this.data.wallPointId]) {
       const wallMesh = wall.meshList[this.data.wallPointId];
       const cylinderBrush = new Brush(geometry);
-      const boxBrush = new Brush(wallMesh.geometry);
+      cylinderBrush.position.set(this.data.x, this.height / 2, this.data.y)
+      cylinderBrush.updateMatrixWorld()
+      const boxBrush = new Brush(wallMesh.geometry.clone());// 主体
+      boxBrush.position.set(
+        wallMesh.position.x,
+        wallMesh.position.y,
+        wallMesh.position.z
+      )
       // 3. 执行布尔运算 (立方体减去圆柱体)
       const evaluator = new Evaluator();
       // 注意：这里 SUBTRACTION 的顺序很重要：主体减去洞模型
       const resultGeometry = evaluator.evaluate(boxBrush, cylinderBrush, SUBTRACTION);
 
-      // 4. 创建最终的网格
-      const material = new THREE.MeshStandardMaterial({ color: 0x00aaff, side: THREE.DoubleSide });
-      const resultMesh = new THREE.Mesh(resultGeometry.geometry, material);
+      wallMesh.geometry = resultGeometry.geometry
+      // // 4. 创建最终的网格
+      // const material = new THREE.MeshStandardMaterial({ color: 0x00aaff, side: THREE.DoubleSide });
+      // const resultMesh = new THREE.Mesh(resultGeometry.geometry, material);
 
-      resultMesh.position.set(this.data.x, this.height / 2, this.data.y)
-      resultMesh.rotateY(this.angle * -1);
-      return [resultMesh]
+      // resultMesh.position.set(wallMesh.position.x, wallMesh.position.y, wallMesh.position.z + 3)
+      // resultMesh.rotateY(this.angle * -1);
+      doorMesh.position.set(this.data.x, this.height / 2, this.data.y)
+      // doorMesh缩放到90%
+      doorMesh.scale.set(0.9, 0.9, 0.9)
+      doorMesh.rotateY(this.angle * -1);
+      return [
+        doorMesh,
+        // resultMesh
+      ]
     } else {
-      const doorMesh = new THREE.Mesh(geometry, material)
       doorMesh.position.set(this.data.x, this.height / 2, this.data.y)
       doorMesh.rotateY(this.angle * -1);
       return [doorMesh]
