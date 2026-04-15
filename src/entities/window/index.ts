@@ -83,7 +83,6 @@ export class WindowEntity extends EntityClass<Window> {
     const doorMesh = new THREE.Mesh(geometry, material)
     doorMesh.position.set(this.data.x, this.height / 2 + 40, this.data.y)
     doorMesh.rotateY(this.angle * -1);
-    // scene!.add(doorMesh)
     return [doorMesh]
   }
 
