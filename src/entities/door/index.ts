@@ -57,7 +57,7 @@ export class DoorEntity extends EntityClass<Door> {
     ctx.stroke()
   }
 
-  draw3D(scene: any): void {
+  draw3D() {
     // 实现门的3D绘制逻辑
     const wallThickness = 20; // props.data.walls.find((wall) => wall.id === door.wallId)?.thickness || 0;
     console.log('doorPointId-get', this.data.wallPointId)
@@ -66,7 +66,8 @@ export class DoorEntity extends EntityClass<Door> {
     const doorMesh = new THREE.Mesh(geometry, material)
     doorMesh.position.set(this.data.x, this.height / 2, this.data.y)
     doorMesh.rotateY(this.angle * -1);
-    scene!.add(doorMesh)
+    // scene!.add(doorMesh)
+    return [doorMesh]
   }
 
   matchHandelInfo(x: number, y: number, zoomLevel: number) {

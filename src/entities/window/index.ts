@@ -72,7 +72,7 @@ export class WindowEntity extends EntityClass<Window> {
     this.changePosition({ x, y })
   }
 
-  draw3D(scene: any, wall: Wall | undefined): void {
+  draw3D() {
     // 实现门的3D绘制逻辑
     const wallThickness = 20; // props.data.walls.find((wall) => wall.id === door.wallId)?.thickness || 0;
     console.log('window', this.width, this.height)
@@ -83,7 +83,8 @@ export class WindowEntity extends EntityClass<Window> {
     const doorMesh = new THREE.Mesh(geometry, material)
     doorMesh.position.set(this.data.x, this.height / 2 + 40, this.data.y)
     doorMesh.rotateY(this.angle * -1);
-    scene!.add(doorMesh)
+    // scene!.add(doorMesh)
+    return [doorMesh]
   }
 
   inSceneSnapPointArea(newPosition: MatchSnapPoint) {

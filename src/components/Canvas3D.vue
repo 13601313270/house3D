@@ -200,7 +200,8 @@ const renderWalls = () => {
 
   props.data.walls.forEach((wall) => {
     const api = new WallEntity(wall);
-    api.draw3D(scene)
+    const meshList = api.draw3D()
+    meshList.forEach(mesh => scene!.add(mesh))
   })
 
   // const margineds: Geometry | null = createShapeFromPoints(props.data.walls);
@@ -275,7 +276,8 @@ const renderDoors = () => {
 
   props.data.doors.forEach((door) => {
     const api = new DoorEntity(door);
-    api.draw3D(scene)
+    const meshList = api.draw3D()
+    meshList.forEach(mesh => scene!.add(mesh))
   })
 }
 
@@ -285,7 +287,8 @@ const renderWindows = () => {
   props.data.windows.forEach((win) => {
     const api = new WindowEntity(win)
     const wall: Wall | undefined = props.data.walls.find((wall) => wall.id === win.wallId);
-    api.draw3D(scene, wall)
+    const meshList = api.draw3D()
+    meshList.forEach(mesh => scene!.add(mesh))
 
     // const geometry = new THREE.CylinderGeometry(3, 3, 20, 8)
     // const material = new THREE.MeshStandardMaterial({ color: 0x3498db })

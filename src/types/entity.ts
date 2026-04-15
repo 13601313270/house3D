@@ -1,7 +1,7 @@
+import * as THREE from 'three'
 import { Entity, HandelInfo, Point, PointWithIndex } from './map2d'
 
 export type EntityType = 'wall' | 'door' | 'window'
-
 export type allSnapFromType = 'point' | 'line' | 'axis'
 // 磁吸点
 export type OrigionSnapPoint = {
@@ -26,7 +26,7 @@ export abstract class EntityClass<T extends Entity> {
     this.data = data
   }
 
-  abstract draw3D(scene: any, ...args: any[]): void
+  abstract draw3D(...args: any[]): THREE.Mesh[]
 
   // 命中可拖拽具柄
   abstract matchHandelInfo(x: number, y: number, zoomLevel: number): HandelInfo | null;

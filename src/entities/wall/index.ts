@@ -71,10 +71,11 @@ export class WallEntity extends EntityClass<Wall> {
     });
   }
 
-  draw3D(scene: any): void {
+  draw3D() {
     const margineds: Geometry | null = createShapeFromPoints([this.wall]);
-    if (!margineds) return
+    if (!margineds) return []
 
+    const meshList: THREE.Mesh[] = []
     // console.log('margineds', margineds)
     for (const poly of margineds || []) {
       for (let i = 0; i < poly.length; i++) {
@@ -102,9 +103,11 @@ export class WallEntity extends EntityClass<Wall> {
         wallMesh.position.set(0, 0, 0)
         wallMesh.castShadow = true
         wallMesh.receiveShadow = true
-        scene!.add(wallMesh)
+        meshList.push(wallMesh)
       }
     }
+    // meshList.forEach(mesh => scene!.add(mesh))
+    return meshList
   }
 
   // 命中可拖拽具柄
