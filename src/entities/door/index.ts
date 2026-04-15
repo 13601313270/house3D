@@ -111,12 +111,13 @@ export class DoorEntity extends EntityClass<Door> {
     return []
   }
 
-  afterBeSnapByLine(obj: { type: EntityType }, line: [Point, Point]) {
+  afterBeSnapByLine(obj: EntityClass<Door>, line: [Point, Point]) {
     if (obj.type === 'wall') {
       const p1 = line[0]
       const p2 = line[1]
       const nearestAngle = Math.atan2(p2.y - p1.y, p2.x - p1.x)
       console.log('after', obj.type, line, nearestAngle)
+      this.data.wallId = obj.data.id as string
       this.data.angle = nearestAngle
     }
   }

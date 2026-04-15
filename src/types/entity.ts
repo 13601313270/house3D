@@ -48,7 +48,7 @@ export abstract class EntityClass<T extends Entity> {
 
   // 当前对象吸附到一根线后的后续处理
   abstract afterBeSnapByLine(
-    obj: { type: EntityType },
+    obj: EntityClass<Entity>,
     line: [Point, Point]
   ): void;
 
