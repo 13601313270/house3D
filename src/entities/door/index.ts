@@ -97,6 +97,7 @@ export class DoorEntity extends EntityClass<Door> {
     const key: allSnapFromType = 'point';
     return [{
       objType: this.type,
+      objId: this.data.id,
       snapFromType: key,
       point: {
         index: 0,

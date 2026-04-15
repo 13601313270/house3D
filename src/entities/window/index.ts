@@ -98,6 +98,7 @@ export class WindowEntity extends EntityClass<Window> {
     const key: allSnapFromType = 'point';
     return [{
       objType: this.type,
+      objId: this.data.id,
       snapFromType: key,
       point: {
         index: 0,

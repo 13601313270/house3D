@@ -245,6 +245,7 @@ const getSnapPoint = (
         pointDistance = dist
         pointSnapped = {
           objType: point.objType,
+          objId: point.objId,
           snapFromType: point.snapFromType,
           point: point.point
         }
@@ -257,6 +258,7 @@ const getSnapPoint = (
     return {
       objType: pointSnapped.objType,
       snapFromType: pointSnapped.snapFromType,
+      objId: pointSnapped.objId,
       point: {
         ...roundNumberList(pointSnapped.point),
         index: (pointSnapped.point as PointWithIndex).index,
@@ -292,10 +294,12 @@ const getSnapPoint = (
   // 3. 计算轴对齐磁吸数据
   let xAxisSnappedYVal: {
     objType: EntityType,
+    objId: string,
     number: number
   } | null = null // 命中的y坐标值（水平对齐，即y值与某个点一致）
   let yAxisSnappedXVal: {
     objType: EntityType,
+    objId: string,
     number: number
   } | null = null // 命中的x坐标值（垂直对齐，即x值与某个点一致）
   let xAxisDistance = Infinity // 命中x轴对齐的最小距离
@@ -306,6 +310,7 @@ const getSnapPoint = (
       xAxisDistance = distToXAxis
       xAxisSnappedYVal = {
         objType: point.objType,
+        objId: point.objId,
         number: point.point.y
       }
     }
@@ -315,6 +320,7 @@ const getSnapPoint = (
       yAxisDistance = distToYAxis
       yAxisSnappedXVal = {
         objType: point.objType,
+        objId: point.objId,
         number: point.point.x
       }
     }
@@ -345,6 +351,7 @@ const getSnapPoint = (
     // 1. 计算角度磁吸数据
     let angleSnapped: {
       objType: EntityType,
+      objId: string,
       point: Point
     } | null = null
     let angleDistance = Infinity
@@ -357,6 +364,7 @@ const getSnapPoint = (
       if (distToMouse < 10) {
         angleSnapped = {
           objType: nearestStart.objType,
+          objId: nearestStart.objId,
           point: {
             x: snappedXTemp,
             y: snappedYTemp
@@ -420,6 +428,7 @@ const getSnapPoint = (
       }
       return {
         objType: nearestStart.objType,
+        objId: nearestStart.objId,
         snapFromType: 'line',
         point: roundNumberList({
           x: snappedX,
@@ -433,6 +442,7 @@ const getSnapPoint = (
       snappedY = angleSnapped.point.y
       return {
         objType: angleSnapped.objType,
+        objId: angleSnapped.objId,
         snapFromType: 'line',
         point: roundNumberList({
           x: snappedX,
@@ -447,6 +457,7 @@ const getSnapPoint = (
     snappedY = xAxisSnappedYVal.number
     return {
       objType: yAxisSnappedXVal.objType,
+      objId: yAxisSnappedXVal.objId,
       snapFromType: 'axis',
       point: roundNumberList({
         x: snappedX,
@@ -459,6 +470,7 @@ const getSnapPoint = (
     snappedY = current.y
     return {
       objType: yAxisSnappedXVal.objType,
+      objId: yAxisSnappedXVal.objId,
       snapFromType: 'axis',
       point: roundNumberList({
         x: snappedX,
@@ -471,6 +483,7 @@ const getSnapPoint = (
     snappedY = xAxisSnappedYVal.number
     return {
       objType: xAxisSnappedYVal.objType,
+      objId: xAxisSnappedYVal.objId,
       snapFromType: 'axis',
       point: roundNumberList({
         x: snappedX,
@@ -724,7 +737,11 @@ const handleCanvasClick = (e: MouseEvent) => {
           allPoints.push(point)
         })
       })
-      let snapped = getSnapPoint([{ objType: 'wall', snapFromType: 'point', point: last }], clickPoint, allPoints.map((v, index) => ({
+      let snapped = getSnapPoint([{
+        objType: 'wall',
+        snapFromType: 'point',
+        point: last
+      }], clickPoint, allPoints.map((v, index) => ({
         objType: 'wall',
         snapFromType: 'point',
         point: {
@@ -879,7 +896,7 @@ const handleMouseMove = (e: MouseEvent) => {
 
     // const targetX = x - (dragOffset.value?.x || 0)
     // const targetY = y - (dragOffset.value?.y || 0)
-    function temp(api: EntityClass<any>): boolean {
+    function temp(api: EntityClass<Entity>): boolean {
       if (matchHandelObj && matchHandelInfo) {
         let beMatchPoints = api.getMineBeSnapPoints()
         // 排出掉和自己磁吸
@@ -897,6 +914,7 @@ const handleMouseMove = (e: MouseEvent) => {
             const result = matchHandelObj.inSceneSnapPointArea(
               {
                 objType: api.type,
+                objId: snapped.objId,
                 snapFromType: 'point',
                 point: snapped.point
               },
@@ -925,6 +943,7 @@ const handleMouseMove = (e: MouseEvent) => {
           if (nearestPoint && minDistance < snapThreshold) {
             const result = matchHandelObj.inSceneSnapPointArea({
               objType: api.type,
+              objId: api.data.id,
               snapFromType: 'line',
               point: nearestPoint
             }, matchHandelInfo)
@@ -1009,7 +1028,11 @@ const handleMouseMove = (e: MouseEvent) => {
             allPoints.push(point)
           })
         })
-        let snappedPoint = getSnapPoint([{ objType: 'wall', snapFromType: 'point', point: last }], { x, y }, allPoints.map(v => ({ objType: 'wall', snapFromType: 'point', point: v })))
+        let snappedPoint = getSnapPoint([{
+          objType: 'wall',
+          snapFromType: 'point',
+          point: last
+        }], { x, y }, allPoints.map(v => ({ objType: 'wall', snapFromType: 'point', point: v })))
         if (snappedPoint === null) {
           snappedPoint = {
             objType: 'wall',
@@ -1017,7 +1040,9 @@ const handleMouseMove = (e: MouseEvent) => {
             point: { x, y }
           }
         }
-        hoverPoint.value = snappedPoint.point
+        if (snappedPoint) {
+          hoverPoint.value = snappedPoint.point
+        }
       }
     }
   } else {
