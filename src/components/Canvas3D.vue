@@ -11,7 +11,9 @@ import { Geometry } from 'martinez-polygon-clipping'
 import { Wall } from '@/entities/wall/index.d'
 import { Door } from '@/entities/door/index.d'
 import { Window } from '@/entities/window/index.d'
-import { DoorEntity, WallEntity, WindowEntity } from '@/entities'
+import { DoorEntity } from '@/entities/door'
+import { WindowEntity } from '@/entities/window'
+import { WallEntity } from '@/entities/wall'
 
 interface DrawingData {
   walls: Wall[]
