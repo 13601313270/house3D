@@ -37,6 +37,15 @@
           :style="{ display: isSplitting ? 'none' : 'block' }" />
         <div v-if="contextMenu?.visible" class="context-menu"
           :style="{ top: contextMenu.y + 'px', left: contextMenu.x + 'px' }">
+          {{ editPropConfigInfo }}
+          {{ editPropInputInfo }}
+          <div>
+            <label v-for="item in editPropConfigInfo" :key="item.id">
+              {{ item.label }}：
+              <input v-if="item.dataType === 'number'" type="number" v-model.number="editPropInputInfo[item.id]" />
+            </label>
+          </div>
+          <button @click="useEditProp">use</button>
           <div v-if="contextMenu.type === 'wall-point'">
             <label>
               墙体厚度：
@@ -69,8 +78,8 @@ import { DoorEntity, WallEntity, WindowEntity } from '@/entities'
 import { EntityClass, EntityType, MatchSnapPoint } from '@/types/entity'
 import { HandelInfo, PointWithIndex } from '@/types/map2d'
 import pointToLineDistance from '@/utils/pointToLineDistance'
-import { createDoorData } from '@/entities/door'
-import { createWindowData } from '@/entities/window'
+import { createDoorData, editPropConfig as doorEditPropConfig } from '@/entities/door'
+import { createWindowData, editPropConfig as windowEditPropConfig } from '@/entities/window'
 
 const canvasRef = ref<HTMLCanvasElement | null>(null)
 const canvas3DRef = ref<HTMLCanvasElement | null>(null)
@@ -166,7 +175,19 @@ const drawingData = computed(() => ({
   windows: windows.value
 }))
 
-const contextMenu = ref<{ visible: boolean; x: number; y: number; type: 'door' | 'window' | 'wall-point'; index?: number; wallIndex?: number; pointIndex?: number; thickness?: number } | null>(null)
+const contextMenu = ref<{
+  visible: boolean;
+  x: number;
+  y: number;
+  type: 'door' | 'window' | 'wall-point';
+  index?: number;
+  wallIndex?: number;
+  pointIndex?: number;
+  thickness?: number
+} | null>(null)
+
+const editPropConfigInfo = ref<any[]>([])
+const editPropInputInfo = ref<any>({})
 
 interface NearestWallResult {
   wall: Wall
@@ -677,6 +698,8 @@ const handleContextMenu = (e: MouseEvent) => {
     const door = doors.value[i]
     const dist = Math.hypot(x - door.x, y - door.y)
     if (dist < 10) {
+      editPropConfigInfo.value = doorEditPropConfig()
+      editPropInputInfo.value = door;
       contextMenu.value = {
         visible: true,
         x: e.clientX,
@@ -693,6 +716,8 @@ const handleContextMenu = (e: MouseEvent) => {
     const windowItem = windows.value[i]
     const dist = Math.hypot(x - windowItem.x, y - windowItem.y)
     if (dist < 10) {
+      editPropConfigInfo.value = windowEditPropConfig()
+      editPropInputInfo.value = windowItem;
       contextMenu.value = {
         visible: true,
         x: e.clientX,
@@ -1263,6 +1288,9 @@ function changeCurrentTool(type: 'wall' | 'door' | 'window' | 'drag') {
     insertTempWindow = createWindowData();
   }
   currentTool.value = type
+}
+function useEditProp() {
+
 }
 </script>
 

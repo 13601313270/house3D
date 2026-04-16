@@ -15,9 +15,35 @@ export function createWindowData() {
     width: 120,
     height: 120,
     angle: 0,
-    bottom: 0,
+    bottom: 40,
   }
   return window
+}
+
+type editItem = {
+  id: string,
+  label: string,
+  dataType: 'number' | 'poiListAndLineCircle' | 'poiListAndLine' | 'poiList' | 'color' | 'boolean' | 'mesh' | 'area' | string[]/* 枚举 */
+}
+
+export function editPropConfig(): editItem[] {
+  return [
+    {
+      id: 'bottom',
+      label: '距离地面',
+      dataType: 'number',
+    },
+    {
+      id: 'width',
+      label: '宽度',
+      dataType: 'number',
+    },
+    {
+      id: 'height',
+      label: '高度',
+      dataType: 'number',
+    }
+  ]
 }
 
 export class WindowEntity extends EntityClass<Window> {
@@ -102,7 +128,7 @@ export class WindowEntity extends EntityClass<Window> {
       );
       subtractGeometry.rotateY(this.data.angle * -1);
       const cylinderBrush = new Brush(subtractGeometry);
-      cylinderBrush.position.set(this.data.x, this.data.height / 2 - 1, this.data.y)
+      cylinderBrush.position.set(this.data.x, this.data.height / 2 - 1 + (this.data.bottom || 0), this.data.y)
       cylinderBrush.updateMatrixWorld()
       const boxBrush = new Brush(wallMesh.geometry.clone());// 主体
       boxBrush.position.set(
@@ -122,7 +148,7 @@ export class WindowEntity extends EntityClass<Window> {
 
       // resultMesh.position.set(wallMesh.position.x, wallMesh.position.y, wallMesh.position.z + 3)
       // resultMesh.rotateY(this.data.angle * -1);
-      windowMesh.position.set(this.data.x, this.height / 2, this.data.y)
+      windowMesh.position.set(this.data.x, this.height / 2 + (this.data.bottom || 0), this.data.y)
       // mesh缩放到90%
       windowMesh.scale.set(0.99, 0.99, 0.99)
       windowMesh.rotateY(this.data.angle * -1);

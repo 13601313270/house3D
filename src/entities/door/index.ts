@@ -19,6 +19,27 @@ export function createDoorData() {
   return door
 }
 
+type editItem = {
+  id: string,
+  label: string,
+  dataType: 'number' | 'poiListAndLineCircle' | 'poiListAndLine' | 'poiList' | 'color' | 'boolean' | 'mesh' | 'area' | string[]/* 枚举 */
+}
+
+export function editPropConfig(): editItem[] {
+  return [
+    {
+      id: 'width',
+      label: '宽度',
+      dataType: 'number',
+    },
+    {
+      id: 'height',
+      label: '高度',
+      dataType: 'number',
+    }
+  ]
+}
+
 export class DoorEntity extends EntityClass<Door> {
   type: EntityType = 'door'
   id: string
