@@ -31,6 +31,14 @@ let scene: THREE.Scene | null = null
 let camera: THREE.PerspectiveCamera | null = null
 let renderer: THREE.WebGLRenderer | null = null
 
+const camera1TargetPositionX = ref<number>(0);
+const camera1TargetPositionY = ref<number>(0);
+const camera1TargetPositionZ = ref<number>(0);
+
+const camera1TargetPositionStartX = ref<number>(0);
+const camera1TargetPositionStartY = ref<number>(0);
+const camera1TargetPositionStartZ = ref<number>(0);
+
 const initThree = () => {
   const container = containerRef.value
   if (!container) return
@@ -67,12 +75,6 @@ const initThree = () => {
     let camera1AngleX = 0;
     let camera1AngelStartX = 0;
     let camera1AngelStartY = 0;
-    let camera1TargetPositionStartX = 0;
-    let camera1TargetPositionStartY = 0;
-    let camera1TargetPositionStartZ = 0;
-    let camera1TargetPositionX = 0;
-    const camera1TargetPositionY = 0;
-    let camera1TargetPositionZ = 0;
 
     function updateCameraAngel() {
       const camera1X = camera1Radius * Math.sin(camera1AngleX) * Math.cos(camera1AngleY) * -1;
@@ -85,14 +87,14 @@ const initThree = () => {
 
       if (camera) {
         camera.position.set(
-          camera1TargetPositionX + camera1X, // 镜头左右摇摆
-          camera1TargetPositionY + camera1Y,
-          camera1TargetPositionZ + camera1Z
+          camera1TargetPositionX.value + camera1X, // 镜头左右摇摆
+          camera1TargetPositionY.value + camera1Y,
+          camera1TargetPositionZ.value + camera1Z
         );
         camera.lookAt(
-          camera1TargetPositionX,
-          camera1TargetPositionY,
-          camera1TargetPositionZ
+          camera1TargetPositionX.value,
+          camera1TargetPositionY.value,
+          camera1TargetPositionZ.value
         );
       }
       // if (camera) {
@@ -130,9 +132,9 @@ const initThree = () => {
         e.preventDefault();
       } else if (e.button === 0) {
         // 移动
-        camera1TargetPositionStartX = camera1TargetPositionX;
-        camera1TargetPositionStartY = camera1TargetPositionY;
-        camera1TargetPositionStartZ = camera1TargetPositionZ;
+        camera1TargetPositionStartX.value = camera1TargetPositionX.value;
+        camera1TargetPositionStartY.value = camera1TargetPositionY.value;
+        camera1TargetPositionStartZ.value = camera1TargetPositionZ.value;
         canvas1IsMouseMove = true;
         canvas1LastMouseX = e.clientX;
         canvas1LastMouseY = e.clientY;
@@ -153,8 +155,8 @@ const initThree = () => {
         const deltaY = e.clientY - canvas1LastMouseY;
         const sensitivity = 1;
 
-        camera1TargetPositionX = camera1TargetPositionStartX - (deltaX * Math.cos(camera1AngleX) - deltaY * Math.sin(camera1AngleX)) * sensitivity;
-        camera1TargetPositionZ = camera1TargetPositionStartZ - (deltaX * Math.sin(camera1AngleX) + deltaY * Math.cos(camera1AngleX)) * sensitivity;
+        camera1TargetPositionX.value = camera1TargetPositionStartX.value - (deltaX * Math.cos(camera1AngleX) - deltaY * Math.sin(camera1AngleX)) * sensitivity;
+        camera1TargetPositionZ.value = camera1TargetPositionStartZ.value - (deltaX * Math.sin(camera1AngleX) + deltaY * Math.cos(camera1AngleX)) * sensitivity;
         updateCameraAngel()
       }
     })
