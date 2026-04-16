@@ -38,7 +38,45 @@ const camera1TargetPositionZ = ref<number>(0);
 const camera1TargetPositionStartX = ref<number>(0);
 const camera1TargetPositionStartY = ref<number>(0);
 const camera1TargetPositionStartZ = ref<number>(0);
+let camera1Radius = 800; // 摄像机距离
+let camera1AngleX = 0;
+let camera1AngleY = Math.PI / 4;
 
+function updateCameraAngel() {
+  const camera1X = camera1Radius * Math.sin(camera1AngleX) * Math.cos(camera1AngleY) * -1;
+  const camera1Y = camera1Radius * Math.sin(camera1AngleY);
+  const camera1Z = camera1Radius * Math.cos(camera1AngleX) * Math.cos(camera1AngleY);
+
+  if (camera) {
+    camera.position.set(
+      camera1TargetPositionX.value + camera1X, // 镜头左右摇摆
+      camera1TargetPositionY.value + camera1Y,
+      camera1TargetPositionZ.value + camera1Z
+    );
+    camera.lookAt(
+      camera1TargetPositionX.value,
+      camera1TargetPositionY.value,
+      camera1TargetPositionZ.value
+    );
+  }
+  // if (camera) {
+  //   camera.lookAt(
+  //     camera.position.x - camera2X,
+  //     camera.position.y - camera2Y,
+  //     camera.position.z - camera2Z,
+  //   );
+  // }
+  // camera2Cube.position.set(
+  //   camera2.position.x,
+  //   camera2.position.y,
+  //   camera2.position.z
+  // );
+  // camera2Cube.rotation.set(
+  //   camera2.rotation.x,
+  //   camera2.rotation.y,
+  //   camera2.rotation.z
+  // );
+}
 const initThree = () => {
   const container = containerRef.value
   if (!container) return
@@ -54,7 +92,6 @@ const initThree = () => {
   camera.lookAt(0, 0, 0);
 
   (() => {
-    let camera1Radius = 800; // 摄像机距离
     // let canvas2IsMouseAngel = false;
     // let canvas2IsMouseMove = false;
     // let canvas2LastMouseX = 0;
@@ -71,50 +108,9 @@ const initThree = () => {
     let canvas1IsMouseMove = false;
     let canvas1LastMouseX = 0;
     let canvas1LastMouseY = 0;
-    let camera1AngleY = Math.PI / 4;
-    let camera1AngleX = 0;
+
     let camera1AngelStartX = 0;
     let camera1AngelStartY = 0;
-
-    function updateCameraAngel() {
-      const camera1X = camera1Radius * Math.sin(camera1AngleX) * Math.cos(camera1AngleY) * -1;
-      const camera1Y = camera1Radius * Math.sin(camera1AngleY);
-      const camera1Z = camera1Radius * Math.cos(camera1AngleX) * Math.cos(camera1AngleY);
-
-      const camera2X = camera1Radius * Math.sin(camera2AngleX) * Math.cos(camera2AngleY) * -1;
-      const camera2Y = camera1Radius * Math.sin(camera2AngleY);
-      const camera2Z = camera1Radius * Math.cos(camera2AngleX) * Math.cos(camera2AngleY);
-
-      if (camera) {
-        camera.position.set(
-          camera1TargetPositionX.value + camera1X, // 镜头左右摇摆
-          camera1TargetPositionY.value + camera1Y,
-          camera1TargetPositionZ.value + camera1Z
-        );
-        camera.lookAt(
-          camera1TargetPositionX.value,
-          camera1TargetPositionY.value,
-          camera1TargetPositionZ.value
-        );
-      }
-      // if (camera) {
-      //   camera.lookAt(
-      //     camera.position.x - camera2X,
-      //     camera.position.y - camera2Y,
-      //     camera.position.z - camera2Z,
-      //   );
-      // }
-      // camera2Cube.position.set(
-      //   camera2.position.x,
-      //   camera2.position.y,
-      //   camera2.position.z
-      // );
-      // camera2Cube.rotation.set(
-      //   camera2.rotation.x,
-      //   camera2.rotation.y,
-      //   camera2.rotation.z
-      // );
-    }
 
     updateCameraAngel();
 
