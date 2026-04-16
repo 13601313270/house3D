@@ -66,7 +66,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
 import { Entity, Point } from '../types'
 import { draw, canvasWidth, canvasHeight, snapThreshold } from '../utils/drawUtils'
 import Canvas3D from '../components/Canvas3D.vue'
@@ -569,7 +569,21 @@ onMounted(() => {
     const ctx = canvas.getContext('2d')
     if (ctx) {
       ctx.canvas.width = canvasWidth
-      ctx.canvas.height = canvasHeight
+      ctx.canvas.height = canvasHeight;
+      nextTick(() => {
+        // (0,0)位移到中央
+        const canvasContainer = document.querySelector('.canvas-container')
+        if (canvasContainer) {
+          const canvasRect = canvasContainer.getBoundingClientRect()
+          const dx = canvasRect.width / 2
+          const dy = canvasRect.height / 2
+          panOffset.value.x += dx
+          panOffset.value.y += dy
+          panStartScreenX = screenX
+          panStartScreenY = screenY
+          drawWrapper()
+        }
+      })
       drawWrapper()
     }
 

@@ -4,7 +4,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted, onUnmounted, watch } from 'vue'
+import { ref, onMounted, onUnmounted, watch, nextTick } from 'vue'
 import * as THREE from 'three'
 // import { createShapeFromPoints } from '@/utils/createShapeFromPoints'
 import { Geometry } from 'martinez-polygon-clipping'
@@ -379,14 +379,15 @@ const updateScene = () => {
 }
 
 onMounted(() => {
-  initThree()
-  if (props.cameraState) {
-    camera1State.value = { ...props.cameraState }
-    updateCameraAngel()
-  }
-  updateScene()
-  animate()
-
+  nextTick(() => {
+    initThree()
+    if (props.cameraState) {
+      camera1State.value = { ...props.cameraState }
+      updateCameraAngel()
+    }
+    updateScene()
+    animate()
+  })
   window.addEventListener('resize', resize)
 })
 
