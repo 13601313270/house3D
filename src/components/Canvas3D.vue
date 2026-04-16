@@ -35,17 +35,14 @@ const camera1TargetPositionX = ref<number>(0);
 const camera1TargetPositionY = ref<number>(0);
 const camera1TargetPositionZ = ref<number>(0);
 
-const camera1TargetPositionStartX = ref<number>(0);
-const camera1TargetPositionStartY = ref<number>(0);
-const camera1TargetPositionStartZ = ref<number>(0);
-let camera1Radius = 800; // 摄像机距离
+const camera1Radius = ref<number>(800); // 摄像机距离
 let camera1AngleX = 0;
 let camera1AngleY = Math.PI / 4;
 
 function updateCameraAngel() {
-  const camera1X = camera1Radius * Math.sin(camera1AngleX) * Math.cos(camera1AngleY) * -1;
-  const camera1Y = camera1Radius * Math.sin(camera1AngleY);
-  const camera1Z = camera1Radius * Math.cos(camera1AngleX) * Math.cos(camera1AngleY);
+  const camera1X = camera1Radius.value * Math.sin(camera1AngleX) * Math.cos(camera1AngleY) * -1;
+  const camera1Y = camera1Radius.value * Math.sin(camera1AngleY);
+  const camera1Z = camera1Radius.value * Math.cos(camera1AngleX) * Math.cos(camera1AngleY);
 
   if (camera) {
     camera.position.set(
@@ -103,6 +100,9 @@ const initThree = () => {
     // let camera2AngelStartY = 0;
     // let camera2PositionStartX = 0;
     // let camera2PositionStartZ = 0;
+    let camera1TargetPositionStartX = 0;
+    let camera1TargetPositionStartY = 0;
+    let camera1TargetPositionStartZ = 0;
 
     let canvas1IsMouseAngel = false;
     let canvas1IsMouseMove = false;
@@ -128,9 +128,9 @@ const initThree = () => {
         e.preventDefault();
       } else if (e.button === 0) {
         // 移动
-        camera1TargetPositionStartX.value = camera1TargetPositionX.value;
-        camera1TargetPositionStartY.value = camera1TargetPositionY.value;
-        camera1TargetPositionStartZ.value = camera1TargetPositionZ.value;
+        camera1TargetPositionStartX = camera1TargetPositionX.value;
+        camera1TargetPositionStartY = camera1TargetPositionY.value;
+        camera1TargetPositionStartZ = camera1TargetPositionZ.value;
         canvas1IsMouseMove = true;
         canvas1LastMouseX = e.clientX;
         canvas1LastMouseY = e.clientY;
@@ -151,8 +151,8 @@ const initThree = () => {
         const deltaY = e.clientY - canvas1LastMouseY;
         const sensitivity = 1;
 
-        camera1TargetPositionX.value = camera1TargetPositionStartX.value - (deltaX * Math.cos(camera1AngleX) - deltaY * Math.sin(camera1AngleX)) * sensitivity;
-        camera1TargetPositionZ.value = camera1TargetPositionStartZ.value - (deltaX * Math.sin(camera1AngleX) + deltaY * Math.cos(camera1AngleX)) * sensitivity;
+        camera1TargetPositionX.value = camera1TargetPositionStartX - (deltaX * Math.cos(camera1AngleX) - deltaY * Math.sin(camera1AngleX)) * sensitivity;
+        camera1TargetPositionZ.value = camera1TargetPositionStartZ - (deltaX * Math.sin(camera1AngleX) + deltaY * Math.cos(camera1AngleX)) * sensitivity;
         updateCameraAngel()
       }
     })
@@ -168,8 +168,8 @@ const initThree = () => {
       e.preventDefault();
       const zoomSpeed = 0.001;
       const delta = e.deltaY * zoomSpeed;
-      const newRadius = Math.max(5, Math.min(maxCamera1Radius, camera1Radius * (1 + delta)));
-      camera1Radius = newRadius;
+      const newRadius = Math.max(5, Math.min(maxCamera1Radius, camera1Radius.value * (1 + delta)));
+      camera1Radius.value = newRadius;
       updateCameraAngel();
     }, { passive: false });
 
