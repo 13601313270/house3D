@@ -149,7 +149,7 @@ export const draw = (
       // 鼠标悬浮
       if (currentTool === 'door') {
         const door = {
-          id: '123',
+          id: 'tempDoor',
           wallPointId: -1,
           wallId: nearestWall.wall.id,
           x: wallScreenX,
@@ -162,7 +162,7 @@ export const draw = (
         doorApi.draw2D(ctx, panOffset, wallThickness, zoomLevel)
       } else if (currentTool === 'window') {
         const window = {
-          id: '123',
+          id: 'tempWindow',
           wallPointId: -1,
           wallId: nearestWall.wall.id,
           x: wallScreenX,
@@ -170,6 +170,7 @@ export const draw = (
           width: windowWidth,
           height: windowHeight,
           angle,
+          bottom: 0,
         }
         const windowApi = new WindowEntity(window)
         const wallThickness = walls.find((wall) => wall.id === window.wallId)?.thickness || 0;

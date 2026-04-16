@@ -824,6 +824,7 @@ const handleCanvasClick = (e: MouseEvent) => {
           width: windowWidth,
           height: windowHeight,
           angle: nearest.angle,
+          bottom: 0,
         }
         windows.value.push(windowItem)
       }

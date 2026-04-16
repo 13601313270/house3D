@@ -6,4 +6,5 @@ export type Window = Entity & {
   width: number
   height: number
   angle: number
+  bottom: number// 距离地面
 }
