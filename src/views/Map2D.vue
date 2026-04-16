@@ -61,7 +61,7 @@
     <div class="right-panel" :style="{ width: (1 - panel1SplitWidthPer) * 100 + '%' }">
       <!-- {{ drawingData }} -->
       {{ insertTempDoor }}
-      <Canvas3D :data="drawingData" v-model:cameraState="cameraState" />
+      <Canvas3D ref="canvas3DRef" :data="drawingData" v-model:cameraState="cameraState" />
     </div>
   </div>
 </template>
@@ -82,7 +82,7 @@ import { createDoorData, editPropConfig as doorEditPropConfig } from '@/entities
 import { createWindowData, editPropConfig as windowEditPropConfig } from '@/entities/window'
 
 const canvasRef = ref<HTMLCanvasElement | null>(null)
-const canvas3DRef = ref<HTMLCanvasElement | null>(null)
+const canvas3DRef = ref<typeof Canvas3D | null>(null)
 const currentTool = ref<'wall' | 'door' | 'window' | 'drag'>('drag')
 const walls = ref<Wall[]>([])
 const doors = ref<Door[]>([])
@@ -103,7 +103,6 @@ const panStart = ref<Point | null>(null)
 const panel1SplitWidthPer = ref(0.5)
 const isSplitting = ref(false)
 const canvasSize = ref({ width: 0, height: 0 })
-const canvas3DSize = ref({ width: 0, height: 0 })
 const zoomLevel = ref(1)
 const wallThickness = ref<number>(20)
 const cameraState = ref({
@@ -140,20 +139,9 @@ const updateCanvasSize = () => {
     }
   }
 
-  const canvas3D = canvas3DRef.value
-  if (canvas3D) {
-    const canvas3DContainer = document.querySelector('.canvas-3d-container')
-    if (canvas3DContainer) {
-      const canvas3DRect = canvas3DContainer.getBoundingClientRect()
-      const width = Math.floor(canvas3DRect.width)
-      const height = Math.floor(canvas3DRect.height)
-
-      if (width > 0 && height > 0) {
-        canvas3D.width = width
-        canvas3D.height = height
-        canvas3DSize.value = { width, height }
-      }
-    }
+  const canvas3DPanel = canvas3DRef.value
+  if (canvas3DPanel) {
+    canvas3DPanel.resize();
   }
   setTimeout(() => {
     drawWrapper()

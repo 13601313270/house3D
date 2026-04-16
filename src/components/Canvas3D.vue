@@ -409,6 +409,10 @@ watch(() => props.cameraState, (newVal) => {
     updateCameraAngel()
   }
 })
+
+defineExpose({
+  resize
+})
 </script>
 
 <style scoped>
