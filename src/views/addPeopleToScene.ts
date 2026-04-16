@@ -5,7 +5,7 @@ import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
 import { MTLLoader } from 'three/addons/loaders/MTLLoader.js';
 
 const objLoader = new OBJLoader();
-const mtlLoader = new MTLLoader();
+// const mtlLoader = new MTLLoader();
 async function addPeopleToScene(
   scene: THREE.Scene,
   type: 'people' | 'peopleSit',

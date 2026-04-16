@@ -35,9 +35,7 @@ const props = defineProps<{
   cameraState?: CameraState
 }>()
 
-const emit = defineEmits<{
-  (e: 'update:cameraState', value: CameraState): void
-}>()
+const emit = defineEmits<{(e: 'update:cameraState', value: CameraState): void}>()
 
 const containerRef = ref<HTMLDivElement | null>(null)
 
