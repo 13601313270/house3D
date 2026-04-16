@@ -64,13 +64,18 @@ export class DoorEntity extends EntityClass<Door> {
     const geometry = new THREE.BoxGeometry(
       this.width * 1,
       this.height * 1,
-      wallThickness + 10
+      1
     );// 额外增加2保证，门框比强款一点
     const material = new THREE.MeshStandardMaterial({ color: 0xe67e22 })
     const doorMesh = new THREE.Mesh(geometry, material)
     if (this.data.wallPointId > -1 && wall.meshList[this.data.wallPointId]) {
       const wallMesh = wall.meshList[this.data.wallPointId];
-      const cylinderBrush = new Brush(geometry);
+      const subtractGeometry = new THREE.BoxGeometry(
+        this.width,
+        this.height,
+        wallThickness + 10
+      );
+      const cylinderBrush = new Brush(subtractGeometry);
       cylinderBrush.position.set(this.data.x, this.height / 2 - 1, this.data.y)
       cylinderBrush.updateMatrixWorld()
       const boxBrush = new Brush(wallMesh.geometry.clone());// 主体
@@ -92,18 +97,15 @@ export class DoorEntity extends EntityClass<Door> {
       // resultMesh.position.set(wallMesh.position.x, wallMesh.position.y, wallMesh.position.z + 3)
       // resultMesh.rotateY(this.angle * -1);
       doorMesh.position.set(this.data.x, this.height / 2, this.data.y)
-      // doorMesh缩放到90%
-      doorMesh.scale.set(0.9, 0.9, 0.9)
       doorMesh.rotateY(this.angle * -1);
       return [
-        // doorMesh,
-        // resultMesh
+        doorMesh,
       ]
     } else {
       doorMesh.position.set(this.data.x, this.height / 2, this.data.y)
       doorMesh.rotateY(this.angle * -1);
       return [
-        // doorMesh
+        doorMesh
       ]
     }
   }
