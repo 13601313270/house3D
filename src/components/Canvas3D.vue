@@ -21,8 +21,22 @@ interface DrawingData {
   windows: Window[]
 }
 
+interface CameraState {
+  targetPositionX: number
+  targetPositionY: number
+  targetPositionZ: number
+  radius: number
+  angleX: number
+  angleY: number
+}
+
 const props = defineProps<{
   data: DrawingData
+  cameraState?: CameraState
+}>()
+
+const emit = defineEmits<{
+  (e: 'update:cameraState', value: CameraState): void
 }>()
 
 const containerRef = ref<HTMLDivElement | null>(null)
@@ -31,15 +45,6 @@ let scene: THREE.Scene | null = null
 let camera: THREE.PerspectiveCamera | null = null
 let renderer: THREE.WebGLRenderer | null = null
 
-interface CameraState {
-  targetPositionX: number;
-  targetPositionY: number;
-  targetPositionZ: number;
-  radius: number;
-  angleX: number;
-  angleY: number;
-}
-
 const camera1State = ref<CameraState>({
   targetPositionX: 0,
   targetPositionY: 0,
@@ -47,7 +52,7 @@ const camera1State = ref<CameraState>({
   radius: 800, // 摄像机距离
   angleX: 0,
   angleY: Math.PI / 4,
-});
+})
 
 function updateCameraAngel() {
   const camera1X = camera1State.value.radius * Math.sin(camera1State.value.angleX) * Math.cos(camera1State.value.angleY) * -1;
@@ -122,7 +127,18 @@ const initThree = () => {
     let camera1AngelStartX = 0;
     let camera1AngelStartY = 0;
 
-    updateCameraAngel();
+    updateCameraAngel()
+
+    const emitCameraState = () => {
+      emit('update:cameraState', {
+        targetPositionX: camera1State.value.targetPositionX,
+        targetPositionY: camera1State.value.targetPositionY,
+        targetPositionZ: camera1State.value.targetPositionZ,
+        radius: camera1State.value.radius,
+        angleX: camera1State.value.angleX,
+        angleY: camera1State.value.angleY
+      })
+    }
 
     const container = containerRef.value
     if (!container) return
@@ -168,9 +184,11 @@ const initThree = () => {
     })
     container.addEventListener('mouseup', (e) => {
       if (e.button === 2) {
-        canvas1IsMouseAngel = false;
+        canvas1IsMouseAngel = false
+        emitCameraState()
       } else if (e.button === 0) {
-        canvas1IsMouseMove = false;
+        canvas1IsMouseMove = false
+        emitCameraState()
       }
     });
 
@@ -181,6 +199,7 @@ const initThree = () => {
       const newRadius = Math.max(5, Math.min(maxCamera1Radius, camera1State.value.radius * (1 + delta)));
       camera1State.value.radius = newRadius;
       updateCameraAngel();
+      emitCameraState()
     }, { passive: false });
 
     container.addEventListener('contextmenu', (e) => {
@@ -363,6 +382,10 @@ const updateScene = () => {
 
 onMounted(() => {
   initThree()
+  if (props.cameraState) {
+    camera1State.value = { ...props.cameraState }
+    updateCameraAngel()
+  }
   updateScene()
   animate()
 
@@ -380,6 +403,13 @@ onUnmounted(() => {
 watch(() => props.data, () => {
   updateScene()
 }, { deep: true })
+
+watch(() => props.cameraState, (newVal) => {
+  if (newVal) {
+    camera1State.value = { ...newVal }
+    updateCameraAngel()
+  }
+})
 </script>
 
 <style scoped>

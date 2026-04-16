@@ -52,7 +52,7 @@
 
     <div class="right-panel">
       {{ drawingData }}
-      <Canvas3D :data="drawingData" />
+      <Canvas3D :data="drawingData" v-model:cameraState="cameraState" />
     </div>
   </div>
 </template>
@@ -95,6 +95,14 @@ const canvasSize = ref({ width: 0, height: 0 })
 const canvas3DSize = ref({ width: 0, height: 0 })
 const zoomLevel = ref(1)
 const wallThickness = ref<number>(20)
+const cameraState = ref({
+  targetPositionX: 0,
+  targetPositionY: 0,
+  targetPositionZ: 0,
+  radius: 800,
+  angleX: 0,
+  angleY: Math.PI / 4
+})
 let panStartScreenX = 0
 let panStartScreenY = 0
 
@@ -581,7 +589,8 @@ const saveDrawing = () => {
     doors: doors.value,
     windows: windows.value,
     panOffset: panOffset.value,
-    zoomLevel: zoomLevel.value
+    zoomLevel: zoomLevel.value,
+    cameraState: cameraState.value
   }
   const json = JSON.stringify(data, null, 2)
   const blob = new Blob([json], { type: 'application/json' })
@@ -611,6 +620,9 @@ const handleFileChange = (e: Event) => {
       windows.value = data.windows || []
       panOffset.value = data.panOffset || { x: 0, y: 0 }
       zoomLevel.value = data.zoomLevel || 1
+      if (data.cameraState) {
+        cameraState.value = data.cameraState
+      }
       history.value = []
       drawWrapper()
     } catch (error) {
