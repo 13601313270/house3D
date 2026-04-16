@@ -10,16 +10,10 @@ export class DoorEntity extends EntityClass<Door> {
   type: EntityType = 'door'
   id: string
   wallId: string | undefined
-  width: number
-  height: number
-  angle: number
 
   constructor(door: Door) {
     super(door)
     this.wallId = door.wallId
-    this.angle = door.angle
-    this.width = door.width
-    this.height = door.height
     this.id = door.id
   }
 
@@ -34,11 +28,11 @@ export class DoorEntity extends EntityClass<Door> {
     const screenY = this.data.y * zoomLevel + panOffset.y
     // const wallThickness = 10; // walls.find((wall) => wall.id === this.wallId)?.thickness || 0;
     const color = '#e67e22'
-    const width = this.width * zoomLevel;
+    const width = this.data.width * zoomLevel;
     const thickness = wallThickness * zoomLevel;
     ctx.save()
     ctx.translate(screenX, screenY)
-    ctx.rotate(this.angle)
+    ctx.rotate(this.data.angle)
     ctx.fillStyle = color
     ctx.strokeStyle = color
     ctx.lineWidth = 3
@@ -62,8 +56,8 @@ export class DoorEntity extends EntityClass<Door> {
     const wallThickness = wall.data.thickness;
     // console.log('doorPointId-get', wall, wall.points)
     const geometry = new THREE.BoxGeometry(
-      this.width * 1,
-      this.height * 1,
+      this.data.width * 1,
+      this.data.height * 1,
       1
     );// 额外增加2保证，门框比强款一点
     const material = new THREE.MeshStandardMaterial({ color: 0xe67e22 })
@@ -71,12 +65,13 @@ export class DoorEntity extends EntityClass<Door> {
     if (this.data.wallPointId > -1 && wall.meshList[this.data.wallPointId]) {
       const wallMesh = wall.meshList[this.data.wallPointId];
       const subtractGeometry = new THREE.BoxGeometry(
-        this.width,
-        this.height,
+        this.data.width,
+        this.data.height,
         wallThickness + 10
       );
+      subtractGeometry.rotateY(this.data.angle * -1);
       const cylinderBrush = new Brush(subtractGeometry);
-      cylinderBrush.position.set(this.data.x, this.height / 2 - 1, this.data.y)
+      cylinderBrush.position.set(this.data.x, this.data.height / 2 - 1, this.data.y)
       cylinderBrush.updateMatrixWorld()
       const boxBrush = new Brush(wallMesh.geometry.clone());// 主体
       boxBrush.position.set(
@@ -96,14 +91,14 @@ export class DoorEntity extends EntityClass<Door> {
 
       // resultMesh.position.set(wallMesh.position.x, wallMesh.position.y, wallMesh.position.z + 3)
       // resultMesh.rotateY(this.angle * -1);
-      doorMesh.position.set(this.data.x, this.height / 2, this.data.y)
-      doorMesh.rotateY(this.angle * -1);
+      doorMesh.position.set(this.data.x, this.data.height / 2, this.data.y)
+      doorMesh.rotateY(this.data.angle * -1);
       return [
         doorMesh,
       ]
     } else {
-      doorMesh.position.set(this.data.x, this.height / 2, this.data.y)
-      doorMesh.rotateY(this.angle * -1);
+      doorMesh.position.set(this.data.x, this.data.height / 2, this.data.y)
+      doorMesh.rotateY(this.data.angle * -1);
       return [
         doorMesh
       ]
@@ -112,7 +107,7 @@ export class DoorEntity extends EntityClass<Door> {
 
   matchHandelInfo(x: number, y: number, zoomLevel: number) {
     const dist = Math.hypot(x - this.data.x, y - this.data.y)
-    if (dist < this.width * zoomLevel) {
+    if (dist < this.data.width * zoomLevel) {
       return {
         index: 0,
         type: this.type,

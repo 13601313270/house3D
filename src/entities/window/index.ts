@@ -8,15 +8,11 @@ import { WallEntity } from '../wall';
 
 export class WindowEntity extends EntityClass<Window> {
   type: EntityType = 'window'
-  width: number
   height: number
-  angle: number
   color: string
 
   constructor(window: Window) {
     super(window)
-    this.width = window.width
-    this.angle = window.angle
     this.height = window.height
     this.color = '#3498db'
   }
@@ -31,12 +27,12 @@ export class WindowEntity extends EntityClass<Window> {
     const screenY = this.data.y * zoomLevel + panOffset.y
 
     const color = '#3498db'
-    const width = this.width * zoomLevel;
+    const width = this.data.width * zoomLevel;
     const thickness = 20 * zoomLevel;
 
     ctx.save()
     ctx.translate(screenX, screenY)
-    ctx.rotate(this.angle)
+    ctx.rotate(this.data.angle)
 
     ctx.fillStyle = color
     ctx.strokeStyle = color
@@ -59,7 +55,7 @@ export class WindowEntity extends EntityClass<Window> {
   // 命中可拖拽具柄
   matchHandelInfo(x: number, y: number, zoomLevel: number): HandelInfo | null {
     const dist = Math.hypot(x - this.data.x, y - this.data.y)
-    if (dist < this.width * zoomLevel) {
+    if (dist < this.data.width * zoomLevel) {
       return {
         index: 0,
         id: this.data.id,
@@ -76,8 +72,8 @@ export class WindowEntity extends EntityClass<Window> {
   draw3D(wall: WallEntity) {
     const wallThickness = wall.data.thickness;
     const geometry = new THREE.BoxGeometry(
-      this.width * 1,
-      this.height * 1,
+      this.data.width * 1,
+      this.data.height * 1,
       1
     );// 额外增加2保证，门框比强款一点
     const material = new THREE.MeshStandardMaterial({ color: 0xe67e22 })
@@ -86,12 +82,13 @@ export class WindowEntity extends EntityClass<Window> {
       const wallMesh = wall.meshList[this.data.wallPointId];
 
       const subtractGeometry = new THREE.BoxGeometry(
-        this.width,
-        this.height,
+        this.data.width,
+        this.data.height,
         wallThickness + 10
       );
+      subtractGeometry.rotateY(this.data.angle * -1);
       const cylinderBrush = new Brush(subtractGeometry);
-      cylinderBrush.position.set(this.data.x, this.height / 2 - 1, this.data.y)
+      cylinderBrush.position.set(this.data.x, this.data.height / 2 - 1, this.data.y)
       cylinderBrush.updateMatrixWorld()
       const boxBrush = new Brush(wallMesh.geometry.clone());// 主体
       boxBrush.position.set(
@@ -110,18 +107,18 @@ export class WindowEntity extends EntityClass<Window> {
       // const resultMesh = new THREE.Mesh(resultGeometry.geometry, material);
 
       // resultMesh.position.set(wallMesh.position.x, wallMesh.position.y, wallMesh.position.z + 3)
-      // resultMesh.rotateY(this.angle * -1);
+      // resultMesh.rotateY(this.data.angle * -1);
       windowMesh.position.set(this.data.x, this.height / 2, this.data.y)
       // mesh缩放到90%
       windowMesh.scale.set(0.99, 0.99, 0.99)
-      windowMesh.rotateY(this.angle * -1);
+      windowMesh.rotateY(this.data.angle * -1);
       return [
         windowMesh,
         // resultMesh
       ]
     } else {
       windowMesh.position.set(this.data.x, this.height / 2, this.data.y)
-      windowMesh.rotateY(this.angle * -1);
+      windowMesh.rotateY(this.data.angle * -1);
       return [
         windowMesh
       ]
