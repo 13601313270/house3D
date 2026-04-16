@@ -20,7 +20,6 @@ export const draw = (
   tempWallPoints: Point[],
   hoverPoint: Point | null,
   currentTool: string,
-  getNearestWall: (point: Point) => { wall: Wall; lineIndex: number; pointOnWall: Point; angle: number } | null,
   xAxisSnappedY: number | null,
   yAxisSnappedX: number | null,
   panOffset: Point = { x: 0, y: 0 },
@@ -127,19 +126,11 @@ export const draw = (
 
   const allDoors = [...doors];
   if (currentTool === 'door' && hoverPoint) {
-    const nearestWall = getNearestWall(hoverPoint)
-    if (nearestWall) {
-      const { pointOnWall, angle } = nearestWall
-      const wallScreenX = pointOnWall.x
-      const wallScreenY = pointOnWall.y
-      if (insertTempDoor) {
-        insertTempDoor.wallId = nearestWall.wall.id
-        insertTempDoor.wallPointId = nearestWall.lineIndex
-        insertTempDoor.x = wallScreenX
-        insertTempDoor.y = wallScreenY
-        insertTempDoor.angle = angle
-        allDoors.push(insertTempDoor)
-      }
+    // const nearestWall = getNearestWall(hoverPoint)
+    // console.log('hoverPoint---------', hoverPoint, nearestWall)
+    if (insertTempDoor) {
+      console.log('insertTempDoor', insertTempDoor)
+      allDoors.push(insertTempDoor)
     }
   }
   allDoors.forEach((door) => {
@@ -150,17 +141,8 @@ export const draw = (
 
   const allWindows = [...windows];
   if (currentTool === 'window' && hoverPoint) {
-    const nearestWall = getNearestWall(hoverPoint)
-    if (nearestWall) {
-      const { pointOnWall, angle } = nearestWall
-      if (insertTempWindow) {
-        insertTempWindow.wallId = nearestWall.wall.id
-        insertTempWindow.wallPointId = nearestWall.lineIndex
-        insertTempWindow.x = pointOnWall.x
-        insertTempWindow.y = pointOnWall.y
-        insertTempWindow.angle = angle
-        allWindows.push(insertTempWindow)
-      }
+    if (insertTempWindow) {
+      allWindows.push(insertTempWindow)
     }
   }
 

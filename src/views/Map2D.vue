@@ -59,7 +59,8 @@
     <div class="split-bar" @mousedown="startSplit" title="拖动调整左右比例"></div>
 
     <div class="right-panel">
-      {{ drawingData }}
+      <!-- {{ drawingData }} -->
+      {{ insertTempDoor }}
       <Canvas3D :data="drawingData" v-model:cameraState="cameraState" />
     </div>
   </div>
@@ -550,7 +551,6 @@ const drawWrapper = () => {
       tempDrawWall.value?.points || [],
       hoverPoint.value,
       currentTool.value,
-      getNearestWall,
       xAxisSnappedY.value === null ? null : xAxisSnappedY.value?.number,
       yAxisSnappedX.value === null ? null : yAxisSnappedX.value?.number,
       panOffset.value,
@@ -859,17 +859,16 @@ const handleCanvasClick = (e: MouseEvent) => {
     }
     lastPoint.value = clickPoint
   } else {
-    const nearest = getNearestWall({ x, y })
-    if (nearest) {
+    if (hoverPoint.value) {
       if (currentTool.value === 'door') {
         if (insertTempDoor) {
           doors.value.push(insertTempDoor)
-          insertTempDoor = createDoorData();
+          insertTempDoor = null;
         }
       } else if (currentTool.value === 'window') {
         if (insertTempWindow) {
           windows.value.push(insertTempWindow)
-          insertTempWindow = createWindowData();
+          insertTempWindow = null;
         }
       }
     }
@@ -1100,6 +1099,31 @@ const handleMouseMove = (e: MouseEvent) => {
     const nearest = getNearestWall({ x, y })
     if (nearest) {
       hoverPoint.value = nearest.pointOnWall
+      if (currentTool.value === 'door') {
+        if (insertTempDoor === null) {
+          insertTempDoor = createDoorData();
+        }
+        const { pointOnWall, angle } = nearest
+        const wallScreenX = pointOnWall.x
+        const wallScreenY = pointOnWall.y
+        insertTempDoor.wallId = nearest.wall.id
+        insertTempDoor.wallPointId = nearest.lineIndex
+        insertTempDoor.x = wallScreenX
+        insertTempDoor.y = wallScreenY
+        insertTempDoor.angle = angle
+      } else if (currentTool.value === 'window') {
+        if (insertTempWindow === null) {
+          insertTempWindow = createWindowData();
+        }
+        const { pointOnWall, angle } = nearest
+        const wallScreenX = pointOnWall.x
+        const wallScreenY = pointOnWall.y
+        insertTempWindow.wallId = nearest.wall.id
+        insertTempWindow.wallPointId = nearest.lineIndex
+        insertTempWindow.x = wallScreenX
+        insertTempWindow.y = wallScreenY
+        insertTempWindow.angle = angle
+      }
     } else {
       hoverPoint.value = null
     }
