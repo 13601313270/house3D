@@ -818,7 +818,7 @@ const handleCanvasClick = (e: MouseEvent) => {
         const windowItem: Window = {
           id: Date.now().toString(),
           wallId: nearest.wall.id,
-          wallPointId: -1,
+          wallPointId: nearest.lineIndex,
           x: nearest.pointOnWall.x,
           y: nearest.pointOnWall.y,
           width: windowWidth,
