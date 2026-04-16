@@ -1,7 +1,7 @@
 import * as THREE from 'three'
 import { Entity, HandelInfo, Point, PointWithIndex } from './map2d'
 
-export type EntityType = 'wall' | 'door' | 'window'
+export type EntityType = 'wall' | 'door' | 'window' | 'camera'
 export type allSnapFromType = 'point' | 'line' | 'axis'
 // 磁吸点
 export type OrigionSnapPoint = {

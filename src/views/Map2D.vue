@@ -11,6 +11,9 @@
         <button :class="{ active: currentTool === 'window' }" @click="changeCurrentTool('window')" type="button">
           窗户
         </button>
+        <button :class="{ active: currentTool === 'camera' }" @click="changeCurrentTool('camera')" type="button">
+          摄像机
+        </button>
         <button @click="clearDrawing" type="button">
           清空
         </button>
@@ -59,7 +62,7 @@
     <div class="split-bar" @mousedown.prevent="startSplit(1)" title="拖动调整左右比例"></div>
 
     <div class="right-panel" :style="{ width: panel2SplitWidthPer * 100 + '%' }">
-      <!-- {{ drawingData }} -->
+      {{ drawingData }}
       <!-- {{ insertTempDoor }} -->
       <Canvas3D ref="canvas3DRef" :data="drawingData" v-model:cameraState="cameraState" />
     </div>
@@ -81,20 +84,25 @@ import Canvas3D from '../components/Canvas3D.vue'
 import { Wall } from '@/entities/wall/index.d'
 import { Door } from '@/entities/door/index.d'
 import { Window } from '@/entities/window/index.d'
-import { DoorEntity, WallEntity, WindowEntity } from '@/entities'
+import { DoorEntity, fileData, WallEntity, WindowEntity } from '@/entities'
 import { EntityClass, EntityType, MatchSnapPoint } from '@/types/entity'
 import { HandelInfo, PointWithIndex } from '@/types/map2d'
 import pointToLineDistance from '@/utils/pointToLineDistance'
 import { createDoorData, editPropConfig as doorEditPropConfig } from '@/entities/door'
 import { createWindowData, editPropConfig as windowEditPropConfig } from '@/entities/window'
+import { CameraEntity, createCameraData } from '@/entities/camera'
+import { CameraData } from '@/entities/camera/index.d'
 
 const canvasRef = ref<HTMLCanvasElement | null>(null)
 const canvas3DRef = ref<typeof Canvas3D | null>(null)
 const canvas3DRef2 = ref<typeof Canvas3D | null>(null)
-const currentTool = ref<'wall' | 'door' | 'window' | 'drag'>('drag')
-const walls = ref<Wall[]>([])
-const doors = ref<Door[]>([])
-const windows = ref<Window[]>([])
+const currentTool = ref<'wall' | 'door' | 'window' | 'camera' | 'drag'>('drag')
+const allFileObjects = ref<fileData>({
+  walls: [],
+  doors: [],
+  windows: [],
+  cameras: []
+})
 const tempDrawWall = ref<Wall | null>(null)
 const hoverPoint = ref<Point | null>(null)
 const lastPoint = ref<Point | null>(null)
@@ -108,13 +116,21 @@ const prevTool = ref<'wall' | 'door' | 'window' | 'drag'>('wall')
 const panOffset = ref<Point>({ x: 0, y: 0 })
 const isPanning = ref(false)
 const panStart = ref<Point | null>(null)
-const panel1SplitWidthPer = ref(0.4)
-const panel2SplitWidthPer = ref(0.3)
+const panel1SplitWidthPer = ref(0.5)
+const panel2SplitWidthPer = ref(0.4)
 const isSplitting = ref(false)
 const canvasSize = ref({ width: 0, height: 0 })
 const zoomLevel = ref(1)
 const wallThickness = ref<number>(20)
-const cameraState = ref({
+type cameraStateType = {
+  targetPositionX: number
+  targetPositionY: number
+  targetPositionZ: number
+  radius: number
+  angleX: number
+  angleY: number
+}
+const cameraState = ref<cameraStateType>({
   targetPositionX: 0,
   targetPositionY: 0,
   targetPositionZ: 0,
@@ -124,6 +140,7 @@ const cameraState = ref({
 })
 let insertTempDoor: Door | null = null;
 let insertTempWindow: Window | null = null;
+let insertTempCamera: CameraData | null = null;
 let panStartScreenX = 0
 let panStartScreenY = 0
 
@@ -161,17 +178,13 @@ const updateCanvasSize = () => {
   }, 30)
 }
 
-const drawingData = computed(() => ({
-  walls: walls.value,
-  doors: doors.value,
-  windows: windows.value
-}))
+const drawingData = computed<fileData>(() => (allFileObjects.value))
 
 const contextMenu = ref<{
   visible: boolean;
   x: number;
   y: number;
-  type: 'door' | 'window' | 'wall-point';
+  type: 'door' | 'window' | 'wall-point' | 'camera';
   index?: number;
   wallIndex?: number;
   pointIndex?: number;
@@ -195,7 +208,7 @@ const getNearestWall = (point: Point): NearestWallResult | null => {
   let nearestAngle = 0
   let lineIndex: number = -1;
 
-  walls.value.forEach((wall: Wall) => {
+  allFileObjects.value.walls.forEach((wall: Wall) => {
     for (let i = 0; i < wall.points.length - 1; i++) {
       const p1 = wall.points[i]
       const p2 = wall.points[i + 1]
@@ -537,9 +550,7 @@ const drawWrapper = () => {
   if (canvas) {
     draw(
       canvas,
-      walls.value,
-      doors.value,
-      windows.value,
+      drawingData.value,
       tempDrawWall.value?.points || [],
       hoverPoint.value,
       currentTool.value,
@@ -551,6 +562,7 @@ const drawWrapper = () => {
       zoomLevel.value,
       insertTempDoor,
       insertTempWindow,
+      insertTempCamera,
     )
   }
 }
@@ -594,8 +606,8 @@ onMounted(() => {
               points: [...tempDrawWall.value.points],
               thickness: wallThickness.value
             }
-            walls.value.push(newWall)
-            history.value.push(JSON.parse(JSON.stringify(walls.value)))
+            allFileObjects.value.walls.push(newWall)
+            history.value.push(JSON.parse(JSON.stringify(allFileObjects.value.walls)))
           }
           tempDrawWall.value = null
           lastPoint.value = null
@@ -617,10 +629,12 @@ onMounted(() => {
 const fileInputRef = ref<HTMLInputElement | null>(null)
 
 const saveDrawing = () => {
-  const data = {
-    walls: walls.value,
-    doors: doors.value,
-    windows: windows.value,
+  const data: fileData & {
+    panOffset: Point
+    zoomLevel: number
+    cameraState: cameraStateType
+  } = {
+    ...allFileObjects.value,
     panOffset: panOffset.value,
     zoomLevel: zoomLevel.value,
     cameraState: cameraState.value
@@ -647,10 +661,17 @@ const handleFileChange = (e: Event) => {
   const reader = new FileReader()
   reader.onload = (event) => {
     try {
-      const data = JSON.parse(event.target?.result as string)
-      walls.value = data.walls || []
-      doors.value = data.doors || []
-      windows.value = data.windows || []
+      const data: fileData & {
+        panOffset: Point
+        zoomLevel: number
+        cameraState: cameraStateType
+      } = JSON.parse(event.target?.result as string)
+      const allObjKey: string[] = Object.keys(allFileObjects.value)
+      allObjKey.forEach((key) => {
+        // @ts-ignore
+        allFileObjects.value[key] = data[key] || []
+      })
+
       panOffset.value = data.panOffset || { x: 0, y: 0 }
       zoomLevel.value = data.zoomLevel || 1
       if (data.cameraState) {
@@ -681,8 +702,8 @@ const handleContextMenu = (e: MouseEvent) => {
   editPropConfigInfo.value = []
   editPropInputInfo.value = {}
   // 检查是否点击了墙上的点
-  for (let i = 0; i < walls.value.length; i++) {
-    const wall = walls.value[i]
+  for (let i = 0; i < allFileObjects.value.walls.length; i++) {
+    const wall = allFileObjects.value.walls[i]
     for (let j = 0; j < wall.points.length; j++) {
       const point = wall.points[j]
       const dist = Math.hypot(x - point.x, y - point.y)
@@ -702,8 +723,8 @@ const handleContextMenu = (e: MouseEvent) => {
   }
 
   // 检查是否点击了门
-  for (let i = 0; i < doors.value.length; i++) {
-    const door = doors.value[i]
+  for (let i = 0; i < allFileObjects.value.doors.length; i++) {
+    const door = allFileObjects.value.doors[i]
     const dist = Math.hypot(x - door.x, y - door.y)
     if (dist < 10) {
       editPropConfigInfo.value = doorEditPropConfig()
@@ -720,8 +741,8 @@ const handleContextMenu = (e: MouseEvent) => {
   }
 
   // 检查是否点击了窗户
-  for (let i = 0; i < windows.value.length; i++) {
-    const windowItem = windows.value[i]
+  for (let i = 0; i < allFileObjects.value.windows.length; i++) {
+    const windowItem = allFileObjects.value.windows[i]
     const dist = Math.hypot(x - windowItem.x, y - windowItem.y)
     if (dist < 10) {
       editPropConfigInfo.value = windowEditPropConfig()
@@ -743,10 +764,13 @@ const handleContextMenu = (e: MouseEvent) => {
 const deleteContextMenuEntity = () => {
   if (!contextMenu.value) return
 
-  if (contextMenu.value.type === 'door') {
-    doors.value.splice(contextMenu.value.index!, 1)
-  } else if (contextMenu.value.type === 'window') {
-    windows.value.splice(contextMenu.value.index!, 1)
+  const type = contextMenu.value.type;
+  if (type === 'door') {
+    allFileObjects.value.doors.splice(contextMenu.value.index!, 1)
+  } else if (type === 'window') {
+    allFileObjects.value.windows.splice(contextMenu.value.index!, 1)
+  } else if (type === 'camera') {
+    allFileObjects.value.cameras.splice(contextMenu.value.index!, 1)
   }
 
   contextMenu.value = null
@@ -755,7 +779,7 @@ const deleteContextMenuEntity = () => {
 
 const updateWallThickness = () => {
   if (contextMenu.value?.type === 'wall-point' && contextMenu.value.wallIndex !== undefined && contextMenu.value.thickness !== undefined) {
-    walls.value[contextMenu.value.wallIndex].thickness = contextMenu.value.thickness
+    allFileObjects.value.walls[contextMenu.value.wallIndex].thickness = contextMenu.value.thickness
     contextMenu.value = null
     drawWrapper()
   }
@@ -792,7 +816,7 @@ const handleCanvasClick = (e: MouseEvent) => {
         }
         // 收集所有点（包括临时折线和已绘制的墙上的点）
         const allPoints = [...tempDrawWall.value.points]
-        walls.value.forEach(wall => {
+        allFileObjects.value.walls.forEach(wall => {
           wall.points.forEach(point => {
             allPoints.push(point)
           })
@@ -830,8 +854,8 @@ const handleCanvasClick = (e: MouseEvent) => {
               y: snapped.point.y,
               thickness: wallThickness.value
             }
-            walls.value.push(newWall)
-            history.value.push(JSON.parse(JSON.stringify(walls.value)))
+            allFileObjects.value.walls.push(newWall)
+            history.value.push(JSON.parse(JSON.stringify(allFileObjects.value.walls)))
             tempDrawWall.value.points = []
             lastPoint.value = null
           }
@@ -851,17 +875,20 @@ const handleCanvasClick = (e: MouseEvent) => {
     }
     lastPoint.value = clickPoint
   } else {
-    if (hoverPoint.value) {
-      if (currentTool.value === 'door') {
-        if (insertTempDoor) {
-          doors.value.push(insertTempDoor)
-          insertTempDoor = null;
-        }
-      } else if (currentTool.value === 'window') {
-        if (insertTempWindow) {
-          windows.value.push(insertTempWindow)
-          insertTempWindow = null;
-        }
+    if (currentTool.value === 'door') {
+      if (insertTempDoor && hoverPoint.value) {
+        allFileObjects.value.doors.push(insertTempDoor)
+        insertTempDoor = null;
+      }
+    } else if (currentTool.value === 'window') {
+      if (insertTempWindow && hoverPoint.value) {
+        allFileObjects.value.windows.push(insertTempWindow)
+        insertTempWindow = null;
+      }
+    } else if (currentTool.value === 'camera') {
+      if (insertTempCamera) {
+        allFileObjects.value.cameras.push(insertTempCamera)
+        insertTempCamera = null;
       }
     }
   }
@@ -871,9 +898,10 @@ const handleCanvasClick = (e: MouseEvent) => {
 
 const clearDrawing = () => {
   if (confirm('确定要清空所有绘制内容吗？')) {
-    walls.value = []
-    doors.value = []
-    windows.value = []
+    allFileObjects.value.walls = []
+    allFileObjects.value.doors = []
+    allFileObjects.value.windows = []
+    allFileObjects.value.cameras = []
     if (tempDrawWall.value) {
       tempDrawWall.value = null
     }
@@ -884,7 +912,7 @@ const clearDrawing = () => {
 
 const undo = () => {
   if (history.value.length > 0) {
-    walls.value = history.value.pop() || []
+    allFileObjects.value.walls = history.value.pop() || []
     drawWrapper()
   }
 }
@@ -901,60 +929,6 @@ const handleMouseMove = (e: MouseEvent) => {
 
   // 如果正在拖拽，处理拖拽逻辑（即使当前工具不是 drag）
   if (matchHandelObj && matchHandelInfo) {
-    // const dragged = draggedPoint.value
-    // let originalPoint: Point = { x: 0, y: 0 }
-    // let prevPoint: Point | null = null
-    // let nextPoint: Point | null = null
-
-    // if (dragged.type === 'wall') {
-    //   if (dragged.wallIndex === -1) {
-    //     originalPoint = tempWallPoints.value[dragged.pointIndex]
-    //     if (dragged.pointIndex > 0) {
-    //       prevPoint = tempWallPoints.value[dragged.pointIndex - 1]
-    //     }
-    //     if (dragged.pointIndex < tempWallPoints.value.length - 1) {
-    //       nextPoint = tempWallPoints.value[dragged.pointIndex + 1]
-    //     }
-    //   } else {
-    //     originalPoint = walls.value[dragged.wallIndex].points[dragged.pointIndex]
-    //     const wall = walls.value[dragged.wallIndex]
-    //     if (dragged.pointIndex > 0) {
-    //       prevPoint = wall.points[dragged.pointIndex - 1]
-    //     }
-    //     if (dragged.pointIndex < wall.points.length - 1) {
-    //       nextPoint = wall.points[dragged.pointIndex + 1]
-    //     }
-    //   }
-    // } else if (dragged.type === 'door') {
-    //   originalPoint = { x: doors.value[dragged.doorIndex].x, y: doors.value[dragged.doorIndex].y }
-    // } else if (dragged.type === 'window') {
-    //   originalPoint = { x: windows.value[dragged.windowIndex].x, y: windows.value[dragged.windowIndex].y }
-    // }
-
-    // const allPoints = [...tempWallPoints.value]
-    // walls.value.forEach((wall) => {
-    //   wall.points.forEach(point => {
-    //     allPoints.push(point)
-    //   })
-    // })
-    // // doors.value.forEach((door, doorIdx) => {
-    // //   if (dragged.type !== 'door' || doorIdx !== dragged.doorIndex) {
-    // //     allPoints.push({ x: door.x, y: door.y })
-    // //   }
-    // // })
-    // // windows.value.forEach((win, winIdx) => {
-    // //   if (dragged.type !== 'window' || winIdx !== dragged.windowIndex) {
-    // //     allPoints.push({ x: win.x, y: win.y })
-    // //   }
-    // // })
-
-    // const startPoints: Point[] = []
-    // if (prevPoint) startPoints.push(prevPoint)
-    // if (nextPoint) startPoints.push(nextPoint)
-    // if (startPoints.length === 0) startPoints.push(originalPoint)
-
-    // const targetX = x - (dragOffset.value?.x || 0)
-    // const targetY = y - (dragOffset.value?.y || 0)
     function temp(api: EntityClass<Entity>): boolean {
       if (matchHandelObj && matchHandelInfo) {
         let beMatchPoints = api.getMineBeSnapPoints()
@@ -1018,8 +992,8 @@ const handleMouseMove = (e: MouseEvent) => {
       }
       return false;
     }
-    for (let i = 0; i < walls.value.length; i++) {
-      const wall = walls.value[i]
+    for (let i = 0; i < allFileObjects.value.walls.length; i++) {
+      const wall = allFileObjects.value.walls[i]
       const api = new WallEntity(wall)
       if (temp(api)) {
         return;
@@ -1058,7 +1032,7 @@ const handleMouseMove = (e: MouseEvent) => {
       } else {
         // 收集所有点（包括临时折线和已绘制的墙上的点）
         const allPoints = [...tempDrawWall.value.points]
-        walls.value.forEach(wall => {
+        allFileObjects.value.walls.forEach(wall => {
           wall.points.forEach(point => {
             allPoints.push(point)
           })
@@ -1091,7 +1065,11 @@ const handleMouseMove = (e: MouseEvent) => {
     const nearest = getNearestWall({ x, y })
     if (nearest) {
       hoverPoint.value = nearest.pointOnWall
-      if (currentTool.value === 'door') {
+    } else {
+      hoverPoint.value = null
+    }
+    if (currentTool.value === 'door') {
+      if (nearest) {
         if (insertTempDoor === null) {
           insertTempDoor = createDoorData();
         }
@@ -1103,7 +1081,9 @@ const handleMouseMove = (e: MouseEvent) => {
         insertTempDoor.x = wallScreenX
         insertTempDoor.y = wallScreenY
         insertTempDoor.angle = angle
-      } else if (currentTool.value === 'window') {
+      }
+    } else if (currentTool.value === 'window') {
+      if (nearest) {
         if (insertTempWindow === null) {
           insertTempWindow = createWindowData();
         }
@@ -1116,8 +1096,12 @@ const handleMouseMove = (e: MouseEvent) => {
         insertTempWindow.y = wallScreenY
         insertTempWindow.angle = angle
       }
-    } else {
-      hoverPoint.value = null
+    } else if (currentTool.value === 'camera') {
+      if (insertTempCamera === null) {
+        insertTempCamera = createCameraData();
+      }
+      insertTempCamera.x = x
+      insertTempCamera.y = y
     }
   }
 
@@ -1142,8 +1126,8 @@ const handleMouseDown = (e: MouseEvent) => {
   if (currentTool.value === 'drag') {
     if (e.button !== 0) return
     // 检查已绘制的墙上的点
-    for (let i = 0; i < walls.value.length; i++) {
-      const wall = walls.value[i]
+    for (let i = 0; i < allFileObjects.value.walls.length; i++) {
+      const wall = allFileObjects.value.walls[i]
       const api = new WallEntity(wall)
       const matchInfo = api.matchHandelInfo(x, y, zoomLevel.value)
       if (matchInfo) {
@@ -1156,8 +1140,8 @@ const handleMouseDown = (e: MouseEvent) => {
     }
 
     // 检查门
-    for (let i = 0; i < doors.value.length; i++) {
-      const door = doors.value[i]
+    for (let i = 0; i < allFileObjects.value.doors.length; i++) {
+      const door = allFileObjects.value.doors[i]
       const api = new DoorEntity(door)
       const matchInfo = api.matchHandelInfo(x, y, zoomLevel.value)
       if (matchInfo) {
@@ -1167,18 +1151,11 @@ const handleMouseDown = (e: MouseEvent) => {
         dragStartPoint.value = { x, y }
         return;
       }
-      // const dist = Math.hypot(x - door.x, y - door.y)
-      // if (dist < wallThickness.value * zoomLevel.value) {
-      //   draggedPoint.value = { type: 'door', doorIndex }
-      //   dragOffset.value = { x: door.x - x, y: door.y - y }
-      //   prevTool.value = currentTool.value
-      //   drawWrapper()
-      // }
     }
 
     // 检查窗户
-    for (let i = 0; i < windows.value.length; i++) {
-      const windowItem = windows.value[i]
+    for (let i = 0; i < allFileObjects.value.windows.length; i++) {
+      const windowItem = allFileObjects.value.windows[i]
       const api = new WindowEntity(windowItem)
       const matchInfo = api.matchHandelInfo(x, y, zoomLevel.value)
       if (matchInfo) {
@@ -1188,14 +1165,19 @@ const handleMouseDown = (e: MouseEvent) => {
         dragStartPoint.value = { x, y }
         return;
       }
-
-      // const dist = Math.hypot(x - windowItem.x, y - windowItem.y)
-      // if (dist < wallThickness.value * zoomLevel.value) {
-      //   draggedPoint.value = { type: 'window', windowIndex }
-      //   dragOffset.value = { x: windowItem.x - x, y: windowItem.y - y }
-      //   prevTool.value = currentTool.value
-      //   drawWrapper()
-      // }
+    }
+    // 检查相机
+    for (let i = 0; i < allFileObjects.value.cameras.length; i++) {
+      const camera = allFileObjects.value.cameras[i]
+      const api = new CameraEntity(camera)
+      const matchInfo = api.matchHandelInfo(x, y, zoomLevel.value)
+      if (matchInfo) {
+        matchHandelObj = api;
+        matchHandelInfo = matchInfo
+        dragOffset.value = { x: 0, y: 0 };
+        dragStartPoint.value = { x, y }
+        return;
+      }
     }
 
     // 如果没有拖拽到任何点，开始平移
@@ -1213,7 +1195,7 @@ const handleMouseUp = () => {
   matchHandelObj = null
   matchHandelInfo = null
   if (draggedPoint.value !== null) {
-    history.value.push(JSON.parse(JSON.stringify(walls.value)))
+    history.value.push(JSON.parse(JSON.stringify(allFileObjects.value.walls)))
     draggedPoint.value = null
     dragOffset.value = null
     currentTool.value = prevTool.value
@@ -1303,13 +1285,15 @@ const handleWheel = (e: WheelEvent) => {
 
   drawWrapper()
 }
-function changeCurrentTool(type: 'wall' | 'door' | 'window' | 'drag') {
+function changeCurrentTool(type: 'wall' | 'door' | 'window' | 'camera' | 'drag') {
   insertTempDoor = null
   insertTempWindow = null
   if (type === 'door') {
     insertTempDoor = createDoorData();
   } else if (type === 'window') {
     insertTempWindow = createWindowData();
+  } else if (type === 'camera') {
+    insertTempCamera = createCameraData();
   }
   currentTool.value = type
 }

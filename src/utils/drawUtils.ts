@@ -7,6 +7,9 @@ import { DoorEntity } from '@/entities/door/index'
 import { WindowEntity } from '@/entities/window'
 import { drawPoint } from './drawPoint'
 import { calculateAngle } from './calculateAngle'
+import { CameraData } from '@/entities/camera/index.d'
+import { CameraEntity } from '@/entities/camera'
+import { fileData } from '@/entities/index'
 
 export const canvasWidth = 800
 export const canvasHeight = 600
@@ -14,9 +17,7 @@ export const snapThreshold = 20
 
 export const draw = (
   canvasRef: HTMLCanvasElement | null,
-  walls: Wall[],
-  doors: Door[],
-  windows: Window[],
+  fileData: fileData,
   tempWallPoints: Point[],
   hoverPoint: Point | null,
   currentTool: string,
@@ -28,11 +29,13 @@ export const draw = (
   zoomLevel: number = 1,
   insertTempDoor: Door | null = null,
   insertTempWindow: Window | null = null,
+  insertTempCamera: CameraData | null = null,
 ) => {
   if (!canvasRef) return
   const ctx = canvasRef.getContext('2d')
   if (!ctx) return
 
+  const { walls, doors, windows, cameras } = fileData
   ctx.clearRect(0, 0, canvasWidth, canvasHeight)
 
   ctx.fillStyle = '#f5f5f5'
@@ -147,6 +150,17 @@ export const draw = (
     const windowApi = new WindowEntity(win)
     const wallThickness = walls.find((wall) => wall.id === win.wallId)?.thickness || 0;
     windowApi.draw2D(ctx, panOffset, wallThickness, zoomLevel)
+  })
+
+  const allCameras = [...cameras];
+  if (currentTool === 'camera') {
+    if (insertTempCamera) {
+      allCameras.push(insertTempCamera)
+    }
+  }
+  allCameras.forEach((camera) => {
+    const cameraApi = new CameraEntity(camera)
+    cameraApi.draw2D(ctx, panOffset, zoomLevel)
   })
 
   // 绘制坐标轴
