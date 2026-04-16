@@ -63,11 +63,11 @@ export class DoorEntity extends EntityClass<Door> {
   draw3D(wall: WallEntity) {
     // 实现门的3D绘制逻辑
     const wallThickness = wall.data.thickness;
-    console.log('doorPointId-get', wall, wall.points)
+    // console.log('doorPointId-get', wall, wall.points)
     const geometry = new THREE.BoxGeometry(
       this.width * 1,
       this.height * 1,
-      wallThickness + 2
+      wallThickness + 10
     );// 额外增加2保证，门框比强款一点
     const material = new THREE.MeshStandardMaterial({ color: 0xe67e22 })
     const doorMesh = new THREE.Mesh(geometry, material)
@@ -163,7 +163,7 @@ export class DoorEntity extends EntityClass<Door> {
       console.log('after---', obj.getMineBeSnapLines(), line, index)
       this.data.wallId = obj.data.id as string
       if (index !== -1) {
-        console.log('doorPointId-set', index)
+        // console.log('doorPointId-set', index)
         this.data.wallPointId = index
       }
       this.data.angle = nearestAngle

@@ -73,20 +73,34 @@ export class WallEntity extends EntityClass<Wall> {
 
   draw3D() {
     const margineds: Geometry | null = createShapeFromPoints([this.wall]);
+    console.log('margineds', margineds)
     if (!margineds) return []
 
     const meshList: THREE.Mesh[] = []
     // console.log('margineds', margineds)
-    for (const poly of margineds || []) {
-      for (let i = 0; i < poly.length; i++) {
-        const ring = poly[i] as any
+    for (let i = 0; i < margineds.length; i++) {
+      const poly = margineds[i]
+
+      let shape: THREE.Shape | null = null
+      for (let j = 0; j < poly.length; j++) {
+        const ring = poly[j] as any
         const points = []; // wall.points.map((p) => new THREE.Vector2(p.x, p.y))
         for (let j = 0; j < ring.length; j++) {
           if (ring[j] === null) continue
           points.push(new THREE.Vector2(ring[j][0], ring[j][1] * -1))
         }
+        if (j === 0) {
+          shape = new THREE.Shape(points)
+        } else {
+          const holePath = new THREE.Path();
+          holePath.setFromPoints(points)
+          if (shape) {
+            shape.holes.push(holePath);
+          }
+        }
+      }
 
-        const shape = new THREE.Shape(points)
+      if (shape) {
         const extrudeSettings = {
           steps: 1,
           depth: 280,
