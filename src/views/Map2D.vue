@@ -1,6 +1,6 @@
 <template>
   <div class="map2d-container">
-    <div class="left-panel">
+    <div class="left-panel" :style="{ width: panel1SplitWidthPer * 100 + '%' }">
       <div class="toolbar">
         <button :class="{ active: currentTool === 'wall' }" @click="changeCurrentTool('wall')" type="button">
           墙面
@@ -37,8 +37,8 @@
           :style="{ display: isSplitting ? 'none' : 'block' }" />
         <div v-if="contextMenu?.visible" class="context-menu"
           :style="{ top: contextMenu.y + 'px', left: contextMenu.x + 'px' }">
-          {{ editPropConfigInfo }}
-          {{ editPropInputInfo }}
+          <!-- {{ editPropConfigInfo }} -->
+          <!-- {{ editPropInputInfo }} -->
           <div>
             <label v-for="item in editPropConfigInfo" :key="item.id">
               {{ item.label }}：
@@ -58,7 +58,7 @@
 
     <div class="split-bar" @mousedown="startSplit" title="拖动调整左右比例"></div>
 
-    <div class="right-panel">
+    <div class="right-panel" :style="{ width: (1 - panel1SplitWidthPer) * 100 + '%' }">
       <!-- {{ drawingData }} -->
       {{ insertTempDoor }}
       <Canvas3D :data="drawingData" v-model:cameraState="cameraState" />
@@ -100,7 +100,7 @@ const prevTool = ref<'wall' | 'door' | 'window' | 'drag'>('wall')
 const panOffset = ref<Point>({ x: 0, y: 0 })
 const isPanning = ref(false)
 const panStart = ref<Point | null>(null)
-const splitPosition = ref(0.5)
+const panel1SplitWidthPer = ref(0.5)
 const isSplitting = ref(false)
 const canvasSize = ref({ width: 0, height: 0 })
 const canvas3DSize = ref({ width: 0, height: 0 })
@@ -119,18 +119,9 @@ let insertTempWindow: Window | null = null;
 let panStartScreenX = 0
 let panStartScreenY = 0
 
-const updateCanvasSize = (skipPanelWidthUpdate = false) => {
+const updateCanvasSize = () => {
   const container = document.querySelector('.map2d-container')
   if (!container) return
-
-  if (!skipPanelWidthUpdate) {
-    const leftPanel = document.querySelector('.left-panel') as HTMLElement
-    const rightPanel = document.querySelector('.right-panel') as HTMLElement
-    if (leftPanel && rightPanel) {
-      leftPanel.style.width = (splitPosition.value * 100) + '%'
-      rightPanel.style.width = ((1 - splitPosition.value) * 100) + '%'
-    }
-  }
 
   const canvas = canvasRef.value
   if (canvas) {
@@ -587,7 +578,7 @@ onMounted(() => {
       drawWrapper()
     }
 
-    window.addEventListener('resize', () => updateCanvasSize(true))
+    window.addEventListener('resize', () => updateCanvasSize())
     updateCanvasSize()
 
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -1259,21 +1250,14 @@ const handleMouseMoveSplit = (e: MouseEvent) => {
   else if (newSplitPosition > maxRatio) finalRatio = maxRatio
   else finalRatio = newSplitPosition
 
-  splitPosition.value = finalRatio
-
-  const leftPanel = document.querySelector('.left-panel') as HTMLElement
-  const rightPanel = document.querySelector('.right-panel') as HTMLElement
-  if (leftPanel && rightPanel) {
-    leftPanel.style.width = (finalRatio * 100) + '%'
-    rightPanel.style.width = ((1 - finalRatio) * 100) + '%'
-  }
+  panel1SplitWidthPer.value = finalRatio
 }
 
 const handleMouseUpSplit = () => {
   if (isSplitting.value) {
     isSplitting.value = false
     document.body.style.cursor = 'default'
-    updateCanvasSize(true)
+    updateCanvasSize()
   }
 }
 
