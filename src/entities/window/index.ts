@@ -20,18 +20,6 @@ export function createWindowData() {
   return window
 }
 
-export const defaultData: Window = {
-  id: 'tempWindow',
-  wallPointId: -1,
-  wallId: '',
-  x: 0,
-  y: 0,
-  width: 120,
-  height: 120,
-  angle: 0,
-  bottom: 0,
-}
-
 export class WindowEntity extends EntityClass<Window> {
   type: EntityType = 'window'
   height: number
