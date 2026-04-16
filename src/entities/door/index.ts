@@ -74,7 +74,7 @@ export class DoorEntity extends EntityClass<Door> {
     if (this.data.wallPointId > -1 && wall.meshList[this.data.wallPointId]) {
       const wallMesh = wall.meshList[this.data.wallPointId];
       const cylinderBrush = new Brush(geometry);
-      cylinderBrush.position.set(this.data.x, this.height / 2, this.data.y)
+      cylinderBrush.position.set(this.data.x, this.height / 2 - 1, this.data.y)
       cylinderBrush.updateMatrixWorld()
       const boxBrush = new Brush(wallMesh.geometry.clone());// 主体
       boxBrush.position.set(
