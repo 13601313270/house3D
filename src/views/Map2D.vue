@@ -51,7 +51,7 @@
     <div class="split-bar" @mousedown="startSplit" title="拖动调整左右比例"></div>
 
     <div class="right-panel">
-      {{ drawingData }}
+      <!-- {{ drawingData }} -->
       <Canvas3D :data="drawingData" />
     </div>
   </div>
