@@ -31,28 +31,39 @@ let scene: THREE.Scene | null = null
 let camera: THREE.PerspectiveCamera | null = null
 let renderer: THREE.WebGLRenderer | null = null
 
-const camera1TargetPositionX = ref<number>(0);
-const camera1TargetPositionY = ref<number>(0);
-const camera1TargetPositionZ = ref<number>(0);
-const camera1Radius = ref<number>(800); // 摄像机距离
-const camera1AngleX = ref<number>(0);
-const camera1AngleY = ref<number>(Math.PI / 4);
+interface CameraState {
+  targetPositionX: number;
+  targetPositionY: number;
+  targetPositionZ: number;
+  radius: number;
+  angleX: number;
+  angleY: number;
+}
+
+const camera1State = ref<CameraState>({
+  targetPositionX: 0,
+  targetPositionY: 0,
+  targetPositionZ: 0,
+  radius: 800, // 摄像机距离
+  angleX: 0,
+  angleY: Math.PI / 4,
+});
 
 function updateCameraAngel() {
-  const camera1X = camera1Radius.value * Math.sin(camera1AngleX.value) * Math.cos(camera1AngleY.value) * -1;
-  const camera1Y = camera1Radius.value * Math.sin(camera1AngleY.value);
-  const camera1Z = camera1Radius.value * Math.cos(camera1AngleX.value) * Math.cos(camera1AngleY.value);
+  const camera1X = camera1State.value.radius * Math.sin(camera1State.value.angleX) * Math.cos(camera1State.value.angleY) * -1;
+  const camera1Y = camera1State.value.radius * Math.sin(camera1State.value.angleY);
+  const camera1Z = camera1State.value.radius * Math.cos(camera1State.value.angleX) * Math.cos(camera1State.value.angleY);
 
   if (camera) {
     camera.position.set(
-      camera1TargetPositionX.value + camera1X, // 镜头左右摇摆
-      camera1TargetPositionY.value + camera1Y,
-      camera1TargetPositionZ.value + camera1Z
+      camera1State.value.targetPositionX + camera1X, // 镜头左右摇摆
+      camera1State.value.targetPositionY + camera1Y,
+      camera1State.value.targetPositionZ + camera1Z
     );
     camera.lookAt(
-      camera1TargetPositionX.value,
-      camera1TargetPositionY.value,
-      camera1TargetPositionZ.value
+      camera1State.value.targetPositionX,
+      camera1State.value.targetPositionY,
+      camera1State.value.targetPositionZ
     );
   }
   // if (camera) {
@@ -119,17 +130,17 @@ const initThree = () => {
     container.addEventListener('mousedown', (e) => {
       if (e.button === 2) {
         // 旋转
-        camera1AngelStartX = camera1AngleX.value;
-        camera1AngelStartY = camera1AngleY.value;
+        camera1AngelStartX = camera1State.value.angleX;
+        camera1AngelStartY = camera1State.value.angleY;
         canvas1IsMouseAngel = true;
         canvas1LastMouseX = e.clientX;
         canvas1LastMouseY = e.clientY;
         e.preventDefault();
       } else if (e.button === 0) {
         // 移动
-        camera1TargetPositionStartX = camera1TargetPositionX.value;
-        camera1TargetPositionStartY = camera1TargetPositionY.value;
-        camera1TargetPositionStartZ = camera1TargetPositionZ.value;
+        camera1TargetPositionStartX = camera1State.value.targetPositionX;
+        camera1TargetPositionStartY = camera1State.value.targetPositionY;
+        camera1TargetPositionStartZ = camera1State.value.targetPositionZ;
         canvas1IsMouseMove = true;
         canvas1LastMouseX = e.clientX;
         canvas1LastMouseY = e.clientY;
@@ -141,17 +152,17 @@ const initThree = () => {
         // 镜头旋转
         const delta2DDiffX = e.clientX - canvas1LastMouseX;
         const delta2DDiffY = e.clientY - canvas1LastMouseY;
-        camera1AngleX.value = camera1AngelStartX + delta2DDiffX * 0.01;
-        camera1AngleY.value = camera1AngelStartY + delta2DDiffY * 0.01;
-        camera1AngleY.value = Math.max(-Math.PI / 2 + 0.05, Math.min(Math.PI / 2 - 0.05, camera1AngleY.value)); // 因为camera，是采用控制position和lookat的逻辑，所以在angleY==Math.PI/2的定点的时候，无法控制方向，所以这里限制一下，只允许angleY在[-Math.PI/2+0.05, Math.PI/2-0.05]之间
+        camera1State.value.angleX = camera1AngelStartX + delta2DDiffX * 0.01;
+        const angleY = camera1AngelStartY + delta2DDiffY * 0.01;
+        camera1State.value.angleY = Math.max(-Math.PI / 2 + 0.05, Math.min(Math.PI / 2 - 0.05, angleY)); // 因为camera，是采用控制position和lookat的逻辑，所以在angleY==Math.PI/2的定点的时候，无法控制方向，所以这里限制一下，只允许angleY在[-Math.PI/2+0.05, Math.PI/2-0.05]之间
         updateCameraAngel()
       } else if (canvas1IsMouseMove) {
         const deltaX = e.clientX - canvas1LastMouseX;
         const deltaY = e.clientY - canvas1LastMouseY;
         const sensitivity = 1;
 
-        camera1TargetPositionX.value = camera1TargetPositionStartX - (deltaX * Math.cos(camera1AngleX.value) - deltaY * Math.sin(camera1AngleX.value)) * sensitivity;
-        camera1TargetPositionZ.value = camera1TargetPositionStartZ - (deltaX * Math.sin(camera1AngleX.value) + deltaY * Math.cos(camera1AngleX.value)) * sensitivity;
+        camera1State.value.targetPositionX = camera1TargetPositionStartX - (deltaX * Math.cos(camera1State.value.angleX) - deltaY * Math.sin(camera1State.value.angleX)) * sensitivity;
+        camera1State.value.targetPositionZ = camera1TargetPositionStartZ - (deltaX * Math.sin(camera1State.value.angleX) + deltaY * Math.cos(camera1State.value.angleX)) * sensitivity;
         updateCameraAngel()
       }
     })
@@ -167,8 +178,8 @@ const initThree = () => {
       e.preventDefault();
       const zoomSpeed = 0.001;
       const delta = e.deltaY * zoomSpeed;
-      const newRadius = Math.max(5, Math.min(maxCamera1Radius, camera1Radius.value * (1 + delta)));
-      camera1Radius.value = newRadius;
+      const newRadius = Math.max(5, Math.min(maxCamera1Radius, camera1State.value.radius * (1 + delta)));
+      camera1State.value.radius = newRadius;
       updateCameraAngel();
     }, { passive: false });
 
