@@ -2,13 +2,13 @@
   <div class="map2d-container">
     <div class="left-panel">
       <div class="toolbar">
-        <button :class="{ active: currentTool === 'wall' }" @click="currentTool = 'wall'" type="button">
+        <button :class="{ active: currentTool === 'wall' }" @click="changeCurrentTool('wall')" type="button">
           墙面
         </button>
-        <button :class="{ active: currentTool === 'door' }" @click="currentTool = 'door'" type="button">
+        <button :class="{ active: currentTool === 'door' }" @click="changeCurrentTool('door')" type="button">
           门
         </button>
-        <button :class="{ active: currentTool === 'window' }" @click="currentTool = 'window'" type="button">
+        <button :class="{ active: currentTool === 'window' }" @click="changeCurrentTool('window')" type="button">
           窗户
         </button>
         <button @click="clearDrawing" type="button">
@@ -25,7 +25,7 @@
         </button>
         <input type="file" id="fileInput" ref="fileInputRef" accept=".json" style="display: none"
           @change="handleFileChange" />
-        <button :class="{ active: currentTool === 'drag' }" @click="currentTool = 'drag'" type="button">
+        <button :class="{ active: currentTool === 'drag' }" @click="changeCurrentTool('drag')" type="button">
           拖拽
         </button>
         <input type="number" v-model="wallThickness" placeholder="墙厚度" />
@@ -51,7 +51,7 @@
     <div class="split-bar" @mousedown="startSplit" title="拖动调整左右比例"></div>
 
     <div class="right-panel">
-      {{ cameraState }}
+      {{ drawingData }}
       <Canvas3D :data="drawingData" v-model:cameraState="cameraState" />
     </div>
   </div>
@@ -60,7 +60,7 @@
 <script lang="ts" setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { Entity, Point } from '../types'
-import { draw, canvasWidth, canvasHeight, snapThreshold, doorWidth, windowWidth, doorHeight, windowHeight } from '../utils/drawUtils'
+import { draw, canvasWidth, canvasHeight, snapThreshold } from '../utils/drawUtils'
 import Canvas3D from '../components/Canvas3D.vue'
 import { Wall } from '@/entities/wall/index.d'
 import { Door } from '@/entities/door/index.d'
@@ -69,6 +69,8 @@ import { DoorEntity, WallEntity, WindowEntity } from '@/entities'
 import { EntityClass, EntityType, MatchSnapPoint } from '@/types/entity'
 import { HandelInfo, PointWithIndex } from '@/types/map2d'
 import pointToLineDistance from '@/utils/pointToLineDistance'
+import { createDoorData } from '@/entities/door'
+import { createWindowData } from '@/entities/window'
 
 const canvasRef = ref<HTMLCanvasElement | null>(null)
 const canvas3DRef = ref<HTMLCanvasElement | null>(null)
@@ -103,6 +105,8 @@ const cameraState = ref({
   angleX: 0,
   angleY: Math.PI / 4
 })
+let insertTempDoor: Door | null = null;
+let insertTempWindow: Window | null = null;
 let panStartScreenX = 0
 let panStartScreenY = 0
 
@@ -532,7 +536,9 @@ const drawWrapper = () => {
       panOffset.value,
       canvasSize.value.width,
       canvasSize.value.height,
-      zoomLevel.value
+      zoomLevel.value,
+      insertTempDoor,
+      insertTempWindow,
     )
   }
 }
@@ -815,30 +821,15 @@ const handleCanvasClick = (e: MouseEvent) => {
     const nearest = getNearestWall({ x, y })
     if (nearest) {
       if (currentTool.value === 'door') {
-        const door: Door = {
-          id: Date.now().toString(),
-          wallId: nearest.wall.id,
-          wallPointId: nearest.lineIndex,
-          x: nearest.pointOnWall.x,
-          y: nearest.pointOnWall.y,
-          width: doorWidth,
-          height: doorHeight,
-          angle: nearest.angle,
+        if (insertTempDoor) {
+          doors.value.push(insertTempDoor)
+          insertTempDoor = createDoorData();
         }
-        doors.value.push(door)
       } else if (currentTool.value === 'window') {
-        const windowItem: Window = {
-          id: Date.now().toString(),
-          wallId: nearest.wall.id,
-          wallPointId: nearest.lineIndex,
-          x: nearest.pointOnWall.x,
-          y: nearest.pointOnWall.y,
-          width: windowWidth,
-          height: windowHeight,
-          angle: nearest.angle,
-          bottom: 0,
+        if (insertTempWindow) {
+          windows.value.push(insertTempWindow)
+          insertTempWindow = createWindowData();
         }
-        windows.value.push(windowItem)
       }
     }
   }
@@ -1262,6 +1253,16 @@ const handleWheel = (e: WheelEvent) => {
   panOffset.value = { x: newPanX, y: newPanY }
 
   drawWrapper()
+}
+function changeCurrentTool(type: 'wall' | 'door' | 'window' | 'drag') {
+  insertTempDoor = null
+  insertTempWindow = null
+  if (type === 'door') {
+    insertTempDoor = createDoorData();
+  } else if (type === 'window') {
+    insertTempWindow = createWindowData();
+  }
+  currentTool.value = type
 }
 </script>
 

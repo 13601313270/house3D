@@ -3,18 +3,14 @@ import { Wall } from '@/entities/wall/index.d'
 import { Door } from '@/entities/door/index.d'
 import { Window } from '@/entities/window/index.d'
 import { WallEntity } from '@/entities/wall/index'
-import { DoorEntity } from '@/entities/door'
-import { WindowEntity } from '@/entities/window'
+import { DoorEntity, defaultData as doorDefaultData } from '@/entities/door/index'
+import { WindowEntity, defaultData as windowDefaultData } from '@/entities/window'
 import { drawPoint } from './drawPoint'
 import { calculateAngle } from './calculateAngle'
 
 export const canvasWidth = 800
 export const canvasHeight = 600
 export const snapThreshold = 20
-export const doorWidth = 110
-export const doorHeight = 180
-export const windowWidth = 120
-export const windowHeight = 120
 
 export const draw = (
   canvasRef: HTMLCanvasElement | null,
@@ -24,13 +20,15 @@ export const draw = (
   tempWallPoints: Point[],
   hoverPoint: Point | null,
   currentTool: string,
-  getNearestWall: (point: Point) => { wall: Wall; pointOnWall: Point; angle: number } | null,
+  getNearestWall: (point: Point) => { wall: Wall; lineIndex: number; pointOnWall: Point; angle: number } | null,
   xAxisSnappedY: number | null,
   yAxisSnappedX: number | null,
   panOffset: Point = { x: 0, y: 0 },
   canvasWidth: number = 800,
   canvasHeight: number = 600,
-  zoomLevel: number = 1
+  zoomLevel: number = 1,
+  insertTempDoor: Door | null = null,
+  insertTempWindow: Window | null = null,
 ) => {
   if (!canvasRef) return
   const ctx = canvasRef.getContext('2d')
@@ -134,16 +132,14 @@ export const draw = (
       const { pointOnWall, angle } = nearestWall
       const wallScreenX = pointOnWall.x
       const wallScreenY = pointOnWall.y
-      allDoors.push({
-        id: 'tempDoor',
-        wallPointId: -1,
-        wallId: nearestWall.wall.id,
-        x: wallScreenX,
-        y: wallScreenY,
-        width: doorWidth,
-        height: doorHeight,
-        angle,
-      })
+      if (insertTempDoor) {
+        insertTempDoor.wallId = nearestWall.wall.id
+        insertTempDoor.wallPointId = nearestWall.lineIndex
+        insertTempDoor.x = wallScreenX
+        insertTempDoor.y = wallScreenY
+        insertTempDoor.angle = angle
+        allDoors.push(insertTempDoor)
+      }
     }
   }
   allDoors.forEach((door) => {
@@ -157,20 +153,14 @@ export const draw = (
     const nearestWall = getNearestWall(hoverPoint)
     if (nearestWall) {
       const { pointOnWall, angle } = nearestWall
-      const wallScreenX = pointOnWall.x
-      const wallScreenY = pointOnWall.y
-      const window = {
-        id: 'tempWindow',
-        wallPointId: -1,
-        wallId: nearestWall.wall.id,
-        x: wallScreenX,
-        y: wallScreenY,
-        width: windowWidth,
-        height: windowHeight,
-        angle,
-        bottom: 0,
+      if (insertTempWindow) {
+        insertTempWindow.wallId = nearestWall.wall.id
+        insertTempWindow.wallPointId = nearestWall.lineIndex
+        insertTempWindow.x = pointOnWall.x
+        insertTempWindow.y = pointOnWall.y
+        insertTempWindow.angle = angle
+        allWindows.push(insertTempWindow)
       }
-      allWindows.push(window)
     }
   }
 

@@ -6,6 +6,30 @@ import { allSnapFromType, EntityClass, EntityType, MatchSnapPoint } from '@/type
 import { Wall } from '../wall/index.d'
 import { WallEntity } from '../wall'
 
+export function createDoorData() {
+  const door: Door = {
+    id: Date.now().toString(),
+    wallPointId: -1,
+    x: 0,
+    y: 0,
+    width: 110,
+    height: 180,
+    angle: 0,
+  }
+  return door
+}
+
+export const defaultData: Door = {
+  id: 'tempDoor',
+  wallId: '',// 所属墙ID，如果没有磁吸在墙上，为undefined
+  wallPointId: -1, // 门在墙上的点的索引（比如0，代表从0到1的墙面上，-1代表未磁吸在墙上）
+  width: 110,
+  height: 180,
+  angle: 0,
+  x: 0,
+  y: 0,
+}
+
 export class DoorEntity extends EntityClass<Door> {
   type: EntityType = 'door'
   id: string

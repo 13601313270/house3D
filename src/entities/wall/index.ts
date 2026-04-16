@@ -10,6 +10,13 @@ export class WallEntity extends EntityClass<Wall> {
   points: Point[]
   thickness: number
   wall: Wall
+  defaultData: Wall = {
+    id: '',
+    x: 0,
+    y: 0,
+    points: [],
+    thickness: 20,
+  }
 
   constructor(wall: Wall) {
     super(wall)
