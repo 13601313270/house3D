@@ -1,9 +1,8 @@
-import { Point, Entity, HandelInfo } from '@/types/map2d'
+import { Point, HandelInfo } from '@/types/map2d'
 import { allSnapFromType, EntityClass, EntityType, MatchSnapPoint } from '@/types/entity'
 import { Window } from './index.d'
 import * as THREE from 'three'
 import { Brush, Evaluator, SUBTRACTION } from 'three-bvh-csg';
-import { Wall } from '../wall/index.d';
 import { WallEntity } from '../wall';
 
 export class WindowEntity extends EntityClass<Window> {
@@ -28,7 +27,7 @@ export class WindowEntity extends EntityClass<Window> {
 
     const color = '#3498db'
     const width = this.data.width * zoomLevel;
-    const thickness = 20 * zoomLevel;
+    const thickness = wallThickness * zoomLevel;
 
     ctx.save()
     ctx.translate(screenX, screenY)

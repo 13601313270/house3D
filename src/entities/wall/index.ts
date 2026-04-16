@@ -1,13 +1,9 @@
-import { Point, Entity, HandelInfo, PointWithIndex } from '@/types/map2d'
+import { Point, HandelInfo } from '@/types/map2d'
 import { allSnapFromType, EntityClass, EntityType, MatchSnapPoint } from '@/types/entity'
 import { Wall } from './index.d'
 import { drawPoint } from '@/utils/drawPoint'
-import { createShapeFromPoints } from '@/utils/createShapeFromPoints'
 import { createAllWallFromPoints } from '@/utils/createAllWallFromPoints'
-import { calculateAngle } from '@/utils/calculateAngle'
-import pointToLineDistance from '@/utils/pointToLineDistance'
 import * as THREE from 'three'
-import { Geometry } from 'martinez-polygon-clipping'
 
 export class WallEntity extends EntityClass<Wall> {
   type: EntityType = 'wall'
