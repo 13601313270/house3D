@@ -158,6 +158,7 @@ const contextMenu = ref<{ visible: boolean; x: number; y: number; type: 'door' |
 
 interface NearestWallResult {
   wall: Wall
+  lineIndex: number,
   pointOnWall: Point
   angle: number
 }
@@ -167,6 +168,7 @@ const getNearestWall = (point: Point): NearestWallResult | null => {
   let nearestPoint: Point | null = null
   let minDistance = Infinity
   let nearestAngle = 0
+  let lineIndex: number = -1;
 
   walls.value.forEach((wall: Wall) => {
     for (let i = 0; i < wall.points.length - 1; i++) {
@@ -178,14 +180,20 @@ const getNearestWall = (point: Point): NearestWallResult | null => {
       if (distance < minDistance) {
         minDistance = distance
         nearestWall = wall
+        lineIndex = i;
         nearestPoint = getClosestPointOnLine(point, p1, p2)
         nearestAngle = Math.atan2(p2.y - p1.y, p2.x - p1.x)
       }
     }
   })
 
-  if (nearestPoint && minDistance < snapThreshold && nearestWall) {
-    return { wall: nearestWall, pointOnWall: nearestPoint, angle: nearestAngle }
+  if (nearestPoint && lineIndex > -1 && minDistance < snapThreshold && nearestWall) {
+    return {
+      lineIndex,
+      wall: nearestWall,
+      pointOnWall: nearestPoint,
+      angle: nearestAngle
+    }
   }
 
   return null
@@ -798,7 +806,7 @@ const handleCanvasClick = (e: MouseEvent) => {
         const door: Door = {
           id: Date.now().toString(),
           wallId: nearest.wall.id,
-          wallPointId: -1,
+          wallPointId: nearest.lineIndex,
           x: nearest.pointOnWall.x,
           y: nearest.pointOnWall.y,
           width: doorWidth,
@@ -982,30 +990,6 @@ const handleMouseMove = (e: MouseEvent) => {
       }
     }
     matchHandelObj.matchHandelMoveCallback(x, y, matchHandelInfo)
-    // const newX = snapped.x
-    // const newY = snapped.y
-    // if (dragged.type === 'wall') {
-
-    //   // if (dragged.wallIndex === -1) {
-    //   //   tempWallPoints.value[dragged.pointIndex] = { x: newX, y: newY }
-    //   // } else {
-    //   //   walls.value[dragged.wallIndex].points[dragged.pointIndex] = { x: newX, y: newY }
-    //   // }
-    // } else if (dragged.type === 'door') {
-    //   const nearest = getNearestWall({ x: newX, y: newY })
-    //   if (nearest) {
-    //     doors.value[dragged.doorIndex].x = nearest.pointOnWall.x
-    //     doors.value[dragged.doorIndex].y = nearest.pointOnWall.y
-    //     doors.value[dragged.doorIndex].angle = nearest.angle
-    //   }
-    // } else if (dragged.type === 'window') {
-    //   const nearest = getNearestWall({ x: newX, y: newY })
-    //   if (nearest) {
-    //     windows.value[dragged.windowIndex].x = nearest.pointOnWall.x
-    //     windows.value[dragged.windowIndex].y = nearest.pointOnWall.y
-    //     windows.value[dragged.windowIndex].angle = nearest.angle
-    //   }
-    // }
     drawWrapper()
   }
 
