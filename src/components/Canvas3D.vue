@@ -34,15 +34,14 @@ let renderer: THREE.WebGLRenderer | null = null
 const camera1TargetPositionX = ref<number>(0);
 const camera1TargetPositionY = ref<number>(0);
 const camera1TargetPositionZ = ref<number>(0);
-
 const camera1Radius = ref<number>(800); // 摄像机距离
-let camera1AngleX = 0;
-let camera1AngleY = Math.PI / 4;
+const camera1AngleX = ref<number>(0);
+const camera1AngleY = ref<number>(Math.PI / 4);
 
 function updateCameraAngel() {
-  const camera1X = camera1Radius.value * Math.sin(camera1AngleX) * Math.cos(camera1AngleY) * -1;
-  const camera1Y = camera1Radius.value * Math.sin(camera1AngleY);
-  const camera1Z = camera1Radius.value * Math.cos(camera1AngleX) * Math.cos(camera1AngleY);
+  const camera1X = camera1Radius.value * Math.sin(camera1AngleX.value) * Math.cos(camera1AngleY.value) * -1;
+  const camera1Y = camera1Radius.value * Math.sin(camera1AngleY.value);
+  const camera1Z = camera1Radius.value * Math.cos(camera1AngleX.value) * Math.cos(camera1AngleY.value);
 
   if (camera) {
     camera.position.set(
@@ -120,8 +119,8 @@ const initThree = () => {
     container.addEventListener('mousedown', (e) => {
       if (e.button === 2) {
         // 旋转
-        camera1AngelStartX = camera1AngleX;
-        camera1AngelStartY = camera1AngleY;
+        camera1AngelStartX = camera1AngleX.value;
+        camera1AngelStartY = camera1AngleY.value;
         canvas1IsMouseAngel = true;
         canvas1LastMouseX = e.clientX;
         canvas1LastMouseY = e.clientY;
@@ -142,17 +141,17 @@ const initThree = () => {
         // 镜头旋转
         const delta2DDiffX = e.clientX - canvas1LastMouseX;
         const delta2DDiffY = e.clientY - canvas1LastMouseY;
-        camera1AngleX = camera1AngelStartX + delta2DDiffX * 0.01;
-        camera1AngleY = camera1AngelStartY + delta2DDiffY * 0.01;
-        camera1AngleY = Math.max(-Math.PI / 2 + 0.05, Math.min(Math.PI / 2 - 0.05, camera1AngleY)); // 因为camera，是采用控制position和lookat的逻辑，所以在angleY==Math.PI/2的定点的时候，无法控制方向，所以这里限制一下，只允许angleY在[-Math.PI/2+0.05, Math.PI/2-0.05]之间
+        camera1AngleX.value = camera1AngelStartX + delta2DDiffX * 0.01;
+        camera1AngleY.value = camera1AngelStartY + delta2DDiffY * 0.01;
+        camera1AngleY.value = Math.max(-Math.PI / 2 + 0.05, Math.min(Math.PI / 2 - 0.05, camera1AngleY.value)); // 因为camera，是采用控制position和lookat的逻辑，所以在angleY==Math.PI/2的定点的时候，无法控制方向，所以这里限制一下，只允许angleY在[-Math.PI/2+0.05, Math.PI/2-0.05]之间
         updateCameraAngel()
       } else if (canvas1IsMouseMove) {
         const deltaX = e.clientX - canvas1LastMouseX;
         const deltaY = e.clientY - canvas1LastMouseY;
         const sensitivity = 1;
 
-        camera1TargetPositionX.value = camera1TargetPositionStartX - (deltaX * Math.cos(camera1AngleX) - deltaY * Math.sin(camera1AngleX)) * sensitivity;
-        camera1TargetPositionZ.value = camera1TargetPositionStartZ - (deltaX * Math.sin(camera1AngleX) + deltaY * Math.cos(camera1AngleX)) * sensitivity;
+        camera1TargetPositionX.value = camera1TargetPositionStartX - (deltaX * Math.cos(camera1AngleX.value) - deltaY * Math.sin(camera1AngleX.value)) * sensitivity;
+        camera1TargetPositionZ.value = camera1TargetPositionStartZ - (deltaX * Math.sin(camera1AngleX.value) + deltaY * Math.cos(camera1AngleX.value)) * sensitivity;
         updateCameraAngel()
       }
     })
