@@ -45,7 +45,6 @@
               <input v-if="item.dataType === 'number'" type="number" v-model.number="editPropInputInfo[item.id]" />
             </label>
           </div>
-          <button @click="useEditProp">use</button>
           <div v-if="contextMenu.type === 'wall-point'">
             <label>
               墙体厚度：
@@ -597,6 +596,7 @@ onMounted(() => {
           hoverPoint.value = null
         }
         drawWrapper()
+        currentTool.value = 'drag'
       }
     }
 
@@ -672,6 +672,8 @@ const handleContextMenu = (e: MouseEvent) => {
   const x = (screenX - panOffset.value.x) / zoomLevel.value
   const y = (screenY - panOffset.value.y) / zoomLevel.value
 
+  editPropConfigInfo.value = []
+  editPropInputInfo.value = {}
   // 检查是否点击了墙上的点
   for (let i = 0; i < walls.value.length; i++) {
     const wall = walls.value[i]
@@ -1288,9 +1290,6 @@ function changeCurrentTool(type: 'wall' | 'door' | 'window' | 'drag') {
     insertTempWindow = createWindowData();
   }
   currentTool.value = type
-}
-function useEditProp() {
-
 }
 </script>
 
