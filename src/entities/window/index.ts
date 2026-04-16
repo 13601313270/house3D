@@ -12,6 +12,7 @@ export function createWindowData() {
     wallId: '',
     x: 0,
     y: 0,
+    z: 0,
     width: 120,
     height: 120,
     angle: 0,

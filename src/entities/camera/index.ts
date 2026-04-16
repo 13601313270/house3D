@@ -9,6 +9,7 @@ export function createCameraData() {
     id: Date.now().toString(),
     x: 0,
     y: 0,
+    z: 0,
     angle: 0,
   }
   return camera

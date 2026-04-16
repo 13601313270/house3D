@@ -14,12 +14,8 @@ import { Window } from '@/entities/window/index.d'
 import { DoorEntity } from '@/entities/door'
 import { WindowEntity } from '@/entities/window'
 import { WallEntity } from '@/entities/wall'
-
-interface DrawingData {
-  walls: Wall[]
-  doors: Door[]
-  windows: Window[]
-}
+import { fileData } from '@/entities'
+import { CameraEntity } from '@/entities/camera'
 
 interface CameraState {
   targetPositionX: number
@@ -31,7 +27,7 @@ interface CameraState {
 }
 
 const props = defineProps<{
-  data: DrawingData
+  data: fileData,
   cameraState?: CameraState
 }>()
 
@@ -334,6 +330,15 @@ const renderWindows = () => {
   })
 }
 
+const renderCameras = () => {
+  if (!scene) return
+  props.data.cameras.forEach((camera) => {
+    const api = new CameraEntity(camera)
+    const meshList = api.draw3DAndCache()
+    meshList.forEach(mesh => scene!.add(mesh))
+  })
+}
+
 const animate = () => {
   if (renderer && scene && camera) {
     renderer.render(scene, camera)
@@ -374,6 +379,7 @@ const updateScene = () => {
     renderWalls()
     renderDoors()
     renderWindows()
+    renderCameras()
     resize();
   }
 }

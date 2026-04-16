@@ -603,6 +603,7 @@ onMounted(() => {
               id: tempDrawWall.value.id,
               x: firstPoint.x,
               y: firstPoint.y,
+              z: 0,
               points: [...tempDrawWall.value.points],
               thickness: wallThickness.value
             }
@@ -852,6 +853,7 @@ const handleCanvasClick = (e: MouseEvent) => {
               points: [...tempDrawWall.value.points],
               x: snapped.point.x,
               y: snapped.point.y,
+              z: 0,
               thickness: wallThickness.value
             }
             allFileObjects.value.walls.push(newWall)
@@ -869,6 +871,7 @@ const handleCanvasClick = (e: MouseEvent) => {
         id: Date.now().toString(),
         x: clickPoint.x,
         y: clickPoint.y,
+        z: 0,
         points: [clickPoint],
         thickness: wallThickness.value
       }
