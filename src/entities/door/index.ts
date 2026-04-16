@@ -99,13 +99,15 @@ export class DoorEntity extends EntityClass<Door> {
       doorMesh.scale.set(0.9, 0.9, 0.9)
       doorMesh.rotateY(this.angle * -1);
       return [
-        doorMesh,
+        // doorMesh,
         // resultMesh
       ]
     } else {
       doorMesh.position.set(this.data.x, this.height / 2, this.data.y)
       doorMesh.rotateY(this.angle * -1);
-      return [doorMesh]
+      return [
+        // doorMesh
+      ]
     }
   }
 

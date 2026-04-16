@@ -3,6 +3,7 @@ import { allSnapFromType, EntityClass, EntityType, MatchSnapPoint } from '@/type
 import { Wall } from './index.d'
 import { drawPoint } from '@/utils/drawPoint'
 import { createShapeFromPoints } from '@/utils/createShapeFromPoints'
+import { createAllWallFromPoints } from '@/utils/createAllWallFromPoints'
 import { calculateAngle } from '@/utils/calculateAngle'
 import pointToLineDistance from '@/utils/pointToLineDistance'
 import * as THREE from 'three'
@@ -26,32 +27,29 @@ export class WallEntity extends EntityClass<Wall> {
     panOffset: Point,
     zoomLevel: number,
   ): void {
-    const margineds = createShapeFromPoints([this.wall]);
+    const wallBoxList = createAllWallFromPoints([this.wall]);
 
     ctx.strokeStyle = '#333'
     ctx.lineWidth = 3
     ctx.setLineDash([])
     ctx.beginPath();
 
-    for (const poly of margineds || []) {
-      for (let i = 0; i < poly.length; i++) {
-        const ring = poly[i] as any
-        for (let j = 0; j < ring.length; j++) {
-          if (ring[j] === null) continue
-          const screenX = ring[j][0] * zoomLevel + panOffset.x
-          const screenY = ring[j][1] * zoomLevel + panOffset.y
-          if (j === 0) {
-            // @ts-ignore
-            ctx.moveTo(screenX, screenY);
-          } else {
-            // @ts-ignore
-            ctx.lineTo(screenX, screenY);
-          }
+    for (let i = 0; i < wallBoxList.length; i++) {
+      const box = wallBoxList[i]
+      ctx.beginPath()
+      for (let j = 0; j < box.length; j++) {
+        const screenX = box[j].x * zoomLevel + panOffset.x
+        const screenY = box[j].y * zoomLevel + panOffset.y
+        if (j === 0) {
+          ctx.moveTo(screenX, screenY)
+        } else {
+          ctx.lineTo(screenX, screenY)
         }
       }
       ctx.closePath();
+      ctx.stroke();
     }
-    ctx.stroke();
+
     // 绘制墙上的点
     [this.wall].forEach((wall) => {
       if (wall.points.length < 2) return
@@ -72,55 +70,86 @@ export class WallEntity extends EntityClass<Wall> {
   }
 
   draw3D() {
-    const margineds: Geometry | null = createShapeFromPoints([this.wall]);
-    console.log('margineds', margineds)
-    if (!margineds) return []
-
     const meshList: THREE.Mesh[] = []
-    // console.log('margineds', margineds)
-    for (let i = 0; i < margineds.length; i++) {
-      const poly = margineds[i]
-
-      let shape: THREE.Shape | null = null
-      for (let j = 0; j < poly.length; j++) {
-        const ring = poly[j] as any
-        const points = []; // wall.points.map((p) => new THREE.Vector2(p.x, p.y))
-        for (let j = 0; j < ring.length; j++) {
-          if (ring[j] === null) continue
-          points.push(new THREE.Vector2(ring[j][0], ring[j][1] * -1))
-        }
-        if (j === 0) {
-          shape = new THREE.Shape(points)
-        } else {
-          const holePath = new THREE.Path();
-          holePath.setFromPoints(points)
-          if (shape) {
-            shape.holes.push(holePath);
-          }
-        }
-      }
-
-      if (shape) {
-        const extrudeSettings = {
-          steps: 1,
-          depth: 280,
-          bevelEnabled: true,
-          // bevelThickness: 2,
-          // bevelSize: 2,
-          // bevelSegments: 1
-        }
-
-        const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings)
-        geometry.rotateX(-Math.PI / 2);   // 将 XY 平面旋转成 XZ 平面
-        const material = new THREE.MeshStandardMaterial({ color: 0xe0e0e0, side: THREE.DoubleSide })
-        const wallMesh = new THREE.Mesh(geometry, material)
-        wallMesh.position.set(0, 0, 0)
-        wallMesh.castShadow = true
-        wallMesh.receiveShadow = true
-        meshList.push(wallMesh)
-      }
+    const wallBoxList = createAllWallFromPoints([this.wall]);
+    const extrudeSettings = {
+      steps: 1,
+      depth: 280,
+      bevelEnabled: true,
+      // bevelThickness: 2,
+      // bevelSize: 2,
+      // bevelSegments: 1
     }
-    // meshList.forEach(mesh => scene!.add(mesh))
+    for (let i = 0; i < wallBoxList.length; i++) {
+      const box = wallBoxList[i]
+
+      const points = []; // wall.points.map((p) => new THREE.Vector2(p.x, p.y))
+      for (let j = 0; j < box.length; j++) {
+        points.push(new THREE.Vector2(box[j].x, box[j].y * -1))
+      }
+      const shape = new THREE.Shape(points)
+      const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings)
+      geometry.rotateX(-Math.PI / 2);   // 将 XY 平面旋转成 XZ 平面
+      const material = new THREE.MeshStandardMaterial({
+        color: 0xe0e0e0,
+        side: THREE.DoubleSide
+      })
+      const wallMesh = new THREE.Mesh(geometry, material)
+      // wallMesh.position.set(0, 0, 0)
+      wallMesh.castShadow = true
+      wallMesh.receiveShadow = true
+      meshList.push(wallMesh)
+    }
+    return meshList
+
+
+
+    // const margineds: Geometry | null = createShapeFromPoints([this.wall]);
+    // console.log('margineds', margineds)
+    // if (!margineds) return []
+    // // console.log('margineds', margineds)
+    // for (let i = 0; i < margineds.length; i++) {
+    //   const poly = margineds[i]
+
+    //   let shape: THREE.Shape | null = null
+    //   for (let j = 0; j < poly.length; j++) {
+    //     const ring = poly[j] as any
+    //     const points = []; // wall.points.map((p) => new THREE.Vector2(p.x, p.y))
+    //     for (let j = 0; j < ring.length; j++) {
+    //       if (ring[j] === null) continue
+    //       points.push(new THREE.Vector2(ring[j][0], ring[j][1] * -1))
+    //     }
+    //     if (j === 0) {
+    //       shape = new THREE.Shape(points)
+    //     } else {
+    //       const holePath = new THREE.Path();
+    //       holePath.setFromPoints(points)
+    //       if (shape) {
+    //         shape.holes.push(holePath);
+    //       }
+    //     }
+    //   }
+
+    //   if (shape) {
+    //     const extrudeSettings = {
+    //       steps: 1,
+    //       depth: 280,
+    //       bevelEnabled: true,
+    //       // bevelThickness: 2,
+    //       // bevelSize: 2,
+    //       // bevelSegments: 1
+    //     }
+
+    //     const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings)
+    //     geometry.rotateX(-Math.PI / 2);   // 将 XY 平面旋转成 XZ 平面
+    //     const material = new THREE.MeshStandardMaterial({ color: 0xe0e0e0, side: THREE.DoubleSide })
+    //     const wallMesh = new THREE.Mesh(geometry, material)
+    //     wallMesh.position.set(0, 0, 0)
+    //     wallMesh.castShadow = true
+    //     wallMesh.receiveShadow = true
+    //     meshList.push(wallMesh)
+    //   }
+    // }
     return meshList
   }
 
