@@ -102,8 +102,6 @@ export class WallEntity extends EntityClass<Wall> {
     }
     return meshList
 
-
-
     // const margineds: Geometry | null = createShapeFromPoints([this.wall]);
     // console.log('margineds', margineds)
     // if (!margineds) return []

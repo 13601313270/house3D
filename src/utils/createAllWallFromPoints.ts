@@ -19,7 +19,7 @@ export function createAllWallFromPoints(wallList: Wall[]): wallBox[] {
   const left: Point[] = [];
   const right: Point[] = [];
   let margineds: Geometry | null = null;
-  let allWallBox: wallBox[] = []
+  const allWallBox: wallBox[] = []
   // console.log('========线========')
   for (let i = 0; i < wallList.length; i++) {
     const wallitem = wallList[i];

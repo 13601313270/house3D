@@ -4,6 +4,7 @@ import { Window } from './index.d'
 import * as THREE from 'three'
 import { Brush, Evaluator, SUBTRACTION } from 'three-bvh-csg';
 import { Wall } from '../wall/index.d';
+import { WallEntity } from '../wall';
 
 export class WindowEntity extends EntityClass<Window> {
   type: EntityType = 'window'
@@ -72,18 +73,53 @@ export class WindowEntity extends EntityClass<Window> {
     this.changePosition({ x, y })
   }
 
-  draw3D() {
-    // 实现门的3D绘制逻辑
-    const wallThickness = 20; // props.data.walls.find((wall) => wall.id === door.wallId)?.thickness || 0;
-    console.log('window', this.width, this.height)
-    // const boxBrush = new Brush(wall.geometry);
-    const geometry = new THREE.BoxGeometry(this.width, this.height, wallThickness + 4);// 额外增加2保证，门框比强款一点
-    // const cylinderBrush = new Brush(geometry);
-    const material = new THREE.MeshStandardMaterial({ color: this.color })
-    const doorMesh = new THREE.Mesh(geometry, material)
-    doorMesh.position.set(this.data.x, this.height / 2 + 40, this.data.y)
-    doorMesh.rotateY(this.angle * -1);
-    return [doorMesh]
+  draw3D(wall: WallEntity) {
+    const wallThickness = wall.data.thickness;
+    const geometry = new THREE.BoxGeometry(
+      this.width * 1,
+      this.height * 1,
+      wallThickness + 10
+    );// 额外增加2保证，门框比强款一点
+    const material = new THREE.MeshStandardMaterial({ color: 0xe67e22 })
+    const windowMesh = new THREE.Mesh(geometry, material)
+    if (this.data.wallPointId > -1 && wall.meshList[this.data.wallPointId]) {
+      const wallMesh = wall.meshList[this.data.wallPointId];
+      const cylinderBrush = new Brush(geometry);
+      cylinderBrush.position.set(this.data.x, this.height / 2 - 1, this.data.y)
+      cylinderBrush.updateMatrixWorld()
+      const boxBrush = new Brush(wallMesh.geometry.clone());// 主体
+      boxBrush.position.set(
+        wallMesh.position.x,
+        wallMesh.position.y,
+        wallMesh.position.z
+      )
+      // 3. 执行布尔运算 (立方体减去圆柱体)
+      const evaluator = new Evaluator();
+      // 注意：这里 SUBTRACTION 的顺序很重要：主体减去洞模型
+      const resultGeometry = evaluator.evaluate(boxBrush, cylinderBrush, SUBTRACTION);
+
+      wallMesh.geometry = resultGeometry.geometry
+      // // 4. 创建最终的网格
+      // const material = new THREE.MeshStandardMaterial({ color: 0x00aaff, side: THREE.DoubleSide });
+      // const resultMesh = new THREE.Mesh(resultGeometry.geometry, material);
+
+      // resultMesh.position.set(wallMesh.position.x, wallMesh.position.y, wallMesh.position.z + 3)
+      // resultMesh.rotateY(this.angle * -1);
+      windowMesh.position.set(this.data.x, this.height / 2, this.data.y)
+      // mesh缩放到90%
+      windowMesh.scale.set(0.9, 0.9, 0.9)
+      windowMesh.rotateY(this.angle * -1);
+      return [
+        windowMesh,
+        // resultMesh
+      ]
+    } else {
+      windowMesh.position.set(this.data.x, this.height / 2, this.data.y)
+      windowMesh.rotateY(this.angle * -1);
+      return [
+        windowMesh
+      ]
+    }
   }
 
   inSceneSnapPointArea(newPosition: MatchSnapPoint) {
@@ -112,12 +148,17 @@ export class WindowEntity extends EntityClass<Window> {
     return []
   }
 
-  afterBeSnapByLine(obj: { type: EntityType }, line: [Point, Point]) {
+  afterBeSnapByLine(obj: EntityClass<Window>, line: [Point, Point]) {
     if (obj.type === 'wall') {
       const p1 = line[0]
       const p2 = line[1]
       const nearestAngle = Math.atan2(p2.y - p1.y, p2.x - p1.x)
+
+      const allLineKey = obj.getMineBeSnapLines().map(v => [v[0].x, v[0].y, v[1].x, v[1].y].join(','))
+      const lineKey = [p1.x, p1.y, p2.x, p2.y].join(',')
+      const index = allLineKey.indexOf(lineKey)
       this.data.angle = nearestAngle
+      this.data.wallPointId = index
     }
   }
 }

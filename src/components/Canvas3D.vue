@@ -6,7 +6,7 @@
 <script lang="ts" setup>
 import { ref, onMounted, onUnmounted, watch } from 'vue'
 import * as THREE from 'three'
-import { createShapeFromPoints } from '@/utils/createShapeFromPoints'
+// import { createShapeFromPoints } from '@/utils/createShapeFromPoints'
 import { Geometry } from 'martinez-polygon-clipping'
 import { Wall } from '@/entities/wall/index.d'
 import { Door } from '@/entities/door/index.d'
@@ -295,8 +295,8 @@ const renderWindows = () => {
 
   props.data.windows.forEach((win) => {
     const api = new WindowEntity(win)
-    const wall: Wall | undefined = props.data.walls.find((wall) => wall.id === win.wallId);
-    const meshList = api.draw3DAndCache()
+    const findWall = wallEntityList.find((entity) => entity.data.id === win.wallId)
+    const meshList = api.draw3DAndCache(findWall)
     meshList.forEach(mesh => scene!.add(mesh))
 
     // const geometry = new THREE.CylinderGeometry(3, 3, 20, 8)

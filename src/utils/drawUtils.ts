@@ -163,6 +163,7 @@ export const draw = (
       } else if (currentTool === 'window') {
         const window = {
           id: '123',
+          wallPointId: -1,
           wallId: nearestWall.wall.id,
           x: wallScreenX,
           y: wallScreenY,

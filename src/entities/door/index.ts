@@ -10,7 +10,6 @@ export class DoorEntity extends EntityClass<Door> {
   type: EntityType = 'door'
   id: string
   wallId: string | undefined
-  wallPointId: number
   width: number
   height: number
   angle: number
@@ -18,7 +17,6 @@ export class DoorEntity extends EntityClass<Door> {
   constructor(door: Door) {
     super(door)
     this.wallId = door.wallId
-    this.wallPointId = door.wallPointId
     this.angle = door.angle
     this.width = door.width
     this.height = door.height
@@ -61,7 +59,6 @@ export class DoorEntity extends EntityClass<Door> {
   }
 
   draw3D(wall: WallEntity) {
-    // 实现门的3D绘制逻辑
     const wallThickness = wall.data.thickness;
     // console.log('doorPointId-get', wall, wall.points)
     const geometry = new THREE.BoxGeometry(
@@ -158,17 +155,12 @@ export class DoorEntity extends EntityClass<Door> {
       const p1 = line[0]
       const p2 = line[1]
       const nearestAngle = Math.atan2(p2.y - p1.y, p2.x - p1.x)
-      console.log('after', obj.type, line, nearestAngle)
+
       const allLineKey = obj.getMineBeSnapLines().map(v => [v[0].x, v[0].y, v[1].x, v[1].y].join(','))
       const lineKey = [p1.x, p1.y, p2.x, p2.y].join(',')
       const index = allLineKey.indexOf(lineKey)
-      console.log('after---', obj.getMineBeSnapLines(), line, index)
-      this.data.wallId = obj.data.id as string
-      if (index !== -1) {
-        // console.log('doorPointId-set', index)
-        this.data.wallPointId = index
-      }
       this.data.angle = nearestAngle
+      this.data.wallPointId = index
     }
   }
 }
