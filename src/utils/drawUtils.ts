@@ -126,10 +126,7 @@ export const draw = (
 
   const allDoors = [...doors];
   if (currentTool === 'door' && hoverPoint) {
-    // const nearestWall = getNearestWall(hoverPoint)
-    // console.log('hoverPoint---------', hoverPoint, nearestWall)
     if (insertTempDoor) {
-      console.log('insertTempDoor', insertTempDoor)
       allDoors.push(insertTempDoor)
     }
   }
