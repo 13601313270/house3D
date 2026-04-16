@@ -127,57 +127,58 @@ export const draw = (
     }
   }
 
-  doors.forEach((door) => {
+  const allDoors = [...doors];
+  if (currentTool === 'door' && hoverPoint) {
+    const nearestWall = getNearestWall(hoverPoint)
+    if (nearestWall) {
+      const { pointOnWall, angle } = nearestWall
+      const wallScreenX = pointOnWall.x
+      const wallScreenY = pointOnWall.y
+      allDoors.push({
+        id: 'tempDoor',
+        wallPointId: -1,
+        wallId: nearestWall.wall.id,
+        x: wallScreenX,
+        y: wallScreenY,
+        width: doorWidth,
+        height: doorHeight,
+        angle,
+      })
+    }
+  }
+  allDoors.forEach((door) => {
     const doorApi = new DoorEntity(door)
     const wallThickness = walls.find((wall) => wall.id === door.wallId)?.thickness || 0;
     doorApi.draw2D(ctx, panOffset, wallThickness, zoomLevel)
   })
 
-  windows.forEach((win) => {
+  const allWindows = [...windows];
+  if (currentTool === 'window' && hoverPoint) {
+    const nearestWall = getNearestWall(hoverPoint)
+    if (nearestWall) {
+      const { pointOnWall, angle } = nearestWall
+      const wallScreenX = pointOnWall.x
+      const wallScreenY = pointOnWall.y
+      const window = {
+        id: 'tempWindow',
+        wallPointId: -1,
+        wallId: nearestWall.wall.id,
+        x: wallScreenX,
+        y: wallScreenY,
+        width: windowWidth,
+        height: windowHeight,
+        angle,
+        bottom: 0,
+      }
+      allWindows.push(window)
+    }
+  }
+
+  allWindows.forEach((win) => {
     const windowApi = new WindowEntity(win)
     const wallThickness = walls.find((wall) => wall.id === win.wallId)?.thickness || 0;
     windowApi.draw2D(ctx, panOffset, wallThickness, zoomLevel)
   })
-
-  if (hoverPoint && currentTool !== 'wall') {
-    const nearestWall = getNearestWall(hoverPoint)
-    if (nearestWall) {
-      const { pointOnWall, angle } = nearestWall
-      const wallScreenX = pointOnWall.x * zoomLevel + panOffset.x
-      const wallScreenY = pointOnWall.y * zoomLevel + panOffset.y
-      const wallThickness = nearestWall.wall.thickness || 0;
-      // 鼠标悬浮
-      if (currentTool === 'door') {
-        const door = {
-          id: 'tempDoor',
-          wallPointId: -1,
-          wallId: nearestWall.wall.id,
-          x: wallScreenX,
-          y: wallScreenY,
-          width: doorWidth,
-          height: doorHeight,
-          angle,
-        }
-        const doorApi = new DoorEntity(door)
-        doorApi.draw2D(ctx, panOffset, wallThickness, zoomLevel)
-      } else if (currentTool === 'window') {
-        const window = {
-          id: 'tempWindow',
-          wallPointId: -1,
-          wallId: nearestWall.wall.id,
-          x: wallScreenX,
-          y: wallScreenY,
-          width: windowWidth,
-          height: windowHeight,
-          angle,
-          bottom: 0,
-        }
-        const windowApi = new WindowEntity(window)
-        const wallThickness = walls.find((wall) => wall.id === window.wallId)?.thickness || 0;
-        windowApi.draw2D(ctx, panOffset, wallThickness, zoomLevel)
-      }
-    }
-  }
 
   // 绘制轴对齐参考线
   if (hoverPoint) {

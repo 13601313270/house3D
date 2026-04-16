@@ -51,7 +51,7 @@
     <div class="split-bar" @mousedown="startSplit" title="拖动调整左右比例"></div>
 
     <div class="right-panel">
-      {{ drawingData }}
+      {{ cameraState }}
       <Canvas3D :data="drawingData" v-model:cameraState="cameraState" />
     </div>
   </div>
