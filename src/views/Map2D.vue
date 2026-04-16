@@ -39,7 +39,7 @@
           :style="{ top: contextMenu.y + 'px', left: contextMenu.x + 'px' }">
           <!-- {{ editPropConfigInfo }} -->
           <!-- {{ editPropInputInfo }} -->
-          <div>
+          <div class="configList">
             <label v-for="item in editPropConfigInfo" :key="item.id">
               {{ item.label }}：
               <input v-if="item.dataType === 'number'" type="number" v-model.number="editPropInputInfo[item.id]" />
@@ -56,12 +56,19 @@
       </div>
     </div>
 
-    <div class="split-bar" @mousedown="startSplit" title="拖动调整左右比例"></div>
+    <div class="split-bar" @mousedown.prevent="startSplit(1)" title="拖动调整左右比例"></div>
 
-    <div class="right-panel" :style="{ width: (1 - panel1SplitWidthPer) * 100 + '%' }">
+    <div class="right-panel" :style="{ width: panel2SplitWidthPer * 100 + '%' }">
       <!-- {{ drawingData }} -->
-      {{ insertTempDoor }}
+      <!-- {{ insertTempDoor }} -->
       <Canvas3D ref="canvas3DRef" :data="drawingData" v-model:cameraState="cameraState" />
+    </div>
+
+    <div class="split-bar" @mousedown.prevent="startSplit(2)" title="拖动调整左右比例"></div>
+    <div class="right-panel" :style="{ width: (1 - panel1SplitWidthPer - panel2SplitWidthPer) * 100 + '%' }">
+      <!-- {{ drawingData }} -->
+      <!-- {{ insertTempDoor }} -->
+      <Canvas3D ref="canvas3DRef2" :data="drawingData" v-model:cameraState="cameraState" />
     </div>
   </div>
 </template>
@@ -83,6 +90,7 @@ import { createWindowData, editPropConfig as windowEditPropConfig } from '@/enti
 
 const canvasRef = ref<HTMLCanvasElement | null>(null)
 const canvas3DRef = ref<typeof Canvas3D | null>(null)
+const canvas3DRef2 = ref<typeof Canvas3D | null>(null)
 const currentTool = ref<'wall' | 'door' | 'window' | 'drag'>('drag')
 const walls = ref<Wall[]>([])
 const doors = ref<Door[]>([])
@@ -100,7 +108,8 @@ const prevTool = ref<'wall' | 'door' | 'window' | 'drag'>('wall')
 const panOffset = ref<Point>({ x: 0, y: 0 })
 const isPanning = ref(false)
 const panStart = ref<Point | null>(null)
-const panel1SplitWidthPer = ref(0.5)
+const panel1SplitWidthPer = ref(0.4)
+const panel2SplitWidthPer = ref(0.3)
 const isSplitting = ref(false)
 const canvasSize = ref({ width: 0, height: 0 })
 const zoomLevel = ref(1)
@@ -142,6 +151,10 @@ const updateCanvasSize = () => {
   const canvas3DPanel = canvas3DRef.value
   if (canvas3DPanel) {
     canvas3DPanel.resize();
+  }
+  const canvas3DPanel2 = canvas3DRef2.value
+  if (canvas3DPanel2) {
+    canvas3DPanel2.resize();
   }
   setTimeout(() => {
     drawWrapper()
@@ -1214,31 +1227,30 @@ const handleMouseUp = () => {
   }
 }
 
-const startSplit = (e: MouseEvent) => {
+const dragSplitIndex = ref(0)
+const startSplit = (index: number) => {
+  dragSplitIndex.value = index
   isSplitting.value = true
   document.body.style.cursor = 'col-resize'
-  e.preventDefault()
 }
 
 const handleMouseMoveSplit = (e: MouseEvent) => {
   if (!isSplitting.value) return
 
-  const container = document.querySelector('.map2d-container')
-  if (!container) return
+  const containerWidth = window.innerWidth
 
-  const rect = container.getBoundingClientRect()
-  const containerWidth = rect.width
-  const newSplitPosition = (e.clientX - rect.left) / containerWidth
-
-  const minRatio = 0.2
-  const maxRatio = 0.8
-
-  let finalRatio: number
-  if (newSplitPosition < minRatio) finalRatio = minRatio
-  else if (newSplitPosition > maxRatio) finalRatio = maxRatio
-  else finalRatio = newSplitPosition
-
-  panel1SplitWidthPer.value = finalRatio
+  const mousePositionPer = e.clientX / containerWidth
+  if (dragSplitIndex.value === 1) {
+    const panel1StartWidth = panel1SplitWidthPer.value;
+    const panel2StartWidth = panel2SplitWidthPer.value;
+    panel1SplitWidthPer.value = mousePositionPer
+    panel2SplitWidthPer.value = panel2StartWidth - (mousePositionPer - panel1StartWidth)
+  } else if (dragSplitIndex.value === 2) {
+    const panel1StartWidth = panel1SplitWidthPer.value;
+    const panel2StartWidth = panel2SplitWidthPer.value;
+    // console.log(panel2StartWidth - ((panel2StartWidth + panel1StartWidth) - mousePositionPer));
+    panel2SplitWidthPer.value = panel2StartWidth - ((panel2StartWidth + panel1StartWidth) - mousePositionPer)
+  }
 }
 
 const handleMouseUpSplit = () => {
@@ -1303,7 +1315,7 @@ function changeCurrentTool(type: 'wall' | 'door' | 'window' | 'drag') {
 }
 </script>
 
-<style scoped>
+<style scoped lang="less">
 .map2d-container {
   display: flex;
   width: 100vw;
@@ -1417,25 +1429,30 @@ function changeCurrentTool(type: 'wall' | 'door' | 'window' | 'drag') {
   position: absolute;
   background: white;
   border: 1px solid #d9d9d9;
-  border-radius: 4px;
+  border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-  padding: 5px 0;
   z-index: 1000;
-}
 
-.context-menu button {
-  display: block;
-  width: 100%;
-  padding: 8px 16px;
-  border: none;
-  background: transparent;
-  text-align: left;
-  cursor: pointer;
-  font-size: 14px;
-  color: #ff4d4f;
-}
+  .configList {
+    display: flex;
+    flex-direction: column;
+    padding: 8px;
+  }
 
-.context-menu button:hover {
-  background: #f5f5f5;
+  button {
+    display: block;
+    width: 100%;
+    padding: 8px 16px;
+    border: none;
+    background: transparent;
+    text-align: left;
+    cursor: pointer;
+    font-size: 14px;
+    color: #ff4d4f;
+
+    &:hover {
+      background: #f5f5f5;
+    }
+  }
 }
 </style>
