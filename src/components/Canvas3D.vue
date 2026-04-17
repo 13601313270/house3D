@@ -224,7 +224,7 @@ const renderWalls = () => {
   if (!scene) return
 
   wallEntityList = [];
-  props.data.walls.forEach((wall) => {
+  props.data.wall.forEach((wall) => {
     const api = new WallEntity(wall);
     wallEntityList.push(api)
     const meshList = api.draw3DAndCache()
@@ -301,10 +301,10 @@ const renderWalls = () => {
 const renderDoors = () => {
   if (!scene) return
 
-  props.data.doors.forEach((door) => {
+  props.data.door.forEach((door) => {
     const api = new DoorEntity(door);
 
-    const wall = props.data.walls.find((wall) => wall.id === door.wallId);
+    const wall = props.data.wall.find((wall) => wall.id === door.wallId);
 
     const findWall = wallEntityList.find((entity) => entity.data.id === door.wallId)
 
@@ -316,7 +316,7 @@ const renderDoors = () => {
 const renderWindows = () => {
   if (!scene) return
 
-  props.data.windows.forEach((win) => {
+  props.data.window.forEach((win) => {
     const api = new WindowEntity(win)
     const findWall = wallEntityList.find((entity) => entity.data.id === win.wallId)
     const meshList = api.draw3DAndCache(findWall)
@@ -332,7 +332,7 @@ const renderWindows = () => {
 
 const renderCameras = () => {
   if (!scene) return
-  props.data.cameras.forEach((camera) => {
+  props.data.camera.forEach((camera) => {
     const api = new CameraEntity(camera)
     const meshList = api.draw3DAndCache()
     meshList.forEach(mesh => scene!.add(mesh))

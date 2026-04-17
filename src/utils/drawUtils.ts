@@ -35,7 +35,7 @@ export const draw = (
   const ctx = canvasRef.getContext('2d')
   if (!ctx) return
 
-  const { walls, doors, windows, cameras } = fileData
+  const { wall: walls, door: doors, window: windows, camera: cameras } = fileData
   ctx.clearRect(0, 0, canvasWidth, canvasHeight)
 
   ctx.fillStyle = '#f5f5f5'

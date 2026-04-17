@@ -2,14 +2,21 @@ import { Door } from './door/index.d'
 import { Wall } from './wall/index.d'
 import { Window } from './window/index.d'
 import { CameraData } from './camera/index.d'
-
-export { WallEntity } from './wall'
-export { DoorEntity } from './door'
-export { WindowEntity } from './window'
+import { WallEntity } from './wall'
+import { DoorEntity } from './door'
+import { WindowEntity } from './window'
+import { CameraEntity } from './camera'
 
 export type fileData = {
-    walls: Wall[],
-    doors: Door[],
-    windows: Window[],
-    cameras: CameraData[],
+  wall: Wall[],
+  door: Door[],
+  window: Window[],
+  camera: CameraData[],
+}
+
+export type fileDataKeyToClass = {
+  walls: WallEntity,
+  doors: DoorEntity,
+  windows: WindowEntity,
+  cameras: CameraEntity,
 }
