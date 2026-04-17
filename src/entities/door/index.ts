@@ -138,7 +138,7 @@ export class DoorEntity extends EntityClass<Door> {
 
   matchHandelInfo(x: number, y: number, zoomLevel: number) {
     const dist = Math.hypot(x - this.data.x, y - this.data.y)
-    if (dist < this.data.width * zoomLevel) {
+    if (dist < 6 * zoomLevel) {
       return {
         index: 0,
         type: this.type,

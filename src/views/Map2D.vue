@@ -62,8 +62,9 @@
     <div class="split-bar" @mousedown.prevent="startSplit(1)" title="拖动调整左右比例"></div>
 
     <div class="right-panel" :style="{ width: panel2SplitWidthPer * 100 + '%' }">
-      {{ drawingData }}
+      <!-- {{ drawingData }} -->
       <!-- {{ insertTempDoor }} -->
+        <!-- {{ drawingData.camera[0] }} -->
       <Canvas3D ref="canvas3DRef" :data="drawingData" v-model:cameraState="cameraState" />
     </div>
 
@@ -71,7 +72,8 @@
     <div class="right-panel" :style="{ width: (1 - panel1SplitWidthPer - panel2SplitWidthPer) * 100 + '%' }">
       <!-- {{ drawingData }} -->
       <!-- {{ insertTempDoor }} -->
-      <Canvas3D ref="canvas3DRef2" :data="drawingData" v-model:cameraState="cameraState" />
+      <!-- {{ cameraState2 }} -->
+      <Canvas3D ref="canvas3DRef2" :data="drawingData" v-model:cameraState="cameraState2" />
     </div>
   </div>
 </template>
@@ -80,7 +82,7 @@
 import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
 import { Entity, Point } from '../types'
 import { draw, canvasWidth, canvasHeight, snapThreshold } from '../utils/drawUtils'
-import Canvas3D from '../components/Canvas3D.vue'
+import Canvas3D, { CameraState } from '../components/Canvas3D.vue'
 import { Wall } from '@/entities/wall/index.d'
 import { Door } from '@/entities/door/index.d'
 import { Window } from '@/entities/window/index.d'
@@ -89,7 +91,7 @@ import { EntityClass, EntityType, MatchSnapPoint } from '@/types/entity'
 import { HandelInfo, PointWithIndex } from '@/types/map2d'
 import pointToLineDistance from '@/utils/pointToLineDistance'
 import { createDoorData, DoorEntity } from '@/entities/door'
-import { createWindowData,  WindowEntity } from '@/entities/window'
+import { createWindowData, WindowEntity } from '@/entities/window'
 import { CameraEntity, createCameraData } from '@/entities/camera'
 import { CameraData } from '@/entities/camera/index.d'
 import { WallEntity } from '@/entities/wall'
@@ -115,27 +117,28 @@ const dragStartPoint = ref<Point | null>(null)
 const panOffset = ref<Point>({ x: 0, y: 0 })
 const isPanning = ref(false)
 const panStart = ref<Point | null>(null)
-const panel1SplitWidthPer = ref(0.5)
-const panel2SplitWidthPer = ref(0.4)
+const panel1SplitWidthPer = ref(0.4)
+const panel2SplitWidthPer = ref(0.2)
 const isSplitting = ref(false)
 const canvasSize = ref({ width: 0, height: 0 })
 const zoomLevel = ref(1)
 const wallThickness = ref<number>(20)
-type cameraStateType = {
-  targetPositionX: number
-  targetPositionY: number
-  targetPositionZ: number
-  radius: number
-  angleX: number
-  angleY: number
-}
-const cameraState = ref<cameraStateType>({
+
+const cameraState = ref<CameraState>({
   targetPositionX: 0,
   targetPositionY: 0,
   targetPositionZ: 0,
   radius: 800,
   angleX: 0,
   angleY: Math.PI / 4
+})
+const cameraState2 = ref<CameraState>({
+  targetPositionX: 0,
+  targetPositionY: 0,
+  targetPositionZ: 100,
+  positionX: 0,
+  positionY: 0,
+  positionZ: 100
 })
 let insertTempDoor: Door | null = null;
 let insertTempWindow: Window | null = null;
@@ -632,7 +635,7 @@ const saveDrawing = () => {
   const data: fileData & {
     panOffset: Point
     zoomLevel: number
-    cameraState: cameraStateType
+    cameraState: CameraState
   } = {
     ...allFileObjects.value,
     panOffset: panOffset.value,
@@ -664,7 +667,7 @@ const handleFileChange = (e: Event) => {
       const data: fileData & {
         panOffset: Point
         zoomLevel: number
-        cameraState: cameraStateType
+        cameraState: CameraState
       } = JSON.parse(event.target?.result as string)
       const allObjKey: string[] = Object.keys(allFileObjects.value)
       allObjKey.forEach((key) => {
@@ -676,6 +679,18 @@ const handleFileChange = (e: Event) => {
       zoomLevel.value = data.zoomLevel || 1
       if (data.cameraState) {
         cameraState.value = data.cameraState
+      }
+      if (allFileObjects.value.camera) {
+        const cameraData = allFileObjects.value.camera[0]
+        console.log('cameraData', JSON.stringify(cameraData))
+        cameraState2.value = {
+          targetPositionX: cameraData.targetPositionX,
+          targetPositionY: cameraData.targetPositionY,
+          targetPositionZ: cameraData.targetPositionZ,
+          positionX: cameraData.x,
+          positionY: cameraData.y,
+          positionZ: cameraData.z
+        }
       }
       history.value = []
       drawWrapper()
@@ -987,6 +1002,25 @@ const handleMouseMove = (e: MouseEvent) => {
       }
     }
     matchHandelObj.matchHandelMoveCallback(x, y, matchHandelInfo)
+    if (matchHandelInfo?.type === 'camera') {
+      if ('positionX' in cameraState2.value) {
+        console.log('matchHandelInfo.index', matchHandelInfo.index)
+
+        if (matchHandelInfo.index === 1) {
+          cameraState2.value = {
+            ...cameraState2.value,
+            targetPositionX: x,
+            targetPositionY: y,
+          }
+        } else {
+          cameraState2.value = {
+            ...cameraState2.value,
+            positionX: x,
+            positionY: y,
+          }
+        }
+      }
+    }
     drawWrapper()
   }
 

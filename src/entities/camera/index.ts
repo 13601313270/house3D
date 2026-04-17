@@ -1,7 +1,7 @@
-import { Point } from '@/types/map2d'
+import { HandelInfo, Point } from '@/types/map2d'
 import * as THREE from 'three'
 import { CameraData } from './index.d'
-import { allSnapFromType, EntityClass, EntityType, MatchSnapPoint } from '@/types/entity'
+import { allSnapFromType, EntityClass, EntityType, MatchSnapPoint, OrigionSnapPoint } from '@/types/entity'
 import { WallEntity } from '../wall'
 import { editItem } from '..'
 
@@ -10,8 +10,11 @@ export function createCameraData() {
     id: Date.now().toString(),
     x: 0,
     y: 0,
-    z: 0,
-    angle: 0,
+    z: 100,
+    // 相机目标位置
+    targetPositionX: 0,
+    targetPositionY: 0,
+    targetPositionZ: 100,
   }
   return camera
 }
@@ -41,9 +44,6 @@ export class CameraEntity extends EntityClass<CameraData> {
     const screenY = this.data.y * zoomLevel + panOffset.y
     const color = '#e67e22'
     const width = 10 * zoomLevel;
-    ctx.save()
-    ctx.translate(screenX, screenY)
-    ctx.rotate(this.data.angle)
     ctx.fillStyle = color
     ctx.strokeStyle = color
     ctx.lineWidth = 3
@@ -51,14 +51,25 @@ export class CameraEntity extends EntityClass<CameraData> {
     ctx.beginPath()
     ctx.arc(0, 0, width / 2, -Math.PI / 4, Math.PI / 4)
     ctx.stroke()
-    ctx.restore()
 
     // 控制点
     ctx.fillStyle = '#fff'
     ctx.strokeStyle = '#e67e22'
     ctx.lineWidth = 2
     ctx.beginPath()
-    ctx.arc(screenX, screenY, 6 * zoomLevel, 0, Math.PI * 2)
+    ctx.arc(screenX, screenY, 1 * zoomLevel, 0, Math.PI * 2)
+    ctx.fill()
+    ctx.stroke()
+
+    // targetPosition 控制点
+    ctx.fillStyle = '#fff'
+    ctx.strokeStyle = '#e67e22'
+    ctx.lineWidth = 2
+    ctx.beginPath()
+    ctx.arc(
+      this.data.targetPositionX * zoomLevel + panOffset.x,
+      this.data.targetPositionY * zoomLevel + panOffset.y,
+      6 * zoomLevel, 0, Math.PI * 2)
     ctx.fill()
     ctx.stroke()
   }
@@ -72,7 +83,7 @@ export class CameraEntity extends EntityClass<CameraData> {
     const material = new THREE.MeshStandardMaterial({ color: 0xe67e22 })
     const doorMesh = new THREE.Mesh(geometry, material)
     doorMesh.position.set(this.data.x, 10, this.data.y)
-    doorMesh.rotateY(this.data.angle * -1);
+    // doorMesh.rotateY(this.data.angle * -1);
     return [
       doorMesh
     ]
@@ -87,27 +98,36 @@ export class CameraEntity extends EntityClass<CameraData> {
         id: this.data.id,
       }
     }
+    const distToTarget = Math.hypot(x - this.data.targetPositionX, y - this.data.targetPositionY)
+    if (distToTarget < 10 * zoomLevel) {
+      return {
+        index: 1,
+        type: this.type,
+        id: this.data.id,
+      }
+    }
     return null;
   }
 
-  matchHandelMoveCallback(x: number, y: number) {
-    this.changePosition({ x, y })
+  matchHandelMoveCallback(x: number, y: number, matchHandelInfo: HandelInfo) {
+    console.log(matchHandelInfo)
+    if (matchHandelInfo.index === 1) {
+      this.data.targetPositionX = x
+      this.data.targetPositionY = y
+    } else {
+      this.changePosition({ x, y })
+    }
   }
 
   inSceneSnapPointArea(newPosition: MatchSnapPoint) {
-    if (newPosition.objType === 'wall' && newPosition.snapFromType === 'line') {
-      this.changePosition(newPosition.point)
-      return true
-    }
     return false
   }
 
-  getMineBeSnapPoints() {
-    const key: allSnapFromType = 'point';
+  getMineBeSnapPoints(): Array<OrigionSnapPoint> {
     return [{
       objType: this.type,
       objId: this.data.id,
-      snapFromType: key,
+      snapFromType: 'point',
       point: {
         index: 0,
         x: this.data.x,

@@ -17,13 +17,20 @@ import { WallEntity } from '@/entities/wall'
 import { fileData } from '@/entities'
 import { CameraEntity } from '@/entities/camera'
 
-interface CameraState {
+export type CameraState = {
   targetPositionX: number
   targetPositionY: number
   targetPositionZ: number
   radius: number
   angleX: number
   angleY: number
+} | {
+  targetPositionX: number
+  targetPositionY: number
+  targetPositionZ: number
+  positionX: number
+  positionY: number
+  positionZ: number
 }
 
 const props = defineProps<{
@@ -39,7 +46,7 @@ let scene: THREE.Scene | null = null
 let camera: THREE.PerspectiveCamera | null = null
 let renderer: THREE.WebGLRenderer | null = null
 
-const camera1State = ref<CameraState>({
+const cameraState = ref<CameraState>({
   targetPositionX: 0,
   targetPositionY: 0,
   targetPositionZ: 0,
@@ -49,22 +56,38 @@ const camera1State = ref<CameraState>({
 })
 
 function updateCameraAngel() {
-  const camera1X = camera1State.value.radius * Math.sin(camera1State.value.angleX) * Math.cos(camera1State.value.angleY) * -1;
-  const camera1Y = camera1State.value.radius * Math.sin(camera1State.value.angleY);
-  const camera1Z = camera1State.value.radius * Math.cos(camera1State.value.angleX) * Math.cos(camera1State.value.angleY);
+  if ('radius' in cameraState.value && cameraState.value.radius) {
+    const camera1X = cameraState.value.radius * Math.sin(cameraState.value.angleX) * Math.cos(cameraState.value.angleY) * -1;
+    const camera1Y = cameraState.value.radius * Math.sin(cameraState.value.angleY);
+    const camera1Z = cameraState.value.radius * Math.cos(cameraState.value.angleX) * Math.cos(cameraState.value.angleY);
 
-  if (camera) {
-    camera.position.set(
-      camera1State.value.targetPositionX + camera1X, // 镜头左右摇摆
-      camera1State.value.targetPositionY + camera1Y,
-      camera1State.value.targetPositionZ + camera1Z
-    );
-    camera.lookAt(
-      camera1State.value.targetPositionX,
-      camera1State.value.targetPositionY,
-      camera1State.value.targetPositionZ
-    );
+    if (camera) {
+      camera.position.set(
+        cameraState.value.targetPositionX + camera1X, // 镜头左右摇摆
+        cameraState.value.targetPositionY + camera1Y,
+        cameraState.value.targetPositionZ + camera1Z
+      );
+      camera.lookAt(
+        cameraState.value.targetPositionX,
+        cameraState.value.targetPositionY,
+        cameraState.value.targetPositionZ
+      );
+    }
+  } else if ('positionX' in cameraState.value) {
+    if (camera) {
+      camera.position.set(
+        cameraState.value.positionX,
+        cameraState.value.positionZ,
+        cameraState.value.positionY,
+      );
+      camera.lookAt(
+        cameraState.value.targetPositionX,
+        cameraState.value.targetPositionZ,
+        cameraState.value.targetPositionY
+      );
+    }
   }
+
   // if (camera) {
   //   camera.lookAt(
   //     camera.position.x - camera2X,
@@ -124,56 +147,71 @@ const initThree = () => {
     updateCameraAngel()
 
     const emitCameraState = () => {
-      emit('update:cameraState', {
-        targetPositionX: camera1State.value.targetPositionX,
-        targetPositionY: camera1State.value.targetPositionY,
-        targetPositionZ: camera1State.value.targetPositionZ,
-        radius: camera1State.value.radius,
-        angleX: camera1State.value.angleX,
-        angleY: camera1State.value.angleY
-      })
+      if ('radius' in cameraState.value) {
+        emit('update:cameraState', {
+          targetPositionX: cameraState.value.targetPositionX,
+          targetPositionY: cameraState.value.targetPositionY,
+          targetPositionZ: cameraState.value.targetPositionZ,
+          radius: cameraState.value.radius,
+          angleX: cameraState.value.angleX,
+          angleY: cameraState.value.angleY
+        })
+      } else if ('positionX' in cameraState.value) {
+        emit('update:cameraState', {
+          targetPositionX: cameraState.value.targetPositionX,
+          targetPositionY: cameraState.value.targetPositionZ,
+          targetPositionZ: cameraState.value.targetPositionY,
+          positionX: cameraState.value.positionX,
+          positionY: cameraState.value.positionZ,
+          positionZ: cameraState.value.positionY
+        })
+      }
     }
 
     const container = containerRef.value
     if (!container) return
 
     container.addEventListener('mousedown', (e) => {
-      if (e.button === 2) {
-        // 旋转
-        camera1AngelStartX = camera1State.value.angleX;
-        camera1AngelStartY = camera1State.value.angleY;
-        canvas1IsMouseAngel = true;
-        canvas1LastMouseX = e.clientX;
-        canvas1LastMouseY = e.clientY;
-        e.preventDefault();
-      } else if (e.button === 0) {
-        // 移动
-        camera1TargetPositionStartX = camera1State.value.targetPositionX;
-        camera1TargetPositionStartY = camera1State.value.targetPositionY;
-        camera1TargetPositionStartZ = camera1State.value.targetPositionZ;
-        canvas1IsMouseMove = true;
-        canvas1LastMouseX = e.clientX;
-        canvas1LastMouseY = e.clientY;
-        e.preventDefault();
+      if ('radius' in cameraState.value) {
+        if (e.button === 2) {
+          // 旋转
+          camera1AngelStartX = cameraState.value.angleX;
+          camera1AngelStartY = cameraState.value.angleY;
+          canvas1IsMouseAngel = true;
+          canvas1LastMouseX = e.clientX;
+          canvas1LastMouseY = e.clientY;
+          e.preventDefault();
+        } else if (e.button === 0) {
+          // 移动
+          camera1TargetPositionStartX = cameraState.value.targetPositionX;
+          camera1TargetPositionStartY = cameraState.value.targetPositionY;
+          camera1TargetPositionStartZ = cameraState.value.targetPositionZ;
+          canvas1IsMouseMove = true;
+          canvas1LastMouseX = e.clientX;
+          canvas1LastMouseY = e.clientY;
+          e.preventDefault();
+        }
       }
     })
     container.addEventListener('mousemove', (e) => {
-      if (canvas1IsMouseAngel) {
-        // 镜头旋转
-        const delta2DDiffX = e.clientX - canvas1LastMouseX;
-        const delta2DDiffY = e.clientY - canvas1LastMouseY;
-        camera1State.value.angleX = camera1AngelStartX + delta2DDiffX * 0.01;
-        const angleY = camera1AngelStartY + delta2DDiffY * 0.01;
-        camera1State.value.angleY = Math.max(-Math.PI / 2 + 0.05, Math.min(Math.PI / 2 - 0.05, angleY)); // 因为camera，是采用控制position和lookat的逻辑，所以在angleY==Math.PI/2的定点的时候，无法控制方向，所以这里限制一下，只允许angleY在[-Math.PI/2+0.05, Math.PI/2-0.05]之间
-        updateCameraAngel()
-      } else if (canvas1IsMouseMove) {
-        const deltaX = e.clientX - canvas1LastMouseX;
-        const deltaY = e.clientY - canvas1LastMouseY;
-        const sensitivity = 1;
+      if ('radius' in cameraState.value) {
+        if (canvas1IsMouseAngel) {
+          // 镜头旋转
+          const delta2DDiffX = e.clientX - canvas1LastMouseX;
+          const delta2DDiffY = e.clientY - canvas1LastMouseY;
+          cameraState.value.angleX = camera1AngelStartX + delta2DDiffX * 0.01;
+          const angleY = camera1AngelStartY + delta2DDiffY * 0.01;
+          cameraState.value.angleY = Math.max(-Math.PI / 2 + 0.05, Math.min(Math.PI / 2 - 0.05, angleY)); // 因为camera，是采用控制position和lookat的逻辑，所以在angleY==Math.PI/2的定点的时候，无法控制方向，所以这里限制一下，只允许angleY在[-Math.PI/2+0.05, Math.PI/2-0.05]之间
+          updateCameraAngel()
+        } else if (canvas1IsMouseMove) {
+          const deltaX = e.clientX - canvas1LastMouseX;
+          const deltaY = e.clientY - canvas1LastMouseY;
+          const sensitivity = 1;
 
-        camera1State.value.targetPositionX = camera1TargetPositionStartX - (deltaX * Math.cos(camera1State.value.angleX) - deltaY * Math.sin(camera1State.value.angleX)) * sensitivity;
-        camera1State.value.targetPositionZ = camera1TargetPositionStartZ - (deltaX * Math.sin(camera1State.value.angleX) + deltaY * Math.cos(camera1State.value.angleX)) * sensitivity;
-        updateCameraAngel()
+          cameraState.value.targetPositionX = camera1TargetPositionStartX - (deltaX * Math.cos(cameraState.value.angleX) - deltaY * Math.sin(cameraState.value.angleX)) * sensitivity;
+          cameraState.value.targetPositionZ = camera1TargetPositionStartZ - (deltaX * Math.sin(cameraState.value.angleX) + deltaY * Math.cos(cameraState.value.angleX)) * sensitivity;
+          updateCameraAngel()
+        }
       }
     })
     container.addEventListener('mouseup', (e) => {
@@ -188,12 +226,14 @@ const initThree = () => {
 
     container.addEventListener('wheel', (e) => {
       e.preventDefault();
-      const zoomSpeed = 0.001;
-      const delta = e.deltaY * zoomSpeed;
-      const newRadius = Math.max(5, Math.min(maxCamera1Radius, camera1State.value.radius * (1 + delta)));
-      camera1State.value.radius = newRadius;
-      updateCameraAngel();
-      emitCameraState()
+      if ('radius' in cameraState.value) {
+        const zoomSpeed = 0.001;
+        const delta = e.deltaY * zoomSpeed;
+        const newRadius = Math.max(5, Math.min(maxCamera1Radius, cameraState.value.radius * (1 + delta)));
+        cameraState.value.radius = newRadius;
+        updateCameraAngel();
+        emitCameraState()
+      }
     }, { passive: false });
 
     container.addEventListener('contextmenu', (e) => {
@@ -388,7 +428,7 @@ onMounted(() => {
   nextTick(() => {
     initThree()
     if (props.cameraState) {
-      camera1State.value = { ...props.cameraState }
+      cameraState.value = { ...props.cameraState }
       updateCameraAngel()
     }
     updateScene()
@@ -411,7 +451,7 @@ watch(() => props.data, () => {
 
 watch(() => props.cameraState, (newVal) => {
   if (newVal) {
-    camera1State.value = { ...newVal }
+    cameraState.value = { ...newVal }
     updateCameraAngel()
   }
 })

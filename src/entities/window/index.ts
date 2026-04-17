@@ -97,7 +97,7 @@ export class WindowEntity extends EntityClass<Window> {
   // 命中可拖拽具柄
   matchHandelInfo(x: number, y: number, zoomLevel: number): HandelInfo | null {
     const dist = Math.hypot(x - this.data.x, y - this.data.y)
-    if (dist < this.data.width * zoomLevel) {
+    if (dist < 6 * zoomLevel) {
       return {
         index: 0,
         id: this.data.id,
