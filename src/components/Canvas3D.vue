@@ -75,6 +75,15 @@ function updateCameraAngel() {
     }
   } else if ('positionX' in cameraState.value) {
     if (camera) {
+      // position和lookAt之间距离
+      const distance = Math.hypot(
+        cameraState.value.positionX - cameraState.value.targetPositionX,
+        cameraState.value.positionZ - cameraState.value.targetPositionZ,
+        cameraState.value.positionY - cameraState.value.targetPositionY
+      );
+
+      console.log('distance', distance, 3000 / distance)
+      camera.fov = 3000 / distance
       camera.position.set(
         cameraState.value.positionX,
         cameraState.value.positionZ,
