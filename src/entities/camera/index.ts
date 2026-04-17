@@ -18,16 +18,6 @@ export function createCameraData() {
 
 export function editPropConfig(): editItem[] {
   return [
-    {
-      id: 'width',
-      label: '宽度',
-      dataType: 'number',
-    },
-    {
-      id: 'height',
-      label: '高度',
-      dataType: 'number',
-    }
   ]
 }
 
