@@ -81,9 +81,12 @@ function updateCameraAngel() {
         cameraState.value.positionZ - cameraState.value.targetPositionZ,
         cameraState.value.positionY - cameraState.value.targetPositionY
       );
+      const fov = Math.round(3000 / distance)
+      if (fov > 10 && fov < 180) {
+        console.log('distance', fov)
+        camera.fov = fov
+      }
 
-      console.log('distance', distance, 3000 / distance)
-      camera.fov = 3000 / distance
       camera.position.set(
         cameraState.value.positionX,
         cameraState.value.positionZ,
