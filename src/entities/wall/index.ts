@@ -4,9 +4,16 @@ import { Wall } from './index.d'
 import { drawPoint } from '@/utils/drawPoint'
 import { createAllWallFromPoints } from '@/utils/createAllWallFromPoints'
 import * as THREE from 'three'
+import { editItem } from '..'
+
+export function editPropConfig(): editItem[] {
+  return [
+  ]
+}
 
 export class WallEntity extends EntityClass<Wall> {
   type: EntityType = 'wall'
+  isPointObj: boolean = false
   points: Point[]
   thickness: number
   wall: Wall

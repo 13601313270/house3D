@@ -5,6 +5,7 @@ import { Brush, Evaluator, SUBTRACTION } from 'three-bvh-csg';
 import { allSnapFromType, EntityClass, EntityType, MatchSnapPoint } from '@/types/entity'
 import { Wall } from '../wall/index.d'
 import { WallEntity } from '../wall'
+import { editItem } from '..';
 
 export function createDoorData() {
   const door: Door = {
@@ -18,12 +19,6 @@ export function createDoorData() {
     angle: 0,
   }
   return door
-}
-
-type editItem = {
-  id: string,
-  label: string,
-  dataType: 'number' | 'poiListAndLineCircle' | 'poiListAndLine' | 'poiList' | 'color' | 'boolean' | 'mesh' | 'area' | string[]/* 枚举 */
 }
 
 export function editPropConfig(): editItem[] {
@@ -45,6 +40,7 @@ export class DoorEntity extends EntityClass<Door> {
   type: EntityType = 'door'
   id: string
   wallId: string | undefined
+  isPointObj: boolean = true
 
   constructor(door: Door) {
     super(door)

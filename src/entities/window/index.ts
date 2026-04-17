@@ -51,6 +51,7 @@ export class WindowEntity extends EntityClass<Window> {
   type: EntityType = 'window'
   height: number
   color: string
+  isPointObj: boolean = true
 
   constructor(window: Window) {
     super(window)

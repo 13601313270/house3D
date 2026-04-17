@@ -20,6 +20,7 @@ export type MatchSnapPoint = OrigionSnapPoint | {
 
 export abstract class EntityClass<T extends Entity> {
   abstract type: EntityType
+  abstract isPointObj: boolean // 点状对象，如窗户/门。非点状的如墙
   data: T
   meshList: THREE.Mesh[] = []
 

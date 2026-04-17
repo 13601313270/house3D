@@ -3,6 +3,7 @@ import * as THREE from 'three'
 import { CameraData } from './index.d'
 import { allSnapFromType, EntityClass, EntityType, MatchSnapPoint } from '@/types/entity'
 import { WallEntity } from '../wall'
+import { editItem } from '..'
 
 export function createCameraData() {
   const camera: CameraData = {
@@ -13,12 +14,6 @@ export function createCameraData() {
     angle: 0,
   }
   return camera
-}
-
-type editItem = {
-  id: string,
-  label: string,
-  dataType: 'number' | 'poiListAndLineCircle' | 'poiListAndLine' | 'poiList' | 'color' | 'boolean' | 'mesh' | 'area' | string[]/* 枚举 */
 }
 
 export function editPropConfig(): editItem[] {
@@ -39,6 +34,7 @@ export function editPropConfig(): editItem[] {
 export class CameraEntity extends EntityClass<CameraData> {
   type: EntityType = 'camera'
   id: string
+  isPointObj: boolean = true
 
   constructor(camera: CameraData) {
     super(camera)
