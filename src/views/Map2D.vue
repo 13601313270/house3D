@@ -84,7 +84,7 @@ import Canvas3D from '../components/Canvas3D.vue'
 import { Wall } from '@/entities/wall/index.d'
 import { Door } from '@/entities/door/index.d'
 import { Window } from '@/entities/window/index.d'
-import { allFileKeys, defaultFileData, PropConfigMap, fileData, fileDataKeyToClass } from '@/entities'
+import { allFileKeys, defaultFileData, PropConfigMap, fileData, fileDataKeyToClass, allFileKeysEnum } from '@/entities'
 import { EntityClass, EntityType, MatchSnapPoint } from '@/types/entity'
 import { HandelInfo, PointWithIndex } from '@/types/map2d'
 import pointToLineDistance from '@/utils/pointToLineDistance'
@@ -1272,7 +1272,7 @@ const handleWheel = (e: WheelEvent) => {
 function changeCurrentTool(type: 'wall' | 'door' | 'window' | 'camera' | 'drag') {
   insertTempDoor = null
   insertTempWindow = null
-  if (allFileKeys.includes(type)) {
+  if (allFileKeys.includes(type as any)) {
     if (type === 'door') {
       insertTempDoor = createDoorData();
     } else if (type === 'window') {
