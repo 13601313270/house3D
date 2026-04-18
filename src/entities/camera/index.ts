@@ -45,18 +45,8 @@ export class CameraEntity extends EntityClass<CameraData> {
     panOffset: Point,
     zoomLevel: number
   ): void {
-    // 实现门的2D绘制逻辑
     const screenX = this.data.x * zoomLevel + panOffset.x
     const screenY = this.data.y * zoomLevel + panOffset.y
-    const color = '#e67e22'
-    const width = 10 * zoomLevel;
-    ctx.fillStyle = color
-    ctx.strokeStyle = color
-    ctx.lineWidth = 3
-    ctx.fillRect(-width / 2, -width / 2, width, width)
-    ctx.beginPath()
-    ctx.arc(0, 0, width / 2, -Math.PI / 4, Math.PI / 4)
-    ctx.stroke()
 
     // 控制点
     ctx.fillStyle = '#fff'
