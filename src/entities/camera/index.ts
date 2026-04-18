@@ -11,6 +11,8 @@ export function createCameraData() {
     x: 0,
     y: 0,
     z: 100,
+    aspectW: 16,
+    aspectH: 9,
     // 相机目标位置
     targetPositionX: 0,
     targetPositionY: 0,
@@ -25,6 +27,16 @@ export function editPropConfig(): editItem[] {
     {
       id: 'fov',
       label: '角度',
+      dataType: 'number',
+    },
+    {
+      id: 'aspectW',
+      label: '宽度比',
+      dataType: 'number',
+    },
+    {
+      id: 'aspectH',
+      label: '高度比',
       dataType: 'number',
     }
   ]

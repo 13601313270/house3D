@@ -5,4 +5,6 @@ export type CameraData = Entity & {
   targetPositionY: number
   targetPositionZ: number
   fov: number
+  aspectW: number
+  aspectH: number
 }

@@ -36,7 +36,8 @@ export type CameraState = {
 
 const props = defineProps<{
   data: fileData,
-  cameraState?: CameraState
+  cameraState?: CameraState,
+  aspectRatio?: number
 }>()
 
 const emit = defineEmits<{(e: 'update:cameraState', value: CameraState): void}>()
@@ -403,6 +404,8 @@ const resize = () => {
   if (!containerRef.value || !renderer || !camera) return
   if (!cameraState.value) return;
 
+  updateContainerHeight()
+  
   const width = containerRef.value.clientWidth
   const height = containerRef.value.clientHeight
 
@@ -444,8 +447,17 @@ const updateScene = () => {
   }
 }
 
+const updateContainerHeight = () => {
+  if (!containerRef.value || !props.aspectRatio) return
+  
+  const width = containerRef.value.clientWidth
+  const height = width / props.aspectRatio
+  containerRef.value.style.height = `${height}px`
+}
+
 onMounted(() => {
   nextTick(() => {
+    updateContainerHeight()
     initThree()
     if (props.cameraState) {
       cameraState.value = { ...props.cameraState }
@@ -489,7 +501,6 @@ function calcVerticalFovByHorizontalFov(hFov: number, aspect: number) {
 .canvas-3d-container {
   overflow: hidden;
   width: 100%;
-  height: 600px;
   background: white;
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
