@@ -7,10 +7,6 @@
 import { ref, onMounted, onUnmounted, watch, nextTick } from 'vue'
 import * as THREE from 'three'
 // import { createShapeFromPoints } from '@/utils/createShapeFromPoints'
-import { Geometry } from 'martinez-polygon-clipping'
-import { Wall } from '@/entities/wall/index.d'
-import { Door } from '@/entities/door/index.d'
-import { Window } from '@/entities/window/index.d'
 import { DoorEntity } from '@/entities/door'
 import { WindowEntity } from '@/entities/window'
 import { WallEntity } from '@/entities/wall'
@@ -263,7 +259,7 @@ const initThree = () => {
   scene.add(directionalLight)
 
   renderer = new THREE.WebGLRenderer({ antialias: true })
-  renderer.setSize(width, height)
+  // renderer.setSize(width, height)
   renderer.setPixelRatio(window.devicePixelRatio)
   renderer.shadowMap.enabled = true
 
@@ -404,8 +400,8 @@ const resize = () => {
   if (!containerRef.value || !renderer || !camera) return
   if (!cameraState.value) return;
 
-  updateContainerHeight()
-  
+  updateContainerHeight(renderer)
+
   const width = containerRef.value.clientWidth
   const height = containerRef.value.clientHeight
 
@@ -417,7 +413,7 @@ const resize = () => {
   }
   console.log('camera.aspect', camera.aspect)
   camera.updateProjectionMatrix()
-  renderer.setSize(width, height)
+  // renderer.setSize(width, height)
 }
 
 const updateScene = () => {
@@ -447,17 +443,35 @@ const updateScene = () => {
   }
 }
 
-const updateContainerHeight = () => {
+const updateContainerHeight = (renderer: THREE.WebGLRenderer) => {
   if (!containerRef.value || !props.aspectRatio) return
-  
-  const width = containerRef.value.clientWidth
-  const height = width / props.aspectRatio
-  containerRef.value.style.height = `${height}px`
+
+  const containerWidth = containerRef.value.clientWidth
+  const containerHeight = containerRef.value.clientHeight
+
+  const containerAspectRatio = containerWidth / containerHeight
+  let renderWidth, renderHeight
+
+  if (props.aspectRatio > containerAspectRatio) {
+    // Width is the limiting factor
+    renderWidth = containerWidth
+    renderHeight = containerWidth / props.aspectRatio
+  } else {
+    // Height is the limiting factor
+    renderHeight = containerHeight
+    renderWidth = containerHeight * props.aspectRatio
+  }
+
+  renderer.setSize(renderWidth, renderHeight)
+  console.log('render size', renderWidth, renderHeight, props.aspectRatio, containerAspectRatio)
+  // containerRef.value.style.height = `${renderHeight}px`
 }
 
 onMounted(() => {
   nextTick(() => {
-    updateContainerHeight()
+    if (renderer) {
+      updateContainerHeight(renderer)
+    }
     initThree()
     if (props.cameraState) {
       cameraState.value = { ...props.cameraState }
@@ -497,13 +511,25 @@ function calcVerticalFovByHorizontalFov(hFov: number, aspect: number) {
 }
 </script>
 
-<style scoped>
+<style scoped lang="less">
 .canvas-3d-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   overflow: hidden;
   width: 100%;
-  background: white;
+  height: 100%;
+
+  /* background: white;
   border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); */
+  :deep(>canvas) {
+    border: 2px solid #d0d0d0;
+    box-sizing: border-box;
+    border-radius: 8px;
+    width: 100%;
+    height: 100%;
+  }
 }
 
 .drawing-canvas-3d {

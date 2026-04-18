@@ -75,9 +75,10 @@ export class WallEntity extends EntityClass<Wall> {
   draw3D() {
     const meshList: THREE.Mesh[] = []
     const wallBoxList = createAllWallFromPoints([this.wall]);
+    const wallHeight = 280
     const extrudeSettings = {
       steps: 1,
-      depth: 280,
+      depth: wallHeight,
       bevelEnabled: true,
       // bevelThickness: 2,
       // bevelSize: 2,
@@ -103,6 +104,43 @@ export class WallEntity extends EntityClass<Wall> {
       wallMesh.receiveShadow = true
       meshList.push(wallMesh)
     }
+
+    // 盖一个地板
+    const extrudeSettingsBottom = {
+      steps: 1,
+      depth: 20,
+      bevelEnabled: true,
+    }
+    const points: THREE.Vector2[] = []; // wall.points.map((p) => new THREE.Vector2(p.x, p.y))
+    this.wall.points.forEach((mesh) => {
+      points.push(new THREE.Vector2(mesh.x, mesh.y * -1))
+    })
+    const shape = new THREE.Shape(points)
+    const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettingsBottom)
+    geometry.rotateX(-Math.PI / 2);   // 将 XY 平面旋转成 XZ 平面
+    const material = new THREE.MeshStandardMaterial({
+      color: 0xe0e0e0,
+      side: THREE.DoubleSide
+    })
+    const floorMesh = new THREE.Mesh(geometry, material)
+    meshList.push(floorMesh)
+
+    // 盖一个盖子
+    const extrudeSettingsTop = {
+      steps: 1,
+      depth: 20,
+      bevelEnabled: true,
+    }
+    const geometryTop = new THREE.ExtrudeGeometry(shape, extrudeSettingsTop)
+    geometryTop.rotateX(-Math.PI / 2);   // 将 XY 平面旋转成 XZ 平面
+    const materialTop = new THREE.MeshStandardMaterial({
+      color: 0xe0e0e0,
+      side: THREE.DoubleSide
+    })
+    const topMesh = new THREE.Mesh(geometryTop, materialTop)
+    topMesh.position.set(0, wallHeight, 0)
+    meshList.push(topMesh)
+
     return meshList
 
     // const margineds: Geometry | null = createShapeFromPoints([this.wall]);

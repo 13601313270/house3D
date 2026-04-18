@@ -1410,7 +1410,7 @@ watch(() => editPropInputInfo.value, (newVal) => {
 
 .right-panel {
   height: 100%;
-  padding: 20px;
+  padding: 12px;
   background: #f0f2f5;
   display: flex;
   flex-direction: column;
