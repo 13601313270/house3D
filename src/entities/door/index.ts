@@ -3,7 +3,6 @@ import * as THREE from 'three'
 import { Door } from './index.d'
 import { Brush, Evaluator, SUBTRACTION } from 'three-bvh-csg';
 import { allSnapFromType, EntityClass, EntityType, MatchSnapPoint } from '@/types/entity'
-import { Wall } from '../wall/index.d'
 import { WallEntity } from '../wall'
 import { editItem } from '..';
 
@@ -17,6 +16,7 @@ export function createDoorData() {
     width: 110,
     height: 180,
     angle: 0,
+    color: '#e67e22',
   }
   return door
 }
@@ -32,7 +32,12 @@ export function editPropConfig(): editItem[] {
       id: 'height',
       label: '高度',
       dataType: 'number',
-    }
+    },
+    {
+      id: 'color',
+      label: '颜色',
+      dataType: 'color',
+    },
   ]
 }
 
@@ -58,7 +63,7 @@ export class DoorEntity extends EntityClass<Door> {
     const screenX = this.data.x * zoomLevel + panOffset.x
     const screenY = this.data.y * zoomLevel + panOffset.y
     // const wallThickness = 10; // walls.find((wall) => wall.id === this.wallId)?.thickness || 0;
-    const color = '#e67e22'
+    const color = this.data.color
     const width = this.data.width * zoomLevel;
     const thickness = wallThickness * zoomLevel;
     ctx.save()
@@ -91,7 +96,7 @@ export class DoorEntity extends EntityClass<Door> {
       this.data.height * 1,
       1
     );// 额外增加2保证，门框比强款一点
-    const material = new THREE.MeshStandardMaterial({ color: 0xe67e22 })
+    const material = new THREE.MeshStandardMaterial({ color: this.data.color })
     const doorMesh = new THREE.Mesh(geometry, material)
     if (this.data.wallPointId > -1 && wall.meshList[this.data.wallPointId]) {
       const wallMesh = wall.meshList[this.data.wallPointId];

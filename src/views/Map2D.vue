@@ -44,8 +44,9 @@
           <!-- {{ editPropInputInfo }} -->
           <div class="configList">
             <label v-for="item in editPropConfigInfo" :key="item.id">
-              {{ item.label }}：
+              {{ item.label }}：{{ editPropInputInfo[item.id] }}
               <input v-if="item.dataType === 'number'" type="number" v-model.number="editPropInputInfo[item.id]" />
+              <input v-else-if="item.dataType === 'color'" type="color" v-model="editPropInputInfo[item.id]" />
             </label>
           </div>
           <div v-if="contextMenu.type === 'wall'">
@@ -80,7 +81,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
+import { ref, computed, onMounted, onUnmounted, nextTick, watch } from 'vue'
 import { Entity, Point } from '../types'
 import { draw, canvasWidth, canvasHeight, snapThreshold } from '../utils/drawUtils'
 import Canvas3D, { CameraState } from '../components/Canvas3D.vue'
@@ -1337,6 +1338,12 @@ function changeCurrentTool(type: 'wall' | 'door' | 'window' | 'camera' | 'drag')
   }
   currentTool.value = type
 }
+
+watch(() => editPropInputInfo.value, (newVal) => {
+  drawWrapper()
+}, {
+  deep: true
+})
 </script>
 
 <style scoped lang="less">

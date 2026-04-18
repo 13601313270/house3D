@@ -17,6 +17,7 @@ export function createWindowData() {
     height: 120,
     angle: 0,
     bottom: 40,
+    color: '#3498db',
   }
   return window
 }
@@ -43,20 +44,23 @@ export function editPropConfig(): editItem[] {
       id: 'height',
       label: '高度',
       dataType: 'number',
-    }
+    },
+    {
+      id: 'color',
+      label: '颜色',
+      dataType: 'color',
+    },
   ]
 }
 
 export class WindowEntity extends EntityClass<Window> {
   type: EntityType = 'window'
   height: number
-  color: string
   isPointObj: boolean = true
 
   constructor(window: Window) {
     super(window)
     this.height = window.height
-    this.color = '#3498db'
   }
 
   draw2D(
@@ -68,7 +72,7 @@ export class WindowEntity extends EntityClass<Window> {
     const screenX = this.data.x * zoomLevel + panOffset.x
     const screenY = this.data.y * zoomLevel + panOffset.y
 
-    const color = '#3498db'
+    const color = this.data.color
     const width = this.data.width * zoomLevel;
     const thickness = wallThickness * zoomLevel;
 
@@ -86,7 +90,7 @@ export class WindowEntity extends EntityClass<Window> {
 
     // 控制点
     ctx.fillStyle = '#fff'
-    ctx.strokeStyle = this.color
+    ctx.strokeStyle = '#3498db'
     ctx.lineWidth = 2
     ctx.beginPath()
     ctx.arc(screenX, screenY, 6 * zoomLevel, 0, Math.PI * 2)
@@ -118,7 +122,7 @@ export class WindowEntity extends EntityClass<Window> {
       this.data.height * 1,
       1
     );// 额外增加2保证，门框比强款一点
-    const material = new THREE.MeshStandardMaterial({ color: 0xe67e22 })
+    const material = new THREE.MeshStandardMaterial({ color: this.data.color })
     const windowMesh = new THREE.Mesh(geometry, material)
     if (this.data.wallPointId > -1 && wall.meshList[this.data.wallPointId]) {
       const wallMesh = wall.meshList[this.data.wallPointId];

@@ -7,4 +7,5 @@ export type Window = Entity & {
   height: number
   angle: number
   bottom: number// 距离地面
+  color: string// 颜色
 }

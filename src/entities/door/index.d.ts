@@ -6,4 +6,5 @@ export type Door = Entity & {
   width: number
   height: number
   angle: number
+  color: string
 }
