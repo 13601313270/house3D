@@ -259,7 +259,6 @@ const initThree = () => {
   scene.add(directionalLight)
 
   renderer = new THREE.WebGLRenderer({ antialias: true })
-  // renderer.setSize(width, height)
   renderer.setPixelRatio(window.devicePixelRatio)
   renderer.shadowMap.enabled = true
 
@@ -399,21 +398,18 @@ const animate = () => {
 const resize = () => {
   if (!containerRef.value || !renderer || !camera) return
   if (!cameraState.value) return;
+  // const width = containerRef.value.clientWidth
+  // const height = containerRef.value.clientHeight
 
+  // camera.aspect = width / height
+  // if ('fov' in cameraState.value) {
+  //   const vFov = calcVerticalFovByHorizontalFov(cameraState.value.fov, width / height)
+  //   console.log('distance', vFov)
+  //   camera.fov = vFov
+  // }
+  // console.log('camera.aspect', camera.aspect)
+  // camera.updateProjectionMatrix()
   updateContainerHeight(renderer)
-
-  const width = containerRef.value.clientWidth
-  const height = containerRef.value.clientHeight
-
-  camera.aspect = width / height
-  if ('fov' in cameraState.value) {
-    const vFov = calcVerticalFovByHorizontalFov(cameraState.value.fov, width / height)
-    console.log('distance', vFov)
-    camera.fov = vFov
-  }
-  console.log('camera.aspect', camera.aspect)
-  camera.updateProjectionMatrix()
-  // renderer.setSize(width, height)
 }
 
 const updateScene = () => {
@@ -444,6 +440,7 @@ const updateScene = () => {
 }
 
 const updateContainerHeight = (renderer: THREE.WebGLRenderer) => {
+  if (!containerRef.value || !renderer || !camera) return
   if (!containerRef.value || !props.aspectRatio) return
 
   const containerWidth = containerRef.value.clientWidth
@@ -461,10 +458,18 @@ const updateContainerHeight = (renderer: THREE.WebGLRenderer) => {
     renderHeight = containerHeight
     renderWidth = containerHeight * props.aspectRatio
   }
+  console.log('renderWidth', renderWidth, 'renderHeight', renderHeight)
 
+  camera.aspect = renderWidth / renderHeight
+  if ('fov' in cameraState.value) {
+    const vFov = calcVerticalFovByHorizontalFov(cameraState.value.fov, renderWidth / renderHeight)
+    console.log('distance', vFov)
+    camera.fov = vFov
+  }
+  console.log('camera.aspect', camera.aspect)
+  camera.updateProjectionMatrix()
   renderer.setSize(renderWidth, renderHeight)
-  console.log('render size', renderWidth, renderHeight, props.aspectRatio, containerAspectRatio)
-  // containerRef.value.style.height = `${renderHeight}px`
+  // console.log('render size', renderWidth, renderHeight, props.aspectRatio, containerAspectRatio)
 }
 
 onMounted(() => {
