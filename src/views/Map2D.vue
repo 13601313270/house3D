@@ -1432,14 +1432,6 @@ function changeCurrentTool(type: 'wall' | 'door' | 'window' | 'camera' | 'drag')
   color: #666;
 }
 
-.canvas-3d-container {
-  width: 100%;
-  height: 600px;
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
 .drawing-canvas-3d {
   width: 100%;
   height: 100%;

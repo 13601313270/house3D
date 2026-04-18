@@ -487,9 +487,12 @@ function calcVerticalFovByHorizontalFov(hFov: number, aspect: number) {
 
 <style scoped>
 .canvas-3d-container {
-  width: 100%;
-  height: 100%;
   overflow: hidden;
+  width: 100%;
+  height: 600px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .drawing-canvas-3d {
