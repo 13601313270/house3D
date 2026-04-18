@@ -64,7 +64,7 @@
     <div class="right-panel" :style="{ width: panel2SplitWidthPer * 100 + '%' }">
       <!-- {{ drawingData }} -->
       <!-- {{ insertTempDoor }} -->
-        <!-- {{ drawingData.camera[0] }} -->
+      <!-- {{ drawingData.camera[0] }} -->
       <Canvas3D ref="canvas3DRef" :data="drawingData" v-model:cameraState="cameraState" />
     </div>
 
@@ -132,13 +132,29 @@ const cameraState = ref<CameraState>({
   angleX: 0,
   angleY: Math.PI / 4
 })
-const cameraState2 = ref<CameraState>({
-  targetPositionX: 0,
-  targetPositionY: 0,
-  targetPositionZ: 100,
-  positionX: 0,
-  positionY: 0,
-  positionZ: 100
+// const cameraState2 = ref<CameraState>({
+//   targetPositionX: 0,
+//   targetPositionY: 0,
+//   targetPositionZ: 100,
+//   positionX: 0,
+//   positionY: 0,
+//   positionZ: 100,
+//   fov: 45,
+// })
+const cameraState2 = computed(() => {
+  if (allFileObjects.value.camera && allFileObjects.value.camera[0]) {
+    const cameraData = allFileObjects.value.camera[0]
+    return {
+      targetPositionX: cameraData.targetPositionX,
+      targetPositionY: cameraData.targetPositionY,
+      targetPositionZ: cameraData.targetPositionZ,
+      positionX: cameraData.x,
+      positionY: cameraData.y,
+      positionZ: cameraData.z,
+      fov: cameraData.fov,
+    }
+  }
+  return undefined;
 })
 let insertTempDoor: Door | null = null;
 let insertTempWindow: Window | null = null;
@@ -683,14 +699,15 @@ const handleFileChange = (e: Event) => {
       if (allFileObjects.value.camera) {
         const cameraData = allFileObjects.value.camera[0]
         console.log('cameraData', JSON.stringify(cameraData))
-        cameraState2.value = {
-          targetPositionX: cameraData.targetPositionX,
-          targetPositionY: cameraData.targetPositionY,
-          targetPositionZ: cameraData.targetPositionZ,
-          positionX: cameraData.x,
-          positionY: cameraData.y,
-          positionZ: cameraData.z
-        }
+        // cameraState2.value = {
+        //   targetPositionX: cameraData.targetPositionX,
+        //   targetPositionY: cameraData.targetPositionY,
+        //   targetPositionZ: cameraData.targetPositionZ,
+        //   positionX: cameraData.x,
+        //   positionY: cameraData.y,
+        //   positionZ: cameraData.z,
+        //   fov: cameraData.fov,
+        // }
       }
       history.value = []
       drawWrapper()
@@ -1003,21 +1020,21 @@ const handleMouseMove = (e: MouseEvent) => {
     }
     matchHandelObj.matchHandelMoveCallback(x, y, matchHandelInfo)
     if (matchHandelInfo?.type === 'camera') {
-      if ('positionX' in cameraState2.value) {
+      if (cameraState2.value && 'positionX' in cameraState2.value) {
         console.log('matchHandelInfo.index', matchHandelInfo.index)
 
         if (matchHandelInfo.index === 1) {
-          cameraState2.value = {
-            ...cameraState2.value,
-            targetPositionX: x,
-            targetPositionY: y,
-          }
+          // cameraState2.value = {
+          //   ...cameraState2.value,
+          //   targetPositionX: x,
+          //   targetPositionY: y,
+          // }
         } else {
-          cameraState2.value = {
-            ...cameraState2.value,
-            positionX: x,
-            positionY: y,
-          }
+          // cameraState2.value = {
+          //   ...cameraState2.value,
+          //   positionX: x,
+          //   positionY: y,
+          // }
         }
       }
     }

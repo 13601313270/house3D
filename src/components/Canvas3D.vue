@@ -31,6 +31,7 @@ export type CameraState = {
   positionX: number
   positionY: number
   positionZ: number
+  fov: number
 }
 
 const props = defineProps<{
@@ -75,13 +76,7 @@ function updateCameraAngel() {
     }
   } else if ('positionX' in cameraState.value) {
     if (camera) {
-      // position和lookAt之间距离
-      const distance = Math.hypot(
-        cameraState.value.positionX - cameraState.value.targetPositionX,
-        cameraState.value.positionZ - cameraState.value.targetPositionZ,
-        cameraState.value.positionY - cameraState.value.targetPositionY
-      );
-      const fov = Math.round(3000 / distance)
+      const fov = cameraState.value.fov
       if (fov > 10 && fov < 180) {
         console.log('distance', fov)
         camera.fov = fov
@@ -97,6 +92,7 @@ function updateCameraAngel() {
         cameraState.value.targetPositionZ,
         cameraState.value.targetPositionY
       );
+      camera.updateProjectionMatrix()
     }
   }
 
@@ -175,7 +171,8 @@ const initThree = () => {
           targetPositionZ: cameraState.value.targetPositionY,
           positionX: cameraState.value.positionX,
           positionY: cameraState.value.positionZ,
-          positionZ: cameraState.value.positionY
+          positionZ: cameraState.value.positionY,
+          fov: cameraState.value.fov,
         })
       }
     }

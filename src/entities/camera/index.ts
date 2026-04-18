@@ -15,12 +15,18 @@ export function createCameraData() {
     targetPositionX: 0,
     targetPositionY: 0,
     targetPositionZ: 100,
+    fov: 45,
   }
   return camera
 }
 
 export function editPropConfig(): editItem[] {
   return [
+    {
+      id: 'fov',
+      label: '角度',
+      dataType: 'number',
+    }
   ]
 }
 
