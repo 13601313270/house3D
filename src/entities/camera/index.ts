@@ -68,6 +68,31 @@ export class CameraEntity extends EntityClass<CameraData> {
       6 * zoomLevel, 0, Math.PI * 2)
     ctx.fill()
     ctx.stroke()
+
+    // 绘制扇形
+    const targetX = this.data.targetPositionX * zoomLevel + panOffset.x
+    const targetY = this.data.targetPositionY * zoomLevel + panOffset.y
+    const distance = Math.hypot(targetX - screenX, targetY - screenY)
+    const radius = distance
+    
+    // 计算方向角度
+    const angle = Math.atan2(targetY - screenY, targetX - screenX)
+    // 计算FOV的半角
+    const halfFov = (this.data.fov * Math.PI) / 360
+    // 计算扇形的起始和结束角度
+    const startAngle = angle - halfFov
+    const endAngle = angle + halfFov
+    
+    // 绘制扇形
+    ctx.fillStyle = 'rgba(230, 126, 34, 0.2)'
+    ctx.strokeStyle = '#e67e22'
+    ctx.lineWidth = 1
+    ctx.beginPath()
+    ctx.moveTo(screenX, screenY)
+    ctx.arc(screenX, screenY, radius, startAngle, endAngle)
+    ctx.closePath()
+    ctx.fill()
+    ctx.stroke()
   }
 
   draw3D(wall: WallEntity) {
