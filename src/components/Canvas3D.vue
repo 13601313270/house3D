@@ -78,8 +78,12 @@ function updateCameraAngel() {
     if (camera) {
       const fov = cameraState.value.fov
       if (fov > 10 && fov < 180) {
-        console.log('distance', fov)
-        camera.fov = fov
+        if (!containerRef.value || !renderer || !camera) return
+        const width = containerRef.value.clientWidth
+        const height = containerRef.value.clientHeight
+        const vFov = calcVerticalFovByHorizontalFov(fov, width / height)
+        console.log('distance', vFov)
+        camera.fov = vFov
       }
 
       camera.position.set(
@@ -397,11 +401,18 @@ const animate = () => {
 
 const resize = () => {
   if (!containerRef.value || !renderer || !camera) return
+  if (!cameraState.value) return;
 
   const width = containerRef.value.clientWidth
   const height = containerRef.value.clientHeight
 
   camera.aspect = width / height
+  if ('fov' in cameraState.value) {
+    const vFov = calcVerticalFovByHorizontalFov(cameraState.value.fov, width / height)
+    console.log('distance', vFov)
+    camera.fov = vFov
+  }
+  console.log('camera.aspect', camera.aspect)
   camera.updateProjectionMatrix()
   renderer.setSize(width, height)
 }
@@ -468,6 +479,10 @@ watch(() => props.cameraState, (newVal) => {
 defineExpose({
   resize
 })
+function calcVerticalFovByHorizontalFov(hFov: number, aspect: number) {
+  const vFov = 2 * Math.atan(Math.tan((hFov * Math.PI / 180) / 2) / aspect)
+  return vFov * 180 / Math.PI
+}
 </script>
 
 <style scoped>
