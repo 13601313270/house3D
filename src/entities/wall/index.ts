@@ -126,16 +126,11 @@ export class WallEntity extends EntityClass<Wall> {
     meshList.push(floorMesh)
 
     // 盖一个盖子
-    const extrudeSettingsTop = {
-      steps: 1,
-      depth: 20,
-      bevelEnabled: true,
-    }
-    const geometryTop = new THREE.ExtrudeGeometry(shape, extrudeSettingsTop)
+    const geometryTop = new THREE.ShapeGeometry(shape)
     geometryTop.rotateX(-Math.PI / 2);   // 将 XY 平面旋转成 XZ 平面
     const materialTop = new THREE.MeshStandardMaterial({
       color: 0xe0e0e0,
-      side: THREE.DoubleSide
+      side: THREE.BackSide
     })
     const topMesh = new THREE.Mesh(geometryTop, materialTop)
     topMesh.position.set(0, wallHeight, 0)
