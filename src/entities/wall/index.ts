@@ -106,9 +106,10 @@ export class WallEntity extends EntityClass<Wall> {
     }
 
     // 盖一个地板
+    const floorDepth = 20
     const extrudeSettingsBottom = {
       steps: 1,
-      depth: 20,
+      depth: floorDepth,
       bevelEnabled: true,
     }
     const points: THREE.Vector2[] = []; // wall.points.map((p) => new THREE.Vector2(p.x, p.y))
@@ -123,6 +124,7 @@ export class WallEntity extends EntityClass<Wall> {
       side: THREE.DoubleSide
     })
     const floorMesh = new THREE.Mesh(geometry, material)
+    floorMesh.position.set(0, floorDepth * -1 + 1, 0)
     meshList.push(floorMesh)
 
     // 盖一个盖子

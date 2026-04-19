@@ -107,7 +107,7 @@ export class CameraEntity extends EntityClass<CameraData> {
     ctx.stroke()
   }
 
-  draw3D(wall: WallEntity) {
+  draw3D() {
     const geometry = new THREE.BoxGeometry(
       10,
       10,
