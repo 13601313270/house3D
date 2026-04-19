@@ -46,6 +46,8 @@ export class CameraEntity extends EntityClass<CameraData> {
   type: EntityType = 'camera'
   id: string
   isPointObj: boolean = true
+  color: string = '#14b737'
+  colorOpacity: string = '#14b737a5'
 
   constructor(camera: CameraData) {
     super(camera)
@@ -59,6 +61,51 @@ export class CameraEntity extends EntityClass<CameraData> {
   ): void {
     const screenX = this.data.x * zoomLevel + panOffset.x
     const screenY = this.data.y * zoomLevel + panOffset.y
+
+    // 绘制扇形
+    const targetX = this.data.targetPositionX * zoomLevel + panOffset.x
+    const targetY = this.data.targetPositionY * zoomLevel + panOffset.y
+    const distance = Math.hypot(targetX - screenX, targetY - screenY)
+    const radius = distance
+
+    // 计算FOV的半角
+    const halfFov = (this.data.fov * Math.PI) / 360
+
+    // 绘制三角形
+    ctx.fillStyle = this.colorOpacity
+    ctx.strokeStyle = this.colorOpacity
+    ctx.lineWidth = 1
+    ctx.beginPath()
+    ctx.moveTo(screenX, screenY)
+
+    // 计算方向向量
+    const dirX = targetX - screenX
+    const dirY = targetY - screenY
+    const dirLength = Math.sqrt(dirX * dirX + dirY * dirY)
+    const unitDirX = dirX / dirLength
+    const unitDirY = dirY / dirLength
+
+    // 计算垂直方向向量
+    const perpX = -unitDirY
+    const perpY = unitDirX
+
+    // 计算三角形底边长
+    const baseHalfLength = radius * Math.tan(halfFov)
+
+    // 计算三角形的两个底点
+    const midX = screenX + unitDirX * radius
+    const midY = screenY + unitDirY * radius
+    const p1X = midX + perpX * baseHalfLength
+    const p1Y = midY + perpY * baseHalfLength
+    const p2X = midX - perpX * baseHalfLength
+    const p2Y = midY - perpY * baseHalfLength
+
+    // 绘制三角形
+    ctx.lineTo(p1X, p1Y)
+    ctx.lineTo(p2X, p2Y)
+    ctx.closePath()
+    ctx.fill()
+    ctx.stroke()
 
     // 控制点
     ctx.fillStyle = '#fff'
@@ -78,56 +125,6 @@ export class CameraEntity extends EntityClass<CameraData> {
       this.data.targetPositionX * zoomLevel + panOffset.x,
       this.data.targetPositionY * zoomLevel + panOffset.y,
       6 * zoomLevel, 0, Math.PI * 2)
-    ctx.fill()
-    ctx.stroke()
-
-    // 绘制扇形
-    const targetX = this.data.targetPositionX * zoomLevel + panOffset.x
-    const targetY = this.data.targetPositionY * zoomLevel + panOffset.y
-    const distance = Math.hypot(targetX - screenX, targetY - screenY)
-    const radius = distance
-
-    // 计算方向角度
-    const angle = Math.atan2(targetY - screenY, targetX - screenX)
-    // 计算FOV的半角
-    const halfFov = (this.data.fov * Math.PI) / 360
-    // 计算扇形的起始和结束角度
-    const startAngle = angle - halfFov
-    const endAngle = angle + halfFov
-
-    // 绘制三角形
-    ctx.fillStyle = 'rgba(230, 126, 34, 0.2)'
-    ctx.strokeStyle = '#e67e22'
-    ctx.lineWidth = 1
-    ctx.beginPath()
-    ctx.moveTo(screenX, screenY)
-    
-    // 计算方向向量
-    const dirX = targetX - screenX
-    const dirY = targetY - screenY
-    const dirLength = Math.sqrt(dirX * dirX + dirY * dirY)
-    const unitDirX = dirX / dirLength
-    const unitDirY = dirY / dirLength
-    
-    // 计算垂直方向向量
-    const perpX = -unitDirY
-    const perpY = unitDirX
-    
-    // 计算三角形底边长
-    const baseHalfLength = radius * Math.tan(halfFov)
-    
-    // 计算三角形的两个底点
-    const midX = screenX + unitDirX * radius
-    const midY = screenY + unitDirY * radius
-    const p1X = midX + perpX * baseHalfLength
-    const p1Y = midY + perpY * baseHalfLength
-    const p2X = midX - perpX * baseHalfLength
-    const p2Y = midY - perpY * baseHalfLength
-    
-    // 绘制三角形
-    ctx.lineTo(p1X, p1Y)
-    ctx.lineTo(p2X, p2Y)
-    ctx.closePath()
     ctx.fill()
     ctx.stroke()
   }
@@ -188,13 +185,12 @@ export class CameraEntity extends EntityClass<CameraData> {
     geometry.computeVertexNormals();
 
     const material = new THREE.MeshStandardMaterial({
-      color: 0x00ffcc,
-      side: THREE.DoubleSide
+      color: this.color,
+      opacity: 0.8,
+      side: THREE.DoubleSide,
     });
 
     const pyramid = new THREE.Mesh(geometry, material);
-    // pyramid.rotateX(-Math.PI / 2);
-
     return [
       pyramid
     ]
