@@ -31,7 +31,7 @@
         <button :class="{ active: currentTool === 'drag' }" @click="changeCurrentTool('drag')" type="button">
           拖拽
         </button>
-        <input type="number" v-model="wallThickness" placeholder="墙厚度" />
+        <!-- <input type="number" v-model="wallThickness" placeholder="墙厚度" /> -->
       </div>
 
       <div class="canvas-container">
@@ -75,7 +75,7 @@
     <div class="right-panel" :style="{ width: (1 - panel1SplitWidthPer - panel2SplitWidthPer) * 100 + '%' }">
       <!-- {{ drawingData }} -->
       <!-- {{ insertTempDoor }} -->
-      <!-- {{ cameraState2 }} -->
+      {{ allFileObjects.camera }}
       <Canvas3D v-if="cameraState2" ref="canvas3DRef2" :data="drawingData2" v-model:cameraState="cameraState2"
         :aspectRatio="cameraState2.aspectW / cameraState2.aspectH" />
     </div>
