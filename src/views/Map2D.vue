@@ -85,7 +85,7 @@
 <script lang="ts" setup>
 import { ref, computed, onMounted, onUnmounted, nextTick, watch } from 'vue'
 import { Entity, Point } from '../types'
-import { draw, snapThreshold } from '../utils/world'
+import { snapThreshold, World } from '../utils/world'
 import Canvas3D, { CameraState } from '../components/Canvas3D.vue'
 import { Wall } from '@/entities/wall/index.d'
 import { Door } from '@/entities/door/index.d'
@@ -568,11 +568,11 @@ const getSnapPoint = (
 function roundNumberList(point: { x: number, y: number }) {
   return { x: Math.round(point.x), y: Math.round(point.y) }
 }
-
+const worldApi = new World()
 const drawWrapper = () => {
   const canvas = canvasRef.value
   if (canvas) {
-    draw(
+    worldApi.draw(
       canvas,
       drawingData.value,
       tempDrawWall.value?.points || [],
