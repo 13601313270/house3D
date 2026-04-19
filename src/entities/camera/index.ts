@@ -86,7 +86,7 @@ export class CameraEntity extends EntityClass<CameraData> {
     const targetY = this.data.targetPositionY * zoomLevel + panOffset.y
     const distance = Math.hypot(targetX - screenX, targetY - screenY)
     const radius = distance
-    
+
     // 计算方向角度
     const angle = Math.atan2(targetY - screenY, targetX - screenX)
     // 计算FOV的半角
@@ -94,7 +94,7 @@ export class CameraEntity extends EntityClass<CameraData> {
     // 计算扇形的起始和结束角度
     const startAngle = angle - halfFov
     const endAngle = angle + halfFov
-    
+
     // 绘制扇形
     ctx.fillStyle = 'rgba(230, 126, 34, 0.2)'
     ctx.strokeStyle = '#e67e22'
@@ -108,17 +108,41 @@ export class CameraEntity extends EntityClass<CameraData> {
   }
 
   draw3D() {
-    const geometry = new THREE.BoxGeometry(
-      10,
-      10,
-      1
-    );// 额外增加2保证，门框比强款一点
-    const material = new THREE.MeshStandardMaterial({ color: 0xe67e22 })
-    const doorMesh = new THREE.Mesh(geometry, material)
-    doorMesh.position.set(this.data.x, 10, this.data.y)
-    // doorMesh.rotateY(this.data.angle * -1);
+    // Calculate direction vector from camera to target
+    const dx = this.data.targetPositionX - this.data.x
+    const dy = this.data.targetPositionY - this.data.y
+    const dz = this.data.targetPositionZ - 0
+
+    // Calculate distance
+    const distance = Math.sqrt(dx * dx + dy * dy + dz * dz)
+
+    // Calculate base size based on FOV
+    const halfFov = (this.data.fov * Math.PI) / 360
+    const baseSize = distance * Math.tan(halfFov)
+
+    // Create pyramid geometry
+    const geometry = new THREE.ConeGeometry(baseSize, distance, 4)
+    // Translate geometry so apex is at local origin
+    geometry.translate(0, -distance / 2, 0)
+    const material = new THREE.MeshStandardMaterial({
+      color: 0xe67e22,
+      transparent: true,
+      opacity: 0.3
+    })
+    const pyramid = new THREE.Mesh(geometry, material)
+
+    // Position at camera location (apex at camera position)
+    pyramid.position.set(this.data.x, 0, this.data.y)
+
+    // Calculate rotation to face target
+    const target = new THREE.Vector3(this.data.targetPositionX, 0, this.data.targetPositionY)
+    pyramid.lookAt(target)
+
+    // Adjust rotation to point the apex towards target
+    pyramid.rotateX(-Math.PI / 2);   // 将 XY 平面旋转成 XZ 平面
+
     return [
-      doorMesh
+      pyramid
     ]
   }
 
