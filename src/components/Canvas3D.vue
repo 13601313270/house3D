@@ -36,7 +36,7 @@ const props = defineProps<{
   aspectRatio?: number
 }>()
 
-const emit = defineEmits<{(e: 'update:cameraState', value: CameraState): void}>()
+const emit = defineEmits<{ (e: 'update:cameraState', value: CameraState): void }>()
 
 const containerRef = ref<HTMLDivElement | null>(null)
 
@@ -276,8 +276,10 @@ const renderWalls = () => {
   props.data.wall.forEach((wall) => {
     const api = new WallEntity(wall);
     wallEntityList.push(api)
-    const meshList = api.draw3DAndCache()
-    meshList.forEach(mesh => scene!.add(mesh))
+    if (scene) {
+      const meshList = api.draw3DAndCache()
+      meshList.forEach(mesh => scene!.add(mesh))
+    }
   })
 
   // const margineds: Geometry | null = createShapeFromPoints(props.data.walls);

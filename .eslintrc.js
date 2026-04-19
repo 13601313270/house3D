@@ -40,7 +40,8 @@ module.exports = {
     'prefer-promise-reject-errors': 'off',
     '@typescript-eslint/no-explicit-any': 'off',
     'quote-props': 'off',
-    'comma-spacing': 'off'
+    'comma-spacing': 'off',
+    'func-call-spacing': 'off'
   },
   env: {
     'vue/setup-compiler-macros': true
