@@ -1,4 +1,4 @@
-import { Point } from '../types'
+import { Entity, EntityType, Point } from '../types'
 import { Wall } from '@/entities/wall/index.d'
 import { Door } from '@/entities/door/index.d'
 import { Window } from '@/entities/window/index.d'
@@ -9,15 +9,17 @@ import { drawPoint } from './drawPoint'
 import { calculateAngle } from './calculateAngle'
 import { CameraData } from '@/entities/camera/index.d'
 import { CameraEntity } from '@/entities/camera'
-import { fileData } from '@/entities/index'
+import { defaultFileData, fileData } from '@/entities/index'
+import { EntityClass } from '@/types/entity'
 
 export const canvasHeight = 600
 export const snapThreshold = 20
 
 export class World {
+  allFileObjects: fileData = defaultFileData
+
   draw(
     canvasRef: HTMLCanvasElement | null,
-    fileData: fileData,
     tempWallPoints: Point[],
     hoverPoint: Point | null,
     currentTool: string,
@@ -34,6 +36,8 @@ export class World {
     if (!canvasRef) return
     const ctx = canvasRef.getContext('2d')
     if (!ctx) return
+
+    const fileData = this.allFileObjects
 
     const { wall: walls, door: doors, window: windows, camera: cameras } = fileData
     ctx.clearRect(0, 0, canvasWidth, canvasHeight)
@@ -192,6 +196,10 @@ export class World {
         ctx.stroke()
       }
     }
+  }
+
+  add(type: EntityType, data: Entity) {
+    this.allFileObjects[type].push(data as any)
   }
 }
 

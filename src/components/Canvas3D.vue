@@ -12,6 +12,7 @@ import { WindowEntity } from '@/entities/window'
 import { WallEntity } from '@/entities/wall'
 import { fileData } from '@/entities'
 import { CameraEntity } from '@/entities/camera'
+import { World } from '@/utils/world'
 
 export type CameraState = {
   targetPositionX: number
@@ -31,7 +32,7 @@ export type CameraState = {
 }
 
 const props = defineProps<{
-  data: fileData,
+  data: World,
   cameraState?: CameraState,
   aspectRatio?: number
 }>()
@@ -273,7 +274,7 @@ const renderWalls = () => {
   if (!scene) return
 
   wallEntityList = [];
-  props.data.wall.forEach((wall) => {
+  props.data.allFileObjects.wall.forEach((wall) => {
     const api = new WallEntity(wall);
     wallEntityList.push(api)
     if (scene) {
@@ -282,7 +283,7 @@ const renderWalls = () => {
     }
   })
 
-  // const margineds: Geometry | null = createShapeFromPoints(props.data.walls);
+  // const margineds: Geometry | null = createShapeFromPoints(props.data.allFileObjects.walls);
   // if (!margineds) return
 
   // // console.log('margineds', margineds)
@@ -352,10 +353,10 @@ const renderWalls = () => {
 const renderDoors = () => {
   if (!scene) return
 
-  props.data.door.forEach((door) => {
+  props.data.allFileObjects.door.forEach((door) => {
     const api = new DoorEntity(door);
 
-    const wall = props.data.wall.find((wall) => wall.id === door.wallId);
+    const wall = props.data.allFileObjects.wall.find((wall) => wall.id === door.wallId);
 
     const findWall = wallEntityList.find((entity) => entity.data.id === door.wallId)
 
@@ -369,7 +370,7 @@ const renderDoors = () => {
 const renderWindows = () => {
   if (!scene) return
 
-  props.data.window.forEach((win) => {
+  props.data.allFileObjects.window.forEach((win) => {
     const api = new WindowEntity(win)
     const findWall = wallEntityList.find((entity) => entity.data.id === win.wallId)
     if (scene) {
@@ -381,7 +382,7 @@ const renderWindows = () => {
 
 const renderCameras = () => {
   if (!scene) return
-  props.data.camera.forEach((camera) => {
+  props.data.allFileObjects.camera.forEach((camera) => {
     const api = new CameraEntity(camera)
     if (scene) {
       const meshList = api.draw3DAndCache(scene)
@@ -498,7 +499,7 @@ onUnmounted(() => {
   }
 })
 
-watch(() => props.data, () => {
+watch(() => props.data.allFileObjects, () => {
   updateScene()
 }, { deep: true })
 
