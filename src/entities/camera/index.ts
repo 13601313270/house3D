@@ -140,7 +140,6 @@ export class CameraEntity extends EntityClass<CameraData> {
     // Calculate distance
     const distance = Math.sqrt(dx * dx + dy * dy + dz * dz)
     const halfFov = (this.data.fov * Math.PI) / 360
-    console.log('halfFov', halfFov)
     const baseSize = distance * Math.tan(halfFov) * 2
     const depth = this.data.aspectH / this.data.aspectW * baseSize;   // 长方形长
     const width = baseSize;   // 长方形宽
@@ -222,7 +221,6 @@ export class CameraEntity extends EntityClass<CameraData> {
   }
 
   matchHandelMoveCallback(x: number, y: number, matchHandelInfo: HandelInfo) {
-    console.log(matchHandelInfo)
     if (matchHandelInfo.index === 1) {
       this.data.targetPositionX = x
       this.data.targetPositionY = y

@@ -45,8 +45,10 @@
           <div class="configList">
             <label v-for="item in editPropConfigInfo" :key="item.id">
               {{ item.label }}：{{ editPropInputInfo[item.id] }}
-              <input v-if="item.dataType === 'number'" type="number" v-model.number="editPropInputInfo[item.id]" />
-              <input v-else-if="item.dataType === 'color'" type="color" v-model="editPropInputInfo[item.id]" />
+              <input v-if="item.dataType === 'number'" type="number" :value="editPropInputInfo[item.id]"
+                @change="updateEditPropInputNumberInfo(item.id, $event)" />
+              <input v-else-if="item.dataType === 'color'" type="color" :value="editPropInputInfo[item.id]"
+                @change="updateEditPropInputInfo(item.id, $event)" />
             </label>
           </div>
           <div v-if="contextMenu.type === 'wall'">
@@ -1352,6 +1354,14 @@ const drawingData2 = computed<fileData>(() => {
     camera: []
   };
 })
+function updateEditPropInputNumberInfo(id: string, event: Event) {
+  // @ts-ignore
+  editPropInputInfo.value[id] = +event.target.value as number
+}
+function updateEditPropInputInfo(id: string, event: Event) {
+  // @ts-ignore
+  editPropInputInfo.value[id] = event.target.value as string
+}
 </script>
 
 <style scoped lang="less">

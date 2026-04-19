@@ -504,7 +504,10 @@ watch(() => props.cameraState, (newVal) => {
   if (newVal) {
     cameraState.value = { ...newVal }
     updateCameraAngel()
+    updateScene()
   }
+}, {
+  deep: true
 })
 
 defineExpose({
