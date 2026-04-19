@@ -95,13 +95,38 @@ export class CameraEntity extends EntityClass<CameraData> {
     const startAngle = angle - halfFov
     const endAngle = angle + halfFov
 
-    // 绘制扇形
+    // 绘制三角形
     ctx.fillStyle = 'rgba(230, 126, 34, 0.2)'
     ctx.strokeStyle = '#e67e22'
     ctx.lineWidth = 1
     ctx.beginPath()
     ctx.moveTo(screenX, screenY)
-    ctx.arc(screenX, screenY, radius, startAngle, endAngle)
+    
+    // 计算方向向量
+    const dirX = targetX - screenX
+    const dirY = targetY - screenY
+    const dirLength = Math.sqrt(dirX * dirX + dirY * dirY)
+    const unitDirX = dirX / dirLength
+    const unitDirY = dirY / dirLength
+    
+    // 计算垂直方向向量
+    const perpX = -unitDirY
+    const perpY = unitDirX
+    
+    // 计算三角形底边长
+    const baseHalfLength = radius * Math.tan(halfFov)
+    
+    // 计算三角形的两个底点
+    const midX = screenX + unitDirX * radius
+    const midY = screenY + unitDirY * radius
+    const p1X = midX + perpX * baseHalfLength
+    const p1Y = midY + perpY * baseHalfLength
+    const p2X = midX - perpX * baseHalfLength
+    const p2Y = midY - perpY * baseHalfLength
+    
+    // 绘制三角形
+    ctx.lineTo(p1X, p1Y)
+    ctx.lineTo(p2X, p2Y)
     ctx.closePath()
     ctx.fill()
     ctx.stroke()
