@@ -74,7 +74,7 @@
       <!-- {{ drawingData }} -->
       <!-- {{ insertTempDoor }} -->
       <!-- {{ cameraState2 }} -->
-      <Canvas3D v-if="cameraState2" ref="canvas3DRef2" :data="drawingData" v-model:cameraState="cameraState2"
+      <Canvas3D v-if="cameraState2" ref="canvas3DRef2" :data="drawingData2" v-model:cameraState="cameraState2"
         :aspectRatio="cameraState2.aspectW / cameraState2.aspectH" />
     </div>
   </div>
@@ -1343,6 +1343,14 @@ watch(() => editPropInputInfo.value, (newVal) => {
   drawWrapper()
 }, {
   deep: true
+})
+
+const drawingData2 = computed<fileData>(() => {
+  const temp = drawingData.value;
+  return {
+    ...temp,
+    camera: []
+  };
 })
 </script>
 

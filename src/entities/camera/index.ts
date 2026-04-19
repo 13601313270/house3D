@@ -108,38 +108,68 @@ export class CameraEntity extends EntityClass<CameraData> {
   }
 
   draw3D() {
-    // Calculate direction vector from camera to target
     const dx = this.data.targetPositionX - this.data.x
     const dy = this.data.targetPositionY - this.data.y
-    const dz = this.data.targetPositionZ - 0
+    const dz = this.data.targetPositionZ - this.data.z
 
     // Calculate distance
     const distance = Math.sqrt(dx * dx + dy * dy + dz * dz)
-
-    // Calculate base size based on FOV
     const halfFov = (this.data.fov * Math.PI) / 360
-    const baseSize = distance * Math.tan(halfFov)
+    console.log('halfFov', halfFov)
+    const baseSize = distance * Math.tan(halfFov) * 2
+    const depth = this.data.aspectH / this.data.aspectW * baseSize;   // 长方形长
+    const width = baseSize;   // 长方形宽
 
-    // Create pyramid geometry
-    const geometry = new THREE.ConeGeometry(baseSize, distance, 4)
-    // Translate geometry so apex is at local origin
-    geometry.translate(0, -distance / 2, 0)
+    const apex = new THREE.Vector3(this.data.x, this.data.z, this.data.y);
+    const center = new THREE.Vector3(this.data.targetPositionX, this.data.targetPositionZ, this.data.targetPositionY);
+
+    const up = apex.clone().sub(center).normalize();
+
+    const temp = Math.abs(up.y) < 0.999
+      ? new THREE.Vector3(0, 1, 0)
+      : new THREE.Vector3(1, 0, 0);
+
+    const right = new THREE.Vector3().crossVectors(temp, up).normalize();
+    const forward = new THREE.Vector3().crossVectors(up, right).normalize();
+
+    const hw = width / 2;
+    const hd = depth / 2;
+
+    const p0 = center.clone().addScaledVector(right, -hw).addScaledVector(forward, -hd);
+    const p1 = center.clone().addScaledVector(right, hw).addScaledVector(forward, -hd);
+    const p2 = center.clone().addScaledVector(right, hw).addScaledVector(forward, hd);
+    const p3 = center.clone().addScaledVector(right, -hw).addScaledVector(forward, hd);
+
+    const geometry = new THREE.BufferGeometry();
+
+    const vertices = new Float32Array([
+      p0.x, p0.y, p0.z,
+      p1.x, p1.y, p1.z,
+      p2.x, p2.y, p2.z,
+      p3.x, p3.y, p3.z,
+      apex.x, apex.y, apex.z
+    ]);
+
+    const indices = [
+      0, 1, 2,
+      0, 2, 3,
+      0, 1, 4,
+      1, 2, 4,
+      2, 3, 4,
+      3, 0, 4
+    ];
+
+    geometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
+    geometry.setIndex(indices);
+    geometry.computeVertexNormals();
+
     const material = new THREE.MeshStandardMaterial({
-      color: 0xe67e22,
-      transparent: true,
-      opacity: 0.3
-    })
-    const pyramid = new THREE.Mesh(geometry, material)
+      color: 0x00ffcc,
+      side: THREE.DoubleSide
+    });
 
-    // Position at camera location (apex at camera position)
-    pyramid.position.set(this.data.x, 0, this.data.y)
-
-    // Calculate rotation to face target
-    const target = new THREE.Vector3(this.data.targetPositionX, 0, this.data.targetPositionY)
-    pyramid.lookAt(target)
-
-    // Adjust rotation to point the apex towards target
-    pyramid.rotateX(-Math.PI / 2);   // 将 XY 平面旋转成 XZ 平面
+    const pyramid = new THREE.Mesh(geometry, material);
+    // pyramid.rotateX(-Math.PI / 2);
 
     return [
       pyramid
