@@ -357,8 +357,10 @@ const renderDoors = () => {
 
     const findWall = wallEntityList.find((entity) => entity.data.id === door.wallId)
 
-    const meshList = api.draw3DAndCache(findWall)
-    meshList.forEach(mesh => scene!.add(mesh))
+    if (scene) {
+      const meshList = api.draw3DAndCache(findWall)
+      meshList.forEach(mesh => scene!.add(mesh))
+    }
   })
 }
 
@@ -368,14 +370,10 @@ const renderWindows = () => {
   props.data.window.forEach((win) => {
     const api = new WindowEntity(win)
     const findWall = wallEntityList.find((entity) => entity.data.id === win.wallId)
-    const meshList = api.draw3DAndCache(findWall)
-    meshList.forEach(mesh => scene!.add(mesh))
-
-    // const geometry = new THREE.CylinderGeometry(3, 3, 20, 8)
-    // const material = new THREE.MeshStandardMaterial({ color: 0x3498db })
-    // const winMesh = new THREE.Mesh(geometry, material)
-    // winMesh.position.set(win.x, 10, win.y)
-    // scene!.add(winMesh)
+    if (scene) {
+      const meshList = api.draw3DAndCache(findWall)
+      meshList.forEach(mesh => scene!.add(mesh))
+    }
   })
 }
 
@@ -383,8 +381,10 @@ const renderCameras = () => {
   if (!scene) return
   props.data.camera.forEach((camera) => {
     const api = new CameraEntity(camera)
-    const meshList = api.draw3DAndCache()
-    meshList.forEach(mesh => scene!.add(mesh))
+    if (scene) {
+      const meshList = api.draw3DAndCache()
+      meshList.forEach(mesh => scene!.add(mesh))
+    }
   })
 }
 
