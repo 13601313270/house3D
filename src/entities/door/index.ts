@@ -88,7 +88,7 @@ export class DoorEntity extends EntityClass<Door> {
     ctx.stroke()
   }
 
-  draw3D(wall: WallEntity) {
+  draw3D(scene: THREE.Scene, wall: WallEntity) {
     const wallThickness = wall.data.thickness;
     // console.log('doorPointId-get', wall, wall.points)
     const geometry = new THREE.BoxGeometry(

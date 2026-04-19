@@ -277,7 +277,7 @@ const renderWalls = () => {
     const api = new WallEntity(wall);
     wallEntityList.push(api)
     if (scene) {
-      const meshList = api.draw3DAndCache()
+      const meshList = api.draw3DAndCache(scene)
       meshList.forEach(mesh => scene!.add(mesh))
     }
   })
@@ -360,7 +360,7 @@ const renderDoors = () => {
     const findWall = wallEntityList.find((entity) => entity.data.id === door.wallId)
 
     if (scene) {
-      const meshList = api.draw3DAndCache(findWall)
+      const meshList = api.draw3DAndCache(scene, findWall)
       meshList.forEach(mesh => scene!.add(mesh))
     }
   })
@@ -373,7 +373,7 @@ const renderWindows = () => {
     const api = new WindowEntity(win)
     const findWall = wallEntityList.find((entity) => entity.data.id === win.wallId)
     if (scene) {
-      const meshList = api.draw3DAndCache(findWall)
+      const meshList = api.draw3DAndCache(scene, findWall)
       meshList.forEach(mesh => scene!.add(mesh))
     }
   })
@@ -384,7 +384,7 @@ const renderCameras = () => {
   props.data.camera.forEach((camera) => {
     const api = new CameraEntity(camera)
     if (scene) {
-      const meshList = api.draw3DAndCache()
+      const meshList = api.draw3DAndCache(scene)
       meshList.forEach(mesh => scene!.add(mesh))
     }
   })
