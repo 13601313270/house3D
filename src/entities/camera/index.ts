@@ -38,6 +38,11 @@ export function editPropConfig(): editItem[] {
       id: 'aspectH',
       label: '高度比',
       dataType: 'number',
+    },
+    {
+      id: 'z',
+      label: 'Z轴',
+      dataType: 'number',
     }
   ]
 }
