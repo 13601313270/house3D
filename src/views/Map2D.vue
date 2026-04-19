@@ -85,7 +85,7 @@
 <script lang="ts" setup>
 import { ref, computed, onMounted, onUnmounted, nextTick, watch } from 'vue'
 import { Entity, Point } from '../types'
-import { draw, canvasWidth, canvasHeight, snapThreshold } from '../utils/world'
+import { draw, snapThreshold } from '../utils/world'
 import Canvas3D, { CameraState } from '../components/Canvas3D.vue'
 import { Wall } from '@/entities/wall/index.d'
 import { Door } from '@/entities/door/index.d'
@@ -596,8 +596,8 @@ onMounted(() => {
   if (canvas) {
     const ctx = canvas.getContext('2d')
     if (ctx) {
-      ctx.canvas.width = canvasWidth
-      ctx.canvas.height = canvasHeight;
+      ctx.canvas.width = 800
+      ctx.canvas.height = 600;
       nextTick(() => {
         // (0,0)位移到中央
         const canvasContainer = document.querySelector('.canvas-container')

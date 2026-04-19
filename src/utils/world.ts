@@ -11,7 +11,6 @@ import { CameraData } from '@/entities/camera/index.d'
 import { CameraEntity } from '@/entities/camera'
 import { fileData } from '@/entities/index'
 
-export const canvasWidth = 800
 export const canvasHeight = 600
 export const snapThreshold = 20
 
