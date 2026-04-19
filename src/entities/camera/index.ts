@@ -46,7 +46,8 @@ export class CameraEntity extends EntityClass<CameraData> {
   type: EntityType = 'camera'
   id: string
   isPointObj: boolean = true
-  color: string = '#14b737'
+  color: string = '#0c7f25'
+  color3D: string = '#0c7f25'
   colorOpacity: string = '#14b737a5'
 
   constructor(camera: CameraData) {
@@ -61,8 +62,6 @@ export class CameraEntity extends EntityClass<CameraData> {
   ): void {
     const screenX = this.data.x * zoomLevel + panOffset.x
     const screenY = this.data.y * zoomLevel + panOffset.y
-
-    // 绘制扇形
     const targetX = this.data.targetPositionX * zoomLevel + panOffset.x
     const targetY = this.data.targetPositionY * zoomLevel + panOffset.y
     const distance = Math.hypot(targetX - screenX, targetY - screenY)
@@ -104,7 +103,7 @@ export class CameraEntity extends EntityClass<CameraData> {
     ctx.lineTo(p1X, p1Y)
     ctx.lineTo(p2X, p2Y)
     ctx.closePath()
-    ctx.fill()
+    // ctx.fill()
     ctx.stroke()
 
     // 控制点
@@ -129,7 +128,7 @@ export class CameraEntity extends EntityClass<CameraData> {
     ctx.stroke()
   }
 
-  draw3D() {
+  draw3D(): THREE.Mesh[] {
     const dx = this.data.targetPositionX - this.data.x
     const dy = this.data.targetPositionY - this.data.y
     const dz = this.data.targetPositionZ - this.data.z
@@ -184,15 +183,15 @@ export class CameraEntity extends EntityClass<CameraData> {
     geometry.setIndex(indices);
     geometry.computeVertexNormals();
 
-    const material = new THREE.MeshStandardMaterial({
-      color: this.color,
-      opacity: 0.8,
-      side: THREE.DoubleSide,
+    const edges = new THREE.EdgesGeometry(geometry);
+    const lineMaterial = new THREE.LineBasicMaterial({
+      color: this.color3D,
+      linewidth: 1
     });
-
-    const pyramid = new THREE.Mesh(geometry, material);
+    const line = new THREE.LineSegments(edges, lineMaterial);
     return [
-      pyramid
+      // @ts-ignore
+      line
     ]
   }
 
