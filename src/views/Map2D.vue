@@ -85,7 +85,7 @@
 <script lang="ts" setup>
 import { ref, computed, onMounted, onUnmounted, nextTick, watch } from 'vue'
 import { Entity, Point } from '../types'
-import { draw, canvasWidth, canvasHeight, snapThreshold } from '../utils/drawUtils'
+import { draw, canvasWidth, canvasHeight, snapThreshold } from '../utils/world'
 import Canvas3D, { CameraState } from '../components/Canvas3D.vue'
 import { Wall } from '@/entities/wall/index.d'
 import { Door } from '@/entities/door/index.d'
