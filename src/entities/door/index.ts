@@ -44,14 +44,17 @@ export function editPropConfig(): editItem[] {
 
 export class DoorEntity extends EntityClass<Door> {
   type: EntityType = 'door'
-  id: string
-  // wallId: string | undefined
   isPointObj: boolean = true
 
   constructor(world: World, door: Door) {
     super(world, door)
-    // this.wallId = door.wallId
-    this.id = door.id
+    if (door.wallId) {
+      const wall = this.world.allFileMapObjects.wall.find((entity) => entity.data.id === door.wallId);
+      if (wall) {
+        this.associationEntity.push(wall)
+        wall.associationEntity.push(this)
+      }
+    }
   }
 
   draw2D(

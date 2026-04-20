@@ -1,6 +1,5 @@
 import * as THREE from 'three'
 import { Entity, EntityType, Point } from '../types'
-import { Wall } from '@/entities/wall/index.d'
 import { Door } from '@/entities/door/index.d'
 import { Window } from '@/entities/window/index.d'
 import { WallEntity } from '@/entities/wall/index'
@@ -237,8 +236,8 @@ export class World {
     for (let i = 0; i < data.length; i++) {
       this.allFileObjects[type].push(data[i] as any)
       // @ts-ignore
-      const doorApi: EntityClass<any> = new EntityClassItem(this, data[i]);
-      this.allFileMapObjects[type].push(doorApi)
+      const api: EntityClass<any> = new EntityClassItem(this, data[i]);
+      this.allFileMapObjects[type].push(api)
     }
   }
 

@@ -61,6 +61,13 @@ export class WindowEntity extends EntityClass<Window> {
 
   constructor(world: World, window: Window) {
     super(world, window)
+    if (window.wallId) {
+      const wall = this.world.allFileMapObjects.wall.find((entity) => entity.data.id === window.wallId);
+      if (wall) {
+        this.associationEntity.push(wall)
+        wall.associationEntity.push(this)
+      }
+    }
     this.height = window.height
   }
 
