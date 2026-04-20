@@ -13,6 +13,10 @@ import { WallEntity } from '@/entities/wall'
 import { fileData } from '@/entities'
 import { CameraEntity } from '@/entities/camera'
 import { World } from '@/utils/world'
+import { Wall } from '@/entities/wall/index.d'
+import { Door } from '@/entities/door/index.d'
+import { CameraData } from '@/entities/camera/index.d'
+import { Window } from '@/entities/window/index.d'
 
 export type CameraState = {
   targetPositionX: number
@@ -274,7 +278,7 @@ const renderWalls = () => {
   if (!scene) return
 
   wallEntityList = [];
-  props.data.allFileObjects.wall.forEach((wall) => {
+  (props.data.getObjects('wall') as Wall[]).forEach((wall) => {
     const api = new WallEntity(wall);
     wallEntityList.push(api)
     if (scene) {
@@ -353,10 +357,10 @@ const renderWalls = () => {
 const renderDoors = () => {
   if (!scene) return
 
-  props.data.allFileObjects.door.forEach((door) => {
+  (props.data.getObjects('door') as Door[]).forEach((door) => {
     const api = new DoorEntity(door);
 
-    const wall = props.data.allFileObjects.wall.find((wall) => wall.id === door.wallId);
+    const wall = props.data.getObjects('wall').find((wall) => wall.id === door.wallId);
 
     const findWall = wallEntityList.find((entity) => entity.data.id === door.wallId)
 
@@ -370,7 +374,7 @@ const renderDoors = () => {
 const renderWindows = () => {
   if (!scene) return
 
-  props.data.allFileObjects.window.forEach((win) => {
+  (props.data.getObjects('window') as Window[]).forEach((win) => {
     const api = new WindowEntity(win)
     const findWall = wallEntityList.find((entity) => entity.data.id === win.wallId)
     if (scene) {
@@ -382,7 +386,7 @@ const renderWindows = () => {
 
 const renderCameras = () => {
   if (!scene) return
-  props.data.allFileObjects.camera.forEach((camera) => {
+  (props.data.getObjects('camera') as CameraData[]).forEach((camera) => {
     const api = new CameraEntity(camera)
     if (scene) {
       const meshList = api.draw3DAndCache(scene)
