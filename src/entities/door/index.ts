@@ -90,7 +90,7 @@ export class DoorEntity extends EntityClass<Door> {
 
   create3DMesh(scene: THREE.Scene, wall: WallEntity) {
     const wallThickness = wall.data.thickness;
-    // console.log('doorPointId-get', wall, wall.points)
+    console.log('doorPointId-get', wall, wall.points)
     const geometry = new THREE.BoxGeometry(
       this.data.width * 1,
       this.data.height * 1,

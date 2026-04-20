@@ -52,8 +52,9 @@ export class World {
     ctx.fillStyle = '#f5f5f5'
     ctx.fillRect(0, 0, canvasWidth, canvasHeight)
     // 绘制墙体
-    walls.forEach(wall => {
-      const wallApi = new WallEntity(wall)
+    walls.forEach((wall, index) => {
+      // @ts-ignore
+      const wallApi: WallEntity = this.allFileMapObjects.wall[index]
       wallApi.draw2D(ctx, panOffset, zoomLevel)
     })
 
@@ -146,7 +147,7 @@ export class World {
     }
     allDoors.forEach((door, index) => {
       // @ts-ignore
-      let doorApi: DoorEntity = this.allFileMapObjects.door[index];;
+      let doorApi: DoorEntity = this.allFileMapObjects.door[index];
       const wallThickness = walls.find((wall) => wall.id === door.wallId)?.thickness || 0;
       doorApi.draw2D(ctx, panOffset, wallThickness, zoomLevel)
     })

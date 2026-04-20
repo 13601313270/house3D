@@ -278,94 +278,23 @@ const renderWalls = () => {
   if (!scene) return
 
   wallEntityList = [];
-  (props.data.getObjects('wall') as Wall[]).forEach((wall) => {
-    const api = new WallEntity(wall);
-    wallEntityList.push(api)
+  (props.data.allFileMapObjects['wall'] as WallEntity[]).forEach((wall) => {
+    wallEntityList.push(wall)
     if (scene) {
-      const meshList = api.draw3DAndCache(scene)
+      const meshList = wall.draw3DAndCache(scene)
       meshList.forEach(mesh => scene!.add(mesh))
     }
   })
-
-  // const margineds: Geometry | null = createShapeFromPoints(props.data.allFileObjects.walls);
-  // if (!margineds) return
-
-  // // console.log('margineds', margineds)
-  // for (const poly of margineds || []) {
-  //   for (let i = 0; i < poly.length; i++) {
-  //     const ring = poly[i] as any
-  //     const points = []; // wall.points.map((p) => new THREE.Vector2(p.x, p.y))
-  //     for (let j = 0; j < ring.length; j++) {
-  //       if (ring[j] === null) continue
-  //       points.push(new THREE.Vector2(ring[j][0], ring[j][1] * -1))
-  //     }
-
-  //     const shape = new THREE.Shape(points)
-
-  //     const extrudeSettings = {
-  //       steps: 1,
-  //       depth: 280,
-  //       bevelEnabled: true,
-  //       // bevelThickness: 2,
-  //       // bevelSize: 2,
-  //       // bevelSegments: 1
-  //     }
-
-  //     const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings)
-  //     geometry.rotateX(-Math.PI / 2);   // 将 XY 平面旋转成 XZ 平面
-  //     const material = new THREE.MeshStandardMaterial({ color: 0xe0e0e0, side: THREE.DoubleSide })
-  //     const wallMesh = new THREE.Mesh(geometry, material)
-  //     wallMesh.position.set(0, 0, 0)
-  //     wallMesh.castShadow = true
-  //     wallMesh.receiveShadow = true
-  //     scene!.add(wallMesh)
-  //   }
-  // }
-  // props.data.walls.forEach((wall) => {
-  //   if (wall.points.length < 2) return
-  //   console.log(11111, wall.points)
-  //   const points = wall.points.map((p) => new THREE.Vector2(p.x, p.y))
-  //   const shape = new THREE.Shape(points)
-
-  //   const extrudeSettings = {
-  //     steps: 1,
-  //     depth: 20,
-  //     bevelEnabled: true,
-  //     bevelThickness: 2,
-  //     bevelSize: 2,
-  //     bevelSegments: 1
-  //   }
-
-  //   const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings)
-  //   const material = new THREE.MeshStandardMaterial({ color: 0xe0e0e0, side: THREE.DoubleSide })
-  //   const wallMesh = new THREE.Mesh(geometry, material)
-  //   wallMesh.position.set(0, 10, 0)
-  //   wallMesh.castShadow = true
-  //   wallMesh.receiveShadow = true
-  //   scene!.add(wallMesh)
-
-  //   wall.points.forEach((point) => {
-  //     const pointGeometry = new THREE.SphereGeometry(3, 8, 8)
-  //     const pointMaterial = new THREE.MeshBasicMaterial({ color: 0x1890ff })
-  //     const pointMesh = new THREE.Mesh(pointGeometry, pointMaterial)
-  //     pointMesh.position.set(point.x, 0, point.y)
-  //     scene!.add(pointMesh)
-  //   })
-  // })
 }
 
 const renderDoors = () => {
   if (!scene) return
 
-  (props.data.getObjects('door') as Door[]).forEach((door) => {
-    const api = new DoorEntity(door);
-
+  (props.data.allFileMapObjects['door'] as DoorEntity[]).forEach((door) => {
     const wall = props.data.getObjects('wall').find((wall) => wall.id === door.wallId);
-
     const findWall = wallEntityList.find((entity) => entity.data.id === door.wallId)
-
     if (scene) {
-      const meshList = api.draw3DAndCache(scene, findWall)
+      const meshList = door.draw3DAndCache(scene, findWall)
       meshList.forEach(mesh => scene!.add(mesh))
     }
   })
@@ -374,11 +303,10 @@ const renderDoors = () => {
 const renderWindows = () => {
   if (!scene) return
 
-  (props.data.getObjects('window') as Window[]).forEach((win) => {
-    const api = new WindowEntity(win)
-    const findWall = wallEntityList.find((entity) => entity.data.id === win.wallId)
+  (props.data.allFileMapObjects['window'] as WindowEntity[]).forEach((win) => {
+    const findWall = wallEntityList.find((entity) => entity.data.id === win.data.wallId)
     if (scene) {
-      const meshList = api.draw3DAndCache(scene, findWall)
+      const meshList = win.draw3DAndCache(scene, findWall)
       meshList.forEach(mesh => scene!.add(mesh))
     }
   })
@@ -386,10 +314,9 @@ const renderWindows = () => {
 
 const renderCameras = () => {
   if (!scene) return
-  (props.data.getObjects('camera') as CameraData[]).forEach((camera) => {
-    const api = new CameraEntity(camera)
+  (props.data.allFileMapObjects['camera'] as CameraEntity[]).forEach((camera) => {
     if (scene) {
-      const meshList = api.draw3DAndCache(scene)
+      const meshList = camera.draw3DAndCache(scene)
       meshList.forEach(mesh => scene!.add(mesh))
     }
   })

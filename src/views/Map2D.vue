@@ -968,8 +968,8 @@ const handleMouseMove = (e: MouseEvent) => {
       return false;
     }
     for (let i = 0; i < worldApi.getObjects('wall').length; i++) {
-      const wall = worldApi.getObjects('wall')[i] as Wall
-      const api = new WallEntity(wall)
+      // const wall = worldApi.getObjects('wall')[i] as Wall
+      const api: WallEntity = worldApi.allFileMapObjects['wall'][i] as WallEntity;
       if (temp(api)) {
         return;
       }
@@ -1121,8 +1121,8 @@ const handleMouseDown = (e: MouseEvent) => {
     if (e.button !== 0) return
     // 检查已绘制的墙上的点
     for (let i = 0; i < worldApi.getObjects('wall').length; i++) {
-      const wall = worldApi.getObjects('wall')[i]
-      const api = new WallEntity(wall as Wall)
+      // const wall = worldApi.getObjects('wall')[i]
+      const api: WallEntity = worldApi.allFileMapObjects['wall'][i] as WallEntity;
       const matchInfo = api.matchHandelInfo(x, y, zoomLevel.value)
       if (matchInfo) {
         matchHandelObj = api;
@@ -1135,8 +1135,8 @@ const handleMouseDown = (e: MouseEvent) => {
 
     // 检查门
     for (let i = 0; i < worldApi.getObjects('door').length; i++) {
-      const door = worldApi.getObjects('door')[i]
-      const api = new DoorEntity(door as Door)
+      // const door = worldApi.getObjects('door')[i]
+      const api: DoorEntity = worldApi.allFileMapObjects['door'][i] as DoorEntity;
       const matchInfo = api.matchHandelInfo(x, y, zoomLevel.value)
       if (matchInfo) {
         matchHandelObj = api;
@@ -1149,8 +1149,8 @@ const handleMouseDown = (e: MouseEvent) => {
 
     // 检查窗户
     for (let i = 0; i < worldApi.getObjects('window').length; i++) {
-      const windowItem = worldApi.getObjects('window')[i]
-      const api = new WindowEntity(windowItem as Window)
+      // const windowItem = worldApi.getObjects('window')[i]
+      const api: WindowEntity = worldApi.allFileMapObjects['window'][i] as WindowEntity;
       const matchInfo = api.matchHandelInfo(x, y, zoomLevel.value)
       if (matchInfo) {
         matchHandelObj = api;
@@ -1162,8 +1162,8 @@ const handleMouseDown = (e: MouseEvent) => {
     }
     // 检查相机
     for (let i = 0; i < worldApi.getObjects('camera').length; i++) {
-      const camera = worldApi.getObjects('camera')[i]
-      const api = new CameraEntity(camera as CameraData)
+      // const camera = worldApi.getObjects('camera')[i]
+      const api: CameraEntity = worldApi.allFileMapObjects['camera'][i] as CameraEntity;
       const matchInfo = api.matchHandelInfo(x, y, zoomLevel.value)
       if (matchInfo) {
         matchHandelObj = api;
