@@ -123,7 +123,7 @@ export class WindowEntity extends EntityClass<Window> {
     this.changePosition({ x, y })
   }
 
-  create3DMesh() {
+  create3DMesh(scene: THREE.Scene) {
     const wall = this.world.allFileMapObjects.wall.find((entity) => entity.data.id === this.data.wallId)
     const geometry = new THREE.BoxGeometry(
       this.data.width * 1,

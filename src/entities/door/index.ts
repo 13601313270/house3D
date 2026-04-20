@@ -92,7 +92,7 @@ export class DoorEntity extends EntityClass<Door> {
     ctx.stroke()
   }
 
-  create3DMesh() {
+  create3DMesh(scene: THREE.Scene) {
     const wall = this.world.allFileMapObjects.wall.find((entity) => entity.data.id === this.data.wallId)
     const geometry = new THREE.BoxGeometry(
       this.data.width * 1,

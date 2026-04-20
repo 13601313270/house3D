@@ -134,7 +134,7 @@ export class CameraEntity extends EntityClass<CameraData> {
     ctx.stroke()
   }
 
-  create3DMesh(): THREE.Mesh[] {
+  create3DMesh(scene: THREE.Scene): THREE.Mesh[] {
     const dx = this.data.targetPositionX - this.data.x
     const dy = this.data.targetPositionY - this.data.y
     const dz = this.data.targetPositionZ - this.data.z

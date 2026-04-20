@@ -78,7 +78,7 @@ export class WallEntity extends EntityClass<Wall> {
     });
   }
 
-  create3DMesh() {
+  create3DMesh(scene: THREE.Scene) {
     const meshList: THREE.Mesh[] = []
     const wallBoxList = createAllWallFromPoints([this.wall]);
     const wallHeight = 280

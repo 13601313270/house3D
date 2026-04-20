@@ -34,7 +34,7 @@ export abstract class EntityClass<T extends Entity> {
     this.data = data
   }
 
-  abstract create3DMesh(...args: any[]): THREE.Mesh[]
+  abstract create3DMesh(scene: THREE.Scene, ...args: any[]): THREE.Mesh[]
 
   private cacheKeyStr = '';
   draw3DAndCache(scene: THREE.Scene, ...args: any[]) {
@@ -45,7 +45,7 @@ export abstract class EntityClass<T extends Entity> {
       // console.log('doorPointId-get-draw3DAndCache-1', this.cacheKeyStr)
       // console.log('doorPointId-get-draw3DAndCache-2', newKeyStr)
       this.cacheKeyStr = newKeyStr
-      const meshList = this.create3DMesh(...args)
+      const meshList = this.create3DMesh(scene, ...args)
       if (this.associationEntity.length) {
         this.associationEntity.forEach(item => {
           item.remove3DCache()
