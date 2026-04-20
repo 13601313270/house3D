@@ -968,7 +968,7 @@ const handleMouseMove = (e: MouseEvent) => {
       return false;
     }
     for (let i = 0; i < worldApi.getObjects('wall').length; i++) {
-      const wall = worldApi.getObjects('wall')[i]
+      const wall = worldApi.getObjects('wall')[i] as Wall
       const api = new WallEntity(wall)
       if (temp(api)) {
         return;
@@ -1025,9 +1025,9 @@ const handleMouseMove = (e: MouseEvent) => {
         hoverPoint.value = { ...last }
       } else {
         // 收集所有点（包括临时折线和已绘制的墙上的点）
-        const allPoints = [...tempDrawWall.value.points]
-        worldApi.getObjects('wall').forEach(wall => {
-          wall.points.forEach(point => {
+        const allPoints = [...tempDrawWall.value.points];
+        (worldApi.getObjects('wall') as Wall[]).forEach((wall: Wall) => {
+          wall.points.forEach((point) => {
             allPoints.push(point)
           })
         })
