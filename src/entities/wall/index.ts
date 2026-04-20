@@ -93,7 +93,7 @@ export class WallEntity extends EntityClass<Wall> {
     for (let i = 0; i < wallBoxList.length; i++) {
       const box = wallBoxList[i]
 
-      const points = []; // wall.points.map((p) => new THREE.Vector2(p.x, p.y))
+      const points = [];
       for (let j = 0; j < box.length; j++) {
         points.push(new THREE.Vector2(box[j].x, box[j].y * -1))
       }
@@ -145,54 +145,6 @@ export class WallEntity extends EntityClass<Wall> {
     meshList.push(topMesh)
 
     return meshList
-
-    // const margineds: Geometry | null = createShapeFromPoints([this.wall]);
-    // console.log('margineds', margineds)
-    // if (!margineds) return []
-    // // console.log('margineds', margineds)
-    // for (let i = 0; i < margineds.length; i++) {
-    //   const poly = margineds[i]
-
-    //   let shape: THREE.Shape | null = null
-    //   for (let j = 0; j < poly.length; j++) {
-    //     const ring = poly[j] as any
-    //     const points = []; // wall.points.map((p) => new THREE.Vector2(p.x, p.y))
-    //     for (let j = 0; j < ring.length; j++) {
-    //       if (ring[j] === null) continue
-    //       points.push(new THREE.Vector2(ring[j][0], ring[j][1] * -1))
-    //     }
-    //     if (j === 0) {
-    //       shape = new THREE.Shape(points)
-    //     } else {
-    //       const holePath = new THREE.Path();
-    //       holePath.setFromPoints(points)
-    //       if (shape) {
-    //         shape.holes.push(holePath);
-    //       }
-    //     }
-    //   }
-
-    //   if (shape) {
-    //     const extrudeSettings = {
-    //       steps: 1,
-    //       depth: 280,
-    //       bevelEnabled: true,
-    //       // bevelThickness: 2,
-    //       // bevelSize: 2,
-    //       // bevelSegments: 1
-    //     }
-
-    //     const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings)
-    //     geometry.rotateX(-Math.PI / 2);   // 将 XY 平面旋转成 XZ 平面
-    //     const material = new THREE.MeshStandardMaterial({ color: 0xe0e0e0, side: THREE.DoubleSide })
-    //     const wallMesh = new THREE.Mesh(geometry, material)
-    //     wallMesh.position.set(0, 0, 0)
-    //     wallMesh.castShadow = true
-    //     wallMesh.receiveShadow = true
-    //     meshList.push(wallMesh)
-    //   }
-    // }
-    return meshList
   }
 
   // 命中可拖拽具柄
@@ -201,10 +153,6 @@ export class WallEntity extends EntityClass<Wall> {
       const point = this.wall.points[i]
       const dist = Math.hypot(x - point.x, y - point.y)
       if (dist < this.thickness * zoomLevel) {
-        // draggedPoint.value = { type: 'wall', wallIndex, pointIndex }
-        // dragOffset.value = { x: point.x - x, y: point.y - y }
-        // prevTool.value = currentTool.value
-        // drawWrapper()
         return {
           id: this.data.id,
           type: this.type,

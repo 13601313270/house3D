@@ -226,11 +226,13 @@ export class World {
 
   clear(type: EntityType) {
     this.allFileObjects[type] = []
+    this.allFileMapObjects[type] = []
   }
 
   splice(type: EntityType, index: number, count: number = 1) {
-    if (this.allFileObjects) {
+    if (this.allFileObjects[type]) {
       this.allFileObjects[type].splice(index, count)
+      this.allFileMapObjects[type].splice(index, count)
     }
   }
 }
