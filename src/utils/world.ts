@@ -241,7 +241,7 @@ export class World {
     for (let i = 0; i < data.length; i++) {
       this.allFileObjects[type].push(data[i] as any)
       // @ts-ignore
-      const doorApi: EntityClass<any> = new EntityClassItem(data[i]);
+      const doorApi: EntityClass<any> = new EntityClassItem(this, data[i]);
       this.allFileMapObjects[type].push(doorApi)
     }
   }

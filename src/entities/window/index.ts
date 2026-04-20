@@ -4,6 +4,7 @@ import { Window } from './index.d'
 import * as THREE from 'three'
 import { Brush, Evaluator, SUBTRACTION } from 'three-bvh-csg';
 import { WallEntity } from '../wall';
+import { World } from '@/utils/world';
 
 export function createWindowData() {
   const window: Window = {
@@ -58,8 +59,8 @@ export class WindowEntity extends EntityClass<Window> {
   height: number
   isPointObj: boolean = true
 
-  constructor(window: Window) {
-    super(window)
+  constructor(world: World, window: Window) {
+    super(world, window)
     this.height = window.height
   }
 

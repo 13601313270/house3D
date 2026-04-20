@@ -5,6 +5,7 @@ import { drawPoint } from '@/utils/drawPoint'
 import { createAllWallFromPoints } from '@/utils/createAllWallFromPoints'
 import * as THREE from 'three'
 import { editItem } from '..'
+import { World } from '@/utils/world'
 
 export function editPropConfig(): editItem[] {
   return [
@@ -23,8 +24,8 @@ export class WallEntity extends EntityClass<Wall> {
   thickness: number
   wall: Wall
 
-  constructor(wall: Wall) {
-    super(wall)
+  constructor(world: World, wall: Wall) {
+    super(world, wall)
     this.wall = wall
     this.points = wall.points
     this.thickness = wall.thickness

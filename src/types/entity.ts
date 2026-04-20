@@ -1,5 +1,6 @@
 import * as THREE from 'three'
 import { Entity, HandelInfo, Point, PointWithIndex } from './map2d'
+import { World } from '@/utils/world'
 
 export type EntityType = 'wall' | 'door' | 'window' | 'camera'
 export type allSnapFromType = 'point' | 'line' | 'axis'
@@ -21,13 +22,14 @@ export type MatchSnapPoint = OrigionSnapPoint | {
 export abstract class EntityClass<T extends Entity> {
   abstract type: EntityType
   abstract isPointObj: boolean // 点状对象，如窗户/门。非点状的如墙
-  // world: World;
+  world: World;
   data: T
   meshList: THREE.Mesh[] = []
   // eslint-disable-next-line
   associationEntity: EntityClass<any>[] = []// 关联对象，就是本对象渲染，需要联动修改的对象。（比如：墙壁上被窗户挖洞，那么墙修改，需要重新挖洞）
 
-  constructor(data: T) {
+  constructor(world: World, data: T) {
+    this.world = world
     // console.trace('doorPointId-get-draw3DAndCache-0')
     this.data = data
   }

@@ -4,6 +4,7 @@ import { CameraData } from './index.d'
 import { allSnapFromType, EntityClass, EntityType, MatchSnapPoint, OrigionSnapPoint } from '@/types/entity'
 import { WallEntity } from '../wall'
 import { editItem } from '..'
+import { World } from '@/utils/world'
 
 export function createCameraData() {
   const camera: CameraData = {
@@ -55,8 +56,8 @@ export class CameraEntity extends EntityClass<CameraData> {
   color3D: string = '#0c7f25'
   colorOpacity: string = '#14b737a5'
 
-  constructor(camera: CameraData) {
-    super(camera)
+  constructor(world: World, camera: CameraData) {
+    super(world, camera)
     this.id = camera.id
   }
 

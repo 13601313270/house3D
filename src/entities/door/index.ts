@@ -5,6 +5,7 @@ import { Brush, Evaluator, SUBTRACTION } from 'three-bvh-csg';
 import { allSnapFromType, EntityClass, EntityType, MatchSnapPoint } from '@/types/entity'
 import { WallEntity } from '../wall'
 import { editItem } from '..';
+import { World } from '@/utils/world';
 
 export function createDoorData() {
   const door: Door = {
@@ -47,8 +48,8 @@ export class DoorEntity extends EntityClass<Door> {
   // wallId: string | undefined
   isPointObj: boolean = true
 
-  constructor(door: Door) {
-    super(door)
+  constructor(world: World, door: Door) {
+    super(world, door)
     // this.wallId = door.wallId
     this.id = door.id
   }
