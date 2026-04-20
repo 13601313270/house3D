@@ -132,8 +132,7 @@ export class WindowEntity extends EntityClass<Window> {
     );// 额外增加2保证，门框比强款一点
     const material = new THREE.MeshStandardMaterial({ color: this.data.color })
     const windowMesh = new THREE.Mesh(geometry, material)
-    // wall.remove3DCache()
-    // wall.draw3DAndCache(scene)
+
     if (wall && this.data.wallPointId > -1 && wall.meshList[this.data.wallPointId]) {
       const wallThickness = wall.data.thickness;
       const wallMesh = wall.meshList[this.data.wallPointId];

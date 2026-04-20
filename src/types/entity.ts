@@ -30,22 +30,19 @@ export abstract class EntityClass<T extends Entity> {
 
   constructor(world: World, data: T) {
     this.world = world
-    // console.trace('doorPointId-get-draw3DAndCache-0')
     this.data = data
   }
 
   abstract create3DMesh(scene: THREE.Scene, ...args: any[]): THREE.Mesh[]
 
   private cacheKeyStr = '';
-  draw3DAndCache(scene: THREE.Scene, ...args: any[]) {
+  draw3DAndCache(scene: THREE.Scene) {
     const newKeyStr = this.type + JSON.stringify(this.data)
     if (this.cacheKeyStr === newKeyStr) {
       return this.meshList
     } else {
-      // console.log('doorPointId-get-draw3DAndCache-1', this.cacheKeyStr)
-      // console.log('doorPointId-get-draw3DAndCache-2', newKeyStr)
       this.cacheKeyStr = newKeyStr
-      const meshList = this.create3DMesh(scene, ...args)
+      const meshList = this.create3DMesh(scene)
       if (this.associationEntity.length) {
         this.associationEntity.forEach(item => {
           item.remove3DCache()

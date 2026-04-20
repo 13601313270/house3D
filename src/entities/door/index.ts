@@ -1,5 +1,7 @@
 import { HandelInfo, Point } from '@/types/map2d'
 import * as THREE from 'three'
+// @ts-ignore
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { Door } from './index.d'
 import { Brush, Evaluator, SUBTRACTION } from 'three-bvh-csg';
 import { allSnapFromType, EntityClass, EntityType, MatchSnapPoint } from '@/types/entity'
@@ -93,6 +95,14 @@ export class DoorEntity extends EntityClass<Door> {
   }
 
   create3DMesh(scene: THREE.Scene) {
+    // 加载 https://video-obj.oss-cn-beijing.aliyuncs.com/door.glb
+
+    console.trace('s---1---')
+    const loader = new GLTFLoader();
+    loader.load('https://video-obj.oss-cn-beijing.aliyuncs.com/door.glb', (gltf: any) => {
+      scene.add(gltf.scene);
+    });
+
     const wall = this.world.allFileMapObjects.wall.find((entity) => entity.data.id === this.data.wallId)
     const geometry = new THREE.BoxGeometry(
       this.data.width * 1,
@@ -101,8 +111,7 @@ export class DoorEntity extends EntityClass<Door> {
     );// 额外增加2保证，门框比强款一点
     const material = new THREE.MeshStandardMaterial({ color: this.data.color })
     const doorMesh = new THREE.Mesh(geometry, material)
-    // wall.remove3DCache()
-    // wall.draw3DAndCache(scene)
+
     if (wall && this.data.wallPointId > -1 && wall.meshList[this.data.wallPointId]) {
       const wallThickness = wall.data.thickness;
       const wallMesh = wall.meshList[this.data.wallPointId];
@@ -127,12 +136,6 @@ export class DoorEntity extends EntityClass<Door> {
       const resultGeometry = evaluator.evaluate(boxBrush, cylinderBrush, SUBTRACTION);
 
       wallMesh.geometry = resultGeometry.geometry
-      // // 4. 创建最终的网格
-      // const material = new THREE.MeshStandardMaterial({ color: 0x00aaff, side: THREE.DoubleSide });
-      // const resultMesh = new THREE.Mesh(resultGeometry.geometry, material);
-
-      // resultMesh.position.set(wallMesh.position.x, wallMesh.position.y, wallMesh.position.z + 3)
-      // resultMesh.rotateY(this.angle * -1);
       doorMesh.position.set(this.data.x, this.data.height / 2, this.data.y)
       doorMesh.rotateY(this.data.angle * -1);
       return [

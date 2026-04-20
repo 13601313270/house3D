@@ -689,7 +689,7 @@ const handleFileChange = (e: Event) => {
       history.value = []
       drawWrapper()
     } catch (error) {
-      alert('文件格式错误')
+      console.error(error)
     }
   }
   reader.readAsText(file)
