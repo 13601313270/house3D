@@ -51,7 +51,16 @@ export abstract class EntityClass<T extends Entity> {
   }
 
   public remove3DCache() {
-    this.cacheKeyStr = ''
+    // 这里注意防止死循环
+
+    if (this.cacheKeyStr) {
+      this.cacheKeyStr = ''
+      if (this.associationEntity.length > 0) {
+        this.associationEntity.forEach(entity => {
+          entity.remove3DCache()
+        })
+      }
+    }
   }
 
   // 命中可拖拽具柄
