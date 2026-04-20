@@ -366,10 +366,6 @@ onUnmounted(() => {
   }
 })
 
-watch(() => props.world.allFileObjects, () => {
-  updateScene()
-}, { deep: true })
-
 watch(() => props.cameraState, (newVal) => {
   if (newVal) {
     cameraState.value = { ...newVal }
