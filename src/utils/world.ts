@@ -1,3 +1,4 @@
+import * as THREE from 'three'
 import { Entity, EntityType, Point } from '../types'
 import { Wall } from '@/entities/wall/index.d'
 import { Door } from '@/entities/door/index.d'
@@ -205,6 +206,26 @@ export class World {
         ctx.stroke()
       }
     }
+  }
+
+  draw3D(scene: THREE.Scene) {
+    (this.allFileMapObjects.wall as WallEntity[]).forEach((wall) => {
+      wall.draw3DAndCache(scene)
+    });
+
+    (this.allFileMapObjects.door as DoorEntity[]).forEach((door) => {
+      const findWall = this.allFileMapObjects.wall.find((entity) => entity.data.id === door.data.wallId)
+      door.draw3DAndCache(scene, findWall)
+    });
+
+    (this.allFileMapObjects.window as WindowEntity[]).forEach((win) => {
+      const findWall = this.allFileMapObjects.wall.find((entity) => entity.data.id === win.data.wallId)
+      win.draw3DAndCache(scene, findWall)
+    });
+
+    (this.allFileMapObjects.camera as CameraEntity[]).forEach((camera) => {
+      camera.draw3DAndCache(scene)
+    })
   }
 
   getAllFileObjects() {

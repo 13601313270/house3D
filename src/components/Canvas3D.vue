@@ -278,47 +278,6 @@ const initThree = () => {
   }
 }
 
-const renderWalls = () => {
-  if (!scene) return
-  (props.world.allFileMapObjects.wall as WallEntity[]).forEach((wall) => {
-    if (scene) {
-      const meshList = wall.draw3DAndCache(scene)
-    }
-  })
-}
-
-const renderDoors = () => {
-  if (!scene) return
-
-  (props.world.allFileMapObjects.door as DoorEntity[]).forEach((door) => {
-    const wall = props.world.getObjects('wall').find((wall) => wall.id === door.data.wallId);
-    const findWall = props.world.allFileMapObjects.wall.find((entity) => entity.data.id === door.data.wallId)
-    if (scene) {
-      const meshList = door.draw3DAndCache(scene, findWall)
-    }
-  })
-}
-
-const renderWindows = () => {
-  if (!scene) return
-
-  (props.world.allFileMapObjects.window as WindowEntity[]).forEach((win) => {
-    const findWall = props.world.allFileMapObjects.wall.find((entity) => entity.data.id === win.data.wallId)
-    if (scene) {
-      const meshList = win.draw3DAndCache(scene, findWall)
-    }
-  })
-}
-
-const renderCameras = () => {
-  if (!scene) return
-  (props.world.allFileMapObjects.camera as CameraEntity[]).forEach((camera) => {
-    if (scene) {
-      const meshList = camera.draw3DAndCache(scene)
-    }
-  })
-}
-
 const animate = () => {
   if (renderer && scene && camera) {
     renderer.render(scene, camera)
@@ -345,15 +304,7 @@ const resize = () => {
 
 const updateScene = () => {
   if (scene) {
-    // while (scene.children.length > 0) {
-    //   scene.remove(scene.children[0])
-    // }
-
-    // alert(1)
-    renderWalls()
-    renderDoors()
-    renderWindows()
-    renderCameras()
+    props.world.draw3D(scene)
     resize();
   }
 }
