@@ -556,7 +556,7 @@ const worldApi = new World()
 const drawWrapper = () => {
   const canvas = canvasRef.value
   if (canvas) {
-    worldApi.draw(
+    worldApi.draw2D(
       canvas,
       tempDrawWall.value?.points || [],
       hoverPoint.value,

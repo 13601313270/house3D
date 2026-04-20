@@ -25,7 +25,7 @@ export class World {
     camera: [],
   }
 
-  draw(
+  draw2D(
     canvasRef: HTMLCanvasElement | null,
     tempWallPoints: Point[],
     hoverPoint: Point | null,
