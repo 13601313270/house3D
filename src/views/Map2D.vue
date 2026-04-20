@@ -17,9 +17,6 @@
         <button @click="clearDrawing" type="button">
           清空
         </button>
-        <button @click="undo" type="button">
-          撤销
-        </button>
         <button @click="saveDrawing" type="button">
           保存
         </button>
@@ -51,13 +48,7 @@
                 @change="updateEditPropInputInfo(item.id, $event)" />
             </label>
           </div>
-          <div v-if="contextMenu.type === 'wall'">
-            <label>
-              墙体厚度：
-              <input type="number" v-model.number="contextMenu.thickness" @change="updateWallThickness" />
-            </label>
-          </div>
-          <button v-else @click="deleteContextMenuEntity">删除</button>
+          <button @click="deleteContextMenuEntity">删除</button>
         </div>
       </div>
     </div>
@@ -141,8 +132,8 @@ const cameraState = ref<CameraState>({
 //   fov: 45,
 // })
 const cameraState2 = computed(() => {
-  if (worldApi.allFileObjects.camera && worldApi.allFileObjects.camera[0]) {
-    const cameraData = worldApi.allFileObjects.camera[0]
+  if (worldApi.getObjects('camera') && worldApi.getObjects('camera')[0]) {
+    const cameraData = worldApi.getObjects('camera')[0] as CameraData
     return {
       targetPositionX: cameraData.targetPositionX,
       targetPositionY: cameraData.targetPositionY,
@@ -227,7 +218,7 @@ const getNearestWall = (point: Point): NearestWallResult | null => {
   let nearestAngle = 0
   let lineIndex: number = -1;
 
-  worldApi.allFileObjects.wall.forEach((wall: Wall) => {
+  (worldApi.getObjects('wall') as Wall[]).forEach((wall: Wall) => {
     for (let i = 0; i < wall.points.length - 1; i++) {
       const p1 = wall.points[i]
       const p2 = wall.points[i + 1]
@@ -625,8 +616,8 @@ onMounted(() => {
               points: [...tempDrawWall.value.points],
               thickness: wallThickness.value
             }
-            worldApi.allFileObjects.wall.push(newWall)
-            history.value.push(JSON.parse(JSON.stringify(worldApi.allFileObjects.wall)))
+            worldApi.add('wall', [newWall])
+            history.value.push(JSON.parse(JSON.stringify(worldApi.getObjects('wall'))))
           }
           tempDrawWall.value = null
           lastPoint.value = null
@@ -653,7 +644,7 @@ const saveDrawing = () => {
     zoomLevel: number
     cameraState: CameraState
   } = {
-    ...worldApi.allFileObjects,
+    ...worldApi.getAllFileObjects(),
     panOffset: panOffset.value,
     zoomLevel: zoomLevel.value,
     cameraState: cameraState.value
@@ -685,19 +676,16 @@ const handleFileChange = (e: Event) => {
         zoomLevel: number
         cameraState: CameraState
       } = JSON.parse(event.target?.result as string)
-      const allObjKey: string[] = Object.keys(worldApi.allFileObjects)
-      allObjKey.forEach((key) => {
-        // @ts-ignore
-        worldApi.allFileObjects[key] = data[key] || []
+      allFileKeys.forEach((key) => {
+        const key2 = key as EntityType
+        console.log('key2', key2, data[key2])
+        worldApi.add(key2, data[key2] || [])
       })
 
       panOffset.value = data.panOffset || { x: 0, y: 0 }
       zoomLevel.value = data.zoomLevel || 1
       if (data.cameraState) {
         cameraState.value = data.cameraState
-      }
-      if (worldApi.allFileObjects.camera) {
-        const cameraData = worldApi.allFileObjects.camera[0]
       }
       history.value = []
       drawWrapper()
@@ -723,48 +711,34 @@ const handleContextMenu = (e: MouseEvent) => {
 
   editPropConfigInfo.value = []
   editPropInputInfo.value = {}
-  // 检查是否点击了墙上的点
-  for (let i = 0; i < worldApi.allFileObjects.wall.length; i++) {
-    const wall = worldApi.allFileObjects.wall[i]
-    for (let j = 0; j < wall.points.length; j++) {
-      const point = wall.points[j]
-      const dist = Math.hypot(x - point.x, y - point.y)
-      if (dist < 10) {
-        contextMenu.value = {
-          visible: true,
-          x: e.clientX,
-          y: e.clientY,
-          type: 'wall',
-          wallIndex: i,
-          pointIndex: j,
-          thickness: wall.thickness || 2
-        }
-        return
-      }
-    }
-  }
 
   for (let i = 0; i < allFileKeys.length; i++) {
     const type = allFileKeys[i]
     const propConfig = PropConfigMap[type];
-    if (['door', 'window', 'camera'].includes(type)) {
-      for (let j = 0; j < worldApi.allFileObjects[type].length; j++) {
+    if (allFileKeys.includes(type)) {
+      for (let j = 0; j < worldApi.getObjects(type).length; j++) {
         // @ts-ignore
-        const item = worldApi.allFileObjects[type][j]
-        const dist = Math.hypot(x - item.x, y - item.y)
-        if (dist < 10) {
-          console.log('dist', propConfig())
-          editPropConfigInfo.value = propConfig()
-          editPropInputInfo.value = item;
-          contextMenu.value = {
-            visible: true,
-            x: e.clientX,
-            y: e.clientY,
-            // @ts-ignore
-            type: type,
-            index: j
+        const item = worldApi.getObjects(type)[j]
+        console.log('api', worldApi.allFileMapObjects)
+        const api: EntityClass<any> = worldApi.allFileMapObjects[type][j]
+        const snapPoints = api.getMineBeSnapPoints()
+        for (let k = 0; k < snapPoints.length; k++) {
+          const snapPoint = snapPoints[k]
+          const dist = Math.hypot(x - snapPoint.point.x, y - snapPoint.point.y)
+          if (dist < 10) {
+            console.log('dist', propConfig())
+            editPropConfigInfo.value = propConfig()
+            editPropInputInfo.value = item;
+            contextMenu.value = {
+              visible: true,
+              x: e.clientX,
+              y: e.clientY,
+              // @ts-ignore
+              type: type,
+              index: j
+            }
+            return
           }
-          return
         }
       }
     }
@@ -777,19 +751,11 @@ const deleteContextMenuEntity = () => {
   if (!contextMenu.value) return
 
   const type = contextMenu.value.type;
-  if (worldApi.allFileObjects[type]) {
-    worldApi.allFileObjects[type].splice(contextMenu.value.index!, 1)
+  if (contextMenu.value.index !== undefined) {
+    worldApi.splice(type, contextMenu.value.index)
   }
   contextMenu.value = null
   drawWrapper()
-}
-
-const updateWallThickness = () => {
-  if (contextMenu.value?.type === 'wall' && contextMenu.value.wallIndex !== undefined && contextMenu.value.thickness !== undefined) {
-    worldApi.allFileObjects.wall[contextMenu.value.wallIndex].thickness = contextMenu.value.thickness
-    contextMenu.value = null
-    drawWrapper()
-  }
 }
 
 const handleCanvasClick = (e: MouseEvent) => {
@@ -822,8 +788,8 @@ const handleCanvasClick = (e: MouseEvent) => {
           index: tempDrawWall.value.points.length - 1,
         }
         // 收集所有点（包括临时折线和已绘制的墙上的点）
-        const allPoints = [...tempDrawWall.value.points]
-        worldApi.allFileObjects.wall.forEach(wall => {
+        const allPoints: Point[] = [...tempDrawWall.value.points];
+        (worldApi.getObjects('wall') as Wall[]).forEach((wall: Wall) => {
           wall.points.forEach(point => {
             allPoints.push(point)
           })
@@ -862,8 +828,8 @@ const handleCanvasClick = (e: MouseEvent) => {
               z: 0,
               thickness: wallThickness.value
             }
-            worldApi.add('wall', newWall)
-            history.value.push(JSON.parse(JSON.stringify(worldApi.allFileObjects.wall)))
+            worldApi.add('wall', [newWall])
+            history.value.push(JSON.parse(JSON.stringify(worldApi.getObjects('wall'))))
             tempDrawWall.value.points = []
             lastPoint.value = null
           }
@@ -886,17 +852,17 @@ const handleCanvasClick = (e: MouseEvent) => {
   } else {
     if (currentTool.value === 'door') {
       if (insertTempDoor && hoverPoint.value) {
-        worldApi.add('door', insertTempDoor)
+        worldApi.add('door', [insertTempDoor])
         insertTempDoor = null;
       }
     } else if (currentTool.value === 'window') {
       if (insertTempWindow && hoverPoint.value) {
-        worldApi.add('window', insertTempWindow)
+        worldApi.add('window', [insertTempWindow])
         insertTempWindow = null;
       }
     } else if (currentTool.value === 'camera') {
       if (insertTempCamera) {
-        worldApi.add('camera', insertTempCamera)
+        worldApi.add('camera', [insertTempCamera])
         insertTempCamera = null;
       }
     }
@@ -907,10 +873,10 @@ const handleCanvasClick = (e: MouseEvent) => {
 
 const clearDrawing = () => {
   if (confirm('确定要清空所有绘制内容吗？')) {
-    worldApi.allFileObjects.wall = []
-    worldApi.allFileObjects.door = []
-    worldApi.allFileObjects.window = []
-    worldApi.allFileObjects.camera = []
+    worldApi.clear('wall')
+    worldApi.clear('door')
+    worldApi.clear('window')
+    worldApi.clear('camera')
     if (tempDrawWall.value) {
       tempDrawWall.value = null
     }
@@ -919,12 +885,12 @@ const clearDrawing = () => {
   }
 }
 
-const undo = () => {
-  if (history.value.length > 0) {
-    worldApi.allFileObjects.wall = history.value.pop() || []
-    drawWrapper()
-  }
-}
+// const undo = () => {
+//   if (history.value.length > 0) {
+//     worldApi.allFileObjects.wall = history.value.pop() || []
+//     drawWrapper()
+//   }
+// }
 
 const handleMouseMove = (e: MouseEvent) => {
   const canvas = canvasRef.value
@@ -1001,8 +967,8 @@ const handleMouseMove = (e: MouseEvent) => {
       }
       return false;
     }
-    for (let i = 0; i < worldApi.allFileObjects.wall.length; i++) {
-      const wall = worldApi.allFileObjects.wall[i]
+    for (let i = 0; i < worldApi.getObjects('wall').length; i++) {
+      const wall = worldApi.getObjects('wall')[i]
       const api = new WallEntity(wall)
       if (temp(api)) {
         return;
@@ -1060,7 +1026,7 @@ const handleMouseMove = (e: MouseEvent) => {
       } else {
         // 收集所有点（包括临时折线和已绘制的墙上的点）
         const allPoints = [...tempDrawWall.value.points]
-        worldApi.allFileObjects.wall.forEach(wall => {
+        worldApi.getObjects('wall').forEach(wall => {
           wall.points.forEach(point => {
             allPoints.push(point)
           })
@@ -1154,9 +1120,9 @@ const handleMouseDown = (e: MouseEvent) => {
   if (currentTool.value === 'drag') {
     if (e.button !== 0) return
     // 检查已绘制的墙上的点
-    for (let i = 0; i < worldApi.allFileObjects.wall.length; i++) {
-      const wall = worldApi.allFileObjects.wall[i]
-      const api = new WallEntity(wall)
+    for (let i = 0; i < worldApi.getObjects('wall').length; i++) {
+      const wall = worldApi.getObjects('wall')[i]
+      const api = new WallEntity(wall as Wall)
       const matchInfo = api.matchHandelInfo(x, y, zoomLevel.value)
       if (matchInfo) {
         matchHandelObj = api;
@@ -1168,9 +1134,9 @@ const handleMouseDown = (e: MouseEvent) => {
     }
 
     // 检查门
-    for (let i = 0; i < worldApi.allFileObjects.door.length; i++) {
-      const door = worldApi.allFileObjects.door[i]
-      const api = new DoorEntity(door)
+    for (let i = 0; i < worldApi.getObjects('door').length; i++) {
+      const door = worldApi.getObjects('door')[i]
+      const api = new DoorEntity(door as Door)
       const matchInfo = api.matchHandelInfo(x, y, zoomLevel.value)
       if (matchInfo) {
         matchHandelObj = api;
@@ -1182,9 +1148,9 @@ const handleMouseDown = (e: MouseEvent) => {
     }
 
     // 检查窗户
-    for (let i = 0; i < worldApi.allFileObjects.window.length; i++) {
-      const windowItem = worldApi.allFileObjects.window[i]
-      const api = new WindowEntity(windowItem)
+    for (let i = 0; i < worldApi.getObjects('window').length; i++) {
+      const windowItem = worldApi.getObjects('window')[i]
+      const api = new WindowEntity(windowItem as Window)
       const matchInfo = api.matchHandelInfo(x, y, zoomLevel.value)
       if (matchInfo) {
         matchHandelObj = api;
@@ -1195,9 +1161,9 @@ const handleMouseDown = (e: MouseEvent) => {
       }
     }
     // 检查相机
-    for (let i = 0; i < worldApi.allFileObjects.camera.length; i++) {
-      const camera = worldApi.allFileObjects.camera[i]
-      const api = new CameraEntity(camera)
+    for (let i = 0; i < worldApi.getObjects('camera').length; i++) {
+      const camera = worldApi.getObjects('camera')[i]
+      const api = new CameraEntity(camera as CameraData)
       const matchInfo = api.matchHandelInfo(x, y, zoomLevel.value)
       if (matchInfo) {
         matchHandelObj = api;
@@ -1222,7 +1188,7 @@ const handleMouseUp = () => {
   matchHandelObj = null
   matchHandelInfo = null
   if (draggedPoint.value !== null) {
-    history.value.push(JSON.parse(JSON.stringify(worldApi.allFileObjects.wall)))
+    history.value.push(JSON.parse(JSON.stringify(worldApi.getObjects('wall'))))
     draggedPoint.value = null
     dragOffset.value = null
     drawWrapper()

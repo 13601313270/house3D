@@ -9,14 +9,21 @@ import { drawPoint } from './drawPoint'
 import { calculateAngle } from './calculateAngle'
 import { CameraData } from '@/entities/camera/index.d'
 import { CameraEntity } from '@/entities/camera'
-import { defaultFileData, fileData } from '@/entities/index'
+import { defaultFileData, fileData, fileDataKeyToClass } from '@/entities/index'
 import { EntityClass } from '@/types/entity'
 
 export const canvasHeight = 600
 export const snapThreshold = 20
 
 export class World {
-  allFileObjects: fileData = defaultFileData
+  private allFileObjects: fileData = defaultFileData
+
+  allFileMapObjects: Record<EntityType, EntityClass<any>[]> = {
+    wall: [],
+    door: [],
+    window: [],
+    camera: [],
+  }
 
   draw(
     canvasRef: HTMLCanvasElement | null,
@@ -137,8 +144,9 @@ export class World {
         allDoors.push(insertTempDoor)
       }
     }
-    allDoors.forEach((door) => {
-      const doorApi = new DoorEntity(door)
+    allDoors.forEach((door, index) => {
+      // @ts-ignore
+      let doorApi: DoorEntity = this.allFileMapObjects.door[index];;
       const wallThickness = walls.find((wall) => wall.id === door.wallId)?.thickness || 0;
       doorApi.draw2D(ctx, panOffset, wallThickness, zoomLevel)
     })
@@ -150,8 +158,8 @@ export class World {
       }
     }
 
-    allWindows.forEach((win) => {
-      const windowApi = new WindowEntity(win)
+    allWindows.forEach((win, index) => {
+      let windowApi: WindowEntity = this.allFileMapObjects.window[index] as WindowEntity;
       const wallThickness = walls.find((wall) => wall.id === win.wallId)?.thickness || 0;
       windowApi.draw2D(ctx, panOffset, wallThickness, zoomLevel)
     })
@@ -162,8 +170,8 @@ export class World {
         allCameras.push(insertTempCamera)
       }
     }
-    allCameras.forEach((camera) => {
-      const cameraApi = new CameraEntity(camera)
+    allCameras.forEach((camera, index) => {
+      let cameraApi: CameraEntity = this.allFileMapObjects.camera[index] as CameraEntity;
       cameraApi.draw2D(ctx, panOffset, zoomLevel)
     })
 
@@ -198,8 +206,32 @@ export class World {
     }
   }
 
-  add(type: EntityType, data: Entity) {
-    this.allFileObjects[type].push(data as any)
+  getAllFileObjects() {
+    return this.allFileObjects
+  }
+
+  getObjects(type: EntityType) {
+    return [...this.allFileObjects[type]]
+  }
+
+  add(type: EntityType, data: Entity[]) {
+    const EntityClassItem: EntityClass<any> = fileDataKeyToClass[type] as any;
+    for (let i = 0; i < data.length; i++) {
+      this.allFileObjects[type].push(data[i] as any)
+      // @ts-ignore
+      let doorApi: EntityClass<any> = new EntityClassItem(data[i]);
+      this.allFileMapObjects[type].push(doorApi)
+    }
+  }
+
+  clear(type: EntityType) {
+    this.allFileObjects[type] = []
+  }
+
+  splice(type: EntityType, index: number, count: number = 1) {
+    if (this.allFileObjects) {
+      this.allFileObjects[type].splice(index, count)
+    }
   }
 }
 

@@ -8,6 +8,11 @@ import { editItem } from '..'
 
 export function editPropConfig(): editItem[] {
   return [
+    {
+      id: 'thickness',
+      label: '墙体厚度222',
+      dataType: 'number',
+    }
   ]
 }
 
