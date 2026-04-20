@@ -57,13 +57,13 @@
 
     <div class="right-panel" :style="{ width: panel2SplitWidthPer * 100 + '%' }">
       <!-- {{ insertTempDoor }} -->
-      <Canvas3D ref="canvas3DRef" :data="worldApi" v-model:cameraState="cameraState" :aspectRatio="1" />
+      <Canvas3D ref="canvas3DRef" :world="worldApi" v-model:cameraState="cameraState" :aspectRatio="1" />
     </div>
 
     <div class="split-bar" @mousedown.prevent="startSplit(2)" title="拖动调整左右比例"></div>
     <div class="right-panel" :style="{ width: (1 - panel1SplitWidthPer - panel2SplitWidthPer) * 100 + '%' }">
       <!-- {{ insertTempDoor }} -->
-      <Canvas3D v-if="cameraState2" ref="canvas3DRef2" :data="worldApi" v-model:cameraState="cameraState2"
+      <Canvas3D v-if="cameraState2" ref="canvas3DRef2" :world="worldApi" v-model:cameraState="cameraState2"
         :aspectRatio="cameraState2.aspectW / cameraState2.aspectH" />
     </div>
   </div>

@@ -36,7 +36,7 @@ export type CameraState = {
 }
 
 const props = defineProps<{
-  data: World,
+  world: World,
   cameraState?: CameraState,
   aspectRatio?: number
 }>()
@@ -284,7 +284,7 @@ const renderWalls = () => {
   if (!scene) return
 
   wallEntityList = [];
-  (props.data.allFileMapObjects.wall as WallEntity[]).forEach((wall) => {
+  (props.world.allFileMapObjects.wall as WallEntity[]).forEach((wall) => {
     wallEntityList.push(wall)
     if (scene) {
       const meshList = wall.draw3DAndCache(scene)
@@ -295,8 +295,8 @@ const renderWalls = () => {
 const renderDoors = () => {
   if (!scene) return
 
-  (props.data.allFileMapObjects.door as DoorEntity[]).forEach((door) => {
-    const wall = props.data.getObjects('wall').find((wall) => wall.id === door.data.wallId);
+  (props.world.allFileMapObjects.door as DoorEntity[]).forEach((door) => {
+    const wall = props.world.getObjects('wall').find((wall) => wall.id === door.data.wallId);
     const findWall = wallEntityList.find((entity) => entity.data.id === door.data.wallId)
     if (scene) {
       const meshList = door.draw3DAndCache(scene, findWall)
@@ -307,7 +307,7 @@ const renderDoors = () => {
 const renderWindows = () => {
   if (!scene) return
 
-  (props.data.allFileMapObjects.window as WindowEntity[]).forEach((win) => {
+  (props.world.allFileMapObjects.window as WindowEntity[]).forEach((win) => {
     const findWall = wallEntityList.find((entity) => entity.data.id === win.data.wallId)
     if (scene) {
       const meshList = win.draw3DAndCache(scene, findWall)
@@ -317,7 +317,7 @@ const renderWindows = () => {
 
 const renderCameras = () => {
   if (!scene) return
-  (props.data.allFileMapObjects.camera as CameraEntity[]).forEach((camera) => {
+  (props.world.allFileMapObjects.camera as CameraEntity[]).forEach((camera) => {
     if (scene) {
       const meshList = camera.draw3DAndCache(scene)
     }
@@ -420,7 +420,7 @@ onUnmounted(() => {
   }
 })
 
-watch(() => props.data.allFileObjects, () => {
+watch(() => props.world.allFileObjects, () => {
   updateScene()
 }, { deep: true })
 
