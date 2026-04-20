@@ -97,7 +97,7 @@ export class DoorEntity extends EntityClass<Door> {
   create3DMesh(scene: THREE.Scene) {
     // 加载 https://video-obj.oss-cn-beijing.aliyuncs.com/door.glb
 
-    console.trace('s---1---')
+    console.log('s---1---')
     const loader = new GLTFLoader();
     loader.load('https://video-obj.oss-cn-beijing.aliyuncs.com/door.glb', (gltf: any) => {
       scene.add(gltf.scene);
