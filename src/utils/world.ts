@@ -10,7 +10,7 @@ import { drawPoint } from './drawPoint'
 import { calculateAngle } from './calculateAngle'
 import { CameraData } from '@/entities/camera/index.d'
 import { CameraEntity } from '@/entities/camera'
-import { defaultFileData, fileData, fileDataKeyToClass } from '@/entities/index'
+import { allFileKeys, defaultFileData, fileData, fileDataKeyToClass } from '@/entities/index'
 import { EntityClass } from '@/types/entity'
 
 export const canvasHeight = 600
@@ -217,21 +217,11 @@ export class World {
 
   draw3D() {
     const { scene } = this;
-    (this.allFileMapObjects.wall as WallEntity[]).forEach((wall) => {
-      wall.draw3DAndCache(scene)
+    allFileKeys.forEach((key) => {
+      (this.allFileMapObjects[key] as EntityClass<any>[]).forEach((wall) => {
+        wall.draw3DAndCache(scene)
+      });
     });
-
-    (this.allFileMapObjects.door as DoorEntity[]).forEach((door) => {
-      door.draw3DAndCache(scene)
-    });
-
-    (this.allFileMapObjects.window as WindowEntity[]).forEach((win) => {
-      win.draw3DAndCache(scene)
-    });
-
-    (this.allFileMapObjects.camera as CameraEntity[]).forEach((camera) => {
-      camera.draw3DAndCache(scene)
-    })
   }
 
   getAllFileObjects() {
