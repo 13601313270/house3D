@@ -41,6 +41,9 @@ export abstract class EntityClass<T extends Entity> {
       console.log('doorPointId-get-draw3DAndCache-2', newKeyStr)
       this.cacheKeyStr = newKeyStr
       const meshList = this.create3DMesh(scene, ...args)
+      // 删除原有的
+      this.meshList.forEach(mesh => scene!.remove(mesh))
+      meshList.forEach(mesh => scene!.add(mesh))
       this.meshList = meshList
       return meshList
     }
