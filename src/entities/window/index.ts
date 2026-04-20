@@ -115,7 +115,7 @@ export class WindowEntity extends EntityClass<Window> {
     this.changePosition({ x, y })
   }
 
-  create3DMesh(scene: THREE.Scene, wall: WallEntity) {
+  create3DMesh(wall: WallEntity) {
     const wallThickness = wall.data.thickness;
     const geometry = new THREE.BoxGeometry(
       this.data.width * 1,
@@ -124,6 +124,8 @@ export class WindowEntity extends EntityClass<Window> {
     );// 额外增加2保证，门框比强款一点
     const material = new THREE.MeshStandardMaterial({ color: this.data.color })
     const windowMesh = new THREE.Mesh(geometry, material)
+    // wall.remove3DCache()
+    // wall.draw3DAndCache(scene)
     if (this.data.wallPointId > -1 && wall.meshList[this.data.wallPointId]) {
       const wallMesh = wall.meshList[this.data.wallPointId];
 

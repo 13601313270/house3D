@@ -296,8 +296,8 @@ const renderDoors = () => {
   if (!scene) return
 
   (props.data.allFileMapObjects.door as DoorEntity[]).forEach((door) => {
-    const wall = props.data.getObjects('wall').find((wall) => wall.id === door.wallId);
-    const findWall = wallEntityList.find((entity) => entity.data.id === door.wallId)
+    const wall = props.data.getObjects('wall').find((wall) => wall.id === door.data.wallId);
+    const findWall = wallEntityList.find((entity) => entity.data.id === door.data.wallId)
     if (scene) {
       const meshList = door.draw3DAndCache(scene, findWall)
     }

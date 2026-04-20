@@ -44,12 +44,12 @@ export function editPropConfig(): editItem[] {
 export class DoorEntity extends EntityClass<Door> {
   type: EntityType = 'door'
   id: string
-  wallId: string | undefined
+  // wallId: string | undefined
   isPointObj: boolean = true
 
   constructor(door: Door) {
     super(door)
-    this.wallId = door.wallId
+    // this.wallId = door.wallId
     this.id = door.id
   }
 
@@ -88,9 +88,8 @@ export class DoorEntity extends EntityClass<Door> {
     ctx.stroke()
   }
 
-  create3DMesh(scene: THREE.Scene, wall: WallEntity) {
+  create3DMesh(wall: WallEntity) {
     const wallThickness = wall.data.thickness;
-    console.log('doorPointId-get', wall, wall.points)
     const geometry = new THREE.BoxGeometry(
       this.data.width * 1,
       this.data.height * 1,
@@ -98,6 +97,8 @@ export class DoorEntity extends EntityClass<Door> {
     );// 额外增加2保证，门框比强款一点
     const material = new THREE.MeshStandardMaterial({ color: this.data.color })
     const doorMesh = new THREE.Mesh(geometry, material)
+    // wall.remove3DCache()
+    // wall.draw3DAndCache(scene)
     if (this.data.wallPointId > -1 && wall.meshList[this.data.wallPointId]) {
       const wallMesh = wall.meshList[this.data.wallPointId];
       const subtractGeometry = new THREE.BoxGeometry(
@@ -193,7 +194,9 @@ export class DoorEntity extends EntityClass<Door> {
       const lineKey = [p1.x, p1.y, p2.x, p2.y].join(',')
       const index = allLineKey.indexOf(lineKey)
       this.data.angle = nearestAngle
+      this.data.wallId = obj.data.id
       this.data.wallPointId = index
+      this.remove3DCache()
     }
   }
 }

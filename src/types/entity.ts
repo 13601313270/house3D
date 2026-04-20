@@ -23,13 +23,15 @@ export abstract class EntityClass<T extends Entity> {
   abstract isPointObj: boolean // 点状对象，如窗户/门。非点状的如墙
   data: T
   meshList: THREE.Mesh[] = []
+  // eslint-disable-next-line
+  associationEntity: EntityClass<any>[] = []// 关联对象，就是本对象渲染，需要联动修改的对象。（比如：墙壁上被窗户挖洞，那么墙修改，需要重新挖洞）
 
   constructor(data: T) {
-    console.trace('doorPointId-get-draw3DAndCache-0')
+    // console.trace('doorPointId-get-draw3DAndCache-0')
     this.data = data
   }
 
-  abstract create3DMesh(scene: THREE.Scene, ...args: any[]): THREE.Mesh[]
+  abstract create3DMesh(...args: any[]): THREE.Mesh[]
 
   private cacheKeyStr = '';
   draw3DAndCache(scene: THREE.Scene, ...args: any[]) {
@@ -37,16 +39,20 @@ export abstract class EntityClass<T extends Entity> {
     if (this.cacheKeyStr === newKeyStr) {
       return this.meshList
     } else {
-      console.log('doorPointId-get-draw3DAndCache-1', this.cacheKeyStr)
-      console.log('doorPointId-get-draw3DAndCache-2', newKeyStr)
+      // console.log('doorPointId-get-draw3DAndCache-1', this.cacheKeyStr)
+      // console.log('doorPointId-get-draw3DAndCache-2', newKeyStr)
       this.cacheKeyStr = newKeyStr
-      const meshList = this.create3DMesh(scene, ...args)
+      const meshList = this.create3DMesh(...args)
       // 删除原有的
       this.meshList.forEach(mesh => scene!.remove(mesh))
       meshList.forEach(mesh => scene!.add(mesh))
       this.meshList = meshList
       return meshList
     }
+  }
+
+  public remove3DCache() {
+    this.cacheKeyStr = ''
   }
 
   // 命中可拖拽具柄
