@@ -222,13 +222,11 @@ export class World {
     });
 
     (this.allFileMapObjects.door as DoorEntity[]).forEach((door) => {
-      const findWall = this.allFileMapObjects.wall.find((entity) => entity.data.id === door.data.wallId)
-      door.draw3DAndCache(scene, findWall)
+      door.draw3DAndCache(scene)
     });
 
     (this.allFileMapObjects.window as WindowEntity[]).forEach((win) => {
-      const findWall = this.allFileMapObjects.wall.find((entity) => entity.data.id === win.data.wallId)
-      win.draw3DAndCache(scene, findWall)
+      win.draw3DAndCache(scene)
     });
 
     (this.allFileMapObjects.camera as CameraEntity[]).forEach((camera) => {

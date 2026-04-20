@@ -89,8 +89,8 @@ export class DoorEntity extends EntityClass<Door> {
     ctx.stroke()
   }
 
-  create3DMesh(wall: WallEntity) {
-    const wallThickness = wall.data.thickness;
+  create3DMesh() {
+    const wall = this.world.allFileMapObjects.wall.find((entity) => entity.data.id === this.data.wallId)
     const geometry = new THREE.BoxGeometry(
       this.data.width * 1,
       this.data.height * 1,
@@ -100,7 +100,8 @@ export class DoorEntity extends EntityClass<Door> {
     const doorMesh = new THREE.Mesh(geometry, material)
     // wall.remove3DCache()
     // wall.draw3DAndCache(scene)
-    if (this.data.wallPointId > -1 && wall.meshList[this.data.wallPointId]) {
+    if (wall && this.data.wallPointId > -1 && wall.meshList[this.data.wallPointId]) {
+      const wallThickness = wall.data.thickness;
       const wallMesh = wall.meshList[this.data.wallPointId];
       const subtractGeometry = new THREE.BoxGeometry(
         this.data.width,
