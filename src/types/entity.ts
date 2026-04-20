@@ -28,10 +28,10 @@ export abstract class EntityClass<T extends Entity> {
     this.data = data
   }
 
-  abstract draw3D(scene: THREE.Scene, ...args: any[]): THREE.Mesh[]
+  abstract create3DMesh(scene: THREE.Scene, ...args: any[]): THREE.Mesh[]
 
   draw3DAndCache(scene: THREE.Scene, ...args: any[]) {
-    const meshList = this.draw3D(scene, ...args)
+    const meshList = this.create3DMesh(scene, ...args)
     this.meshList = meshList
     return meshList
   }

@@ -115,7 +115,7 @@ export class WindowEntity extends EntityClass<Window> {
     this.changePosition({ x, y })
   }
 
-  draw3D(scene: THREE.Scene, wall: WallEntity) {
+  create3DMesh(scene: THREE.Scene, wall: WallEntity) {
     const wallThickness = wall.data.thickness;
     const geometry = new THREE.BoxGeometry(
       this.data.width * 1,
