@@ -24,15 +24,15 @@ import { onMounted, ref } from 'vue'
 import * as THREE from 'three'
 import axios from 'axios'
 // @ts-ignore
-import { FBXLoader } from 'three/addons/loaders/FBXLoader.js';
+// import { FBXLoader } from 'three/addons/loaders/FBXLoader.js';
 // @ts-ignore
-import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
+// import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
 // @ts-ignore
-import { MTLLoader } from 'three/addons/loaders/MTLLoader.js';
+// import { MTLLoader } from 'three/addons/loaders/MTLLoader.js';
 // @ts-ignore
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 // @ts-ignore
-import { RGBELoader } from 'three/addons/loaders/RGBELoader.js';
+// import { RGBELoader } from 'three/addons/loaders/RGBELoader.js';
 import addPeopleToScene from './addPeopleToScene';
 
 const emits = defineEmits(['update']);
@@ -66,9 +66,9 @@ onMounted(() => {
   // fillLight.position.set(2, 1, 3);
   // scene.add(fillLight);
 
-  const objLoader = new OBJLoader();
+  // const objLoader = new OBJLoader();
   const glbloader = new GLTFLoader();
-  const mtlLoader = new MTLLoader();
+  // const mtlLoader = new MTLLoader();
   function initScene(model: any) {
     model.position.set(0, -1, 0);
     model.scale.set(0.15, 0.15, 0.15);

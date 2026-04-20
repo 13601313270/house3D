@@ -147,7 +147,7 @@ export class World {
     }
     allDoors.forEach((door, index) => {
       // @ts-ignore
-      let doorApi: DoorEntity = this.allFileMapObjects.door[index];
+      const doorApi: DoorEntity = this.allFileMapObjects.door[index];
       const wallThickness = walls.find((wall) => wall.id === door.wallId)?.thickness || 0;
       doorApi.draw2D(ctx, panOffset, wallThickness, zoomLevel)
     })
@@ -160,7 +160,7 @@ export class World {
     }
 
     allWindows.forEach((win, index) => {
-      let windowApi: WindowEntity = this.allFileMapObjects.window[index] as WindowEntity;
+      const windowApi: WindowEntity = this.allFileMapObjects.window[index] as WindowEntity;
       const wallThickness = walls.find((wall) => wall.id === win.wallId)?.thickness || 0;
       windowApi.draw2D(ctx, panOffset, wallThickness, zoomLevel)
     })
@@ -172,7 +172,7 @@ export class World {
       }
     }
     allCameras.forEach((camera, index) => {
-      let cameraApi: CameraEntity = this.allFileMapObjects.camera[index] as CameraEntity;
+      const cameraApi: CameraEntity = this.allFileMapObjects.camera[index] as CameraEntity;
       cameraApi.draw2D(ctx, panOffset, zoomLevel)
     })
 
@@ -220,7 +220,7 @@ export class World {
     for (let i = 0; i < data.length; i++) {
       this.allFileObjects[type].push(data[i] as any)
       // @ts-ignore
-      let doorApi: EntityClass<any> = new EntityClassItem(data[i]);
+      const doorApi: EntityClass<any> = new EntityClassItem(data[i]);
       this.allFileMapObjects[type].push(doorApi)
     }
   }

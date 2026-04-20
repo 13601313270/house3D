@@ -263,6 +263,12 @@ const initThree = () => {
   directionalLight.position.set(100, 200, 100)
   scene.add(directionalLight)
 
+  const gridHelper = new THREE.GridHelper(1000, 50, 0xcccccc, 0xeeeeee)
+  scene.add(gridHelper)
+
+  const axesHelper = new THREE.AxesHelper(100)
+  scene.add(axesHelper)
+
   renderer = new THREE.WebGLRenderer({ antialias: true })
   renderer.setPixelRatio(window.devicePixelRatio)
   renderer.shadowMap.enabled = true
@@ -278,7 +284,7 @@ const renderWalls = () => {
   if (!scene) return
 
   wallEntityList = [];
-  (props.data.allFileMapObjects['wall'] as WallEntity[]).forEach((wall) => {
+  (props.data.allFileMapObjects.wall as WallEntity[]).forEach((wall) => {
     wallEntityList.push(wall)
     if (scene) {
       const meshList = wall.draw3DAndCache(scene)
@@ -290,7 +296,7 @@ const renderWalls = () => {
 const renderDoors = () => {
   if (!scene) return
 
-  (props.data.allFileMapObjects['door'] as DoorEntity[]).forEach((door) => {
+  (props.data.allFileMapObjects.door as DoorEntity[]).forEach((door) => {
     const wall = props.data.getObjects('wall').find((wall) => wall.id === door.wallId);
     const findWall = wallEntityList.find((entity) => entity.data.id === door.wallId)
     if (scene) {
@@ -303,7 +309,7 @@ const renderDoors = () => {
 const renderWindows = () => {
   if (!scene) return
 
-  (props.data.allFileMapObjects['window'] as WindowEntity[]).forEach((win) => {
+  (props.data.allFileMapObjects.window as WindowEntity[]).forEach((win) => {
     const findWall = wallEntityList.find((entity) => entity.data.id === win.data.wallId)
     if (scene) {
       const meshList = win.draw3DAndCache(scene, findWall)
@@ -314,7 +320,7 @@ const renderWindows = () => {
 
 const renderCameras = () => {
   if (!scene) return
-  (props.data.allFileMapObjects['camera'] as CameraEntity[]).forEach((camera) => {
+  (props.data.allFileMapObjects.camera as CameraEntity[]).forEach((camera) => {
     if (scene) {
       const meshList = camera.draw3DAndCache(scene)
       meshList.forEach(mesh => scene!.add(mesh))
@@ -348,23 +354,11 @@ const resize = () => {
 
 const updateScene = () => {
   if (scene) {
-    while (scene.children.length > 0) {
-      scene.remove(scene.children[0])
-    }
+    // while (scene.children.length > 0) {
+    //   scene.remove(scene.children[0])
+    // }
 
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.6)
-    scene.add(ambientLight)
-
-    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8)
-    directionalLight.position.set(100, 200, 100)
-    scene.add(directionalLight)
-
-    const gridHelper = new THREE.GridHelper(1000, 50, 0xcccccc, 0xeeeeee)
-    scene.add(gridHelper)
-
-    const axesHelper = new THREE.AxesHelper(100)
-    scene.add(axesHelper)
-
+    // alert(1)
     renderWalls()
     renderDoors()
     renderWindows()

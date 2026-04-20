@@ -77,7 +77,7 @@ import Canvas3D, { CameraState } from '../components/Canvas3D.vue'
 import { Wall } from '@/entities/wall/index.d'
 import { Door } from '@/entities/door/index.d'
 import { Window } from '@/entities/window/index.d'
-import { allFileKeys, defaultFileData, PropConfigMap, fileData, fileDataKeyToClass, allFileKeysEnum } from '@/entities'
+import { allFileKeys, PropConfigMap, fileData } from '@/entities'
 import { EntityClass, EntityType, MatchSnapPoint } from '@/types/entity'
 import { HandelInfo, PointWithIndex } from '@/types/map2d'
 import pointToLineDistance from '@/utils/pointToLineDistance'
@@ -411,7 +411,6 @@ const getSnapPoint = (
       objId: string,
       point: Point
     } | null = null
-    let angleDistance = Infinity
     if (minAngleDiff < 10) {
       const length = Math.hypot(dx, dy)
       const snapAngleRad = nearestSnapAngle * Math.PI / 180
@@ -427,7 +426,6 @@ const getSnapPoint = (
             y: snappedYTemp
           }
         }
-        angleDistance = distToMouse
       }
     }
     if (angleSnapped && (xAxisSnappedY.value !== null || yAxisSnappedX.value !== null)) {
@@ -734,7 +732,7 @@ const handleContextMenu = (e: MouseEvent) => {
               x: e.clientX,
               y: e.clientY,
               // @ts-ignore
-              type: type,
+              type,
               index: j
             }
             return
@@ -805,7 +803,7 @@ const handleCanvasClick = (e: MouseEvent) => {
           snapFromType: 'point',
           point: {
             ...v,
-            index: index,
+            index,
           }
         })))
         if (snapped === null) {
@@ -969,7 +967,7 @@ const handleMouseMove = (e: MouseEvent) => {
     }
     for (let i = 0; i < worldApi.getObjects('wall').length; i++) {
       // const wall = worldApi.getObjects('wall')[i] as Wall
-      const api: WallEntity = worldApi.allFileMapObjects['wall'][i] as WallEntity;
+      const api: WallEntity = worldApi.allFileMapObjects.wall[i] as WallEntity;
       if (temp(api)) {
         return;
       }
@@ -1122,7 +1120,7 @@ const handleMouseDown = (e: MouseEvent) => {
     // 检查已绘制的墙上的点
     for (let i = 0; i < worldApi.getObjects('wall').length; i++) {
       // const wall = worldApi.getObjects('wall')[i]
-      const api: WallEntity = worldApi.allFileMapObjects['wall'][i] as WallEntity;
+      const api: WallEntity = worldApi.allFileMapObjects.wall[i] as WallEntity;
       const matchInfo = api.matchHandelInfo(x, y, zoomLevel.value)
       if (matchInfo) {
         matchHandelObj = api;
@@ -1136,7 +1134,7 @@ const handleMouseDown = (e: MouseEvent) => {
     // 检查门
     for (let i = 0; i < worldApi.getObjects('door').length; i++) {
       // const door = worldApi.getObjects('door')[i]
-      const api: DoorEntity = worldApi.allFileMapObjects['door'][i] as DoorEntity;
+      const api: DoorEntity = worldApi.allFileMapObjects.door[i] as DoorEntity;
       const matchInfo = api.matchHandelInfo(x, y, zoomLevel.value)
       if (matchInfo) {
         matchHandelObj = api;
@@ -1150,7 +1148,7 @@ const handleMouseDown = (e: MouseEvent) => {
     // 检查窗户
     for (let i = 0; i < worldApi.getObjects('window').length; i++) {
       // const windowItem = worldApi.getObjects('window')[i]
-      const api: WindowEntity = worldApi.allFileMapObjects['window'][i] as WindowEntity;
+      const api: WindowEntity = worldApi.allFileMapObjects.window[i] as WindowEntity;
       const matchInfo = api.matchHandelInfo(x, y, zoomLevel.value)
       if (matchInfo) {
         matchHandelObj = api;
@@ -1163,7 +1161,7 @@ const handleMouseDown = (e: MouseEvent) => {
     // 检查相机
     for (let i = 0; i < worldApi.getObjects('camera').length; i++) {
       // const camera = worldApi.getObjects('camera')[i]
-      const api: CameraEntity = worldApi.allFileMapObjects['camera'][i] as CameraEntity;
+      const api: CameraEntity = worldApi.allFileMapObjects.camera[i] as CameraEntity;
       const matchInfo = api.matchHandelInfo(x, y, zoomLevel.value)
       if (matchInfo) {
         matchHandelObj = api;
@@ -1291,7 +1289,7 @@ function changeCurrentTool(type: 'wall' | 'door' | 'window' | 'camera' | 'drag')
   currentTool.value = type
 }
 
-watch(() => editPropInputInfo.value, (newVal) => {
+watch(() => editPropInputInfo.value, () => {
   drawWrapper()
 }, {
   deep: true
