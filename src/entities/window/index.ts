@@ -209,7 +209,25 @@ export class WindowEntity extends EntityClass<Window> {
       const lineKey = [p1.x, p1.y, p2.x, p2.y].join(',')
       const index = allLineKey.indexOf(lineKey)
       this.data.angle = nearestAngle
+      this.data.wallId = obj.data.id
       this.data.wallPointId = index
+
+      // 双向去除原有的关联对象
+      this.associationEntity.forEach(entity => {
+        if (entity.associationEntity.includes(this)) {
+          entity.associationEntity.splice(entity.associationEntity.indexOf(this), 1)
+          entity.remove3DCache()
+        }
+      })
+      this.associationEntity = []
+      // 双向添加新的关联对象
+      if (!this.associationEntity.includes(obj)) {
+        this.associationEntity.push(obj)
+      }
+      if (!obj.associationEntity.includes(this)) {
+        obj.associationEntity.push(this)
+      }
+      this.remove3DCache()
     }
   }
 }
