@@ -213,7 +213,6 @@ export class DoorEntity extends EntityClass<Door> {
         obj.associationEntity.push(this)
       }
       this.remove3DCache()
-      this.world.draw3D()
     }
   }
 }

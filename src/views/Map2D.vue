@@ -571,6 +571,7 @@ const drawWrapper = () => {
       insertTempWindow,
       insertTempCamera,
     )
+    worldApi.draw3D()
   }
 }
 
