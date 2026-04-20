@@ -26,6 +26,13 @@ export class World {
     camera: [],
   }
 
+  scene: THREE.Scene
+
+  constructor() {
+    this.scene = new THREE.Scene()
+    this.scene.background = new THREE.Color(0xf0f0f0)
+  }
+
   draw2D(
     canvasRef: HTMLCanvasElement | null,
     tempWallPoints: Point[],
@@ -208,7 +215,8 @@ export class World {
     }
   }
 
-  draw3D(scene: THREE.Scene) {
+  draw3D() {
+    const { scene } = this;
     (this.allFileMapObjects.wall as WallEntity[]).forEach((wall) => {
       wall.draw3DAndCache(scene)
     });

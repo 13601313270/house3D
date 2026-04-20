@@ -229,6 +229,7 @@ export class WindowEntity extends EntityClass<Window> {
         obj.associationEntity.push(this)
       }
       this.remove3DCache()
+      this.world.draw3D()
     }
   }
 }

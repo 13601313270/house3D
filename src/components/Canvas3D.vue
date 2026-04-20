@@ -45,7 +45,7 @@ const emit = defineEmits<{ (e: 'update:cameraState', value: CameraState): void }
 
 const containerRef = ref<HTMLDivElement | null>(null)
 
-let scene: THREE.Scene | null = null
+// let scene: THREE.Scene | null = null
 let camera: THREE.PerspectiveCamera | null = null
 let renderer: THREE.WebGLRenderer | null = null
 
@@ -127,8 +127,7 @@ const initThree = () => {
   const width = container.clientWidth
   const height = container.clientHeight
 
-  scene = new THREE.Scene()
-  scene.background = new THREE.Color(0xf0f0f0)
+  const scene = props.world.scene
   const maxCamera1Radius = 10000;
   camera = new THREE.PerspectiveCamera(45, width / height, 0.1, maxCamera1Radius)
   camera.position.set(0, 800, 1200)
@@ -279,6 +278,7 @@ const initThree = () => {
 }
 
 const animate = () => {
+  const scene = props.world.scene
   if (renderer && scene && camera) {
     renderer.render(scene, camera)
     requestAnimationFrame(animate)
@@ -303,8 +303,8 @@ const resize = () => {
 }
 
 const updateScene = () => {
-  if (scene) {
-    props.world.draw3D(scene)
+  if (props.world.scene) {
+    props.world.draw3D()
     resize();
   }
 }
