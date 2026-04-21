@@ -133,9 +133,10 @@ export class WindowEntity extends EntityClass<Window> {
     const material = new THREE.MeshStandardMaterial({ color: this.data.color })
     const windowMesh = new THREE.Mesh(geometry, material)
 
+    const group = new THREE.Group()
     if (wall && this.data.wallPointId > -1 && wall.meshList[this.data.wallPointId]) {
       const wallThickness = wall.data.thickness;
-      const wallMesh = wall.meshList[this.data.wallPointId];
+      const wallGroup = wall.meshList[this.data.wallPointId];
 
       const subtractGeometry = new THREE.BoxGeometry(
         this.data.width,
@@ -146,37 +147,41 @@ export class WindowEntity extends EntityClass<Window> {
       const cylinderBrush = new Brush(subtractGeometry);
       cylinderBrush.position.set(this.data.x, this.data.height / 2 - 1 + (this.data.bottom || 0), this.data.y)
       cylinderBrush.updateMatrixWorld()
-      const boxBrush = new Brush(wallMesh.geometry.clone());// 主体
+      const firstMesh = wallGroup.children.find(child => child instanceof THREE.Mesh) as THREE.Mesh;
+      const boxBrush = new Brush(firstMesh.geometry.clone());// 主体
       boxBrush.position.set(
-        wallMesh.position.x,
-        wallMesh.position.y,
-        wallMesh.position.z
+        wallGroup.position.x,
+        wallGroup.position.y,
+        wallGroup.position.z
       )
       // 3. 执行布尔运算 (立方体减去圆柱体)
       const evaluator = new Evaluator();
       // 注意：这里 SUBTRACTION 的顺序很重要：主体减去洞模型
       const resultGeometry = evaluator.evaluate(boxBrush, cylinderBrush, SUBTRACTION);
 
-      wallMesh.geometry = resultGeometry.geometry
+      if (firstMesh) {
+        firstMesh.geometry = resultGeometry.geometry;
+      }
       // // 4. 创建最终的网格
       // const material = new THREE.MeshStandardMaterial({ color: 0x00aaff, side: THREE.DoubleSide });
       // const resultMesh = new THREE.Mesh(resultGeometry.geometry, material);
-
       // resultMesh.position.set(wallMesh.position.x, wallMesh.position.y, wallMesh.position.z + 3)
       // resultMesh.rotateY(this.data.angle * -1);
       windowMesh.position.set(this.data.x, this.height / 2 + (this.data.bottom || 0), this.data.y)
       // mesh缩放到90%
       windowMesh.scale.set(0.99, 0.99, 0.99)
       windowMesh.rotateY(this.data.angle * -1);
+      group.add(windowMesh)
       return [
-        windowMesh,
+        group,
         // resultMesh
       ]
     } else {
       windowMesh.position.set(this.data.x, this.height / 2, this.data.y)
       windowMesh.rotateY(this.data.angle * -1);
+      group.add(windowMesh)
       return [
-        windowMesh
+        group
       ]
     }
   }

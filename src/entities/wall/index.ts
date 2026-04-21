@@ -79,7 +79,7 @@ export class WallEntity extends EntityClass<Wall> {
   }
 
   create3DMesh(scene: THREE.Scene) {
-    const meshList: THREE.Mesh[] = []
+    const meshList: THREE.Group[] = []
     const wallBoxList = createAllWallFromPoints([this.wall]);
     const wallHeight = 280
     const extrudeSettings = {
@@ -109,11 +109,13 @@ export class WallEntity extends EntityClass<Wall> {
       // wallMesh.position.set(0, 0, 0)
       wallMesh.castShadow = true
       wallMesh.receiveShadow = true
-      meshList.push(wallMesh)
+      const group = new THREE.Group()
+      group.add(wallMesh)
+      meshList.push(group)
     }
 
     // 盖一个地板
-    const floorDepth = 20
+    const floorDepth = 1
     const extrudeSettingsBottom = {
       steps: 1,
       depth: floorDepth,
@@ -132,7 +134,9 @@ export class WallEntity extends EntityClass<Wall> {
     })
     const floorMesh = new THREE.Mesh(geometry, material)
     floorMesh.position.set(0, floorDepth * -1 + 1, 0)
-    meshList.push(floorMesh)
+    const group = new THREE.Group()
+    group.add(floorMesh)
+    meshList.push(group)
 
     // 盖一个盖子
     const geometryTop = new THREE.ShapeGeometry(shape)
@@ -143,7 +147,9 @@ export class WallEntity extends EntityClass<Wall> {
     })
     const topMesh = new THREE.Mesh(geometryTop, materialTop)
     topMesh.position.set(0, wallHeight, 0)
-    meshList.push(topMesh)
+    const group2 = new THREE.Group()
+    group2.add(topMesh)
+    meshList.push(group2)
 
     return meshList
   }

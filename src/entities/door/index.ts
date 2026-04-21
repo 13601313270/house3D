@@ -94,16 +94,25 @@ export class DoorEntity extends EntityClass<Door> {
     ctx.stroke()
   }
 
+  glbObj: THREE.Group | null = null;
+
   create3DMesh(scene: THREE.Scene) {
     // 加载 https://video-obj.oss-cn-beijing.aliyuncs.com/door.glb
-
-    console.log('s---1---')
-    const loader = new GLTFLoader();
-    loader.load('https://video-obj.oss-cn-beijing.aliyuncs.com/door.glb', (gltf: any) => {
-      scene.add(gltf.scene);
-    });
-
+    const group = new THREE.Group()
     const wall = this.world.allFileMapObjects.wall.find((entity) => entity.data.id === this.data.wallId)
+    const wallThickness = wall ? wall.data.thickness : 10;
+    console.log('s---1---')
+    if (this.glbObj === null) {
+      const loader = new GLTFLoader();
+      loader.load('https://video-obj.oss-cn-beijing.aliyuncs.com/door.glb', (gltf: any) => {
+        this.glbObj = gltf.scene;
+        gltf.scene.position.set(this.data.width / -1.9, this.data.height / -2, this.data.width / 2.25);
+        // gltf.scene.rotateY(Math.PI / -2);
+        gltf.scene.scale.set(this.data.width * 2.3, this.data.height * 1.1, wallThickness * 20);
+        // group.add(gltf.scene)
+      });
+    }
+
     const geometry = new THREE.BoxGeometry(
       this.data.width * 1,
       this.data.height * 1,
@@ -113,8 +122,7 @@ export class DoorEntity extends EntityClass<Door> {
     const doorMesh = new THREE.Mesh(geometry, material)
 
     if (wall && this.data.wallPointId > -1 && wall.meshList[this.data.wallPointId]) {
-      const wallThickness = wall.data.thickness;
-      const wallMesh = wall.meshList[this.data.wallPointId];
+      const wallGroup = wall.meshList[this.data.wallPointId];
       const subtractGeometry = new THREE.BoxGeometry(
         this.data.width,
         this.data.height,
@@ -124,28 +132,35 @@ export class DoorEntity extends EntityClass<Door> {
       const cylinderBrush = new Brush(subtractGeometry);
       cylinderBrush.position.set(this.data.x, this.data.height / 2 - 1, this.data.y)
       cylinderBrush.updateMatrixWorld()
-      const boxBrush = new Brush(wallMesh.geometry.clone());// 主体
+      const firstMesh = wallGroup.children.find(child => child instanceof THREE.Mesh) as THREE.Mesh;
+      const boxBrush = new Brush(firstMesh.geometry.clone());// 主体
       boxBrush.position.set(
-        wallMesh.position.x,
-        wallMesh.position.y,
-        wallMesh.position.z
+        wallGroup.position.x,
+        wallGroup.position.y,
+        wallGroup.position.z
       )
       // 3. 执行布尔运算 (立方体减去圆柱体)
       const evaluator = new Evaluator();
       // 注意：这里 SUBTRACTION 的顺序很重要：主体减去洞模型
       const resultGeometry = evaluator.evaluate(boxBrush, cylinderBrush, SUBTRACTION);
-
-      wallMesh.geometry = resultGeometry.geometry
-      doorMesh.position.set(this.data.x, this.data.height / 2, this.data.y)
-      doorMesh.rotateY(this.data.angle * -1);
+      if (firstMesh) {
+        firstMesh.geometry = resultGeometry.geometry
+      }
+      group.position.set(this.data.x, this.data.height / 2, this.data.y)
+      group.rotateY(this.data.angle * -1);
+      // group.add(doorMesh)
+      if (this.glbObj) {
+        // group.add(this.glbObj)
+      }
       return [
-        doorMesh,
+        group,
       ]
     } else {
-      doorMesh.position.set(this.data.x, this.data.height / 2, this.data.y)
-      doorMesh.rotateY(this.data.angle * -1);
+      group.position.set(this.data.x, this.data.height / 2, this.data.y)
+      group.rotateY(this.data.angle * -1);
+      group.add(doorMesh)
       return [
-        doorMesh
+        group
       ]
     }
   }

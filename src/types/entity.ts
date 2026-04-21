@@ -24,7 +24,7 @@ export abstract class EntityClass<T extends Entity> {
   abstract isPointObj: boolean // 点状对象，如窗户/门。非点状的如墙
   world: World;
   data: T
-  meshList: THREE.Mesh[] = []
+  meshList: THREE.Group[] = []
   // eslint-disable-next-line
   associationEntity: EntityClass<any>[] = []// 关联对象，就是本对象渲染，需要联动修改的对象。（比如：墙壁上被窗户挖洞，那么墙修改，需要重新挖洞）
 
@@ -33,7 +33,7 @@ export abstract class EntityClass<T extends Entity> {
     this.data = data
   }
 
-  abstract create3DMesh(scene: THREE.Scene, ...args: any[]): THREE.Mesh[]
+  abstract create3DMesh(scene: THREE.Scene, ...args: any[]): THREE.Group[]
 
   private cacheKeyStr = '';
   draw3DAndCache(scene: THREE.Scene) {
@@ -52,7 +52,7 @@ export abstract class EntityClass<T extends Entity> {
 
   public remove3DCache() {
     // 这里注意防止死循环
-
+    console.log(1)
     if (this.cacheKeyStr) {
       this.cacheKeyStr = ''
       if (this.associationEntity.length > 0) {
