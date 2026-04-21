@@ -52,7 +52,7 @@ export abstract class EntityClass<T extends Entity> {
 
   public remove3DCache() {
     // 这里注意防止死循环
-    console.log(1)
+    console.log('remove3DCache')
     if (this.cacheKeyStr) {
       this.cacheKeyStr = ''
       if (this.associationEntity.length > 0) {

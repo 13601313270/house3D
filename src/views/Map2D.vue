@@ -571,6 +571,7 @@ const drawWrapper = () => {
       insertTempWindow,
       insertTempCamera,
     )
+    console.log('drawWrapper')
     worldApi.draw3D()
   }
 }
@@ -1011,7 +1012,6 @@ const handleMouseMove = (e: MouseEvent) => {
 
   // 如果当前是拖拽模式，处理拖拽逻辑
   if (currentTool.value === 'drag') {
-    drawWrapper()
     return
   }
 
@@ -1074,6 +1074,7 @@ const handleMouseMove = (e: MouseEvent) => {
         insertTempDoor.x = wallScreenX
         insertTempDoor.y = wallScreenY
         insertTempDoor.angle = angle
+        drawWrapper()
       }
     } else if (currentTool.value === 'window') {
       if (nearest) {
@@ -1088,6 +1089,7 @@ const handleMouseMove = (e: MouseEvent) => {
         insertTempWindow.x = wallScreenX
         insertTempWindow.y = wallScreenY
         insertTempWindow.angle = angle
+        drawWrapper()
       }
     } else if (currentTool.value === 'camera') {
       if (insertTempCamera === null) {
@@ -1095,10 +1097,9 @@ const handleMouseMove = (e: MouseEvent) => {
       }
       insertTempCamera.x = x
       insertTempCamera.y = y
+      drawWrapper()
     }
   }
-
-  drawWrapper()
 }
 
 let matchHandelObj: EntityClass<any> | null = null;
