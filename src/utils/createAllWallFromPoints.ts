@@ -9,7 +9,7 @@ import { Geometry, union } from 'martinez-polygon-clipping';
 import { Point } from '@/types';
 import { Wall } from '@/entities/wall/index.d';
 
-const cache = new Map<string, [number, number][][]>();
+// const cache = new Map<string, [number, number][][]>();
 
 type wallBox = [{ x: number, y: number }, { x: number, y: number }, { x: number, y: number }, { x: number, y: number }]
 

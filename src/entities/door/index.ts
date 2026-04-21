@@ -1,11 +1,10 @@
-import { HandelInfo, Point } from '@/types/map2d'
+import { Point } from '@/types/map2d'
 import * as THREE from 'three'
 // @ts-ignore
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { Door } from './index.d'
 import { Brush, Evaluator, SUBTRACTION } from 'three-bvh-csg';
 import { allSnapFromType, EntityClass, EntityType, MatchSnapPoint } from '@/types/entity'
-import { WallEntity } from '../wall'
 import { editItem } from '..';
 import { World } from '@/utils/world';
 

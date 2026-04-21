@@ -42,8 +42,8 @@ export abstract class EntityClass<T extends Entity> {
       return this.meshList
     } else {
       const meshList = this.create3DMesh(scene)
-      this.meshList.forEach(mesh => scene!.remove(mesh))
-      meshList.forEach(mesh => scene!.add(mesh))
+      this.meshList.forEach(mesh => scene.remove(mesh))
+      meshList.forEach(mesh => scene.add(mesh))
       this.meshList = meshList
       this.cacheKeyStr = newKeyStr
       return meshList

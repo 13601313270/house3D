@@ -3,7 +3,6 @@ import { allSnapFromType, EntityClass, EntityType, MatchSnapPoint } from '@/type
 import { Window } from './index.d'
 import * as THREE from 'three'
 import { Brush, Evaluator, SUBTRACTION } from 'three-bvh-csg';
-import { WallEntity } from '../wall';
 import { World } from '@/utils/world';
 
 export function createWindowData() {

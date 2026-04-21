@@ -18,12 +18,17 @@ export const snapThreshold = 20
 export class World {
   private allFileObjects: fileData = defaultFileData
 
-  allFileMapObjects: Record<EntityType, EntityClass<any>[]> = {
-    wall: [],
-    door: [],
-    window: [],
-    camera: [],
-  }
+  allFileMapObjects: {
+    wall: WallEntity[],
+    door: DoorEntity[],
+    window: WindowEntity[],
+    camera: CameraEntity[],
+  } = {
+      wall: [],
+      door: [],
+      window: [],
+      camera: [],
+    }
 
   scene: THREE.Scene
 
@@ -60,9 +65,10 @@ export class World {
     ctx.fillRect(0, 0, canvasWidth, canvasHeight)
     // 绘制墙体
     walls.forEach((wall, index) => {
-      // @ts-ignore
       const wallApi: WallEntity = this.allFileMapObjects.wall[index]
-      wallApi.draw2D(ctx, panOffset, zoomLevel)
+      if (wallApi) {
+        wallApi.draw2D(ctx, panOffset, zoomLevel)
+      }
     })
 
     if (currentTool === 'wall' && tempWallPoints.length > 0) {
@@ -188,8 +194,8 @@ export class World {
 
     // 绘制轴对齐参考线
     if (hoverPoint) {
-      const hoverScreenX = hoverPoint.x * zoomLevel + panOffset.x
-      const hoverScreenY = hoverPoint.y * zoomLevel + panOffset.y
+      // const hoverScreenX = hoverPoint.x * zoomLevel + panOffset.x
+      // const hoverScreenY = hoverPoint.y * zoomLevel + panOffset.y
       ctx.strokeStyle = '#999'
       ctx.lineWidth = 1
       ctx.setLineDash([5, 5])
@@ -237,6 +243,7 @@ export class World {
       this.allFileObjects[type].push(data[i] as any)
       // @ts-ignore
       const api: EntityClass<any> = new EntityClassItem(this, data[i]);
+      // @ts-ignore
       this.allFileMapObjects[type].push(api)
     }
   }

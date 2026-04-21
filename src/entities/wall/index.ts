@@ -62,7 +62,7 @@ export class WallEntity extends EntityClass<Wall> {
     // 绘制墙上的点
     [this.wall].forEach((wall) => {
       if (wall.points.length < 2) return
-      wall.points.forEach((point: Point, pointIndex: number) => {
+      wall.points.forEach((point: Point) => {
         const screenX = point.x * zoomLevel + panOffset.x
         const screenY = point.y * zoomLevel + panOffset.y
         const isDragged = false;// pointIndex === draggedPointIndex

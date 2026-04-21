@@ -6,17 +6,7 @@
 <script lang="ts" setup>
 import { ref, onMounted, onUnmounted, watch, nextTick } from 'vue'
 import * as THREE from 'three'
-// import { createShapeFromPoints } from '@/utils/createShapeFromPoints'
-import { DoorEntity } from '@/entities/door'
-import { WindowEntity } from '@/entities/window'
-import { WallEntity } from '@/entities/wall'
-import { fileData } from '@/entities'
-import { CameraEntity } from '@/entities/camera'
 import { World } from '@/utils/world'
-import { Wall } from '@/entities/wall/index.d'
-import { Door } from '@/entities/door/index.d'
-import { CameraData } from '@/entities/camera/index.d'
-import { Window } from '@/entities/window/index.d'
 
 export type CameraState = {
   targetPositionX: number

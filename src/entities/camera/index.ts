@@ -1,8 +1,7 @@
 import { HandelInfo, Point } from '@/types/map2d'
 import * as THREE from 'three'
 import { CameraData } from './index.d'
-import { allSnapFromType, EntityClass, EntityType, MatchSnapPoint, OrigionSnapPoint } from '@/types/entity'
-import { WallEntity } from '../wall'
+import { EntityClass, EntityType, MatchSnapPoint, OrigionSnapPoint } from '@/types/entity'
 import { editItem } from '..'
 import { World } from '@/utils/world'
 
