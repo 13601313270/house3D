@@ -108,7 +108,7 @@ const panOffset = ref<Point>({ x: 0, y: 0 })
 const isPanning = ref(false)
 const panStart = ref<Point | null>(null)
 const panel1SplitWidthPer = ref(0.4)
-const panel2SplitWidthPer = ref(0.2)
+const panel2SplitWidthPer = ref(0.4)
 const isSplitting = ref(false)
 const canvasSize = ref({ width: 0, height: 0 })
 const zoomLevel = ref(1)
@@ -571,8 +571,7 @@ const drawWrapper = () => {
       insertTempWindow,
       insertTempCamera,
     )
-    console.log('drawWrapper')
-    worldApi.draw3D()
+    // worldApi.draw3D()
   }
 }
 

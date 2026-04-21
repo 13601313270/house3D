@@ -172,6 +172,7 @@ export class WallEntity extends EntityClass<Wall> {
 
   matchHandelMoveCallback(x: number, y: number, matchHandelInfo: HandelInfo) {
     if (matchHandelInfo.index !== undefined) {
+      this.remove3DCache()
       this.wall.points[matchHandelInfo.index] = { x, y }
     }
   }

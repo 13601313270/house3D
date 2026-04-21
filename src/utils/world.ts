@@ -161,8 +161,10 @@ export class World {
     allDoors.forEach((door, index) => {
       // @ts-ignore
       const doorApi: DoorEntity = this.allFileMapObjects.door[index];
-      const wallThickness = walls.find((wall) => wall.id === door.wallId)?.thickness || 0;
-      doorApi.draw2D(ctx, panOffset, wallThickness, zoomLevel)
+      if (doorApi) {
+        const wallThickness = walls.find((wall) => wall.id === door.wallId)?.thickness || 0;
+        doorApi.draw2D(ctx, panOffset, wallThickness, zoomLevel)
+      }
     })
 
     const allWindows = [...windows];
