@@ -11,35 +11,31 @@ export function editPropConfig(): editItem[] {
   return [
     {
       id: 'thickness',
-      label: '墙体厚度222',
+      label: '墙体厚度',
       dataType: 'number',
-    }
+    },
+    {
+      id: 'color',
+      label: '颜色',
+      dataType: 'color',
+    },
   ]
 }
 
 export class WallEntity extends EntityClass<Wall> {
   type: EntityType = 'wall'
   isPointObj: boolean = false
-  points: Point[]
-  thickness: number
-  wall: Wall
-
-  constructor(world: World, wall: Wall) {
-    super(world, wall)
-    this.wall = wall
-    this.points = wall.points
-    this.thickness = wall.thickness
-  }
 
   draw2D(
     ctx: CanvasRenderingContext2D,
     panOffset: Point,
     zoomLevel: number,
   ): void {
-    const wallBoxList = createAllWallFromPoints([this.wall]);
+    const wallBoxList = createAllWallFromPoints([this.getData()]);
 
-    ctx.strokeStyle = '#333'
-    ctx.lineWidth = 3
+    ctx.strokeStyle = 'black'
+    ctx.fillStyle = this.getData().color
+    ctx.lineWidth = 2
     ctx.setLineDash([])
     ctx.beginPath();
 
@@ -57,30 +53,29 @@ export class WallEntity extends EntityClass<Wall> {
       }
       ctx.closePath();
       ctx.stroke();
+      ctx.fill()
     }
 
     // 绘制墙上的点
-    [this.wall].forEach((wall) => {
+    [this.getData()].forEach((wall) => {
       if (wall.points.length < 2) return
+      ctx.strokeStyle = 'black'
+      ctx.fillStyle = 'white'
+      ctx.lineWidth = 2
       wall.points.forEach((point: Point) => {
         const screenX = point.x * zoomLevel + panOffset.x
         const screenY = point.y * zoomLevel + panOffset.y
-        const isDragged = false;// pointIndex === draggedPointIndex
-        drawPoint(ctx, screenX, screenY, isDragged ? '#1890ff' : '#333')
-        if (isDragged) {
-          ctx.strokeStyle = '#1890ff'
-          ctx.lineWidth = 2
-          ctx.beginPath()
-          ctx.arc(screenX, screenY, 12 * zoomLevel, 0, Math.PI * 2)
-          ctx.stroke()
-        }
+        ctx.beginPath()
+        ctx.arc(screenX, screenY, 6 * zoomLevel, 0, Math.PI * 2)
+        ctx.stroke()
+        ctx.fill()
       })
     });
   }
 
   create3DMesh(scene: THREE.Scene) {
     const meshList: THREE.Group[] = []
-    const wallBoxList = createAllWallFromPoints([this.wall]);
+    const wallBoxList = createAllWallFromPoints([this.getData()]);
     const wallHeight = 280
     const extrudeSettings = {
       steps: 1,
@@ -102,7 +97,7 @@ export class WallEntity extends EntityClass<Wall> {
       const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings)
       geometry.rotateX(-Math.PI / 2);   // 将 XY 平面旋转成 XZ 平面
       const material = new THREE.MeshStandardMaterial({
-        color: 0xe0e0e0,
+        color: this.getData().color,
         side: THREE.DoubleSide
       })
       const wallMesh = new THREE.Mesh(geometry, material)
@@ -122,7 +117,7 @@ export class WallEntity extends EntityClass<Wall> {
       bevelEnabled: true,
     }
     const points: THREE.Vector2[] = []; // wall.points.map((p) => new THREE.Vector2(p.x, p.y))
-    this.wall.points.forEach((mesh) => {
+    this.getData().points.forEach((mesh) => {
       points.push(new THREE.Vector2(mesh.x, mesh.y * -1))
     })
     const shape = new THREE.Shape(points)
@@ -157,10 +152,10 @@ export class WallEntity extends EntityClass<Wall> {
   // 命中可拖拽具柄
   matchHandelInfo(x: number, y: number, zoomLevel: number) {
     const data = this.getData();
-    for (let i = 0; i < this.wall.points.length; i++) {
-      const point = this.wall.points[i]
+    for (let i = 0; i < this.getData().points.length; i++) {
+      const point = this.getData().points[i]
       const dist = Math.hypot(x - point.x, y - point.y)
-      if (dist < this.thickness * zoomLevel) {
+      if (dist < this.getData().thickness * zoomLevel) {
         return {
           id: data.id,
           type: this.type,
@@ -174,7 +169,7 @@ export class WallEntity extends EntityClass<Wall> {
   matchHandelMoveCallback(x: number, y: number, matchHandelInfo: HandelInfo) {
     if (matchHandelInfo.index !== undefined) {
       this.remove3DCache()
-      this.wall.points[matchHandelInfo.index] = { x, y }
+      this.getData().points[matchHandelInfo.index] = { x, y }
     }
   }
 
@@ -185,7 +180,7 @@ export class WallEntity extends EntityClass<Wall> {
     if (newPosition.snapFromType === 'point') {
       // 暂时没有考虑好怎么写磁吸到边的情况，因为暂时无法排除自己，所以只命中point磁吸
       // console.log('MatchSnapPoint-3', newPosition.point, dragHandelInfo.index)
-      this.wall.points[dragHandelInfo.index] = newPosition.point
+      this.getData().points[dragHandelInfo.index] = newPosition.point
       return true
     }
     return false;
@@ -194,7 +189,7 @@ export class WallEntity extends EntityClass<Wall> {
   getMineBeSnapPoints() {
     const key: allSnapFromType = 'point';
     const data = this.getData();
-    return this.wall.points.map((v, index: number) => {
+    return this.getData().points.map((v, index: number) => {
       return {
         objType: this.type,
         objId: data.id,
@@ -206,9 +201,9 @@ export class WallEntity extends EntityClass<Wall> {
 
   getMineBeSnapLines(): Array<[Point, Point]> {
     const lines: Array<[Point, Point]> = []
-    for (let i = 0; i < this.wall.points.length - 1; i++) {
-      const p1 = this.wall.points[i]
-      const p2 = this.wall.points[i + 1]
+    for (let i = 0; i < this.getData().points.length - 1; i++) {
+      const p1 = this.getData().points[i]
+      const p2 = this.getData().points[i + 1]
       lines.push([p1, p2])
     }
     return lines;

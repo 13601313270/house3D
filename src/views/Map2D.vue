@@ -614,6 +614,7 @@ onMounted(() => {
               x: firstPoint.x,
               y: firstPoint.y,
               z: 0,
+              color: '#fff',
               points: [...tempDrawWall.value.points],
               thickness: wallThickness.value
             }
@@ -830,6 +831,7 @@ const handleCanvasClick = (e: MouseEvent) => {
               points: [...tempDrawWall.value.points],
               x: snapped.point.x,
               y: snapped.point.y,
+              color: '#fff',
               z: 0,
               thickness: wallThickness.value
             }
@@ -848,6 +850,7 @@ const handleCanvasClick = (e: MouseEvent) => {
         id: Date.now().toString(),
         x: clickPoint.x,
         y: clickPoint.y,
+        color: '#fff',
         z: 0,
         points: [clickPoint],
         thickness: wallThickness.value
