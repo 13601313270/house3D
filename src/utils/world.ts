@@ -267,7 +267,7 @@ export class World {
 
   replaceObjects(type: EntityType, index: number, data: Entity) {
     this.allFileMapObjects[type][index].setData(data as any)
-    this.allFileMapObjects[type][index].remove3DCache()
+    // this.changeBindList.forEach(callback => callback())
   }
 
   add(type: EntityType, data: Entity[]) {
@@ -278,16 +278,29 @@ export class World {
       // @ts-ignore
       this.allFileMapObjects[type].push(api)
     }
+    this.changeBindList.forEach(callback => callback())
   }
 
   clear(type: EntityType) {
     this.allFileMapObjects[type] = []
+    this.changeBindList.forEach(callback => callback())
   }
 
   splice(type: EntityType, index: number, count: number = 1) {
     if (this.allFileMapObjects[type]) {
       this.allFileMapObjects[type].splice(index, count)
+      this.changeBindList.forEach(callback => callback())
     }
+  }
+
+  changeBindList: (() => void)[] = [];
+
+  onChange(callback: () => void) {
+    this.changeBindList.push(callback)
+  }
+
+  _callAllOnChangeCallback() {
+    this.changeBindList.forEach(callback => callback())
   }
 }
 

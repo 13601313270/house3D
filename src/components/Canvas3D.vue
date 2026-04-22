@@ -15,6 +15,8 @@ export type CameraState = {
   radius: number
   angleX: number
   angleY: number
+  aspectW: number,
+  aspectH: number,
 } | {
   targetPositionX: number
   targetPositionY: number
@@ -22,7 +24,9 @@ export type CameraState = {
   positionX: number
   positionY: number
   positionZ: number
-  fov: number
+  fov: number,
+  aspectW: number,
+  aspectH: number,
 }
 
 const props = defineProps<{
@@ -46,6 +50,8 @@ const cameraState = ref<CameraState>({
   radius: 800, // 摄像机距离
   angleX: 0,
   angleY: Math.PI / 4,
+  aspectW: 1,
+  aspectH: 1,
 })
 
 function updateCameraAngel() {
@@ -157,7 +163,9 @@ const initThree = () => {
           targetPositionZ: cameraState.value.targetPositionZ,
           radius: cameraState.value.radius,
           angleX: cameraState.value.angleX,
-          angleY: cameraState.value.angleY
+          angleY: cameraState.value.angleY,
+          aspectW: cameraState.value.aspectW,
+          aspectH: cameraState.value.aspectH,
         })
       } else if ('positionX' in cameraState.value) {
         emit('update:cameraState', {
@@ -168,6 +176,8 @@ const initThree = () => {
           positionY: cameraState.value.positionZ,
           positionZ: cameraState.value.positionY,
           fov: cameraState.value.fov,
+          aspectW: cameraState.value.aspectW,
+          aspectH: cameraState.value.aspectH,
         })
       }
     }

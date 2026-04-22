@@ -34,7 +34,9 @@ export abstract class EntityClass<T extends Entity> {
   }
 
   setData(data: T) {
+    this.remove3DCache()
     this.data = data
+    this.world._callAllOnChangeCallback()
   }
 
   getData(): T {
@@ -101,5 +103,6 @@ export abstract class EntityClass<T extends Entity> {
     this.data.x = newPosition.x
     this.data.y = newPosition.y
     this.remove3DCache()
+    this.world._callAllOnChangeCallback()
   }
 }

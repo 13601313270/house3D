@@ -229,8 +229,11 @@ export class CameraEntity extends EntityClass<CameraData> {
   matchHandelMoveCallback(x: number, y: number, matchHandelInfo: HandelInfo) {
     const data = this.getData();
     if (matchHandelInfo.index === 1) {
-      data.targetPositionX = x
-      data.targetPositionY = y
+      this.setData({
+        ...data,
+        targetPositionX: x,
+        targetPositionY: y,
+      })
     } else {
       this.changePosition({ x, y })
     }

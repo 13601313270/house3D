@@ -59,12 +59,13 @@
 
     <div class="right-panel" :style="{ width: panel2SplitWidthPer * 100 + '%' }">
       <!-- {{ insertTempDoor }} -->
-      <Canvas3D ref="canvas3DRef" :world="worldApi" v-model:cameraState="cameraState" :aspectRatio="1" />
+      <Canvas3D ref="canvas3DRef" :world="worldApi" v-model:cameraState="cameraState"
+        :aspectRatio="cameraState.aspectW / cameraState.aspectH" />
     </div>
 
     <div class="split-bar" @mousedown.prevent="startSplit(2)" title="拖动调整左右比例"></div>
     <div class="right-panel" :style="{ width: (1 - panel1SplitWidthPer - panel2SplitWidthPer) * 100 + '%' }">
-      <!-- {{ insertTempDoor }} -->
+      !!{{ cameraState2 }}@@
       <Canvas3D v-if="cameraState2" ref="canvas3DRef2" :world="worldApi" v-model:cameraState="cameraState2"
         :aspectRatio="cameraState2.aspectW / cameraState2.aspectH" />
     </div>
@@ -122,34 +123,38 @@ const cameraState = ref<CameraState>({
   targetPositionZ: 0,
   radius: 800,
   angleX: 0,
-  angleY: Math.PI / 4
+  angleY: Math.PI / 4,
+  aspectW: 1,
+  aspectH: 1,
 })
-// const cameraState2 = ref<CameraState>({
-//   targetPositionX: 0,
-//   targetPositionY: 0,
-//   targetPositionZ: 100,
-//   positionX: 0,
-//   positionY: 0,
-//   positionZ: 100,
-//   fov: 45,
+const cameraState2 = ref<CameraState>({
+  targetPositionX: 0,
+  targetPositionY: 0,
+  targetPositionZ: 100,
+  positionX: 0,
+  positionY: 0,
+  positionZ: 100,
+  fov: 45,
+  aspectW: 1,
+  aspectH: 1,
+})
+// const cameraState23 = computed(() => {
+//   if (worldApi.getObjects('camera') && worldApi.getObjects('camera')[0]) {
+//     const cameraData = worldApi.getObjects('camera')[0] as CameraData
+//     return {
+//       targetPositionX: cameraData.targetPositionX,
+//       targetPositionY: cameraData.targetPositionY,
+//       targetPositionZ: cameraData.targetPositionZ,
+//       positionX: cameraData.x,
+//       positionY: cameraData.y,
+//       positionZ: cameraData.z,
+//       fov: cameraData.fov,
+//       aspectW: cameraData.aspectW,
+//       aspectH: cameraData.aspectH,
+//     }
+//   }
+//   return undefined;
 // })
-const cameraState2 = computed(() => {
-  if (worldApi.getObjects('camera') && worldApi.getObjects('camera')[0]) {
-    const cameraData = worldApi.getObjects('camera')[0] as CameraData
-    return {
-      targetPositionX: cameraData.targetPositionX,
-      targetPositionY: cameraData.targetPositionY,
-      targetPositionZ: cameraData.targetPositionZ,
-      positionX: cameraData.x,
-      positionY: cameraData.y,
-      positionZ: cameraData.z,
-      fov: cameraData.fov,
-      aspectW: cameraData.aspectW,
-      aspectH: cameraData.aspectH,
-    }
-  }
-  return undefined;
-})
 let insertTempDoor: Door | null = null;
 let insertTempWindow: Window | null = null;
 let insertTempCamera: CameraData | null = null;
@@ -577,7 +582,24 @@ const drawWrapper = () => {
   }
 }
 
+function changeCamera2State() {
+  if (worldApi.getObjects('camera') && worldApi.getObjects('camera')[0]) {
+    const cameraData = worldApi.getObjects('camera')[0] as CameraData
+    cameraState2.value = {
+      targetPositionX: cameraData.targetPositionX,
+      targetPositionY: cameraData.targetPositionY,
+      targetPositionZ: cameraData.targetPositionZ,
+      positionX: cameraData.x,
+      positionY: cameraData.y,
+      positionZ: cameraData.z,
+      fov: cameraData.fov,
+      aspectW: cameraData.aspectW,
+      aspectH: cameraData.aspectH,
+    }
+  }
+}
 onMounted(() => {
+  worldApi.onChange(changeCamera2State)
   const canvas = canvasRef.value
   if (canvas) {
     const ctx = canvas.getContext('2d')
