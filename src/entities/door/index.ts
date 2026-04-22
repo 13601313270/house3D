@@ -126,6 +126,11 @@ export class DoorEntity extends EntityClass<Door> {
     console.log('s---1---');
     const changeBLBState = () => {
       if (this.glbObj) {
+        this.glbObj.traverse((child: any) => {
+          if (child instanceof THREE.Mesh) {
+            child.material = material
+          }
+        })
         if (data.openType === 1) {
           this.glbObj.position.set(data.width / -2.1, data.height / -2, wallThickness / 2);
           this.glbObj.scale.set(data.width * 0.23, data.height * 0.11, wallThickness * 2);
