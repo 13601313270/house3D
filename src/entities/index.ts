@@ -18,11 +18,13 @@ export type fileData = {
   camera: CameraData[],
 }
 
-export const defaultFileData: fileData = {
-  wall: [],
-  door: [],
-  window: [],
-  camera: [],
+export const defaultFileData: () => fileData = () => {
+  return {
+    wall: [],
+    door: [],
+    window: [],
+    camera: [],
+  }
 }
 
 export const fileDataKeyToClass: Record<allFileKeysEnum, typeof EntityClass<any>> = {

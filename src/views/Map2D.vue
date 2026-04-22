@@ -696,6 +696,9 @@ const handleFileChange = (e: Event) => {
   input.value = ''
 }
 
+const editPropTypeKey = ref<EntityType>()
+const editPropTypeIndex = ref<number>(-1)
+
 const handleContextMenu = (e: MouseEvent) => {
   e.preventDefault()
 
@@ -726,8 +729,10 @@ const handleContextMenu = (e: MouseEvent) => {
           const dist = Math.hypot(x - snapPoint.point.x, y - snapPoint.point.y)
           if (dist < 10) {
             console.log('dist', propConfig())
+            editPropTypeKey.value = type
+            editPropTypeIndex.value = j
             editPropConfigInfo.value = propConfig()
-            editPropInputInfo.value = item;
+            editPropInputInfo.value = JSON.parse(JSON.stringify(item));
             contextMenu.value = {
               visible: true,
               x: e.clientX,
@@ -1291,6 +1296,10 @@ function changeCurrentTool(type: 'wall' | 'door' | 'window' | 'camera' | 'drag')
 }
 
 watch(() => editPropInputInfo.value, () => {
+  if (editPropTypeKey.value) {
+    console.log(111, worldApi.getObjects(editPropTypeKey.value)[editPropTypeIndex.value], editPropInputInfo.value)
+    Object.assign(worldApi.getObjects(editPropTypeKey.value)[editPropTypeIndex.value], editPropInputInfo.value)
+  }
   drawWrapper()
 }, {
   deep: true

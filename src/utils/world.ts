@@ -16,7 +16,7 @@ export const canvasHeight = 600
 export const snapThreshold = 20
 
 export class World {
-  private allFileObjects: fileData = defaultFileData
+  private allFileObjects: fileData = defaultFileData()
 
   allFileMapObjects: {
     wall: WallEntity[],

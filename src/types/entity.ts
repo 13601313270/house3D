@@ -33,11 +33,11 @@ export abstract class EntityClass<T extends Entity> {
     this.data = data
   }
 
-  // setData(data: T) {
-  //   this.data = data
-  // }
+  setData(data: T) {
+    this.data = data
+  }
 
-  getData() {
+  getData(): T {
     return this.data
   }
 
