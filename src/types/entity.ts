@@ -61,6 +61,8 @@ export abstract class EntityClass<T extends Entity> {
   public remove3DCache() {
     // 这里注意防止死循环
     console.log('remove3DCache')
+    this.meshList.forEach(mesh => this.world.scene.remove(mesh))
+    this.meshList = []
     if (this.cacheKeyStr) {
       this.cacheKeyStr = ''
       if (this.associationEntity.length > 0) {
@@ -98,5 +100,6 @@ export abstract class EntityClass<T extends Entity> {
   changePosition(newPosition: { x: number, y: number }) {
     this.data.x = newPosition.x
     this.data.y = newPosition.y
+    this.remove3DCache()
   }
 }

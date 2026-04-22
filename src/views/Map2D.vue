@@ -571,7 +571,7 @@ const drawWrapper = () => {
       insertTempWindow,
       insertTempCamera,
     )
-    // worldApi.draw3D()
+    worldApi.draw3D()
   }
 }
 
@@ -719,7 +719,6 @@ const handleContextMenu = (e: MouseEvent) => {
     const propConfig = PropConfigMap[type];
     if (allFileKeys.includes(type)) {
       for (let j = 0; j < worldApi.getObjects(type).length; j++) {
-        // @ts-ignore
         const item = worldApi.getObjects(type)[j]
         console.log('api', worldApi.allFileMapObjects)
         const api: EntityClass<any> = worldApi.allFileMapObjects[type][j]

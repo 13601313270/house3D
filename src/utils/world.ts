@@ -222,13 +222,6 @@ export class World {
 
   draw3D() {
     const { scene } = this;
-
-    allFileKeys.forEach((key) => {
-      (this.allFileMapObjects[key] as EntityClass<any>[]).forEach((wall) => {
-        wall.draw3DAndCache(scene)
-      });
-    });
-
     allFileKeys.forEach((key) => {
       (this.allFileMapObjects[key] as EntityClass<any>[]).forEach((wall) => {
         wall.draw3DAndCache(scene)
@@ -261,6 +254,7 @@ export class World {
 
   replaceObjects(type: EntityType, index: number, data: Entity) {
     this.allFileMapObjects[type][index].setData(data as any)
+    this.allFileMapObjects[type][index].remove3DCache()
   }
 
   add(type: EntityType, data: Entity[]) {
