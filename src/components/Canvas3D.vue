@@ -245,19 +245,6 @@ const initThree = () => {
     });
   })();
 
-  const ambientLight = new THREE.AmbientLight(0xffffff, 0.6)
-  scene.add(ambientLight)
-
-  const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8)
-  directionalLight.position.set(100, 200, 100)
-  scene.add(directionalLight)
-
-  const gridHelper = new THREE.GridHelper(1000, 50, 0xcccccc, 0xeeeeee)
-  scene.add(gridHelper)
-
-  const axesHelper = new THREE.AxesHelper(100)
-  scene.add(axesHelper)
-
   renderer = new THREE.WebGLRenderer({ antialias: true })
   renderer.setPixelRatio(window.devicePixelRatio)
   renderer.shadowMap.enabled = true

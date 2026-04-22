@@ -33,6 +33,19 @@ export class World {
   constructor() {
     this.scene = new THREE.Scene()
     this.scene.background = new THREE.Color(0xf0f0f0)
+
+    const ambientLight = new THREE.AmbientLight(0xffffff, 1.5)
+    this.scene.add(ambientLight)
+
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8)
+    directionalLight.position.set(100, 200, 100)
+    this.scene.add(directionalLight)
+
+    const gridHelper = new THREE.GridHelper(1000, 50, 0xcccccc, 0xeeeeee)
+    this.scene.add(gridHelper)
+
+    const axesHelper = new THREE.AxesHelper(100)
+    this.scene.add(axesHelper)
   }
 
   draw2D(

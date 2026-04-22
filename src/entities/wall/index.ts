@@ -19,6 +19,16 @@ export function editPropConfig(): editItem[] {
       label: '颜色',
       dataType: 'color',
     },
+    {
+      id: 'hb',
+      label: '是否有地板',
+      dataType: 'boolean',
+    },
+    {
+      id: 'bc',
+      label: '地板颜色',
+      dataType: 'color',
+    }
   ]
 }
 
@@ -71,6 +81,19 @@ export class WallEntity extends EntityClass<Wall> {
         ctx.fill()
       })
     });
+    // for (let i = 0; i < wallBoxList.length; i++) {
+    //   const box = wallBoxList[i]
+    //   ctx.beginPath()
+    //   for (let j = 0; j < box.length; j++) {
+    //     if (j === 0) {
+    //       ctx.moveTo(box[j].x * zoomLevel + panOffset.x, box[j].y * zoomLevel + panOffset.y)
+    //     } else {
+    //       ctx.lineTo(box[j].x * zoomLevel + panOffset.x, box[j].y * zoomLevel + panOffset.y)
+    //     }
+    //   }
+    //   ctx.stroke()
+    //   ctx.fill()
+    // }
   }
 
   create3DMesh(scene: THREE.Scene) {
@@ -109,29 +132,31 @@ export class WallEntity extends EntityClass<Wall> {
       meshList.push(group)
     }
 
-    // 盖一个地板
-    const floorDepth = 1
-    const extrudeSettingsBottom = {
-      steps: 1,
-      depth: floorDepth,
-      bevelEnabled: true,
-    }
     const points: THREE.Vector2[] = []; // wall.points.map((p) => new THREE.Vector2(p.x, p.y))
     this.getData().points.forEach((mesh) => {
       points.push(new THREE.Vector2(mesh.x, mesh.y * -1))
     })
     const shape = new THREE.Shape(points)
-    const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettingsBottom)
-    geometry.rotateX(-Math.PI / 2);   // 将 XY 平面旋转成 XZ 平面
-    const material = new THREE.MeshStandardMaterial({
-      color: 0xe0e0e0,
-      side: THREE.DoubleSide
-    })
-    const floorMesh = new THREE.Mesh(geometry, material)
-    floorMesh.position.set(0, floorDepth * -1 + 1, 0)
-    const group = new THREE.Group()
-    group.add(floorMesh)
-    meshList.push(group)
+    // 盖一个地板
+    if (this.getData().hb) {
+      const floorDepth = 1
+      const extrudeSettingsBottom = {
+        steps: 1,
+        depth: floorDepth,
+        bevelEnabled: true,
+      }
+      const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettingsBottom)
+      geometry.rotateX(-Math.PI / 2);   // 将 XY 平面旋转成 XZ 平面
+      const materialBottom = new THREE.MeshStandardMaterial({
+        color: this.getData().bc,
+        side: THREE.DoubleSide
+      })
+      const floorMesh = new THREE.Mesh(geometry, materialBottom)
+      floorMesh.position.set(0, floorDepth * -1 + 1, 0)
+      const group = new THREE.Group()
+      group.add(floorMesh)
+      meshList.push(group)
+    }
 
     // 盖一个盖子
     const geometryTop = new THREE.ShapeGeometry(shape)

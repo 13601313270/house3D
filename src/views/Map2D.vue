@@ -615,6 +615,8 @@ onMounted(() => {
               y: firstPoint.y,
               z: 0,
               color: '#fff',
+              hb: true,// 有地板，默认有
+              bc: '#333', // 地板颜色，默认灰色
               points: [...tempDrawWall.value.points],
               thickness: wallThickness.value
             }
@@ -833,7 +835,9 @@ const handleCanvasClick = (e: MouseEvent) => {
               y: snapped.point.y,
               color: '#fff',
               z: 0,
-              thickness: wallThickness.value
+              thickness: wallThickness.value,
+              hb: true,// 有地板，默认有
+              bc: '#333', // 地板颜色，默认灰色
             }
             worldApi.add('wall', [newWall])
             history.value.push(JSON.parse(JSON.stringify(worldApi.getObjects('wall'))))
@@ -853,7 +857,9 @@ const handleCanvasClick = (e: MouseEvent) => {
         color: '#fff',
         z: 0,
         points: [clickPoint],
-        thickness: wallThickness.value
+        thickness: wallThickness.value,
+        hb: true,// 有地板，默认有
+        bc: '#333', // 地板颜色，默认灰色
       }
     }
     lastPoint.value = clickPoint
