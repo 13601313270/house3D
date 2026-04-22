@@ -18,6 +18,7 @@ export function createWindowData() {
     angle: 0,
     bottom: 40,
     color: '#3498db',
+    hasBorder: false,// 是否有窗户框
   }
   return window
 }
@@ -50,6 +51,11 @@ export function editPropConfig(): editItem[] {
       label: '颜色',
       dataType: 'color',
     },
+    {
+      id: 'hasBorder',
+      label: '是否有窗户框',
+      dataType: 'boolean',
+    }
   ]
 }
 
@@ -128,9 +134,11 @@ export class WindowEntity extends EntityClass<Window> {
 
   create3DMesh(scene: THREE.Scene) {
     const data = this.getData();
+    const group = new THREE.Group();
     const wall = this.world.allFileMapObjects.wall.find((entity) => {
       return entity.getData().id === data.wallId;
     })
+    const wallThickness = wall ? wall.getData().thickness : 10;
     const geometry = new THREE.BoxGeometry(
       data.width * 1,
       data.height * 1,
@@ -138,12 +146,53 @@ export class WindowEntity extends EntityClass<Window> {
     );// 额外增加2保证，门框比强款一点
     const material = new THREE.MeshStandardMaterial({ color: data.color })
     const windowMesh = new THREE.Mesh(geometry, material)
+    group.add(windowMesh);
 
-    const group = new THREE.Group()
+    // group添加门框
+    (() => {
+      if (!data.hasBorder) return
+      const border = 7;
+      const geometryRight = new THREE.BoxGeometry(
+        border,
+        data.height * 1,
+        wallThickness + 4
+      );
+      const material = new THREE.MeshStandardMaterial({ color: data.color })
+      const doorMeshRight = new THREE.Mesh(geometryRight, material)
+      doorMeshRight.position.setX(data.width / 2)
+      group.add(doorMeshRight);
+
+      const geometryLeft = new THREE.BoxGeometry(
+        border,
+        data.height * 1,
+        wallThickness + 4
+      );
+      const doorMeshLeft = new THREE.Mesh(geometryLeft, material)
+      doorMeshLeft.position.setX(-data.width / 2)
+      group.add(doorMeshLeft);
+
+      const geometryTop = new THREE.BoxGeometry(
+        data.width * 1 + border,
+        border,
+        wallThickness + 4
+      );
+      const doorMeshTop = new THREE.Mesh(geometryTop, material)
+      doorMeshTop.position.setY(data.height / 2)
+      group.add(doorMeshTop);
+
+      const geometryBottom = new THREE.BoxGeometry(
+        data.width * 1 + border,
+        border,
+        wallThickness + 4
+      );
+      const doorMeshBottom = new THREE.Mesh(geometryBottom, material)
+      doorMeshBottom.position.setY(-data.height / 2)
+      group.add(doorMeshBottom);
+    })();
+    group.position.set(data.x, data.height / 2 + (data.bottom || 0), data.y)
+    group.rotateY(data.angle * -1);
     if (wall && data.wallPointId > -1 && wall.meshList[data.wallPointId]) {
-      const wallThickness = wall.getData().thickness;
       const wallGroup = wall.meshList[data.wallPointId];
-
       const subtractGeometry = new THREE.BoxGeometry(
         data.width,
         data.height,
@@ -173,19 +222,11 @@ export class WindowEntity extends EntityClass<Window> {
       // const resultMesh = new THREE.Mesh(resultGeometry.geometry, material);
       // resultMesh.position.set(wallMesh.position.x, wallMesh.position.y, wallMesh.position.z + 3)
       // resultMesh.rotateY(this.data.angle * -1);
-      windowMesh.position.set(data.x, data.height / 2 + (data.bottom || 0), data.y)
-      // mesh缩放到90%
-      windowMesh.scale.set(0.99, 0.99, 0.99)
-      windowMesh.rotateY(data.angle * -1);
-      group.add(windowMesh)
       return [
         group,
         // resultMesh
       ]
     } else {
-      windowMesh.position.set(data.x, data.height / 2, data.y)
-      windowMesh.rotateY(data.angle * -1);
-      group.add(windowMesh)
       return [
         group
       ]

@@ -8,4 +8,5 @@ export type Window = Entity & {
   angle: number
   bottom: number// 距离地面
   color: string// 颜色
+  hasBorder: boolean // 是否有门框
 }

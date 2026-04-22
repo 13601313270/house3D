@@ -18,9 +18,11 @@ export function createDoorData() {
     z: 0,
     width: 110,
     height: 180,
+    openAngle: 0,
     angle: 0,
     hasBorder: true,
     color: '#e67e22',
+    openType: 1,
   }
   return door
 }
@@ -46,7 +48,17 @@ export function editPropConfig(): editItem[] {
       id: 'hasBorder',
       label: '是否有门框',
       dataType: 'boolean',
-    }
+    },
+    {
+      id: 'openAngle',
+      label: '门打开的角度',
+      dataType: 'number',
+    },
+    {
+      id: 'openType',
+      label: '开门方式(1内左开 2内右开 3外左开 4外右开)',
+      dataType: 'number',
+    },
   ]
 }
 
@@ -112,17 +124,39 @@ export class DoorEntity extends EntityClass<Door> {
     })
     const wallThickness = wall ? wall.getData().thickness : 10;
     console.log('s---1---');
-    // if (this.glbObj === null) {
-    //   const loader = new GLTFLoader();
-    //   loader.load('https://video-obj.oss-cn-beijing.aliyuncs.com/door.glb', (gltf: any) => {
-    //     this.glbObj = gltf.scene;
-    //     const allHeight = wallThickness * 20;
-
-    //     gltf.scene.position.set(data.width / -1.9, data.height / -2, wallThickness * 2.5);
-    //     gltf.scene.scale.set(data.width * 2.3, data.height * 1.1, wallThickness * 20);
-    //     group.add(gltf.scene)
-    //   });
-    // }
+    const changeBLBState = () => {
+      if (this.glbObj) {
+        if (data.openType === 1) {
+          this.glbObj.position.set(data.width / -2.1, data.height / -2, wallThickness / 2);
+          this.glbObj.scale.set(data.width * 0.23, data.height * 0.11, wallThickness * 2);
+          this.glbObj.rotation.y = THREE.MathUtils.degToRad(data.openAngle * -1 || 0);
+        }
+        else if (data.openType === 2) {
+          this.glbObj.position.set(data.width / 2.1, data.height / -2, wallThickness / 2);
+          this.glbObj.scale.set(data.width * -0.23, data.height * 0.11, wallThickness * 2);
+          this.glbObj.rotation.y = THREE.MathUtils.degToRad(data.openAngle || 0);
+        }
+        else if (data.openType === 3) {
+          this.glbObj.position.set(data.width / -2.1, data.height / -2, wallThickness / -2);
+          this.glbObj.scale.set(data.width * 0.23, data.height * 0.11, wallThickness * -2);
+          this.glbObj.rotation.y = THREE.MathUtils.degToRad(data.openAngle || 0);
+        }
+        else if (data.openType === 4) {
+          this.glbObj.position.set(data.width / 2.1, data.height / -2, wallThickness / -2);
+          this.glbObj.scale.set(data.width * -0.23, data.height * 0.11, wallThickness * -2);
+          this.glbObj.rotation.y = THREE.MathUtils.degToRad(data.openAngle * -1 || 0);
+        }
+      }
+    }
+    if (this.glbObj === null) {
+      const loader = new GLTFLoader();
+      loader.load('https://video-obj.oss-cn-beijing.aliyuncs.com/door.glb', (gltf: any) => {
+        this.glbObj = gltf.scene;
+        // 旋转45度
+        changeBLBState()
+        group.add(gltf.scene)
+      });
+    }
 
     // group添加门
     const geometry = new THREE.BoxGeometry(
@@ -131,8 +165,8 @@ export class DoorEntity extends EntityClass<Door> {
       1
     );// 额外增加2保证，门框比强款一点
     const material = new THREE.MeshStandardMaterial({ color: data.color })
-    const doorMesh = new THREE.Mesh(geometry, material)
-    group.add(doorMesh);
+    const doorMesh = new THREE.Mesh(geometry, material);
+    // group.add(doorMesh);
 
     // group添加门框
     (() => {
@@ -166,12 +200,13 @@ export class DoorEntity extends EntityClass<Door> {
       doorMeshTop.position.setY(data.height / 2)
       group.add(doorMeshTop);
     })();
-    // if (this.glbObj) {
-    //   this.glbObj.position.set(data.width / -1.9, data.height / -2, wallThickness * 3);
-    //   this.glbObj.scale.set(data.width * 2.3, data.height * 1.1, wallThickness * 20);
-    //   // group.add(this.glbObj)
-    // }
+    if (this.glbObj) {
+      changeBLBState()
+      group.add(this.glbObj)
+    }
 
+    group.position.set(data.x, data.height / 2, data.y)
+    group.rotateY(data.angle * -1);
     if (wall && data.wallPointId > -1 && wall.meshList[data.wallPointId]) {
       const wallGroup = wall.meshList[data.wallPointId];
       const subtractGeometry = new THREE.BoxGeometry(
@@ -198,14 +233,10 @@ export class DoorEntity extends EntityClass<Door> {
       if (firstMesh) {
         firstMesh.geometry = resultGeometry.geometry
       }
-      group.position.set(data.x, data.height / 2, data.y)
-      group.rotateY(data.angle * -1);
       return [
         group,
       ]
     } else {
-      group.position.set(data.x, data.height / 2, data.y)
-      group.rotateY(data.angle * -1);
       return [
         group
       ]
