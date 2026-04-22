@@ -156,7 +156,7 @@ export class WallEntity extends EntityClass<Wall> {
 
   // 命中可拖拽具柄
   matchHandelInfo(x: number, y: number, zoomLevel: number) {
-    const data = this.data;
+    const data = this.getData();
     for (let i = 0; i < this.wall.points.length; i++) {
       const point = this.wall.points[i]
       const dist = Math.hypot(x - point.x, y - point.y)
@@ -193,7 +193,7 @@ export class WallEntity extends EntityClass<Wall> {
 
   getMineBeSnapPoints() {
     const key: allSnapFromType = 'point';
-    const data = this.data;
+    const data = this.getData();
     return this.wall.points.map((v, index: number) => {
       return {
         objType: this.type,

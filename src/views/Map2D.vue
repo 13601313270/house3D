@@ -950,7 +950,7 @@ const handleMouseMove = (e: MouseEvent) => {
           if (nearestPoint && minDistance < snapThreshold) {
             const result = matchHandelObj.inSceneSnapPointArea({
               objType: api.type,
-              objId: api.data.id,
+              objId: api.getData().id,
               snapFromType: 'line',
               point: nearestPoint
             }, matchHandelInfo)

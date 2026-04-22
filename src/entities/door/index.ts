@@ -51,7 +51,7 @@ export class DoorEntity extends EntityClass<Door> {
   constructor(world: World, door: Door) {
     super(world, door)
     if (door.wallId) {
-      const wall = this.world.allFileMapObjects.wall.find((entity) => entity.data.id === door.wallId);
+      const wall = this.world.allFileMapObjects.wall.find((entity) => entity.getData().id === door.wallId);
       if (wall) {
         this.associationEntity.push(wall)
         wall.associationEntity.push(this)
@@ -65,7 +65,7 @@ export class DoorEntity extends EntityClass<Door> {
     wallThickness: number,
     zoomLevel: number
   ): void {
-    const data = this.data;
+    const data = this.getData();
     // 实现门的2D绘制逻辑
     const screenX = data.x * zoomLevel + panOffset.x
     const screenY = data.y * zoomLevel + panOffset.y
@@ -99,7 +99,7 @@ export class DoorEntity extends EntityClass<Door> {
 
   create3DMesh(scene: THREE.Scene) {
     // 加载 https://video-obj.oss-cn-beijing.aliyuncs.com/door.glb
-    const data = this.data;
+    const data = this.getData();
     const group = new THREE.Group()
     const wall = this.world.allFileMapObjects.wall.find((entity) => {
       return entity.getData().id === data.wallId
@@ -170,7 +170,7 @@ export class DoorEntity extends EntityClass<Door> {
   }
 
   matchHandelInfo(x: number, y: number, zoomLevel: number) {
-    const data = this.data;
+    const data = this.getData();
     const dist = Math.hypot(x - data.x, y - data.y)
     if (dist < 6 * zoomLevel) {
       return {
@@ -196,7 +196,7 @@ export class DoorEntity extends EntityClass<Door> {
 
   getMineBeSnapPoints() {
     const key: allSnapFromType = 'point';
-    const data = this.data;
+    const data = this.getData();
     return [{
       objType: this.type,
       objId: data.id,
@@ -215,7 +215,7 @@ export class DoorEntity extends EntityClass<Door> {
 
   afterBeSnapByLine(obj: EntityClass<Wall>, line: [Point, Point]) {
     if (obj.type === 'wall') {
-      const data = this.data;
+      const data = this.getData();
       const p1 = line[0]
       const p2 = line[1]
       const nearestAngle = Math.atan2(p2.y - p1.y, p2.x - p1.x)

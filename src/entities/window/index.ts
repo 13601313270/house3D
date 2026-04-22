@@ -78,7 +78,7 @@ export class WindowEntity extends EntityClass<Window> {
     wallThickness: number,
     zoomLevel: number
   ): void {
-    const data = this.data;
+    const data = this.getData();
     const screenX = data.x * zoomLevel + panOffset.x
     const screenY = data.y * zoomLevel + panOffset.y
 
@@ -110,7 +110,7 @@ export class WindowEntity extends EntityClass<Window> {
 
   // 命中可拖拽具柄
   matchHandelInfo(x: number, y: number, zoomLevel: number): HandelInfo | null {
-    const data = this.data;
+    const data = this.getData();
     const dist = Math.hypot(x - data.x, y - data.y)
     if (dist < 6 * zoomLevel) {
       return {
@@ -127,7 +127,7 @@ export class WindowEntity extends EntityClass<Window> {
   }
 
   create3DMesh(scene: THREE.Scene) {
-    const data = this.data;
+    const data = this.getData();
     const wall = this.world.allFileMapObjects.wall.find((entity) => {
       return entity.getData().id === data.wallId;
     })
@@ -141,7 +141,7 @@ export class WindowEntity extends EntityClass<Window> {
 
     const group = new THREE.Group()
     if (wall && data.wallPointId > -1 && wall.meshList[data.wallPointId]) {
-      const wallThickness = wall.data.thickness;
+      const wallThickness = wall.getData().thickness;
       const wallGroup = wall.meshList[data.wallPointId];
 
       const subtractGeometry = new THREE.BoxGeometry(
@@ -202,7 +202,7 @@ export class WindowEntity extends EntityClass<Window> {
 
   getMineBeSnapPoints() {
     const key: allSnapFromType = 'point';
-    const data = this.data;
+    const data = this.getData();
     return [{
       objType: this.type,
       objId: data.id,
@@ -228,8 +228,8 @@ export class WindowEntity extends EntityClass<Window> {
       const allLineKey = obj.getMineBeSnapLines().map(v => [v[0].x, v[0].y, v[1].x, v[1].y].join(','))
       const lineKey = [p1.x, p1.y, p2.x, p2.y].join(',')
       const index = allLineKey.indexOf(lineKey)
-      const data = this.data;
-      const objData = obj.data
+      const data = this.getData();
+      const objData = obj.getData()
       data.angle = nearestAngle
       data.wallId = objData.id
       data.wallPointId = index

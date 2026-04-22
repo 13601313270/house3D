@@ -65,15 +65,16 @@ export class CameraEntity extends EntityClass<CameraData> {
     panOffset: Point,
     zoomLevel: number
   ): void {
-    const screenX = this.data.x * zoomLevel + panOffset.x
-    const screenY = this.data.y * zoomLevel + panOffset.y
-    const targetX = this.data.targetPositionX * zoomLevel + panOffset.x
-    const targetY = this.data.targetPositionY * zoomLevel + panOffset.y
+    const data = this.getData();
+    const screenX = data.x * zoomLevel + panOffset.x
+    const screenY = data.y * zoomLevel + panOffset.y
+    const targetX = data.targetPositionX * zoomLevel + panOffset.x
+    const targetY = data.targetPositionY * zoomLevel + panOffset.y
     const distance = Math.hypot(targetX - screenX, targetY - screenY)
     const radius = distance
 
     // 计算FOV的半角
-    const halfFov = (this.data.fov * Math.PI) / 360
+    const halfFov = (data.fov * Math.PI) / 360
 
     // 绘制三角形
     ctx.fillStyle = this.colorOpacity
@@ -126,15 +127,15 @@ export class CameraEntity extends EntityClass<CameraData> {
     ctx.lineWidth = 2
     ctx.beginPath()
     ctx.arc(
-      this.data.targetPositionX * zoomLevel + panOffset.x,
-      this.data.targetPositionY * zoomLevel + panOffset.y,
+      data.targetPositionX * zoomLevel + panOffset.x,
+      data.targetPositionY * zoomLevel + panOffset.y,
       6 * zoomLevel, 0, Math.PI * 2)
     ctx.fill()
     ctx.stroke()
   }
 
   create3DMesh(scene: THREE.Scene): THREE.Group[] {
-    const data = this.data;
+    const data = this.getData();
     const dx = data.targetPositionX - data.x
     const dy = data.targetPositionY - data.y
     const dz = data.targetPositionZ - data.z
@@ -205,7 +206,7 @@ export class CameraEntity extends EntityClass<CameraData> {
   }
 
   matchHandelInfo(x: number, y: number, zoomLevel: number) {
-    const data = this.data;
+    const data = this.getData();
     const dist = Math.hypot(x - data.x, y - data.y)
     if (dist < 10 * zoomLevel) {
       return {
@@ -226,7 +227,7 @@ export class CameraEntity extends EntityClass<CameraData> {
   }
 
   matchHandelMoveCallback(x: number, y: number, matchHandelInfo: HandelInfo) {
-    const data = this.data;
+    const data = this.getData();
     if (matchHandelInfo.index === 1) {
       data.targetPositionX = x
       data.targetPositionY = y
@@ -240,7 +241,7 @@ export class CameraEntity extends EntityClass<CameraData> {
   }
 
   getMineBeSnapPoints(): Array<OrigionSnapPoint> {
-    const data = this.data;
+    const data = this.getData();
     return [{
       objType: this.type,
       objId: data.id,
