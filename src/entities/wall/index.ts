@@ -28,7 +28,22 @@ export function editPropConfig(): editItem[] {
       id: 'bc',
       label: '地板颜色',
       dataType: 'color',
-    }
+    },
+    {
+      id: 'ht',
+      label: '是否有天花板',
+      dataType: 'boolean',
+    },
+    {
+      id: 'tc',
+      label: '天花板颜色',
+      dataType: 'color',
+    },
+    {
+      id: 'td',
+      label: '天花板是否是双面',
+      dataType: 'boolean',
+    },
   ]
 }
 
@@ -41,10 +56,28 @@ export class WallEntity extends EntityClass<Wall> {
     panOffset: Point,
     zoomLevel: number,
   ): void {
-    const wallBoxList = createAllWallFromPoints([this.getData()]);
+    const data = this.getData()
+    if (data.hb) {
+      ctx.strokeStyle = 'black'
+      ctx.fillStyle = data.bc
+      ctx.lineWidth = 2
+      ctx.setLineDash([5, 5])
+      ctx.beginPath()
+      for (let i = 0; i < data.points.length; i++) {
+        const point = data.points[i]
+        if (i === 0) {
+          ctx.moveTo(point.x * zoomLevel + panOffset.x, point.y * zoomLevel + panOffset.y)
+        } else {
+          ctx.lineTo(point.x * zoomLevel + panOffset.x, point.y * zoomLevel + panOffset.y)
+        }
+      }
+      ctx.stroke()
+      ctx.fill()
+    }
+    const wallBoxList = createAllWallFromPoints([data]);
 
     ctx.strokeStyle = 'black'
-    ctx.fillStyle = this.getData().color
+    ctx.fillStyle = data.color
     ctx.lineWidth = 2
     ctx.setLineDash([])
     ctx.beginPath();
@@ -67,7 +100,7 @@ export class WallEntity extends EntityClass<Wall> {
     }
 
     // 绘制墙上的点
-    [this.getData()].forEach((wall) => {
+    [data].forEach((wall) => {
       if (wall.points.length < 2) return
       ctx.strokeStyle = 'black'
       ctx.fillStyle = 'white'
@@ -81,19 +114,6 @@ export class WallEntity extends EntityClass<Wall> {
         ctx.fill()
       })
     });
-    // for (let i = 0; i < wallBoxList.length; i++) {
-    //   const box = wallBoxList[i]
-    //   ctx.beginPath()
-    //   for (let j = 0; j < box.length; j++) {
-    //     if (j === 0) {
-    //       ctx.moveTo(box[j].x * zoomLevel + panOffset.x, box[j].y * zoomLevel + panOffset.y)
-    //     } else {
-    //       ctx.lineTo(box[j].x * zoomLevel + panOffset.x, box[j].y * zoomLevel + panOffset.y)
-    //     }
-    //   }
-    //   ctx.stroke()
-    //   ctx.fill()
-    // }
   }
 
   create3DMesh(scene: THREE.Scene) {
@@ -159,18 +179,19 @@ export class WallEntity extends EntityClass<Wall> {
     }
 
     // 盖一个盖子
-    const geometryTop = new THREE.ShapeGeometry(shape)
-    geometryTop.rotateX(-Math.PI / 2);   // 将 XY 平面旋转成 XZ 平面
-    const materialTop = new THREE.MeshStandardMaterial({
-      color: 0xe0e0e0,
-      side: THREE.BackSide
-    })
-    const topMesh = new THREE.Mesh(geometryTop, materialTop)
-    topMesh.position.set(0, wallHeight, 0)
-    const group2 = new THREE.Group()
-    group2.add(topMesh)
-    meshList.push(group2)
-
+    if (this.getData().ht) {
+      const geometryTop = new THREE.ShapeGeometry(shape)
+      geometryTop.rotateX(-Math.PI / 2);   // 将 XY 平面旋转成 XZ 平面
+      const materialTop = new THREE.MeshStandardMaterial({
+        color: this.getData().tc,
+        side: this.getData().td ? THREE.DoubleSide : THREE.BackSide
+      })
+      const topMesh = new THREE.Mesh(geometryTop, materialTop)
+      topMesh.position.set(0, wallHeight + 1, 0)
+      const group2 = new THREE.Group()
+      group2.add(topMesh)
+      meshList.push(group2)
+    }
     return meshList
   }
 

@@ -615,10 +615,13 @@ onMounted(() => {
               y: firstPoint.y,
               z: 0,
               color: '#fff',
-              hb: true,// 有地板，默认有
-              bc: '#333', // 地板颜色，默认灰色
               points: [...tempDrawWall.value.points],
-              thickness: wallThickness.value
+              thickness: wallThickness.value,
+              hb: true,// 有地板，默认有
+              bc: '#aaa', // 地板颜色，默认灰色
+              ht: true,// 有天花板，默认有
+              tc: '#fff', // 天花板颜色，默认白色
+              td: false, // 天花板是否是双面，默认否
             }
             worldApi.add('wall', [newWall])
             history.value.push(JSON.parse(JSON.stringify(worldApi.getObjects('wall'))))
@@ -837,7 +840,10 @@ const handleCanvasClick = (e: MouseEvent) => {
               z: 0,
               thickness: wallThickness.value,
               hb: true,// 有地板，默认有
-              bc: '#333', // 地板颜色，默认灰色
+              bc: '#aaa', // 地板颜色，默认灰色
+              ht: true,// 有天花板，默认有
+              tc: '#fff', // 天花板颜色，默认白色
+              td: false, // 天花板是否是双面，默认否
             }
             worldApi.add('wall', [newWall])
             history.value.push(JSON.parse(JSON.stringify(worldApi.getObjects('wall'))))
@@ -859,7 +865,10 @@ const handleCanvasClick = (e: MouseEvent) => {
         points: [clickPoint],
         thickness: wallThickness.value,
         hb: true,// 有地板，默认有
-        bc: '#333', // 地板颜色，默认灰色
+        bc: '#aaa', // 地板颜色，默认灰色
+        ht: true,// 有天花板，默认有
+        tc: '#fff', // 天花板颜色，默认白色
+        td: false, // 天花板是否是双面，默认否
       }
     }
     lastPoint.value = clickPoint
