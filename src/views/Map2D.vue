@@ -1297,8 +1297,9 @@ function changeCurrentTool(type: 'wall' | 'door' | 'window' | 'camera' | 'drag')
 
 watch(() => editPropInputInfo.value, () => {
   if (editPropTypeKey.value) {
-    console.log(111, worldApi.getObjects(editPropTypeKey.value)[editPropTypeIndex.value], editPropInputInfo.value)
-    Object.assign(worldApi.getObjects(editPropTypeKey.value)[editPropTypeIndex.value], editPropInputInfo.value)
+    // console.log(111, worldApi.getObjects(editPropTypeKey.value)[editPropTypeIndex.value], editPropInputInfo.value)
+    // Object.assign(worldApi.getObjects(editPropTypeKey.value)[editPropTypeIndex.value], editPropInputInfo.value)
+    worldApi.replaceObjects(editPropTypeKey.value, editPropTypeIndex.value, editPropInputInfo.value)
   }
   drawWrapper()
 }, {

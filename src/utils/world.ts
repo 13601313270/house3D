@@ -16,8 +16,6 @@ export const canvasHeight = 600
 export const snapThreshold = 20
 
 export class World {
-  private allFileObjects: fileData = defaultFileData()
-
   allFileMapObjects: {
     wall: WallEntity[],
     door: DoorEntity[],
@@ -56,7 +54,7 @@ export class World {
     const ctx = canvasRef.getContext('2d')
     if (!ctx) return
 
-    const fileData = this.allFileObjects
+    const fileData: fileData = this.getAllFileObjects()
 
     const { wall: walls, door: doors, window: windows, camera: cameras } = fileData
     ctx.clearRect(0, 0, canvasWidth, canvasHeight)
@@ -224,6 +222,13 @@ export class World {
 
   draw3D() {
     const { scene } = this;
+
+    allFileKeys.forEach((key) => {
+      (this.allFileMapObjects[key] as EntityClass<any>[]).forEach((wall) => {
+        wall.draw3DAndCache(scene)
+      });
+    });
+
     allFileKeys.forEach((key) => {
       (this.allFileMapObjects[key] as EntityClass<any>[]).forEach((wall) => {
         wall.draw3DAndCache(scene)
@@ -231,18 +236,36 @@ export class World {
     });
   }
 
-  getAllFileObjects() {
-    return this.allFileObjects
+  getAllFileObjects(): fileData {
+    const returnData: fileData = {
+      wall: [],
+      door: [],
+      window: [],
+      camera: [],
+    };
+    allFileKeys.forEach((key) => {
+      (this.allFileMapObjects[key] as EntityClass<any>[]).forEach((item) => {
+        returnData[key].push(item.getData())
+      })
+    })
+    return returnData
   }
 
   getObjects(type: EntityType) {
-    return [...this.allFileObjects[type]]
+    const returnData: Entity[] = [];
+    this.allFileMapObjects[type].forEach((item) => {
+      returnData.push(item.getData())
+    })
+    return returnData
+  }
+
+  replaceObjects(type: EntityType, index: number, data: Entity) {
+    this.allFileMapObjects[type][index].setData(data as any)
   }
 
   add(type: EntityType, data: Entity[]) {
     const EntityClassItem: EntityClass<any> = fileDataKeyToClass[type] as any;
     for (let i = 0; i < data.length; i++) {
-      this.allFileObjects[type].push(data[i] as any)
       // @ts-ignore
       const api: EntityClass<any> = new EntityClassItem(this, data[i]);
       // @ts-ignore
@@ -251,13 +274,11 @@ export class World {
   }
 
   clear(type: EntityType) {
-    this.allFileObjects[type] = []
     this.allFileMapObjects[type] = []
   }
 
   splice(type: EntityType, index: number, count: number = 1) {
-    if (this.allFileObjects[type]) {
-      this.allFileObjects[type].splice(index, count)
+    if (this.allFileMapObjects[type]) {
       this.allFileMapObjects[type].splice(index, count)
     }
   }
