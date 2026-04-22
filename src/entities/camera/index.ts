@@ -134,19 +134,20 @@ export class CameraEntity extends EntityClass<CameraData> {
   }
 
   create3DMesh(scene: THREE.Scene): THREE.Group[] {
-    const dx = this.data.targetPositionX - this.data.x
-    const dy = this.data.targetPositionY - this.data.y
-    const dz = this.data.targetPositionZ - this.data.z
+    const data = this.data;
+    const dx = data.targetPositionX - data.x
+    const dy = data.targetPositionY - data.y
+    const dz = data.targetPositionZ - data.z
 
     // Calculate distance
     const distance = Math.sqrt(dx * dx + dy * dy + dz * dz)
-    const halfFov = (this.data.fov * Math.PI) / 360
+    const halfFov = (data.fov * Math.PI) / 360
     const baseSize = distance * Math.tan(halfFov) * 2
-    const depth = this.data.aspectH / this.data.aspectW * baseSize;   // 长方形长
+    const depth = data.aspectH / data.aspectW * baseSize;   // 长方形长
     const width = baseSize;   // 长方形宽
 
-    const apex = new THREE.Vector3(this.data.x, this.data.z, this.data.y);
-    const center = new THREE.Vector3(this.data.targetPositionX, this.data.targetPositionZ, this.data.targetPositionY);
+    const apex = new THREE.Vector3(data.x, data.z, data.y);
+    const center = new THREE.Vector3(data.targetPositionX, data.targetPositionZ, data.targetPositionY);
 
     const up = apex.clone().sub(center).normalize();
 
@@ -204,29 +205,31 @@ export class CameraEntity extends EntityClass<CameraData> {
   }
 
   matchHandelInfo(x: number, y: number, zoomLevel: number) {
-    const dist = Math.hypot(x - this.data.x, y - this.data.y)
+    const data = this.data;
+    const dist = Math.hypot(x - data.x, y - data.y)
     if (dist < 10 * zoomLevel) {
       return {
         index: 0,
         type: this.type,
-        id: this.data.id,
+        id: data.id,
       }
     }
-    const distToTarget = Math.hypot(x - this.data.targetPositionX, y - this.data.targetPositionY)
+    const distToTarget = Math.hypot(x - data.targetPositionX, y - data.targetPositionY)
     if (distToTarget < 10 * zoomLevel) {
       return {
         index: 1,
         type: this.type,
-        id: this.data.id,
+        id: data.id,
       }
     }
     return null;
   }
 
   matchHandelMoveCallback(x: number, y: number, matchHandelInfo: HandelInfo) {
+    const data = this.data;
     if (matchHandelInfo.index === 1) {
-      this.data.targetPositionX = x
-      this.data.targetPositionY = y
+      data.targetPositionX = x
+      data.targetPositionY = y
     } else {
       this.changePosition({ x, y })
     }
@@ -237,14 +240,15 @@ export class CameraEntity extends EntityClass<CameraData> {
   }
 
   getMineBeSnapPoints(): Array<OrigionSnapPoint> {
+    const data = this.data;
     return [{
       objType: this.type,
-      objId: this.data.id,
+      objId: data.id,
       snapFromType: 'point',
       point: {
         index: 0,
-        x: this.data.x,
-        y: this.data.y,
+        x: data.x,
+        y: data.y,
       },
     }]
   }

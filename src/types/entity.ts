@@ -33,6 +33,14 @@ export abstract class EntityClass<T extends Entity> {
     this.data = data
   }
 
+  // setData(data: T) {
+  //   this.data = data
+  // }
+
+  getData() {
+    return this.data
+  }
+
   abstract create3DMesh(scene: THREE.Scene, ...args: any[]): THREE.Group[]
 
   private cacheKeyStr = '';

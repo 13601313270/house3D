@@ -61,7 +61,9 @@ export class WindowEntity extends EntityClass<Window> {
   constructor(world: World, window: Window) {
     super(world, window)
     if (window.wallId) {
-      const wall = this.world.allFileMapObjects.wall.find((entity) => entity.data.id === window.wallId);
+      const wall = this.world.allFileMapObjects.wall.find((entity) => {
+        return entity.getData().id === window.wallId
+      });
       if (wall) {
         this.associationEntity.push(wall)
         wall.associationEntity.push(this)
@@ -76,16 +78,17 @@ export class WindowEntity extends EntityClass<Window> {
     wallThickness: number,
     zoomLevel: number
   ): void {
-    const screenX = this.data.x * zoomLevel + panOffset.x
-    const screenY = this.data.y * zoomLevel + panOffset.y
+    const data = this.data;
+    const screenX = data.x * zoomLevel + panOffset.x
+    const screenY = data.y * zoomLevel + panOffset.y
 
-    const color = this.data.color
-    const width = this.data.width * zoomLevel;
+    const color = data.color
+    const width = data.width * zoomLevel;
     const thickness = wallThickness * zoomLevel;
 
     ctx.save()
     ctx.translate(screenX, screenY)
-    ctx.rotate(this.data.angle)
+    ctx.rotate(data.angle)
 
     ctx.fillStyle = color
     ctx.strokeStyle = color
@@ -107,11 +110,12 @@ export class WindowEntity extends EntityClass<Window> {
 
   // 命中可拖拽具柄
   matchHandelInfo(x: number, y: number, zoomLevel: number): HandelInfo | null {
-    const dist = Math.hypot(x - this.data.x, y - this.data.y)
+    const data = this.data;
+    const dist = Math.hypot(x - data.x, y - data.y)
     if (dist < 6 * zoomLevel) {
       return {
         index: 0,
-        id: this.data.id,
+        id: data.id,
         type: this.type,
       }
     }
@@ -123,28 +127,31 @@ export class WindowEntity extends EntityClass<Window> {
   }
 
   create3DMesh(scene: THREE.Scene) {
-    const wall = this.world.allFileMapObjects.wall.find((entity) => entity.data.id === this.data.wallId)
+    const data = this.data;
+    const wall = this.world.allFileMapObjects.wall.find((entity) => {
+      return entity.getData().id === data.wallId;
+    })
     const geometry = new THREE.BoxGeometry(
-      this.data.width * 1,
-      this.data.height * 1,
+      data.width * 1,
+      data.height * 1,
       1
     );// 额外增加2保证，门框比强款一点
-    const material = new THREE.MeshStandardMaterial({ color: this.data.color })
+    const material = new THREE.MeshStandardMaterial({ color: data.color })
     const windowMesh = new THREE.Mesh(geometry, material)
 
     const group = new THREE.Group()
-    if (wall && this.data.wallPointId > -1 && wall.meshList[this.data.wallPointId]) {
+    if (wall && data.wallPointId > -1 && wall.meshList[data.wallPointId]) {
       const wallThickness = wall.data.thickness;
-      const wallGroup = wall.meshList[this.data.wallPointId];
+      const wallGroup = wall.meshList[data.wallPointId];
 
       const subtractGeometry = new THREE.BoxGeometry(
-        this.data.width,
-        this.data.height,
+        data.width,
+        data.height,
         wallThickness + 10
       );
-      subtractGeometry.rotateY(this.data.angle * -1);
+      subtractGeometry.rotateY(data.angle * -1);
       const cylinderBrush = new Brush(subtractGeometry);
-      cylinderBrush.position.set(this.data.x, this.data.height / 2 - 1 + (this.data.bottom || 0), this.data.y)
+      cylinderBrush.position.set(data.x, data.height / 2 - 1 + (data.bottom || 0), data.y)
       cylinderBrush.updateMatrixWorld()
       const firstMesh = wallGroup.children.find(child => child instanceof THREE.Mesh) as THREE.Mesh;
       const boxBrush = new Brush(firstMesh.geometry.clone());// 主体
@@ -166,18 +173,18 @@ export class WindowEntity extends EntityClass<Window> {
       // const resultMesh = new THREE.Mesh(resultGeometry.geometry, material);
       // resultMesh.position.set(wallMesh.position.x, wallMesh.position.y, wallMesh.position.z + 3)
       // resultMesh.rotateY(this.data.angle * -1);
-      windowMesh.position.set(this.data.x, this.height / 2 + (this.data.bottom || 0), this.data.y)
+      windowMesh.position.set(data.x, data.height / 2 + (data.bottom || 0), data.y)
       // mesh缩放到90%
       windowMesh.scale.set(0.99, 0.99, 0.99)
-      windowMesh.rotateY(this.data.angle * -1);
+      windowMesh.rotateY(data.angle * -1);
       group.add(windowMesh)
       return [
         group,
         // resultMesh
       ]
     } else {
-      windowMesh.position.set(this.data.x, this.height / 2, this.data.y)
-      windowMesh.rotateY(this.data.angle * -1);
+      windowMesh.position.set(data.x, data.height / 2, data.y)
+      windowMesh.rotateY(data.angle * -1);
       group.add(windowMesh)
       return [
         group
@@ -195,14 +202,15 @@ export class WindowEntity extends EntityClass<Window> {
 
   getMineBeSnapPoints() {
     const key: allSnapFromType = 'point';
+    const data = this.data;
     return [{
       objType: this.type,
-      objId: this.data.id,
+      objId: data.id,
       snapFromType: key,
       point: {
         index: 0,
-        x: this.data.x,
-        y: this.data.y,
+        x: data.x,
+        y: data.y,
       },
     }]
   }
@@ -220,9 +228,11 @@ export class WindowEntity extends EntityClass<Window> {
       const allLineKey = obj.getMineBeSnapLines().map(v => [v[0].x, v[0].y, v[1].x, v[1].y].join(','))
       const lineKey = [p1.x, p1.y, p2.x, p2.y].join(',')
       const index = allLineKey.indexOf(lineKey)
-      this.data.angle = nearestAngle
-      this.data.wallId = obj.data.id
-      this.data.wallPointId = index
+      const data = this.data;
+      const objData = obj.data
+      data.angle = nearestAngle
+      data.wallId = objData.id
+      data.wallPointId = index
 
       // 双向去除原有的关联对象
       this.associationEntity.forEach(entity => {
