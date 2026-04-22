@@ -46,6 +46,8 @@
                 @change="updateEditPropInputNumberInfo(item.id, $event)" />
               <input v-else-if="item.dataType === 'color'" type="color" :value="editPropInputInfo[item.id]"
                 @change="updateEditPropInputInfo(item.id, $event)" />
+              <input v-else-if="item.dataType === 'boolean'" type="checkbox" :checked="editPropInputInfo[item.id]"
+                @change="updateEditPropInputInfoBoolean(item.id, $event)" />
             </label>
           </div>
           <button @click="deleteContextMenuEntity">删除</button>
@@ -1312,6 +1314,10 @@ function updateEditPropInputNumberInfo(id: string, event: Event) {
 function updateEditPropInputInfo(id: string, event: Event) {
   // @ts-ignore
   editPropInputInfo.value[id] = event.target.value as string
+}
+function updateEditPropInputInfoBoolean(id: string, event: Event) {
+  // @ts-ignore
+  editPropInputInfo.value[id] = event.target.checked
 }
 </script>
 

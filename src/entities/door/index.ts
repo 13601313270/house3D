@@ -19,6 +19,7 @@ export function createDoorData() {
     width: 110,
     height: 180,
     angle: 0,
+    hasBorder: true,
     color: '#e67e22',
   }
   return door
@@ -41,6 +42,11 @@ export function editPropConfig(): editItem[] {
       label: '颜色',
       dataType: 'color',
     },
+    {
+      id: 'hasBorder',
+      label: '是否有门框',
+      dataType: 'boolean',
+    }
   ]
 }
 
@@ -105,18 +111,20 @@ export class DoorEntity extends EntityClass<Door> {
       return entity.getData().id === data.wallId
     })
     const wallThickness = wall ? wall.getData().thickness : 10;
-    console.log('s---1---')
-    if (this.glbObj === null) {
-      const loader = new GLTFLoader();
-      loader.load('https://video-obj.oss-cn-beijing.aliyuncs.com/door.glb', (gltf: any) => {
-        this.glbObj = gltf.scene;
-        gltf.scene.position.set(data.width / -1.9, data.height / -2, data.width / 2.25);
-        // gltf.scene.rotateY(Math.PI / -2);
-        gltf.scene.scale.set(data.width * 2.3, data.height * 1.1, wallThickness * 20);
-        // group.add(gltf.scene)
-      });
-    }
+    console.log('s---1---');
+    // if (this.glbObj === null) {
+    //   const loader = new GLTFLoader();
+    //   loader.load('https://video-obj.oss-cn-beijing.aliyuncs.com/door.glb', (gltf: any) => {
+    //     this.glbObj = gltf.scene;
+    //     const allHeight = wallThickness * 20;
 
+    //     gltf.scene.position.set(data.width / -1.9, data.height / -2, wallThickness * 2.5);
+    //     gltf.scene.scale.set(data.width * 2.3, data.height * 1.1, wallThickness * 20);
+    //     group.add(gltf.scene)
+    //   });
+    // }
+
+    // group添加门
     const geometry = new THREE.BoxGeometry(
       data.width * 1,
       data.height * 1,
@@ -124,6 +132,45 @@ export class DoorEntity extends EntityClass<Door> {
     );// 额外增加2保证，门框比强款一点
     const material = new THREE.MeshStandardMaterial({ color: data.color })
     const doorMesh = new THREE.Mesh(geometry, material)
+    group.add(doorMesh);
+
+    // group添加门框
+    (() => {
+      if (!data.hasBorder) return
+      const border = 7;
+      const geometryRight = new THREE.BoxGeometry(
+        border,
+        data.height * 1,
+        wallThickness + 4
+      );
+      const material = new THREE.MeshStandardMaterial({ color: data.color })
+      const doorMeshRight = new THREE.Mesh(geometryRight, material)
+      doorMeshRight.position.setX(data.width / 2)
+      group.add(doorMeshRight);
+
+      const geometryLeft = new THREE.BoxGeometry(
+        border,
+        data.height * 1,
+        wallThickness + 4
+      );
+      const doorMeshLeft = new THREE.Mesh(geometryLeft, material)
+      doorMeshLeft.position.setX(-data.width / 2)
+      group.add(doorMeshLeft);
+
+      const geometryTop = new THREE.BoxGeometry(
+        data.width * 1 + border,
+        border,
+        wallThickness + 4
+      );
+      const doorMeshTop = new THREE.Mesh(geometryTop, material)
+      doorMeshTop.position.setY(data.height / 2)
+      group.add(doorMeshTop);
+    })();
+    // if (this.glbObj) {
+    //   this.glbObj.position.set(data.width / -1.9, data.height / -2, wallThickness * 3);
+    //   this.glbObj.scale.set(data.width * 2.3, data.height * 1.1, wallThickness * 20);
+    //   // group.add(this.glbObj)
+    // }
 
     if (wall && data.wallPointId > -1 && wall.meshList[data.wallPointId]) {
       const wallGroup = wall.meshList[data.wallPointId];
@@ -133,8 +180,9 @@ export class DoorEntity extends EntityClass<Door> {
         wallThickness + 10
       );
       subtractGeometry.rotateY(data.angle * -1);
+      // subtractGeometry.position.set(data.x, data.height / 2 - 1, data.y)
       const cylinderBrush = new Brush(subtractGeometry);
-      cylinderBrush.position.set(data.x, data.height / 2 - 1, data.y)
+      cylinderBrush.position.set(data.x, data.height / 2, data.y)
       cylinderBrush.updateMatrixWorld()
       const firstMesh = wallGroup.children.find(child => child instanceof THREE.Mesh) as THREE.Mesh;
       const boxBrush = new Brush(firstMesh.geometry.clone());// 主体
@@ -152,17 +200,12 @@ export class DoorEntity extends EntityClass<Door> {
       }
       group.position.set(data.x, data.height / 2, data.y)
       group.rotateY(data.angle * -1);
-      // group.add(doorMesh)
-      if (this.glbObj) {
-        // group.add(this.glbObj)
-      }
       return [
         group,
       ]
     } else {
       group.position.set(data.x, data.height / 2, data.y)
       group.rotateY(data.angle * -1);
-      group.add(doorMesh)
       return [
         group
       ]

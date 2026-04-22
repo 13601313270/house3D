@@ -7,4 +7,5 @@ export type Door = Entity & {
   height: number
   angle: number
   color: string
+  hasBorder: boolean // 是否有门框
 }
