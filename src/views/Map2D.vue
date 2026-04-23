@@ -772,13 +772,17 @@ const handleContextMenu = (e: MouseEvent) => {
           const dist = Math.hypot(x - snapPoint.point.x, y - snapPoint.point.y)
           if (dist < 10) {
             console.log('dist', propConfig())
+            let contextMenuX = e.clientX
+            if (contextMenuX + 320 > panel1SplitWidthPer.value * window.innerWidth) {
+              contextMenuX = panel1SplitWidthPer.value * window.innerWidth - 320
+            }
             editPropTypeKey.value = type
             editPropTypeIndex.value = j
             editPropConfigInfo.value = propConfig()
             editPropInputInfo.value = JSON.parse(JSON.stringify(item));
             contextMenu.value = {
               visible: true,
-              x: e.clientX,
+              x: contextMenuX,
               y: e.clientY,
               // @ts-ignore
               type,
@@ -1483,6 +1487,7 @@ function updateEditPropInputInfoBoolean(id: string, event: Event) {
 
 .context-menu {
   position: absolute;
+  width: 320px;
   background: white;
   border: 1px solid #d9d9d9;
   border-radius: 8px;
