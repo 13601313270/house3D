@@ -18,7 +18,7 @@ export function createTriplanarMaterial(
     map,
     normalMap = null,
     tileSize = 1,
-    direction = new THREE.Vector3(1, 0, 0), // 默认沿 X 方向
+    direction = new THREE.Vector3(1, 0, 1), // 默认沿 X 方向
     side = THREE.FrontSide,
   } = options;
 

@@ -205,7 +205,7 @@ export class WindowEntity extends EntityClass<Window> {
         data.height * 1 + border,
         wallThickness + 4
       );
-      const material = getMaterialById(data.bmt)?.material || new THREE.MeshStandardMaterial({ color: bqc })
+      const material = getMaterialById(data.bmt)?.material(new THREE.Vector3(0, 0, 0)) || new THREE.MeshStandardMaterial({ color: bqc })
       const doorMeshRight = new THREE.Mesh(geometryRight, material)
       doorMeshRight.position.setX(data.width / 2 + border / 2 - 1)
       group.add(doorMeshRight);
@@ -240,7 +240,7 @@ export class WindowEntity extends EntityClass<Window> {
     // 内部的框
     const innerKborder = 4;
     (() => {
-      const material = getMaterialById(data.tmt)?.material || new THREE.MeshStandardMaterial({ color: tc })
+      const material = getMaterialById(data.tmt)?.material(new THREE.Vector3(0, 0, 0)) || new THREE.MeshStandardMaterial({ color: tc })
 
       const geometryRight = new THREE.BoxGeometry(
         innerKborder,
@@ -289,7 +289,7 @@ export class WindowEntity extends EntityClass<Window> {
       group.add(doorMeshBottom);
     })();
     const windowKWidth = 4;
-    const windowMaterial = getMaterialById(data.icmt)?.material || new THREE.MeshStandardMaterial({ color: ic });
+    const windowMaterial = getMaterialById(data.icmt)?.material(new THREE.Vector3(0, 0, 0)) || new THREE.MeshStandardMaterial({ color: ic });
     (() => {
       const rightWindowGorup = new THREE.Group()
       // 两扇扇面
