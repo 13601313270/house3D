@@ -51,6 +51,14 @@
               <div v-else-if="item.dataType === 'material'">
                 <input type="number" :value="editPropInputInfo[item.id]"
                   @change="updateEditPropInputNumberInfo(item.id, $event)" />
+                <div class="materialItem" @click="updateEditPropInputNumberInfo(item.id, 0)">
+                  无
+                </div>
+                <div v-for="item2 in allMaterial" :key="item2.id" class="materialItem"
+                  @click="updateEditPropInputNumberInfo(item.id, item2.id)">
+                  {{ item2.name }}
+                  <img :src="item2.img" alt="material" class="img" />
+                </div>
               </div>
             </label>
           </div>
@@ -93,6 +101,8 @@ import { createWindowData, WindowEntity } from '@/entities/window'
 import { CameraEntity, createCameraData } from '@/entities/camera'
 import { CameraData } from '@/entities/camera/index.d'
 import { WallEntity } from '@/entities/wall'
+import { allMaterial } from '@/material'
+import { textureStore } from 'three/src/nodes/accessors/StorageTextureNode'
 
 const canvasRef = ref<HTMLCanvasElement | null>(null)
 const canvas3DRef = ref<typeof Canvas3D | null>(null)
@@ -1351,9 +1361,13 @@ watch(() => editPropInputInfo.value, () => {
   deep: true
 })
 
-function updateEditPropInputNumberInfo(id: string, event: Event) {
-  // @ts-ignore
-  editPropInputInfo.value[id] = +event.target.value as number
+function updateEditPropInputNumberInfo(id: string, event: Event | number) {
+  if (event instanceof Event) {
+    // @ts-ignore
+    editPropInputInfo.value[id] = +(+event.target.value)
+  } else {
+    editPropInputInfo.value[id] = event
+  }
 }
 function updateEditPropInputInfo(id: string, event: Event) {
   // @ts-ignore
@@ -1495,6 +1509,15 @@ function updateEditPropInputInfoBoolean(id: string, event: Event) {
     &:hover {
       background: #f5f5f5;
     }
+  }
+}
+
+.materialItem {
+  border: solid 1px black;
+
+  .img {
+    width: 50px;
+    height: 50px;
   }
 }
 </style>
