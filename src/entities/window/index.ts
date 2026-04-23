@@ -144,7 +144,7 @@ export class WindowEntity extends EntityClass<Window> {
       data.height * 1,
       1
     );// 额外增加2保证，门框比强款一点
-    const material = new THREE.MeshStandardMaterial({ color: data.color })
+    const material = new THREE.MeshStandardMaterial({ color: 'white', opacity: 0.1, transparent: true })
     const windowMesh = new THREE.Mesh(geometry, material)
     group.add(windowMesh);
 
