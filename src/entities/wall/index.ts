@@ -6,7 +6,7 @@ import { createAllWallFromPoints } from '@/utils/createAllWallFromPoints'
 import * as THREE from 'three'
 import { editItem } from '..'
 import cementMaterial from '@/material/cement'
-import { World } from '@/utils/world'
+import brickMaterial from '@/material/redBrick'
 
 export function editPropConfig(): editItem[] {
   return [
@@ -172,7 +172,7 @@ export class WallEntity extends EntityClass<Wall> {
       //   color: this.getData().bc,
       //   side: THREE.DoubleSide
       // })
-      const materialBottom = cementMaterial;
+      const materialBottom = brickMaterial;// cementMaterial;
       const floorMesh = new THREE.Mesh(geometry, materialBottom)
       floorMesh.position.set(0, floorDepth * -1 + 1, 0)
       const group = new THREE.Group()
