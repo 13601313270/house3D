@@ -42,13 +42,14 @@
           <div class="configList">
             <div v-for="item in editPropConfigInfo" :key="item.id" class="configItem">
               <div>
-                {{ item.label }}：{{ editPropInputInfo[item.id] }}
+                {{ item.label }}：
+                <!-- {{ editPropInputInfo[item.id] }} -->
               </div>
               <div>
                 <input v-if="item.dataType === 'number'" type="number" :value="editPropInputInfo[item.id]"
                   @change="updateEditPropInputNumberInfo(item.id, $event)" />
-                <input v-else-if="item.dataType === 'color'" type="color" :value="editPropInputInfo[item.id]"
-                  @change="updateEditPropInputInfo(item.id, $event)" />
+                <input v-else-if="item.dataType === 'color'" type="color" class="colorInput"
+                  :value="editPropInputInfo[item.id]" @change="updateEditPropInputInfo(item.id, $event)" />
                 <input v-else-if="item.dataType === 'boolean'" type="checkbox" :checked="editPropInputInfo[item.id]"
                   @change="updateEditPropInputInfoBoolean(item.id, $event)" />
                 <div v-else-if="item.dataType === 'material'" class="materialList">
@@ -1505,6 +1506,7 @@ function updateEditPropInputInfoBoolean(id: string, event: Event) {
   width: 320px;
   background: white;
   border: 1px solid #d9d9d9;
+  box-sizing: border-box;
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   z-index: 1000;
@@ -1519,6 +1521,11 @@ function updateEditPropInputInfoBoolean(id: string, event: Event) {
       flex-direction: row;
       align-items: center;
       justify-content: space-between;
+      margin: 4px 0;
+
+      .colorInput {
+        width: 130px;
+      }
     }
   }
 
