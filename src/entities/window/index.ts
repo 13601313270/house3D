@@ -211,7 +211,7 @@ export class WindowEntity extends EntityClass<Window> {
         wallThickness + 4
       );
       const doorMeshTop = new THREE.Mesh(geometryTop, material)
-      doorMeshTop.position.setY(data.height / 2 + border / 2 - 1)
+      doorMeshTop.position.setY(data.height / 2 + border / 2 - 2)
       group.add(doorMeshTop);
 
       const geometryBottom = new THREE.BoxGeometry(
@@ -262,7 +262,7 @@ export class WindowEntity extends EntityClass<Window> {
         5
       );
       const doorMeshTop = new THREE.Mesh(geometryTop, material)
-      doorMeshTop.position.setY(data.height / 2)
+      doorMeshTop.position.setY(data.height / 2 - 1)
       group.add(doorMeshTop);
 
       const geometryBottom = new THREE.BoxGeometry(

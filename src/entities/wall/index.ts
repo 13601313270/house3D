@@ -5,6 +5,7 @@ import { drawPoint } from '@/utils/drawPoint'
 import { createAllWallFromPoints } from '@/utils/createAllWallFromPoints'
 import * as THREE from 'three'
 import { editItem } from '..'
+import cementMaterial from '@/material/cement'
 import { World } from '@/utils/world'
 
 export function editPropConfig(): editItem[] {
@@ -167,10 +168,11 @@ export class WallEntity extends EntityClass<Wall> {
       }
       const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettingsBottom)
       geometry.rotateX(-Math.PI / 2);   // 将 XY 平面旋转成 XZ 平面
-      const materialBottom = new THREE.MeshStandardMaterial({
-        color: this.getData().bc,
-        side: THREE.DoubleSide
-      })
+      // const materialBottom = new THREE.MeshStandardMaterial({
+      //   color: this.getData().bc,
+      //   side: THREE.DoubleSide
+      // })
+      const materialBottom = cementMaterial;
       const floorMesh = new THREE.Mesh(geometry, materialBottom)
       floorMesh.position.set(0, floorDepth * -1 + 1, 0)
       const group = new THREE.Group()
