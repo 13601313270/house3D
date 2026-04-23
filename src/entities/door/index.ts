@@ -8,6 +8,7 @@ import { allSnapFromType, EntityClass, EntityType, MatchSnapPoint } from '@/type
 import { editItem } from '..';
 import { World } from '@/utils/world';
 import { Wall } from '../wall/index.d';
+import { getMaterialById } from '@/material';
 
 export function createDoorData() {
   const door: Door = {
@@ -22,6 +23,7 @@ export function createDoorData() {
     angle: 0,
     hasBorder: true,
     color: '#e67e22',
+    mt: 0,
     openType: 1,
   }
   return door
@@ -38,6 +40,11 @@ export function editPropConfig(): editItem[] {
       id: 'height',
       label: '高度',
       dataType: 'number',
+    },
+    {
+      id: 'mt',
+      label: '门材质',
+      dataType: 'material',
     },
     {
       id: 'color',
@@ -169,8 +176,8 @@ export class DoorEntity extends EntityClass<Door> {
       data.height * 1,
       1
     );// 额外增加2保证，门框比强款一点
-    const material = new THREE.MeshStandardMaterial({ color: data.color })
-    const doorMesh = new THREE.Mesh(geometry, material);
+    const material = data.mt ? (getMaterialById(data.mt)?.material(new THREE.Vector3(0, 0, 1))) : (new THREE.MeshStandardMaterial({ color: data.color }));
+    // const doorMesh = new THREE.Mesh(geometry, material);
     // group.add(doorMesh);
 
     // group添加门框
@@ -182,7 +189,7 @@ export class DoorEntity extends EntityClass<Door> {
         data.height * 1,
         wallThickness + 4
       );
-      const material = new THREE.MeshStandardMaterial({ color: data.color })
+      const material = data.mt ? (getMaterialById(data.mt)?.material(new THREE.Vector3(0, 0, 1))) : (new THREE.MeshStandardMaterial({ color: data.color }));
       const doorMeshRight = new THREE.Mesh(geometryRight, material)
       doorMeshRight.position.setX(data.width / 2)
       group.add(doorMeshRight);

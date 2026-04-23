@@ -41,7 +41,8 @@ module.exports = {
     '@typescript-eslint/no-explicit-any': 'off',
     'quote-props': 'off',
     'comma-spacing': 'off',
-    'func-call-spacing': 'off'
+    'func-call-spacing': 'off',
+    'multiline-ternary': 'off'
   },
   env: {
     'vue/setup-compiler-macros': true
