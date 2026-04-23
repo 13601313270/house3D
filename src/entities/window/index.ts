@@ -191,7 +191,7 @@ export class WindowEntity extends EntityClass<Window> {
         data.height * 1 + border,
         wallThickness + 4
       );
-      const material = woodenMaterial;// new THREE.MeshStandardMaterial({ color: bqc })
+      const material = woodenMaterial.material;// new THREE.MeshStandardMaterial({ color: bqc })
       const doorMeshRight = new THREE.Mesh(geometryRight, material)
       doorMeshRight.position.setX(data.width / 2 + border / 2 - 1)
       group.add(doorMeshRight);

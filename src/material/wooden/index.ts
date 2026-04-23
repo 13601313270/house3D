@@ -9,4 +9,7 @@ const material = createTriplanarMaterial({
   map: woodTexture,
   tileSize: 20, // 👈 控制密度
 });
-export default material;
+export default {
+  material,
+  img,
+};

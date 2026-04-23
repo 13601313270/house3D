@@ -172,7 +172,7 @@ export class WallEntity extends EntityClass<Wall> {
       //   color: this.getData().bc,
       //   side: THREE.DoubleSide
       // })
-      const materialBottom = brickMaterial;// cementMaterial;
+      const materialBottom = brickMaterial.material;// cementMaterial;
       const floorMesh = new THREE.Mesh(geometry, materialBottom)
       floorMesh.position.set(0, floorDepth * -1 + 1, 0)
       const group = new THREE.Group()
