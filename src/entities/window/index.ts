@@ -113,7 +113,9 @@ export class WindowEntity extends EntityClass<Window> {
     const screenY = data.y * zoomLevel + panOffset.y
 
     const {
+      hasBorder,
       bqc,
+      tc
     } = data
     const width = data.width * zoomLevel;
     const thickness = wallThickness * zoomLevel;
@@ -122,8 +124,8 @@ export class WindowEntity extends EntityClass<Window> {
     ctx.translate(screenX, screenY)
     ctx.rotate(data.angle)
 
-    ctx.fillStyle = bqc
-    ctx.strokeStyle = bqc
+    ctx.fillStyle = hasBorder ? bqc : tc
+    ctx.strokeStyle = hasBorder ? bqc : tc
     ctx.lineWidth = 3
     ctx.fillRect(-width / 2, -thickness / 2, width, thickness)
     ctx.setLineDash([5, 5])
