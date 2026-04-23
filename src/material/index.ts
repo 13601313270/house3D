@@ -19,7 +19,7 @@ const allMaterial: MaterialDate[] = [
   },
   {
     id: 2,
-    name: '水泥墙',
+    name: '水泥',
     material: cementMaterial.material,
     img: cementMaterial.img,
   },

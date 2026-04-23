@@ -663,8 +663,10 @@ onMounted(() => {
               thickness: wallThickness.value,
               hb: true,// 有地板，默认有
               bc: '#aaa', // 地板颜色，默认灰色
+              bmt: 2, // 地板材质，默认砖墙
               ht: true,// 有天花板，默认有
               tc: '#fff', // 天花板颜色，默认白色
+              tmt: 2, // 天花板材质，默认水泥墙
               td: false, // 天花板是否是双面，默认否
             }
             worldApi.add('wall', [newWall])
@@ -897,8 +899,10 @@ const handleCanvasClick = (e: MouseEvent) => {
               thickness: wallThickness.value,
               hb: true,// 有地板，默认有
               bc: '#aaa', // 地板颜色，默认灰色
+              bmt: 2, // 地板材质，默认砖墙
               ht: true,// 有天花板，默认有
               tc: '#fff', // 天花板颜色，默认白色
+              tmt: 2, // 天花板材质，默认水泥墙
               td: false, // 天花板是否是双面，默认否
             }
             worldApi.add('wall', [newWall])
@@ -922,8 +926,10 @@ const handleCanvasClick = (e: MouseEvent) => {
         thickness: wallThickness.value,
         hb: true,// 有地板，默认有
         bc: '#aaa', // 地板颜色，默认灰色
+        bmt: 2, // 地板材质，默认砖墙
         ht: true,// 有天花板，默认有
         tc: '#fff', // 天花板颜色，默认白色
+        tmt: 2, // 天花板材质，默认水泥墙
         td: false, // 天花板是否是双面，默认否
       }
     }

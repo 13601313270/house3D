@@ -7,6 +7,7 @@ import * as THREE from 'three'
 import { editItem } from '..'
 import cementMaterial from '@/material/cement'
 import brickMaterial from '@/material/redBrick'
+import { getMaterialById } from '@/material'
 
 export function editPropConfig(): editItem[] {
   return [
@@ -31,6 +32,11 @@ export function editPropConfig(): editItem[] {
       dataType: 'color',
     },
     {
+      id: 'bmt',
+      label: '地板材质',
+      dataType: 'material',
+    },
+    {
       id: 'ht',
       label: '是否有天花板',
       dataType: 'boolean',
@@ -39,6 +45,11 @@ export function editPropConfig(): editItem[] {
       id: 'tc',
       label: '天花板颜色',
       dataType: 'color',
+    },
+    {
+      id: 'tmt',
+      label: '天花板材质',
+      dataType: 'material',
     },
     {
       id: 'td',
@@ -168,11 +179,10 @@ export class WallEntity extends EntityClass<Wall> {
       }
       const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettingsBottom)
       geometry.rotateX(-Math.PI / 2);   // 将 XY 平面旋转成 XZ 平面
-      // const materialBottom = new THREE.MeshStandardMaterial({
-      //   color: this.getData().bc,
-      //   side: THREE.DoubleSide
-      // })
-      const materialBottom = brickMaterial.material;// cementMaterial;
+      const materialBottom = getMaterialById(this.getData().bmt)?.material || new THREE.MeshStandardMaterial({
+        color: this.getData().bc,
+        side: THREE.DoubleSide
+      });
       const floorMesh = new THREE.Mesh(geometry, materialBottom)
       floorMesh.position.set(0, floorDepth * -1 + 1, 0)
       const group = new THREE.Group()
@@ -184,10 +194,11 @@ export class WallEntity extends EntityClass<Wall> {
     if (this.getData().ht) {
       const geometryTop = new THREE.ShapeGeometry(shape)
       geometryTop.rotateX(-Math.PI / 2);   // 将 XY 平面旋转成 XZ 平面
-      const materialTop = new THREE.MeshStandardMaterial({
+      const mater = getMaterialById(this.getData().tmt)?.material;
+      const materialTop = mater || new THREE.MeshStandardMaterial({
         color: this.getData().tc,
         side: this.getData().td ? THREE.DoubleSide : THREE.BackSide
-      })
+      });
       const topMesh = new THREE.Mesh(geometryTop, materialTop)
       topMesh.position.set(0, wallHeight + 1, 0)
       const group2 = new THREE.Group()
