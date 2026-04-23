@@ -788,6 +788,14 @@ const handleContextMenu = (e: MouseEvent) => {
               type,
               index: j
             }
+            nextTick(() => {
+              const height = document.querySelector('.context-menu')?.clientHeight
+              if (height && contextMenu.value) {
+                if (e.clientY + height > window.outerHeight) {
+                  contextMenu.value.y = window.outerHeight - height - 5
+                }
+              }
+            })
             return
           }
         }
@@ -1493,6 +1501,8 @@ function updateEditPropInputInfoBoolean(id: string, event: Event) {
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   z-index: 1000;
+  max-height: 80vh;
+  overflow: auto;
 
   .configList {
     display: flex;
