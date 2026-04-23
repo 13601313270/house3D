@@ -14,7 +14,7 @@ const allMaterial: MaterialDate[] = [
   {
     id: 1,
     name: '砖墙',
-    material: () => brickMaterial.material,
+    material: brickMaterial.material,
     img: brickMaterial.img,
   },
   {

@@ -154,7 +154,12 @@ export class WallEntity extends EntityClass<Wall> {
       const shape = new THREE.Shape(points)
       const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings)
       geometry.rotateX(-Math.PI / 2);   // 将 XY 平面旋转成 XZ 平面
-      const material = getMaterialById(this.getData().wmt)?.material(new THREE.Vector3(0, 0, 0)) || new THREE.MeshStandardMaterial({
+      // 计算点points[0]到points[1]的方向向量
+      const direction = new THREE.Vector3(box[1].x - box[0].x, 0, box[1].y - box[0].y).normalize()
+      // 将方向向量旋转90度
+      const rotatedDirection = new THREE.Vector3(-direction.z, direction.y, direction.x)
+
+      const material = getMaterialById(this.getData().wmt)?.material(rotatedDirection) || new THREE.MeshStandardMaterial({
         color: this.getData().color,
         side: THREE.DoubleSide
       })
@@ -182,7 +187,7 @@ export class WallEntity extends EntityClass<Wall> {
       }
       const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettingsBottom)
       geometry.rotateX(-Math.PI / 2);   // 将 XY 平面旋转成 XZ 平面
-      const materialBottom = getMaterialById(this.getData().bmt)?.material(new THREE.Vector3(0, 0, 0)) || new THREE.MeshStandardMaterial({
+      const materialBottom = getMaterialById(this.getData().bmt)?.material(new THREE.Vector3(0, 1, 0)) || new THREE.MeshStandardMaterial({
         color: this.getData().bc,
         side: THREE.DoubleSide
       });
@@ -197,7 +202,7 @@ export class WallEntity extends EntityClass<Wall> {
     if (this.getData().ht) {
       const geometryTop = new THREE.ShapeGeometry(shape)
       geometryTop.rotateX(-Math.PI / 2);   // 将 XY 平面旋转成 XZ 平面
-      const mater = getMaterialById(this.getData().tmt)?.material(new THREE.Vector3(0, 0, 0));
+      const mater = getMaterialById(this.getData().tmt)?.material(new THREE.Vector3(0, 1, 0));
       if (mater) {
         mater.side = this.getData().td ? THREE.DoubleSide : THREE.BackSide;
       }
