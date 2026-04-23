@@ -40,27 +40,34 @@
           <!-- {{ editPropConfigInfo }} -->
           <!-- {{ editPropInputInfo }} -->
           <div class="configList">
-            <label v-for="item in editPropConfigInfo" :key="item.id">
-              {{ item.label }}：{{ editPropInputInfo[item.id] }}
-              <input v-if="item.dataType === 'number'" type="number" :value="editPropInputInfo[item.id]"
-                @change="updateEditPropInputNumberInfo(item.id, $event)" />
-              <input v-else-if="item.dataType === 'color'" type="color" :value="editPropInputInfo[item.id]"
-                @change="updateEditPropInputInfo(item.id, $event)" />
-              <input v-else-if="item.dataType === 'boolean'" type="checkbox" :checked="editPropInputInfo[item.id]"
-                @change="updateEditPropInputInfoBoolean(item.id, $event)" />
-              <div v-else-if="item.dataType === 'material'">
-                <input type="number" :value="editPropInputInfo[item.id]"
+            <div v-for="item in editPropConfigInfo" :key="item.id" class="configItem">
+              <div>
+                {{ item.label }}：{{ editPropInputInfo[item.id] }}
+              </div>
+              <div>
+                <input v-if="item.dataType === 'number'" type="number" :value="editPropInputInfo[item.id]"
                   @change="updateEditPropInputNumberInfo(item.id, $event)" />
-                <div class="materialItem" @click="updateEditPropInputNumberInfo(item.id, 0)">
-                  无
-                </div>
-                <div v-for="item2 in allMaterial" :key="item2.id" class="materialItem"
-                  @click="updateEditPropInputNumberInfo(item.id, item2.id)">
-                  {{ item2.name }}
-                  <img :src="item2.img" alt="material" class="img" />
+                <input v-else-if="item.dataType === 'color'" type="color" :value="editPropInputInfo[item.id]"
+                  @change="updateEditPropInputInfo(item.id, $event)" />
+                <input v-else-if="item.dataType === 'boolean'" type="checkbox" :checked="editPropInputInfo[item.id]"
+                  @change="updateEditPropInputInfoBoolean(item.id, $event)" />
+                <div v-else-if="item.dataType === 'material'" class="materialList">
+                  <div class="materialItem" @click="updateEditPropInputNumberInfo(item.id, 0)">
+                    <div class="imgOuting">
+                      <img src="../assets/Empty.png" alt="noMaterial" class="img" style="width: 50px;" />
+                    </div>
+                    <div class="name">无</div>
+                  </div>
+                  <div v-for="item2 in allMaterial" :key="item2.id" class="materialItem"
+                    @click="updateEditPropInputNumberInfo(item.id, item2.id)">
+                    <div class="imgOuting">
+                      <img :src="item2.img" alt="material" class="img" />
+                    </div>
+                    <div class="name">{{ item2.name }}</div>
+                  </div>
                 </div>
               </div>
-            </label>
+            </div>
           </div>
           <button @click="deleteContextMenuEntity">删除</button>
         </div>
@@ -1505,9 +1512,14 @@ function updateEditPropInputInfoBoolean(id: string, event: Event) {
   overflow: auto;
 
   .configList {
-    display: flex;
-    flex-direction: column;
     padding: 8px;
+
+    .configItem {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+    }
   }
 
   button {
@@ -1527,12 +1539,31 @@ function updateEditPropInputInfoBoolean(id: string, event: Event) {
   }
 }
 
-.materialItem {
-  border: solid 1px black;
+.materialList {
+  display: flex;
+  flex-wrap: wrap;
 
-  .img {
+  .materialItem {
     width: 50px;
-    height: 50px;
+    border: solid 1px black;
+    display: flex;
+    flex-direction: column;
+
+    .imgOuting {
+      width: 50px;
+      height: 50px;
+      overflow: hidden;
+      position: relative;
+
+      .img {
+        width: 400px; // 稍微放大一点，不然50像素，看不清细节
+      }
+    }
+
+    .name {
+      font-size: 14px;
+      text-align: center;
+    }
   }
 }
 </style>
