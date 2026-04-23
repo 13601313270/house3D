@@ -24,7 +24,7 @@ export function createAllWallFromPoints(wallList: Wall[]): wallBox[] {
   for (let i = 0; i < wallList.length; i++) {
     const wallitem = wallList[i];
     const radius = wallitem.thickness / 2;
-    if (wallitem.points.length < 2) return []
+    if (!wallitem.points || wallitem.points.length < 2) return []
     // console.log('========点========')
     for (let j = 0, len = wallitem.points.length; j < len; j++) {
       let prev = wallitem.points[j - 1] || {} as Point;

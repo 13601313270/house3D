@@ -5,8 +5,6 @@ import { drawPoint } from '@/utils/drawPoint'
 import { createAllWallFromPoints } from '@/utils/createAllWallFromPoints'
 import * as THREE from 'three'
 import { editItem } from '..'
-import cementMaterial from '@/material/cement'
-import brickMaterial from '@/material/redBrick'
 import { getMaterialById } from '@/material'
 
 export function editPropConfig(): editItem[] {
