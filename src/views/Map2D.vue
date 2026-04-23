@@ -65,8 +65,8 @@
 
     <div class="split-bar" @mousedown.prevent="startSplit(2)" title="拖动调整左右比例"></div>
     <div class="right-panel" :style="{ width: (1 - panel1SplitWidthPer - panel2SplitWidthPer) * 100 + '%' }">
-      !!{{ cameraState2 }}@@
-      <Canvas3D v-if="cameraState2" ref="canvas3DRef2" :world="worldApi" v-model:cameraState="cameraState2"
+      <!-- {{ cameraState2 }} -->
+      <Canvas3D v-if="cameraState2" ref="canvas3DRef2" :world="worldApi" :cameraState="cameraState2"
         :aspectRatio="cameraState2.aspectW / cameraState2.aspectH" />
     </div>
   </div>
