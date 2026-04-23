@@ -6,8 +6,10 @@ export type Window = Entity & {
   width: number
   height: number
   angle: number
-  bottom: number// 距离地面
-  color: string// 颜色
+  bottom: number // 距离地面
+  bqc: string // 包墙颜色
+  tc: string // 门框颜色
+  ic: string // 玻璃框颜色
   hasBorder: boolean // 是否有门框
   rightOpenAngle: number // 右门打开角度
   leftOpenAngle: number // 左门打开角度

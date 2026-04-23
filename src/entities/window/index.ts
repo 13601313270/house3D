@@ -17,7 +17,9 @@ export function createWindowData() {
     height: 120,
     angle: 0,
     bottom: 40,
-    color: '#3498db',
+    bqc: '#3498db',
+    tc: '#3498db',
+    ic: '#3498db',
     hasBorder: false,// 是否有窗户框
     rightOpenAngle: 0, // 右门打开角度
     leftOpenAngle: 0, // 左门打开角度
@@ -49,14 +51,24 @@ export function editPropConfig(): editItem[] {
       dataType: 'number',
     },
     {
-      id: 'color',
-      label: '颜色',
+      id: 'hasBorder',
+      label: '是否有包墙',
+      dataType: 'boolean',
+    },
+    {
+      id: 'bqc',
+      label: '包墙颜色',
       dataType: 'color',
     },
     {
-      id: 'hasBorder',
-      label: '是否有窗户框',
-      dataType: 'boolean',
+      id: 'tc',
+      label: '门框颜色',
+      dataType: 'color',
+    },
+    {
+      id: 'ic',
+      label: '玻璃框颜色',
+      dataType: 'color',
     },
     {
       id: 'rightOpenAngle',
@@ -100,7 +112,9 @@ export class WindowEntity extends EntityClass<Window> {
     const screenX = data.x * zoomLevel + panOffset.x
     const screenY = data.y * zoomLevel + panOffset.y
 
-    const color = data.color
+    const {
+      bqc,
+    } = data
     const width = data.width * zoomLevel;
     const thickness = wallThickness * zoomLevel;
 
@@ -108,8 +122,8 @@ export class WindowEntity extends EntityClass<Window> {
     ctx.translate(screenX, screenY)
     ctx.rotate(data.angle)
 
-    ctx.fillStyle = color
-    ctx.strokeStyle = color
+    ctx.fillStyle = bqc
+    ctx.strokeStyle = bqc
     ctx.lineWidth = 3
     ctx.fillRect(-width / 2, -thickness / 2, width, thickness)
     ctx.setLineDash([5, 5])
@@ -147,6 +161,11 @@ export class WindowEntity extends EntityClass<Window> {
   create3DMesh(scene: THREE.Scene) {
     const data = this.getData();
     const group = new THREE.Group();
+    const {
+      bqc,
+      tc,
+      ic,
+    } = data
     const wall = this.world.allFileMapObjects.wall.find((entity) => {
       return entity.getData().id === data.wallId;
     })
@@ -169,7 +188,7 @@ export class WindowEntity extends EntityClass<Window> {
         data.height * 1 + border,
         wallThickness + 4
       );
-      const material = new THREE.MeshStandardMaterial({ color: data.color })
+      const material = new THREE.MeshStandardMaterial({ color: bqc })
       const doorMeshRight = new THREE.Mesh(geometryRight, material)
       doorMeshRight.position.setX(data.width / 2 + border / 2 - 1)
       group.add(doorMeshRight);
@@ -204,7 +223,7 @@ export class WindowEntity extends EntityClass<Window> {
     // 内部的框
     const innerKborder = 4;
     (() => {
-      const material = new THREE.MeshStandardMaterial({ color: data.color })
+      const material = new THREE.MeshStandardMaterial({ color: tc })
 
       const geometryRight = new THREE.BoxGeometry(
         innerKborder,
@@ -256,7 +275,7 @@ export class WindowEntity extends EntityClass<Window> {
     (() => {
       const rightWindowGorup = new THREE.Group()
       // 两扇扇面
-      const material = new THREE.MeshStandardMaterial({ color: 'red' })
+      const material = new THREE.MeshStandardMaterial({ color: ic })
 
       const leftX = data.width / -2 + windowKWidth + innerKborder / 2
       const rightX = -windowKWidth / 2;
@@ -307,7 +326,7 @@ export class WindowEntity extends EntityClass<Window> {
     (() => {
       const leftWindowGorup = new THREE.Group()
       // 两扇扇面
-      const material = new THREE.MeshStandardMaterial({ color: 'red' })
+      const material = new THREE.MeshStandardMaterial({ color: ic })
 
       const leftX = windowKWidth / 2;// data.width / -2 + windowKWidth + innerKborder / 2
       const rightX = data.width / 2 - windowKWidth - innerKborder / 2;
