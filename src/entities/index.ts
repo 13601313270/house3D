@@ -37,7 +37,7 @@ export const fileDataKeyToClass: Record<allFileKeysEnum, typeof EntityClass<any>
 export type editItem = {
   id: string,
   label: string,
-  dataType: 'number' | 'poiListAndLineCircle' | 'poiListAndLine' | 'poiList' | 'color' | 'boolean' | 'mesh' | 'area' | string[]/* 枚举 */
+  dataType: 'number' | 'poiListAndLineCircle' | 'poiListAndLine' | 'poiList' | 'color' | 'boolean' | 'mesh' | 'area' | 'material' | string[]/* 枚举 */
 }
 
 export const PropConfigMap: Record<allFileKeysEnum, () => editItem[]> = {

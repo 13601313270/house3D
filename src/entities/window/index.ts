@@ -5,6 +5,8 @@ import * as THREE from 'three'
 import { Brush, Evaluator, SUBTRACTION } from 'three-bvh-csg';
 import { World } from '@/utils/world';
 import woodenMaterial from '@/material/wooden'
+import { editItem } from '..';
+import { getMaterialById } from '@/material';
 
 export function createWindowData() {
   const window: Window = {
@@ -19,19 +21,16 @@ export function createWindowData() {
     angle: 0,
     bottom: 40,
     bqc: '#3498db',
+    bmt: 1,
     tc: '#3498db',
+    tmt: 1,
     ic: '#3498db',
+    icmt: 1,
     hasBorder: false,// 是否有窗户框
     rightOpenAngle: 0, // 右门打开角度
     leftOpenAngle: 0, // 左门打开角度
   }
   return window
-}
-
-type editItem = {
-  id: string,
-  label: string,
-  dataType: 'number' | 'poiListAndLineCircle' | 'poiListAndLine' | 'poiList' | 'color' | 'boolean' | 'mesh' | 'area' | string[]/* 枚举 */
 }
 
 export function editPropConfig(): editItem[] {
@@ -62,14 +61,29 @@ export function editPropConfig(): editItem[] {
       dataType: 'color',
     },
     {
+      id: 'bmt',
+      label: '包墙材质',
+      dataType: 'material',
+    },
+    {
       id: 'tc',
       label: '门框颜色',
       dataType: 'color',
     },
     {
+      id: 'tmt',
+      label: '门框材质',
+      dataType: 'material',
+    },
+    {
       id: 'ic',
       label: '玻璃框颜色',
       dataType: 'color',
+    },
+    {
+      id: 'icmt',
+      label: '玻璃框材质',
+      dataType: 'material',
     },
     {
       id: 'rightOpenAngle',
@@ -191,7 +205,7 @@ export class WindowEntity extends EntityClass<Window> {
         data.height * 1 + border,
         wallThickness + 4
       );
-      const material = woodenMaterial.material;// new THREE.MeshStandardMaterial({ color: bqc })
+      const material = getMaterialById(data.bmt)?.material || new THREE.MeshStandardMaterial({ color: bqc })
       const doorMeshRight = new THREE.Mesh(geometryRight, material)
       doorMeshRight.position.setX(data.width / 2 + border / 2 - 1)
       group.add(doorMeshRight);
@@ -226,7 +240,7 @@ export class WindowEntity extends EntityClass<Window> {
     // 内部的框
     const innerKborder = 4;
     (() => {
-      const material = new THREE.MeshStandardMaterial({ color: tc })
+      const material = getMaterialById(data.tmt)?.material || new THREE.MeshStandardMaterial({ color: tc })
 
       const geometryRight = new THREE.BoxGeometry(
         innerKborder,
@@ -275,10 +289,10 @@ export class WindowEntity extends EntityClass<Window> {
       group.add(doorMeshBottom);
     })();
     const windowKWidth = 4;
+    const windowMaterial = getMaterialById(data.icmt)?.material || new THREE.MeshStandardMaterial({ color: ic });
     (() => {
       const rightWindowGorup = new THREE.Group()
       // 两扇扇面
-      const material = new THREE.MeshStandardMaterial({ color: ic })
 
       const leftX = data.width / -2 + windowKWidth + innerKborder / 2
       const rightX = -windowKWidth / 2;
@@ -288,16 +302,16 @@ export class WindowEntity extends EntityClass<Window> {
         data.height * 1 - innerKborder,
         5
       );
-      const doorMeshRight = new THREE.Mesh(geometryRight, material)
-      doorMeshRight.position.setX(rightX)
-      rightWindowGorup.add(doorMeshRight)
+      const meshRight = new THREE.Mesh(geometryRight, windowMaterial)
+      meshRight.position.setX(rightX)
+      rightWindowGorup.add(meshRight)
       // 左
       const geometryLeft = new THREE.BoxGeometry(
         windowKWidth,
         data.height * 1 - innerKborder,
         5
       );
-      const doorMeshLeft = new THREE.Mesh(geometryLeft, material)
+      const doorMeshLeft = new THREE.Mesh(geometryLeft, windowMaterial)
       doorMeshLeft.position.setX(leftX)
       rightWindowGorup.add(doorMeshLeft)
       // 上
@@ -306,7 +320,7 @@ export class WindowEntity extends EntityClass<Window> {
         windowKWidth,
         5
       );
-      const doorMeshTop = new THREE.Mesh(geometryTop, material)
+      const doorMeshTop = new THREE.Mesh(geometryTop, windowMaterial)
       doorMeshTop.position.setY(data.height / 2 - windowKWidth)
       doorMeshTop.position.setX((leftX + rightX) / 2)
       rightWindowGorup.add(doorMeshTop)
@@ -316,7 +330,7 @@ export class WindowEntity extends EntityClass<Window> {
         windowKWidth,
         5
       );
-      const doorMeshBottom = new THREE.Mesh(geometryBottom, material)
+      const doorMeshBottom = new THREE.Mesh(geometryBottom, windowMaterial)
       doorMeshBottom.position.setY(-data.height / 2 + windowKWidth)
       doorMeshBottom.position.setX((leftX + rightX) / 2)
       rightWindowGorup.add(doorMeshBottom)
@@ -328,9 +342,6 @@ export class WindowEntity extends EntityClass<Window> {
     })();
     (() => {
       const leftWindowGorup = new THREE.Group()
-      // 两扇扇面
-      const material = new THREE.MeshStandardMaterial({ color: ic })
-
       const leftX = windowKWidth / 2;// data.width / -2 + windowKWidth + innerKborder / 2
       const rightX = data.width / 2 - windowKWidth - innerKborder / 2;
       // 右
@@ -339,7 +350,7 @@ export class WindowEntity extends EntityClass<Window> {
         data.height * 1 - innerKborder,
         5
       );
-      const doorMeshRight = new THREE.Mesh(geometryRight, material)
+      const doorMeshRight = new THREE.Mesh(geometryRight, windowMaterial)
       doorMeshRight.position.setX(rightX)
       leftWindowGorup.add(doorMeshRight)
       // 左
@@ -348,16 +359,16 @@ export class WindowEntity extends EntityClass<Window> {
         data.height * 1 - innerKborder,
         5
       );
-      const doorMeshLeft = new THREE.Mesh(geometryLeft, material)
-      doorMeshLeft.position.setX(leftX)
-      leftWindowGorup.add(doorMeshLeft)
+      const meshLeft = new THREE.Mesh(geometryLeft, windowMaterial)
+      meshLeft.position.setX(leftX)
+      leftWindowGorup.add(meshLeft)
       // 上
       const geometryTop = new THREE.BoxGeometry(
         rightX - leftX,
         windowKWidth,
         5
       );
-      const doorMeshTop = new THREE.Mesh(geometryTop, material)
+      const doorMeshTop = new THREE.Mesh(geometryTop, windowMaterial)
       doorMeshTop.position.setY(data.height / 2 - windowKWidth)
       doorMeshTop.position.setX((leftX + rightX) / 2)
       leftWindowGorup.add(doorMeshTop)
@@ -367,7 +378,7 @@ export class WindowEntity extends EntityClass<Window> {
         windowKWidth,
         5
       );
-      const doorMeshBottom = new THREE.Mesh(geometryBottom, material)
+      const doorMeshBottom = new THREE.Mesh(geometryBottom, windowMaterial)
       doorMeshBottom.position.setY(-data.height / 2 + windowKWidth)
       doorMeshBottom.position.setX((leftX + rightX) / 2)
       leftWindowGorup.add(doorMeshBottom)

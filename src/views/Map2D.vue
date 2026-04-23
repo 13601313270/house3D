@@ -48,6 +48,10 @@
                 @change="updateEditPropInputInfo(item.id, $event)" />
               <input v-else-if="item.dataType === 'boolean'" type="checkbox" :checked="editPropInputInfo[item.id]"
                 @change="updateEditPropInputInfoBoolean(item.id, $event)" />
+              <div v-else-if="item.dataType === 'material'">
+                <input type="number" :value="editPropInputInfo[item.id]"
+                  @change="updateEditPropInputNumberInfo(item.id, $event)" />
+              </div>
             </label>
           </div>
           <button @click="deleteContextMenuEntity">删除</button>
@@ -80,7 +84,7 @@ import Canvas3D, { CameraState } from '../components/Canvas3D.vue'
 import { Wall } from '@/entities/wall/index.d'
 import { Door } from '@/entities/door/index.d'
 import { Window } from '@/entities/window/index.d'
-import { allFileKeys, PropConfigMap, fileData } from '@/entities'
+import { allFileKeys, PropConfigMap, fileData, editItem } from '@/entities'
 import { EntityClass, EntityType, MatchSnapPoint } from '@/types/entity'
 import { HandelInfo, PointWithIndex } from '@/types/map2d'
 import pointToLineDistance from '@/utils/pointToLineDistance'
@@ -208,7 +212,7 @@ const contextMenu = ref<{
   thickness?: number
 } | null>(null)
 
-const editPropConfigInfo = ref<any[]>([])
+const editPropConfigInfo = ref<editItem[]>([])
 const editPropInputInfo = ref<any>({})
 
 interface NearestWallResult {

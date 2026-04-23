@@ -31,4 +31,7 @@ const allMaterial: MaterialDate[] = [
   }
 ]
 
-export default allMaterial
+export { allMaterial }
+export function getMaterialById(id: number) {
+  return allMaterial.find(item => item.id === id)
+}
