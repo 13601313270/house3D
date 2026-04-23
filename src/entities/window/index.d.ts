@@ -9,4 +9,6 @@ export type Window = Entity & {
   bottom: number// 距离地面
   color: string// 颜色
   hasBorder: boolean // 是否有门框
+  rightOpenAngle: number // 右门打开角度
+  leftOpenAngle: number // 左门打开角度
 }

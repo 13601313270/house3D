@@ -19,6 +19,8 @@ export function createWindowData() {
     bottom: 40,
     color: '#3498db',
     hasBorder: false,// 是否有窗户框
+    rightOpenAngle: 0, // 右门打开角度
+    leftOpenAngle: 0, // 左门打开角度
   }
   return window
 }
@@ -55,7 +57,17 @@ export function editPropConfig(): editItem[] {
       id: 'hasBorder',
       label: '是否有窗户框',
       dataType: 'boolean',
-    }
+    },
+    {
+      id: 'rightOpenAngle',
+      label: '右门打开角度',
+      dataType: 'number',
+    },
+    {
+      id: 'leftOpenAngle',
+      label: '左门打开角度',
+      dataType: 'number',
+    },
   ]
 }
 
@@ -154,40 +166,143 @@ export class WindowEntity extends EntityClass<Window> {
       const border = 7;
       const geometryRight = new THREE.BoxGeometry(
         border,
-        data.height * 1,
+        data.height * 1 + border,
         wallThickness + 4
       );
       const material = new THREE.MeshStandardMaterial({ color: data.color })
       const doorMeshRight = new THREE.Mesh(geometryRight, material)
-      doorMeshRight.position.setX(data.width / 2)
+      doorMeshRight.position.setX(data.width / 2 + border / 2 - 1)
       group.add(doorMeshRight);
 
       const geometryLeft = new THREE.BoxGeometry(
         border,
-        data.height * 1,
+        data.height * 1 + border,
         wallThickness + 4
+      );
+      const doorMeshLeft = new THREE.Mesh(geometryLeft, material)
+      doorMeshLeft.position.setX(-data.width / 2 - border / 2 + 1)
+      group.add(doorMeshLeft);
+
+      const geometryTop = new THREE.BoxGeometry(
+        data.width * 1 + border * 2 - 2,
+        border,
+        wallThickness + 4
+      );
+      const doorMeshTop = new THREE.Mesh(geometryTop, material)
+      doorMeshTop.position.setY(data.height / 2 + border / 2 - 1)
+      group.add(doorMeshTop);
+
+      const geometryBottom = new THREE.BoxGeometry(
+        data.width * 1 + border * 2 - 2,
+        border,
+        wallThickness + 4
+      );
+      const doorMeshBottom = new THREE.Mesh(geometryBottom, material)
+      doorMeshBottom.position.setY(-data.height / 2 - border / 2 + 1)
+      group.add(doorMeshBottom);
+    })();
+    // 内部的框
+    const innerKborder = 4;
+    (() => {
+      const material = new THREE.MeshStandardMaterial({ color: data.color })
+
+      const geometryRight = new THREE.BoxGeometry(
+        innerKborder,
+        data.height * 1,
+        5
+      );
+      const doorMeshRight = new THREE.Mesh(geometryRight, material)
+      doorMeshRight.position.setX(data.width / 2)
+      group.add(doorMeshRight);
+
+      const geometryCenter = new THREE.BoxGeometry(
+        innerKborder,
+        data.height * 1,
+        5
+      );
+
+      const doorMeshCenter = new THREE.Mesh(geometryCenter, material)
+      doorMeshCenter.position.setX(0)
+      group.add(doorMeshCenter);
+
+      const geometryLeft = new THREE.BoxGeometry(
+        innerKborder,
+        data.height * 1,
+        5
       );
       const doorMeshLeft = new THREE.Mesh(geometryLeft, material)
       doorMeshLeft.position.setX(-data.width / 2)
       group.add(doorMeshLeft);
 
       const geometryTop = new THREE.BoxGeometry(
-        data.width * 1 + border,
-        border,
-        wallThickness + 4
+        data.width * 1 + innerKborder,
+        innerKborder,
+        5
       );
       const doorMeshTop = new THREE.Mesh(geometryTop, material)
       doorMeshTop.position.setY(data.height / 2)
       group.add(doorMeshTop);
 
       const geometryBottom = new THREE.BoxGeometry(
-        data.width * 1 + border,
-        border,
-        wallThickness + 4
+        data.width * 1 + innerKborder,
+        innerKborder,
+        5
       );
       const doorMeshBottom = new THREE.Mesh(geometryBottom, material)
       doorMeshBottom.position.setY(-data.height / 2)
       group.add(doorMeshBottom);
+    })();
+    (() => {
+      const rightWindowGorup = new THREE.Group()
+      // 两扇扇面
+      const material = new THREE.MeshStandardMaterial({ color: 'red' })
+
+      const windowKWidth = 4;
+      const leftX = data.width / -2 + windowKWidth + innerKborder / 2
+      const rightX = -windowKWidth / 2;
+      // 右
+      const geometryRight = new THREE.BoxGeometry(
+        windowKWidth,
+        data.height * 1 - innerKborder,
+        5
+      );
+      const doorMeshRight = new THREE.Mesh(geometryRight, material)
+      doorMeshRight.position.setX(rightX)
+      rightWindowGorup.add(doorMeshRight)
+      // 左
+      const geometryLeft = new THREE.BoxGeometry(
+        windowKWidth,
+        data.height * 1 - innerKborder,
+        5
+      );
+      const doorMeshLeft = new THREE.Mesh(geometryLeft, material)
+      doorMeshLeft.position.setX(leftX)
+      rightWindowGorup.add(doorMeshLeft)
+      // 上
+      const geometryTop = new THREE.BoxGeometry(
+        rightX - leftX,
+        windowKWidth,
+        5
+      );
+      const doorMeshTop = new THREE.Mesh(geometryTop, material)
+      doorMeshTop.position.setY(data.height / 2 - windowKWidth)
+      doorMeshTop.position.setX((leftX + rightX) / 2)
+      rightWindowGorup.add(doorMeshTop)
+      // 下
+      const geometryBottom = new THREE.BoxGeometry(
+        rightX - leftX,
+        windowKWidth,
+        5
+      );
+      const doorMeshBottom = new THREE.Mesh(geometryBottom, material)
+      doorMeshBottom.position.setY(-data.height / 2 + windowKWidth)
+      doorMeshBottom.position.setX((leftX + rightX) / 2)
+      rightWindowGorup.add(doorMeshBottom)
+
+      // 组合起来
+      rightWindowGorup.position.setX(data.width / 2 - innerKborder / 2)
+      rightWindowGorup.rotation.y = THREE.MathUtils.degToRad(data.rightOpenAngle * -1 || 0)
+      group.add(rightWindowGorup);
     })();
     group.position.set(data.x, data.height / 2 + (data.bottom || 0), data.y)
     group.rotateY(data.angle * -1);
