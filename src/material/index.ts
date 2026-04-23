@@ -20,13 +20,13 @@ const allMaterial: MaterialDate[] = [
   {
     id: 2,
     name: '水泥',
-    material: () => cementMaterial.material,
+    material: cementMaterial.material,
     img: cementMaterial.img,
   },
   {
     id: 3,
     name: '木头',
-    material: () => woodMaterial.material,
+    material: woodMaterial.material,
     img: woodMaterial.img,
   }
 ]

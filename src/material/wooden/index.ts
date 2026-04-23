@@ -5,11 +5,15 @@ import { createTriplanarMaterial } from '../createTriplanarMaterial';
 
 const textureLoader = new THREE.TextureLoader();
 const woodTexture = textureLoader.load(img);
-const material = createTriplanarMaterial({
-  map: woodTexture,
-  tileSize: 20, // 👈 控制密度
-});
+function getMaterial(vector: THREE.Vector3) {
+  const material = createTriplanarMaterial({
+    map: woodTexture,
+    tileSize: 20, // 👈 控制密度
+    direction: vector,
+  });
+  return material
+}
 export default {
-  material,
+  material: getMaterial,
   img,
 };
