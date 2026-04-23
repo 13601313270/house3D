@@ -53,13 +53,15 @@
                 <input v-else-if="item.dataType === 'boolean'" type="checkbox" :checked="editPropInputInfo[item.id]"
                   @change="updateEditPropInputInfoBoolean(item.id, $event)" />
                 <div v-else-if="item.dataType === 'material'" class="materialList">
-                  <div class="materialItem" @click="updateEditPropInputNumberInfo(item.id, 0)">
+                  <div class="materialItem" :class="{ active: editPropInputInfo[item.id] === 0 }"
+                    @click="updateEditPropInputNumberInfo(item.id, 0)">
                     <div class="imgOuting">
                       <img src="../assets/Empty.png" alt="noMaterial" class="img" style="width: 50px;" />
                     </div>
                     <div class="name">无</div>
                   </div>
                   <div v-for="item2 in allMaterial" :key="item2.id" class="materialItem"
+                    :class="{ active: editPropInputInfo[item.id] === item2.id }"
                     @click="updateEditPropInputNumberInfo(item.id, item2.id)">
                     <div class="imgOuting">
                       <img :src="item2.img" alt="material" class="img" />
@@ -659,6 +661,7 @@ onMounted(() => {
               y: firstPoint.y,
               z: 0,
               color: '#fff',
+              wmt: 0, // 墙材质
               points: [...tempDrawWall.value.points],
               thickness: wallThickness.value,
               hb: true,// 有地板，默认有
@@ -895,6 +898,7 @@ const handleCanvasClick = (e: MouseEvent) => {
               x: snapped.point.x,
               y: snapped.point.y,
               color: '#fff',
+              wmt: 0, // 墙材质
               z: 0,
               thickness: wallThickness.value,
               hb: true,// 有地板，默认有
@@ -921,6 +925,7 @@ const handleCanvasClick = (e: MouseEvent) => {
         x: clickPoint.x,
         y: clickPoint.y,
         color: '#fff',
+        wmt: 0, // 墙材质
         z: 0,
         points: [clickPoint],
         thickness: wallThickness.value,
@@ -1561,12 +1566,19 @@ function updateEditPropInputInfoBoolean(id: string, event: Event) {
     border: solid 1px black;
     display: flex;
     flex-direction: column;
+    box-sizing: border-box;
+
+    &.active {
+      border: solid 1px #1890ff;
+      box-shadow: inset 0 0 0px 2px #1890ff;
+    }
 
     .imgOuting {
-      width: 50px;
-      height: 50px;
+      width: 48px;
+      height: 48px;
       overflow: hidden;
       position: relative;
+      z-index: -1;
 
       .img {
         width: 400px; // 稍微放大一点，不然50像素，看不清细节
