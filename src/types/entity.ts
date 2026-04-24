@@ -46,7 +46,8 @@ export abstract class EntityClass<T extends Entity> {
   abstract create3DMesh(scene: THREE.Scene, ...args: any[]): THREE.Group[]
 
   private cacheKeyStr = '';
-  draw3DAndCache(scene: THREE.Scene) {
+  draw3DAndCache() {
+    const scene: THREE.Scene = this.world.scene
     const newKeyStr = this.type + JSON.stringify(this.data)
     if (this.cacheKeyStr === newKeyStr) {
       return this.meshList
@@ -104,5 +105,21 @@ export abstract class EntityClass<T extends Entity> {
     this.data.y = newPosition.y
     this.remove3DCache()
     this.world._callAllOnChangeCallback()
+  }
+
+  beforeRemove() {
+    const scene: THREE.Scene = this.world.scene
+    this.remove3DCache()
+    this.meshList.forEach(mesh => scene.remove(mesh))
+
+    if (this.associationEntity.length > 0) {
+      this.associationEntity.forEach(entity => {
+        const index = entity.associationEntity.indexOf(this)
+        if (index !== -1) {
+          entity.associationEntity.splice(index, 1)
+        }
+      })
+    }
+    this.associationEntity = []
   }
 }

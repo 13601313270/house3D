@@ -238,10 +238,9 @@ export class World {
   }
 
   draw3D() {
-    const { scene } = this;
     allFileKeys.forEach((key) => {
       (this.allFileMapObjects[key] as EntityClass<any>[]).forEach((wall) => {
-        wall.draw3DAndCache(scene)
+        wall.draw3DAndCache()
       });
     });
   }
@@ -286,12 +285,16 @@ export class World {
   }
 
   clear(type: EntityType) {
+    (this.allFileMapObjects[type] as EntityClass<any>[]).forEach((item) => {
+      item.beforeRemove()
+    });
     this.allFileMapObjects[type] = []
     this.changeBindList.forEach(callback => callback())
   }
 
   splice(type: EntityType, index: number, count: number = 1) {
     if (this.allFileMapObjects[type]) {
+      this.allFileMapObjects[type][index].beforeRemove()
       this.allFileMapObjects[type].splice(index, count)
       this.changeBindList.forEach(callback => callback())
     }
