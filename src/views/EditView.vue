@@ -44,27 +44,27 @@ onMounted(() => {
   const scene = new THREE.Scene();
 
   // 可选：添加一些环境光，让模型看得更清楚
-  const ambientLight = new THREE.AmbientLight(0xffffff, 1);
+  const ambientLight = new THREE.AmbientLight(0xffffff, 2);
   scene.add(ambientLight);
 
   // 主光源 - 方向光，产生主要阴影和立体感
-  // const directionalLight = new THREE.DirectionalLight(0xffffff, 1.2);
-  // directionalLight.position.set(5, 10, 0);
-  // directionalLight.castShadow = true;
-  // directionalLight.receiveShadow = true;
-  // directionalLight.shadow.mapSize.width = 1024;
-  // directionalLight.shadow.mapSize.height = 1024;
-  // scene.add(directionalLight);
+  const directionalLight = new THREE.DirectionalLight(0xffffff, 1.2);
+  directionalLight.position.set(5, 10, 0);
+  directionalLight.castShadow = true;
+  directionalLight.receiveShadow = true;
+  directionalLight.shadow.mapSize.width = 1024;
+  directionalLight.shadow.mapSize.height = 1024;
+  scene.add(directionalLight);
 
-  // // 辅助光源 - 从背面补充照明
-  // const backLight = new THREE.DirectionalLight(0xffffff, 0.5);
-  // backLight.position.set(-3, 2, -4);
-  // scene.add(backLight);
+  // 辅助光源 - 从背面补充照明
+  const backLight = new THREE.DirectionalLight(0xffffff, 0.5);
+  backLight.position.set(-3, 2, -4);
+  scene.add(backLight);
 
-  // // 填充光 - 从侧面补充
-  // const fillLight = new THREE.PointLight(0xffaa66, 0.3);
-  // fillLight.position.set(2, 1, 3);
-  // scene.add(fillLight);
+  // 填充光 - 从侧面补充
+  const fillLight = new THREE.PointLight(0xffaa66, 0.3);
+  fillLight.position.set(2, 1, 3);
+  scene.add(fillLight);
 
   // const objLoader = new OBJLoader();
   const glbloader = new GLTFLoader();

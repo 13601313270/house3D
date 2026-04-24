@@ -6,6 +6,7 @@ import woodFloorMaterial from './woodFloor'
 import roughPlankMaterial from './roughPlank'
 import squareFloorTileMaterial from './squareFloorTile'
 import clayRoofTilesMaterial from './clayRoofTiles'
+import ironMaterial from './iron'
 
 type MaterialDate = {
   id: number
@@ -56,7 +57,13 @@ const allMaterial: MaterialDate[] = [
     name: '粘土瓦片',
     material: clayRoofTilesMaterial.material,
     img: clayRoofTilesMaterial.img,
-  }
+  },
+  // {
+  //   id: 8,
+  //   name: '铁',
+  //   material: ironMaterial.material,
+  //   img: ironMaterial.img,
+  // }
 ]
 
 export { allMaterial }
