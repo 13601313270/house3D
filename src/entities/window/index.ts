@@ -100,7 +100,6 @@ export function editPropConfig(): editItem[] {
 
 export class WindowEntity extends EntityClass<Window> {
   type: EntityType = 'window'
-  height: number
   isPointObj: boolean = true
 
   constructor(world: World, window: Window) {
@@ -114,7 +113,6 @@ export class WindowEntity extends EntityClass<Window> {
         wall.associationEntity.push(this)
       }
     }
-    this.height = window.height
   }
 
   draw2D(
