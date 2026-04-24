@@ -7,6 +7,11 @@ import roughPlankMaterial from './roughPlank'
 import squareFloorTileMaterial from './squareFloorTile'
 import clayRoofTilesMaterial from './clayRoofTiles'
 import ironMaterial from './iron'
+import oldLinoleumFlooringMaterial from './oldLinoleumFlooring'
+import sandstoneMaterial from './sandstone'
+import brickPavementMaterial from './brickPavement'
+import orientedStrandBoardMaterial from './orientedStrandBoard'
+import marbleCliffMaterial from './marbleCliff'
 
 type MaterialDate = {
   id: number
@@ -63,7 +68,37 @@ const allMaterial: MaterialDate[] = [
   //   name: '铁',
   //   material: ironMaterial.material,
   //   img: ironMaterial.img,
-  // }
+  // },
+  {
+    id: 9,
+    name: '复古地砖',
+    material: oldLinoleumFlooringMaterial.material,
+    img: oldLinoleumFlooringMaterial.img,
+  },
+  {
+    id: 10,
+    name: '沙石',
+    material: sandstoneMaterial.material,
+    img: sandstoneMaterial.img,
+  },
+  {
+    id: 11,
+    name: '砖铺',
+    material: brickPavementMaterial.material,
+    img: brickPavementMaterial.img,
+  },
+  {
+    id: 12,
+    name: '定向刨花板',
+    material: orientedStrandBoardMaterial.material,
+    img: orientedStrandBoardMaterial.img,
+  },
+  {
+    id: 13,
+    name: '大理石崖',
+    material: marbleCliffMaterial.material,
+    img: marbleCliffMaterial.img,
+  },
 ]
 
 export { allMaterial }

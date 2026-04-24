@@ -54,7 +54,7 @@
                   @change="updateEditPropInputInfoBoolean(item.id, $event)" />
                 <div v-else-if="item.dataType === 'material'" class="materialList">
                   <div @click="allMaterialShow = true, allMaterialShowPropId = item.id">
-                    <div class="materialItem" v-if="editPropInputInfo[item.id] === 0">
+                    <div class="materialItem" v-if="!editPropInputInfo[item.id]">
                       <div class="imgOuting">
                         <img src="../assets/Empty.png" alt="noMaterial" class="img"
                           style="width: 50px;background-color: white;" />
