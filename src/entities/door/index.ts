@@ -23,7 +23,7 @@ export function createDoorData() {
     angle: 0,
     hasBorder: true,
     color: '#e67e22',
-    mt: 0,
+    mt: 3,
     openType: 1,
   }
   return door

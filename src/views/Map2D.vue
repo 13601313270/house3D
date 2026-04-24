@@ -86,6 +86,13 @@
 
     <div class="split-bar" @mousedown.prevent="startSplit(2)" title="拖动调整左右比例"></div>
     <div class="right-panel" :style="{ width: (1 - panel1SplitWidthPer - panel2SplitWidthPer) * 100 + '%' }">
+      <div class="rightCameraList">
+        摄像机：
+        <div class="cameraList">
+          <div v-for="(item, index) in allCamera" @click="changeCamera2State(index)" class="cameraItem">{{ index }}
+          </div>
+        </div>
+      </div>
       <Canvas3D v-if="cameraState2" ref="canvas3DRef2" :world="worldApi" :cameraState="cameraState2"
         :aspectRatio="cameraState2.aspectW / cameraState2.aspectH" />
     </div>
@@ -176,6 +183,7 @@ const cameraState = ref<CameraState>({
   aspectW: 1,
   aspectH: 1,
 })
+const allCamera = ref<CameraState[]>([])
 const cameraState2 = ref<CameraState | null>(null)
 
 let insertTempDoor: Door | null = null;
@@ -233,6 +241,8 @@ const contextMenu = ref<{
 
 const editPropConfigInfo = ref<editItem[]>([])
 const editPropInputInfo = ref<any>({})
+const editPropTypeKey = ref<EntityType>()
+const editPropTypeIndex = ref<number>(-1)
 
 interface NearestWallResult {
   wall: Wall
@@ -605,21 +615,27 @@ const drawWrapper = () => {
   }
 }
 
-function changeCamera2State() {
-  if (worldApi.getObjects('camera') && worldApi.getObjects('camera')[0]) {
-    const cameraData = worldApi.getObjects('camera')[0] as CameraData
-    cameraState2.value = {
-      targetPositionX: cameraData.targetPositionX,
-      targetPositionY: cameraData.targetPositionY,
-      targetPositionZ: cameraData.targetPositionZ,
-      positionX: cameraData.x,
-      positionY: cameraData.y,
-      positionZ: cameraData.z,
-      fov: cameraData.fov,
-      aspectW: cameraData.aspectW,
-      aspectH: cameraData.aspectH,
-    }
+function changeCamera2State(index: number = 0) {
+  if (worldApi.getObjects('camera')) {
+    const allCameraList: CameraState[] = [];
+    console.log('生成摄像机', JSON.stringify(worldApi.getObjects('camera') as CameraData[]));
+    (worldApi.getObjects('camera') as CameraData[]).forEach(cameraData => {
+      allCameraList.push({
+        targetPositionX: cameraData.targetPositionX,
+        targetPositionY: cameraData.targetPositionY,
+        targetPositionZ: cameraData.targetPositionZ,
+        positionX: cameraData.x,
+        positionY: cameraData.y,
+        positionZ: cameraData.z,
+        fov: cameraData.fov,
+        aspectW: cameraData.aspectW,
+        aspectH: cameraData.aspectH,
+      });
+    })
+    allCamera.value = allCameraList
+    cameraState2.value = allCameraList[index]
   } else {
+    allCamera.value = []
     cameraState2.value = null
   }
 }
@@ -755,9 +771,6 @@ const handleFileChange = (e: Event) => {
   input.value = ''
 }
 
-const editPropTypeKey = ref<EntityType>()
-const editPropTypeIndex = ref<number>(-1)
-
 const handleContextMenu = (e: MouseEvent) => {
   e.preventDefault()
 
@@ -772,6 +785,7 @@ const handleContextMenu = (e: MouseEvent) => {
 
   editPropConfigInfo.value = []
   editPropInputInfo.value = {}
+  editPropTypeIndex.value = -1
 
   for (let i = 0; i < allFileKeys.length; i++) {
     const type = allFileKeys[i]
@@ -817,7 +831,6 @@ const handleContextMenu = (e: MouseEvent) => {
       }
     }
   }
-  // 检查是否点击了门
   contextMenu.value = null
 }
 
@@ -1072,25 +1085,6 @@ const handleMouseMove = (e: MouseEvent) => {
       }
     }
     matchHandelObj.matchHandelMoveCallback(x, y, matchHandelInfo)
-    if (matchHandelInfo?.type === 'camera') {
-      if (cameraState2.value && 'positionX' in cameraState2.value) {
-        console.log('matchHandelInfo.index', matchHandelInfo.index)
-
-        if (matchHandelInfo.index === 1) {
-          // cameraState2.value = {
-          //   ...cameraState2.value,
-          //   targetPositionX: x,
-          //   targetPositionY: y,
-          // }
-        } else {
-          // cameraState2.value = {
-          //   ...cameraState2.value,
-          //   positionX: x,
-          //   positionY: y,
-          // }
-        }
-      }
-    }
     drawWrapper()
   }
 
@@ -1389,10 +1383,10 @@ function changeCurrentTool(type: 'wall' | 'door' | 'window' | 'camera' | 'drag')
 }
 
 watch(() => editPropInputInfo.value, () => {
-  if (editPropTypeKey.value) {
+  if (editPropTypeKey.value && editPropTypeIndex.value > -1) {
     // console.log(111, worldApi.getObjects(editPropTypeKey.value)[editPropTypeIndex.value], editPropInputInfo.value)
     // Object.assign(worldApi.getObjects(editPropTypeKey.value)[editPropTypeIndex.value], editPropInputInfo.value)
-    worldApi.replaceObjects(editPropTypeKey.value, editPropTypeIndex.value, editPropInputInfo.value)
+    worldApi.replaceObjects(editPropTypeKey.value, editPropTypeIndex.value, JSON.parse(JSON.stringify(editPropInputInfo.value)))
   }
   drawWrapper()
 }, {
@@ -1718,6 +1712,29 @@ function updateEditPropInputInfoBoolean(id: string, event: Event) {
           background-color: white;
         }
       }
+    }
+  }
+}
+
+.rightCameraList {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin-bottom: 4px;
+  margin-top: -8px;
+  width: 100%;
+
+  .cameraList {
+    display: flex;
+
+    .cameraItem {
+      border: solid 1px black;
+      width: 32px;
+      height: 32px;
+      line-height: 32px;
+      text-align: center;
+      border-radius: 4px;
+      margin-left: 4px;
     }
   }
 }
