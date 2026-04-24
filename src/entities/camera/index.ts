@@ -11,13 +11,13 @@ export function createCameraData() {
     x: 0,
     y: 0,
     z: 100,
-    aspectW: 16,
-    aspectH: 9,
+    aspectW: 9,
+    aspectH: 16,
     // 相机目标位置
     targetPositionX: 0,
     targetPositionY: 0,
     targetPositionZ: 100,
-    fov: 45,
+    fov: 55,
   }
   return camera
 }

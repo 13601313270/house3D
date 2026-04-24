@@ -89,18 +89,19 @@
     <div class="split-bar" @mousedown.prevent="startSplit(2)" title="拖动调整左右比例"></div>
     <div class="right-panel" :style="{ width: (1 - panel1SplitWidthPer - panel2SplitWidthPer) * 100 + '%' }">
       <div class="tools">
-        摄像机：
+        <div style="flex-shrink: 0;">摄像机：</div>
         <div class="cameraList">
           <div v-for="(item, index) in allCamera" @click="changeCamera2State(index)" class="cameraItem">{{ index }}
           </div>
         </div>
-        <div class="tools">
+        <div>
           <button type="button">导出图片</button>
         </div>
       </div>
       <div class="right-panel-content">
-        <Canvas3D v-if="cameraState2" ref="canvas3DRef2" :world="worldApi" :cameraState="cameraState2"
-          :aspectRatio="cameraState2.aspectW / cameraState2.aspectH" />
+        <Canvas3D v-if="allCamera.length && cameraState2" ref="canvas3DRef2" :world="worldApi"
+          :cameraState="cameraState2" :aspectRatio="cameraState2.aspectW / cameraState2.aspectH" />
+        <div v-else class="noCamera">场景中请至少添加一个摄像机</div>
       </div>
     </div>
 
@@ -1195,6 +1196,8 @@ const handleMouseMove = (e: MouseEvent) => {
       }
       insertTempCamera.x = x
       insertTempCamera.y = y
+      insertTempCamera.targetPositionX = x + 100
+      insertTempCamera.targetPositionY = y
       drawWrapper()
     }
   }
@@ -1428,7 +1431,7 @@ function updateEditPropInputInfoBoolean(id: string, event: Event) {
 
 .toolbar {
   display: flex;
-  padding: 8px;
+  padding: 4px 8px;
   background: white;
   gap: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
@@ -1750,12 +1753,22 @@ button {
 
   .cameraItem {
     border: solid 1px black;
-    width: 32px;
-    height: 32px;
+    width: 28px;
+    height: 28px;
     line-height: 32px;
     text-align: center;
     border-radius: 4px;
     margin-left: 4px;
   }
+}
+
+.noCamera {
+  font-size: 14px;
+  color: #ff4d4f;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
 }
 </style>
