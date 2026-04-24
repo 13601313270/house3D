@@ -304,17 +304,30 @@ const updateContainerHeight = (renderer: THREE.WebGLRenderer) => {
     renderHeight = containerHeight
     renderWidth = containerHeight * props.aspectRatio
   }
-  console.log('renderWidth', renderWidth, 'renderHeight', renderHeight)
+  let hasChangeCamera = false;
 
-  camera.aspect = renderWidth / renderHeight
-  if ('fov' in cameraState.value) {
-    const vFov = calcVerticalFovByHorizontalFov(cameraState.value.fov, renderWidth / renderHeight)
-    console.log('distance', vFov)
-    camera.fov = vFov
+  const oldSize = renderer.getSize(new THREE.Vector2())
+  if (oldSize.x !== renderWidth || oldSize.y !== renderHeight) {
+    hasChangeCamera = true
   }
-  camera.updateProjectionMatrix()
-  renderer.setSize(renderWidth, renderHeight)
-  // console.log('render size', renderWidth, renderHeight, props.aspectRatio, containerAspectRatio)
+  const newAspect = renderWidth / renderHeight
+  if (camera.aspect !== newAspect) {
+    camera.aspect = newAspect
+    hasChangeCamera = true
+  }
+  if ('fov' in cameraState.value) {
+    const vFov = calcVerticalFovByHorizontalFov(cameraState.value.fov, newAspect)
+    console.log('distance', vFov)
+    if (camera.fov !== vFov) {
+      camera.fov = vFov
+      hasChangeCamera = true
+    }
+  }
+  if (hasChangeCamera) {
+    console.log('renderWidth', renderWidth, 'renderHeight', renderHeight)
+    camera.updateProjectionMatrix()
+    renderer.setSize(renderWidth, renderHeight)
+  }
 }
 
 onMounted(() => {

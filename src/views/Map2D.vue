@@ -626,7 +626,7 @@ const drawWrapper = () => {
 function changeCamera2State(index: number = 0) {
   if (worldApi.getObjects('camera')) {
     const allCameraList: CameraState[] = [];
-    console.log('生成摄像机', JSON.stringify(worldApi.getObjects('camera') as CameraData[]));
+    // console.log('生成摄像机', JSON.stringify(worldApi.getObjects('camera') as CameraData[]));
     (worldApi.getObjects('camera') as CameraData[]).forEach(cameraData => {
       allCameraList.push({
         targetPositionX: cameraData.targetPositionX,

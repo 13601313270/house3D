@@ -106,8 +106,6 @@ export abstract class EntityClass<T extends Entity> {
     this.data.x = newPosition.x
     this.data.y = newPosition.y
     this.remove3DCache()
-    // @ts-ignore
-    console.log('renderWidth-0-2', window.ccc?.fov)
     this.world._callAllOnChangeCallback()
   }
 

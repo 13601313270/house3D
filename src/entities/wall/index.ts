@@ -149,7 +149,6 @@ export class WallEntity extends EntityClass<Wall> {
       // bevelSize: 2,
       // bevelSegments: 1
     }
-    console.log('wallBoxList', wallBoxList)
     for (let i = 0; i < wallBoxList.length; i++) {
       const box = wallBoxList[i]
 

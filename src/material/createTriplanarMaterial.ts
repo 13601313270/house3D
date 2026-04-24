@@ -24,7 +24,7 @@ export function createTriplanarMaterial(
 
   const material = new THREE.MeshStandardMaterial({
     map,
-    normalMap: normalMap ?? undefined,
+    // normalMap: normalMap ?? undefined, // 暂时不要normalMap
     side,
   });
 
