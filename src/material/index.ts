@@ -12,6 +12,7 @@ import sandstoneMaterial from './sandstone'
 import brickPavementMaterial from './brickPavement'
 import orientedStrandBoardMaterial from './orientedStrandBoard'
 import marbleCliffMaterial from './marbleCliff'
+import ginghamMaterial from './gingham'
 
 type MaterialDate = {
   id: number
@@ -99,6 +100,12 @@ const allMaterial: MaterialDate[] = [
     material: marbleCliffMaterial.material,
     img: marbleCliffMaterial.img,
   },
+  {
+    id: 14,
+    name: '格林布料',
+    material: ginghamMaterial.material,
+    img: ginghamMaterial.img,
+  }
 ]
 
 export { allMaterial }
