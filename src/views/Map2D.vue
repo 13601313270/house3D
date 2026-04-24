@@ -56,7 +56,8 @@
                   <div class="materialItem" :class="{ active: editPropInputInfo[item.id] === 0 }"
                     @click="updateEditPropInputNumberInfo(item.id, 0)">
                     <div class="imgOuting">
-                      <img src="../assets/Empty.png" alt="noMaterial" class="img" style="width: 50px;" />
+                      <img src="../assets/Empty.png" alt="noMaterial" class="img"
+                        style="width: 50px;background-color: white;" />
                     </div>
                     <div class="name">无</div>
                   </div>
@@ -1563,6 +1564,7 @@ function updateEditPropInputInfoBoolean(id: string, event: Event) {
 .materialList {
   display: flex;
   flex-wrap: wrap;
+  width: 200px;
 
   .materialItem {
     width: 50px;
@@ -1570,6 +1572,13 @@ function updateEditPropInputInfoBoolean(id: string, event: Event) {
     display: flex;
     flex-direction: column;
     box-sizing: border-box;
+    border-radius: 4px;
+    overflow: hidden;
+
+    &:hover {
+      transform: scale(2);
+      transition: all 0.1s;
+    }
 
     &.active {
       border: solid 1px #1890ff;
@@ -1584,13 +1593,15 @@ function updateEditPropInputInfoBoolean(id: string, event: Event) {
       z-index: -1;
 
       .img {
-        width: 400px; // 稍微放大一点，不然50像素，看不清细节
+        width: 300px; // 稍微放大一点，不然50像素，看不清细节
       }
     }
 
     .name {
+      z-index: -1;
       font-size: 14px;
       text-align: center;
+      background-color: white;
     }
   }
 }
