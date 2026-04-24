@@ -88,9 +88,13 @@ export class DoorEntity extends EntityClass<Door> {
     ctx: CanvasRenderingContext2D,
     panOffset: Point,
     zoomLevel: number,
-    wallThickness: number,
   ): void {
     const data = this.getData();
+    const findWall = this.world.allFileMapObjects.wall.find((entity) => entity.getData().id === data.wallId);
+    let wallThickness = 10;
+    if (findWall) {
+      wallThickness = findWall.getData().thickness;
+    }
     // 实现门的2D绘制逻辑
     const screenX = data.x * zoomLevel + panOffset.x
     const screenY = data.y * zoomLevel + panOffset.y
@@ -130,7 +134,6 @@ export class DoorEntity extends EntityClass<Door> {
       return entity.getData().id === data.wallId
     })
     const wallThickness = wall ? wall.getData().thickness : 10;
-    console.log('s---1---');
     const changeBLBState = () => {
       if (this.glbObj) {
         this.glbObj.traverse((child: any) => {

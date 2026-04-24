@@ -119,9 +119,13 @@ export class WindowEntity extends EntityClass<Window> {
     ctx: CanvasRenderingContext2D,
     panOffset: Point,
     zoomLevel: number,
-    wallThickness: number,
   ): void {
     const data = this.getData();
+    const findWall = this.world.allFileMapObjects.wall.find((entity) => entity.getData().id === data.wallId);
+    let wallThickness = 10;
+    if (findWall) {
+      wallThickness = findWall.getData().thickness;
+    }
     const screenX = data.x * zoomLevel + panOffset.x
     const screenY = data.y * zoomLevel + panOffset.y
 

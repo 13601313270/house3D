@@ -63,9 +63,11 @@ export abstract class EntityClass<T extends Entity> {
 
   public remove3DCache() {
     // 这里注意防止死循环
-    console.log('remove3DCache')
-    this.meshList.forEach(mesh => this.world.scene.remove(mesh))
-    this.meshList = []
+    // console.log('remove3DCache')
+    if (this.meshList.length) {
+      this.meshList.forEach(mesh => this.world.scene.remove(mesh))
+      this.meshList = []
+    }
     if (this.cacheKeyStr) {
       this.cacheKeyStr = ''
       if (this.associationEntity.length > 0) {
@@ -104,6 +106,8 @@ export abstract class EntityClass<T extends Entity> {
     this.data.x = newPosition.x
     this.data.y = newPosition.y
     this.remove3DCache()
+    // @ts-ignore
+    console.log('renderWidth-0-2', window.ccc?.fov)
     this.world._callAllOnChangeCallback()
   }
 
