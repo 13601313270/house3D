@@ -81,20 +81,27 @@
 
     <div class="right-panel" :style="{ width: panel2SplitWidthPer * 100 + '%' }">
       <!-- {{ insertTempDoor }} -->
-      <Canvas3D ref="canvas3DRef" :world="worldApi" v-model:cameraState="cameraState" :aspectRatio="1" />
+      <div class="right-panel-content">
+        <Canvas3D ref="canvas3DRef" :world="worldApi" v-model:cameraState="cameraState" :aspectRatio="1" />
+      </div>
     </div>
 
     <div class="split-bar" @mousedown.prevent="startSplit(2)" title="拖动调整左右比例"></div>
     <div class="right-panel" :style="{ width: (1 - panel1SplitWidthPer - panel2SplitWidthPer) * 100 + '%' }">
-      <div class="rightCameraList">
+      <div class="tools">
         摄像机：
         <div class="cameraList">
           <div v-for="(item, index) in allCamera" @click="changeCamera2State(index)" class="cameraItem">{{ index }}
           </div>
         </div>
+        <div class="tools">
+          <button type="button">导出图片</button>
+        </div>
       </div>
-      <Canvas3D v-if="cameraState2" ref="canvas3DRef2" :world="worldApi" :cameraState="cameraState2"
-        :aspectRatio="cameraState2.aspectW / cameraState2.aspectH" />
+      <div class="right-panel-content">
+        <Canvas3D v-if="cameraState2" ref="canvas3DRef2" :world="worldApi" :cameraState="cameraState2"
+          :aspectRatio="cameraState2.aspectW / cameraState2.aspectH" />
+      </div>
     </div>
 
     <div class="allMaterialPanel" v-if="allMaterialShow && allMaterialShowPropId"
@@ -1464,7 +1471,7 @@ function updateEditPropInputInfoBoolean(id: string, event: Event) {
   }
 }
 
-.toolbar button {
+button {
   padding: 4px 8px;
   border: none;
   border-radius: 4px;
@@ -1510,13 +1517,34 @@ function updateEditPropInputInfoBoolean(id: string, event: Event) {
 
 .right-panel {
   height: 100%;
-  padding: 12px;
   background: #f0f2f5;
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
   box-sizing: border-box;
   overflow: hidden;
+  position: relative;
+  display: flex;
+
+  .tools {
+    left: 0;
+    top: 0;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 4px;
+    background-color: white;
+  }
+
+  .right-panel-content {
+    padding: 8px;
+    width: 100%;
+    flex-grow: 1;
+    box-sizing: border-box;
+  }
 }
 
 .split-bar {
@@ -1716,26 +1744,18 @@ function updateEditPropInputInfoBoolean(id: string, event: Event) {
   }
 }
 
-.rightCameraList {
+.cameraList {
   display: flex;
-  flex-direction: row;
-  align-items: center;
-  margin-bottom: 4px;
-  margin-top: -8px;
-  width: 100%;
+  flex-grow: 1;
 
-  .cameraList {
-    display: flex;
-
-    .cameraItem {
-      border: solid 1px black;
-      width: 32px;
-      height: 32px;
-      line-height: 32px;
-      text-align: center;
-      border-radius: 4px;
-      margin-left: 4px;
-    }
+  .cameraItem {
+    border: solid 1px black;
+    width: 32px;
+    height: 32px;
+    line-height: 32px;
+    text-align: center;
+    border-radius: 4px;
+    margin-left: 4px;
   }
 }
 </style>

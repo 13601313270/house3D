@@ -377,7 +377,7 @@ function calcVerticalFovByHorizontalFov(hFov: number, aspect: number) {
   display: flex;
   align-items: center;
   justify-content: center;
-  overflow: hidden;
+  // overflow: hidden;
   width: 100%;
   height: 100%;
 
@@ -385,11 +385,12 @@ function calcVerticalFovByHorizontalFov(hFov: number, aspect: number) {
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); */
   :deep(>canvas) {
-    border: 2px solid #d0d0d0;
-    box-sizing: border-box;
-    border-radius: 8px;
     width: 100%;
     height: 100%;
+    border: 1px solid #a1a1a1;
+    box-sizing: border-box;
+    border-radius: 8px;
+    box-shadow: 0 0 14px #8d8d8d;
   }
 }
 
