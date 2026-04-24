@@ -13,6 +13,8 @@ import brickPavementMaterial from './brickPavement'
 import orientedStrandBoardMaterial from './orientedStrandBoard'
 import marbleCliffMaterial from './marbleCliff'
 import ginghamMaterial from './gingham'
+import rockEmbeddedMaterial from './rockEmbedded'
+import rustyMaterial from './rusty'
 
 type MaterialDate = {
   id: number
@@ -105,7 +107,19 @@ const allMaterial: MaterialDate[] = [
     name: '格林布料',
     material: ginghamMaterial.material,
     img: ginghamMaterial.img,
-  }
+  },
+  {
+    id: 15,
+    name: '岩嵌',
+    material: rockEmbeddedMaterial.material,
+    img: rockEmbeddedMaterial.img,
+  },
+  {
+    id: 16,
+    name: '锈色金属',
+    material: rustyMaterial.material,
+    img: rustyMaterial.img,
+  },
 ]
 
 export { allMaterial }
