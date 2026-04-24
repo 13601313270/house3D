@@ -121,7 +121,7 @@ export class WallEntity extends EntityClass<Wall> {
 
     // 绘制墙上的点
     [data].forEach((wall) => {
-      if (wall.points.length < 2) return
+      if (!wall.points || wall.points.length < 2) return
       ctx.strokeStyle = 'black'
       ctx.fillStyle = 'white'
       ctx.lineWidth = 2
