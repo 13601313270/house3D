@@ -48,7 +48,7 @@ export class World {
     this.scene.add(axesHelper)
   }
 
-  draw2D(
+  draw2DWorld(
     canvasRef: HTMLCanvasElement | null,
     tempWallPoints: Point[],
     hoverPoint: Point | null,
