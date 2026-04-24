@@ -74,15 +74,15 @@ function updateCameraAngel() {
     }
   } else if ('positionX' in cameraState.value) {
     if (camera) {
-      const fov = cameraState.value.fov
-      if (fov > 10 && fov < 180) {
-        if (!containerRef.value || !renderer || !camera) return
-        const width = containerRef.value.clientWidth
-        const height = containerRef.value.clientHeight
-        const vFov = calcVerticalFovByHorizontalFov(fov, width / height)
-        console.log('distance', vFov)
-        camera.fov = vFov
-      }
+      // const fov = cameraState.value.fov
+      // if (fov > 10 && fov < 180) {
+      //   if (!containerRef.value || !renderer || !camera) return
+      //   const width = containerRef.value.clientWidth
+      //   const height = containerRef.value.clientHeight
+      //   const vFov = calcVerticalFovByHorizontalFov(fov, width / height)
+      //   // console.log('distance', vFov)
+      //   camera.fov = vFov
+      // }
 
       camera.position.set(
         cameraState.value.positionX,
@@ -97,24 +97,6 @@ function updateCameraAngel() {
       camera.updateProjectionMatrix()
     }
   }
-
-  // if (camera) {
-  //   camera.lookAt(
-  //     camera.position.x - camera2X,
-  //     camera.position.y - camera2Y,
-  //     camera.position.z - camera2Z,
-  //   );
-  // }
-  // camera2Cube.position.set(
-  //   camera2.position.x,
-  //   camera2.position.y,
-  //   camera2.position.z
-  // );
-  // camera2Cube.rotation.set(
-  //   camera2.rotation.x,
-  //   camera2.rotation.y,
-  //   camera2.rotation.z
-  // );
 }
 const initThree = () => {
   const container = containerRef.value
@@ -130,17 +112,6 @@ const initThree = () => {
   camera.lookAt(0, 0, 0);
 
   (() => {
-    // let canvas2IsMouseAngel = false;
-    // let canvas2IsMouseMove = false;
-    // let canvas2LastMouseX = 0;
-    // let canvas2LastMouseY = 0;
-
-    const camera2AngleY = 0; // 摄像机垂直移动
-    const camera2AngleX = 0; // 摄像机横移
-    // let camera2AngelStartX = 0;
-    // let camera2AngelStartY = 0;
-    // let camera2PositionStartX = 0;
-    // let camera2PositionStartZ = 0;
     let camera1TargetPositionStartX = 0;
     let camera1TargetPositionStartY = 0;
     let camera1TargetPositionStartZ = 0;
@@ -317,7 +288,7 @@ const updateContainerHeight = (renderer: THREE.WebGLRenderer) => {
   }
   if ('fov' in cameraState.value) {
     const vFov = calcVerticalFovByHorizontalFov(cameraState.value.fov, newAspect)
-    console.log('distance', vFov)
+    // console.log('distance', vFov)
     if (camera.fov !== vFov) {
       camera.fov = vFov
       hasChangeCamera = true
