@@ -174,7 +174,7 @@ export class World {
       const doorApi: DoorEntity = this.allFileMapObjects.door[index];
       if (doorApi) {
         const wallThickness = walls.find((wall) => wall.id === door.wallId)?.thickness || 0;
-        doorApi.draw2D(ctx, panOffset, wallThickness, zoomLevel)
+        doorApi.draw2D(ctx, panOffset, zoomLevel, wallThickness)
       }
     })
 
@@ -189,7 +189,7 @@ export class World {
       const windowApi: WindowEntity = this.allFileMapObjects.window[index] as WindowEntity;
       const wallThickness = walls.find((wall) => wall.id === win.wallId)?.thickness || 0;
       if (windowApi) {
-        windowApi.draw2D(ctx, panOffset, wallThickness, zoomLevel)
+        windowApi.draw2D(ctx, panOffset, zoomLevel, wallThickness)
       }
     })
 

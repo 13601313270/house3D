@@ -87,8 +87,8 @@ export class DoorEntity extends EntityClass<Door> {
   draw2D(
     ctx: CanvasRenderingContext2D,
     panOffset: Point,
+    zoomLevel: number,
     wallThickness: number,
-    zoomLevel: number
   ): void {
     const data = this.getData();
     // 实现门的2D绘制逻辑
