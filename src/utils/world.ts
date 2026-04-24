@@ -188,7 +188,9 @@ export class World {
     allWindows.forEach((win, index) => {
       const windowApi: WindowEntity = this.allFileMapObjects.window[index] as WindowEntity;
       const wallThickness = walls.find((wall) => wall.id === win.wallId)?.thickness || 0;
-      windowApi.draw2D(ctx, panOffset, wallThickness, zoomLevel)
+      if (windowApi) {
+        windowApi.draw2D(ctx, panOffset, wallThickness, zoomLevel)
+      }
     })
 
     const allCameras = [...cameras];
@@ -199,7 +201,9 @@ export class World {
     }
     allCameras.forEach((camera, index) => {
       const cameraApi: CameraEntity = this.allFileMapObjects.camera[index] as CameraEntity;
-      cameraApi.draw2D(ctx, panOffset, zoomLevel)
+      if (cameraApi) {
+        cameraApi.draw2D(ctx, panOffset, zoomLevel)
+      }
     })
 
     // 绘制坐标轴

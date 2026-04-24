@@ -2,10 +2,17 @@
   <div class="map2d-container">
     <div class="left-panel" :style="{ width: panel1SplitWidthPer * 100 + '%' }">
       <div class="toolbar">
-        <button v-for="value in allFileKeys" :key="value" :class="{ active: currentTool === value }"
-          @click="changeCurrentTool(value)">
-          {{ allFileKeysName[value] }}
-        </button>
+        <div class="toolbar-item">
+          <button type="button">
+            添加
+          </button>
+          <div class="list">
+            <div class="childItem" v-for="value in allFileKeys" :key="value" :class="{ active: currentTool === value }"
+              @click="changeCurrentTool(value)">
+              {{ allFileKeysName[value] }}
+            </div>
+          </div>
+        </div>
         <button @click="clearDrawing" type="button">
           清空
         </button>
@@ -1449,6 +1456,41 @@ function updateEditPropInputInfoBoolean(id: string, event: Event) {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   width: 100%;
   box-sizing: border-box;
+
+  .toolbar-item {
+    position: relative;
+
+    &:hover {
+      .list {
+        display: block;
+      }
+    }
+
+    .list {
+      position: absolute;
+      display: none;
+      top: 100%;
+      width: 100px;
+      left: 0;
+      background: white;
+      border: 1px solid #d9d9d9;
+      box-sizing: border-box;
+      border-radius: 8px;
+      z-index: 1000;
+      max-height: 80vh;
+      overflow: auto;
+
+      .childItem {
+        padding: 4px 0;
+        cursor: default;
+
+        &:hover,
+        &.active {
+          background-color: #1890ff;
+        }
+      }
+    }
+  }
 }
 
 .toolbar button {
