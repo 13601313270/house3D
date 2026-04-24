@@ -2,6 +2,7 @@ import * as THREE from 'three'
 import brickMaterial from './redBrick'
 import cementMaterial from './cement'
 import woodMaterial from './wooden'
+import woodFloorMaterial from './woodFloor'
 
 type MaterialDate = {
   id: number
@@ -28,6 +29,12 @@ const allMaterial: MaterialDate[] = [
     name: '木头',
     material: woodMaterial.material,
     img: woodMaterial.img,
+  },
+  {
+    id: 4,
+    name: '木地板',
+    material: woodFloorMaterial.material,
+    img: woodFloorMaterial.img,
   }
 ]
 
