@@ -4,6 +4,7 @@ export type Wall = Entity & {
   points: Point[]
   thickness: number
   color: string
+  height: number
   wmt: number // 墙材质
   hb: boolean // 是否有地板
   bc: string // 地板颜色

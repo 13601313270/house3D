@@ -662,6 +662,7 @@ onMounted(() => {
               z: 0,
               color: '#fff',
               wmt: 0, // 墙材质
+              height: 280, // 墙高，默认280
               points: [...tempDrawWall.value.points],
               thickness: wallThickness.value,
               hb: true,// 有地板，默认有
@@ -899,6 +900,7 @@ const handleCanvasClick = (e: MouseEvent) => {
               y: snapped.point.y,
               color: '#fff',
               wmt: 0, // 墙材质
+              height: 280, // 墙高
               z: 0,
               thickness: wallThickness.value,
               hb: true,// 有地板，默认有
@@ -926,6 +928,7 @@ const handleCanvasClick = (e: MouseEvent) => {
         y: clickPoint.y,
         color: '#fff',
         wmt: 0, // 墙材质
+        height: 280, // 墙高
         z: 0,
         points: [clickPoint],
         thickness: wallThickness.value,

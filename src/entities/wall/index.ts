@@ -15,6 +15,11 @@ export function editPropConfig(): editItem[] {
       dataType: 'number',
     },
     {
+      id: 'height',
+      label: '墙体高度',
+      dataType: 'number',
+    },
+    {
       id: 'color',
       label: '墙体颜色',
       dataType: 'color',
@@ -135,7 +140,7 @@ export class WallEntity extends EntityClass<Wall> {
     const data = this.getData()
     const meshList: THREE.Group[] = []
     const wallBoxList = createAllWallFromPoints([data]);
-    const wallHeight = 280
+    const wallHeight = data.height
     const extrudeSettings = {
       steps: 1,
       depth: wallHeight,
