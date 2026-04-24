@@ -11,6 +11,13 @@ import { EntityClass } from '@/types/entity'
 export type allFileKeysEnum = 'wall' | 'door' | 'window' | 'camera';
 export const allFileKeys: allFileKeysEnum[] = ['wall', 'door', 'window', 'camera']
 
+export const allFileKeysName: Record<allFileKeysEnum, string> = {
+  wall: '墙体',
+  door: '门',
+  window: '窗户',
+  camera: '相机',
+}
+
 export type fileData = {
   wall: Wall[],
   door: Door[],

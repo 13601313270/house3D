@@ -2,17 +2,9 @@
   <div class="map2d-container">
     <div class="left-panel" :style="{ width: panel1SplitWidthPer * 100 + '%' }">
       <div class="toolbar">
-        <button :class="{ active: currentTool === 'wall' }" @click="changeCurrentTool('wall')" type="button">
-          墙面
-        </button>
-        <button :class="{ active: currentTool === 'door' }" @click="changeCurrentTool('door')" type="button">
-          门
-        </button>
-        <button :class="{ active: currentTool === 'window' }" @click="changeCurrentTool('window')" type="button">
-          窗户
-        </button>
-        <button :class="{ active: currentTool === 'camera' }" @click="changeCurrentTool('camera')" type="button">
-          摄像机
+        <button v-for="value in allFileKeys" :key="value" :class="{ active: currentTool === value }"
+          @click="changeCurrentTool(value)">
+          {{ allFileKeysName[value] }}
         </button>
         <button @click="clearDrawing" type="button">
           清空
@@ -121,14 +113,14 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, onMounted, onUnmounted, nextTick, watch } from 'vue'
+import { ref, onMounted, onUnmounted, nextTick, watch } from 'vue'
 import { Entity, Point } from '../types'
 import { snapThreshold, World } from '../utils/world'
 import Canvas3D, { CameraState } from '../components/Canvas3D.vue'
 import { Wall } from '@/entities/wall/index.d'
 import { Door } from '@/entities/door/index.d'
 import { Window } from '@/entities/window/index.d'
-import { allFileKeys, PropConfigMap, fileData, editItem } from '@/entities'
+import { allFileKeys, PropConfigMap, fileData, editItem, allFileKeysName } from '@/entities'
 import { EntityClass, EntityType, MatchSnapPoint } from '@/types/entity'
 import { HandelInfo, PointWithIndex } from '@/types/map2d'
 import pointToLineDistance from '@/utils/pointToLineDistance'
@@ -138,7 +130,6 @@ import { CameraEntity, createCameraData } from '@/entities/camera'
 import { CameraData } from '@/entities/camera/index.d'
 import { WallEntity } from '@/entities/wall'
 import { allMaterial } from '@/material'
-import { textureStore } from 'three/src/nodes/accessors/StorageTextureNode'
 
 const canvasRef = ref<HTMLCanvasElement | null>(null)
 const canvas3DRef = ref<typeof Canvas3D | null>(null)
