@@ -82,7 +82,7 @@
     <div class="right-panel" :style="{ width: panel2SplitWidthPer * 100 + '%' }">
       <!-- {{ insertTempDoor }} -->
       <Canvas3D ref="canvas3DRef" :world="worldApi" v-model:cameraState="cameraState"
-        :aspectRatio="cameraState.aspectW / cameraState.aspectH" />
+        :aspectRatio="1" />
     </div>
 
     <div class="split-bar" @mousedown.prevent="startSplit(2)" title="拖动调整左右比例"></div>
