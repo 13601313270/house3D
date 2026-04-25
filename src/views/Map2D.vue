@@ -1147,6 +1147,7 @@ const handleMouseMove = (e: MouseEvent) => {
         }
       }
     }
+    drawWrapper()
   } else {
     const nearest = getNearestWall({ x, y })
     if (nearest) {
@@ -1188,7 +1189,7 @@ const handleMouseMove = (e: MouseEvent) => {
         drawWrapper()
       }
     } else if (insertTempObj instanceof EntityClass) {
-      console.log('nearest---1', nearest)
+      // console.log('nearest---1', nearest)
       insertTempObj.setPrepareState(x, y)
       drawWrapper()
     }
@@ -1370,7 +1371,7 @@ const handleWheel = (e: WheelEvent) => {
   drawWrapper()
 }
 function changeCurrentTool(type: 'wall' | 'door' | 'window' | 'camera' | 'drag') {
-  console.log('changeTool---1---nearest---2---clear')
+  // console.log('changeTool---1---nearest---2---clear')
   insertTempObj = null
 
   if (allFileKeys.includes(type as any)) {
