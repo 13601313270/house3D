@@ -1,6 +1,6 @@
 import { Point, ObjData } from '@/types/map2d'
 
-export type Wall = ObjData & {
+export type WallData = ObjData & {
   points: Point[]
   thickness: number
   color: string

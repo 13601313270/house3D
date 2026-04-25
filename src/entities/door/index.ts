@@ -2,16 +2,16 @@ import { Point } from '@/types/map2d'
 import * as THREE from 'three'
 // @ts-ignore
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-import { Door } from './index.d'
+import { DoorData } from './index.d'
 import { Brush, Evaluator, SUBTRACTION } from 'three-bvh-csg';
 import { allSnapFromType, EntityClass, EntityType, MatchSnapPoint } from '@/types/entity'
 import { editItem } from '..';
 import { World } from '@/utils/world';
-import { Wall } from '../wall/index.d';
+import { WallData } from '../wall/index.d';
 import { getMaterialById } from '@/material';
 
 export function createDoorData() {
-  const door: Door = {
+  const door: DoorData = {
     id: Date.now().toString(),
     wallPointId: -1,
     x: 0,
@@ -69,11 +69,11 @@ export function editPropConfig(): editItem[] {
   ]
 }
 
-export class DoorEntity extends EntityClass<Door> {
+export class DoorEntity extends EntityClass<DoorData> {
   type: EntityType = 'door'
   isPointObj: boolean = true
 
-  constructor(world: World, door: Door) {
+  constructor(world: World, door: DoorData) {
     super(world, door)
     if (door.wallId) {
       const wall = this.world.allFileMapObjects.wall.find((entity) => entity.getData().id === door.wallId);
@@ -86,7 +86,7 @@ export class DoorEntity extends EntityClass<Door> {
 
   draw2DByData(
     ctx: CanvasRenderingContext2D,
-    data: Door,
+    data: DoorData,
     panOffset: Point,
     zoomLevel: number,
   ): void {
@@ -302,7 +302,7 @@ export class DoorEntity extends EntityClass<Door> {
     return []
   }
 
-  afterBeSnapByLine(obj: EntityClass<Wall>, line: [Point, Point]) {
+  afterBeSnapByLine(obj: EntityClass<WallData>, line: [Point, Point]) {
     if (obj.type === 'wall') {
       const data = this.getData();
       const p1 = line[0]

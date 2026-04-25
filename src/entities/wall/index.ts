@@ -1,6 +1,6 @@
 import { Point, HandelInfo } from '@/types/map2d'
 import { allSnapFromType, EntityClass, EntityType, MatchSnapPoint } from '@/types/entity'
-import { Wall } from './index.d'
+import { WallData } from './index.d'
 import { drawPoint } from '@/utils/drawPoint'
 import { createAllWallFromPoints } from '@/utils/createAllWallFromPoints'
 import * as THREE from 'three'
@@ -67,13 +67,13 @@ export function editPropConfig(): editItem[] {
   ]
 }
 
-export class WallEntity extends EntityClass<Wall> {
+export class WallEntity extends EntityClass<WallData> {
   type: EntityType = 'wall'
   isPointObj: boolean = false
 
   draw2DByData(
     ctx: CanvasRenderingContext2D,
-    data: Wall,
+    data: WallData,
     panOffset: Point,
     zoomLevel: number,
   ): void {

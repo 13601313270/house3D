@@ -1,6 +1,6 @@
 import { Point, HandelInfo } from '@/types/map2d'
 import { allSnapFromType, EntityClass, EntityType, MatchSnapPoint } from '@/types/entity'
-import { Window } from './index.d'
+import { WindowData } from './index.d'
 import * as THREE from 'three'
 import { Brush, Evaluator, SUBTRACTION } from 'three-bvh-csg';
 import { World } from '@/utils/world';
@@ -9,7 +9,7 @@ import { editItem } from '..';
 import { getMaterialById } from '@/material';
 
 export function createWindowData() {
-  const window: Window = {
+  const window: WindowData = {
     id: Date.now().toString(),
     wallPointId: -1,
     wallId: '',
@@ -98,11 +98,11 @@ export function editPropConfig(): editItem[] {
   ]
 }
 
-export class WindowEntity extends EntityClass<Window> {
+export class WindowEntity extends EntityClass<WindowData> {
   type: EntityType = 'window'
   isPointObj: boolean = true
 
-  constructor(world: World, window: Window) {
+  constructor(world: World, window: WindowData) {
     super(world, window)
     if (window.wallId) {
       const wall = this.world.allFileMapObjects.wall.find((entity) => {
@@ -117,7 +117,7 @@ export class WindowEntity extends EntityClass<Window> {
 
   draw2DByData(
     ctx: CanvasRenderingContext2D,
-    data: Window,
+    data: WindowData,
     panOffset: Point,
     zoomLevel: number,
   ): void {
@@ -461,7 +461,7 @@ export class WindowEntity extends EntityClass<Window> {
     return []
   }
 
-  afterBeSnapByLine(obj: EntityClass<Window>, line: [Point, Point]) {
+  afterBeSnapByLine(obj: EntityClass<WindowData>, line: [Point, Point]) {
     if (obj.type === 'wall') {
       const p1 = line[0]
       const p2 = line[1]

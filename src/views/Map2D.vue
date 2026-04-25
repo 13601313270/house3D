@@ -137,9 +137,9 @@ import { ref, onMounted, onUnmounted, nextTick, watch } from 'vue'
 import { ObjData, Point } from '../types'
 import { snapThreshold, World } from '../utils/world'
 import Canvas3D, { CameraState } from '../components/Canvas3D.vue'
-import { Wall } from '@/entities/wall/index.d'
-import { Door } from '@/entities/door/index.d'
-import { Window } from '@/entities/window/index.d'
+import { WallData } from '@/entities/wall/index.d'
+import { DoorData } from '@/entities/door/index.d'
+import { WindowData } from '@/entities/window/index.d'
 import { allFileKeys, PropConfigMap, fileData, editItem, allFileKeysName } from '@/entities'
 import { EntityClass, EntityType, MatchSnapPoint } from '@/types/entity'
 import { HandelInfo, PointWithIndex } from '@/types/map2d'
@@ -155,10 +155,10 @@ const canvasRef = ref<HTMLCanvasElement | null>(null)
 const canvas3DRef = ref<typeof Canvas3D | null>(null)
 const canvas3DRef2 = ref<typeof Canvas3D | null>(null)
 const currentTool = ref<'wall' | 'door' | 'window' | 'camera' | 'drag'>('drag')
-const tempDrawWall = ref<Wall | null>(null)
+const tempDrawWall = ref<WallData | null>(null)
 const hoverPoint = ref<Point | null>(null)
 const lastPoint = ref<Point | null>(null)
-const history = ref<Wall[][]>([])
+const history = ref<WallData[][]>([])
 const xAxisSnappedY = ref<{ objType: EntityType; number: number } | null>(null)
 const yAxisSnappedX = ref<{ objType: EntityType; number: number } | null>(null)
 const draggedPoint = ref<
@@ -194,8 +194,8 @@ const cameraState = ref<CameraState>({
 const allCamera = ref<CameraState[]>([])
 const cameraState2 = ref<CameraState | null>(null)
 
-let insertTempDoor: Door | null = null;
-let insertTempWindow: Window | null = null;
+let insertTempDoor: DoorData | null = null;
+let insertTempWindow: WindowData | null = null;
 let insertTempCamera: CameraData | null = null;
 let panStartScreenX = 0
 let panStartScreenY = 0
@@ -253,20 +253,20 @@ const editPropTypeKey = ref<EntityType>()
 const editPropTypeIndex = ref<number>(-1)
 
 interface NearestWallResult {
-  wall: Wall
+  wall: WallData
   lineIndex: number,
   pointOnWall: Point
   angle: number
 }
 
 const getNearestWall = (point: Point): NearestWallResult | null => {
-  let nearestWall: Wall | null = null
+  let nearestWall: WallData | null = null
   let nearestPoint: Point | null = null
   let minDistance = Infinity
   let nearestAngle = 0
   let lineIndex: number = -1;
 
-  (worldApi.getObjects('wall') as Wall[]).forEach((wall: Wall) => {
+  (worldApi.getObjects('wall') as WallData[]).forEach((wall: WallData) => {
     for (let i = 0; i < wall.points.length - 1; i++) {
       const p1 = wall.points[i]
       const p2 = wall.points[i + 1]
@@ -680,7 +680,7 @@ onMounted(() => {
         if (tempDrawWall.value?.points?.length && tempDrawWall.value.points.length > 0) {
           if (tempDrawWall.value?.points.length > 1) {
             const firstPoint = tempDrawWall.value.points[0]
-            const newWall: Wall = {
+            const newWall: WallData = {
               id: tempDrawWall.value.id,
               x: firstPoint.x,
               y: firstPoint.y,
@@ -884,7 +884,7 @@ const handleCanvasClick = (e: MouseEvent) => {
         }
         // 收集所有点（包括临时折线和已绘制的墙上的点）
         const allPoints: Point[] = [...tempDrawWall.value.points];
-        (worldApi.getObjects('wall') as Wall[]).forEach((wall: Wall) => {
+        (worldApi.getObjects('wall') as WallData[]).forEach((wall: WallData) => {
           wall.points.forEach(point => {
             allPoints.push(point)
           })
@@ -896,7 +896,7 @@ const handleCanvasClick = (e: MouseEvent) => {
           point: last
         }], clickPoint, allPoints.map((v, index) => ({
           objType: 'wall',
-          objId: (tempDrawWall.value as Wall).id,
+          objId: (tempDrawWall.value as WallData).id,
           snapFromType: 'point',
           point: {
             ...v,
@@ -915,7 +915,7 @@ const handleCanvasClick = (e: MouseEvent) => {
 
         if (dist < 10 * zoomLevel.value) {
           if (tempDrawWall.value?.points?.length && tempDrawWall.value.points.length > 1) {
-            const newWall: Wall = {
+            const newWall: WallData = {
               id: Date.now().toString(),
               points: [...tempDrawWall.value.points],
               x: snapped.point.x,
@@ -1124,7 +1124,7 @@ const handleMouseMove = (e: MouseEvent) => {
       } else {
         // 收集所有点（包括临时折线和已绘制的墙上的点）
         const allPoints = [...tempDrawWall.value.points];
-        (worldApi.getObjects('wall') as Wall[]).forEach((wall: Wall) => {
+        (worldApi.getObjects('wall') as WallData[]).forEach((wall: WallData) => {
           wall.points.forEach((point) => {
             allPoints.push(point)
           })
@@ -1136,7 +1136,7 @@ const handleMouseMove = (e: MouseEvent) => {
           point: last
         }], { x, y }, allPoints.map(v => ({
           objType: 'wall',
-          objId: (tempDrawWall.value as Wall).id,
+          objId: (tempDrawWall.value as WallData).id,
           snapFromType: 'point',
           point: v
         })))

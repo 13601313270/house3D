@@ -1,6 +1,6 @@
-import { Door } from './door/index.d'
-import { Wall } from './wall/index.d'
-import { Window } from './window/index.d'
+import { DoorData } from './door/index.d'
+import { WallData } from './wall/index.d'
+import { WindowData } from './window/index.d'
 import { CameraData } from './camera/index.d'
 import { WallEntity, editPropConfig as wallEditPropConfig } from './wall'
 import { DoorEntity, createDoorData, editPropConfig as doorEditPropConfig } from './door'
@@ -19,9 +19,9 @@ export const allFileKeysName: Record<allFileKeysEnum, string> = {
 }
 
 export type fileData = {
-  wall: Wall[],
-  door: Door[],
-  window: Window[],
+  wall: WallData[],
+  door: DoorData[],
+  window: WindowData[],
   camera: CameraData[],
 }
 

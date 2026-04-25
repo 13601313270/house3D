@@ -1,7 +1,7 @@
 import * as THREE from 'three'
 import { ObjData, EntityType, Point } from '../types'
-import { Door } from '@/entities/door/index.d'
-import { Window } from '@/entities/window/index.d'
+import { DoorData } from '@/entities/door/index.d'
+import { WindowData } from '@/entities/window/index.d'
 import { WallEntity } from '@/entities/wall/index'
 import { DoorEntity } from '@/entities/door/index'
 import { WindowEntity } from '@/entities/window'
@@ -59,8 +59,8 @@ export class World {
     canvasWidth: number = 800,
     canvasHeight: number = 600,
     zoomLevel: number = 1,
-    insertTempDoor: Door | null = null,
-    insertTempWindow: Window | null = null,
+    insertTempDoor: DoorData | null = null,
+    insertTempWindow: WindowData | null = null,
     insertTempCamera: CameraData | null = null
   ) {
     if (!canvasRef) return

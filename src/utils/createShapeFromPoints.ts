@@ -7,11 +7,11 @@
 // @ts-ignore
 import { Geometry, union } from 'martinez-polygon-clipping';
 import { Point } from '@/types';
-import { Wall } from '@/entities/wall/index.d';
+import { WallData } from '@/entities/wall/index.d';
 
 const cache = new Map<string, [number, number][][]>();
 
-export function createShapeFromPoints(wallList: Wall[]): Geometry | null {
+export function createShapeFromPoints(wallList: WallData[]): Geometry | null {
   // const key = `${wallList.map((item) => item.points.map((point: Point) => `${point.x},${point.y}`).join(',')).join(',')}`
   // if (cache.has(key)) return cache.get(key) || []
   const left: Point[] = [];
