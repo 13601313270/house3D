@@ -1,6 +1,14 @@
 import * as THREE from 'three'
 import { ObjData, HandelInfo, Point, PointWithIndex, ObjInWallData } from './map2d'
 import { World } from '@/utils/world'
+import { WallData } from '@/entities/wall/index.d'
+
+interface NearestWallResult {
+  wall: WallData
+  lineIndex: number,
+  pointOnWall: Point
+  angle: number
+}
 
 export type EntityType = 'wall' | 'door' | 'window' | 'camera'
 export type allSnapFromType = 'point' | 'line' | 'axis'
@@ -126,6 +134,9 @@ export abstract class EntityClass<T extends ObjData> {
     this.world._callAllOnChangeCallback()
   }
 
+  // 待添加状态（鼠标新增悬浮的时候）
+  abstract setPrepareState(x: number, y: number, ...args: any[]): void
+
   beforeRemove() {
     const scene: THREE.Scene = this.world.scene
     this.remove3DCache()
@@ -144,5 +155,21 @@ export abstract class EntityClass<T extends ObjData> {
 }
 
 export abstract class EntityClassInWall<T extends ObjInWallData> extends EntityClass<T> {
-  
+  // 待添加状态（鼠标新增悬浮的时候）
+  setPrepareState(x: number, y: number, nearest: NearestWallResult) {
+    const { pointOnWall, angle } = nearest
+    const wallScreenX = pointOnWall.x
+    const wallScreenY = pointOnWall.y
+
+    const newData: ObjInWallData = {
+      ...this.getData(),
+      wallId: nearest.wall.id,
+      wallPointId: nearest.lineIndex,
+      x: wallScreenX,
+      y: wallScreenY,
+      angle,
+    };
+    // @ts-ignore
+    this.setData(newData)
+  }
 }

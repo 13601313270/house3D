@@ -140,8 +140,8 @@ import Canvas3D, { CameraState } from '../components/Canvas3D.vue'
 import { WallData } from '@/entities/wall/index.d'
 import { DoorData } from '@/entities/door/index.d'
 import { WindowData } from '@/entities/window/index.d'
-import { allFileKeys, PropConfigMap, fileData, editItem, allFileKeysName, createInitData } from '@/entities'
-import { EntityClass, EntityType, MatchSnapPoint } from '@/types/entity'
+import { allFileKeys, PropConfigMap, fileData, editItem, allFileKeysName, createInitData, fileDataKeyToClass } from '@/entities'
+import { EntityClass, EntityClassInWall, EntityType, MatchSnapPoint } from '@/types/entity'
 import { HandelInfo, PointWithIndex } from '@/types/map2d'
 import pointToLineDistance from '@/utils/pointToLineDistance'
 import { createDoorData, DoorDataClass, DoorEntity } from '@/entities/door'
@@ -195,7 +195,7 @@ const cameraState = ref<CameraState>({
 const allCamera = ref<CameraState[]>([])
 const cameraState2 = ref<CameraState | null>(null)
 
-let insertTempObjData: ObjDataClass<any> | null = null
+let insertTempObj: EntityClass<any> | null = null
 
 let panStartScreenX = 0
 let panStartScreenY = 0
@@ -252,7 +252,7 @@ const editPropInputInfo = ref<any>({})
 const editPropTypeKey = ref<EntityType>()
 const editPropTypeIndex = ref<number>(-1)
 
-interface NearestWallResult {
+export interface NearestWallResult {
   wall: WallData
   lineIndex: number,
   pointOnWall: Point
@@ -615,7 +615,7 @@ const drawWrapper = () => {
       canvasSize.value.width,
       canvasSize.value.height,
       zoomLevel.value,
-      insertTempObjData,
+      insertTempObj,
     )
     worldApi.draw3D()
   }
@@ -962,16 +962,20 @@ const handleCanvasClick = (e: MouseEvent) => {
       }
     }
     lastPoint.value = clickPoint
-  } else if (insertTempObjData) {
-    if (insertTempObjData instanceof ObjInWallDataClass) {
+  } else if (insertTempObj) {
+    if (insertTempObj instanceof EntityClassInWall) {
       if (hoverPoint.value) {
-        worldApi.add(currentTool.value, [insertTempObjData])
-        insertTempObjData = null;
+        worldApi.add(currentTool.value, [insertTempObj.getData()])
+        // insertTempObjData = null;
+        console.log('nearest---2---clear-2')
+        insertTempObj = null;
         currentTool.value = 'drag'
       }
     } else {
-      worldApi.add(currentTool.value, [insertTempObjData])
-      insertTempObjData = null;
+      worldApi.add(currentTool.value, [insertTempObj.getData()])
+      // insertTempObjData = null;
+      console.log('nearest---2---clear-3')
+      insertTempObj = null;
       currentTool.value = 'drag'
     }
   }
@@ -1150,35 +1154,43 @@ const handleMouseMove = (e: MouseEvent) => {
     } else {
       hoverPoint.value = null
     }
-    const ObjClass = createInitData[currentTool.value];
-    if (ObjClass) {
-      if (insertTempObjData === null) {
-        insertTempObjData = ObjClass();
-      }
-      if (insertTempObjData instanceof ObjInWallDataClass) {
-        if (nearest) {
-          const { pointOnWall, angle } = nearest
-          const wallScreenX = pointOnWall.x
-          const wallScreenY = pointOnWall.y
+    // const ObjDataClass = createInitData[currentTool.value];
+    // const ClassName = fileDataKeyToClass[currentTool.value];
+    // if (ObjDataClass) {
+    //   // if (insertTempObjData instanceof ObjInWallDataClass) {
+    //   //   if (nearest) {
+    //   //     const { pointOnWall, angle } = nearest
+    //   //     const wallScreenX = pointOnWall.x
+    //   //     const wallScreenY = pointOnWall.y
 
-          if (insertTempObjData instanceof ObjInWallDataClass) {
-            insertTempObjData.wallId = nearest.wall.id
-            insertTempObjData.wallPointId = nearest.lineIndex
-            insertTempObjData.x = wallScreenX
-            insertTempObjData.y = wallScreenY
-            insertTempObjData.angle = angle
-          }
-          drawWrapper()
-        }
-      } else if (insertTempObjData instanceof ObjDataClass) {
-        if (insertTempObjData instanceof ObjDataClass) {
-          insertTempObjData.x = x
-          insertTempObjData.y = y
-          insertTempObjData.targetPositionX = x + 100
-          insertTempObjData.targetPositionY = y
-        }
+    //   //     if (insertTempObjData instanceof ObjInWallDataClass) {
+    //   //       insertTempObjData.wallId = nearest.wall.id
+    //   //       insertTempObjData.wallPointId = nearest.lineIndex
+    //   //       insertTempObjData.x = wallScreenX
+    //   //       insertTempObjData.y = wallScreenY
+    //   //       insertTempObjData.angle = angle
+    //   //     }
+    //   //     drawWrapper()
+    //   //   }
+    //   // } else if (insertTempObjData instanceof ObjDataClass) {
+    //   //   if (insertTempObjData instanceof ObjDataClass) {
+    //   //     insertTempObjData.x = x
+    //   //     insertTempObjData.y = y
+    //   //     // insertTempObjData.targetPositionX = x + 100
+    //   //     // insertTempObjData.targetPositionY = y
+    //   //   }
+    //   //   drawWrapper()
+    //   // }
+    // }
+    if (insertTempObj instanceof EntityClassInWall) {
+      if (nearest) {
+        insertTempObj.setPrepareState(x, y, nearest)
         drawWrapper()
       }
+    } else if (insertTempObj instanceof EntityClass) {
+      console.log('nearest---1', nearest)
+      insertTempObj.setPrepareState(x, y)
+      drawWrapper()
     }
   }
 }
@@ -1358,14 +1370,19 @@ const handleWheel = (e: WheelEvent) => {
   drawWrapper()
 }
 function changeCurrentTool(type: 'wall' | 'door' | 'window' | 'camera' | 'drag') {
-  insertTempObjData = null
+  console.log('changeTool---1---nearest---2---clear')
+  insertTempObj = null
+
   if (allFileKeys.includes(type as any)) {
-    if (type === 'door') {
-      insertTempObjData = createDoorData()
-    } else if (type === 'window') {
-      insertTempObjData = createWindowData()
-    } else if (type === 'camera') {
-      insertTempObjData = createCameraData()
+    console.log('changeTool---2---nearest---2---clear')
+    // @ts-ignore
+    const ObjDataClass = createInitData[type];
+    // @ts-ignore
+    const ClassName = fileDataKeyToClass[type];
+    if (ClassName && ObjDataClass) {
+      const insertTempObjData = new ObjDataClass()
+      console.log('changeTool---3---nearest---2---clear')
+      insertTempObj = new ClassName(worldApi, insertTempObjData)
     }
   }
   currentTool.value = type

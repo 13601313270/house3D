@@ -318,4 +318,7 @@ export class WallEntity extends EntityClass<WallData> {
 
   afterBeSnapByLine(obj: { type: EntityType }, line: [Point, Point]) {
   }
+
+  setPrepareState(x: number, y: number): void {
+  }
 }

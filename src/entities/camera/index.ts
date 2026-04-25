@@ -275,4 +275,14 @@ export class CameraEntity extends EntityClass<CameraData> {
 
   afterBeSnapByLine(obj: EntityClass<CameraData>, line: [Point, Point]) {
   }
+
+  setPrepareState(x: number, y: number): void {
+    this.setData({
+      ...this.getData(),
+      x,
+      y,
+      targetPositionX: x + 100,
+      targetPositionY: y,
+    })
+  }
 }

@@ -2,7 +2,7 @@ import { DoorData } from './door/index.d'
 import { WallData } from './wall/index.d'
 import { WindowData } from './window/index.d'
 import { CameraData } from './camera/index.d'
-import { WallEntity, editPropConfig as wallEditPropConfig } from './wall'
+import { WallDataClass, WallEntity, editPropConfig as wallEditPropConfig } from './wall'
 import { DoorEntity, createDoorData, editPropConfig as doorEditPropConfig } from './door'
 import { WindowEntity, createWindowData, editPropConfig as windowEditPropConfig } from './window'
 import { CameraEntity, editPropConfig as cameraEditPropConfig, createCameraData } from './camera'
@@ -34,7 +34,9 @@ export const defaultFileData: () => fileData = () => {
   }
 }
 
-export const fileDataKeyToClass: Record<allFileKeysEnum, typeof EntityClass<any>> = {
+type EntityConstructor = new (...args: any[]) => EntityClass<any>;
+
+export const fileDataKeyToClass: Record<allFileKeysEnum, EntityConstructor> = {
   wall: WallEntity,
   door: DoorEntity,
   window: WindowEntity,
@@ -61,6 +63,24 @@ export const createInitData: Record<allFileKeysEnum, () => any> = {
   camera: createCameraData,
 }
 
-function createWallData() {
-  throw new Error('Function not implemented.')
+function createWallData(): WallDataClass {
+  const wall: WallData = {
+    id: Date.now().toString(),
+    x: 0,
+    y: 0,
+    z: 0,
+    height: 180,
+    color: '#e67e22',
+    thickness: 10,
+    points: [],
+    wmt: 0,
+    hb: false,
+    bc: '#000',
+    bmt: 0,
+    ht: false,
+    tc: '#000',
+    tmt: 0,
+    td: false,
+  }
+  return new WallDataClass(wall)
 }

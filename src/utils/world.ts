@@ -60,7 +60,7 @@ export class World {
     canvasWidth: number = 800,
     canvasHeight: number = 600,
     zoomLevel: number = 1,
-    insertTempObj: ObjDataClass<any> | null = null,
+    insertTempObj: EntityClass<any> | null = null,
   ) {
     if (!canvasRef) return
     const ctx = canvasRef.getContext('2d')
@@ -183,19 +183,13 @@ export class World {
         cameraApi.draw2D(ctx, panOffset, zoomLevel)
       }
     })
-
-    if (insertTempObj && currentTool) {
-      // @ts-ignore
-      const ClassName = fileDataKeyToClass[currentTool];
-      if (ClassName) {
-        const temp = new ClassName(this, insertTempObj)
-        if (temp instanceof EntityClassInWall) {
-          if (hoverPoint) {
-            temp.draw2D(ctx, panOffset, zoomLevel)
-          }
-        } else {
-          temp.draw2D(ctx, panOffset, zoomLevel)
+    if (insertTempObj) {
+      if (insertTempObj instanceof EntityClassInWall) {
+        if (hoverPoint) {
+          insertTempObj.draw2D(ctx, panOffset, zoomLevel)
         }
+      } else {
+        insertTempObj.draw2D(ctx, panOffset, zoomLevel)
       }
     }
 
