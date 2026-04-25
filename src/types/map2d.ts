@@ -16,7 +16,7 @@ export interface HandelInfo {
   info?: any
 }
 
-export interface Entity {
+export interface ObjData {
   id: string
   x: number
   y: number

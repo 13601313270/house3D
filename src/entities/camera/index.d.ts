@@ -1,6 +1,6 @@
-import { Entity } from '@/types/map2d'
+import { ObjData } from '@/types/map2d'
 
-export type CameraData = Entity & {
+export type CameraData = ObjData & {
   targetPositionX: number
   targetPositionY: number
   targetPositionZ: number

@@ -1,5 +1,5 @@
 import * as THREE from 'three'
-import { Entity, HandelInfo, Point, PointWithIndex } from './map2d'
+import { ObjData, HandelInfo, Point, PointWithIndex } from './map2d'
 import { World } from '@/utils/world'
 
 export type EntityType = 'wall' | 'door' | 'window' | 'camera'
@@ -19,7 +19,7 @@ export type MatchSnapPoint = OrigionSnapPoint | {
   point: Point,
 }
 
-export abstract class EntityClass<T extends Entity> {
+export abstract class EntityClass<T extends ObjData> {
   abstract type: EntityType
   abstract isPointObj: boolean // 点状对象，如窗户/门。非点状的如墙
   world: World;
@@ -98,7 +98,7 @@ export abstract class EntityClass<T extends Entity> {
 
   // 当前对象吸附到一根线后的后续处理
   abstract afterBeSnapByLine(
-    obj: EntityClass<Entity>,
+    obj: EntityClass<ObjData>,
     line: [Point, Point]
   ): void;
 

@@ -1,6 +1,6 @@
-import { Point, Entity } from '@/types/map2d'
+import { Point, ObjData } from '@/types/map2d'
 
-export type Wall = Entity & {
+export type Wall = ObjData & {
   points: Point[]
   thickness: number
   color: string
