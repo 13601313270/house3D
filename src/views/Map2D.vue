@@ -150,6 +150,7 @@ import { CameraDataClass, CameraEntity, createCameraData } from '@/entities/came
 import { CameraData } from '@/entities/camera/index.d'
 import { WallDataClass, WallEntity } from '@/entities/wall'
 import { allMaterial } from '@/material'
+import { ObjDataClass, ObjInWallDataClass } from '@/entities/objData'
 
 const canvasRef = ref<HTMLCanvasElement | null>(null)
 const canvas3DRef = ref<typeof Canvas3D | null>(null)
@@ -194,9 +195,8 @@ const cameraState = ref<CameraState>({
 const allCamera = ref<CameraState[]>([])
 const cameraState2 = ref<CameraState | null>(null)
 
-let insertTempDoor: DoorDataClass | null = null;
-let insertTempWindow: WindowDataClass | null = null;
-let insertTempCamera: CameraDataClass | null = null;
+let insertTempObj: ObjDataClass<any> | null = null
+
 let panStartScreenX = 0
 let panStartScreenY = 0
 
@@ -615,9 +615,7 @@ const drawWrapper = () => {
       canvasSize.value.width,
       canvasSize.value.height,
       zoomLevel.value,
-      insertTempDoor,
-      insertTempWindow,
-      insertTempCamera,
+      insertTempObj,
     )
     worldApi.draw3D()
   }
@@ -966,21 +964,21 @@ const handleCanvasClick = (e: MouseEvent) => {
     lastPoint.value = clickPoint
   } else {
     if (currentTool.value === 'door') {
-      if (insertTempDoor && hoverPoint.value) {
-        worldApi.add(currentTool.value, [insertTempDoor])
-        insertTempDoor = null;
+      if (insertTempObj && hoverPoint.value) {
+        worldApi.add(currentTool.value, [insertTempObj])
+        insertTempObj = null;
         currentTool.value = 'drag'
       }
     } else if (currentTool.value === 'window') {
-      if (insertTempWindow && hoverPoint.value) {
-        worldApi.add(currentTool.value, [insertTempWindow])
-        insertTempWindow = null;
+      if (insertTempObj && hoverPoint.value) {
+        worldApi.add(currentTool.value, [insertTempObj])
+        insertTempObj = null;
         currentTool.value = 'drag'
       }
     } else if (currentTool.value === 'camera') {
-      if (insertTempCamera) {
-        worldApi.add(currentTool.value, [insertTempCamera])
-        insertTempCamera = null;
+      if (insertTempObj) {
+        worldApi.add(currentTool.value, [insertTempObj])
+        insertTempObj = null;
         currentTool.value = 'drag'
       }
     }
@@ -1162,42 +1160,51 @@ const handleMouseMove = (e: MouseEvent) => {
     }
     if (currentTool.value === 'door') {
       if (nearest) {
-        if (insertTempDoor === null) {
-          insertTempDoor = createDoorData()
+        if (insertTempObj === null) {
+          insertTempObj = createDoorData()
         }
         const { pointOnWall, angle } = nearest
         const wallScreenX = pointOnWall.x
         const wallScreenY = pointOnWall.y
-        insertTempDoor.wallId = nearest.wall.id
-        insertTempDoor.wallPointId = nearest.lineIndex
-        insertTempDoor.x = wallScreenX
-        insertTempDoor.y = wallScreenY
-        insertTempDoor.angle = angle
+
+        if (insertTempObj instanceof ObjInWallDataClass) {
+          insertTempObj.wallId = nearest.wall.id
+          insertTempObj.wallPointId = nearest.lineIndex
+          insertTempObj.x = wallScreenX
+          insertTempObj.y = wallScreenY
+          insertTempObj.angle = angle
+        }
+
         drawWrapper()
       }
     } else if (currentTool.value === 'window') {
       if (nearest) {
-        if (insertTempWindow === null) {
-          insertTempWindow = createWindowData();
+        if (insertTempObj === null) {
+          insertTempObj = createWindowData()
         }
         const { pointOnWall, angle } = nearest
         const wallScreenX = pointOnWall.x
         const wallScreenY = pointOnWall.y
-        insertTempWindow.wallId = nearest.wall.id
-        insertTempWindow.wallPointId = nearest.lineIndex
-        insertTempWindow.x = wallScreenX
-        insertTempWindow.y = wallScreenY
-        insertTempWindow.angle = angle
+        if (insertTempObj instanceof ObjInWallDataClass) {
+          insertTempObj.wallId = nearest.wall.id
+          insertTempObj.wallPointId = nearest.lineIndex
+          insertTempObj.x = wallScreenX
+          insertTempObj.y = wallScreenY
+          insertTempObj.angle = angle
+        }
         drawWrapper()
       }
     } else if (currentTool.value === 'camera') {
-      if (insertTempCamera === null) {
-        insertTempCamera = createCameraData();
+      if (insertTempObj === null) {
+        insertTempObj = createCameraData()
       }
-      insertTempCamera.x = x
-      insertTempCamera.y = y
-      insertTempCamera.targetPositionX = x + 100
-      insertTempCamera.targetPositionY = y
+
+      if (insertTempObj instanceof CameraDataClass) {
+        insertTempObj.x = x
+        insertTempObj.y = y
+        insertTempObj.targetPositionX = x + 100
+        insertTempObj.targetPositionY = y
+      }
       drawWrapper()
     }
   }
@@ -1378,15 +1385,14 @@ const handleWheel = (e: WheelEvent) => {
   drawWrapper()
 }
 function changeCurrentTool(type: 'wall' | 'door' | 'window' | 'camera' | 'drag') {
-  insertTempDoor = null
-  insertTempWindow = null
+  insertTempObj = null
   if (allFileKeys.includes(type as any)) {
     if (type === 'door') {
-      insertTempDoor = createDoorData();
+      insertTempObj = createDoorData()
     } else if (type === 'window') {
-      insertTempWindow = createWindowData();
+      insertTempObj = createWindowData()
     } else if (type === 'camera') {
-      insertTempCamera = createCameraData();
+      insertTempObj = createCameraData()
     }
   }
   currentTool.value = type

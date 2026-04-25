@@ -11,6 +11,7 @@ import { CameraData } from '@/entities/camera/index.d'
 import { CameraDataClass, CameraEntity } from '@/entities/camera'
 import { allFileKeys, defaultFileData, fileData, fileDataKeyToClass } from '@/entities/index'
 import { EntityClass } from '@/types/entity'
+import { ObjDataClass } from '@/entities/objData'
 
 export const canvasHeight = 600
 export const snapThreshold = 20
@@ -59,9 +60,7 @@ export class World {
     canvasWidth: number = 800,
     canvasHeight: number = 600,
     zoomLevel: number = 1,
-    insertTempDoor: DoorDataClass | null = null,
-    insertTempWindow: WindowDataClass | null = null,
-    insertTempCamera: CameraDataClass | null = null
+    insertTempObj: ObjDataClass<any> | null = null,
   ) {
     if (!canvasRef) return
     const ctx = canvasRef.getContext('2d')
@@ -171,10 +170,10 @@ export class World {
       }
     })
     if (currentTool === 'door' && hoverPoint) {
-      if (insertTempDoor) {
+      if (insertTempObj) {
         const ClassName = fileDataKeyToClass[currentTool];
         // @ts-ignore
-        const temp = new ClassName(this, insertTempDoor)
+        const temp = new ClassName(this, insertTempObj)
         temp.draw2D(ctx, panOffset, zoomLevel)
       }
     }
@@ -186,10 +185,10 @@ export class World {
       }
     })
     if (currentTool === 'window' && hoverPoint) {
-      if (insertTempWindow) {
+      if (insertTempObj) {
         const ClassName = fileDataKeyToClass[currentTool];
         // @ts-ignore
-        const temp = new ClassName(this, insertTempWindow)
+        const temp = new ClassName(this, insertTempObj)
         temp.draw2D(ctx, panOffset, zoomLevel)
       }
     }
@@ -201,10 +200,10 @@ export class World {
       }
     })
     if (currentTool === 'camera') {
-      if (insertTempCamera) {
+      if (insertTempObj) {
         const ClassName = fileDataKeyToClass[currentTool];
         // @ts-ignore
-        const temp = new ClassName(this, insertTempCamera)
+        const temp = new ClassName(this, insertTempObj)
         temp.draw2D(ctx, panOffset, zoomLevel)
       }
     }
@@ -263,19 +262,19 @@ export class World {
   }
 
   getObjects(type: EntityType) {
-    const returnData: ObjData[] = [];
+    const returnData: ObjDataClass<any>[] = [];
     this.allFileMapObjects[type].forEach((item) => {
       returnData.push(item.getData())
     })
     return returnData
   }
 
-  replaceObjects(type: EntityType, index: number, data: ObjData) {
+  replaceObjects(type: EntityType, index: number, data: ObjDataClass<any>) {
     this.allFileMapObjects[type][index].setData(data as any)
     // this.changeBindList.forEach(callback => callback())
   }
 
-  add(type: EntityType, data: ObjData[]) {
+  add(type: EntityType, data: ObjDataClass<any>[]) {
     const EntityClassItem: EntityClass<any> = fileDataKeyToClass[type] as any;
     for (let i = 0; i < data.length; i++) {
       // @ts-ignore

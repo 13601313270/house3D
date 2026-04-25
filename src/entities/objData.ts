@@ -18,12 +18,14 @@ class ObjInWallDataClass<T extends ObjInWallData> extends ObjDataClass<T> {
   wallId?: string // 所属墙ID，如果没有磁吸在墙上，为undefined
   wallPointId: number // 门在墙上的点的索引（比如0，代表从0到1的墙面上，-1代表未磁吸在墙上）
   bottom: number // 距离墙面底部的距离
+  angle: number // 门角度
 
   constructor(data: T) {
     super(data)
     this.wallPointId = data.wallPointId
     this.wallId = data.wallId
     this.bottom = data.bottom
+    this.angle = data.angle
   }
 }
 

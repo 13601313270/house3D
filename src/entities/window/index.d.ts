@@ -3,7 +3,6 @@ import { ObjInWallData } from '@/types/map2d'
 export type WindowData = ObjInWallData & {
   width: number
   height: number
-  angle: number
   bqc: string // 包墙颜色
   bmt: number // 包墙材质
   tc: string // 门框颜色
