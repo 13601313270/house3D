@@ -134,7 +134,7 @@
 
 <script lang="ts" setup>
 import { ref, onMounted, onUnmounted, nextTick, watch } from 'vue'
-import { Entity, Point } from '../types'
+import { ObjData, Point } from '../types'
 import { snapThreshold, World } from '../utils/world'
 import Canvas3D, { CameraState } from '../components/Canvas3D.vue'
 import { Wall } from '@/entities/wall/index.d'
@@ -1022,7 +1022,7 @@ const handleMouseMove = (e: MouseEvent) => {
 
   // 如果正在拖拽，处理拖拽逻辑（即使当前工具不是 drag）
   if (matchHandelObj && matchHandelInfo) {
-    function temp(api: EntityClass<Entity>): boolean {
+    function temp(api: EntityClass<ObjData>): boolean {
       if (matchHandelObj && matchHandelInfo) {
         let beMatchPoints = api.getMineBeSnapPoints()
         // 排出掉和自己磁吸

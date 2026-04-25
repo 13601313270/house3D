@@ -1,5 +1,5 @@
 import * as THREE from 'three'
-import { Entity, EntityType, Point } from '../types'
+import { ObjData, EntityType, Point } from '../types'
 import { Door } from '@/entities/door/index.d'
 import { Window } from '@/entities/window/index.d'
 import { WallEntity } from '@/entities/wall/index'
@@ -263,19 +263,19 @@ export class World {
   }
 
   getObjects(type: EntityType) {
-    const returnData: Entity[] = [];
+    const returnData: ObjData[] = [];
     this.allFileMapObjects[type].forEach((item) => {
       returnData.push(item.getData())
     })
     return returnData
   }
 
-  replaceObjects(type: EntityType, index: number, data: Entity) {
+  replaceObjects(type: EntityType, index: number, data: ObjData) {
     this.allFileMapObjects[type][index].setData(data as any)
     // this.changeBindList.forEach(callback => callback())
   }
 
-  add(type: EntityType, data: Entity[]) {
+  add(type: EntityType, data: ObjData[]) {
     const EntityClassItem: EntityClass<any> = fileDataKeyToClass[type] as any;
     for (let i = 0; i < data.length; i++) {
       // @ts-ignore
