@@ -49,16 +49,10 @@ export function editPropConfig(): editItem[] {
 
 export class CameraEntity extends EntityClass<CameraData> {
   type: EntityType = 'camera'
-  id: string
   isPointObj: boolean = true
   color: string = '#0c7f25'
   color3D: string = '#0c7f25'
   colorOpacity: string = '#14b737a5'
-
-  constructor(world: World, camera: CameraData) {
-    super(world, camera)
-    this.id = camera.id
-  }
 
   draw2D(
     ctx: CanvasRenderingContext2D,
