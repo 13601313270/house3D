@@ -73,10 +73,10 @@ export class WallEntity extends EntityClass<Wall> {
 
   draw2D(
     ctx: CanvasRenderingContext2D,
+    data: Wall,
     panOffset: Point,
     zoomLevel: number,
   ): void {
-    const data = this.getData()
     if (data.hb) {
       ctx.strokeStyle = 'black'
       ctx.fillStyle = data.bc

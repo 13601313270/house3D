@@ -86,10 +86,10 @@ export class DoorEntity extends EntityClass<Door> {
 
   draw2D(
     ctx: CanvasRenderingContext2D,
+    data: Door,
     panOffset: Point,
     zoomLevel: number,
   ): void {
-    const data = this.getData();
     const findWall = this.world.allFileMapObjects.wall.find((entity) => entity.getData().id === data.wallId);
     let wallThickness = 10;
     if (findWall) {

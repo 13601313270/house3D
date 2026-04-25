@@ -102,6 +102,23 @@ export abstract class EntityClass<T extends Entity> {
     line: [Point, Point]
   ): void;
 
+  // 本对象的2D绘制逻辑
+  abstract draw2D(
+    ctx: CanvasRenderingContext2D,
+    data: T,
+    panOffset: Point,
+    zoomLevel: number,
+  ): void;
+
+  draw2DByData(
+    ctx: CanvasRenderingContext2D,
+    panOffset: Point,
+    zoomLevel: number,
+  ) {
+    const data = this.getData();
+    this.draw2D(ctx, data, panOffset, zoomLevel)
+  }
+
   changePosition(newPosition: { x: number, y: number }) {
     this.data.x = newPosition.x
     this.data.y = newPosition.y

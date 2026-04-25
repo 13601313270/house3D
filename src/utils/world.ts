@@ -78,7 +78,7 @@ export class World {
     walls.forEach((wall, index) => {
       const wallApi: WallEntity = this.allFileMapObjects.wall[index]
       if (wallApi) {
-        wallApi.draw2D(ctx, panOffset, zoomLevel)
+        wallApi.draw2DByData(ctx, panOffset, zoomLevel)
       }
     })
 
@@ -173,7 +173,7 @@ export class World {
       // @ts-ignore
       const doorApi: DoorEntity = this.allFileMapObjects.door[index];
       if (doorApi) {
-        doorApi.draw2D(ctx, panOffset, zoomLevel)
+        doorApi.draw2DByData(ctx, panOffset, zoomLevel)
       }
     })
 
@@ -187,7 +187,7 @@ export class World {
     allWindows.forEach((win, index) => {
       const windowApi: WindowEntity = this.allFileMapObjects.window[index] as WindowEntity;
       if (windowApi) {
-        windowApi.draw2D(ctx, panOffset, zoomLevel)
+        windowApi.draw2DByData(ctx, panOffset, zoomLevel)
       }
     })
 
@@ -200,7 +200,7 @@ export class World {
     allCameras.forEach((camera, index) => {
       const cameraApi: CameraEntity = this.allFileMapObjects.camera[index] as CameraEntity;
       if (cameraApi) {
-        cameraApi.draw2D(ctx, panOffset, zoomLevel)
+        cameraApi.draw2DByData(ctx, panOffset, zoomLevel)
       }
     })
 
