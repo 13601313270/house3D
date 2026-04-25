@@ -140,7 +140,7 @@ import Canvas3D, { CameraState } from '../components/Canvas3D.vue'
 import { WallData } from '@/entities/wall/index.d'
 import { DoorData } from '@/entities/door/index.d'
 import { WindowData } from '@/entities/window/index.d'
-import { allFileKeys, PropConfigMap, fileData, editItem, allFileKeysName } from '@/entities'
+import { allFileKeys, PropConfigMap, fileData, editItem, allFileKeysName, createInitData } from '@/entities'
 import { EntityClass, EntityType, MatchSnapPoint } from '@/types/entity'
 import { HandelInfo, PointWithIndex } from '@/types/map2d'
 import pointToLineDistance from '@/utils/pointToLineDistance'
@@ -1150,54 +1150,35 @@ const handleMouseMove = (e: MouseEvent) => {
     } else {
       hoverPoint.value = null
     }
-    if (currentTool.value === 'door') {
-      if (nearest) {
-        if (insertTempObj === null) {
-          insertTempObj = createDoorData()
-        }
-        const { pointOnWall, angle } = nearest
-        const wallScreenX = pointOnWall.x
-        const wallScreenY = pointOnWall.y
-
-        if (insertTempObj instanceof ObjInWallDataClass) {
-          insertTempObj.wallId = nearest.wall.id
-          insertTempObj.wallPointId = nearest.lineIndex
-          insertTempObj.x = wallScreenX
-          insertTempObj.y = wallScreenY
-          insertTempObj.angle = angle
-        }
-
-        drawWrapper()
-      }
-    } else if (currentTool.value === 'window') {
-      if (nearest) {
-        if (insertTempObj === null) {
-          insertTempObj = createWindowData()
-        }
-        const { pointOnWall, angle } = nearest
-        const wallScreenX = pointOnWall.x
-        const wallScreenY = pointOnWall.y
-        if (insertTempObj instanceof ObjInWallDataClass) {
-          insertTempObj.wallId = nearest.wall.id
-          insertTempObj.wallPointId = nearest.lineIndex
-          insertTempObj.x = wallScreenX
-          insertTempObj.y = wallScreenY
-          insertTempObj.angle = angle
-        }
-        drawWrapper()
-      }
-    } else if (currentTool.value === 'camera') {
+    const ObjClass = createInitData[currentTool.value];
+    if (ObjClass) {
       if (insertTempObj === null) {
-        insertTempObj = createCameraData()
+        insertTempObj = ObjClass();
       }
+      if (insertTempObj instanceof ObjInWallDataClass) {
+        if (nearest) {
+          const { pointOnWall, angle } = nearest
+          const wallScreenX = pointOnWall.x
+          const wallScreenY = pointOnWall.y
 
-      if (insertTempObj instanceof CameraDataClass) {
-        insertTempObj.x = x
-        insertTempObj.y = y
-        insertTempObj.targetPositionX = x + 100
-        insertTempObj.targetPositionY = y
+          if (insertTempObj instanceof ObjInWallDataClass) {
+            insertTempObj.wallId = nearest.wall.id
+            insertTempObj.wallPointId = nearest.lineIndex
+            insertTempObj.x = wallScreenX
+            insertTempObj.y = wallScreenY
+            insertTempObj.angle = angle
+          }
+          drawWrapper()
+        }
+      } else if (insertTempObj instanceof ObjDataClass) {
+        if (insertTempObj instanceof ObjDataClass) {
+          insertTempObj.x = x
+          insertTempObj.y = y
+          insertTempObj.targetPositionX = x + 100
+          insertTempObj.targetPositionY = y
+        }
+        drawWrapper()
       }
-      drawWrapper()
     }
   }
 }
