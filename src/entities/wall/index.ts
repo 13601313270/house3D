@@ -178,7 +178,7 @@ export class WallEntity extends EntityClass<Wall> {
     }
 
     const points: THREE.Vector2[] = []; // wall.points.map((p) => new THREE.Vector2(p.x, p.y))
-    data.points.forEach((mesh) => {
+    data.points.forEach((mesh: Point) => {
       points.push(new THREE.Vector2(mesh.x, mesh.y * -1))
     })
     const shape = new THREE.Shape(points)
@@ -264,7 +264,7 @@ export class WallEntity extends EntityClass<Wall> {
   getMineBeSnapPoints() {
     const key: allSnapFromType = 'point';
     const data = this.getData();
-    return this.getData().points.map((v, index: number) => {
+    return this.getData().points.map((v: Point, index: number) => {
       return {
         objType: this.type,
         objId: data.id,
