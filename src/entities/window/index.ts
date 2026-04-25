@@ -115,7 +115,7 @@ export class WindowEntity extends EntityClass<Window> {
     }
   }
 
-  draw2D(
+  draw2DByData(
     ctx: CanvasRenderingContext2D,
     data: Window,
     panOffset: Point,

@@ -84,7 +84,7 @@ export class DoorEntity extends EntityClass<Door> {
     }
   }
 
-  draw2D(
+  draw2DByData(
     ctx: CanvasRenderingContext2D,
     data: Door,
     panOffset: Point,

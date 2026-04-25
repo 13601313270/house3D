@@ -78,7 +78,7 @@ export class World {
     walls.forEach((wall, index) => {
       const wallApi: WallEntity = this.allFileMapObjects.wall[index]
       if (wallApi) {
-        wallApi.draw2DByData(ctx, panOffset, zoomLevel)
+        wallApi.draw2D(ctx, panOffset, zoomLevel)
       }
     })
 
@@ -164,47 +164,49 @@ export class World {
     }
 
     const allDoors = [...doors];
-    if (currentTool === 'door' && hoverPoint) {
-      if (insertTempDoor) {
-        allDoors.push(insertTempDoor)
-      }
-    }
     allDoors.forEach((door, index) => {
       // @ts-ignore
       const doorApi: DoorEntity = this.allFileMapObjects.door[index];
       if (doorApi) {
-        doorApi.draw2DByData(ctx, panOffset, zoomLevel)
+        doorApi.draw2D(ctx, panOffset, zoomLevel)
       }
     })
-
-    const allWindows = [...windows];
-    if (currentTool === 'window' && hoverPoint) {
-      if (insertTempWindow) {
-        allWindows.push(insertTempWindow)
+    if (currentTool === 'door' && hoverPoint) {
+      if (insertTempDoor) {
+        const temp = new DoorEntity(this, insertTempDoor)
+        temp.draw2D(ctx, panOffset, zoomLevel)
       }
     }
+
+    const allWindows = [...windows];
 
     allWindows.forEach((win, index) => {
       const windowApi: WindowEntity = this.allFileMapObjects.window[index] as WindowEntity;
       if (windowApi) {
-        windowApi.draw2DByData(ctx, panOffset, zoomLevel)
+        windowApi.draw2D(ctx, panOffset, zoomLevel)
       }
     })
-
-    const allCameras = [...cameras];
-    if (currentTool === 'camera') {
-      if (insertTempCamera) {
-        allCameras.push(insertTempCamera)
+    if (currentTool === 'window' && hoverPoint) {
+      if (insertTempWindow) {
+        const temp = new WindowEntity(this, insertTempWindow)
+        temp.draw2D(ctx, panOffset, zoomLevel)
       }
     }
+
+    const allCameras = [...cameras];
     allCameras.forEach((camera, index) => {
       const cameraApi: CameraEntity = this.allFileMapObjects.camera[index] as CameraEntity;
       if (cameraApi) {
-        cameraApi.draw2DByData(ctx, panOffset, zoomLevel)
+        cameraApi.draw2D(ctx, panOffset, zoomLevel)
       }
     })
+    if (currentTool === 'camera') {
+      if (insertTempCamera) {
+        const temp = new CameraEntity(this, insertTempCamera)
+        temp.draw2D(ctx, panOffset, zoomLevel)
+      }
+    }
 
-    // 绘制坐标轴
     drawAxes(ctx, panOffset, zoomLevel, canvasWidth, canvasHeight)
 
     // 绘制轴对齐参考线
