@@ -148,17 +148,17 @@ import { createDoorData, DoorDataClass, DoorEntity } from '@/entities/door'
 import { createWindowData, WindowDataClass, WindowEntity } from '@/entities/window'
 import { CameraDataClass, CameraEntity, createCameraData } from '@/entities/camera'
 import { CameraData } from '@/entities/camera/index.d'
-import { WallEntity } from '@/entities/wall'
+import { WallDataClass, WallEntity } from '@/entities/wall'
 import { allMaterial } from '@/material'
 
 const canvasRef = ref<HTMLCanvasElement | null>(null)
 const canvas3DRef = ref<typeof Canvas3D | null>(null)
 const canvas3DRef2 = ref<typeof Canvas3D | null>(null)
 const currentTool = ref<'wall' | 'door' | 'window' | 'camera' | 'drag'>('drag')
-const tempDrawWall = ref<WallData | null>(null)
+const tempDrawWall = ref<WallDataClass | null>(null)
 const hoverPoint = ref<Point | null>(null)
 const lastPoint = ref<Point | null>(null)
-const history = ref<WallData[][]>([])
+const history = ref<WallDataClass[][]>([])
 const xAxisSnappedY = ref<{ objType: EntityType; number: number } | null>(null)
 const yAxisSnappedX = ref<{ objType: EntityType; number: number } | null>(null)
 const draggedPoint = ref<
