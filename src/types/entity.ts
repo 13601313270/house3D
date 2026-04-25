@@ -1,5 +1,5 @@
 import * as THREE from 'three'
-import { ObjData, HandelInfo, Point, PointWithIndex } from './map2d'
+import { ObjData, HandelInfo, Point, PointWithIndex, ObjInWallData } from './map2d'
 import { World } from '@/utils/world'
 
 export type EntityType = 'wall' | 'door' | 'window' | 'camera'
@@ -141,4 +141,8 @@ export abstract class EntityClass<T extends ObjData> {
     }
     this.associationEntity = []
   }
+}
+
+export abstract class EntityClassInWall<T extends ObjInWallData> extends EntityClass<T> {
+  
 }

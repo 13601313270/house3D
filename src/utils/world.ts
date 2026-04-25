@@ -3,7 +3,7 @@ import { ObjData, EntityType, Point } from '../types'
 import { DoorData } from '@/entities/door/index.d'
 import { WindowData } from '@/entities/window/index.d'
 import { WallEntity } from '@/entities/wall/index'
-import { DoorEntity } from '@/entities/door/index'
+import { DoorDataClass, DoorEntity } from '@/entities/door/index'
 import { WindowEntity } from '@/entities/window'
 import { drawPoint } from './drawPoint'
 import { calculateAngle } from './calculateAngle'
@@ -59,7 +59,7 @@ export class World {
     canvasWidth: number = 800,
     canvasHeight: number = 600,
     zoomLevel: number = 1,
-    insertTempDoor: DoorData | null = null,
+    insertTempDoor: DoorDataClass | null = null,
     insertTempWindow: WindowData | null = null,
     insertTempCamera: CameraData | null = null
   ) {

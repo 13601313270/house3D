@@ -1,12 +1,9 @@
-import { ObjData } from '@/types/map2d'
+import { ObjInWallData } from '@/types/map2d'
 
-export type WindowData = ObjData & {
-  wallId?: string,// 所属墙ID，如果没有磁吸在墙上，为undefined
-  wallPointId: number // 门在墙上的点的索引（比如0，代表从0到1的墙面上，-1代表未磁吸在墙上）
+export type WindowData = ObjInWallData & {
   width: number
   height: number
   angle: number
-  bottom: number // 距离地面
   bqc: string // 包墙颜色
   bmt: number // 包墙材质
   tc: string // 门框颜色

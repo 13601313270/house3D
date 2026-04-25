@@ -4,13 +4,38 @@ import * as THREE from 'three'
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { DoorData } from './index.d'
 import { Brush, Evaluator, SUBTRACTION } from 'three-bvh-csg';
-import { allSnapFromType, EntityClass, EntityType, MatchSnapPoint } from '@/types/entity'
+import { allSnapFromType, EntityClass, EntityClassInWall, EntityType, MatchSnapPoint } from '@/types/entity'
 import { editItem } from '..';
 import { World } from '@/utils/world';
 import { WallData } from '../wall/index.d';
 import { getMaterialById } from '@/material';
+import { ObjDataClass, ObjInWallDataClass } from '../objData'
 
-export function createDoorData() {
+export class DoorDataClass extends ObjInWallDataClass<DoorData> {
+  width: number
+  height: number
+  openAngle: number
+  angle: number
+  hasBorder: boolean
+  color: string
+  mt: number
+  openType: number
+
+  constructor(data: DoorData) {
+    super(data)
+    this.wallId = data.wallId
+    this.width = data.width
+    this.height = data.height
+    this.openAngle = data.openAngle
+    this.angle = data.angle
+    this.hasBorder = data.hasBorder
+    this.color = data.color
+    this.mt = data.mt
+    this.openType = data.openType
+  }
+}
+
+export function createDoorData(): DoorDataClass {
   const door: DoorData = {
     id: Date.now().toString(),
     wallPointId: -1,
@@ -19,6 +44,7 @@ export function createDoorData() {
     z: 0,
     width: 110,
     height: 180,
+    bottom: 0,
     openAngle: 0,
     angle: 0,
     hasBorder: true,
@@ -26,7 +52,7 @@ export function createDoorData() {
     mt: 3,
     openType: 1,
   }
-  return door
+  return new DoorDataClass(door)
 }
 
 export function editPropConfig(): editItem[] {
@@ -69,7 +95,7 @@ export function editPropConfig(): editItem[] {
   ]
 }
 
-export class DoorEntity extends EntityClass<DoorData> {
+export class DoorEntity extends EntityClassInWall<DoorData> {
   type: EntityType = 'door'
   isPointObj: boolean = true
 

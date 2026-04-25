@@ -144,9 +144,9 @@ import { allFileKeys, PropConfigMap, fileData, editItem, allFileKeysName } from 
 import { EntityClass, EntityType, MatchSnapPoint } from '@/types/entity'
 import { HandelInfo, PointWithIndex } from '@/types/map2d'
 import pointToLineDistance from '@/utils/pointToLineDistance'
-import { createDoorData, DoorEntity } from '@/entities/door'
-import { createWindowData, WindowEntity } from '@/entities/window'
-import { CameraEntity, createCameraData } from '@/entities/camera'
+import { createDoorData, DoorDataClass, DoorEntity } from '@/entities/door'
+import { createWindowData, WindowDataClass, WindowEntity } from '@/entities/window'
+import { CameraDataClass, CameraEntity, createCameraData } from '@/entities/camera'
 import { CameraData } from '@/entities/camera/index.d'
 import { WallEntity } from '@/entities/wall'
 import { allMaterial } from '@/material'
@@ -194,9 +194,9 @@ const cameraState = ref<CameraState>({
 const allCamera = ref<CameraState[]>([])
 const cameraState2 = ref<CameraState | null>(null)
 
-let insertTempDoor: DoorData | null = null;
-let insertTempWindow: WindowData | null = null;
-let insertTempCamera: CameraData | null = null;
+let insertTempDoor: DoorDataClass | null = null;
+let insertTempWindow: WindowDataClass | null = null;
+let insertTempCamera: CameraDataClass | null = null;
 let panStartScreenX = 0
 let panStartScreenY = 0
 
@@ -1163,7 +1163,7 @@ const handleMouseMove = (e: MouseEvent) => {
     if (currentTool.value === 'door') {
       if (nearest) {
         if (insertTempDoor === null) {
-          insertTempDoor = createDoorData();
+          insertTempDoor = createDoorData()
         }
         const { pointOnWall, angle } = nearest
         const wallScreenX = pointOnWall.x

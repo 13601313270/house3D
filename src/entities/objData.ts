@@ -1,6 +1,33 @@
-class ObjDataClass {
-  id: string = ''
-  x: number = 0
-  y: number = 0
-  z: number = 0
+import { ObjData, ObjInWallData } from "@/types/map2d"
+
+class ObjDataClass<T extends ObjData> {
+  id: string
+  x: number
+  y: number
+  z: number
+
+  constructor(data: T) {
+    this.id = data.id
+    this.x = data.x
+    this.y = data.y
+    this.z = data.z
+  }
+}
+
+class ObjInWallDataClass<T extends ObjInWallData> extends ObjDataClass<T> {
+  wallId?: string // 所属墙ID，如果没有磁吸在墙上，为undefined
+  wallPointId: number // 门在墙上的点的索引（比如0，代表从0到1的墙面上，-1代表未磁吸在墙上）
+  bottom: number // 距离墙面底部的距离
+
+  constructor(data: T) {
+    super(data)
+    this.wallPointId = data.wallPointId
+    this.wallId = data.wallId
+    this.bottom = data.bottom
+  }
+}
+
+export {
+  ObjDataClass,
+  ObjInWallDataClass
 }
