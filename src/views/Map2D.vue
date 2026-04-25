@@ -195,7 +195,7 @@ const cameraState = ref<CameraState>({
 const allCamera = ref<CameraState[]>([])
 const cameraState2 = ref<CameraState | null>(null)
 
-let insertTempObj: ObjDataClass<any> | null = null
+let insertTempObjData: ObjDataClass<any> | null = null
 
 let panStartScreenX = 0
 let panStartScreenY = 0
@@ -615,7 +615,7 @@ const drawWrapper = () => {
       canvasSize.value.width,
       canvasSize.value.height,
       zoomLevel.value,
-      insertTempObj,
+      insertTempObjData,
     )
     worldApi.draw3D()
   }
@@ -962,16 +962,16 @@ const handleCanvasClick = (e: MouseEvent) => {
       }
     }
     lastPoint.value = clickPoint
-  } else if (insertTempObj) {
-    if (insertTempObj instanceof ObjInWallDataClass) {
+  } else if (insertTempObjData) {
+    if (insertTempObjData instanceof ObjInWallDataClass) {
       if (hoverPoint.value) {
-        worldApi.add(currentTool.value, [insertTempObj])
-        insertTempObj = null;
+        worldApi.add(currentTool.value, [insertTempObjData])
+        insertTempObjData = null;
         currentTool.value = 'drag'
       }
     } else {
-      worldApi.add(currentTool.value, [insertTempObj])
-      insertTempObj = null;
+      worldApi.add(currentTool.value, [insertTempObjData])
+      insertTempObjData = null;
       currentTool.value = 'drag'
     }
   }
@@ -1152,30 +1152,30 @@ const handleMouseMove = (e: MouseEvent) => {
     }
     const ObjClass = createInitData[currentTool.value];
     if (ObjClass) {
-      if (insertTempObj === null) {
-        insertTempObj = ObjClass();
+      if (insertTempObjData === null) {
+        insertTempObjData = ObjClass();
       }
-      if (insertTempObj instanceof ObjInWallDataClass) {
+      if (insertTempObjData instanceof ObjInWallDataClass) {
         if (nearest) {
           const { pointOnWall, angle } = nearest
           const wallScreenX = pointOnWall.x
           const wallScreenY = pointOnWall.y
 
-          if (insertTempObj instanceof ObjInWallDataClass) {
-            insertTempObj.wallId = nearest.wall.id
-            insertTempObj.wallPointId = nearest.lineIndex
-            insertTempObj.x = wallScreenX
-            insertTempObj.y = wallScreenY
-            insertTempObj.angle = angle
+          if (insertTempObjData instanceof ObjInWallDataClass) {
+            insertTempObjData.wallId = nearest.wall.id
+            insertTempObjData.wallPointId = nearest.lineIndex
+            insertTempObjData.x = wallScreenX
+            insertTempObjData.y = wallScreenY
+            insertTempObjData.angle = angle
           }
           drawWrapper()
         }
-      } else if (insertTempObj instanceof ObjDataClass) {
-        if (insertTempObj instanceof ObjDataClass) {
-          insertTempObj.x = x
-          insertTempObj.y = y
-          insertTempObj.targetPositionX = x + 100
-          insertTempObj.targetPositionY = y
+      } else if (insertTempObjData instanceof ObjDataClass) {
+        if (insertTempObjData instanceof ObjDataClass) {
+          insertTempObjData.x = x
+          insertTempObjData.y = y
+          insertTempObjData.targetPositionX = x + 100
+          insertTempObjData.targetPositionY = y
         }
         drawWrapper()
       }
@@ -1358,14 +1358,14 @@ const handleWheel = (e: WheelEvent) => {
   drawWrapper()
 }
 function changeCurrentTool(type: 'wall' | 'door' | 'window' | 'camera' | 'drag') {
-  insertTempObj = null
+  insertTempObjData = null
   if (allFileKeys.includes(type as any)) {
     if (type === 'door') {
-      insertTempObj = createDoorData()
+      insertTempObjData = createDoorData()
     } else if (type === 'window') {
-      insertTempObj = createWindowData()
+      insertTempObjData = createWindowData()
     } else if (type === 'camera') {
-      insertTempObj = createCameraData()
+      insertTempObjData = createCameraData()
     }
   }
   currentTool.value = type
