@@ -4,11 +4,11 @@ import { DoorData } from '@/entities/door/index.d'
 import { WindowData } from '@/entities/window/index.d'
 import { WallEntity } from '@/entities/wall/index'
 import { DoorDataClass, DoorEntity } from '@/entities/door/index'
-import { WindowEntity } from '@/entities/window'
+import { WindowDataClass, WindowEntity } from '@/entities/window'
 import { drawPoint } from './drawPoint'
 import { calculateAngle } from './calculateAngle'
 import { CameraData } from '@/entities/camera/index.d'
-import { CameraEntity } from '@/entities/camera'
+import { CameraDataClass, CameraEntity } from '@/entities/camera'
 import { allFileKeys, defaultFileData, fileData, fileDataKeyToClass } from '@/entities/index'
 import { EntityClass } from '@/types/entity'
 
@@ -60,8 +60,8 @@ export class World {
     canvasHeight: number = 600,
     zoomLevel: number = 1,
     insertTempDoor: DoorDataClass | null = null,
-    insertTempWindow: WindowData | null = null,
-    insertTempCamera: CameraData | null = null
+    insertTempWindow: WindowDataClass | null = null,
+    insertTempCamera: CameraDataClass | null = null
   ) {
     if (!canvasRef) return
     const ctx = canvasRef.getContext('2d')
