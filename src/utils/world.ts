@@ -163,8 +163,7 @@ export class World {
       }
     }
 
-    const allDoors = [...doors];
-    allDoors.forEach((door, index) => {
+    doors.forEach((door, index) => {
       // @ts-ignore
       const doorApi: DoorEntity = this.allFileMapObjects.door[index];
       if (doorApi) {
@@ -173,14 +172,14 @@ export class World {
     })
     if (currentTool === 'door' && hoverPoint) {
       if (insertTempDoor) {
-        const temp = new DoorEntity(this, insertTempDoor)
+        const ClassName = fileDataKeyToClass[currentTool];
+        // @ts-ignore
+        const temp = new ClassName(this, insertTempDoor)
         temp.draw2D(ctx, panOffset, zoomLevel)
       }
     }
 
-    const allWindows = [...windows];
-
-    allWindows.forEach((win, index) => {
+    windows.forEach((win, index) => {
       const windowApi: WindowEntity = this.allFileMapObjects.window[index] as WindowEntity;
       if (windowApi) {
         windowApi.draw2D(ctx, panOffset, zoomLevel)
@@ -188,13 +187,14 @@ export class World {
     })
     if (currentTool === 'window' && hoverPoint) {
       if (insertTempWindow) {
-        const temp = new WindowEntity(this, insertTempWindow)
+        const ClassName = fileDataKeyToClass[currentTool];
+        // @ts-ignore
+        const temp = new ClassName(this, insertTempWindow)
         temp.draw2D(ctx, panOffset, zoomLevel)
       }
     }
 
-    const allCameras = [...cameras];
-    allCameras.forEach((camera, index) => {
+    cameras.forEach((camera, index) => {
       const cameraApi: CameraEntity = this.allFileMapObjects.camera[index] as CameraEntity;
       if (cameraApi) {
         cameraApi.draw2D(ctx, panOffset, zoomLevel)
@@ -202,7 +202,9 @@ export class World {
     })
     if (currentTool === 'camera') {
       if (insertTempCamera) {
-        const temp = new CameraEntity(this, insertTempCamera)
+        const ClassName = fileDataKeyToClass[currentTool];
+        // @ts-ignore
+        const temp = new ClassName(this, insertTempCamera)
         temp.draw2D(ctx, panOffset, zoomLevel)
       }
     }
