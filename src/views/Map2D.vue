@@ -962,25 +962,17 @@ const handleCanvasClick = (e: MouseEvent) => {
       }
     }
     lastPoint.value = clickPoint
-  } else {
-    if (currentTool.value === 'door') {
-      if (insertTempObj && hoverPoint.value) {
+  } else if (insertTempObj) {
+    if (insertTempObj instanceof ObjInWallDataClass) {
+      if (hoverPoint.value) {
         worldApi.add(currentTool.value, [insertTempObj])
         insertTempObj = null;
         currentTool.value = 'drag'
       }
-    } else if (currentTool.value === 'window') {
-      if (insertTempObj && hoverPoint.value) {
-        worldApi.add(currentTool.value, [insertTempObj])
-        insertTempObj = null;
-        currentTool.value = 'drag'
-      }
-    } else if (currentTool.value === 'camera') {
-      if (insertTempObj) {
-        worldApi.add(currentTool.value, [insertTempObj])
-        insertTempObj = null;
-        currentTool.value = 'drag'
-      }
+    } else {
+      worldApi.add(currentTool.value, [insertTempObj])
+      insertTempObj = null;
+      currentTool.value = 'drag'
     }
   }
 
