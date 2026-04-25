@@ -10,7 +10,7 @@ import { calculateAngle } from './calculateAngle'
 import { CameraData } from '@/entities/camera/index.d'
 import { CameraDataClass, CameraEntity } from '@/entities/camera'
 import { allFileKeys, defaultFileData, fileData, fileDataKeyToClass } from '@/entities/index'
-import { EntityClass } from '@/types/entity'
+import { EntityClass, EntityClassInWall } from '@/types/entity'
 import { ObjDataClass } from '@/entities/objData'
 
 export const canvasHeight = 600
@@ -169,14 +169,6 @@ export class World {
         doorApi.draw2D(ctx, panOffset, zoomLevel)
       }
     })
-    if (currentTool === 'door' && hoverPoint) {
-      if (insertTempObj) {
-        const ClassName = fileDataKeyToClass[currentTool];
-        // @ts-ignore
-        const temp = new ClassName(this, insertTempObj)
-        temp.draw2D(ctx, panOffset, zoomLevel)
-      }
-    }
 
     windows.forEach((win, index) => {
       const windowApi: WindowEntity = this.allFileMapObjects.window[index] as WindowEntity;
@@ -184,14 +176,6 @@ export class World {
         windowApi.draw2D(ctx, panOffset, zoomLevel)
       }
     })
-    if (currentTool === 'window' && hoverPoint) {
-      if (insertTempObj) {
-        const ClassName = fileDataKeyToClass[currentTool];
-        // @ts-ignore
-        const temp = new ClassName(this, insertTempObj)
-        temp.draw2D(ctx, panOffset, zoomLevel)
-      }
-    }
 
     cameras.forEach((camera, index) => {
       const cameraApi: CameraEntity = this.allFileMapObjects.camera[index] as CameraEntity;
@@ -199,12 +183,19 @@ export class World {
         cameraApi.draw2D(ctx, panOffset, zoomLevel)
       }
     })
-    if (currentTool === 'camera') {
-      if (insertTempObj) {
-        const ClassName = fileDataKeyToClass[currentTool];
-        // @ts-ignore
+
+    if (insertTempObj && currentTool) {
+      // @ts-ignore
+      const ClassName = fileDataKeyToClass[currentTool];
+      if (ClassName) {
         const temp = new ClassName(this, insertTempObj)
-        temp.draw2D(ctx, panOffset, zoomLevel)
+        if (temp instanceof EntityClassInWall) {
+          if (hoverPoint) {
+            temp.draw2D(ctx, panOffset, zoomLevel)
+          }
+        } else {
+          temp.draw2D(ctx, panOffset, zoomLevel)
+        }
       }
     }
 
