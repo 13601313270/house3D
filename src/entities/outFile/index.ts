@@ -4,34 +4,31 @@ import { OutFileData } from './index.d'
 import { EntityClass, EntityType, MatchSnapPoint, OrigionSnapPoint } from '@/types/entity'
 import { editItem } from '..'
 import { World } from '@/utils/world'
+// @ts-ignore
+import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
 import { ObjDataClass } from '../objData'
 
 export class OutFileDataClass extends ObjDataClass<OutFileData> {
-  targetPositionX: number
-  targetPositionY: number
-  targetPositionZ: number
-  fov: number
-  aspectW: number
-  aspectH: number
+  url: string
+  scale: number
+
   constructor(data: OutFileData) {
     super(data)
-    this.targetPositionX = 0
-    this.targetPositionY = 0
-    this.targetPositionZ = 100
-    this.fov = 55
-    this.aspectW = 9
-    this.aspectH = 16
+    this.url = data.url
+    this.scale = data.scale
   }
 }
+
 export function createOutFileData(): OutFileDataClass {
-  const camera: OutFileData = {
+  const data: OutFileData = {
     id: Date.now().toString(),
     x: 0,
     y: 0,
     z: 100,
-    url: '',
+    url: 'https://video-obj.oss-cn-beijing.aliyuncs.com/bed.obj',
+    scale: 1,
   }
-  return new OutFileDataClass(camera)
+  return new OutFileDataClass(data)
 }
 
 export function editPropConfig(): editItem[] {
@@ -74,6 +71,41 @@ export class OutFileEntity extends EntityClass<OutFileData> {
   create3DMesh(scene: THREE.Scene): THREE.Group[] {
     const data = this.getData();
     const group = new THREE.Group()
+    const { url, scale } = data
+
+    if (url.endsWith('.obj')) {
+      const loader = new OBJLoader()
+      loader.load(url, (object: THREE.Group) => {
+        // 计算模型的包围盒并居中
+        const box = new THREE.Box3().setFromObject(object)
+        const center = box.getCenter(new THREE.Vector3())
+
+        // 将模型移动到原点
+        object.position.sub(center)
+        object.scale.setScalar(scale)
+
+        // 添加默认材质（如果模型没有材质）
+        object.traverse((child) => {
+          if (child instanceof THREE.Mesh) {
+            if (!child.material) {
+              child.material = new THREE.MeshStandardMaterial({
+                color: 0x888888,
+                roughness: 0.7,
+                metalness: 0.1
+              })
+            }
+          }
+        })
+        group.add(object)
+        console.log('OBJ文件加载成功:', url)
+      }, (progress: any) => {
+        // 加载进度
+        const percent = (progress.loaded / progress.total * 100).toFixed(2)
+        console.log('加载进度:', percent + '%')
+      }, (error: any) => {
+        console.error('OBJ文件加载失败:', error)
+      })
+    }
     // 添加一个方块
     const cube = new THREE.BoxGeometry(100, 100, 100)
     const material = new THREE.MeshBasicMaterial({ color: this.color3D })

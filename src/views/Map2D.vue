@@ -1441,7 +1441,7 @@ function updateEditPropInputInfoBoolean(id: string, event: Event) {
   editPropInputInfo.value[id] = event.target.checked
 }
 function addObjFile(item: ObjItem) {
-  worldApi.addObjFile(item)
+  // worldApi.addObjFile(item)
   drawWrapper()
 }
 </script>

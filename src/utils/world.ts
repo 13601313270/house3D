@@ -306,52 +306,6 @@ export class World {
   _callAllOnChangeCallback() {
     this.changeBindList.forEach(callback => callback())
   }
-
-  addObjFile(item: ObjItem) {
-    if (item.url.endsWith('.obj')) {
-      this.allObjFiles.push({
-        id: item.id,
-        url: item.url,
-        scale: item.scale,
-        x: 0,
-        y: 0,
-        z: 0,
-      })
-      const loader = new OBJLoader()
-      loader.load(item.url, (object: THREE.Group) => {
-        // 计算模型的包围盒并居中
-        const box = new THREE.Box3().setFromObject(object)
-        const center = box.getCenter(new THREE.Vector3())
-
-        // 将模型移动到原点
-        object.position.sub(center)
-        const scale = item.scale
-        object.scale.setScalar(scale)
-
-        // 添加默认材质（如果模型没有材质）
-        object.traverse((child) => {
-          if (child instanceof THREE.Mesh) {
-            if (!child.material) {
-              child.material = new THREE.MeshStandardMaterial({
-                color: 0x888888,
-                roughness: 0.7,
-                metalness: 0.1
-              })
-            }
-          }
-        })
-
-        this.scene.add(object)
-        console.log('OBJ文件加载成功:', item.url)
-      }, (progress: any) => {
-        // 加载进度
-        const percent = (progress.loaded / progress.total * 100).toFixed(2)
-        console.log('加载进度:', percent + '%')
-      }, (error: any) => {
-        console.error('OBJ文件加载失败:', error)
-      })
-    }
-  }
 }
 
 const drawAxes = (
