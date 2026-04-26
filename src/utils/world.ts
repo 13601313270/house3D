@@ -1,17 +1,18 @@
 import * as THREE from 'three'
 import { ObjData, EntityType, Point } from '../types'
-import { DoorData } from '@/entities/door/index.d'
-import { WindowData } from '@/entities/window/index.d'
+// @ts-ignore
+import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
 import { WallEntity } from '@/entities/wall/index'
-import { DoorDataClass, DoorEntity } from '@/entities/door/index'
-import { WindowDataClass, WindowEntity } from '@/entities/window'
+import { DoorEntity } from '@/entities/door/index'
+import { WindowEntity } from '@/entities/window'
 import { drawPoint } from './drawPoint'
 import { calculateAngle } from './calculateAngle'
-import { CameraData } from '@/entities/camera/index.d'
-import { CameraDataClass, CameraEntity } from '@/entities/camera'
-import { allFileKeys, defaultFileData, fileData, fileDataKeyToClass } from '@/entities/index'
+import { CameraEntity } from '@/entities/camera'
+import { allFileKeys, fileData, fileDataKeyToClass } from '@/entities/index'
 import { EntityClass, EntityClassInWall } from '@/types/entity'
 import { ObjDataClass } from '@/entities/objData'
+import { ObjItem } from '@/entities/allObjs';
+import { OutFileEntity } from '@/entities/outFile';
 
 export const canvasHeight = 600
 export const snapThreshold = 20
@@ -22,12 +23,23 @@ export class World {
     door: DoorEntity[],
     window: WindowEntity[],
     camera: CameraEntity[],
+    outFile: OutFileEntity[],
   } = {
       wall: [],
       door: [],
       window: [],
       camera: [],
+      outFile: [],
     }
+
+  allObjFiles: {
+    id: string
+    url: string
+    scale: number,
+    x: number,
+    y: number,
+    z: number,
+  }[] = []
 
   scene: THREE.Scene
 
@@ -162,27 +174,19 @@ export class World {
       }
     }
 
-    doors.forEach((door, index) => {
-      // @ts-ignore
-      const doorApi: DoorEntity = this.allFileMapObjects.door[index];
-      if (doorApi) {
-        doorApi.draw2D(ctx, panOffset, zoomLevel)
+    allFileKeys.forEach((key) => {
+      if (key === 'wall') {
+        return;
       }
+      fileData[key].forEach((item, index) => {
+        // @ts-ignore
+        const itemApi: DoorEntity = this.allFileMapObjects[key][index];
+        if (itemApi) {
+          itemApi.draw2D(ctx, panOffset, zoomLevel)
+        }
+      })
     })
 
-    windows.forEach((win, index) => {
-      const windowApi: WindowEntity = this.allFileMapObjects.window[index] as WindowEntity;
-      if (windowApi) {
-        windowApi.draw2D(ctx, panOffset, zoomLevel)
-      }
-    })
-
-    cameras.forEach((camera, index) => {
-      const cameraApi: CameraEntity = this.allFileMapObjects.camera[index] as CameraEntity;
-      if (cameraApi) {
-        cameraApi.draw2D(ctx, panOffset, zoomLevel)
-      }
-    })
     if (insertTempObj) {
       if (insertTempObj instanceof EntityClassInWall) {
         if (hoverPoint) {
@@ -193,6 +197,12 @@ export class World {
       }
     }
 
+    // 绘制所有ObjFile的中心点
+    this.allObjFiles.forEach((item) => {
+      drawPoint(ctx, item.x * zoomLevel + panOffset.x, item.y * zoomLevel + panOffset.y, '#42b983')
+    })
+
+    // 绘制轴
     drawAxes(ctx, panOffset, zoomLevel, canvasWidth, canvasHeight)
 
     // 绘制轴对齐参考线
@@ -237,6 +247,7 @@ export class World {
       door: [],
       window: [],
       camera: [],
+      outFile: [],
     };
     allFileKeys.forEach((key) => {
       (this.allFileMapObjects[key] as EntityClass<any>[]).forEach((item) => {
@@ -294,6 +305,52 @@ export class World {
 
   _callAllOnChangeCallback() {
     this.changeBindList.forEach(callback => callback())
+  }
+
+  addObjFile(item: ObjItem) {
+    if (item.url.endsWith('.obj')) {
+      this.allObjFiles.push({
+        id: item.id,
+        url: item.url,
+        scale: item.scale,
+        x: 0,
+        y: 0,
+        z: 0,
+      })
+      const loader = new OBJLoader()
+      loader.load(item.url, (object: THREE.Group) => {
+        // 计算模型的包围盒并居中
+        const box = new THREE.Box3().setFromObject(object)
+        const center = box.getCenter(new THREE.Vector3())
+
+        // 将模型移动到原点
+        object.position.sub(center)
+        const scale = item.scale
+        object.scale.setScalar(scale)
+
+        // 添加默认材质（如果模型没有材质）
+        object.traverse((child) => {
+          if (child instanceof THREE.Mesh) {
+            if (!child.material) {
+              child.material = new THREE.MeshStandardMaterial({
+                color: 0x888888,
+                roughness: 0.7,
+                metalness: 0.1
+              })
+            }
+          }
+        })
+
+        this.scene.add(object)
+        console.log('OBJ文件加载成功:', item.url)
+      }, (progress: any) => {
+        // 加载进度
+        const percent = (progress.loaded / progress.total * 100).toFixed(2)
+        console.log('加载进度:', percent + '%')
+      }, (error: any) => {
+        console.error('OBJ文件加载失败:', error)
+      })
+    }
   }
 }
 

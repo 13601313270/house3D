@@ -2,20 +2,23 @@ import { DoorData } from './door/index.d'
 import { WallData } from './wall/index.d'
 import { WindowData } from './window/index.d'
 import { CameraData } from './camera/index.d'
+import { OutFileData } from './outFile/index.d'
 import { WallDataClass, WallEntity, editPropConfig as wallEditPropConfig } from './wall'
 import { DoorEntity, createDoorData, editPropConfig as doorEditPropConfig } from './door'
 import { WindowEntity, createWindowData, editPropConfig as windowEditPropConfig } from './window'
 import { CameraEntity, editPropConfig as cameraEditPropConfig, createCameraData } from './camera'
+import { OutFileEntity, editPropConfig as outFileEditPropConfig, createOutFileData } from './outFile/index'
 import { EntityClass } from '@/types/entity'
 
-export type allFileKeysEnum = 'wall' | 'door' | 'window' | 'camera';
-export const allFileKeys: allFileKeysEnum[] = ['wall', 'door', 'window', 'camera']
+export type allFileKeysEnum = 'wall' | 'door' | 'window' | 'camera' | 'outFile';
+export const allFileKeys: allFileKeysEnum[] = ['wall', 'door', 'window', 'camera', 'outFile']
 
 export const allFileKeysName: Record<allFileKeysEnum, string> = {
   wall: '墙体',
   door: '门',
   window: '窗户',
   camera: '相机',
+  outFile: '外部文件',
 }
 
 export type fileData = {
@@ -23,6 +26,7 @@ export type fileData = {
   door: DoorData[],
   window: WindowData[],
   camera: CameraData[],
+  outFile: OutFileData[],
 }
 
 export const defaultFileData: () => fileData = () => {
@@ -31,6 +35,7 @@ export const defaultFileData: () => fileData = () => {
     door: [],
     window: [],
     camera: [],
+    outFile: [],
   }
 }
 
@@ -41,12 +46,13 @@ export const fileDataKeyToClass: Record<allFileKeysEnum, EntityConstructor> = {
   door: DoorEntity,
   window: WindowEntity,
   camera: CameraEntity,
+  outFile: OutFileEntity,
 }
 
 export type editItem = {
   id: string,
   label: string,
-  dataType: 'number' | 'poiListAndLineCircle' | 'poiListAndLine' | 'poiList' | 'color' | 'boolean' | 'mesh' | 'area' | 'material' | string[]/* 枚举 */
+  dataType: 'number' | 'string' | 'poiListAndLineCircle' | 'poiListAndLine' | 'poiList' | 'color' | 'boolean' | 'mesh' | 'area' | 'material' | string[]/* 枚举 */
 }
 
 export const PropConfigMap: Record<allFileKeysEnum, () => editItem[]> = {
@@ -54,6 +60,7 @@ export const PropConfigMap: Record<allFileKeysEnum, () => editItem[]> = {
   door: doorEditPropConfig,
   window: windowEditPropConfig,
   camera: cameraEditPropConfig,
+  outFile: outFileEditPropConfig,
 }
 
 export const createInitData: Record<allFileKeysEnum, () => any> = {
@@ -61,6 +68,7 @@ export const createInitData: Record<allFileKeysEnum, () => any> = {
   door: createDoorData,
   window: createWindowData,
   camera: createCameraData,
+  outFile: createOutFileData,
 }
 
 function createWallData(): WallDataClass {

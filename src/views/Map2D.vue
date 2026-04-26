@@ -7,9 +7,16 @@
             添加
           </button>
           <div class="list">
-            <div class="childItem" v-for="value in allFileKeys" :key="value" :class="{ active: currentTool === value }"
-              @click="changeCurrentTool(value)">
-              {{ allFileKeysName[value] }}
+            <div>
+              <div class="childItem" v-for="value in allFileKeys" :key="value"
+                :class="{ active: currentTool === value }" @click="changeCurrentTool(value)">
+                {{ allFileKeysName[value] }}
+              </div>
+            </div>
+            <div>
+              <div v-for="item in ObjFiles" :key="item.id" class="childItem" @click="addObjFile(item)">
+                {{ item.id }}
+              </div>
             </div>
           </div>
         </div>
@@ -151,11 +158,12 @@ import { CameraData } from '@/entities/camera/index.d'
 import { WallDataClass, WallEntity } from '@/entities/wall'
 import { allMaterial } from '@/material'
 import { ObjDataClass, ObjInWallDataClass } from '@/entities/objData'
+import ObjFiles, { ObjItem } from '@/entities/allObjs'
 
 const canvasRef = ref<HTMLCanvasElement | null>(null)
 const canvas3DRef = ref<typeof Canvas3D | null>(null)
 const canvas3DRef2 = ref<typeof Canvas3D | null>(null)
-const currentTool = ref<'wall' | 'door' | 'window' | 'camera' | 'drag'>('drag')
+const currentTool = ref<'wall' | 'door' | 'window' | 'camera' | 'outFile' | 'drag'>('drag')
 const tempDrawWall = ref<WallDataClass | null>(null)
 const hoverPoint = ref<Point | null>(null)
 const lastPoint = ref<Point | null>(null)
@@ -1227,46 +1235,62 @@ const handleMouseDown = (e: MouseEvent) => {
       }
     }
 
-    // 检查门
-    for (let i = 0; i < worldApi.getObjects('door').length; i++) {
-      // const door = worldApi.getObjects('door')[i]
-      const api: DoorEntity = worldApi.allFileMapObjects.door[i] as DoorEntity;
-      const matchInfo = api.matchHandelInfo(x, y, zoomLevel.value)
-      if (matchInfo) {
-        matchHandelObj = api;
-        matchHandelInfo = matchInfo
-        dragOffset.value = { x: 0, y: 0 };
-        dragStartPoint.value = { x, y }
-        return;
+    for (let i = 0; i < allFileKeys.length; i++) {
+      const key = allFileKeys[i];
+      if (key === 'wall') continue;
+      for (let j = 0; j < worldApi.getObjects(key).length; j++) {
+        const api: DoorEntity = worldApi.allFileMapObjects[key][j] as DoorEntity;
+        const matchInfo = api.matchHandelInfo(x, y, zoomLevel.value)
+        if (matchInfo) {
+          matchHandelObj = api;
+          matchHandelInfo = matchInfo
+          dragOffset.value = { x: 0, y: 0 };
+          dragStartPoint.value = { x, y }
+          return;
+        }
       }
     }
 
-    // 检查窗户
-    for (let i = 0; i < worldApi.getObjects('window').length; i++) {
-      // const windowItem = worldApi.getObjects('window')[i]
-      const api: WindowEntity = worldApi.allFileMapObjects.window[i] as WindowEntity;
-      const matchInfo = api.matchHandelInfo(x, y, zoomLevel.value)
-      if (matchInfo) {
-        matchHandelObj = api;
-        matchHandelInfo = matchInfo
-        dragOffset.value = { x: 0, y: 0 };
-        dragStartPoint.value = { x, y }
-        return;
-      }
-    }
-    // 检查相机
-    for (let i = 0; i < worldApi.getObjects('camera').length; i++) {
-      // const camera = worldApi.getObjects('camera')[i]
-      const api: CameraEntity = worldApi.allFileMapObjects.camera[i] as CameraEntity;
-      const matchInfo = api.matchHandelInfo(x, y, zoomLevel.value)
-      if (matchInfo) {
-        matchHandelObj = api;
-        matchHandelInfo = matchInfo
-        dragOffset.value = { x: 0, y: 0 };
-        dragStartPoint.value = { x, y }
-        return;
-      }
-    }
+    // // 检查门
+    // for (let j = 0; j < worldApi.getObjects('door').length; j++) {
+    //   // const door = worldApi.getObjects('door')[i]
+    //   const api: DoorEntity = worldApi.allFileMapObjects.door[j] as DoorEntity;
+    //   const matchInfo = api.matchHandelInfo(x, y, zoomLevel.value)
+    //   if (matchInfo) {
+    //     matchHandelObj = api;
+    //     matchHandelInfo = matchInfo
+    //     dragOffset.value = { x: 0, y: 0 };
+    //     dragStartPoint.value = { x, y }
+    //     return;
+    //   }
+    // }
+
+    // // 检查窗户
+    // for (let j = 0; j < worldApi.getObjects('window').length; j++) {
+    //   // const windowItem = worldApi.getObjects('window')[i]
+    //   const api: WindowEntity = worldApi.allFileMapObjects.window[j] as WindowEntity;
+    //   const matchInfo = api.matchHandelInfo(x, y, zoomLevel.value)
+    //   if (matchInfo) {
+    //     matchHandelObj = api;
+    //     matchHandelInfo = matchInfo
+    //     dragOffset.value = { x: 0, y: 0 };
+    //     dragStartPoint.value = { x, y }
+    //     return;
+    //   }
+    // }
+    // // 检查相机
+    // for (let j = 0; j < worldApi.getObjects('camera').length; j++) {
+    //   // const camera = worldApi.getObjects('camera')[i]
+    //   const api: CameraEntity = worldApi.allFileMapObjects.camera[j] as CameraEntity;
+    //   const matchInfo = api.matchHandelInfo(x, y, zoomLevel.value)
+    //   if (matchInfo) {
+    //     matchHandelObj = api;
+    //     matchHandelInfo = matchInfo
+    //     dragOffset.value = { x: 0, y: 0 };
+    //     dragStartPoint.value = { x, y }
+    //     return;
+    //   }
+    // }
 
     // 如果没有拖拽到任何点，开始平移
     if (!draggedPoint.value) {
@@ -1370,7 +1394,7 @@ const handleWheel = (e: WheelEvent) => {
 
   drawWrapper()
 }
-function changeCurrentTool(type: 'wall' | 'door' | 'window' | 'camera' | 'drag') {
+function changeCurrentTool(type: 'wall' | 'door' | 'window' | 'camera' | 'outFile' | 'drag') {
   // console.log('changeTool---1---nearest---2---clear')
   insertTempObj = null
 
@@ -1415,6 +1439,10 @@ function updateEditPropInputInfo(id: string, event: Event) {
 function updateEditPropInputInfoBoolean(id: string, event: Event) {
   // @ts-ignore
   editPropInputInfo.value[id] = event.target.checked
+}
+function addObjFile(item: ObjItem) {
+  worldApi.addObjFile(item)
+  drawWrapper()
 }
 </script>
 

@@ -10,7 +10,7 @@ interface NearestWallResult {
   angle: number
 }
 
-export type EntityType = 'wall' | 'door' | 'window' | 'camera'
+export type EntityType = 'wall' | 'door' | 'window' | 'camera' | 'outFile'
 export type allSnapFromType = 'point' | 'line' | 'axis'
 // 磁吸点
 export type OrigionSnapPoint = {
