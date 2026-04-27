@@ -106,12 +106,7 @@ export class OutFileEntity extends EntityClass<OutFileData> {
         console.error('OBJ文件加载失败:', error)
       })
     }
-    // 添加一个方块
-    const cube = new THREE.BoxGeometry(100, 100, 100)
-    const material = new THREE.MeshBasicMaterial({ color: this.color3D })
-    const cubeMesh = new THREE.Mesh(cube, material)
-    cubeMesh.position.set(data.x, data.z, data.y)
-    group.add(cubeMesh)
+    group.position.set(data.x, data.z, data.y)
 
     return [
       group
