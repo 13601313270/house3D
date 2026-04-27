@@ -222,10 +222,10 @@ export class CameraEntity extends EntityClass<CameraData> {
     ]
   }
 
-  matchHandelInfo(x: number, y: number, zoomLevel: number) {
+  matchHandelInfo(x: number, y: number) {
     const data = this.getData();
     const dist = Math.hypot(x - data.x, y - data.y)
-    if (dist < 10 * zoomLevel) {
+    if (dist < 10) {
       return {
         index: 0,
         type: this.type,
@@ -233,7 +233,7 @@ export class CameraEntity extends EntityClass<CameraData> {
       }
     }
     const distToTarget = Math.hypot(x - data.targetPositionX, y - data.targetPositionY)
-    if (distToTarget < 10 * zoomLevel) {
+    if (distToTarget < 10) {
       return {
         index: 1,
         type: this.type,

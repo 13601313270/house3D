@@ -111,10 +111,51 @@ export class OutFileEntity extends EntityClass<OutFileData> {
     // 控制点向着angleY角度延伸10个单位后的坐标
     const rotatedXAdd = data.x + Math.cos(data.angleY) * this.drawAngelLength
     const rotatedYAdd = data.y - Math.sin(data.angleY) * this.drawAngelLength
+
+    function ttt(angel: number, drawAngelLength: number) {
+      const tempX = data.x + Math.cos(angel) * drawAngelLength;
+      const tempY = data.y - Math.sin(angel) * drawAngelLength;
+      return [tempX * zoomLevel + panOffset.x, tempY * zoomLevel + panOffset.y]
+    }
+
     // 绘制双向箭头表示旋转角度
-    const arrowX = rotatedXAdd * zoomLevel + panOffset.x
-    const arrowY = rotatedYAdd * zoomLevel + panOffset.y
-    const arrowSize = 16 * zoomLevel
+    ctx.strokeStyle = '#e67e22'
+    ctx.fillStyle = '#e67e22'
+    ctx.lineWidth = 2 * zoomLevel
+    // 绘制双向箭头的主线（圆弧）
+    ctx.beginPath();
+    ctx.arc(screenX, screenY, this.drawAngelLength * zoomLevel, data.angleY * -1 - Math.PI / 4, data.angleY * -1 + Math.PI / 4);
+    ctx.stroke();
+
+    // 左侧箭头
+    (() => {
+      ctx.beginPath()
+      const [p1X, p1Y] = ttt(data.angleY + 0.1 + Math.PI / 4, this.drawAngelLength)
+      const [p2X, p2Y] = ttt(data.angleY + Math.PI / 4, this.drawAngelLength + 5)
+      const [p3X, p3Y] = ttt(data.angleY + Math.PI / 4, this.drawAngelLength - 5)
+      ctx.moveTo(
+        p1X,
+        p1Y
+      )
+      ctx.lineTo(p2X, p2Y)
+      ctx.lineTo(p3X, p3Y)
+      ctx.closePath()
+      ctx.fill()
+    })();
+
+    // 右侧箭头
+    ctx.beginPath()
+    const [p1X, p1Y] = ttt(data.angleY - 0.1 - Math.PI / 4, this.drawAngelLength)
+    const [p2X, p2Y] = ttt(data.angleY - Math.PI / 4, this.drawAngelLength + 5)
+    const [p3X, p3Y] = ttt(data.angleY - Math.PI / 4, this.drawAngelLength - 5)
+    ctx.moveTo(
+      p1X,
+      p1Y
+    )
+    ctx.lineTo(p2X, p2Y)
+    ctx.lineTo(p3X, p3Y)
+    ctx.closePath()
+    ctx.fill()
 
     // 在(rotatedXAdd, rotatedYAdd)位置绘制一个圆圈
     const circleX = rotatedXAdd * zoomLevel + panOffset.x
@@ -127,34 +168,6 @@ export class OutFileEntity extends EntityClass<OutFileData> {
     ctx.arc(circleX, circleY, circleRadius, 0, Math.PI * 2)
     ctx.fill()
     ctx.stroke()
-
-    ctx.strokeStyle = '#e67e22'
-    ctx.fillStyle = '#e67e22'
-    ctx.lineWidth = 2 * zoomLevel
-    const angelY = data.angleY * -1 + Math.PI / 2;
-    const perpAngle = angelY + Math.PI / 2
-
-    // 绘制双向箭头的主线
-    ctx.beginPath()
-    ctx.moveTo(arrowX - Math.cos(angelY) * arrowSize * 1.5, arrowY - Math.sin(angelY) * arrowSize * 1.5)
-    ctx.lineTo(arrowX + Math.cos(angelY) * arrowSize * 1.5, arrowY + Math.sin(angelY) * arrowSize * 1.5)
-    ctx.stroke()
-
-    // 左侧箭头
-    ctx.beginPath()
-    ctx.moveTo(arrowX - Math.cos(angelY) * arrowSize * 1.5, arrowY - Math.sin(angelY) * arrowSize * 1.5)
-    ctx.lineTo(arrowX - Math.cos(angelY) * arrowSize + Math.cos(perpAngle) * arrowSize * 0.5, arrowY - Math.sin(angelY) * arrowSize + Math.sin(perpAngle) * arrowSize * 0.5)
-    ctx.lineTo(arrowX - Math.cos(angelY) * arrowSize - Math.cos(perpAngle) * arrowSize * 0.5, arrowY - Math.sin(angelY) * arrowSize - Math.sin(perpAngle) * arrowSize * 0.5)
-    ctx.closePath()
-    ctx.fill()
-
-    // 右侧箭头
-    ctx.beginPath()
-    ctx.moveTo(arrowX + Math.cos(angelY) * arrowSize * 1.5, arrowY + Math.sin(angelY) * arrowSize * 1.5)
-    ctx.lineTo(arrowX + Math.cos(angelY) * arrowSize + Math.cos(perpAngle) * arrowSize * 0.5, arrowY + Math.sin(angelY) * arrowSize + Math.sin(perpAngle) * arrowSize * 0.5)
-    ctx.lineTo(arrowX + Math.cos(angelY) * arrowSize - Math.cos(perpAngle) * arrowSize * 0.5, arrowY + Math.sin(angelY) * arrowSize - Math.sin(perpAngle) * arrowSize * 0.5)
-    ctx.closePath()
-    ctx.fill()
   }
 
   create3DMesh(scene: THREE.Scene): THREE.Group[] {
@@ -234,11 +247,11 @@ export class OutFileEntity extends EntityClass<OutFileData> {
     })
   }
 
-  matchHandelInfo(x: number, y: number, zoomLevel: number) {
+  matchHandelInfo(x: number, y: number) {
     const data = this.getData();
     const dist = Math.hypot(x - data.x, y - data.y)
     console.log('dist', dist)
-    if (dist < 10 * zoomLevel) {
+    if (dist < 10) {
       return {
         index: 0,
         type: this.type,
@@ -251,7 +264,7 @@ export class OutFileEntity extends EntityClass<OutFileData> {
 
     const dist2 = Math.hypot(x - rotatedXAdd, y - rotatedYAdd)
     console.log('dist2', dist2)
-    if (dist2 < 10 * zoomLevel) {
+    if (dist2 < 10) {
       return {
         index: 1,
         type: this.type,
