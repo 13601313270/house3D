@@ -44,6 +44,7 @@ export class WallDataClass extends ObjDataClass<WallData> {
 
 export function editPropConfig(obj: WallEntity): editItem[] {
   console.log('editPropConfig-墙体厚度', obj)
+  console.log('editPropConfig-墙体信息', obj.getData().walls)
   const configList: editItem[] = [
     {
       id: 'thickness',
@@ -110,7 +111,7 @@ export function editPropConfig(obj: WallEntity): editItem[] {
       id: 'walls',
       label: '墙体信息',
       dataType: 'array',
-      children: obj.getData().walls.map(v => {
+      children: (obj.getData().walls || []).map(v => {
         return [
           {
             id: 'hidden',

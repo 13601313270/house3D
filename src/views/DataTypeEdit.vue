@@ -31,7 +31,8 @@
             {{ item3.label }}：
           </div>
           <div>
-            <DataTypeEdit :item="item3" v-model="modelValue[item.id][index]" />
+            <DataTypeEdit :item="item3" :modelValue="modelValue[item.id][index]"
+              @update:modelValue="updateEditPropInputInfoObject(item.id, index, $event)" />
           </div>
         </div>
       </div>
@@ -122,6 +123,14 @@ function updateEditPropInputInfoBoolean(id: string, event: Event) {
       [id]: event.target.checked
     })
   }
+}
+function updateEditPropInputInfoObject(id: string, index: number, event: any) {
+  const existArray = props.modelValue[id] || []
+  existArray[index] = event
+  emit('update:modelValue', {
+    ...props.modelValue,
+    [id]: existArray
+  })
 }
 function addChildArray(id: string) {
   emit('update:modelValue', {
