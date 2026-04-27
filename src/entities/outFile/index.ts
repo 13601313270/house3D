@@ -76,7 +76,6 @@ export class OutFileEntity extends EntityClass<OutFileData> {
     const arrowX = rotatedXAdd * zoomLevel + panOffset.x
     const arrowY = rotatedYAdd * zoomLevel + panOffset.y
     const arrowSize = 8 * zoomLevel
-    const perpAngle = data.angleY + Math.PI / 2
 
     // 在(rotatedXAdd, rotatedYAdd)位置绘制一个圆圈
     const circleX = rotatedXAdd * zoomLevel + panOffset.x
@@ -93,26 +92,28 @@ export class OutFileEntity extends EntityClass<OutFileData> {
     ctx.strokeStyle = '#e67e22'
     ctx.fillStyle = '#e67e22'
     ctx.lineWidth = 2 * zoomLevel
+    const angelY = data.angleY * -1 + Math.PI / 2;
+    const perpAngle = angelY + Math.PI / 2
 
     // 绘制双向箭头的主线
     ctx.beginPath()
-    ctx.moveTo(arrowX - Math.cos(data.angleY) * arrowSize * 1.5, arrowY - Math.sin(data.angleY) * arrowSize * 1.5)
-    ctx.lineTo(arrowX + Math.cos(data.angleY) * arrowSize * 1.5, arrowY + Math.sin(data.angleY) * arrowSize * 1.5)
+    ctx.moveTo(arrowX - Math.cos(angelY) * arrowSize * 1.5, arrowY - Math.sin(angelY) * arrowSize * 1.5)
+    ctx.lineTo(arrowX + Math.cos(angelY) * arrowSize * 1.5, arrowY + Math.sin(angelY) * arrowSize * 1.5)
     ctx.stroke()
 
     // 左侧箭头
     ctx.beginPath()
-    ctx.moveTo(arrowX - Math.cos(data.angleY) * arrowSize * 1.5, arrowY - Math.sin(data.angleY) * arrowSize * 1.5)
-    ctx.lineTo(arrowX - Math.cos(data.angleY) * arrowSize + Math.cos(perpAngle) * arrowSize * 0.5, arrowY - Math.sin(data.angleY) * arrowSize + Math.sin(perpAngle) * arrowSize * 0.5)
-    ctx.lineTo(arrowX - Math.cos(data.angleY) * arrowSize - Math.cos(perpAngle) * arrowSize * 0.5, arrowY - Math.sin(data.angleY) * arrowSize - Math.sin(perpAngle) * arrowSize * 0.5)
+    ctx.moveTo(arrowX - Math.cos(angelY) * arrowSize * 1.5, arrowY - Math.sin(angelY) * arrowSize * 1.5)
+    ctx.lineTo(arrowX - Math.cos(angelY) * arrowSize + Math.cos(perpAngle) * arrowSize * 0.5, arrowY - Math.sin(angelY) * arrowSize + Math.sin(perpAngle) * arrowSize * 0.5)
+    ctx.lineTo(arrowX - Math.cos(angelY) * arrowSize - Math.cos(perpAngle) * arrowSize * 0.5, arrowY - Math.sin(angelY) * arrowSize - Math.sin(perpAngle) * arrowSize * 0.5)
     ctx.closePath()
     ctx.fill()
 
     // 右侧箭头
     ctx.beginPath()
-    ctx.moveTo(arrowX + Math.cos(data.angleY) * arrowSize * 1.5, arrowY + Math.sin(data.angleY) * arrowSize * 1.5)
-    ctx.lineTo(arrowX + Math.cos(data.angleY) * arrowSize + Math.cos(perpAngle) * arrowSize * 0.5, arrowY + Math.sin(data.angleY) * arrowSize + Math.sin(perpAngle) * arrowSize * 0.5)
-    ctx.lineTo(arrowX + Math.cos(data.angleY) * arrowSize - Math.cos(perpAngle) * arrowSize * 0.5, arrowY + Math.sin(data.angleY) * arrowSize - Math.sin(perpAngle) * arrowSize * 0.5)
+    ctx.moveTo(arrowX + Math.cos(angelY) * arrowSize * 1.5, arrowY + Math.sin(angelY) * arrowSize * 1.5)
+    ctx.lineTo(arrowX + Math.cos(angelY) * arrowSize + Math.cos(perpAngle) * arrowSize * 0.5, arrowY + Math.sin(angelY) * arrowSize + Math.sin(perpAngle) * arrowSize * 0.5)
+    ctx.lineTo(arrowX + Math.cos(angelY) * arrowSize - Math.cos(perpAngle) * arrowSize * 0.5, arrowY + Math.sin(angelY) * arrowSize - Math.sin(perpAngle) * arrowSize * 0.5)
     ctx.closePath()
     ctx.fill()
   }
@@ -128,7 +129,7 @@ export class OutFileEntity extends EntityClass<OutFileData> {
       console.error('未找到对应的文件类型:', fileTypeId)
       return []
     }
-    const { scaleX, scaleY, scaleZ, url } = findObjInfo
+    const { scaleX, scaleY, scaleZ, url, angleY } = findObjInfo
     console.log('scaleX', scaleX, 'scaleY', scaleY, 'scaleZ', scaleZ)
     if (url.endsWith('.obj')) {
       const loader = new OBJLoader()
@@ -140,6 +141,7 @@ export class OutFileEntity extends EntityClass<OutFileData> {
         // 将模型移动到原点
         // object.position.sub(center)
         object.scale.set(scaleX, scaleY, scaleZ)
+        object.rotation.y = angleY
 
         // 添加默认材质（如果模型没有材质）
         object.traverse((child) => {

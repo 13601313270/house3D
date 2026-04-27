@@ -4,6 +4,7 @@ type ObjItem = {
   scaleX: number
   scaleY: number
   scaleZ: number
+  angleY: number
 }
 const objFiles: ObjItem[] = [
   {
@@ -12,6 +13,7 @@ const objFiles: ObjItem[] = [
     scaleX: 2.7,
     scaleY: 2.7,
     scaleZ: 2.2,
+    angleY: -Math.PI / 2,
   },
   {
     id: 'table',
@@ -19,6 +21,7 @@ const objFiles: ObjItem[] = [
     scaleX: 0.1,
     scaleY: 0.1,
     scaleZ: 0.1,
+    angleY: 0,
   }
 ]
 export default objFiles
