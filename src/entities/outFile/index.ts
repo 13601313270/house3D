@@ -60,6 +60,19 @@ export class OutFileEntity extends EntityClass<OutFileData> {
   ): void {
     const screenX = data.x * zoomLevel + panOffset.x
     const screenY = data.y * zoomLevel + panOffset.y
+    const angleY = data.angleY;// * -1 + Math.PI / 2
+
+    const findObjInfo = ObjFiles.find(item => item.id === data.fileTypeId)
+    const preImg = findObjInfo?.preImg || ''
+    if (preImg) {
+      const img = new Image()
+      img.src = preImg
+      img.onload = () => {
+        ctx.rotate(angleY)
+        ctx.drawImage(img, screenX, screenY, 50 * zoomLevel, 50 * zoomLevel)
+        ctx.rotate(-angleY)
+      }
+    }
 
     // 控制点
     ctx.fillStyle = '#fff'

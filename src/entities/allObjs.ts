@@ -5,11 +5,13 @@ type ObjItem = {
   scaleY: number
   scaleZ: number
   angleY: number
+  preImg: string
 }
 const objFiles: ObjItem[] = [
   {
     id: 'bed',
     url: 'https://video-obj.oss-cn-beijing.aliyuncs.com/bed.obj',
+    preImg: 'https://video-obj.oss-cn-beijing.aliyuncs.com/bed.png',
     scaleX: 2.7,
     scaleY: 2.7,
     scaleZ: 2.2,
@@ -18,6 +20,7 @@ const objFiles: ObjItem[] = [
   {
     id: 'table',
     url: 'https://video-obj.oss-cn-beijing.aliyuncs.com/table.obj',
+    preImg: 'https://video-obj.oss-cn-beijing.aliyuncs.com/bed.png',
     scaleX: 0.1,
     scaleY: 0.1,
     scaleZ: 0.1,
