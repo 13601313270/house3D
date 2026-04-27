@@ -133,7 +133,20 @@ export abstract class EntityClass<T extends ObjData> {
     line: [Point, Point]
   ): void;
 
-  // 本对象的2D绘制逻辑
+  draw2DPreview(ctx: CanvasRenderingContext2D, panOffset: Point, zoomLevel: number) {
+    const data = this.getData();
+    this.draw2DPreviewByData(ctx, data, panOffset, zoomLevel)
+  }
+
+  // 本对象的2D预览绘制，（时间早于draw2DByData）
+  abstract draw2DPreviewByData(
+    ctx: CanvasRenderingContext2D,
+    data: T,
+    panOffset: Point,
+    zoomLevel: number,
+  ): void;
+
+  // 本对象的2D具柄绘制逻辑（时间晚于draw2DPreview）
   abstract draw2DByData(
     ctx: CanvasRenderingContext2D,
     data: T,

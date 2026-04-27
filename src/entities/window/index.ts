@@ -150,6 +150,9 @@ export class WindowEntity extends EntityClassInWall<WindowData> {
     }
   }
 
+  draw2DPreviewByData(ctx: CanvasRenderingContext2D, data: WindowData, panOffset: Point, zoomLevel: number): void {
+  }
+
   draw2DByData(
     ctx: CanvasRenderingContext2D,
     data: WindowData,

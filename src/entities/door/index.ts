@@ -110,6 +110,9 @@ export class DoorEntity extends EntityClassInWall<DoorData> {
     }
   }
 
+  draw2DPreviewByData(ctx: CanvasRenderingContext2D, data: DoorData, panOffset: Point, zoomLevel: number): void {
+  }
+
   draw2DByData(
     ctx: CanvasRenderingContext2D,
     data: DoorData,

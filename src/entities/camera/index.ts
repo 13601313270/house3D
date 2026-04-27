@@ -72,6 +72,10 @@ export class CameraEntity extends EntityClass<CameraData> {
   color3D: string = '#0c7f25'
   colorOpacity: string = '#14b737a5'
 
+  draw2DPreviewByData(ctx: CanvasRenderingContext2D, data: CameraData, panOffset: Point, zoomLevel: number): void {
+
+  }
+
   draw2DByData(
     ctx: CanvasRenderingContext2D,
     data: CameraData,

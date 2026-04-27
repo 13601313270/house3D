@@ -52,6 +52,29 @@ export class OutFileEntity extends EntityClass<OutFileData> {
   colorOpacity: string = '#14b737a5'
   private drawAngelLength = 50;
 
+  draw2DPreviewByData(ctx: CanvasRenderingContext2D, data: OutFileData, panOffset: Point, zoomLevel: number): void {
+    const screenX = data.x * zoomLevel + panOffset.x
+    const screenY = data.y * zoomLevel + panOffset.y
+    const angleY = data.angleY;// * -1 + Math.PI / 2
+    const findObjInfo = ObjFiles.find(item => item.id === data.fileTypeId)
+    const preImg = findObjInfo?.preImg || ''
+    const img = new Image()
+    img.src = preImg
+    const preImgScale = findObjInfo?.preImgScale || 1
+    ctx.save(); // 保存当前状态
+    const { width, height } = img;
+    ctx.translate(screenX, screenY); // 移动原点到目标中心
+    ctx.rotate(angleY * -1); // 围绕新原点旋转
+    ctx.drawImage(
+      img,
+      preImgScale / -2 * width * zoomLevel,
+      preImgScale / -2 * height * zoomLevel,
+      preImgScale * width * zoomLevel,
+      preImgScale * height * zoomLevel
+    ); // 以新原点为中心绘制
+    ctx.restore(); // 恢复原始状态
+  }
+
   draw2DByData(
     ctx: CanvasRenderingContext2D,
     data: OutFileData,
@@ -60,94 +83,63 @@ export class OutFileEntity extends EntityClass<OutFileData> {
   ): void {
     const screenX = data.x * zoomLevel + panOffset.x
     const screenY = data.y * zoomLevel + panOffset.y
-    const angleY = data.angleY;// * -1 + Math.PI / 2
 
-    const findObjInfo = ObjFiles.find(item => item.id === data.fileTypeId)
-    const preImg = findObjInfo?.preImg || ''
+    // 控制点
+    ctx.fillStyle = '#fff'
+    ctx.strokeStyle = '#e67e22'
+    ctx.lineWidth = 2
+    ctx.beginPath()
+    ctx.arc(screenX, screenY, 5 * zoomLevel, 0, Math.PI * 2)
+    ctx.fill()
+    ctx.stroke()
 
-    const addHandelPoint = () => {
-      // 控制点
-      ctx.fillStyle = '#fff'
-      ctx.strokeStyle = '#e67e22'
-      ctx.lineWidth = 2
-      ctx.beginPath()
-      ctx.arc(screenX, screenY, 5 * zoomLevel, 0, Math.PI * 2)
-      ctx.fill()
-      ctx.stroke()
+    // 控制点向着angleY角度延伸10个单位后的坐标
+    const rotatedXAdd = data.x + Math.cos(data.angleY) * this.drawAngelLength
+    const rotatedYAdd = data.y - Math.sin(data.angleY) * this.drawAngelLength
+    // 绘制双向箭头表示旋转角度
+    const arrowX = rotatedXAdd * zoomLevel + panOffset.x
+    const arrowY = rotatedYAdd * zoomLevel + panOffset.y
+    const arrowSize = 16 * zoomLevel
 
-      // 控制点向着angleY角度延伸10个单位后的坐标
-      const rotatedXAdd = data.x + Math.cos(data.angleY) * this.drawAngelLength
-      const rotatedYAdd = data.y - Math.sin(data.angleY) * this.drawAngelLength
-      // 绘制双向箭头表示旋转角度
-      const arrowX = rotatedXAdd * zoomLevel + panOffset.x
-      const arrowY = rotatedYAdd * zoomLevel + panOffset.y
-      const arrowSize = 16 * zoomLevel
+    // 在(rotatedXAdd, rotatedYAdd)位置绘制一个圆圈
+    const circleX = rotatedXAdd * zoomLevel + panOffset.x
+    const circleY = rotatedYAdd * zoomLevel + panOffset.y
+    const circleRadius = 5 * zoomLevel
+    ctx.fillStyle = '#fff'
+    ctx.strokeStyle = '#e67e22'
+    ctx.lineWidth = 2 * zoomLevel
+    ctx.beginPath()
+    ctx.arc(circleX, circleY, circleRadius, 0, Math.PI * 2)
+    ctx.fill()
+    ctx.stroke()
 
-      // 在(rotatedXAdd, rotatedYAdd)位置绘制一个圆圈
-      const circleX = rotatedXAdd * zoomLevel + panOffset.x
-      const circleY = rotatedYAdd * zoomLevel + panOffset.y
-      const circleRadius = 5 * zoomLevel
-      ctx.fillStyle = '#fff'
-      ctx.strokeStyle = '#e67e22'
-      ctx.lineWidth = 2 * zoomLevel
-      ctx.beginPath()
-      ctx.arc(circleX, circleY, circleRadius, 0, Math.PI * 2)
-      ctx.fill()
-      ctx.stroke()
+    ctx.strokeStyle = '#e67e22'
+    ctx.fillStyle = '#e67e22'
+    ctx.lineWidth = 2 * zoomLevel
+    const angelY = data.angleY * -1 + Math.PI / 2;
+    const perpAngle = angelY + Math.PI / 2
 
-      ctx.strokeStyle = '#e67e22'
-      ctx.fillStyle = '#e67e22'
-      ctx.lineWidth = 2 * zoomLevel
-      const angelY = data.angleY * -1 + Math.PI / 2;
-      const perpAngle = angelY + Math.PI / 2
+    // 绘制双向箭头的主线
+    ctx.beginPath()
+    ctx.moveTo(arrowX - Math.cos(angelY) * arrowSize * 1.5, arrowY - Math.sin(angelY) * arrowSize * 1.5)
+    ctx.lineTo(arrowX + Math.cos(angelY) * arrowSize * 1.5, arrowY + Math.sin(angelY) * arrowSize * 1.5)
+    ctx.stroke()
 
-      // 绘制双向箭头的主线
-      ctx.beginPath()
-      ctx.moveTo(arrowX - Math.cos(angelY) * arrowSize * 1.5, arrowY - Math.sin(angelY) * arrowSize * 1.5)
-      ctx.lineTo(arrowX + Math.cos(angelY) * arrowSize * 1.5, arrowY + Math.sin(angelY) * arrowSize * 1.5)
-      ctx.stroke()
+    // 左侧箭头
+    ctx.beginPath()
+    ctx.moveTo(arrowX - Math.cos(angelY) * arrowSize * 1.5, arrowY - Math.sin(angelY) * arrowSize * 1.5)
+    ctx.lineTo(arrowX - Math.cos(angelY) * arrowSize + Math.cos(perpAngle) * arrowSize * 0.5, arrowY - Math.sin(angelY) * arrowSize + Math.sin(perpAngle) * arrowSize * 0.5)
+    ctx.lineTo(arrowX - Math.cos(angelY) * arrowSize - Math.cos(perpAngle) * arrowSize * 0.5, arrowY - Math.sin(angelY) * arrowSize - Math.sin(perpAngle) * arrowSize * 0.5)
+    ctx.closePath()
+    ctx.fill()
 
-      // 左侧箭头
-      ctx.beginPath()
-      ctx.moveTo(arrowX - Math.cos(angelY) * arrowSize * 1.5, arrowY - Math.sin(angelY) * arrowSize * 1.5)
-      ctx.lineTo(arrowX - Math.cos(angelY) * arrowSize + Math.cos(perpAngle) * arrowSize * 0.5, arrowY - Math.sin(angelY) * arrowSize + Math.sin(perpAngle) * arrowSize * 0.5)
-      ctx.lineTo(arrowX - Math.cos(angelY) * arrowSize - Math.cos(perpAngle) * arrowSize * 0.5, arrowY - Math.sin(angelY) * arrowSize - Math.sin(perpAngle) * arrowSize * 0.5)
-      ctx.closePath()
-      ctx.fill()
-
-      // 右侧箭头
-      ctx.beginPath()
-      ctx.moveTo(arrowX + Math.cos(angelY) * arrowSize * 1.5, arrowY + Math.sin(angelY) * arrowSize * 1.5)
-      ctx.lineTo(arrowX + Math.cos(angelY) * arrowSize + Math.cos(perpAngle) * arrowSize * 0.5, arrowY + Math.sin(angelY) * arrowSize + Math.sin(perpAngle) * arrowSize * 0.5)
-      ctx.lineTo(arrowX + Math.cos(angelY) * arrowSize - Math.cos(perpAngle) * arrowSize * 0.5, arrowY + Math.sin(angelY) * arrowSize - Math.sin(perpAngle) * arrowSize * 0.5)
-      ctx.closePath()
-      ctx.fill()
-    }
-
-    if (preImg) {
-      const img = new Image()
-      img.src = preImg
-      img.onload = () => {
-        const preImgScale = findObjInfo?.preImgScale || 1
-        ctx.save(); // 保存当前状态
-        const { width, height } = img;
-        ctx.translate(screenX, screenY); // 移动原点到目标中心
-        ctx.rotate(angleY * -1); // 围绕新原点旋转
-        // ctx.scale(findObjInfo?.preImgScale || 1, findObjInfo?.preImgScale || 1); // 缩放图片
-        // ctx.scale(1, -1); // 翻转图片垂直方向
-        ctx.drawImage(
-          img,
-          preImgScale / -2 * width * zoomLevel,
-          preImgScale / -2 * height * zoomLevel,
-          preImgScale * width * zoomLevel,
-          preImgScale * height * zoomLevel
-        ); // 以新原点为中心绘制
-        ctx.restore(); // 恢复原始状态
-        addHandelPoint()
-      }
-    } else {
-      addHandelPoint()
-    }
+    // 右侧箭头
+    ctx.beginPath()
+    ctx.moveTo(arrowX + Math.cos(angelY) * arrowSize * 1.5, arrowY + Math.sin(angelY) * arrowSize * 1.5)
+    ctx.lineTo(arrowX + Math.cos(angelY) * arrowSize + Math.cos(perpAngle) * arrowSize * 0.5, arrowY + Math.sin(angelY) * arrowSize + Math.sin(perpAngle) * arrowSize * 0.5)
+    ctx.lineTo(arrowX + Math.cos(angelY) * arrowSize - Math.cos(perpAngle) * arrowSize * 0.5, arrowY + Math.sin(angelY) * arrowSize - Math.sin(perpAngle) * arrowSize * 0.5)
+    ctx.closePath()
+    ctx.fill()
   }
 
   create3DMesh(scene: THREE.Scene): THREE.Group[] {

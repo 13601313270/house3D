@@ -103,6 +103,10 @@ export class WallEntity extends EntityClass<WallData> {
   type: EntityType = 'wall'
   isPointObj: boolean = false
 
+  draw2DPreviewByData(ctx: CanvasRenderingContext2D, data: WallData, panOffset: Point, zoomLevel: number): void {
+
+  }
+
   draw2DByData(
     ctx: CanvasRenderingContext2D,
     data: WallData,

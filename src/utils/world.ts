@@ -181,6 +181,18 @@ export class World {
         // @ts-ignore
         const itemApi: DoorEntity = this.allFileMapObjects[key][index];
         if (itemApi) {
+          itemApi.draw2DPreview(ctx, panOffset, zoomLevel)
+        }
+      })
+    })
+    allFileKeys.forEach((key) => {
+      if (key === 'wall') {
+        return;
+      }
+      fileData[key].forEach((item, index) => {
+        // @ts-ignore
+        const itemApi: DoorEntity = this.allFileMapObjects[key][index];
+        if (itemApi) {
           itemApi.draw2D(ctx, panOffset, zoomLevel)
         }
       })
@@ -189,9 +201,11 @@ export class World {
     if (insertTempObj) {
       if (insertTempObj instanceof EntityClassInWall) {
         if (hoverPoint) {
+          insertTempObj.draw2DPreview(ctx, panOffset, zoomLevel)
           insertTempObj.draw2D(ctx, panOffset, zoomLevel)
         }
       } else {
+        insertTempObj.draw2DPreview(ctx, panOffset, zoomLevel)
         insertTempObj.draw2D(ctx, panOffset, zoomLevel)
       }
     }
