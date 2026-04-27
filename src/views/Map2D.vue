@@ -14,7 +14,8 @@
               </div>
             </div>
             <div>
-              <div v-for="item in ObjFiles" :key="item.id" class="childItem" @click="addObjFile(item)">
+              <div v-for="item in ObjFiles" :key="item.id" class="childItem"
+                @click="changeCurrentToolToOutFile(item.id)">
                 {{ item.id }}
               </div>
             </div>
@@ -159,6 +160,8 @@ import { WallDataClass, WallEntity } from '@/entities/wall'
 import { allMaterial } from '@/material'
 import { ObjDataClass, ObjInWallDataClass } from '@/entities/objData'
 import ObjFiles, { ObjItem } from '@/entities/allObjs'
+import { OutFileDataClass, OutFileEntity } from '@/entities/outFile'
+import { OutFileData } from '@/entities/outFile/index.d'
 
 const canvasRef = ref<HTMLCanvasElement | null>(null)
 const canvas3DRef = ref<typeof Canvas3D | null>(null)
@@ -1399,17 +1402,49 @@ function changeCurrentTool(type: 'wall' | 'door' | 'window' | 'camera' | 'outFil
 
   if (allFileKeys.includes(type as any)) {
     console.log('changeTool---2---nearest---2---clear')
-    // @ts-ignore
-    const ObjDataClass = createInitData[type];
-    // @ts-ignore
-    const ClassName = fileDataKeyToClass[type];
-    if (ClassName && ObjDataClass) {
-      const insertTempObjData = new ObjDataClass()
+    if (type === 'outFile') {
+      const findObjInfo = ObjFiles[1];
+      const data: OutFileData = {
+        fileTypeId: findObjInfo.id,
+        id: Date.now().toString(),
+        x: 0,
+        y: 0,
+        z: 0,
+      }
+      const insertTempObjData = new OutFileDataClass(data)
       console.log('changeTool---3---nearest---2---clear')
-      insertTempObj = new ClassName(worldApi, insertTempObjData)
+      insertTempObj = new OutFileEntity(worldApi, insertTempObjData)
+    } else {
+      // @ts-ignore
+      const ObjDataClass = createInitData[type];
+      // @ts-ignore
+      const ClassName = fileDataKeyToClass[type];
+      if (ClassName && ObjDataClass) {
+        const insertTempObjData = new ObjDataClass()
+        console.log('changeTool---3---nearest---2---clear')
+        insertTempObj = new ClassName(worldApi, insertTempObjData)
+      }
     }
   }
   currentTool.value = type
+}
+
+function changeCurrentToolToOutFile(id: string) {
+  const index = ObjFiles.findIndex(item => item.id === id);
+  if (index === -1) return
+  const findObjInfo = ObjFiles.find(item => item.id === id);
+  if (!findObjInfo) return
+  const data: OutFileData = {
+    fileTypeId: findObjInfo.id,
+    id: Date.now().toString(),
+    x: 0,
+    y: 0,
+    z: 0,
+  }
+  const insertTempObjData = new OutFileDataClass(data)
+  console.log('changeTool---3---nearest---2---clear')
+  insertTempObj = new OutFileEntity(worldApi, insertTempObjData)
+  currentTool.value = 'outFile'
 }
 
 watch(() => editPropInputInfo.value, () => {
