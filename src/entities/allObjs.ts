@@ -1,13 +1,17 @@
 type ObjItem = {
   id: string
   url: string
-  scale: number
+  scaleX: number
+  scaleY: number
+  scaleZ: number
 }
 const objFiles: ObjItem[] = [
   {
     id: 'bed',
     url: 'https://video-obj.oss-cn-beijing.aliyuncs.com/bed.obj',
-    scale: 5,
+    scaleX: 2.7,
+    scaleY: 2.7,
+    scaleZ: 2.2,
   },
 ]
 export default objFiles

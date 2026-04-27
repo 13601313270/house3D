@@ -11,7 +11,6 @@ import { CameraEntity } from '@/entities/camera'
 import { allFileKeys, fileData, fileDataKeyToClass } from '@/entities/index'
 import { EntityClass, EntityClassInWall } from '@/types/entity'
 import { ObjDataClass } from '@/entities/objData'
-import { ObjItem } from '@/entities/allObjs';
 import { OutFileEntity } from '@/entities/outFile';
 
 export const canvasHeight = 600

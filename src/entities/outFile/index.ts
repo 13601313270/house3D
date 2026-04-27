@@ -7,26 +7,25 @@ import { World } from '@/utils/world'
 // @ts-ignore
 import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
 import { ObjDataClass } from '../objData'
+import ObjFiles from '../allObjs'
 
 export class OutFileDataClass extends ObjDataClass<OutFileData> {
-  url: string
-  scale: number
+  fileTypeId: string
 
   constructor(data: OutFileData) {
     super(data)
-    this.url = data.url
-    this.scale = data.scale
+    this.fileTypeId = data.fileTypeId
   }
 }
 
 export function createOutFileData(): OutFileDataClass {
+  const findObjInfo = ObjFiles[0];
   const data: OutFileData = {
+    fileTypeId: findObjInfo.id,
     id: Date.now().toString(),
     x: 0,
     y: 0,
-    z: 100,
-    url: 'https://video-obj.oss-cn-beijing.aliyuncs.com/bed.obj',
-    scale: 1,
+    z: 0,
   }
   return new OutFileDataClass(data)
 }
@@ -38,6 +37,7 @@ export function editPropConfig(): editItem[] {
       label: 'URL',
       dataType: 'string',
     },
+
   ]
 }
 
@@ -71,8 +71,16 @@ export class OutFileEntity extends EntityClass<OutFileData> {
   create3DMesh(scene: THREE.Scene): THREE.Group[] {
     const data = this.getData();
     const group = new THREE.Group()
-    const { url, scale } = data
+    const { fileTypeId } = data
 
+    const findObjInfo = ObjFiles.find(item => item.id === fileTypeId)
+
+    if (!findObjInfo) {
+      console.error('未找到对应的文件类型:', fileTypeId)
+      return []
+    }
+    const { scaleX, scaleY, scaleZ, url } = findObjInfo
+    console.log('scaleX', scaleX, 'scaleY', scaleY, 'scaleZ', scaleZ)
     if (url.endsWith('.obj')) {
       const loader = new OBJLoader()
       loader.load(url, (object: THREE.Group) => {
@@ -81,8 +89,8 @@ export class OutFileEntity extends EntityClass<OutFileData> {
         const center = box.getCenter(new THREE.Vector3())
 
         // 将模型移动到原点
-        object.position.sub(center)
-        object.scale.setScalar(scale)
+        // object.position.sub(center)
+        object.scale.set(scaleX, scaleY, scaleZ)
 
         // 添加默认材质（如果模型没有材质）
         object.traverse((child) => {
