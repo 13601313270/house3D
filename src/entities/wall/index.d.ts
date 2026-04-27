@@ -1,7 +1,11 @@
 import { Point, ObjData } from '@/types/map2d'
 
+type wallInfo = {
+  hidden: boolean
+}
 export type WallData = ObjData & {
   points: Point[]
+  walls: wallInfo[],
   thickness: number
   color: string
   height: number
