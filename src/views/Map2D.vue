@@ -685,12 +685,11 @@ onMounted(() => {
       if (e.key === 'Escape') {
         if (tempDrawWall.value?.points?.length && tempDrawWall.value.points.length > 0) {
           if (tempDrawWall.value?.points.length > 1) {
-            const firstPoint = tempDrawWall.value.points[0]
             const newWall: WallData = {
               id: tempDrawWall.value.id,
-              x: firstPoint.x,
-              y: firstPoint.y,
-              z: 0,
+              x: tempDrawWall.value.x,
+              y: tempDrawWall.value.y,
+              z: tempDrawWall.value.z,
               color: '#fff',
               wmt: 0, // 墙材质
               height: 280, // 墙高，默认280
@@ -924,8 +923,8 @@ const handleCanvasClick = (e: MouseEvent) => {
             const newWall: WallData = {
               id: Date.now().toString(),
               points: [...tempDrawWall.value.points],
-              x: snapped.point.x,
-              y: snapped.point.y,
+              x: 0,
+              y: 0,
               color: '#fff',
               wmt: 0, // 墙材质
               height: 280, // 墙高
@@ -952,12 +951,12 @@ const handleCanvasClick = (e: MouseEvent) => {
     } else {
       tempDrawWall.value = {
         id: Date.now().toString(),
-        x: clickPoint.x,
-        y: clickPoint.y,
+        x: 0,
+        y: 0,
+        z: 0,
         color: '#fff',
         wmt: 0, // 墙材质
         height: 280, // 墙高
-        z: 0,
         points: [clickPoint],
         thickness: wallThickness.value,
         hb: true,// 有地板，默认有
