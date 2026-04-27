@@ -53,31 +53,7 @@
                 <!-- {{ editPropInputInfo[item.id] }} -->
               </div>
               <div>
-                <input v-if="item.dataType === 'number'" type="number" :value="editPropInputInfo[item.id]"
-                  @change="updateEditPropInputNumberInfo(item.id, $event)" :min="item.min" :max="item.max"
-                  :step="item.step" class="numberInput" />
-                <input v-else-if="item.dataType === 'color'" type="color" class="colorInput"
-                  :value="editPropInputInfo[item.id]" @change="updateEditPropInputInfo(item.id, $event)" />
-                <input v-else-if="item.dataType === 'boolean'" type="checkbox" :checked="editPropInputInfo[item.id]"
-                  @change="updateEditPropInputInfoBoolean(item.id, $event)" />
-                <div v-else-if="item.dataType === 'material'" class="materialList">
-                  <div @click="allMaterialShow = true, allMaterialShowPropId = item.id">
-                    <div class="materialItem" v-if="!editPropInputInfo[item.id]">
-                      <div class="imgOuting">
-                        <img src="../assets/Empty.png" alt="noMaterial" class="img"
-                          style="width: 50px;background-color: white;" />
-                      </div>
-                      <div class="name">无</div>
-                    </div>
-                    <div v-for="item2 in allMaterial.filter(item2 => editPropInputInfo[item.id] === item2.id)"
-                      :key="item2.id" class="materialItem">
-                      <div class="imgOuting">
-                        <img :src="item2.img" alt="material" class="img" />
-                      </div>
-                      <div class="name">{{ item2.name }}</div>
-                    </div>
-                  </div>
-                </div>
+                <DataTypeEdit :item="item" v-model="editPropInputInfo" />
               </div>
             </div>
           </div>
@@ -115,7 +91,7 @@
       </div>
     </div>
 
-    <div class="allMaterialPanel" v-if="allMaterialShow && allMaterialShowPropId"
+    <!-- <div class="allMaterialPanel" v-if="allMaterialShow && allMaterialShowPropId"
       @click.self="allMaterialShow = false, allMaterialShowPropId = undefined">
       <div class="allMaterialPanelInner">
         <div class="title">所有材质</div>
@@ -138,7 +114,7 @@
           </div>
         </div>
       </div>
-    </div>
+    </div> -->
   </div>
 </template>
 
@@ -164,6 +140,7 @@ import { ObjDataClass, ObjInWallDataClass } from '@/entities/objData'
 import ObjFiles, { ObjItem } from '@/entities/allObjs'
 import { OutFileDataClass, OutFileEntity } from '@/entities/outFile'
 import { OutFileData } from '@/entities/outFile/index.d'
+import DataTypeEdit from './DataTypeEdit.vue'
 
 const canvasRef = ref<HTMLCanvasElement | null>(null)
 const canvas3DRef = ref<typeof Canvas3D | null>(null)
@@ -823,14 +800,14 @@ const handleContextMenu = (e: MouseEvent) => {
           const snapPoint = snapPoints[k]
           const dist = Math.hypot(x - snapPoint.point.x, y - snapPoint.point.y)
           if (dist < 10) {
-            console.log('dist', propConfig())
+            console.log('dist', propConfig(api))
             let contextMenuX = e.clientX
             if (contextMenuX + 320 > panel1SplitWidthPer.value * window.innerWidth) {
               contextMenuX = panel1SplitWidthPer.value * window.innerWidth - 320
             }
             editPropTypeKey.value = type
             editPropTypeIndex.value = j
-            editPropConfigInfo.value = propConfig()
+            editPropConfigInfo.value = propConfig(api)
             editPropInputInfo.value = JSON.parse(JSON.stringify(item));
             contextMenu.value = {
               visible: true,
@@ -969,6 +946,7 @@ const handleCanvasClick = async (e: MouseEvent) => {
         wmt: 0, // 墙材质
         height: 280, // 墙高
         points: [clickPoint],
+        walls: [],
         thickness: wallThickness.value,
         hb: true,// 有地板，默认有
         bc: '#aaa', // 地板颜色，默认灰色
@@ -1658,14 +1636,6 @@ button {
       align-items: center;
       justify-content: space-between;
       margin: 4px 0;
-
-      .colorInput {
-        width: 130px;
-      }
-
-      .numberInput {
-        width: 100px;
-      }
     }
   }
 
@@ -1682,129 +1652,6 @@ button {
 
     &:hover {
       background: #f5f5f5;
-    }
-  }
-}
-
-.materialList {
-  display: flex;
-  flex-wrap: wrap;
-
-  .materialItem {
-    width: 50px;
-    border: solid 1px black;
-    display: flex;
-    flex-direction: column;
-    box-sizing: border-box;
-    border-radius: 4px;
-    overflow: hidden;
-
-    &:hover {
-      transform: scale(2);
-      transform-origin: right center;
-      transition: all 0.1s;
-    }
-
-    &.active {
-      border: solid 1px #1890ff;
-      box-shadow: inset 0 0 0px 2px #1890ff;
-    }
-
-    .imgOuting {
-      width: 48px;
-      height: 48px;
-      overflow: hidden;
-      position: relative;
-      z-index: -1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-
-      .img {
-        width: 300px; // 稍微放大一点，不然50像素，看不清细节
-      }
-    }
-
-    .name {
-      z-index: -1;
-      font-size: 14px;
-      text-align: center;
-      background-color: white;
-    }
-  }
-}
-
-.allMaterialPanel {
-  position: fixed;
-  left: 0;
-  right: 0;
-  top: 0;
-  bottom: 0;
-  z-index: 1001;
-  background-color: #00000075;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-
-  .allMaterialPanelInner {
-    display: flex;
-    width: 610px;
-    padding: 8px;
-    min-height: 200px;
-    max-height: 70vh;
-    background-color: white;
-    border-radius: 8px;
-    overflow: auto;
-    flex-direction: column;
-    align-items: center;
-
-    .title {
-      font-size: 24px;
-    }
-
-    .list {
-      width: 593px;
-      display: flex;
-      flex-direction: row;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 8px;
-
-      .materialItem {
-        flex-shrink: 0;
-        border: solid 1px #b2b2b2;
-        display: flex;
-        flex-direction: column;
-        box-sizing: border-box;
-        border-radius: 4px;
-        overflow: hidden;
-
-        &.active {
-          border: solid 1px #1890ff;
-          box-shadow: inset 0 0 0px 2px #1890ff;
-        }
-
-        .imgOuting {
-          width: 140px;
-          height: 140px;
-          overflow: hidden;
-          position: relative;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-
-          .img {
-            width: 140px;
-          }
-        }
-
-        .name {
-          font-size: 14px;
-          text-align: center;
-          background-color: white;
-        }
-      }
     }
   }
 }

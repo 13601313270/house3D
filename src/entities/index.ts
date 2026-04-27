@@ -9,6 +9,7 @@ import { WindowEntity, createWindowData, editPropConfig as windowEditPropConfig 
 import { CameraEntity, editPropConfig as cameraEditPropConfig, createCameraData } from './camera'
 import { OutFileEntity, editPropConfig as outFileEditPropConfig, createOutFileData } from './outFile/index'
 import { EntityClass } from '@/types/entity'
+import { ObjData } from '@/types'
 
 export type allFileKeysEnum = 'wall' | 'door' | 'window' | 'camera' | 'outFile';
 export const allFileKeys: allFileKeysEnum[] = ['wall', 'door', 'window', 'camera', 'outFile']
@@ -60,9 +61,14 @@ export type editItem = {
   min: number,
   max: number,
   step: number,
+} | {
+  id: string,
+  label: string,
+  dataType: 'array',
+  children: editItem[],
 }
 
-export const PropConfigMap: Record<allFileKeysEnum, () => editItem[]> = {
+export const PropConfigMap: Record<allFileKeysEnum, (obj: EntityClass<any>) => editItem[]> = {
   wall: wallEditPropConfig,
   door: doorEditPropConfig,
   window: windowEditPropConfig,

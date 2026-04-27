@@ -1,15 +1,17 @@
 import { Point, HandelInfo } from '@/types/map2d'
 import { allSnapFromType, EntityClass, EntityType, MatchSnapPoint } from '@/types/entity'
-import { WallData } from './index.d'
+import { WallData, wallInfo } from './index.d'
 import { drawPoint } from '@/utils/drawPoint'
 import { createAllWallFromPoints } from '@/utils/createAllWallFromPoints'
 import * as THREE from 'three'
 import { editItem } from '..'
 import { getMaterialById } from '@/material'
 import { ObjDataClass } from '../objData'
+import { World } from '@/utils/world'
 
 export class WallDataClass extends ObjDataClass<WallData> {
   points: Point[]
+  walls: wallInfo[]
   thickness: number
   color: string
   height: number
@@ -25,6 +27,7 @@ export class WallDataClass extends ObjDataClass<WallData> {
   constructor(data: WallData) {
     super(data)
     this.points = data.points
+    this.walls = data.walls || []
     this.thickness = data.thickness
     this.height = data.height
     this.color = data.color
@@ -39,7 +42,8 @@ export class WallDataClass extends ObjDataClass<WallData> {
   }
 }
 
-export function editPropConfig(): editItem[] {
+export function editPropConfig(obj: WallEntity): editItem[] {
+  console.log('editPropConfig-墙体厚度', obj)
   return [
     {
       id: 'thickness',
@@ -102,12 +106,31 @@ export function editPropConfig(): editItem[] {
       label: '天花板是否是双面',
       dataType: 'boolean',
     },
+    {
+      id: 'walls',
+      label: '墙体信息',
+      dataType: 'array',
+      children: [
+        {
+          id: 'hidden',
+          label: '是否隐藏',
+          dataType: 'boolean',
+        },
+      ],
+    }
   ]
 }
 
 export class WallEntity extends EntityClass<WallData> {
   type: EntityType = 'wall'
   isPointObj: boolean = false
+
+  constructor(world: World, data: WallData) {
+    if (!data.walls) {
+      data.walls = []
+    }
+    super(world, data)
+  }
 
   draw2DPreviewByData(ctx: CanvasRenderingContext2D, data: WallData, panOffset: Point, zoomLevel: number): void {
     if (data.hb) {
