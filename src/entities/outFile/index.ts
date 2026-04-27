@@ -50,6 +50,7 @@ export class OutFileEntity extends EntityClass<OutFileData> {
   color: string = '#0c7f25'
   color3D: string = '#0c7f25'
   colorOpacity: string = '#14b737a5'
+  private drawAngelLength = 50;
 
   draw2DByData(
     ctx: CanvasRenderingContext2D,
@@ -70,12 +71,12 @@ export class OutFileEntity extends EntityClass<OutFileData> {
     ctx.stroke()
 
     // 控制点向着angleY角度延伸10个单位后的坐标
-    const rotatedXAdd = data.x + Math.cos(data.angleY) * 50
-    const rotatedYAdd = data.y - Math.sin(data.angleY) * 50
+    const rotatedXAdd = data.x + Math.cos(data.angleY) * this.drawAngelLength
+    const rotatedYAdd = data.y - Math.sin(data.angleY) * this.drawAngelLength
     // 绘制双向箭头表示旋转角度
     const arrowX = rotatedXAdd * zoomLevel + panOffset.x
     const arrowY = rotatedYAdd * zoomLevel + panOffset.y
-    const arrowSize = 8 * zoomLevel
+    const arrowSize = 16 * zoomLevel
 
     // 在(rotatedXAdd, rotatedYAdd)位置绘制一个圆圈
     const circleX = rotatedXAdd * zoomLevel + panOffset.x
@@ -207,8 +208,8 @@ export class OutFileEntity extends EntityClass<OutFileData> {
       }
     }
     // 控制点向着angleY角度延伸10个单位后的坐标
-    const rotatedXAdd = data.x + Math.cos(data.angleY) * 50
-    const rotatedYAdd = data.y - Math.sin(data.angleY) * 50
+    const rotatedXAdd = data.x + Math.cos(data.angleY) * this.drawAngelLength
+    const rotatedYAdd = data.y - Math.sin(data.angleY) * this.drawAngelLength
 
     const dist2 = Math.hypot(x - rotatedXAdd, y - rotatedYAdd)
     console.log('dist2', dist2)

@@ -21,7 +21,7 @@ const objFiles: ObjItem[] = [
     scaleX: 0.1,
     scaleY: 0.1,
     scaleZ: 0.1,
-    angleY: 0,
+    angleY: Math.PI / 2,
   }
 ]
 export default objFiles
