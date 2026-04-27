@@ -2,6 +2,7 @@ import * as THREE from 'three'
 import { ObjData, HandelInfo, Point, PointWithIndex, ObjInWallData } from './map2d'
 import { World } from '@/utils/world'
 import { WallData } from '@/entities/wall/index.d'
+import { OutFileDataClass, OutFileEntity } from '@/entities/outFile'
 
 interface NearestWallResult {
   wall: WallData
@@ -42,7 +43,6 @@ export abstract class EntityClass<T extends ObjData> {
   }
 
   setData(data: T) {
-    this.remove3DCache()
     this.data = data
     this.world._callAllOnChangeCallback()
   }
@@ -51,38 +51,31 @@ export abstract class EntityClass<T extends ObjData> {
     return this.data
   }
 
+  // 生成3D模型
   abstract create3DMesh(scene: THREE.Scene, ...args: any[]): THREE.Group[]
 
   private cacheKeyStr = '';
   draw3DAndCache() {
     const scene: THREE.Scene = this.world.scene
-    const cacheData = {
-      ...this.data,
-      x: undefined, // 缓存时，不缓存x，y，z，因为这些值是变化的
-      y: undefined, // 缓存时，不缓存x，y，z，因为这些值是变化的
-      z: undefined, // 缓存时，不缓存x，y，z，因为这些值是变化的
-    }
-    const newKeyStr = this.type + JSON.stringify(cacheData)
     let meshList: THREE.Group[] = []
-    if (this.cacheKeyStr === newKeyStr) {
-      meshList = this.meshList;
-    } else {
+    const newKeyByData = this.meshNeedChangeKey();
+    if (this.cacheKeyStr !== newKeyByData) {
       meshList = this.create3DMesh(scene)
-      console.log('this.getData()', this.getData())
+      // console.log('this.getData()', this.cacheKeyStr)
       this.meshList.forEach(mesh => scene.remove(mesh))
       meshList.forEach(mesh => scene.add(mesh))
       this.meshList = meshList
-      this.cacheKeyStr = newKeyStr
+      this.cacheKeyStr = newKeyByData
+    } else {
+      meshList = this.meshList;
     }
-    meshList.forEach(v => {
-      v.position.set(this.data.x, this.data.z, this.data.y)
-    })
+    this.change3DMeshState()
     return meshList
   }
 
   public remove3DCache() {
     // 这里注意防止死循环
-    // console.log('remove3DCache')
+    console.log('remove3DCache')
     if (this.meshList.length) {
       this.meshList.forEach(mesh => this.world.scene.remove(mesh))
       this.meshList = []
@@ -95,6 +88,25 @@ export abstract class EntityClass<T extends ObjData> {
         })
       }
     }
+  }
+
+  // 当前对象是否需要重新生成3D模型状态
+  meshNeedChangeKey(): string {
+    const cacheData = {
+      ...this.data,
+      x: undefined,
+      y: undefined,
+      z: undefined,
+    }
+    return this.type + JSON.stringify(cacheData)
+  }
+
+  // 改变3D模型的状态
+  // 例如：改变位置，旋转角度等，模型本身不变
+  change3DMeshState(): void {
+    this.meshList.forEach(v => {
+      v.position.set(this.data.x, this.data.z, this.data.y)
+    })
   }
 
   // 命中可拖拽具柄

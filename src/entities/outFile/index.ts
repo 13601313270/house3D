@@ -11,10 +11,12 @@ import ObjFiles from '../allObjs'
 
 export class OutFileDataClass extends ObjDataClass<OutFileData> {
   fileTypeId: string
+  angleY: number
 
   constructor(data: OutFileData) {
     super(data)
     this.fileTypeId = data.fileTypeId
+    this.angleY = data.angleY
   }
 }
 
@@ -23,6 +25,7 @@ export function createOutFileData(): OutFileDataClass {
   const data: OutFileData = {
     fileTypeId: findObjInfo.id,
     id: Date.now().toString(),
+    angleY: 0,
     x: 0,
     y: 0,
     z: 0,
@@ -63,9 +66,55 @@ export class OutFileEntity extends EntityClass<OutFileData> {
     ctx.lineWidth = 2
     ctx.beginPath()
     ctx.arc(screenX, screenY, 5 * zoomLevel, 0, Math.PI * 2)
-    // alert(data.url)
     ctx.fill()
     ctx.stroke()
+
+    // 控制点向着angleY角度延伸10个单位后的坐标
+    const rotatedXAdd = data.x + Math.cos(data.angleY) * 50
+    const rotatedYAdd = data.y - Math.sin(data.angleY) * 50
+    // 绘制双向箭头表示旋转角度
+    const arrowX = rotatedXAdd * zoomLevel + panOffset.x
+    const arrowY = rotatedYAdd * zoomLevel + panOffset.y
+    const arrowSize = 8 * zoomLevel
+    const perpAngle = data.angleY + Math.PI / 2
+
+    // 在(rotatedXAdd, rotatedYAdd)位置绘制一个圆圈
+    const circleX = rotatedXAdd * zoomLevel + panOffset.x
+    const circleY = rotatedYAdd * zoomLevel + panOffset.y
+    const circleRadius = 5 * zoomLevel
+    ctx.fillStyle = '#fff'
+    ctx.strokeStyle = '#e67e22'
+    ctx.lineWidth = 2 * zoomLevel
+    ctx.beginPath()
+    ctx.arc(circleX, circleY, circleRadius, 0, Math.PI * 2)
+    ctx.fill()
+    ctx.stroke()
+
+    ctx.strokeStyle = '#e67e22'
+    ctx.fillStyle = '#e67e22'
+    ctx.lineWidth = 2 * zoomLevel
+
+    // 绘制双向箭头的主线
+    ctx.beginPath()
+    ctx.moveTo(arrowX - Math.cos(data.angleY) * arrowSize * 1.5, arrowY - Math.sin(data.angleY) * arrowSize * 1.5)
+    ctx.lineTo(arrowX + Math.cos(data.angleY) * arrowSize * 1.5, arrowY + Math.sin(data.angleY) * arrowSize * 1.5)
+    ctx.stroke()
+
+    // 左侧箭头
+    ctx.beginPath()
+    ctx.moveTo(arrowX - Math.cos(data.angleY) * arrowSize * 1.5, arrowY - Math.sin(data.angleY) * arrowSize * 1.5)
+    ctx.lineTo(arrowX - Math.cos(data.angleY) * arrowSize + Math.cos(perpAngle) * arrowSize * 0.5, arrowY - Math.sin(data.angleY) * arrowSize + Math.sin(perpAngle) * arrowSize * 0.5)
+    ctx.lineTo(arrowX - Math.cos(data.angleY) * arrowSize - Math.cos(perpAngle) * arrowSize * 0.5, arrowY - Math.sin(data.angleY) * arrowSize - Math.sin(perpAngle) * arrowSize * 0.5)
+    ctx.closePath()
+    ctx.fill()
+
+    // 右侧箭头
+    ctx.beginPath()
+    ctx.moveTo(arrowX + Math.cos(data.angleY) * arrowSize * 1.5, arrowY + Math.sin(data.angleY) * arrowSize * 1.5)
+    ctx.lineTo(arrowX + Math.cos(data.angleY) * arrowSize + Math.cos(perpAngle) * arrowSize * 0.5, arrowY + Math.sin(data.angleY) * arrowSize + Math.sin(perpAngle) * arrowSize * 0.5)
+    ctx.lineTo(arrowX + Math.cos(data.angleY) * arrowSize - Math.cos(perpAngle) * arrowSize * 0.5, arrowY + Math.sin(data.angleY) * arrowSize - Math.sin(perpAngle) * arrowSize * 0.5)
+    ctx.closePath()
+    ctx.fill()
   }
 
   create3DMesh(scene: THREE.Scene): THREE.Group[] {
@@ -121,6 +170,29 @@ export class OutFileEntity extends EntityClass<OutFileData> {
     ]
   }
 
+  // 当前对象是否需要重新生成3D模型状态
+  meshNeedChangeKey(): string {
+    const cacheData = {
+      ...this.getData(),
+      x: undefined,
+      y: undefined,
+      z: undefined,
+      angleY: undefined,
+    }
+    // console.log('dddd', this.type + JSON.stringify(cacheData))
+    return this.type + JSON.stringify(cacheData)
+  }
+
+  // 改变3D模型的状态
+  // 例如：改变位置，旋转角度等，模型本身不变
+  change3DMeshState(): void {
+    const data = this.getData();
+    this.meshList.forEach(v => {
+      v.position.set(data.x, data.z, data.y)
+      v.rotation.y = data.angleY
+    })
+  }
+
   matchHandelInfo(x: number, y: number, zoomLevel: number) {
     const data = this.getData();
     const dist = Math.hypot(x - data.x, y - data.y)
@@ -132,11 +204,35 @@ export class OutFileEntity extends EntityClass<OutFileData> {
         id: data.id,
       }
     }
+    // 控制点向着angleY角度延伸10个单位后的坐标
+    const rotatedXAdd = data.x + Math.cos(data.angleY) * 50
+    const rotatedYAdd = data.y - Math.sin(data.angleY) * 50
+
+    const dist2 = Math.hypot(x - rotatedXAdd, y - rotatedYAdd)
+    console.log('dist2', dist2)
+    if (dist2 < 10 * zoomLevel) {
+      return {
+        index: 1,
+        type: this.type,
+        id: data.id,
+      }
+    }
     return null;
   }
 
   matchHandelMoveCallback(x: number, y: number, matchHandelInfo: HandelInfo) {
-    this.changePosition({ x, y })
+    if (matchHandelInfo.index === 0) {
+      this.changePosition({ x, y })
+    } else if (matchHandelInfo.index === 1) {
+      const data = this.getData();
+      // 根据x,y计算angleY
+      const angleY = Math.atan2(y - data.y, x - data.x)
+      console.log(angleY)
+      this.setData({
+        ...this.getData(),
+        angleY: angleY * -1,
+      })
+    }
   }
 
   inSceneSnapPointArea(newPosition: MatchSnapPoint) {
@@ -144,15 +240,19 @@ export class OutFileEntity extends EntityClass<OutFileData> {
   }
 
   getMineBeSnapPoints(): Array<OrigionSnapPoint> {
-    const data = this.getData();
+    const { x, y, angleY, id } = this.getData()
+    // 计算旋转后的点
+    const rotatedX = x * Math.cos(angleY) - y * Math.sin(angleY)
+    const rotatedY = x * Math.sin(angleY) + y * Math.cos(angleY)
+
     return [{
       objType: this.type,
-      objId: data.id,
+      objId: id,
       snapFromType: 'point',
       point: {
         index: 0,
-        x: data.x,
-        y: data.y,
+        x,
+        y,
       },
     }]
   }
