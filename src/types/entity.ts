@@ -56,22 +56,28 @@ export abstract class EntityClass<T extends ObjData> {
   private cacheKeyStr = '';
   draw3DAndCache() {
     const scene: THREE.Scene = this.world.scene
-    const newKeyStr = this.type + JSON.stringify(this.data)
+    const cacheData = {
+      ...this.data,
+      x: undefined, // 缓存时，不缓存x，y，z，因为这些值是变化的
+      y: undefined, // 缓存时，不缓存x，y，z，因为这些值是变化的
+      z: undefined, // 缓存时，不缓存x，y，z，因为这些值是变化的
+    }
+    const newKeyStr = this.type + JSON.stringify(cacheData)
+    let meshList: THREE.Group[] = []
     if (this.cacheKeyStr === newKeyStr) {
-      return this.meshList
+      meshList = this.meshList;
     } else {
-      const meshList = this.create3DMesh(scene)
-
-      meshList.forEach(v => {
-        v.position.set(this.data.x, this.data.z, this.data.y)
-      })
-
+      meshList = this.create3DMesh(scene)
+      console.log('this.getData()', this.getData())
       this.meshList.forEach(mesh => scene.remove(mesh))
       meshList.forEach(mesh => scene.add(mesh))
       this.meshList = meshList
       this.cacheKeyStr = newKeyStr
-      return meshList
     }
+    meshList.forEach(v => {
+      v.position.set(this.data.x, this.data.z, this.data.y)
+    })
+    return meshList
   }
 
   public remove3DCache() {
@@ -135,7 +141,6 @@ export abstract class EntityClass<T extends ObjData> {
   changePosition(newPosition: { x: number, y: number }) {
     this.data.x = newPosition.x
     this.data.y = newPosition.y
-    this.remove3DCache()
     this.world._callAllOnChangeCallback()
   }
 
