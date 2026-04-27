@@ -14,6 +14,7 @@ export interface HandelInfo {
   type: EntityType
   index: number,// 对象内具柄index
   info?: any
+  dist: number,
 }
 
 export interface ObjData {

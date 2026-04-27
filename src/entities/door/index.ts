@@ -302,6 +302,7 @@ export class DoorEntity extends EntityClassInWall<DoorData> {
         index: 0,
         type: this.type,
         id: data.id,
+        dist: dist,
       }
     }
     return null;

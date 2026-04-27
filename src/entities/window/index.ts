@@ -221,6 +221,7 @@ export class WindowEntity extends EntityClassInWall<WindowData> {
         index: 0,
         id: data.id,
         type: this.type,
+        dist: dist,
       }
     }
     return null;

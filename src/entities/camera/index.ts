@@ -242,6 +242,7 @@ export class CameraEntity extends EntityClass<CameraData> {
         index: 0,
         type: this.type,
         id: data.id,
+        dist: dist,
       }
     }
     const distToTarget = Math.hypot(x - data.targetPositionX, y - data.targetPositionY)
@@ -250,6 +251,7 @@ export class CameraEntity extends EntityClass<CameraData> {
         index: 1,
         type: this.type,
         id: data.id,
+        dist: distToTarget,
       }
     }
     return null;

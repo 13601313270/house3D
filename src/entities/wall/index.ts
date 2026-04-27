@@ -295,6 +295,7 @@ export class WallEntity extends EntityClass<WallData> {
           id: data.id,
           type: this.type,
           index: i * 2,
+          dist: dist,
         }
       }
     }
@@ -311,6 +312,7 @@ export class WallEntity extends EntityClass<WallData> {
           id: data.id,
           type: this.type,
           index: i * 2 + 1,
+          dist: dist,
         }
       }
     }

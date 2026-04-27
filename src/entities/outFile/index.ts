@@ -256,6 +256,7 @@ export class OutFileEntity extends EntityClass<OutFileData> {
         index: 0,
         type: this.type,
         id: data.id,
+        dist: dist,
       }
     }
     // 控制点向着angleY角度延伸10个单位后的坐标
@@ -269,6 +270,7 @@ export class OutFileEntity extends EntityClass<OutFileData> {
         index: 1,
         type: this.type,
         id: data.id,
+        dist: dist2,
       }
     }
     return null;

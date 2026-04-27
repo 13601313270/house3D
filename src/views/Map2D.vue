@@ -1229,17 +1229,25 @@ const handleMouseDown = (e: MouseEvent) => {
   // 只有在拖拽模式下才能拖拽点
   if (currentTool.value === 'drag') {
     if (e.button !== 0) return
+
+    const matchHandelInfoList: Array<{
+      classInfo: EntityClass<any>
+      handle: HandelInfo,
+      startPooint: Point,
+      dist: number,
+    }> = []
     // 检查已绘制的墙上的点
     for (let i = 0; i < worldApi.getObjects('wall').length; i++) {
       // const wall = worldApi.getObjects('wall')[i]
       const api: WallEntity = worldApi.allFileMapObjects.wall[i] as WallEntity;
       const matchInfo = api.matchHandelInfo(x, y, zoomLevel.value)
       if (matchInfo) {
-        matchHandelObj = api;
-        matchHandelInfo = matchInfo
-        dragOffset.value = { x: 0, y: 0 };
-        dragStartPoint.value = { x, y }
-        return;
+        matchHandelInfoList.push({
+          classInfo: api,
+          handle: matchInfo,
+          startPooint: { x, y },
+          dist: matchInfo.dist,
+        })
       }
     }
 
@@ -1250,55 +1258,32 @@ const handleMouseDown = (e: MouseEvent) => {
         const api: DoorEntity = worldApi.allFileMapObjects[key][j] as DoorEntity;
         const matchInfo = api.matchHandelInfo(x, y, zoomLevel.value)
         if (matchInfo) {
-          matchHandelObj = api;
-          matchHandelInfo = matchInfo
-          dragOffset.value = { x: 0, y: 0 };
-          dragStartPoint.value = { x, y }
-          return;
+          matchHandelInfoList.push({
+            classInfo: api,
+            handle: matchInfo,
+            startPooint: { x, y },
+            dist: matchInfo.dist,
+          })
         }
       }
     }
 
-    // // 检查门
-    // for (let j = 0; j < worldApi.getObjects('door').length; j++) {
-    //   // const door = worldApi.getObjects('door')[i]
-    //   const api: DoorEntity = worldApi.allFileMapObjects.door[j] as DoorEntity;
-    //   const matchInfo = api.matchHandelInfo(x, y, zoomLevel.value)
-    //   if (matchInfo) {
-    //     matchHandelObj = api;
-    //     matchHandelInfo = matchInfo
-    //     dragOffset.value = { x: 0, y: 0 };
-    //     dragStartPoint.value = { x, y }
-    //     return;
-    //   }
-    // }
+    const sortedMatchAllObjList = matchHandelInfoList.sort((a, b) => {
+      return a.dist - b.dist
+    })
+    if (sortedMatchAllObjList.length > 0) {
+      matchHandelObj = sortedMatchAllObjList[0].classInfo
+      matchHandelInfo = sortedMatchAllObjList[0].handle
 
-    // // 检查窗户
-    // for (let j = 0; j < worldApi.getObjects('window').length; j++) {
-    //   // const windowItem = worldApi.getObjects('window')[i]
-    //   const api: WindowEntity = worldApi.allFileMapObjects.window[j] as WindowEntity;
-    //   const matchInfo = api.matchHandelInfo(x, y, zoomLevel.value)
-    //   if (matchInfo) {
-    //     matchHandelObj = api;
-    //     matchHandelInfo = matchInfo
-    //     dragOffset.value = { x: 0, y: 0 };
-    //     dragStartPoint.value = { x, y }
-    //     return;
-    //   }
-    // }
-    // // 检查相机
-    // for (let j = 0; j < worldApi.getObjects('camera').length; j++) {
-    //   // const camera = worldApi.getObjects('camera')[i]
-    //   const api: CameraEntity = worldApi.allFileMapObjects.camera[j] as CameraEntity;
-    //   const matchInfo = api.matchHandelInfo(x, y, zoomLevel.value)
-    //   if (matchInfo) {
-    //     matchHandelObj = api;
-    //     matchHandelInfo = matchInfo
-    //     dragOffset.value = { x: 0, y: 0 };
-    //     dragStartPoint.value = { x, y }
-    //     return;
-    //   }
-    // }
+      dragOffset.value = { x: 0, y: 0 }
+      dragStartPoint.value = {
+        x: sortedMatchAllObjList[0].startPooint.x,
+        y: sortedMatchAllObjList[0].startPooint.y
+      }
+      return;
+    }
+
+    console.log('sortedMatchAllObjList', sortedMatchAllObjList)
 
     // 如果没有拖拽到任何点，开始平移
     if (!draggedPoint.value) {
