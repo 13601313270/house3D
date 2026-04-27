@@ -74,16 +74,25 @@ export function editPropConfig(): editItem[] {
       id: 'bottom',
       label: '距离地面',
       dataType: 'number',
+      min: 0,
+      max: Infinity,
+      step: 1,
     },
     {
       id: 'width',
       label: '宽度',
       dataType: 'number',
+      min: 0,
+      max: Infinity,
+      step: 1,
     },
     {
       id: 'height',
       label: '高度',
       dataType: 'number',
+      min: 0,
+      max: Infinity,
+      step: 1,
     },
     {
       id: 'hasBorder',
@@ -124,11 +133,17 @@ export function editPropConfig(): editItem[] {
       id: 'rightOpenAngle',
       label: '右门打开角度',
       dataType: 'number',
+      min: 0,
+      max: 180,
+      step: 15,
     },
     {
       id: 'leftOpenAngle',
       label: '左门打开角度',
       dataType: 'number',
+      min: 0,
+      max: 180,
+      step: 15,
     },
   ]
 }

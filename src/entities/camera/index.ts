@@ -46,21 +46,33 @@ export function editPropConfig(): editItem[] {
       id: 'fov',
       label: '角度',
       dataType: 'number',
+      min: 0,
+      max: 180,
+      step: 15,
     },
     {
       id: 'aspectW',
       label: '宽度比',
       dataType: 'number',
+      min: 0,
+      max: 99,
+      step: 1,
     },
     {
       id: 'aspectH',
       label: '高度比',
       dataType: 'number',
+      min: 0,
+      max: 99,
+      step: 1,
     },
     {
       id: 'z',
       label: 'Z轴',
       dataType: 'number',
+      min: -Infinity,
+      max: Infinity,
+      step: 1,
     }
   ]
 }

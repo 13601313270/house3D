@@ -52,7 +52,14 @@ export const fileDataKeyToClass: Record<allFileKeysEnum, EntityConstructor> = {
 export type editItem = {
   id: string,
   label: string,
-  dataType: 'number' | 'string' | 'poiListAndLineCircle' | 'poiListAndLine' | 'poiList' | 'color' | 'boolean' | 'mesh' | 'area' | 'material' | string[]/* 枚举 */
+  dataType: 'string' | 'poiListAndLineCircle' | 'poiListAndLine' | 'poiList' | 'color' | 'boolean' | 'mesh' | 'area' | 'material' | string[]/* 枚举 */
+} | {
+  id: string,
+  label: string,
+  dataType: 'number',
+  min: number,
+  max: number,
+  step: number,
 }
 
 export const PropConfigMap: Record<allFileKeysEnum, () => editItem[]> = {

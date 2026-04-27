@@ -45,11 +45,17 @@ export function editPropConfig(): editItem[] {
       id: 'thickness',
       label: '墙体厚度',
       dataType: 'number',
+      min: 0,
+      max: Infinity,
+      step: 1,
     },
     {
       id: 'height',
       label: '墙体高度',
       dataType: 'number',
+      min: 1,
+      max: Infinity,
+      step: 1,
     },
     {
       id: 'color',
