@@ -65,7 +65,7 @@ export type editItem = {
   id: string,
   label: string,
   dataType: 'array',
-  children: editItem[],
+  children: editItem[][],
 }
 
 export const PropConfigMap: Record<allFileKeysEnum, (obj: EntityClass<any>) => editItem[]> = {

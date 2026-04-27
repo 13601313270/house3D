@@ -45,7 +45,8 @@
         <div v-if="contextMenu?.visible" class="context-menu"
           :style="{ top: contextMenu.y + 'px', left: contextMenu.x + 'px' }">
           <!-- {{ editPropConfigInfo }} -->
-          <!-- {{ editPropInputInfo }} -->
+          {{ editPropInputInfo }}
+          =========
           <div class="configList">
             <div v-for="item in editPropConfigInfo" :key="item.id" class="configItem">
               <div>
@@ -53,6 +54,7 @@
                 <!-- {{ editPropInputInfo[item.id] }} -->
               </div>
               <div>
+                <!-- {{ item }} -->
                 <DataTypeEdit :item="item" v-model="editPropInputInfo" />
               </div>
             </div>
@@ -1429,6 +1431,17 @@ watch(() => editPropInputInfo.value, () => {
     // console.log(111, worldApi.getObjects(editPropTypeKey.value)[editPropTypeIndex.value], editPropInputInfo.value)
     // Object.assign(worldApi.getObjects(editPropTypeKey.value)[editPropTypeIndex.value], editPropInputInfo.value)
     worldApi.replaceObjects(editPropTypeKey.value, editPropTypeIndex.value, JSON.parse(JSON.stringify(editPropInputInfo.value)))
+  }
+  if (editPropTypeKey.value && editPropTypeIndex.value > -1) {
+    // @ts-ignore
+    const propConfig = PropConfigMap[editPropTypeKey.value];
+    const api: EntityClass<any> = worldApi.allFileMapObjects[editPropTypeKey.value][editPropTypeIndex.value]
+    console.log('editPropConfigInfo.value---1', editPropInputInfo.value)
+    console.log('editPropConfigInfo.value---2', propConfig)
+    if (propConfig && api) {
+      editPropConfigInfo.value = propConfig(api)
+      console.log('editPropConfigInfo.value---3', editPropConfigInfo.value)
+    }
   }
   drawWrapper()
 }, {
