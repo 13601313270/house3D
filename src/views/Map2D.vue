@@ -54,7 +54,7 @@
               </div>
               <div>
                 <input v-if="item.dataType === 'number'" type="number" :value="editPropInputInfo[item.id]"
-                  @change="updateEditPropInputNumberInfo(item.id, $event)" />
+                  @change="updateEditPropInputNumberInfo(item.id, $event)" class="numberInput" />
                 <input v-else-if="item.dataType === 'color'" type="color" class="colorInput"
                   :value="editPropInputInfo[item.id]" @change="updateEditPropInputInfo(item.id, $event)" />
                 <input v-else-if="item.dataType === 'boolean'" type="checkbox" :checked="editPropInputInfo[item.id]"
@@ -1670,6 +1670,23 @@ button {
 
       .colorInput {
         width: 130px;
+      }
+
+      .numberInput {
+        width: 100px;
+        -moz-appearance: textfield;
+        appearance: textfield;
+        /* 标准写法 */
+
+        &::-webkit-outer-spin-button {
+          -webkit-appearance: none;
+          margin: 0;
+        }
+
+        &::-webkit-inner-spin-button {
+          -webkit-appearance: none;
+          margin: 0;
+        }
       }
     }
   }
