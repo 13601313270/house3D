@@ -208,6 +208,7 @@ export class CameraEntity extends EntityClass<CameraData> {
       linewidth: 1
     });
     const line = new THREE.LineSegments(edges, lineMaterial);
+    line.position.set(-data.x, -data.z, -data.y)
 
     const group = new THREE.Group()
     group.add(line)

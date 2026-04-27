@@ -106,7 +106,7 @@ export class OutFileEntity extends EntityClass<OutFileData> {
         console.error('OBJ文件加载失败:', error)
       })
     }
-    group.position.set(data.x, data.z, data.y)
+    // group.position.set(data.x, data.z, data.y)
 
     return [
       group

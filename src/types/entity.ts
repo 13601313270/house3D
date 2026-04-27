@@ -61,6 +61,11 @@ export abstract class EntityClass<T extends ObjData> {
       return this.meshList
     } else {
       const meshList = this.create3DMesh(scene)
+
+      meshList.forEach(v => {
+        v.position.set(this.data.x, this.data.z, this.data.y)
+      })
+
       this.meshList.forEach(mesh => scene.remove(mesh))
       meshList.forEach(mesh => scene.add(mesh))
       this.meshList = meshList

@@ -220,6 +220,7 @@ export class WindowEntity extends EntityClassInWall<WindowData> {
       tc,
       ic,
     } = data
+    const baseZ = data.height / 2 + (data.bottom || 0);
     const wall = this.world.allFileMapObjects.wall.find((entity) => {
       return entity.getData().id === data.wallId;
     })
@@ -231,6 +232,7 @@ export class WindowEntity extends EntityClassInWall<WindowData> {
     );// 额外增加2保证，门框比强款一点
     const material = new THREE.MeshStandardMaterial({ color: 'white', opacity: 0.1, transparent: true })
     const windowMesh = new THREE.Mesh(geometry, material)
+    windowMesh.position.setY(baseZ)
     group.add(windowMesh);
 
     // group添加门框
@@ -245,6 +247,7 @@ export class WindowEntity extends EntityClassInWall<WindowData> {
       const material = getMaterialById(data.bmt)?.material(new THREE.Vector3(0, 0, 0)) || new THREE.MeshStandardMaterial({ color: bqc })
       const doorMeshRight = new THREE.Mesh(geometryRight, material)
       doorMeshRight.position.setX(data.width / 2 + border / 2 - 1)
+      doorMeshRight.position.setY(baseZ)
       group.add(doorMeshRight);
 
       const geometryLeft = new THREE.BoxGeometry(
@@ -254,6 +257,7 @@ export class WindowEntity extends EntityClassInWall<WindowData> {
       );
       const doorMeshLeft = new THREE.Mesh(geometryLeft, material)
       doorMeshLeft.position.setX(-data.width / 2 - border / 2 + 1)
+      doorMeshLeft.position.setY(baseZ)
       group.add(doorMeshLeft);
 
       const geometryTop = new THREE.BoxGeometry(
@@ -262,7 +266,7 @@ export class WindowEntity extends EntityClassInWall<WindowData> {
         wallThickness + 4
       );
       const doorMeshTop = new THREE.Mesh(geometryTop, material)
-      doorMeshTop.position.setY(data.height / 2 + border / 2 - 2)
+      doorMeshTop.position.setY(data.height / 2 + border / 2 - 2 + baseZ)
       group.add(doorMeshTop);
 
       const geometryBottom = new THREE.BoxGeometry(
@@ -271,7 +275,7 @@ export class WindowEntity extends EntityClassInWall<WindowData> {
         wallThickness + 4
       );
       const doorMeshBottom = new THREE.Mesh(geometryBottom, material)
-      doorMeshBottom.position.setY(-data.height / 2 - border / 2 + 1)
+      doorMeshBottom.position.setY(-data.height / 2 - border / 2 + 1 + baseZ)
       group.add(doorMeshBottom);
     })();
     // 内部的框
@@ -286,6 +290,7 @@ export class WindowEntity extends EntityClassInWall<WindowData> {
       );
       const doorMeshRight = new THREE.Mesh(geometryRight, material)
       doorMeshRight.position.setX(data.width / 2)
+      doorMeshRight.position.setY(baseZ)
       group.add(doorMeshRight);
 
       const geometryCenter = new THREE.BoxGeometry(
@@ -296,6 +301,7 @@ export class WindowEntity extends EntityClassInWall<WindowData> {
 
       const doorMeshCenter = new THREE.Mesh(geometryCenter, material)
       doorMeshCenter.position.setX(0)
+      doorMeshCenter.position.setY(baseZ)
       group.add(doorMeshCenter);
 
       const geometryLeft = new THREE.BoxGeometry(
@@ -305,6 +311,7 @@ export class WindowEntity extends EntityClassInWall<WindowData> {
       );
       const doorMeshLeft = new THREE.Mesh(geometryLeft, material)
       doorMeshLeft.position.setX(-data.width / 2)
+      doorMeshLeft.position.setY(baseZ)
       group.add(doorMeshLeft);
 
       const geometryTop = new THREE.BoxGeometry(
@@ -313,7 +320,7 @@ export class WindowEntity extends EntityClassInWall<WindowData> {
         5
       );
       const doorMeshTop = new THREE.Mesh(geometryTop, material)
-      doorMeshTop.position.setY(data.height / 2 - 1)
+      doorMeshTop.position.setY(data.height / 2 - 1 + baseZ)
       group.add(doorMeshTop);
 
       const geometryBottom = new THREE.BoxGeometry(
@@ -322,7 +329,7 @@ export class WindowEntity extends EntityClassInWall<WindowData> {
         5
       );
       const doorMeshBottom = new THREE.Mesh(geometryBottom, material)
-      doorMeshBottom.position.setY(-data.height / 2)
+      doorMeshBottom.position.setY(-data.height / 2 + baseZ)
       group.add(doorMeshBottom);
     })();
     const windowKWidth = 4;
@@ -375,6 +382,7 @@ export class WindowEntity extends EntityClassInWall<WindowData> {
       // 组合起来
       rightWindowGorup.position.setX(data.width / 2 - innerKborder / 2)
       rightWindowGorup.rotation.y = THREE.MathUtils.degToRad(data.rightOpenAngle * -1 || 0)
+      rightWindowGorup.position.setY(baseZ)
       group.add(rightWindowGorup);
     })();
     (() => {
@@ -423,9 +431,10 @@ export class WindowEntity extends EntityClassInWall<WindowData> {
       // 组合起来
       leftWindowGorup.position.setX(data.width / -2 + innerKborder / 2)
       leftWindowGorup.rotation.y = THREE.MathUtils.degToRad(data.leftOpenAngle || 0)
+      leftWindowGorup.position.setY(baseZ)
       group.add(leftWindowGorup);
     })();
-    group.position.set(data.x, data.height / 2 + (data.bottom || 0), data.y)
+    // group.position.set(data.x, data.height / 2 + (data.bottom || 0), data.y)
     group.rotateY(data.angle * -1);
     if (wall && data.wallPointId > -1 && wall.meshList[data.wallPointId]) {
       const wallGroup = wall.meshList[data.wallPointId];

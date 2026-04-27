@@ -202,6 +202,7 @@ export class WallEntity extends EntityClass<WallData> {
       })
       const wallMesh = new THREE.Mesh(geometry, material)
       // wallMesh.position.set(0, 0, 0)
+      console.log('this.getData() ', this.getData())
       wallMesh.castShadow = true
       wallMesh.receiveShadow = true
       const group = new THREE.Group()

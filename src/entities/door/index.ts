@@ -195,19 +195,11 @@ export class DoorEntity extends EntityClassInWall<DoorData> {
         this.glbObj = gltf.scene;
         // 旋转45度
         changeBLBState()
+        gltf.scene.position.setY(0)
         group.add(gltf.scene)
       });
     }
-
-    // group添加门
-    const geometry = new THREE.BoxGeometry(
-      data.width * 1,
-      data.height * 1,
-      1
-    );// 额外增加2保证，门框比强款一点
     const material = data.mt ? (getMaterialById(data.mt)?.material(new THREE.Vector3(0, 0, 1))) : (new THREE.MeshStandardMaterial({ color: data.color }));
-    // const doorMesh = new THREE.Mesh(geometry, material);
-    // group.add(doorMesh);
 
     // group添加门框
     (() => {
@@ -221,6 +213,7 @@ export class DoorEntity extends EntityClassInWall<DoorData> {
       const material = data.mt ? (getMaterialById(data.mt)?.material(new THREE.Vector3(0, 0, 1))) : (new THREE.MeshStandardMaterial({ color: data.color }));
       const doorMeshRight = new THREE.Mesh(geometryRight, material)
       doorMeshRight.position.setX(data.width / 2)
+      doorMeshRight.position.setY(data.height / 2)
       group.add(doorMeshRight);
 
       const geometryLeft = new THREE.BoxGeometry(
@@ -230,6 +223,7 @@ export class DoorEntity extends EntityClassInWall<DoorData> {
       );
       const doorMeshLeft = new THREE.Mesh(geometryLeft, material)
       doorMeshLeft.position.setX(-data.width / 2)
+      doorMeshLeft.position.setY(data.height / 2)
       group.add(doorMeshLeft);
 
       const geometryTop = new THREE.BoxGeometry(
@@ -238,15 +232,16 @@ export class DoorEntity extends EntityClassInWall<DoorData> {
         wallThickness + 4
       );
       const doorMeshTop = new THREE.Mesh(geometryTop, material)
-      doorMeshTop.position.setY(data.height / 2)
+      doorMeshTop.position.setY(data.height)
       group.add(doorMeshTop);
     })();
     if (this.glbObj) {
       changeBLBState()
+      this.glbObj.position.setY(0)
       group.add(this.glbObj)
     }
 
-    group.position.set(data.x, data.height / 2, data.y)
+    // group.position.set(data.x, data.height / 2, data.y)
     group.rotateY(data.angle * -1);
     if (wall && data.wallPointId > -1 && wall.meshList[data.wallPointId]) {
       const wallGroup = wall.meshList[data.wallPointId];
