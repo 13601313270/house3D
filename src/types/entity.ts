@@ -42,6 +42,10 @@ export abstract class EntityClass<T extends ObjData> {
     this.data = data
   }
 
+  init(): Promise<void> {
+    return Promise.resolve()
+  }
+
   setData(data: T) {
     this.data = data
     this.world._callAllOnChangeCallback()

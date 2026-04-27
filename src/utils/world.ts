@@ -283,11 +283,12 @@ export class World {
     // this.changeBindList.forEach(callback => callback())
   }
 
-  add(type: EntityType, data: ObjDataClass<any>[]) {
+  async add(type: EntityType, data: ObjDataClass<any>[]) {
     const EntityClassItem: EntityClass<any> = fileDataKeyToClass[type] as any;
     for (let i = 0; i < data.length; i++) {
       // @ts-ignore
       const api: EntityClass<any> = new EntityClassItem(this, data[i]);
+      await api.init()
       // @ts-ignore
       this.allFileMapObjects[type].push(api)
     }

@@ -52,6 +52,21 @@ export class OutFileEntity extends EntityClass<OutFileData> {
   colorOpacity: string = '#14b737a5'
   private drawAngelLength = 50;
 
+  init(): Promise<void> {
+    const img = new Image()
+    const findObjInfo = ObjFiles.find(item => item.id === this.getData().fileTypeId)
+    const preImg = findObjInfo?.preImg || ''
+    img.src = preImg
+    return new Promise((resolve, reject) => {
+      img.onload = () => {
+        resolve()
+      }
+      img.onerror = () => {
+        reject(new Error('图片加载失败'))
+      }
+    })
+  }
+
   draw2DPreviewByData(ctx: CanvasRenderingContext2D, data: OutFileData, panOffset: Point, zoomLevel: number): void {
     const screenX = data.x * zoomLevel + panOffset.x
     const screenY = data.y * zoomLevel + panOffset.y

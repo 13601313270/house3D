@@ -684,7 +684,7 @@ onMounted(() => {
     window.addEventListener('resize', () => updateCanvasSize())
     updateCanvasSize()
 
-    const handleKeyDown = (e: KeyboardEvent) => {
+    const handleKeyDown = async (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         if (tempDrawWall.value?.points?.length && tempDrawWall.value.points.length > 0) {
           if (tempDrawWall.value?.points.length > 1) {
@@ -706,7 +706,7 @@ onMounted(() => {
               tmt: 2, // 天花板材质，默认水泥墙
               td: false, // 天花板是否是双面，默认否
             }
-            worldApi.add('wall', [newWall])
+            await worldApi.add('wall', [newWall])
             history.value.push(JSON.parse(JSON.stringify(worldApi.getObjects('wall'))))
           }
           tempDrawWall.value = null
@@ -759,18 +759,20 @@ const handleFileChange = (e: Event) => {
   if (!file) return
 
   const reader = new FileReader()
-  reader.onload = (event) => {
+  reader.onload = async (event) => {
     try {
       const data: fileData & {
         panOffset: Point
         zoomLevel: number
         cameraState: CameraState
       } = JSON.parse(event.target?.result as string)
-      allFileKeys.forEach((key) => {
+
+      for (let i = 0; i < allFileKeys.length; i++) {
+        const key = allFileKeys[i]
         const key2 = key as EntityType
         console.log('key2', key2, data[key2])
-        worldApi.add(key2, data[key2] || [])
-      })
+        await worldApi.add(key2, data[key2] || [])
+      }
 
       panOffset.value = data.panOffset || { x: 0, y: 0 }
       zoomLevel.value = data.zoomLevel || 1
@@ -861,7 +863,7 @@ const deleteContextMenuEntity = () => {
   drawWrapper()
 }
 
-const handleCanvasClick = (e: MouseEvent) => {
+const handleCanvasClick = async (e: MouseEvent) => {
   // 如果当前是拖拽模式，不执行任何操作
   if (currentTool.value === 'drag') {
     return
@@ -941,7 +943,7 @@ const handleCanvasClick = (e: MouseEvent) => {
               tmt: 2, // 天花板材质，默认水泥墙
               td: false, // 天花板是否是双面，默认否
             }
-            worldApi.add('wall', [newWall])
+            await worldApi.add('wall', [newWall])
             history.value.push(JSON.parse(JSON.stringify(worldApi.getObjects('wall'))))
             tempDrawWall.value.points = []
             lastPoint.value = null
@@ -975,14 +977,14 @@ const handleCanvasClick = (e: MouseEvent) => {
   } else if (insertTempObj) {
     if (insertTempObj instanceof EntityClassInWall) {
       if (hoverPoint.value) {
-        worldApi.add(currentTool.value, [insertTempObj.getData()])
+        await worldApi.add(currentTool.value, [insertTempObj.getData()])
         // insertTempObjData = null;
         console.log('nearest---2---clear-2')
         insertTempObj = null;
         currentTool.value = 'drag'
       }
     } else {
-      worldApi.add(currentTool.value, [insertTempObj.getData()])
+      await worldApi.add(currentTool.value, [insertTempObj.getData()])
       // insertTempObjData = null;
       console.log('nearest---2---clear-3')
       insertTempObj = null;
@@ -1415,6 +1417,7 @@ function changeCurrentTool(type: 'wall' | 'door' | 'window' | 'camera' | 'outFil
       const insertTempObjData = new OutFileDataClass(data)
       console.log('changeTool---3---nearest---2---clear')
       insertTempObj = new OutFileEntity(worldApi, insertTempObjData)
+      insertTempObj.init()
     } else {
       // @ts-ignore
       const ObjDataClass = createInitData[type];
@@ -1424,6 +1427,9 @@ function changeCurrentTool(type: 'wall' | 'door' | 'window' | 'camera' | 'outFil
         const insertTempObjData = new ObjDataClass()
         console.log('changeTool---3---nearest---2---clear')
         insertTempObj = new ClassName(worldApi, insertTempObjData)
+        if (insertTempObj) {
+          insertTempObj.init()
+        }
       }
     }
   }
