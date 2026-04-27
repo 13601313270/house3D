@@ -110,15 +110,6 @@ export class WallEntity extends EntityClass<WallData> {
   isPointObj: boolean = false
 
   draw2DPreviewByData(ctx: CanvasRenderingContext2D, data: WallData, panOffset: Point, zoomLevel: number): void {
-
-  }
-
-  draw2DByData(
-    ctx: CanvasRenderingContext2D,
-    data: WallData,
-    panOffset: Point,
-    zoomLevel: number,
-  ): void {
     if (data.hb) {
       ctx.strokeStyle = 'black'
       ctx.fillStyle = data.bc
@@ -160,7 +151,14 @@ export class WallEntity extends EntityClass<WallData> {
       ctx.stroke();
       ctx.fill()
     }
+  }
 
+  draw2DByData(
+    ctx: CanvasRenderingContext2D,
+    data: WallData,
+    panOffset: Point,
+    zoomLevel: number,
+  ): void {
     // 绘制墙上的点
     [data].forEach((wall) => {
       if (!wall.points || wall.points.length < 2) return
@@ -176,6 +174,25 @@ export class WallEntity extends EntityClass<WallData> {
         ctx.fill()
       })
     });
+    // 每两个点之间，再绘制一个点，代表边的控制器
+    [data].forEach((wall) => {
+      if (!wall.points || wall.points.length < 2) return
+      for (let i = 0; i < wall.points.length - 1; i++) {
+        const p1 = wall.points[i]
+        const p2 = wall.points[i + 1]
+        const midX = (p1.x + p2.x) / 2
+        const midY = (p1.y + p2.y) / 2
+        const screenX = midX * zoomLevel + panOffset.x
+        const screenY = midY * zoomLevel + panOffset.y
+        ctx.strokeStyle = 'gray'
+        ctx.fillStyle = 'lightgray'
+        ctx.lineWidth = 2
+        ctx.beginPath()
+        ctx.arc(screenX, screenY, 4 * zoomLevel, 0, Math.PI * 2)
+        ctx.stroke()
+        ctx.fill()
+      }
+    })
   }
 
   create3DMesh(scene: THREE.Scene) {
@@ -277,7 +294,23 @@ export class WallEntity extends EntityClass<WallData> {
         return {
           id: data.id,
           type: this.type,
-          index: i,
+          index: i * 2,
+        }
+      }
+    }
+
+    // 每两个点之间，再绘制一个点，代表边的控制器
+    for (let i = 0; i < this.getData().points.length - 1; i++) {
+      const p1 = this.getData().points[i]
+      const p2 = this.getData().points[i + 1]
+      const midX = (p1.x + p2.x) / 2
+      const midY = (p1.y + p2.y) / 2
+      const dist = Math.hypot(x - midX, y - midY)
+      if (dist < this.getData().thickness * zoomLevel) {
+        return {
+          id: data.id,
+          type: this.type,
+          index: i * 2 + 1,
         }
       }
     }
@@ -287,7 +320,10 @@ export class WallEntity extends EntityClass<WallData> {
   matchHandelMoveCallback(x: number, y: number, matchHandelInfo: HandelInfo) {
     if (matchHandelInfo.index !== undefined) {
       this.remove3DCache()
-      this.getData().points[matchHandelInfo.index] = { x, y }
+      if (matchHandelInfo.index % 2 === 0) {
+        const index = matchHandelInfo.index / 2;
+        this.getData().points[index] = { x, y }
+      }
     }
   }
 
@@ -298,8 +334,11 @@ export class WallEntity extends EntityClass<WallData> {
     if (newPosition.snapFromType === 'point') {
       // 暂时没有考虑好怎么写磁吸到边的情况，因为暂时无法排除自己，所以只命中point磁吸
       // console.log('MatchSnapPoint-3', newPosition.point, dragHandelInfo.index)
-      this.getData().points[dragHandelInfo.index] = newPosition.point
-      return true
+      if (dragHandelInfo.index % 2 === 0) {
+        const index = dragHandelInfo.index / 2;
+        this.getData().points[index] = newPosition.point
+        return true
+      }
     }
     return false;
   }

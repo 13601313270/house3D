@@ -54,8 +54,8 @@
               </div>
               <div>
                 <input v-if="item.dataType === 'number'" type="number" :value="editPropInputInfo[item.id]"
-                  @change="updateEditPropInputNumberInfo(item.id, $event)" :min="item.min"
-                  :max="item.max" :step="item.step" class="numberInput" />
+                  @change="updateEditPropInputNumberInfo(item.id, $event)" :min="item.min" :max="item.max"
+                  :step="item.step" class="numberInput" />
                 <input v-else-if="item.dataType === 'color'" type="color" class="colorInput"
                   :value="editPropInputInfo[item.id]" @change="updateEditPropInputInfo(item.id, $event)" />
                 <input v-else-if="item.dataType === 'boolean'" type="checkbox" :checked="editPropInputInfo[item.id]"
@@ -100,7 +100,8 @@
       <div class="tools">
         <div style="flex-shrink: 0;">摄像机：</div>
         <div class="cameraList">
-          <div v-for="(item, index) in allCamera" @click="changeCamera2State(index)" class="cameraItem">{{ index }}
+          <div v-for="(item, index) in allCamera" @click="changeCamera2State(index)"
+            :class="{ active: activeCameraIndex === index }" class="cameraItem">{{ index }}
           </div>
         </div>
         <div>
@@ -633,6 +634,7 @@ const drawWrapper = () => {
   }
 }
 
+const activeCameraIndex = ref(0)
 function changeCamera2State(index: number = 0) {
   if (worldApi.getObjects('camera')) {
     const allCameraList: CameraState[] = [];
@@ -652,6 +654,7 @@ function changeCamera2State(index: number = 0) {
     })
     allCamera.value = allCameraList
     cameraState2.value = allCameraList[index]
+    activeCameraIndex.value = index
   } else {
     allCamera.value = []
     cameraState2.value = null
@@ -1827,10 +1830,21 @@ button {
     border: solid 1px black;
     width: 28px;
     height: 28px;
-    line-height: 32px;
+    line-height: 30px;
     text-align: center;
     border-radius: 4px;
     margin-left: 4px;
+    cursor: pointer;
+
+    &:hover {
+      background-color: #f5f5f5;
+    }
+
+    &.active {
+      background-color: #1890ff;
+      border: solid 1px #1890ff;
+      color: white;
+    }
   }
 }
 

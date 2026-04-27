@@ -85,12 +85,18 @@ export class World {
     ctx.fillStyle = '#f5f5f5'
     ctx.fillRect(0, 0, canvasWidth, canvasHeight)
     // 绘制墙体
-    walls.forEach((wall, index) => {
+    for (let index = 0; index < walls.length; index++) {
+      const wallApi: WallEntity = this.allFileMapObjects.wall[index]
+      if (wallApi) {
+        wallApi.draw2DPreview(ctx, panOffset, zoomLevel)
+      }
+    }
+    for (let index = 0; index < walls.length; index++) {
       const wallApi: WallEntity = this.allFileMapObjects.wall[index]
       if (wallApi) {
         wallApi.draw2D(ctx, panOffset, zoomLevel)
       }
-    })
+    }
 
     if (currentTool === 'wall' && tempWallPoints.length > 0) {
       ctx.strokeStyle = '#42b983'
