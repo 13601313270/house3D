@@ -194,31 +194,43 @@ export class OutFileEntity extends EntityClass<OutFileData> {
         roughness: 0.7,
         metalness: 0.1
       })
-      console.log('material-material', getMaterialById(materialId))
+      function render(object: THREE.Group) {
+        object.scale.set(scaleX, scaleY, scaleZ)
+        object.rotation.y = angleY
 
-      materLoader.load(materialUrl, (mtl: any) => {
-        // 关键步骤：预加载所有材质，让纹理图片准备好
-        mtl.preload();
-        loader.setMaterials(mtl);
-
-        loader.load(url, (object: THREE.Group) => {
-          object.scale.set(scaleX, scaleY, scaleZ)
-          object.rotation.y = angleY
-
-          // 添加默认材质（如果模型没有材质）
-          object.traverse((child) => {
-            if (child instanceof THREE.Mesh) {
-              if (materialId !== -1) {
+        // 添加默认材质（如果模型没有材质）
+        object.traverse((child) => {
+          if (child instanceof THREE.Mesh) {
+            if (materialId !== -1) {
+              child.material = material
+            } else {
+              if (!child.material) {
                 child.material = material
-              } else {
-                if (!child.material) {
-                  child.material = material
-                }
               }
             }
+          }
+        })
+        group.add(object)
+        console.log('OBJ文件加载成功:', url)
+      }
+      // console.log('material-material', getMaterialById(materialId))
+      if (materialUrl) {
+        materLoader.load(materialUrl, (mtl: any) => {
+          mtl.preload();
+          loader.setMaterials(mtl);
+          loader.load(url, (object: THREE.Group) => {
+            render(object)
+          }, (progress: any) => {
+            // 加载进度
+            const percent = (progress.loaded / progress.total * 100).toFixed(2)
+            console.log('加载进度:', percent + '%')
+          }, (error: any) => {
+            console.error('OBJ文件加载失败:', error)
           })
-          group.add(object)
-          console.log('OBJ文件加载成功:', url)
+        })
+      } else {
+        loader.load(url, (object: THREE.Group) => {
+          render(object)
         }, (progress: any) => {
           // 加载进度
           const percent = (progress.loaded / progress.total * 100).toFixed(2)
@@ -226,7 +238,7 @@ export class OutFileEntity extends EntityClass<OutFileData> {
         }, (error: any) => {
           console.error('OBJ文件加载失败:', error)
         })
-      })
+      }
     }
     // group.position.set(data.x, data.z, data.y)
 
