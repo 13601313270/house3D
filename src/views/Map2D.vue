@@ -1375,6 +1375,7 @@ function changeCurrentTool(type: 'wall' | 'door' | 'window' | 'camera' | 'outFil
       const data: OutFileData = {
         fileTypeId: findObjInfo.id,
         id: Date.now().toString(),
+        bm: findObjInfo.materialId,
         angleY: 0,
         x: 0,
         y: 0,
@@ -1413,6 +1414,7 @@ function changeCurrentToolToOutFile(id: string) {
     x: 0,
     y: 0,
     z: 0,
+    bm: findObjInfo.materialId,
     angleY: 0,
   }
   const insertTempObjData = new OutFileDataClass(data)

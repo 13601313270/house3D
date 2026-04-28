@@ -12,7 +12,7 @@ type ObjItem = {
   angleY: number
   preImg: string
   preImgScale: number
-  materialId: number
+  materialId: number | null
   materialVec?: [number, number, number]
   drawAngelLength: number
 }
@@ -27,7 +27,8 @@ const objFiles: ObjItem[] = [
     angleY: -Math.PI / 2,
     preImg: 'https://video-obj.oss-cn-beijing.aliyuncs.com/bed.png',
     preImgScale: 0.49,
-    materialId: -1,
+    materialId: null,
+    materialVec: [0, 1, 1],
     drawAngelLength: 70,
   },
   {
@@ -41,7 +42,7 @@ const objFiles: ObjItem[] = [
     preImg: 'https://video-obj.oss-cn-beijing.aliyuncs.com/table.png',
     preImgScale: 0.202,
     materialId: 3,
-    materialVec: [0, 1, 0],
+    materialVec: [0, 1, 1],
     drawAngelLength: 35,
   },
   {
@@ -54,7 +55,7 @@ const objFiles: ObjItem[] = [
     angleY: 0,
     preImg: 'https://video-obj.oss-cn-beijing.aliyuncs.com/sofa.png',
     preImgScale: 0.287,
-    materialId: -1, // 14,
+    materialId: null, // 14,
     materialVec: [0, 1, 1],
     drawAngelLength: 35,
   }

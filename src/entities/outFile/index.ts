@@ -12,11 +12,13 @@ import { allMaterial, getMaterialById } from '@/material'
 export class OutFileDataClass extends ObjDataClass<OutFileData> {
   fileTypeId: string
   angleY: number
+  bm: number | null // 材质
 
   constructor(data: OutFileData) {
     super(data)
     this.fileTypeId = data.fileTypeId
     this.angleY = data.angleY
+    this.bm = data.bm
   }
 }
 
@@ -26,6 +28,7 @@ export function createOutFileData(): OutFileDataClass {
     fileTypeId: findObjInfo.id,
     id: Date.now().toString(),
     angleY: 0,
+    bm: null,
     x: 0,
     y: 0,
     z: 0,
@@ -165,7 +168,7 @@ export class OutFileEntity extends EntityClass<OutFileData> {
   create3DMesh(scene: THREE.Scene): THREE.Group[] {
     const data = this.getData();
     const group = new THREE.Group()
-    const { fileTypeId } = data
+    const { fileTypeId, bm } = data
 
     const findObjInfo = ObjFiles.find(item => item.id === fileTypeId)
 
@@ -173,7 +176,9 @@ export class OutFileEntity extends EntityClass<OutFileData> {
       console.error('未找到对应的文件类型:', fileTypeId)
       return []
     }
-    const { scaleX, scaleY, scaleZ, url, angleY, materialId, materialVec } = findObjInfo
+    const { scaleX, scaleY, scaleZ, url, angleY, materialVec } = findObjInfo
+    // console.log('materialId', bm);
+    const materialId = bm === null ? (findObjInfo.materialId || -1) : bm
     console.log('scaleX', scaleX, 'scaleY', scaleY, 'scaleZ', scaleZ)
     if (url.endsWith('.obj')) {
       const loader = new OBJLoader()
@@ -333,5 +338,20 @@ export class OutFileEntity extends EntityClass<OutFileData> {
   }
 
   editPropConfig(snapPoint: HandelInfo, editShow: (editInfoList: editItem[], callback: (val: any) => void) => void): void {
+    const data = this.getData();
+    const configList: editItem[] = [
+      {
+        id: 'bm',
+        label: '材质',
+        dataType: 'material',
+        value: data.bm,
+      },
+    ]
+    editShow(configList, (val) => {
+      this.setData({
+        ...this.getData(),
+        ...val,
+      })
+    })
   }
 }

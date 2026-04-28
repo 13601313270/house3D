@@ -8,6 +8,7 @@
     <input v-else-if="item.dataType === 'boolean'" type="checkbox" :checked="modelValue[item.id]"
       @change="updateEditPropInputInfoBoolean(item.id, $event)" />
     <div v-else-if="item.dataType === 'material'" class="materialList">
+      <!-- {{ modelValue[item.id] }} -->
       <div @click="allMaterialShow = true, allMaterialShowPropId = item.id">
         <div class="materialItem" v-if="!modelValue[item.id]">
           <div class="imgOuting">
