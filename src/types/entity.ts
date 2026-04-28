@@ -193,7 +193,7 @@ export abstract class EntityClass<T extends ObjData> {
     this.associationEntity = []
   }
 
-  abstract editPropConfig(): editItem[]
+  abstract editPropConfig(snapPoint: HandelInfo): editItem[]
 }
 
 export abstract class EntityClassInWall<T extends ObjInWallData> extends EntityClass<T> {

@@ -318,10 +318,9 @@ export class WallEntity extends EntityClass<WallData> {
   setPrepareState(x: number, y: number): void {
   }
 
-  editPropConfig(): editItem[] {
-    const obj = this;
-    console.log('editPropConfig-墙体厚度', obj)
-    console.log('editPropConfig-墙体信息', obj.getData().walls)
+  editPropConfig(snapPoint: HandelInfo): editItem[] {
+    console.log('editPropConfig-墙体厚度', this)
+    console.log('editPropConfig-墙体信息', snapPoint)
     const configList: editItem[] = [
       {
         id: 'thickness',
@@ -388,7 +387,7 @@ export class WallEntity extends EntityClass<WallData> {
         id: 'walls',
         label: '墙体信息',
         dataType: 'array',
-        children: (obj.getData().walls || []).map(v => {
+        children: (this.getData().walls || []).map(v => {
           return [
             {
               id: 'hidden',
@@ -399,7 +398,7 @@ export class WallEntity extends EntityClass<WallData> {
         }),
       }
     ]
-    console.log('editPropConfig-墙体信息', configList, obj.getData().walls)
+    console.log('editPropConfig-墙体信息', configList, this.getData().walls)
     return configList;
   }
 }
