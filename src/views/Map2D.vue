@@ -650,7 +650,6 @@ onMounted(() => {
               wmt: 0, // 墙材质
               height: 280, // 墙高，默认280
               points: [...tempDrawWall.value.points],
-              walls: [],
               thickness: wallThickness.value,
               hb: true,// 有地板，默认有
               bc: '#aaa', // 地板颜色，默认灰色
@@ -903,7 +902,6 @@ const handleCanvasClick = async (e: MouseEvent) => {
             const newWall: WallData = {
               id: Date.now().toString(),
               points: [...tempDrawWall.value.points],
-              walls: [],
               x: 0,
               y: 0,
               color: '#fff',
@@ -928,7 +926,10 @@ const handleCanvasClick = async (e: MouseEvent) => {
         }
         clickPoint = snapped.point
       }
-      tempDrawWall.value?.points?.push(clickPoint)
+      tempDrawWall.value?.points?.push({
+        ...clickPoint,
+        snw: true,
+      })
     } else {
       tempDrawWall.value = {
         id: Date.now().toString(),
@@ -938,8 +939,10 @@ const handleCanvasClick = async (e: MouseEvent) => {
         color: '#fff',
         wmt: 0, // 墙材质
         height: 280, // 墙高
-        points: [clickPoint],
-        walls: [],
+        points: [{
+          ...clickPoint,
+          snw: true,
+        }],
         thickness: wallThickness.value,
         hb: true,// 有地板，默认有
         bc: '#aaa', // 地板颜色，默认灰色

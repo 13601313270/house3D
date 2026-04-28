@@ -1,7 +1,6 @@
 import { Point, HandelInfo } from '@/types/map2d'
 import { allSnapFromType, EntityClass, EntityType, MatchSnapPoint } from '@/types/entity'
-import { WallData, wallInfo } from './index.d'
-import { drawPoint } from '@/utils/drawPoint'
+import { WallData, WallPoint } from './index.d'
 import { createAllWallFromPoints } from '@/utils/createAllWallFromPoints'
 import * as THREE from 'three'
 import { editItem } from '..'
@@ -10,8 +9,7 @@ import { ObjDataClass } from '../objData'
 import { World } from '@/utils/world'
 
 export class WallDataClass extends ObjDataClass<WallData> {
-  points: Point[]
-  walls: wallInfo[]
+  points: WallPoint[]
   thickness: number
   color: string
   height: number
@@ -27,7 +25,6 @@ export class WallDataClass extends ObjDataClass<WallData> {
   constructor(data: WallData) {
     super(data)
     this.points = data.points
-    this.walls = data.walls || []
     this.thickness = data.thickness
     this.height = data.height
     this.color = data.color
@@ -45,13 +42,6 @@ export class WallDataClass extends ObjDataClass<WallData> {
 export class WallEntity extends EntityClass<WallData> {
   type: EntityType = 'wall'
   isPointObj: boolean = false
-
-  constructor(world: World, data: WallData) {
-    if (!data.walls) {
-      data.walls = []
-    }
-    super(world, data)
-  }
 
   draw2DPreviewByData(ctx: CanvasRenderingContext2D, data: WallData, panOffset: Point, zoomLevel: number): void {
     if (data.hb) {
@@ -81,6 +71,13 @@ export class WallEntity extends EntityClass<WallData> {
 
     for (let i = 0; i < wallBoxList.length; i++) {
       const box = wallBoxList[i]
+
+      if (data.points[i].snw) {
+        ctx.setLineDash([5, 5])
+      } else {
+        ctx.setLineDash([])
+      }
+
       ctx.beginPath()
       for (let j = 0; j < box.length; j++) {
         const screenX = box[j].x * zoomLevel + panOffset.x
@@ -152,6 +149,7 @@ export class WallEntity extends EntityClass<WallData> {
       // bevelSize: 2,
       // bevelSegments: 1
     }
+    console.log('wallBoxList', wallBoxList)
     for (let i = 0; i < wallBoxList.length; i++) {
       const box = wallBoxList[i]
 
@@ -171,7 +169,11 @@ export class WallEntity extends EntityClass<WallData> {
         color: this.getData().color,
         side: THREE.DoubleSide
       })
+
       const wallMesh = new THREE.Mesh(geometry, material)
+      if (data.points[i].snw) {
+        wallMesh.visible = false
+      }
       // wallMesh.position.set(0, 0, 0)
       // console.log('this.getData() ', this.getData())
       wallMesh.castShadow = true
@@ -268,7 +270,7 @@ export class WallEntity extends EntityClass<WallData> {
       this.remove3DCache()
       if (matchHandelInfo.index % 2 === 0) {
         const index = matchHandelInfo.index / 2;
-        this.getData().points[index] = { x, y }
+        this.getData().points[index] = { x, y, snw: this.getData().points[index].snw, }
       }
     }
   }
@@ -282,7 +284,10 @@ export class WallEntity extends EntityClass<WallData> {
       // console.log('MatchSnapPoint-3', newPosition.point, dragHandelInfo.index)
       if (dragHandelInfo.index % 2 === 0) {
         const index = dragHandelInfo.index / 2;
-        this.getData().points[index] = newPosition.point
+        this.getData().points[index] = {
+          ...newPosition.point,
+          snw: this.getData().points[index].snw,
+        }
         return true
       }
     }
@@ -404,16 +409,26 @@ export class WallEntity extends EntityClass<WallData> {
         })
       })
     } else {
+      const data = this.getData()
+      const pointIndex = (snapPoint.index - 1) / 2;
       editShow([
         {
           id: 'hidden',
           label: '是否隐藏',
           dataType: 'boolean',
-          value: false,
+          value: data.points[pointIndex].snw,
         }
       ], (val) => {
+        const points = [...data.points]
+        points[pointIndex] = {
+          ...points[pointIndex],
+          snw: val.hidden,
+        };
         console.log('editPropConfig-是否隐藏', val)
-        // this.setData(val)
+        this.setData({
+          ...data,
+          points,
+        })
       })
     }
   }

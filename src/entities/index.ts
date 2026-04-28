@@ -76,7 +76,6 @@ export const createInitData: Record<allFileKeysEnum, () => any> = {
 function createWallData(): WallDataClass {
   const wall: WallData = {
     id: Date.now().toString(),
-    walls: [],
     x: 0,
     y: 0,
     z: 0,

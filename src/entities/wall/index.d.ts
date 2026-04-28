@@ -1,11 +1,16 @@
 import { Point, ObjData } from '@/types/map2d'
 
+
+export interface WallPoint extends Point {
+  snw: boolean,// show next wall，是否这个点对应的下面的线的信息（是否显示下一个墙）
+}
+
+
 type wallInfo = {
   hidden: boolean
 }
 export type WallData = ObjData & {
-  points: Point[]
-  walls: wallInfo[],
+  points: WallPoint[]
   thickness: number
   color: string
   height: number
