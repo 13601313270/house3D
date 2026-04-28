@@ -8,15 +8,16 @@
           </button>
           <div class="list">
             <div>
-              <div class="childItem" v-for="value in allFileKeys" :key="value"
+              <div class="childItem" v-for="value in allFileKeys.filter(item => item !== 'outFile')" :key="value"
                 :class="{ active: currentTool === value }" @click="changeCurrentTool(value)">
                 {{ allFileKeysName[value] }}
               </div>
             </div>
+            <div class="splitLine"></div>
             <div>
               <div v-for="item in ObjFiles" :key="item.id" class="childItem"
                 @click="changeCurrentToolToOutFile(item.id)">
-                {{ item.id }}
+                {{ item.name }}
               </div>
             </div>
           </div>
@@ -928,7 +929,7 @@ const handleCanvasClick = async (e: MouseEvent) => {
       }
       tempDrawWall.value?.points?.push({
         ...clickPoint,
-        snw: true,
+        snw: false,
       })
     } else {
       tempDrawWall.value = {
@@ -941,7 +942,7 @@ const handleCanvasClick = async (e: MouseEvent) => {
         height: 280, // 墙高
         points: [{
           ...clickPoint,
-          snw: true,
+          snw: false,
         }],
         thickness: wallThickness.value,
         hb: true,// 有地板，默认有
@@ -1477,6 +1478,12 @@ watch(() => editPropInputInfo.value, () => {
         &.active {
           background-color: #1890ff;
         }
+      }
+
+      .splitLine {
+        width: 100%;
+        height: 1px;
+        background-color: #d9d9d9;
       }
     }
   }
