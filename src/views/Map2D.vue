@@ -92,31 +92,6 @@
         <div v-else class="noCamera">场景中请至少添加一个摄像机</div>
       </div>
     </div>
-
-    <!-- <div class="allMaterialPanel" v-if="allMaterialShow && allMaterialShowPropId"
-      @click.self="allMaterialShow = false, allMaterialShowPropId = undefined">
-      <div class="allMaterialPanelInner">
-        <div class="title">所有材质</div>
-        <div class="list">
-          <div class="materialItem"
-            @click="updateEditPropInputNumberInfo(allMaterialShowPropId, 0), allMaterialShow = false">
-            <div class="imgOuting">
-              <img src="../assets/Empty.png" alt="noMaterial" class="img"
-                style="width: 50px;background-color: white;" />
-            </div>
-            <div class="name">无</div>
-          </div>
-          <div v-for="item2 in allMaterial" :key="item2.id" class="materialItem"
-            :class="{ active: editPropInputInfo[item2.id] === item2.id }"
-            @click="updateEditPropInputNumberInfo(allMaterialShowPropId, item2.id), allMaterialShow = false">
-            <div class="imgOuting">
-              <img :src="item2.img" alt="material" class="img" />
-            </div>
-            <div class="name">{{ item2.name }}</div>
-          </div>
-        </div>
-      </div>
-    </div> -->
   </div>
 </template>
 
@@ -1420,8 +1395,6 @@ function changeCurrentToolToOutFile(id: string) {
 
 watch(() => editPropInputInfo.value, () => {
   if (editPropTypeKey.value && editPropTypeIndex.value > -1) {
-    // console.log(111, worldApi.getObjects(editPropTypeKey.value)[editPropTypeIndex.value], editPropInputInfo.value)
-    // Object.assign(worldApi.getObjects(editPropTypeKey.value)[editPropTypeIndex.value], editPropInputInfo.value)
     worldApi.replaceObjects(editPropTypeKey.value, editPropTypeIndex.value, JSON.parse(JSON.stringify(editPropInputInfo.value)))
   }
   if (editPropTypeKey.value && editPropTypeIndex.value > -1) {
