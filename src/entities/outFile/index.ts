@@ -39,7 +39,7 @@ export class OutFileEntity extends EntityClass<OutFileData> {
   color: string = '#0c7f25'
   color3D: string = '#0c7f25'
   colorOpacity: string = '#14b737a5'
-  // private drawAngelLength = 40;
+  private baseDrawAngelLength = 40;
 
   init(): Promise<void> {
     const img = new Image()
@@ -98,7 +98,7 @@ export class OutFileEntity extends EntityClass<OutFileData> {
     ctx.stroke()
 
     const findObjInfo = ObjFiles.find(item => item.id === data.fileTypeId)
-    const drawAngelLength = findObjInfo?.drawAngelLength || 40
+    const drawAngelLength = findObjInfo?.drawAngelLength || this.baseDrawAngelLength
 
     // 控制点向着angleY角度延伸10个单位后的坐标
     const rotatedXAdd = data.x + Math.cos(data.angleY) * drawAngelLength
@@ -262,7 +262,7 @@ export class OutFileEntity extends EntityClass<OutFileData> {
       }
     }
     const findObjInfo = ObjFiles.find(item => item.id === data.fileTypeId)
-    const drawAngelLength = findObjInfo?.drawAngelLength || 40
+    const drawAngelLength = findObjInfo?.drawAngelLength || this.baseDrawAngelLength
     // 控制点向着angleY角度延伸10个单位后的坐标
     const rotatedXAdd = data.x + Math.cos(data.angleY) * drawAngelLength
     const rotatedYAdd = data.y - Math.sin(data.angleY) * drawAngelLength
