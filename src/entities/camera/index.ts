@@ -40,43 +40,6 @@ export function createCameraData(): CameraDataClass {
   return new CameraDataClass(camera)
 }
 
-export function editPropConfig(): editItem[] {
-  return [
-    {
-      id: 'fov',
-      label: '角度',
-      dataType: 'number',
-      min: 0,
-      max: 180,
-      step: 15,
-    },
-    {
-      id: 'aspectW',
-      label: '宽度比',
-      dataType: 'number',
-      min: 0,
-      max: 99,
-      step: 1,
-    },
-    {
-      id: 'aspectH',
-      label: '高度比',
-      dataType: 'number',
-      min: 0,
-      max: 99,
-      step: 1,
-    },
-    {
-      id: 'z',
-      label: 'Z轴',
-      dataType: 'number',
-      min: -Infinity,
-      max: Infinity,
-      step: 1,
-    }
-  ]
-}
-
 export class CameraEntity extends EntityClass<CameraData> {
   type: EntityType = 'camera'
   isPointObj: boolean = true
@@ -303,5 +266,42 @@ export class CameraEntity extends EntityClass<CameraData> {
       targetPositionX: x + 100,
       targetPositionY: y,
     })
+  }
+
+  editPropConfig(): editItem[] {
+    return [
+      {
+        id: 'fov',
+        label: '角度',
+        dataType: 'number',
+        min: 0,
+        max: 180,
+        step: 15,
+      },
+      {
+        id: 'aspectW',
+        label: '宽度比',
+        dataType: 'number',
+        min: 0,
+        max: 99,
+        step: 1,
+      },
+      {
+        id: 'aspectH',
+        label: '高度比',
+        dataType: 'number',
+        min: 0,
+        max: 99,
+        step: 1,
+      },
+      {
+        id: 'z',
+        label: 'Z轴',
+        dataType: 'number',
+        min: -Infinity,
+        max: Infinity,
+        step: 1,
+      }
+    ]
   }
 }

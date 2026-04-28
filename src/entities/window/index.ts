@@ -68,86 +68,6 @@ export function createWindowData(): WindowDataClass {
   return new WindowDataClass(window)
 }
 
-export function editPropConfig(): editItem[] {
-  return [
-    {
-      id: 'bottom',
-      label: '距离地面',
-      dataType: 'number',
-      min: 0,
-      max: Infinity,
-      step: 1,
-    },
-    {
-      id: 'width',
-      label: '宽度',
-      dataType: 'number',
-      min: 0,
-      max: Infinity,
-      step: 1,
-    },
-    {
-      id: 'height',
-      label: '高度',
-      dataType: 'number',
-      min: 0,
-      max: Infinity,
-      step: 1,
-    },
-    {
-      id: 'hasBorder',
-      label: '是否有包墙',
-      dataType: 'boolean',
-    },
-    {
-      id: 'bqc',
-      label: '包墙颜色',
-      dataType: 'color',
-    },
-    {
-      id: 'bmt',
-      label: '包墙材质',
-      dataType: 'material',
-    },
-    {
-      id: 'tc',
-      label: '门框颜色',
-      dataType: 'color',
-    },
-    {
-      id: 'tmt',
-      label: '门框材质',
-      dataType: 'material',
-    },
-    {
-      id: 'ic',
-      label: '玻璃框颜色',
-      dataType: 'color',
-    },
-    {
-      id: 'icmt',
-      label: '玻璃框材质',
-      dataType: 'material',
-    },
-    {
-      id: 'rightOpenAngle',
-      label: '右门打开角度',
-      dataType: 'number',
-      min: 0,
-      max: 180,
-      step: 15,
-    },
-    {
-      id: 'leftOpenAngle',
-      label: '左门打开角度',
-      dataType: 'number',
-      min: 0,
-      max: 180,
-      step: 15,
-    },
-  ]
-}
-
 export class WindowEntity extends EntityClassInWall<WindowData> {
   type: EntityType = 'window'
   isPointObj: boolean = true
@@ -556,5 +476,85 @@ export class WindowEntity extends EntityClassInWall<WindowData> {
       }
       this.remove3DCache()
     }
+  }
+
+  editPropConfig(): editItem[] {
+    return [
+      {
+        id: 'bottom',
+        label: '距离地面',
+        dataType: 'number',
+        min: 0,
+        max: Infinity,
+        step: 1,
+      },
+      {
+        id: 'width',
+        label: '宽度',
+        dataType: 'number',
+        min: 0,
+        max: Infinity,
+        step: 1,
+      },
+      {
+        id: 'height',
+        label: '高度',
+        dataType: 'number',
+        min: 0,
+        max: Infinity,
+        step: 1,
+      },
+      {
+        id: 'hasBorder',
+        label: '是否有包墙',
+        dataType: 'boolean',
+      },
+      {
+        id: 'bqc',
+        label: '包墙颜色',
+        dataType: 'color',
+      },
+      {
+        id: 'bmt',
+        label: '包墙材质',
+        dataType: 'material',
+      },
+      {
+        id: 'tc',
+        label: '门框颜色',
+        dataType: 'color',
+      },
+      {
+        id: 'tmt',
+        label: '门框材质',
+        dataType: 'material',
+      },
+      {
+        id: 'ic',
+        label: '玻璃框颜色',
+        dataType: 'color',
+      },
+      {
+        id: 'icmt',
+        label: '玻璃框材质',
+        dataType: 'material',
+      },
+      {
+        id: 'rightOpenAngle',
+        label: '右门打开角度',
+        dataType: 'number',
+        min: 0,
+        max: 180,
+        step: 15,
+      },
+      {
+        id: 'leftOpenAngle',
+        label: '左门打开角度',
+        dataType: 'number',
+        min: 0,
+        max: 180,
+        step: 15,
+      },
+    ]
   }
 }

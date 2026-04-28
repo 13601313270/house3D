@@ -42,90 +42,6 @@ export class WallDataClass extends ObjDataClass<WallData> {
   }
 }
 
-export function editPropConfig(obj: WallEntity): editItem[] {
-  console.log('editPropConfig-墙体厚度', obj)
-  console.log('editPropConfig-墙体信息', obj.getData().walls)
-  const configList: editItem[] = [
-    {
-      id: 'thickness',
-      label: '墙体厚度',
-      dataType: 'number',
-      min: 0,
-      max: Infinity,
-      step: 1,
-    },
-    {
-      id: 'height',
-      label: '墙体高度',
-      dataType: 'number',
-      min: 1,
-      max: Infinity,
-      step: 1,
-    },
-    {
-      id: 'color',
-      label: '墙体颜色',
-      dataType: 'color',
-    },
-    {
-      id: 'wmt',
-      label: '墙体材质',
-      dataType: 'material',
-    },
-    {
-      id: 'hb',
-      label: '是否有地板',
-      dataType: 'boolean',
-    },
-    {
-      id: 'bc',
-      label: '地板颜色',
-      dataType: 'color',
-    },
-    {
-      id: 'bmt',
-      label: '地板材质',
-      dataType: 'material',
-    },
-    {
-      id: 'ht',
-      label: '是否有天花板',
-      dataType: 'boolean',
-    },
-    {
-      id: 'tc',
-      label: '天花板颜色',
-      dataType: 'color',
-    },
-    {
-      id: 'tmt',
-      label: '天花板材质',
-      dataType: 'material',
-    },
-    {
-      id: 'td',
-      label: '天花板是否是双面',
-      dataType: 'boolean',
-    },
-    {
-      id: 'walls',
-      label: '墙体信息',
-      dataType: 'array',
-      children: (obj.getData().walls || []).map(v => {
-        return [
-          {
-            id: 'hidden',
-            label: '是否隐藏',
-            dataType: 'boolean',
-          }
-        ];
-      }),
-    }
-  ]
-  console.log('editPropConfig-墙体信息', configList, obj.getData().walls)
-  return configList;
-}
-
 export class WallEntity extends EntityClass<WallData> {
   type: EntityType = 'wall'
   isPointObj: boolean = false
@@ -400,5 +316,90 @@ export class WallEntity extends EntityClass<WallData> {
   }
 
   setPrepareState(x: number, y: number): void {
+  }
+
+  editPropConfig(): editItem[] {
+    const obj = this;
+    console.log('editPropConfig-墙体厚度', obj)
+    console.log('editPropConfig-墙体信息', obj.getData().walls)
+    const configList: editItem[] = [
+      {
+        id: 'thickness',
+        label: '墙体厚度',
+        dataType: 'number',
+        min: 0,
+        max: Infinity,
+        step: 1,
+      },
+      {
+        id: 'height',
+        label: '墙体高度',
+        dataType: 'number',
+        min: 1,
+        max: Infinity,
+        step: 1,
+      },
+      {
+        id: 'color',
+        label: '墙体颜色',
+        dataType: 'color',
+      },
+      {
+        id: 'wmt',
+        label: '墙体材质',
+        dataType: 'material',
+      },
+      {
+        id: 'hb',
+        label: '是否有地板',
+        dataType: 'boolean',
+      },
+      {
+        id: 'bc',
+        label: '地板颜色',
+        dataType: 'color',
+      },
+      {
+        id: 'bmt',
+        label: '地板材质',
+        dataType: 'material',
+      },
+      {
+        id: 'ht',
+        label: '是否有天花板',
+        dataType: 'boolean',
+      },
+      {
+        id: 'tc',
+        label: '天花板颜色',
+        dataType: 'color',
+      },
+      {
+        id: 'tmt',
+        label: '天花板材质',
+        dataType: 'material',
+      },
+      {
+        id: 'td',
+        label: '天花板是否是双面',
+        dataType: 'boolean',
+      },
+      {
+        id: 'walls',
+        label: '墙体信息',
+        dataType: 'array',
+        children: (obj.getData().walls || []).map(v => {
+          return [
+            {
+              id: 'hidden',
+              label: '是否隐藏',
+              dataType: 'boolean',
+            }
+          ];
+        }),
+      }
+    ]
+    console.log('editPropConfig-墙体信息', configList, obj.getData().walls)
+    return configList;
   }
 }

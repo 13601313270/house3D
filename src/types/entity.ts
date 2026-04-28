@@ -3,6 +3,7 @@ import { ObjData, HandelInfo, Point, PointWithIndex, ObjInWallData } from './map
 import { World } from '@/utils/world'
 import { WallData } from '@/entities/wall/index.d'
 import { OutFileDataClass, OutFileEntity } from '@/entities/outFile'
+import { editItem } from '@/entities'
 
 interface NearestWallResult {
   wall: WallData
@@ -191,6 +192,8 @@ export abstract class EntityClass<T extends ObjData> {
     }
     this.associationEntity = []
   }
+
+  abstract editPropConfig(): editItem[]
 }
 
 export abstract class EntityClassInWall<T extends ObjInWallData> extends EntityClass<T> {

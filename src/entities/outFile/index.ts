@@ -33,17 +33,6 @@ export function createOutFileData(): OutFileDataClass {
   return new OutFileDataClass(data)
 }
 
-export function editPropConfig(): editItem[] {
-  return [
-    {
-      id: 'url',
-      label: 'URL',
-      dataType: 'string',
-    },
-
-  ]
-}
-
 export class OutFileEntity extends EntityClass<OutFileData> {
   type: EntityType = 'outFile'
   isPointObj: boolean = true
@@ -326,5 +315,10 @@ export class OutFileEntity extends EntityClass<OutFileData> {
       x,
       y,
     })
+  }
+
+  editPropConfig(): editItem[] {
+    return [
+    ]
   }
 }

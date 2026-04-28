@@ -3,11 +3,11 @@ import { WallData } from './wall/index.d'
 import { WindowData } from './window/index.d'
 import { CameraData } from './camera/index.d'
 import { OutFileData } from './outFile/index.d'
-import { WallDataClass, WallEntity, editPropConfig as wallEditPropConfig } from './wall'
-import { DoorEntity, createDoorData, editPropConfig as doorEditPropConfig } from './door'
-import { WindowEntity, createWindowData, editPropConfig as windowEditPropConfig } from './window'
-import { CameraEntity, editPropConfig as cameraEditPropConfig, createCameraData } from './camera'
-import { OutFileEntity, editPropConfig as outFileEditPropConfig, createOutFileData } from './outFile/index'
+import { WallDataClass, WallEntity } from './wall'
+import { DoorEntity, createDoorData } from './door'
+import { WindowEntity, createWindowData } from './window'
+import { CameraEntity, createCameraData } from './camera'
+import { OutFileEntity, createOutFileData } from './outFile/index'
 import { EntityClass } from '@/types/entity'
 import { ObjData } from '@/types'
 
@@ -66,14 +66,6 @@ export type editItem = {
   label: string,
   dataType: 'array',
   children: editItem[][],
-}
-
-export const PropConfigMap: Record<allFileKeysEnum, (obj: EntityClass<any>) => editItem[]> = {
-  wall: wallEditPropConfig,
-  door: doorEditPropConfig,
-  window: windowEditPropConfig,
-  camera: cameraEditPropConfig,
-  outFile: outFileEditPropConfig,
 }
 
 export const createInitData: Record<allFileKeysEnum, () => any> = {

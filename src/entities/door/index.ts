@@ -55,58 +55,6 @@ export function createDoorData(): DoorDataClass {
   return new DoorDataClass(door)
 }
 
-export function editPropConfig(): editItem[] {
-  return [
-    {
-      id: 'width',
-      label: '宽度',
-      dataType: 'number',
-      min: 1,
-      max: Infinity,
-      step: 1,
-    },
-    {
-      id: 'height',
-      label: '高度',
-      dataType: 'number',
-      min: 0,
-      max: Infinity,
-      step: 1,
-    },
-    {
-      id: 'mt',
-      label: '门材质',
-      dataType: 'material',
-    },
-    {
-      id: 'color',
-      label: '颜色',
-      dataType: 'color',
-    },
-    {
-      id: 'hasBorder',
-      label: '是否有门框',
-      dataType: 'boolean',
-    },
-    {
-      id: 'openAngle',
-      label: '门打开的角度',
-      dataType: 'number',
-      min: 0,
-      max: 180,
-      step: 15,
-    },
-    {
-      id: 'openType',
-      label: '开门方式(1内左开 2内右开 3外左开 4外右开)',
-      dataType: 'number',
-      min: 1,
-      max: 4,
-      step: 1,
-    },
-  ]
-}
-
 export class DoorEntity extends EntityClassInWall<DoorData> {
   type: EntityType = 'door'
   isPointObj: boolean = true
@@ -369,5 +317,57 @@ export class DoorEntity extends EntityClassInWall<DoorData> {
       }
       this.remove3DCache()
     }
+  }
+
+  editPropConfig(): editItem[] {
+    return [
+      {
+        id: 'width',
+        label: '宽度',
+        dataType: 'number',
+        min: 1,
+        max: Infinity,
+        step: 10,
+      },
+      {
+        id: 'height',
+        label: '高度',
+        dataType: 'number',
+        min: 0,
+        max: Infinity,
+        step: 10,
+      },
+      {
+        id: 'mt',
+        label: '门材质',
+        dataType: 'material',
+      },
+      {
+        id: 'color',
+        label: '颜色',
+        dataType: 'color',
+      },
+      {
+        id: 'hasBorder',
+        label: '是否有门框',
+        dataType: 'boolean',
+      },
+      {
+        id: 'openAngle',
+        label: '门打开的角度',
+        dataType: 'number',
+        min: 0,
+        max: 180,
+        step: 15,
+      },
+      {
+        id: 'openType',
+        label: '开门方式(1内左开 2内右开 3外左开 4外右开)',
+        dataType: 'number',
+        min: 1,
+        max: 4,
+        step: 1,
+      },
+    ]
   }
 }

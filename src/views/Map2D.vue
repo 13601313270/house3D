@@ -126,19 +126,13 @@ import { ObjData, Point } from '../types'
 import { snapThreshold, World } from '../utils/world'
 import Canvas3D, { CameraState } from '../components/Canvas3D.vue'
 import { WallData } from '@/entities/wall/index.d'
-import { DoorData } from '@/entities/door/index.d'
-import { WindowData } from '@/entities/window/index.d'
-import { allFileKeys, PropConfigMap, fileData, editItem, allFileKeysName, createInitData, fileDataKeyToClass } from '@/entities'
+import { allFileKeys, fileData, editItem, allFileKeysName, createInitData, fileDataKeyToClass } from '@/entities'
 import { EntityClass, EntityClassInWall, EntityType, MatchSnapPoint } from '@/types/entity'
 import { HandelInfo, PointWithIndex } from '@/types/map2d'
 import pointToLineDistance from '@/utils/pointToLineDistance'
-import { createDoorData, DoorDataClass, DoorEntity } from '@/entities/door'
-import { createWindowData, WindowDataClass, WindowEntity } from '@/entities/window'
-import { CameraDataClass, CameraEntity, createCameraData } from '@/entities/camera'
+import { DoorEntity } from '@/entities/door'
 import { CameraData } from '@/entities/camera/index.d'
 import { WallDataClass, WallEntity } from '@/entities/wall'
-import { allMaterial } from '@/material'
-import { ObjDataClass, ObjInWallDataClass } from '@/entities/objData'
 import ObjFiles, { ObjItem } from '@/entities/allObjs'
 import { OutFileDataClass, OutFileEntity } from '@/entities/outFile'
 import { OutFileData } from '@/entities/outFile/index.d'
@@ -791,7 +785,6 @@ const handleContextMenu = (e: MouseEvent) => {
 
   for (let i = 0; i < allFileKeys.length; i++) {
     const type = allFileKeys[i]
-    const propConfig = PropConfigMap[type];
     if (allFileKeys.includes(type)) {
       for (let j = 0; j < worldApi.getObjects(type).length; j++) {
         const item = worldApi.getObjects(type)[j]
@@ -802,14 +795,15 @@ const handleContextMenu = (e: MouseEvent) => {
           const snapPoint = snapPoints[k]
           const dist = Math.hypot(x - snapPoint.point.x, y - snapPoint.point.y)
           if (dist < 10) {
-            console.log('dist', propConfig(api))
+            const propConfig = api.editPropConfig()
+            console.log('dist', propConfig)
             let contextMenuX = e.clientX
             if (contextMenuX + 320 > panel1SplitWidthPer.value * window.innerWidth) {
               contextMenuX = panel1SplitWidthPer.value * window.innerWidth - 320
             }
             editPropTypeKey.value = type
             editPropTypeIndex.value = j
-            editPropConfigInfo.value = propConfig(api)
+            editPropConfigInfo.value = propConfig
             editPropInputInfo.value = JSON.parse(JSON.stringify(item));
             contextMenu.value = {
               visible: true,
@@ -1433,13 +1427,9 @@ watch(() => editPropInputInfo.value, () => {
     worldApi.replaceObjects(editPropTypeKey.value, editPropTypeIndex.value, JSON.parse(JSON.stringify(editPropInputInfo.value)))
   }
   if (editPropTypeKey.value && editPropTypeIndex.value > -1) {
-    // @ts-ignore
-    const propConfig = PropConfigMap[editPropTypeKey.value];
     const api: EntityClass<any> = worldApi.allFileMapObjects[editPropTypeKey.value][editPropTypeIndex.value]
-    console.log('editPropConfigInfo.value---1', editPropInputInfo.value)
-    console.log('editPropConfigInfo.value---2', propConfig)
-    if (propConfig && api) {
-      editPropConfigInfo.value = propConfig(api)
+    if (api) {
+      editPropConfigInfo.value = api.editPropConfig()
       console.log('editPropConfigInfo.value---3', editPropConfigInfo.value)
     }
   }
