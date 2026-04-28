@@ -317,8 +317,6 @@ export class OutFileEntity extends EntityClass<OutFileData> {
     })
   }
 
-  editPropConfig(): editItem[] {
-    return [
-    ]
+  editPropConfig(snapPoint: HandelInfo, editShow: (editInfoList: editItem[]) => any): void {
   }
 }

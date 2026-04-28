@@ -478,8 +478,8 @@ export class WindowEntity extends EntityClassInWall<WindowData> {
     }
   }
 
-  editPropConfig(): editItem[] {
-    return [
+  editPropConfig(snapPoint: HandelInfo, editShow: (editInfoList: editItem[]) => any): void {
+    editShow([
       {
         id: 'bottom',
         label: '距离地面',
@@ -555,6 +555,6 @@ export class WindowEntity extends EntityClassInWall<WindowData> {
         max: 180,
         step: 15,
       },
-    ]
+    ])
   }
 }

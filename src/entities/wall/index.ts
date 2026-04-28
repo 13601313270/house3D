@@ -318,7 +318,7 @@ export class WallEntity extends EntityClass<WallData> {
   setPrepareState(x: number, y: number): void {
   }
 
-  editPropConfig(snapPoint: HandelInfo): editItem[] {
+  editPropConfig(snapPoint: HandelInfo, editShow: (editInfoList: editItem[]) => any): void {
     console.log('editPropConfig-墙体厚度', this)
     console.log('editPropConfig-墙体信息', snapPoint)
     if (snapPoint.index % 2 === 0) {
@@ -398,10 +398,8 @@ export class WallEntity extends EntityClass<WallData> {
             ];
           }),
         }
-      ]
-      return configList;
-    } else {
-      return []
+      ];
+      editShow(configList)
     }
   }
 }

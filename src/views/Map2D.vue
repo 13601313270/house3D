@@ -768,32 +768,33 @@ const handleContextMenu = (e: MouseEvent) => {
         const api: EntityClass<any> = worldApi.allFileMapObjects[type][j]
         const snapPoint = api.matchHandelInfo(x, y, zoomLevel.value)
         if (snapPoint) {
-          const propConfig = api.editPropConfig(snapPoint)
-          console.log('dist', propConfig)
-          let contextMenuX = e.clientX
-          if (contextMenuX + 320 > panel1SplitWidthPer.value * window.innerWidth) {
-            contextMenuX = panel1SplitWidthPer.value * window.innerWidth - 320
-          }
-          editSnapPoint.value = snapPoint
-          editPropTypeKey.value = type
-          editPropTypeIndex.value = j
-          editPropConfigInfo.value = propConfig
-          editPropInputInfo.value = JSON.parse(JSON.stringify(item));
-          contextMenu.value = {
-            visible: true,
-            x: contextMenuX,
-            y: e.clientY,
-            // @ts-ignore
-            type,
-            index: j
-          }
-          nextTick(() => {
-            const height = document.querySelector('.context-menu')?.clientHeight
-            if (height && contextMenu.value) {
-              if (e.clientY + height > window.outerHeight) {
-                contextMenu.value.y = window.outerHeight - height - 5
-              }
+          api.editPropConfig(snapPoint, (propConfig) => {
+            console.log('dist', propConfig)
+            let contextMenuX = e.clientX
+            if (contextMenuX + 320 > panel1SplitWidthPer.value * window.innerWidth) {
+              contextMenuX = panel1SplitWidthPer.value * window.innerWidth - 320
             }
+            editSnapPoint.value = snapPoint
+            editPropTypeKey.value = type
+            editPropTypeIndex.value = j
+            editPropConfigInfo.value = propConfig
+            editPropInputInfo.value = JSON.parse(JSON.stringify(item));
+            contextMenu.value = {
+              visible: true,
+              x: contextMenuX,
+              y: e.clientY,
+              // @ts-ignore
+              type,
+              index: j
+            }
+            nextTick(() => {
+              const height = document.querySelector('.context-menu')?.clientHeight
+              if (height && contextMenu.value) {
+                if (e.clientY + height > window.outerHeight) {
+                  contextMenu.value.y = window.outerHeight - height - 5
+                }
+              }
+            })
           })
           return;
         }
@@ -1400,8 +1401,10 @@ watch(() => editPropInputInfo.value, () => {
   if (editPropTypeKey.value && editPropTypeIndex.value > -1) {
     const api: EntityClass<any> = worldApi.allFileMapObjects[editPropTypeKey.value][editPropTypeIndex.value]
     if (api && editSnapPoint.value) {
-      editPropConfigInfo.value = api.editPropConfig(editSnapPoint.value)
-      console.log('editPropConfigInfo.value---3', editPropConfigInfo.value)
+      api.editPropConfig(editSnapPoint.value, (propConfig) => {
+        editPropConfigInfo.value = propConfig
+        console.log('editPropConfigInfo.value---3', editPropConfigInfo.value)
+      })
     }
   }
   drawWrapper()

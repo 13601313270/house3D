@@ -268,8 +268,8 @@ export class CameraEntity extends EntityClass<CameraData> {
     })
   }
 
-  editPropConfig(): editItem[] {
-    return [
+  editPropConfig(snapPoint: HandelInfo, editShow: (editInfoList: editItem[]) => any): void {
+    editShow([
       {
         id: 'fov',
         label: '角度',
@@ -302,6 +302,6 @@ export class CameraEntity extends EntityClass<CameraData> {
         max: Infinity,
         step: 1,
       }
-    ]
+    ])
   }
 }

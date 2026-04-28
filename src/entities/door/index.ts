@@ -1,4 +1,4 @@
-import { Point } from '@/types/map2d'
+import { HandelInfo, Point } from '@/types/map2d'
 import * as THREE from 'three'
 // @ts-ignore
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
@@ -319,8 +319,8 @@ export class DoorEntity extends EntityClassInWall<DoorData> {
     }
   }
 
-  editPropConfig(): editItem[] {
-    return [
+  editPropConfig(snapPoint: HandelInfo, editShow: (editInfoList: editItem[]) => any): void {
+    editShow([
       {
         id: 'width',
         label: '宽度',
@@ -368,6 +368,6 @@ export class DoorEntity extends EntityClassInWall<DoorData> {
         max: 4,
         step: 1,
       },
-    ]
+    ])
   }
 }
