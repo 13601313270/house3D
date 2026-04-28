@@ -68,7 +68,7 @@ const objFiles: ObjItem[] = [
     scaleX: 100,
     scaleY: 100,
     scaleZ: 100,
-    angleY: Math.PI / 2,
+    angleY: 0,
     preImg: 'https://video-obj.oss-cn-beijing.aliyuncs.com/office-chair.png',
     preImgScale: 0.21,
     materialId: null, // 14,
