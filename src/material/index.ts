@@ -15,6 +15,8 @@ import marbleCliffMaterial from './marbleCliff'
 import ginghamMaterial from './gingham'
 import rockEmbeddedMaterial from './rockEmbedded'
 import rustyMaterial from './rusty'
+import leatherMaterial from './leather'
+import leather2Material from './leather2'
 
 export type MaterialDate = {
   id: number
@@ -119,6 +121,18 @@ const allMaterial: MaterialDate[] = [
     name: '锈色金属',
     material: rustyMaterial.material,
     img: rustyMaterial.img,
+  },
+  {
+    id: 17,
+    name: '皮革1',
+    material: leatherMaterial.material,
+    img: leatherMaterial.img,
+  },
+  {
+    id: 18,
+    name: '皮革2',
+    material: leather2Material.material,
+    img: leather2Material.img,
   },
 ]
 
