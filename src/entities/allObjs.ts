@@ -68,7 +68,7 @@ const objFiles: ObjItem[] = [
     scaleX: 100,
     scaleY: 100,
     scaleZ: 100,
-    angleY: 0,
+    angleY: Math.PI / 2,
     preImg: 'https://video-obj.oss-cn-beijing.aliyuncs.com/office-chair.png',
     preImgScale: 0.21,
     materialId: null, // 14,
@@ -84,11 +84,11 @@ const objFiles: ObjItem[] = [
     scaleY: 10,
     scaleZ: 10,
     angleY: 0,
-    preImg: 'https://video-obj.oss-cn-beijing.aliyuncs.com/office-chair.png',
+    preImg: 'https://video-obj.oss-cn-beijing.aliyuncs.com/monitor.png',
     preImgScale: 0.21,
     materialId: null, // 14,
     materialVec: [0, 1, 1],
-    drawAngelLength: 35,
+    drawAngelLength: 25,
   },
 ]
 export default objFiles
