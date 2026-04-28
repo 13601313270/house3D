@@ -3,11 +3,11 @@ import * as THREE from 'three'
 import { OutFileData } from './index.d'
 import { EntityClass, EntityType, MatchSnapPoint, OrigionSnapPoint } from '@/types/entity'
 import { editItem } from '..'
-import { World } from '@/utils/world'
 // @ts-ignore
 import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
 import { ObjDataClass } from '../objData'
 import ObjFiles from '../allObjs'
+import { allMaterial, getMaterialById } from '@/material'
 
 export class OutFileDataClass extends ObjDataClass<OutFileData> {
   fileTypeId: string
@@ -39,7 +39,7 @@ export class OutFileEntity extends EntityClass<OutFileData> {
   color: string = '#0c7f25'
   color3D: string = '#0c7f25'
   colorOpacity: string = '#14b737a5'
-  private drawAngelLength = 50;
+  // private drawAngelLength = 40;
 
   init(): Promise<void> {
     const img = new Image()
@@ -97,9 +97,12 @@ export class OutFileEntity extends EntityClass<OutFileData> {
     ctx.fill()
     ctx.stroke()
 
+    const findObjInfo = ObjFiles.find(item => item.id === data.fileTypeId)
+    const drawAngelLength = findObjInfo?.drawAngelLength || 40
+
     // 控制点向着angleY角度延伸10个单位后的坐标
-    const rotatedXAdd = data.x + Math.cos(data.angleY) * this.drawAngelLength
-    const rotatedYAdd = data.y - Math.sin(data.angleY) * this.drawAngelLength
+    const rotatedXAdd = data.x + Math.cos(data.angleY) * drawAngelLength
+    const rotatedYAdd = data.y - Math.sin(data.angleY) * drawAngelLength
 
     function ttt(angel: number, drawAngelLength: number) {
       const tempX = data.x + Math.cos(angel) * drawAngelLength;
@@ -113,15 +116,15 @@ export class OutFileEntity extends EntityClass<OutFileData> {
     ctx.lineWidth = 2 * zoomLevel
     // 绘制双向箭头的主线（圆弧）
     ctx.beginPath();
-    ctx.arc(screenX, screenY, this.drawAngelLength * zoomLevel, data.angleY * -1 - Math.PI / 4, data.angleY * -1 + Math.PI / 4);
+    ctx.arc(screenX, screenY, drawAngelLength * zoomLevel, data.angleY * -1 - Math.PI / 4, data.angleY * -1 + Math.PI / 4);
     ctx.stroke();
 
     // 左侧箭头
     (() => {
       ctx.beginPath()
-      const [p1X, p1Y] = ttt(data.angleY + 0.1 + Math.PI / 4, this.drawAngelLength)
-      const [p2X, p2Y] = ttt(data.angleY + Math.PI / 4, this.drawAngelLength + 5)
-      const [p3X, p3Y] = ttt(data.angleY + Math.PI / 4, this.drawAngelLength - 5)
+      const [p1X, p1Y] = ttt(data.angleY + 0.1 + Math.PI / 4, drawAngelLength)
+      const [p2X, p2Y] = ttt(data.angleY + Math.PI / 4, drawAngelLength + 5)
+      const [p3X, p3Y] = ttt(data.angleY + Math.PI / 4, drawAngelLength - 5)
       ctx.moveTo(
         p1X,
         p1Y
@@ -134,9 +137,9 @@ export class OutFileEntity extends EntityClass<OutFileData> {
 
     // 右侧箭头
     ctx.beginPath()
-    const [p1X, p1Y] = ttt(data.angleY - 0.1 - Math.PI / 4, this.drawAngelLength)
-    const [p2X, p2Y] = ttt(data.angleY - Math.PI / 4, this.drawAngelLength + 5)
-    const [p3X, p3Y] = ttt(data.angleY - Math.PI / 4, this.drawAngelLength - 5)
+    const [p1X, p1Y] = ttt(data.angleY - 0.1 - Math.PI / 4, drawAngelLength)
+    const [p2X, p2Y] = ttt(data.angleY - Math.PI / 4, drawAngelLength + 5)
+    const [p3X, p3Y] = ttt(data.angleY - Math.PI / 4, drawAngelLength - 5)
     ctx.moveTo(
       p1X,
       p1Y
@@ -170,10 +173,20 @@ export class OutFileEntity extends EntityClass<OutFileData> {
       console.error('未找到对应的文件类型:', fileTypeId)
       return []
     }
-    const { scaleX, scaleY, scaleZ, url, angleY } = findObjInfo
+    const { scaleX, scaleY, scaleZ, url, angleY, materialId, materialVec } = findObjInfo
     console.log('scaleX', scaleX, 'scaleY', scaleY, 'scaleZ', scaleZ)
     if (url.endsWith('.obj')) {
       const loader = new OBJLoader()
+
+      // 将方向向量旋转90度
+      const rotatedDirection = materialVec ? new THREE.Vector3(...materialVec) : new THREE.Vector3(-1, 1, 1)
+      const material = getMaterialById(materialId)?.material(rotatedDirection) || new THREE.MeshStandardMaterial({
+        color: 0x888888,
+        roughness: 0.7,
+        metalness: 0.1
+      })
+      console.log('material-material', getMaterialById(materialId))
+
       loader.load(url, (object: THREE.Group) => {
         // 计算模型的包围盒并居中
         const box = new THREE.Box3().setFromObject(object)
@@ -187,12 +200,12 @@ export class OutFileEntity extends EntityClass<OutFileData> {
         // 添加默认材质（如果模型没有材质）
         object.traverse((child) => {
           if (child instanceof THREE.Mesh) {
-            if (!child.material) {
-              child.material = new THREE.MeshStandardMaterial({
-                color: 0x888888,
-                roughness: 0.7,
-                metalness: 0.1
-              })
+            if (materialId !== -1) {
+              child.material = material
+            } else {
+              if (!child.material) {
+                child.material = material
+              }
             }
           }
         })
@@ -248,9 +261,11 @@ export class OutFileEntity extends EntityClass<OutFileData> {
         dist: dist,
       }
     }
+    const findObjInfo = ObjFiles.find(item => item.id === data.fileTypeId)
+    const drawAngelLength = findObjInfo?.drawAngelLength || 40
     // 控制点向着angleY角度延伸10个单位后的坐标
-    const rotatedXAdd = data.x + Math.cos(data.angleY) * this.drawAngelLength
-    const rotatedYAdd = data.y - Math.sin(data.angleY) * this.drawAngelLength
+    const rotatedXAdd = data.x + Math.cos(data.angleY) * drawAngelLength
+    const rotatedYAdd = data.y - Math.sin(data.angleY) * drawAngelLength
 
     const dist2 = Math.hypot(x - rotatedXAdd, y - rotatedYAdd)
     console.log('dist2', dist2)

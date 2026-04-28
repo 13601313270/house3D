@@ -16,7 +16,7 @@ import ginghamMaterial from './gingham'
 import rockEmbeddedMaterial from './rockEmbedded'
 import rustyMaterial from './rusty'
 
-type MaterialDate = {
+export type MaterialDate = {
   id: number
   name: string
   material: (vector: THREE.Vector3) => THREE.Material

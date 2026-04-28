@@ -73,7 +73,7 @@ export class WallEntity extends EntityClass<WallData> {
       const box = wallBoxList[i]
 
       if (data.points[i].snw) {
-        ctx.setLineDash([5, 5])
+        ctx.setLineDash([10 * zoomLevel, 10 * zoomLevel])
       } else {
         ctx.setLineDash([])
       }

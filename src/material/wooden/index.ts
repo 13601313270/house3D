@@ -5,7 +5,7 @@ import { createTriplanarMaterial } from '../createTriplanarMaterial';
 
 const textureLoader = new THREE.TextureLoader();
 const woodTexture = textureLoader.load(img);
-function getMaterial(vector: THREE.Vector3) {
+function getMaterial(vector: THREE.Vector3): THREE.Material {
   const material = createTriplanarMaterial({
     map: woodTexture,
     tileSize: 20, // 👈 控制密度
