@@ -569,7 +569,10 @@ export class WindowEntity extends EntityClassInWall<WindowData> {
         value: data.leftOpenAngle,
       },
     ], (val) => {
-      console.log(val)
+      this.setData({
+        ...data,
+        ...val,
+      })
     })
   }
 }

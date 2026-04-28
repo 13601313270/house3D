@@ -377,7 +377,10 @@ export class DoorEntity extends EntityClassInWall<DoorData> {
         value: data.openType,
       },
     ], (val) => {
-      console.log(val)
+      this.setData({
+        ...data,
+        ...val,
+      })
     })
   }
 }

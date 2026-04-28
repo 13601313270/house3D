@@ -308,7 +308,10 @@ export class CameraEntity extends EntityClass<CameraData> {
         value: data.z,
       }
     ], (val) => {
-      console.log(val)
+      this.setData({
+        ...data,
+        ...val,
+      })
     })
   }
 }
