@@ -318,10 +318,11 @@ export class WallEntity extends EntityClass<WallData> {
   setPrepareState(x: number, y: number): void {
   }
 
-  editPropConfig(snapPoint: HandelInfo, editShow: (editInfoList: editItem[]) => any): void {
+  editPropConfig(snapPoint: HandelInfo, editShow: (editInfoList: editItem[], callback: (val: any) => void) => void): void {
     console.log('editPropConfig-墙体厚度', this)
     console.log('editPropConfig-墙体信息', snapPoint)
     if (snapPoint.index % 2 === 0) {
+      const data = this.getData();
       const configList: editItem[] = [
         {
           id: 'thickness',
@@ -330,6 +331,7 @@ export class WallEntity extends EntityClass<WallData> {
           min: 0,
           max: Infinity,
           step: 1,
+          value: data.thickness,
         },
         {
           id: 'height',
@@ -338,68 +340,81 @@ export class WallEntity extends EntityClass<WallData> {
           min: 1,
           max: Infinity,
           step: 1,
+          value: data.height,
         },
         {
           id: 'color',
           label: '墙体颜色',
           dataType: 'color',
+          value: data.color,
         },
         {
           id: 'wmt',
           label: '墙体材质',
           dataType: 'material',
+          value: data.wmt,
         },
         {
           id: 'hb',
           label: '是否有地板',
           dataType: 'boolean',
+          value: data.hb,
         },
         {
           id: 'bc',
           label: '地板颜色',
           dataType: 'color',
+          value: data.bc,
         },
         {
           id: 'bmt',
           label: '地板材质',
           dataType: 'material',
+          value: data.bmt,
         },
         {
           id: 'ht',
           label: '是否有天花板',
           dataType: 'boolean',
+          value: data.ht,
         },
         {
           id: 'tc',
           label: '天花板颜色',
           dataType: 'color',
+          value: data.tc,
         },
         {
           id: 'tmt',
           label: '天花板材质',
           dataType: 'material',
+          value: data.tmt,
         },
         {
           id: 'td',
           label: '天花板是否是双面',
           dataType: 'boolean',
+          value: data.td,
         },
-        {
-          id: 'walls',
-          label: '墙体信息',
-          dataType: 'array',
-          children: (this.getData().walls || []).map(v => {
-            return [
-              {
-                id: 'hidden',
-                label: '是否隐藏',
-                dataType: 'boolean',
-              }
-            ];
-          }),
-        }
       ];
-      editShow(configList)
+      editShow(configList, (val) => {
+        this.setData({
+          ...data,
+          ...val,
+        })
+      })
+    } else {
+      editShow([
+        {
+          id: 'hidden',
+          label: '是否隐藏',
+          dataType: 'boolean',
+          value: false,
+        }
+      ], (val) => {
+        console.log('editPropConfig-是否隐藏', val)
+        // this.setData(val)
+      })
     }
   }
 }

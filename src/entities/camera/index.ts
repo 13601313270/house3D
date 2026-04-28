@@ -268,7 +268,8 @@ export class CameraEntity extends EntityClass<CameraData> {
     })
   }
 
-  editPropConfig(snapPoint: HandelInfo, editShow: (editInfoList: editItem[]) => any): void {
+  editPropConfig(snapPoint: HandelInfo, editShow: (editInfoList: editItem[], callback: (val: any) => void) => void): void {
+    const data = this.getData();
     editShow([
       {
         id: 'fov',
@@ -277,6 +278,7 @@ export class CameraEntity extends EntityClass<CameraData> {
         min: 0,
         max: 180,
         step: 15,
+        value: data.fov,
       },
       {
         id: 'aspectW',
@@ -285,6 +287,7 @@ export class CameraEntity extends EntityClass<CameraData> {
         min: 0,
         max: 99,
         step: 1,
+        value: data.aspectW,
       },
       {
         id: 'aspectH',
@@ -293,6 +296,7 @@ export class CameraEntity extends EntityClass<CameraData> {
         min: 0,
         max: 99,
         step: 1,
+        value: data.aspectH,
       },
       {
         id: 'z',
@@ -301,7 +305,10 @@ export class CameraEntity extends EntityClass<CameraData> {
         min: -Infinity,
         max: Infinity,
         step: 1,
+        value: data.z,
       }
-    ])
+    ], (val) => {
+      console.log(val)
+    })
   }
 }

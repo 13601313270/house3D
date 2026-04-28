@@ -24,20 +24,6 @@
         </div>
       </div>
     </div>
-    <div v-else-if="item.dataType === 'array'">
-      <div v-for="(item2, index) in item.children" :key="index">
-        <div v-for="(item3, index3) in item2" :key="index3">
-          <div>
-            {{ item3.label }}：
-          </div>
-          <div>
-            <DataTypeEdit :item="item3" :modelValue="modelValue[item.id][index]"
-              @update:modelValue="updateEditPropInputInfoObject(item.id, index, $event)" />
-          </div>
-        </div>
-      </div>
-      <button @click="addChildArray(item.id)">添加</button>
-    </div>
     <div class="allMaterialPanel" v-if="allMaterialShow && allMaterialShowPropId"
       @click.self="allMaterialShow = false, allMaterialShowPropId = undefined">
       <div class="allMaterialPanelInner">
@@ -124,21 +110,6 @@ function updateEditPropInputInfoBoolean(id: string, event: Event) {
     })
   }
 }
-function updateEditPropInputInfoObject(id: string, index: number, event: any) {
-  const existArray = props.modelValue[id] || []
-  existArray[index] = event
-  emit('update:modelValue', {
-    ...props.modelValue,
-    [id]: existArray
-  })
-}
-function addChildArray(id: string) {
-  emit('update:modelValue', {
-    ...props.modelValue,
-    [id]: [...(props.modelValue[id] || []), {}]
-  })
-}
-
 </script>
 <style scoped lang="less">
 .colorInput {

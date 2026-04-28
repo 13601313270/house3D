@@ -319,7 +319,8 @@ export class DoorEntity extends EntityClassInWall<DoorData> {
     }
   }
 
-  editPropConfig(snapPoint: HandelInfo, editShow: (editInfoList: editItem[]) => any): void {
+  editPropConfig(snapPoint: HandelInfo, editShow: (editInfoList: editItem[], callback: (val: any) => void) => void): void {
+    const data = this.getData();
     editShow([
       {
         id: 'width',
@@ -328,6 +329,7 @@ export class DoorEntity extends EntityClassInWall<DoorData> {
         min: 1,
         max: Infinity,
         step: 10,
+        value: data.width,
       },
       {
         id: 'height',
@@ -336,21 +338,25 @@ export class DoorEntity extends EntityClassInWall<DoorData> {
         min: 0,
         max: Infinity,
         step: 10,
+        value: data.height,
       },
       {
         id: 'mt',
         label: '门材质',
         dataType: 'material',
+        value: data.mt,
       },
       {
         id: 'color',
         label: '颜色',
         dataType: 'color',
+        value: data.color,
       },
       {
         id: 'hasBorder',
         label: '是否有门框',
         dataType: 'boolean',
+        value: data.hasBorder,
       },
       {
         id: 'openAngle',
@@ -359,6 +365,7 @@ export class DoorEntity extends EntityClassInWall<DoorData> {
         min: 0,
         max: 180,
         step: 15,
+        value: data.openAngle,
       },
       {
         id: 'openType',
@@ -367,7 +374,10 @@ export class DoorEntity extends EntityClassInWall<DoorData> {
         min: 1,
         max: 4,
         step: 1,
+        value: data.openType,
       },
-    ])
+    ], (val) => {
+      console.log(val)
+    })
   }
 }

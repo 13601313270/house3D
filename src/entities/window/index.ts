@@ -478,7 +478,8 @@ export class WindowEntity extends EntityClassInWall<WindowData> {
     }
   }
 
-  editPropConfig(snapPoint: HandelInfo, editShow: (editInfoList: editItem[]) => any): void {
+  editPropConfig(snapPoint: HandelInfo, editShow: (editInfoList: editItem[], callback: (val: any) => void) => void): void {
+    const data = this.getData();
     editShow([
       {
         id: 'bottom',
@@ -487,6 +488,7 @@ export class WindowEntity extends EntityClassInWall<WindowData> {
         min: 0,
         max: Infinity,
         step: 1,
+        value: data.bottom,
       },
       {
         id: 'width',
@@ -495,6 +497,7 @@ export class WindowEntity extends EntityClassInWall<WindowData> {
         min: 0,
         max: Infinity,
         step: 1,
+        value: data.width,
       },
       {
         id: 'height',
@@ -503,41 +506,49 @@ export class WindowEntity extends EntityClassInWall<WindowData> {
         min: 0,
         max: Infinity,
         step: 1,
+        value: data.height,
       },
       {
         id: 'hasBorder',
         label: '是否有包墙',
         dataType: 'boolean',
+        value: data.hasBorder,
       },
       {
         id: 'bqc',
         label: '包墙颜色',
         dataType: 'color',
+        value: data.bqc,
       },
       {
         id: 'bmt',
         label: '包墙材质',
         dataType: 'material',
+        value: data.bmt,
       },
       {
         id: 'tc',
         label: '门框颜色',
         dataType: 'color',
+        value: data.tc,
       },
       {
         id: 'tmt',
         label: '门框材质',
         dataType: 'material',
+        value: data.tmt,
       },
       {
         id: 'ic',
         label: '玻璃框颜色',
         dataType: 'color',
+        value: data.ic,
       },
       {
         id: 'icmt',
         label: '玻璃框材质',
         dataType: 'material',
+        value: data.icmt,
       },
       {
         id: 'rightOpenAngle',
@@ -546,6 +557,7 @@ export class WindowEntity extends EntityClassInWall<WindowData> {
         min: 0,
         max: 180,
         step: 15,
+        value: data.rightOpenAngle,
       },
       {
         id: 'leftOpenAngle',
@@ -554,7 +566,10 @@ export class WindowEntity extends EntityClassInWall<WindowData> {
         min: 0,
         max: 180,
         step: 15,
+        value: data.leftOpenAngle,
       },
-    ])
+    ], (val) => {
+      console.log(val)
+    })
   }
 }

@@ -54,6 +54,7 @@ export type editItem = {
   id: string,
   label: string,
   dataType: 'string' | 'poiListAndLineCircle' | 'poiListAndLine' | 'poiList' | 'color' | 'boolean' | 'mesh' | 'area' | 'material' | string[]/* 枚举 */
+  value: any
 } | {
   id: string,
   label: string,
@@ -61,11 +62,7 @@ export type editItem = {
   min: number,
   max: number,
   step: number,
-} | {
-  id: string,
-  label: string,
-  dataType: 'array',
-  children: editItem[][],
+  value: any
 }
 
 export const createInitData: Record<allFileKeysEnum, () => any> = {

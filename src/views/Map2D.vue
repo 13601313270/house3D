@@ -768,7 +768,7 @@ const handleContextMenu = (e: MouseEvent) => {
         const api: EntityClass<any> = worldApi.allFileMapObjects[type][j]
         const snapPoint = api.matchHandelInfo(x, y, zoomLevel.value)
         if (snapPoint) {
-          api.editPropConfig(snapPoint, (propConfig) => {
+          api.editPropConfig(snapPoint, (propConfig, callback) => {
             console.log('dist', propConfig)
             let contextMenuX = e.clientX
             if (contextMenuX + 320 > panel1SplitWidthPer.value * window.innerWidth) {
@@ -778,22 +778,41 @@ const handleContextMenu = (e: MouseEvent) => {
             editPropTypeKey.value = type
             editPropTypeIndex.value = j
             editPropConfigInfo.value = propConfig
-            editPropInputInfo.value = JSON.parse(JSON.stringify(item));
-            contextMenu.value = {
-              visible: true,
-              x: contextMenuX,
-              y: e.clientY,
-              // @ts-ignore
-              type,
-              index: j
-            }
+            const inputData: any = {}
+            propConfig.forEach(v => {
+              inputData[v.id] = v.value
+            })
+            editPropInputInfo.value = inputData;
             nextTick(() => {
-              const height = document.querySelector('.context-menu')?.clientHeight
-              if (height && contextMenu.value) {
-                if (e.clientY + height > window.outerHeight) {
-                  contextMenu.value.y = window.outerHeight - height - 5
-                }
+              contextMenu.value = {
+                visible: true,
+                x: contextMenuX,
+                y: e.clientY,
+                // @ts-ignore
+                type,
+                index: j
               }
+              editPropConfigEditCallback = (val: any) => {
+                callback(val)
+                // if (editPropTypeKey.value && editPropTypeIndex.value > -1) {
+                //   const api: EntityClass<any> = worldApi.allFileMapObjects[editPropTypeKey.value][editPropTypeIndex.value]
+                //   if (api && editSnapPoint.value) {
+                //     api.editPropConfig(editSnapPoint.value, (propConfig) => {
+                //       editPropConfigInfo.value = propConfig
+                //       console.log('editPropConfigInfo.value---3', editPropConfigInfo.value)
+                //     })
+                //   }
+                // }
+                drawWrapper()
+              }
+              nextTick(() => {
+                const height = document.querySelector('.context-menu')?.clientHeight
+                if (height && contextMenu.value) {
+                  if (e.clientY + height > window.outerHeight) {
+                    contextMenu.value.y = window.outerHeight - height - 5
+                  }
+                }
+              })
             })
           })
           return;
@@ -802,6 +821,10 @@ const handleContextMenu = (e: MouseEvent) => {
     }
   }
   contextMenu.value = null
+}
+
+let editPropConfigEditCallback = (val: any) => {
+  console.log(val)
 }
 
 const deleteContextMenuEntity = () => {
@@ -1395,43 +1418,12 @@ function changeCurrentToolToOutFile(id: string) {
 }
 
 watch(() => editPropInputInfo.value, () => {
-  if (editPropTypeKey.value && editPropTypeIndex.value > -1) {
-    worldApi.replaceObjects(editPropTypeKey.value, editPropTypeIndex.value, JSON.parse(JSON.stringify(editPropInputInfo.value)))
+  if (contextMenu.value?.visible) {
+    editPropConfigEditCallback(editPropInputInfo.value)
   }
-  if (editPropTypeKey.value && editPropTypeIndex.value > -1) {
-    const api: EntityClass<any> = worldApi.allFileMapObjects[editPropTypeKey.value][editPropTypeIndex.value]
-    if (api && editSnapPoint.value) {
-      api.editPropConfig(editSnapPoint.value, (propConfig) => {
-        editPropConfigInfo.value = propConfig
-        console.log('editPropConfigInfo.value---3', editPropConfigInfo.value)
-      })
-    }
-  }
-  drawWrapper()
 }, {
   deep: true
 })
-
-function updateEditPropInputNumberInfo(id: string, event: Event | number) {
-  if (event instanceof Event && id) {
-    // @ts-ignore
-    editPropInputInfo.value[id] = +(+event.target.value)
-  } else {
-    editPropInputInfo.value[id] = event
-  }
-}
-function updateEditPropInputInfo(id: string, event: Event) {
-  // @ts-ignore
-  editPropInputInfo.value[id] = event.target.value as string
-}
-function updateEditPropInputInfoBoolean(id: string, event: Event) {
-  // @ts-ignore
-  editPropInputInfo.value[id] = event.target.checked
-}
-function addObjFile(item: ObjItem) {
-  // worldApi.addObjFile(item)
-  drawWrapper()
-}
 </script>
 
 <style scoped lang="less">
