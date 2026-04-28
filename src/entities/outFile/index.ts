@@ -362,6 +362,15 @@ export class OutFileEntity extends EntityClass<OutFileData> {
         dataType: 'material',
         value: data.bm,
       },
+      {
+        id: 'z',
+        label: '高度',
+        dataType: 'number',
+        min: 0,
+        max: 100,
+        step: 1,
+        value: data.z,
+      }
     ]
     editShow(configList, (val) => {
       this.setData({

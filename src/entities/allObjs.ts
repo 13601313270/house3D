@@ -75,6 +75,21 @@ const objFiles: ObjItem[] = [
     materialVec: [0, 1, 1],
     drawAngelLength: 35,
   },
+  {
+    id: 'monitor',
+    name: '显示器',
+    url: 'https://video-obj.oss-cn-beijing.aliyuncs.com/monitor.obj',
+    materialUrl: 'https://video-obj.oss-cn-beijing.aliyuncs.com/monitor.mtl',
+    scaleX: 10,
+    scaleY: 10,
+    scaleZ: 10,
+    angleY: 0,
+    preImg: 'https://video-obj.oss-cn-beijing.aliyuncs.com/office-chair.png',
+    preImgScale: 0.21,
+    materialId: null, // 14,
+    materialVec: [0, 1, 1],
+    drawAngelLength: 35,
+  },
 ]
 export default objFiles
 export type { ObjItem }
