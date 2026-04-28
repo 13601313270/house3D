@@ -6,6 +6,7 @@ type ObjItem = {
   id: string
   name: string
   url: string
+  materialUrl?: string
   scaleX: number
   scaleY: number
   scaleZ: number
@@ -58,7 +59,22 @@ const objFiles: ObjItem[] = [
     materialId: null, // 14,
     materialVec: [0, 1, 1],
     drawAngelLength: 35,
-  }
+  },
+  {
+    id: 'officeChair',
+    name: '办公椅',
+    url: 'https://video-obj.oss-cn-beijing.aliyuncs.com/office-chair.obj',
+    materialUrl: 'https://video-obj.oss-cn-beijing.aliyuncs.com/office-chair.mtl',
+    scaleX: 100,
+    scaleY: 100,
+    scaleZ: 100,
+    angleY: 0,
+    preImg: 'https://video-obj.oss-cn-beijing.aliyuncs.com/sofa.png',
+    preImgScale: 0.287,
+    materialId: null, // 14,
+    materialVec: [0, 1, 1],
+    drawAngelLength: 35,
+  },
 ]
 export default objFiles
 export type { ObjItem }

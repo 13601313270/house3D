@@ -5,9 +5,12 @@ import { EntityClass, EntityType, MatchSnapPoint, OrigionSnapPoint } from '@/typ
 import { editItem } from '..'
 // @ts-ignore
 import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
+// @ts-ignore
+import { MTLLoader } from 'three/addons/loaders/MTLLoader.js';
+
 import { ObjDataClass } from '../objData'
 import ObjFiles from '../allObjs'
-import { allMaterial, getMaterialById } from '@/material'
+import { getMaterialById } from '@/material'
 
 export class OutFileDataClass extends ObjDataClass<OutFileData> {
   fileTypeId: string
@@ -176,12 +179,13 @@ export class OutFileEntity extends EntityClass<OutFileData> {
       console.error('未找到对应的文件类型:', fileTypeId)
       return []
     }
-    const { scaleX, scaleY, scaleZ, url, angleY, materialVec } = findObjInfo
+    const { scaleX, scaleY, scaleZ, url, materialUrl, angleY, materialVec } = findObjInfo
     // console.log('materialId', bm);
     const materialId = bm === null ? (findObjInfo.materialId || -1) : bm
     console.log('scaleX', scaleX, 'scaleY', scaleY, 'scaleZ', scaleZ)
     if (url.endsWith('.obj')) {
       const loader = new OBJLoader()
+      const materLoader = new MTLLoader()
 
       // 将方向向量旋转90度
       const rotatedDirection = materialVec ? new THREE.Vector3(...materialVec) : new THREE.Vector3(-1, 1, 1)
@@ -192,36 +196,36 @@ export class OutFileEntity extends EntityClass<OutFileData> {
       })
       console.log('material-material', getMaterialById(materialId))
 
-      loader.load(url, (object: THREE.Group) => {
-        // 计算模型的包围盒并居中
-        const box = new THREE.Box3().setFromObject(object)
-        const center = box.getCenter(new THREE.Vector3())
+      materLoader.load(materialUrl, (mtl: any) => {
+        // 关键步骤：预加载所有材质，让纹理图片准备好
+        mtl.preload();
+        loader.setMaterials(mtl);
 
-        // 将模型移动到原点
-        // object.position.sub(center)
-        object.scale.set(scaleX, scaleY, scaleZ)
-        object.rotation.y = angleY
+        loader.load(url, (object: THREE.Group) => {
+          object.scale.set(scaleX, scaleY, scaleZ)
+          object.rotation.y = angleY
 
-        // 添加默认材质（如果模型没有材质）
-        object.traverse((child) => {
-          if (child instanceof THREE.Mesh) {
-            if (materialId !== -1) {
-              child.material = material
-            } else {
-              if (!child.material) {
+          // 添加默认材质（如果模型没有材质）
+          object.traverse((child) => {
+            if (child instanceof THREE.Mesh) {
+              if (materialId !== -1) {
                 child.material = material
+              } else {
+                if (!child.material) {
+                  child.material = material
+                }
               }
             }
-          }
+          })
+          group.add(object)
+          console.log('OBJ文件加载成功:', url)
+        }, (progress: any) => {
+          // 加载进度
+          const percent = (progress.loaded / progress.total * 100).toFixed(2)
+          console.log('加载进度:', percent + '%')
+        }, (error: any) => {
+          console.error('OBJ文件加载失败:', error)
         })
-        group.add(object)
-        console.log('OBJ文件加载成功:', url)
-      }, (progress: any) => {
-        // 加载进度
-        const percent = (progress.loaded / progress.total * 100).toFixed(2)
-        console.log('加载进度:', percent + '%')
-      }, (error: any) => {
-        console.error('OBJ文件加载失败:', error)
       })
     }
     // group.position.set(data.x, data.z, data.y)
