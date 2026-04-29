@@ -114,6 +114,7 @@ import ObjFiles, { ObjItem } from '@/entities/allObjs'
 import { OutFileDataClass, OutFileEntity } from '@/entities/outFile'
 import { OutFileData } from '@/entities/outFile/index.d'
 import DataTypeEdit from './DataTypeEdit.vue'
+import { CameraEntity } from '@/entities/camera'
 
 const canvasRef = ref<HTMLCanvasElement | null>(null)
 const canvas3DRef = ref<typeof Canvas3D | null>(null)
@@ -586,7 +587,7 @@ const drawWrapper = () => {
 }
 
 const activeCameraIndex = ref(0)
-function changeCamera2State(index: number = 0) {
+function changeCamera2State(activeIndex: number = 0) {
   if (worldApi.getObjects('camera')) {
     const allCameraList: CameraState[] = [];
     // console.log('生成摄像机', JSON.stringify(worldApi.getObjects('camera') as CameraData[]));
@@ -604,8 +605,19 @@ function changeCamera2State(index: number = 0) {
       });
     })
     allCamera.value = allCameraList
-    cameraState2.value = allCameraList[index]
-    activeCameraIndex.value = index
+    cameraState2.value = allCameraList[activeIndex]
+    activeCameraIndex.value = activeIndex
+    worldApi.activeCameraIndex = activeIndex
+    worldApi.allFileMapObjects.camera.forEach((camera, index) => {
+      if (index === activeIndex) {
+        camera.active = true
+        camera.remove3DCache()
+      } else {
+        camera.active = false
+        camera.remove3DCache()
+      }
+    })
+    drawWrapper()
   } else {
     allCamera.value = []
     cameraState2.value = null
@@ -688,11 +700,13 @@ const saveDrawing = () => {
     panOffset: Point
     zoomLevel: number
     cameraState: CameraState
+    activeCameraIndex: number
   } = {
     ...worldApi.getAllFileObjects(),
     panOffset: panOffset.value,
     zoomLevel: zoomLevel.value,
-    cameraState: cameraState.value
+    cameraState: cameraState.value,
+    activeCameraIndex: activeCameraIndex.value
   }
   const json = JSON.stringify(data, null, 2)
   const blob = new Blob([json], { type: 'application/json' })
@@ -720,6 +734,7 @@ const handleFileChange = (e: Event) => {
         panOffset: Point
         zoomLevel: number
         cameraState: CameraState
+        activeCameraIndex: number
       } = JSON.parse(event.target?.result as string)
 
       for (let i = 0; i < allFileKeys.length; i++) {
@@ -733,6 +748,9 @@ const handleFileChange = (e: Event) => {
       zoomLevel.value = data.zoomLevel || 1
       if (data.cameraState) {
         cameraState.value = data.cameraState
+      }
+      if (data.activeCameraIndex !== undefined) {
+        changeCamera2State(data.activeCameraIndex)
       }
       history.value = []
       drawWrapper()

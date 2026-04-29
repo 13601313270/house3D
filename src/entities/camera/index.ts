@@ -3,8 +3,11 @@ import * as THREE from 'three'
 import { CameraData } from './index.d'
 import { EntityClass, EntityType, MatchSnapPoint, OrigionSnapPoint } from '@/types/entity'
 import { editItem } from '..'
-import { World } from '@/utils/world'
 import { ObjDataClass } from '../objData'
+// @ts-ignore
+import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
+// @ts-ignore
+import { MTLLoader } from 'three/addons/loaders/MTLLoader.js';
 
 export class CameraDataClass extends ObjDataClass<CameraData> {
   targetPositionX: number
@@ -45,7 +48,10 @@ export class CameraEntity extends EntityClass<CameraData> {
   isPointObj: boolean = true
   color: string = '#0c7f25'
   color3D: string = '#0c7f25'
+  color3DActive: string = 'red'
   colorOpacity: string = '#14b737a5'
+  colorOpacityActive: string = 'red'
+  active: boolean = false // 这个不存在数据库里，只是在前端动态调整
 
   draw2DPreviewByData(ctx: CanvasRenderingContext2D, data: CameraData, panOffset: Point, zoomLevel: number): void {
 
@@ -69,7 +75,7 @@ export class CameraEntity extends EntityClass<CameraData> {
 
     // 绘制三角形
     ctx.fillStyle = this.colorOpacity
-    ctx.strokeStyle = this.colorOpacity
+    ctx.strokeStyle = this.active ? this.colorOpacityActive : this.colorOpacity
     ctx.lineWidth = 1
     ctx.beginPath()
     ctx.moveTo(screenX, screenY)
@@ -140,7 +146,6 @@ export class CameraEntity extends EntityClass<CameraData> {
 
     const apex = new THREE.Vector3(data.x, data.z, data.y);
     const center = new THREE.Vector3(data.targetPositionX, data.targetPositionZ, data.targetPositionY);
-
     const up = apex.clone().sub(center).normalize();
 
     const temp = Math.abs(up.y) < 0.999
@@ -183,7 +188,7 @@ export class CameraEntity extends EntityClass<CameraData> {
 
     const edges = new THREE.EdgesGeometry(geometry);
     const lineMaterial = new THREE.LineBasicMaterial({
-      color: this.color3D,
+      color: this.active ? this.color3DActive : this.color3D,
       linewidth: 1
     });
     const line = new THREE.LineSegments(edges, lineMaterial);
@@ -192,6 +197,38 @@ export class CameraEntity extends EntityClass<CameraData> {
     const group = new THREE.Group()
     line.layers.set(2)
     group.add(line)
+
+    const loader = new OBJLoader()
+    // 将方向向量旋转90度
+    // const rotatedDirection = materialVec ? new THREE.Vector3(...materialVec) : new THREE.Vector3(-1, 1, 1)
+    const material = new THREE.MeshStandardMaterial({
+      color: 0x888888,
+      roughness: 0.7,
+      metalness: 0.1
+    })
+    loader.load('./kamera.obj', (object: THREE.Group) => {
+      object.scale.set(5, 5, 5)
+      object.lookAt(up);
+      object.rotateX(Math.PI);  // 如果需要绕 X 轴翻转 180 度
+      object.rotateZ(Math.PI);  // 如果需要绕 Y 轴翻转 180 度
+      // 添加默认材质（如果模型没有材质）
+      object.traverse((child) => {
+        // child.material = material
+        if (child instanceof THREE.Mesh) {
+          child.layers.set(2)
+          child.material = material
+        }
+      })
+
+      group.add(object)
+      // console.log('OBJ文件加载成功:', url)
+    }, (progress: any) => {
+      // 加载进度
+      const percent = (progress.loaded / progress.total * 100).toFixed(2)
+      console.log('加载进度:', percent + '%')
+    }, (error: any) => {
+      console.error('OBJ文件加载失败:', error)
+    })
 
     return [
       group

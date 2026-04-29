@@ -40,6 +40,8 @@ export class World {
     z: number,
   }[] = []
 
+  activeCameraIndex: number = -1
+
   scene: THREE.Scene
 
   constructor() {
