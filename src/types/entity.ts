@@ -100,7 +100,7 @@ export abstract class EntityClass<T extends ObjData> {
   }
 
   // 改变3D模型的状态
-  // 例如：改变位置，旋转角度等，模型本身不变
+  // 例如：改变位置，旋转角度等
   change3DMeshState(): void {
     this.meshList.forEach(v => {
       v.position.set(this.data.x, this.data.z, this.data.y)

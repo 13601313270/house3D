@@ -285,10 +285,10 @@ export class World {
     return returnData
   }
 
-  replaceObjects(type: EntityType, index: number, data: ObjDataClass<any>) {
-    this.allFileMapObjects[type][index].setData(data as any)
-    // this.changeBindList.forEach(callback => callback())
-  }
+  // replaceObjects(type: EntityType, index: number, data: ObjDataClass<any>) {
+  //   this.allFileMapObjects[type][index].setData(data as any)
+  //   // this.changeBindList.forEach(callback => callback())
+  // }
 
   async add(type: EntityType, data: ObjDataClass<any>[]) {
     const EntityClassItem: EntityClass<any> = fileDataKeyToClass[type] as any;
