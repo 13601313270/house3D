@@ -255,7 +255,8 @@ export class CameraEntity extends EntityClass<CameraData> {
     return []
   }
 
-  afterBeSnapByLine(obj: EntityClass<CameraData>, line: [Point, Point]) {
+  inSceneSnapLineArea(obj: EntityClass<CameraData>, line: [Point, Point]) {
+    return false;
   }
 
   setPrepareState(x: number, y: number): void {

@@ -275,6 +275,11 @@ export class WallEntity extends EntityClass<WallData> {
     }
   }
 
+  // remove3DCache() {
+  //   console.log('remove3DCache---wall')
+  //   super.remove3DCache()
+  // }
+
   inSceneSnapPointArea(
     newPosition: MatchSnapPoint,
     dragHandelInfo: HandelInfo
@@ -317,7 +322,8 @@ export class WallEntity extends EntityClass<WallData> {
     return lines;
   }
 
-  afterBeSnapByLine(obj: { type: EntityType }, line: [Point, Point]) {
+  inSceneSnapLineArea(obj: { type: EntityType }, line: [Point, Point]) {
+    return false;
   }
 
   setPrepareState(x: number, y: number): void {

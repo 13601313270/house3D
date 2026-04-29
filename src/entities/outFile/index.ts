@@ -342,7 +342,8 @@ export class OutFileEntity extends EntityClass<OutFileData> {
     return []
   }
 
-  afterBeSnapByLine(obj: EntityClass<OutFileData>, line: [Point, Point]) {
+  inSceneSnapLineArea(obj: EntityClass<OutFileData>, line: [Point, Point]) {
+    return false
   }
 
   setPrepareState(x: number, y: number): void {

@@ -1054,18 +1054,12 @@ const handleMouseMove = (e: MouseEvent) => {
             }
           }
           if (nearestPoint && minDistance < snapThreshold) {
-            const result = matchHandelObj.inSceneSnapPointArea({
-              objType: api.type,
-              objId: api.getData().id,
-              snapFromType: 'line',
-              point: nearestPoint
-            }, matchHandelInfo)
-            if (result) {
-              if (matchLine) {
-                matchHandelObj.afterBeSnapByLine(api, matchLine)
+            if (matchLine) {
+              const result2 = matchHandelObj.inSceneSnapLineArea(api, matchLine, nearestPoint)
+              if (result2) {
+                drawWrapper()
+                return true;
               }
-              drawWrapper()
-              return true;
             }
           }
         }
@@ -1079,6 +1073,7 @@ const handleMouseMove = (e: MouseEvent) => {
         return;
       }
     }
+    console.log('nearest---2---clear-4');
     matchHandelObj.matchHandelMoveCallback(x, y, matchHandelInfo)
     drawWrapper()
   }

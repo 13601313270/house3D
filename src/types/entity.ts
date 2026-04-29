@@ -125,11 +125,12 @@ export abstract class EntityClass<T extends ObjData> {
   // 本对象可以被其他对象对齐的参考线（注意是被对齐，提供个其他拖动磁吸的参考线）
   abstract getMineBeSnapLines(): Array<[Point, Point]>;
 
-  // 当前对象吸附到一根线后的后续处理
-  abstract afterBeSnapByLine(
+  // 当前对象进入到一根线后的后续处理
+  abstract inSceneSnapLineArea(
     obj: EntityClass<ObjData>,
-    line: [Point, Point]
-  ): void;
+    line: [Point, Point],
+    point: Point,
+  ): boolean;
 
   draw2DPreview(ctx: CanvasRenderingContext2D, panOffset: Point, zoomLevel: number) {
     const data = this.getData();
@@ -210,12 +211,13 @@ export abstract class EntityClassInWall<T extends ObjInWallData> extends EntityC
 
   inSceneSnapPointArea(newPosition: MatchSnapPoint) {
     if (newPosition.objType === 'wall' && newPosition.snapFromType === 'line') {
-      this.changePosition(newPosition.point)
       return true
     }
     return false
   }
-  afterBeSnapByLine(obj: EntityClass<ObjData>, line: [Point, Point]) {
+
+  // inSceneSnapPointArea
+  inSceneSnapLineArea(obj: EntityClass<ObjData>, line: [Point, Point], point: Point) {
     if (obj.type === 'wall') {
       const p1 = line[0]
       const p2 = line[1]
@@ -227,6 +229,7 @@ export abstract class EntityClassInWall<T extends ObjInWallData> extends EntityC
       const data = this.getData();
       const objData = obj.getData()
 
+      this.changePosition(point)
       this.setData({
         ...data,
         angle: nearestAngle,
@@ -250,6 +253,8 @@ export abstract class EntityClassInWall<T extends ObjInWallData> extends EntityC
         obj.associationEntity.push(this)
       }
       this.remove3DCache()
+      return true;
     }
+    return false;
   }
 }
