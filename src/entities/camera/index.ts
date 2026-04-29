@@ -6,6 +6,8 @@ import { editItem } from '..'
 import { ObjDataClass } from '../objData'
 // @ts-ignore
 import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
+// @ts-ignore
+import kamera from './kamera.png'
 
 export class CameraDataClass extends ObjDataClass<CameraData> {
   targetPositionX: number
@@ -52,7 +54,25 @@ export class CameraEntity extends EntityClass<CameraData> {
   active: boolean = false // 这个不存在数据库里，只是在前端动态调整
 
   draw2DPreviewByData(ctx: CanvasRenderingContext2D, data: CameraData, panOffset: Point, zoomLevel: number): void {
-
+    const screenX = data.x * zoomLevel + panOffset.x
+    const screenY = data.y * zoomLevel + panOffset.y
+    const angleY = Math.atan2(data.targetPositionY - data.y, data.targetPositionX - data.x);
+    const preImg = kamera || ''
+    const img = new Image()
+    img.src = preImg
+    const preImgScale = 0.2
+    ctx.save(); // 保存当前状态
+    const { width, height } = img;
+    ctx.translate(screenX, screenY); // 移动原点到目标中心
+    ctx.rotate(angleY - Math.PI / 2); // 围绕新原点旋转
+    ctx.drawImage(
+      img,
+      preImgScale / -2 * width * zoomLevel,
+      preImgScale / -2 * height * zoomLevel,
+      preImgScale * width * zoomLevel,
+      preImgScale * height * zoomLevel
+    ); // 以新原点为中心绘制
+    ctx.restore(); // 恢复原始状态
   }
 
   draw2DByData(
@@ -112,7 +132,7 @@ export class CameraEntity extends EntityClass<CameraData> {
     ctx.strokeStyle = '#e67e22'
     ctx.lineWidth = 2
     ctx.beginPath()
-    ctx.arc(screenX, screenY, 1 * zoomLevel, 0, Math.PI * 2)
+    ctx.arc(screenX, screenY, 6 * zoomLevel, 0, Math.PI * 2)
     ctx.fill()
     ctx.stroke()
 
