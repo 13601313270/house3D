@@ -260,7 +260,6 @@ export class DoorEntity extends EntityClassInWall<DoorData> {
     this.changePosition({ x, y })
   }
 
-
   getMineBeSnapPoints() {
     const key: allSnapFromType = 'point';
     const data = this.getData();
@@ -278,39 +277,6 @@ export class DoorEntity extends EntityClassInWall<DoorData> {
 
   getMineBeSnapLines(): [Point, Point][] {
     return []
-  }
-
-  afterBeSnapByLine(obj: EntityClass<WallData>, line: [Point, Point]) {
-    if (obj.type === 'wall') {
-      const data = this.getData();
-      const p1 = line[0]
-      const p2 = line[1]
-      const nearestAngle = Math.atan2(p2.y - p1.y, p2.x - p1.x)
-
-      const allLineKey = obj.getMineBeSnapLines().map(v => [v[0].x, v[0].y, v[1].x, v[1].y].join(','))
-      const lineKey = [p1.x, p1.y, p2.x, p2.y].join(',')
-      const index = allLineKey.indexOf(lineKey)
-      data.angle = nearestAngle
-      data.wallId = obj.getData().id
-      data.wallPointId = index
-      // console.log('this.associationEntity', this.associationEntity)
-      // 双向去除原有的关联对象
-      this.associationEntity.forEach(entity => {
-        if (entity.associationEntity.includes(this)) {
-          entity.associationEntity.splice(entity.associationEntity.indexOf(this), 1)
-          entity.remove3DCache()
-        }
-      })
-      this.associationEntity = []
-      // 双向添加新的关联对象
-      if (!this.associationEntity.includes(obj)) {
-        this.associationEntity.push(obj)
-      }
-      if (!obj.associationEntity.includes(this)) {
-        obj.associationEntity.push(this)
-      }
-      this.remove3DCache()
-    }
   }
 
   setData(data: DoorData) {
