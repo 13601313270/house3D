@@ -190,43 +190,40 @@ export class CameraEntity extends EntityClass<CameraData> {
       linewidth: 1
     });
     const line = new THREE.LineSegments(edges, lineMaterial);
-    line.position.set(-data.x, -data.z, -data.y)
-
     const group = new THREE.Group()
     line.layers.set(2)
     group.add(line)
 
-    // const loader = new OBJLoader()
-    // // 将方向向量旋转90度
-    // // const rotatedDirection = materialVec ? new THREE.Vector3(...materialVec) : new THREE.Vector3(-1, 1, 1)
-    // const material = new THREE.MeshStandardMaterial({
-    //   color: 0x888888,
-    //   roughness: 0.7,
-    //   metalness: 0.1
-    // })
-    // loader.load('./kamera.obj', (object: THREE.Group) => {
-    //   object.scale.set(5, 5, 5)
-    //   object.lookAt(up);
-    //   object.rotateX(Math.PI);  // 如果需要绕 X 轴翻转 180 度
-    //   object.rotateZ(Math.PI);  // 如果需要绕 Y 轴翻转 180 度
-    //   // 添加默认材质（如果模型没有材质）
-    //   object.traverse((child) => {
-    //     // child.material = material
-    //     if (child instanceof THREE.Mesh) {
-    //       child.layers.set(2)
-    //       child.material = material
-    //     }
-    //   })
-
-    //   group.add(object)
-    //   // console.log('OBJ文件加载成功:', url)
-    // }, (progress: any) => {
-    //   // 加载进度
-    //   const percent = (progress.loaded / progress.total * 100).toFixed(2)
-    //   console.log('加载进度:', percent + '%')
-    // }, (error: any) => {
-    //   console.error('OBJ文件加载失败:', error)
-    // })
+    const loader = new OBJLoader()
+    // 将方向向量旋转90度
+    // const rotatedDirection = materialVec ? new THREE.Vector3(...materialVec) : new THREE.Vector3(-1, 1, 1)
+    const material = new THREE.MeshStandardMaterial({
+      color: 0x888888,
+      roughness: 0.7,
+      metalness: 0.1
+    })
+    loader.load('./kamera.obj', (object: THREE.Group) => {
+      object.scale.set(5, 5, 5)
+      object.lookAt(up);
+      object.rotateX(Math.PI);  // 如果需要绕 X 轴翻转 180 度
+      object.rotateZ(Math.PI);  // 如果需要绕 Y 轴翻转 180 度
+      // 添加默认材质（如果模型没有材质）
+      object.traverse((child) => {
+        // child.material = material
+        if (child instanceof THREE.Mesh) {
+          child.layers.set(2)
+          child.material = material
+        }
+      })
+      group.add(object)
+      // console.log('OBJ文件加载成功:', url)
+    }, (progress: any) => {
+      // 加载进度
+      const percent = (progress.loaded / progress.total * 100).toFixed(2)
+      console.log('加载进度:', percent + '%')
+    }, (error: any) => {
+      console.error('OBJ文件加载失败:', error)
+    })
     console.log(1111)
 
     return [
@@ -294,15 +291,23 @@ export class CameraEntity extends EntityClass<CameraData> {
       color: this.active ? this.color3DActive : this.color3D,
       linewidth: 1
     });
-    const line = new THREE.LineSegments(edges, lineMaterial);
-    line.position.set(-data.x, -data.z, -data.y)
-    line.layers.set(2)
-    this.meshList[0].clear()
-    this.meshList[0].add(line)
-    // this.meshList[0].position.set(data.x, data.z, data.y)
+    const oldLine = this.meshList[0].children[0] as THREE.LineSegments
+    oldLine.geometry = edges
+    // const line = new THREE.LineSegments(edges, lineMaterial);
+    // const group = new THREE.Group()
+    // line.layers.set(2)
     // group.add(line)
+    // const object = this.meshList[0].children[1] as THREE.Group
+    // console.log('ooooooo', object)
+    // if (object) {
+    //   object.lookAt(up);
+    //   // object.rotateX(Math.PI);  // 如果需要绕 X 轴翻转 180 度
+    //   // object.rotateZ(Math.PI);  // 如果需要绕 Y 轴翻转 180 度
+    // }
+    // this.meshList[0].clear()
+    // this.meshList[0].add(line)
     this.meshList.forEach(v => {
-      v.position.set(data.x, data.z, data.y)
+      // v.position.set(data.x, data.z, data.y)
     })
   }
 
