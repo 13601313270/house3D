@@ -1073,7 +1073,7 @@ const handleMouseMove = (e: MouseEvent) => {
         return;
       }
     }
-    console.log('nearest---2---clear-4');
+    matchHandelObj.notInSceneSnapLineArea()
     matchHandelObj.matchHandelMoveCallback(x, y, matchHandelInfo)
     drawWrapper()
   }
