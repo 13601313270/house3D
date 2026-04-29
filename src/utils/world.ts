@@ -256,6 +256,7 @@ export class World {
     allFileKeys.forEach((key) => {
       (this.allFileMapObjects[key] as EntityClass<any>[]).forEach((wall) => {
         wall.draw3DAndCache()
+        wall.change3DMeshState()
       });
     });
   }

@@ -479,7 +479,7 @@ export class WindowEntity extends EntityClassInWall<WindowData> {
   }
 
   setData(data: WindowData) {
-    // 双向去除原有的关联对象
+    // 双向去除原有的关联对象的缓存，也需要重新渲染
     this.associationEntity.forEach(entity => {
       if (entity.associationEntity.includes(this)) {
         entity.remove3DCache()
