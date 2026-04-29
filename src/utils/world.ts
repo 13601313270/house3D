@@ -56,9 +56,11 @@ export class World {
     this.scene.add(directionalLight)
 
     const gridHelper = new THREE.GridHelper(1000, 50, 0xcccccc, 0xeeeeee)
+    gridHelper.layers.set(2)
     this.scene.add(gridHelper)
 
     const axesHelper = new THREE.AxesHelper(100)
+    axesHelper.layers.set(2)
     this.scene.add(axesHelper)
   }
 
