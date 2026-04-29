@@ -254,9 +254,9 @@ export class World {
 
   draw3D() {
     allFileKeys.forEach((key) => {
-      (this.allFileMapObjects[key] as EntityClass<any>[]).forEach((wall) => {
-        wall.draw3DAndCache()
-        wall.change3DMeshState()
+      (this.allFileMapObjects[key] as EntityClass<any>[]).forEach((item) => {
+        item.reCreate3DMeshIfNeed()
+        item.change3DMeshState()
       });
     });
   }

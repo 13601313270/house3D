@@ -60,10 +60,10 @@ export abstract class EntityClass<T extends ObjData> {
   abstract create3DMesh(scene: THREE.Scene, ...args: any[]): THREE.Group[]
 
   private cacheKeyStr = '';
-  draw3DAndCache(): void {
-    const scene: THREE.Scene = this.world.scene
+  reCreate3DMeshIfNeed(): void {
     const newKeyByData = this.meshNeedChangeKey();
     if (this.cacheKeyStr !== newKeyByData) {
+      const scene: THREE.Scene = this.world.scene
       this.meshList.forEach(mesh => scene.remove(mesh))
       this.meshList = this.create3DMesh(scene)
       this.meshList.forEach(mesh => scene.add(mesh))
