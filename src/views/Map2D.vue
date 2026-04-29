@@ -70,7 +70,8 @@
     <div class="right-panel" :style="{ width: panel2SplitWidthPer * 100 + '%' }">
       <!-- {{ insertTempDoor }} -->
       <div class="right-panel-content">
-        <Canvas3D ref="canvas3DRef" :world="worldApi" v-model:cameraState="cameraState" :aspectRatio="1" />
+        <Canvas3D ref="canvas3DRef" :world="worldApi" v-model:cameraState="cameraState" :aspectRatio="1"
+          :showCamera="true" />
       </div>
     </div>
 
@@ -89,7 +90,7 @@
       </div>
       <div class="right-panel-content">
         <Canvas3D v-if="allCamera.length && cameraState2" ref="canvas3DRef2" :world="worldApi"
-          :cameraState="cameraState2" :aspectRatio="cameraState2.aspectW / cameraState2.aspectH" />
+          :cameraState="cameraState2" :aspectRatio="cameraState2.aspectW / cameraState2.aspectH" :showCamera="false" />
         <div v-else class="noCamera">场景中请至少添加一个摄像机</div>
       </div>
     </div>

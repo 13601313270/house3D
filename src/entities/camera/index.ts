@@ -190,6 +190,7 @@ export class CameraEntity extends EntityClass<CameraData> {
     line.position.set(-data.x, -data.z, -data.y)
 
     const group = new THREE.Group()
+    line.layers.set(2)
     group.add(line)
 
     return [

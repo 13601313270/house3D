@@ -33,6 +33,7 @@ const props = defineProps<{
   world: World,
   cameraState?: CameraState,
   aspectRatio?: number
+  showCamera: boolean
 }>()
 
 const emit = defineEmits<{ (e: 'update:cameraState', value: CameraState): void }>()
@@ -110,6 +111,12 @@ const initThree = () => {
   camera = new THREE.PerspectiveCamera(45, width / height, 0.1, maxCamera1Radius)
   camera.position.set(0, 800, 1200)
   camera.lookAt(0, 0, 0);
+
+  if (props.showCamera) {
+    camera.layers.enable(2);
+  } else {
+    camera.layers.disable(2);
+  }
 
   (() => {
     let camera1TargetPositionStartX = 0;
