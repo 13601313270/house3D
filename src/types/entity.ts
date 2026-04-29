@@ -80,7 +80,7 @@ export abstract class EntityClass<T extends ObjData> {
 
   public remove3DCache() {
     // 这里注意防止死循环
-    console.log('remove3DCache')
+    // console.log('remove3DCache')
     if (this.meshList.length) {
       this.meshList.forEach(mesh => this.world.scene.remove(mesh))
       this.meshList = []

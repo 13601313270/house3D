@@ -300,6 +300,7 @@ export class DoorEntity extends EntityClassInWall<DoorData> {
       data.angle = nearestAngle
       data.wallId = obj.getData().id
       data.wallPointId = index
+      // console.log('this.associationEntity', this.associationEntity)
       // 双向去除原有的关联对象
       this.associationEntity.forEach(entity => {
         if (entity.associationEntity.includes(this)) {
@@ -317,6 +318,16 @@ export class DoorEntity extends EntityClassInWall<DoorData> {
       }
       this.remove3DCache()
     }
+  }
+
+  setData(data: DoorData) {
+    // 双向去除原有的关联对象
+    this.associationEntity.forEach(entity => {
+      if (entity.associationEntity.includes(this)) {
+        entity.remove3DCache()
+      }
+    })
+    super.setData(data)
   }
 
   editPropConfig(snapPoint: HandelInfo, editShow: (editInfoList: editItem[], callback: (val: any) => void) => void): void {
