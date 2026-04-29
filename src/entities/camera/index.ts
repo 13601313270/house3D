@@ -196,41 +196,118 @@ export class CameraEntity extends EntityClass<CameraData> {
     line.layers.set(2)
     group.add(line)
 
-    const loader = new OBJLoader()
-    // 将方向向量旋转90度
-    // const rotatedDirection = materialVec ? new THREE.Vector3(...materialVec) : new THREE.Vector3(-1, 1, 1)
-    const material = new THREE.MeshStandardMaterial({
-      color: 0x888888,
-      roughness: 0.7,
-      metalness: 0.1
-    })
-    loader.load('./kamera.obj', (object: THREE.Group) => {
-      object.scale.set(5, 5, 5)
-      object.lookAt(up);
-      object.rotateX(Math.PI);  // 如果需要绕 X 轴翻转 180 度
-      object.rotateZ(Math.PI);  // 如果需要绕 Y 轴翻转 180 度
-      // 添加默认材质（如果模型没有材质）
-      object.traverse((child) => {
-        // child.material = material
-        if (child instanceof THREE.Mesh) {
-          child.layers.set(2)
-          child.material = material
-        }
-      })
+    // const loader = new OBJLoader()
+    // // 将方向向量旋转90度
+    // // const rotatedDirection = materialVec ? new THREE.Vector3(...materialVec) : new THREE.Vector3(-1, 1, 1)
+    // const material = new THREE.MeshStandardMaterial({
+    //   color: 0x888888,
+    //   roughness: 0.7,
+    //   metalness: 0.1
+    // })
+    // loader.load('./kamera.obj', (object: THREE.Group) => {
+    //   object.scale.set(5, 5, 5)
+    //   object.lookAt(up);
+    //   object.rotateX(Math.PI);  // 如果需要绕 X 轴翻转 180 度
+    //   object.rotateZ(Math.PI);  // 如果需要绕 Y 轴翻转 180 度
+    //   // 添加默认材质（如果模型没有材质）
+    //   object.traverse((child) => {
+    //     // child.material = material
+    //     if (child instanceof THREE.Mesh) {
+    //       child.layers.set(2)
+    //       child.material = material
+    //     }
+    //   })
 
-      group.add(object)
-      // console.log('OBJ文件加载成功:', url)
-    }, (progress: any) => {
-      // 加载进度
-      const percent = (progress.loaded / progress.total * 100).toFixed(2)
-      console.log('加载进度:', percent + '%')
-    }, (error: any) => {
-      console.error('OBJ文件加载失败:', error)
-    })
+    //   group.add(object)
+    //   // console.log('OBJ文件加载成功:', url)
+    // }, (progress: any) => {
+    //   // 加载进度
+    //   const percent = (progress.loaded / progress.total * 100).toFixed(2)
+    //   console.log('加载进度:', percent + '%')
+    // }, (error: any) => {
+    //   console.error('OBJ文件加载失败:', error)
+    // })
+    console.log(1111)
 
     return [
       group
     ]
+  }
+
+  change3DMeshState(): void {
+    const data = this.getData();
+    const dx = data.targetPositionX - data.x
+    const dy = data.targetPositionY - data.y
+    const dz = data.targetPositionZ - data.z
+
+    // Calculate distance
+    const distance = Math.sqrt(dx * dx + dy * dy + dz * dz)
+    const halfFov = (data.fov * Math.PI) / 360
+    const baseSize = distance * Math.tan(halfFov) * 2
+    const depth = data.aspectH / data.aspectW * baseSize;   // 长方形长
+    const width = baseSize;   // 长方形宽
+
+    const apex = new THREE.Vector3(data.x, data.z, data.y);
+    const center = new THREE.Vector3(data.targetPositionX, data.targetPositionZ, data.targetPositionY);
+    const up = apex.clone().sub(center).normalize();
+
+    const temp = Math.abs(up.y) < 0.999
+      ? new THREE.Vector3(0, 1, 0)
+      : new THREE.Vector3(1, 0, 0);
+
+    const right = new THREE.Vector3().crossVectors(temp, up).normalize();
+    const forward = new THREE.Vector3().crossVectors(up, right).normalize();
+
+    const hw = width / 2;
+    const hd = depth / 2;
+
+    const p0 = center.clone().addScaledVector(right, -hw).addScaledVector(forward, -hd);
+    const p1 = center.clone().addScaledVector(right, hw).addScaledVector(forward, -hd);
+    const p2 = center.clone().addScaledVector(right, hw).addScaledVector(forward, hd);
+    const p3 = center.clone().addScaledVector(right, -hw).addScaledVector(forward, hd);
+
+    const geometry = new THREE.BufferGeometry();
+
+    const vertices = new Float32Array([
+      p0.x, p0.y, p0.z,
+      p1.x, p1.y, p1.z,
+      p2.x, p2.y, p2.z,
+      p3.x, p3.y, p3.z,
+      apex.x, apex.y, apex.z
+    ]);
+
+    const indices = [
+      0, 1, 2,
+      0, 2, 3,
+      0, 1, 4,
+      1, 2, 4,
+      2, 3, 4,
+      3, 0, 4
+    ];
+
+    geometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
+    geometry.setIndex(indices);
+    geometry.computeVertexNormals();
+
+    const edges = new THREE.EdgesGeometry(geometry);
+    const lineMaterial = new THREE.LineBasicMaterial({
+      color: this.active ? this.color3DActive : this.color3D,
+      linewidth: 1
+    });
+    const line = new THREE.LineSegments(edges, lineMaterial);
+    line.position.set(-data.x, -data.z, -data.y)
+    line.layers.set(2)
+    this.meshList[0].clear()
+    this.meshList[0].add(line)
+    // this.meshList[0].position.set(data.x, data.z, data.y)
+    // group.add(line)
+    this.meshList.forEach(v => {
+      v.position.set(data.x, data.z, data.y)
+    })
+  }
+
+  meshNeedChangeKey() {
+    return "neverChange";
   }
 
   matchHandelInfo(x: number, y: number) {

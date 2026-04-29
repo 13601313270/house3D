@@ -610,11 +610,15 @@ function changeCamera2State(activeIndex: number = 0) {
     worldApi.activeCameraIndex = activeIndex
     worldApi.allFileMapObjects.camera.forEach((camera, index) => {
       if (index === activeIndex) {
-        camera.active = true
-        camera.remove3DCache()
+        if (camera.active === false) {
+          camera.active = true
+          camera.remove3DCache()
+        }
       } else {
-        camera.active = false
-        camera.remove3DCache()
+        if (camera.active === true) {
+          camera.active = false
+          camera.remove3DCache()
+        }
       }
     })
     drawWrapper()
