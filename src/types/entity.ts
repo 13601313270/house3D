@@ -228,10 +228,10 @@ export abstract class EntityClassInWall<T extends ObjInWallData> extends EntityC
       const index = allLineKey.indexOf(lineKey)
       const data = this.getData();
       const objData = obj.getData()
-
-      this.changePosition(point)
       this.setData({
         ...data,
+        x: point.x,
+        y: point.y,
         angle: nearestAngle,
         wallId: objData.id,
         wallPointId: index,
