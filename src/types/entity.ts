@@ -113,7 +113,7 @@ export abstract class EntityClass<T extends ObjData> {
   // 命中可拖拽具柄被移动移动
   abstract matchHandelMoveCallback(x: number, y: number, matchHandelInfo: HandelInfo): void;
 
-  // 具柄的新的值
+  // 本对象进入一个吸附对象的区域
   abstract inSceneSnapPointArea(
     newPosition: MatchSnapPoint,
     dragHandelInfo: HandelInfo,
@@ -206,5 +206,13 @@ export abstract class EntityClassInWall<T extends ObjInWallData> extends EntityC
     };
     // @ts-ignore
     this.setData(newData)
+  }
+
+  inSceneSnapPointArea(newPosition: MatchSnapPoint) {
+    if (newPosition.objType === 'wall' && newPosition.snapFromType === 'line') {
+      this.changePosition(newPosition.point)
+      return true
+    }
+    return false
   }
 }

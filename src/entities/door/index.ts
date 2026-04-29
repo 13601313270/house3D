@@ -260,13 +260,6 @@ export class DoorEntity extends EntityClassInWall<DoorData> {
     this.changePosition({ x, y })
   }
 
-  inSceneSnapPointArea(newPosition: MatchSnapPoint) {
-    if (newPosition.objType === 'wall' && newPosition.snapFromType === 'line') {
-      this.changePosition(newPosition.point)
-      return true
-    }
-    return false
-  }
 
   getMineBeSnapPoints() {
     const key: allSnapFromType = 'point';

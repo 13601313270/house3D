@@ -417,14 +417,6 @@ export class WindowEntity extends EntityClassInWall<WindowData> {
     }
   }
 
-  inSceneSnapPointArea(newPosition: MatchSnapPoint) {
-    if (newPosition.objType === 'wall' && newPosition.snapFromType === 'line') {
-      this.changePosition(newPosition.point)
-      return true
-    }
-    return false
-  }
-
   getMineBeSnapPoints() {
     const key: allSnapFromType = 'point';
     const data = this.getData();
