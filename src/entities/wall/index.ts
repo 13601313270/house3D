@@ -420,7 +420,7 @@ export class WallEntity extends EntityClass<WallData> {
       editShow([
         {
           id: 'hidden',
-          label: '是否隐藏',
+          label: '隐藏墙',
           dataType: 'boolean',
           value: data.points[pointIndex].snw,
         }

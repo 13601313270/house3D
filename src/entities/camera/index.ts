@@ -6,8 +6,6 @@ import { editItem } from '..'
 import { ObjDataClass } from '../objData'
 // @ts-ignore
 import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
-// @ts-ignore
-import { MTLLoader } from 'three/addons/loaders/MTLLoader.js';
 
 export class CameraDataClass extends ObjDataClass<CameraData> {
   targetPositionX: number
