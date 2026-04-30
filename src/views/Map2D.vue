@@ -2,11 +2,24 @@
   <div class="map2d-container">
     <div class="left-panel" :style="{ width: panel1SplitWidthPer * 100 + '%' }">
       <div class="toolbar">
-        <div class="toolbar-item">
-          <button type="button">
+        <div class="toolbar-item" @mouseleave="activeToolsIndex = -1">
+          <button type="button" @mouseenter="activeToolsIndex = 0">
+            文件
+          </button>
+          <div class="list" v-show="activeToolsIndex === 0">
+            <div @click="saveDrawing" class="childItem">
+              保存
+            </div>
+            <div @click="loadDrawing" class="childItem">
+              加载
+            </div>
+          </div>
+        </div>
+        <div class="toolbar-item" @mouseleave="activeToolsIndex = -1">
+          <button type="button" @mouseenter="activeToolsIndex = 1">
             添加
           </button>
-          <div class="list">
+          <div class="list" v-show="activeToolsIndex === 1">
             <div>
               <div class="childItem" v-for="value in allFileKeys.filter(item => item !== 'outFile')" :key="value"
                 :class="{ active: currentTool === value }" @click="changeCurrentTool(value)">
@@ -30,18 +43,8 @@
         <button @click="clearDrawing" type="button">
           清空
         </button>
-        <button @click="saveDrawing" type="button">
-          保存
-        </button>
-        <button @click="loadDrawing" type="button">
-          加载
-        </button>
         <input type="file" id="fileInput" ref="fileInputRef" accept=".json" style="display: none"
           @change="handleFileChange" />
-        <button :class="{ active: currentTool === 'drag' }" @click="changeCurrentTool('drag')" type="button">
-          拖拽
-        </button>
-        <!-- <input type="number" v-model="wallThickness" placeholder="墙厚度" /> -->
       </div>
 
       <div class="canvas-container">
@@ -125,6 +128,7 @@ import { CameraEntity } from '@/entities/camera'
 const canvasRef = ref<HTMLCanvasElement | null>(null)
 const canvas3DRef = ref<typeof Canvas3D | null>(null)
 const canvas3DRef2 = ref<typeof Canvas3D | null>(null)
+const activeToolsIndex = ref(-1)
 const currentTool = ref<'wall' | 'door' | 'window' | 'camera' | 'outFile' | 'drag'>('drag')
 const tempDrawWall = ref<WallDataClass | null>(null)
 const hoverPoint = ref<Point | null>(null)
@@ -733,6 +737,7 @@ onMounted(async () => {
 const fileInputRef = ref<HTMLInputElement | null>(null)
 
 const saveDrawing = () => {
+  activeToolsIndex.value = -1
   const data: fileData & {
     panOffset: Point
     zoomLevel: number
@@ -756,6 +761,7 @@ const saveDrawing = () => {
 }
 
 const loadDrawing = () => {
+  activeToolsIndex.value = -1
   fileInputRef.value?.click()
 }
 
@@ -1032,15 +1038,11 @@ const handleCanvasClick = async (e: MouseEvent) => {
     if (insertTempObj instanceof EntityClassInWall) {
       if (hoverPoint.value) {
         await worldApi.add(currentTool.value, [insertTempObj.getData()])
-        // insertTempObjData = null;
-        console.log('nearest---2---clear-2')
         insertTempObj = null;
         currentTool.value = 'drag'
       }
     } else {
       await worldApi.add(currentTool.value, [insertTempObj.getData()])
-      // insertTempObjData = null;
-      console.log('nearest---2---clear-3')
       insertTempObj = null;
       currentTool.value = 'drag'
     }
@@ -1051,13 +1053,7 @@ const handleCanvasClick = async (e: MouseEvent) => {
 
 const clearDrawing = () => {
   if (confirm('确定要清空所有绘制内容吗？')) {
-    worldApi.clear('wall')
-    worldApi.clear('door')
-    worldApi.clear('window')
-    worldApi.clear('camera')
-    if (tempDrawWall.value) {
-      tempDrawWall.value = null
-    }
+    worldApi.clearAll();
     history.value = []
     drawWrapper()
   }
@@ -1405,11 +1401,10 @@ const handleWheel = (e: WheelEvent) => {
   drawWrapper()
 }
 function changeCurrentTool(type: 'wall' | 'door' | 'window' | 'camera' | 'outFile' | 'drag') {
-  // console.log('changeTool---1---nearest---2---clear')
+  activeToolsIndex.value = -1
   insertTempObj = null
 
   if (allFileKeys.includes(type as any)) {
-    console.log('changeTool---2---nearest---2---clear')
     if (type === 'outFile') {
       const findObjInfo = worldApi.ObjFileTypes[1];
       const data: OutFileData = {
@@ -1422,14 +1417,12 @@ function changeCurrentTool(type: 'wall' | 'door' | 'window' | 'camera' | 'outFil
         z: 0,
       }
       const insertTempObjData = new OutFileDataClass(data)
-      console.log('changeTool---3---nearest---2---clear')
       insertTempObj = new OutFileEntity(worldApi, insertTempObjData)
       insertTempObj.init()
     } else {
       // @ts-ignore
       const ClassName = fileDataKeyToClass[type];
       if (ClassName) {
-        console.log('changeTool---3---nearest---2---clear')
         insertTempObj = new ClassName(worldApi)
         if (insertTempObj) {
           insertTempObj.init()
@@ -1441,6 +1434,7 @@ function changeCurrentTool(type: 'wall' | 'door' | 'window' | 'camera' | 'outFil
 }
 
 async function changeCurrentToolToOutFile(id: string) {
+  activeToolsIndex.value = -1
   const index = worldApi.ObjFileTypes.findIndex(item => item.id === id);
   if (index === -1) {
     const { data: res } = await axios.get('https://api.studying1v1.com/video/objectFileById/' + id)
@@ -1458,14 +1452,12 @@ async function changeCurrentToolToOutFile(id: string) {
     angleY: 0,
   }
   const insertTempObjData = new OutFileDataClass(data)
-  console.log('changeTool---3---nearest---2---clear')
   insertTempObj = new OutFileEntity(worldApi, insertTempObjData)
   insertTempObj.init()
   currentTool.value = 'outFile'
 }
 
 async function mouseEnterType(type: ObjFileType) {
-  console.log(111, type)
   if (!type.child || type.child.length === 0) {
     type.child = [];
     const { data: res } = await axios.get('https://api.studying1v1.com/video/objectFileListByType/' + type.id)
@@ -1515,15 +1507,8 @@ function exportImage() {
   .toolbar-item {
     position: relative;
 
-    &:hover {
-      .list {
-        display: block;
-      }
-    }
-
     .list {
       position: absolute;
-      display: none;
       top: 100%;
       width: 100px;
       left: 0;
@@ -1531,6 +1516,7 @@ function exportImage() {
       border: 1px solid #d9d9d9;
       box-sizing: border-box;
       border-radius: 8px;
+      padding: 8px 0;
       z-index: 1000;
       max-height: 80vh;
       // overflow: auto;
@@ -1591,6 +1577,7 @@ function exportImage() {
       .splitLine {
         width: 100%;
         height: 1px;
+        margin: 8px 0;
         background-color: #d9d9d9;
       }
     }

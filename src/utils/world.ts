@@ -309,11 +309,14 @@ export class World {
     this.changeBindList.forEach(callback => callback())
   }
 
-  clear(type: EntityType) {
-    (this.allFileMapObjects[type] as EntityClass<any>[]).forEach((item) => {
-      item.beforeRemove()
-    });
-    this.allFileMapObjects[type] = []
+  clearAll() {
+    allFileKeys.forEach((type) => {
+      (this.allFileMapObjects[type] as EntityClass<any>[]).forEach((item) => {
+        item.beforeRemove()
+      });
+      this.allFileMapObjects[type] = []
+      this.changeBindList.forEach(callback => callback())
+    })
     this.changeBindList.forEach(callback => callback())
   }
 
