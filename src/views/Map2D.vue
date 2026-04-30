@@ -1172,34 +1172,6 @@ const handleMouseMove = (e: MouseEvent) => {
     } else {
       hoverPoint.value = null
     }
-    // const ObjDataClass = createInitData[currentTool.value];
-    // const ClassName = fileDataKeyToClass[currentTool.value];
-    // if (ObjDataClass) {
-    //   // if (insertTempObjData instanceof ObjInWallDataClass) {
-    //   //   if (nearest) {
-    //   //     const { pointOnWall, angle } = nearest
-    //   //     const wallScreenX = pointOnWall.x
-    //   //     const wallScreenY = pointOnWall.y
-
-    //   //     if (insertTempObjData instanceof ObjInWallDataClass) {
-    //   //       insertTempObjData.wallId = nearest.wall.id
-    //   //       insertTempObjData.wallPointId = nearest.lineIndex
-    //   //       insertTempObjData.x = wallScreenX
-    //   //       insertTempObjData.y = wallScreenY
-    //   //       insertTempObjData.angle = angle
-    //   //     }
-    //   //     drawWrapper()
-    //   //   }
-    //   // } else if (insertTempObjData instanceof ObjDataClass) {
-    //   //   if (insertTempObjData instanceof ObjDataClass) {
-    //   //     insertTempObjData.x = x
-    //   //     insertTempObjData.y = y
-    //   //     // insertTempObjData.targetPositionX = x + 100
-    //   //     // insertTempObjData.targetPositionY = y
-    //   //   }
-    //   //   drawWrapper()
-    //   // }
-    // }
     if (insertTempObj instanceof EntityClassInWall) {
       if (nearest) {
         insertTempObj.setPrepareState(x, y, nearest)
