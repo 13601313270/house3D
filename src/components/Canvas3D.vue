@@ -324,6 +324,26 @@ onMounted(() => {
   window.addEventListener('resize', resize)
 })
 
+const exportImage = () => {
+  if (renderer && renderer.domElement) {
+    // 确保渲染器完成当前帧渲染
+    const scene = props.world.scene
+    if (scene && camera) {
+      renderer.render(scene, camera)
+    }
+
+    // 创建一个临时的 canvas 来正确导出
+    const link = document.createElement('a')
+    link.download = `3d-preview-${Date.now()}.png`
+
+    // 使用 preserveDrawingBuffer 确保能正确获取渲染内容
+    const canvas = renderer.domElement
+    const dataURL = canvas.toDataURL('image/png')
+    link.href = dataURL
+    link.click()
+  }
+}
+
 onUnmounted(() => {
   window.removeEventListener('resize', resize)
 
@@ -343,7 +363,8 @@ watch(() => props.cameraState, (newVal) => {
 })
 
 defineExpose({
-  resize
+  resize,
+  exportImage
 })
 function calcVerticalFovByHorizontalFov(hFov: number, aspect: number) {
   const vFov = 2 * Math.atan(Math.tan((hFov * Math.PI / 180) / 2) / aspect)

@@ -84,8 +84,8 @@
             :class="{ active: activeCameraIndex === index }" class="cameraItem">{{ index }}
           </div>
         </div>
-        <div>
-          <button type="button">导出图片</button>
+        <div v-if="allCamera.length && cameraState2">
+          <button type="button" @click="exportImage">导出图片</button>
         </div>
       </div>
       <div class="right-panel-content">
@@ -1450,6 +1450,13 @@ watch(() => editPropInputInfo.value, () => {
 }, {
   deep: true
 })
+
+function exportImage() {
+  if (canvas3DRef2.value) {
+    const canvas = canvas3DRef2.value
+    canvas.exportImage()
+  }
+}
 </script>
 
 <style scoped lang="less">
