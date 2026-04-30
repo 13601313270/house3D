@@ -64,11 +64,3 @@ export type editItem = {
   step: number,
   value: any
 }
-
-export const createInitData: Record<allFileKeysEnum, () => any> = {
-  wall: createWallData,
-  door: createDoorData,
-  window: createWindowData,
-  camera: createCameraData,
-  outFile: createOutFileData,
-}

@@ -65,6 +65,10 @@ export class WallEntity extends EntityClass<WallData> {
   type: EntityType = 'wall'
   isPointObj: boolean = false
 
+  defaultValue(): WallData {
+    return createWallData()
+  }
+
   draw2DPreviewByData(ctx: CanvasRenderingContext2D, data: WallData, panOffset: Point, zoomLevel: number): void {
     if (data.hb) {
       ctx.strokeStyle = 'black'

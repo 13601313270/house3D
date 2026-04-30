@@ -59,15 +59,19 @@ export class DoorEntity extends EntityClassInWall<DoorData> {
   type: EntityType = 'door'
   isPointObj: boolean = true
 
-  constructor(world: World, door: DoorData) {
+  constructor(world: World, door?: DoorData) {
     super(world, door)
-    if (door.wallId) {
+    if (door && door.wallId) {
       const wall = this.world.allFileMapObjects.wall.find((entity) => entity.getData().id === door.wallId);
       if (wall) {
         this.associationEntity.push(wall)
         wall.associationEntity.push(this)
       }
     }
+  }
+
+  defaultValue(): DoorData {
+    return createDoorData()
   }
 
   draw2DPreviewByData(ctx: CanvasRenderingContext2D, data: DoorData, panOffset: Point, zoomLevel: number): void {

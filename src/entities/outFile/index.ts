@@ -62,6 +62,10 @@ export class OutFileEntity extends EntityClass<OutFileData> {
     })
   }
 
+  defaultValue(): OutFileData {
+    return createOutFileData()
+  }
+
   draw2DPreviewByData(ctx: CanvasRenderingContext2D, data: OutFileData, panOffset: Point, zoomLevel: number): void {
     const screenX = data.x * zoomLevel + panOffset.x
     const screenY = data.y * zoomLevel + panOffset.y

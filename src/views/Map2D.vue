@@ -104,7 +104,7 @@ import { ObjData, Point } from '../types'
 import { snapThreshold, World } from '../utils/world'
 import Canvas3D, { CameraState } from '../components/Canvas3D.vue'
 import { WallData } from '@/entities/wall/index.d'
-import { allFileKeys, fileData, editItem, allFileKeysName, createInitData, fileDataKeyToClass } from '@/entities'
+import { allFileKeys, fileData, editItem, allFileKeysName, fileDataKeyToClass } from '@/entities'
 import { EntityClass, EntityClassInWall, EntityType, MatchSnapPoint } from '@/types/entity'
 import { HandelInfo, PointWithIndex } from '@/types/map2d'
 import pointToLineDistance from '@/utils/pointToLineDistance'
@@ -1383,13 +1383,10 @@ function changeCurrentTool(type: 'wall' | 'door' | 'window' | 'camera' | 'outFil
       insertTempObj.init()
     } else {
       // @ts-ignore
-      const ObjDataClass = createInitData[type];
-      // @ts-ignore
       const ClassName = fileDataKeyToClass[type];
-      if (ClassName && ObjDataClass) {
-        const insertTempObjData = new ObjDataClass()
+      if (ClassName) {
         console.log('changeTool---3---nearest---2---clear')
-        insertTempObj = new ClassName(worldApi, insertTempObjData)
+        insertTempObj = new ClassName(worldApi)
         if (insertTempObj) {
           insertTempObj.init()
         }

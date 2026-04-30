@@ -72,9 +72,9 @@ export class WindowEntity extends EntityClassInWall<WindowData> {
   type: EntityType = 'window'
   isPointObj: boolean = true
 
-  constructor(world: World, window: WindowData) {
+  constructor(world: World, window?: WindowData) {
     super(world, window)
-    if (window.wallId) {
+    if (window && window.wallId) {
       const wall = this.world.allFileMapObjects.wall.find((entity) => {
         return entity.getData().id === window.wallId
       });
@@ -83,6 +83,10 @@ export class WindowEntity extends EntityClassInWall<WindowData> {
         wall.associationEntity.push(this)
       }
     }
+  }
+
+  defaultValue(): WindowData {
+    return createWindowData()
   }
 
   draw2DPreviewByData(ctx: CanvasRenderingContext2D, data: WindowData, panOffset: Point, zoomLevel: number): void {

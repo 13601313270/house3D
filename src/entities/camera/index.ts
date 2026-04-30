@@ -53,6 +53,10 @@ export class CameraEntity extends EntityClass<CameraData> {
   colorOpacityActive: string = 'red'
   active: boolean = false // 这个不存在数据库里，只是在前端动态调整
 
+  defaultValue(): CameraData {
+    return createCameraData()
+  }
+
   draw2DPreviewByData(ctx: CanvasRenderingContext2D, data: CameraData, panOffset: Point, zoomLevel: number): void {
     const screenX = data.x * zoomLevel + panOffset.x
     const screenY = data.y * zoomLevel + panOffset.y
