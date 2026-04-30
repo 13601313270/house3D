@@ -12,6 +12,7 @@ import { allFileKeys, fileData, fileDataKeyToClass } from '@/entities/index'
 import { EntityClass, EntityClassInWall } from '@/types/entity'
 import { ObjDataClass } from '@/entities/objData'
 import { OutFileEntity } from '@/entities/outFile';
+import { ObjItem } from '@/entities/allObjs';
 
 export const canvasHeight = 600
 export const snapThreshold = 20
@@ -39,6 +40,8 @@ export class World {
     y: number,
     z: number,
   }[] = []
+
+  ObjFileTypes: ObjItem[] = []
 
   activeCameraIndex: number = -1
 

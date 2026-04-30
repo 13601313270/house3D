@@ -99,6 +99,7 @@
 
 <script lang="ts" setup>
 import { ref, onMounted, onUnmounted, nextTick, watch } from 'vue'
+import axios from 'axios'
 import { ObjData, Point } from '../types'
 import { snapThreshold, World } from '../utils/world'
 import Canvas3D, { CameraState } from '../components/Canvas3D.vue'
@@ -110,7 +111,7 @@ import pointToLineDistance from '@/utils/pointToLineDistance'
 import { DoorEntity } from '@/entities/door'
 import { CameraData } from '@/entities/camera/index.d'
 import { WallDataClass, WallEntity } from '@/entities/wall'
-import ObjFiles, { ObjItem } from '@/entities/allObjs'
+import { ObjItem } from '@/entities/allObjs'
 import { OutFileDataClass, OutFileEntity } from '@/entities/outFile'
 import { OutFileData } from '@/entities/outFile/index.d'
 import DataTypeEdit from './DataTypeEdit.vue'
@@ -158,6 +159,7 @@ const cameraState = ref<CameraState>({
 })
 const allCamera = ref<CameraState[]>([])
 const cameraState2 = ref<CameraState | null>(null)
+const ObjFiles = ref<ObjItem[]>([])
 
 let insertTempObj: EntityClass<any> | null = null
 
@@ -197,8 +199,6 @@ const updateCanvasSize = () => {
     drawWrapper()
   }, 30)
 }
-
-// const drawingData = computed<fileData>(() => (worldApi.allFileObjects))
 
 const contextMenu = ref<{
   visible: boolean;
@@ -627,7 +627,11 @@ function changeCamera2State(activeIndex: number = 0) {
     cameraState2.value = null
   }
 }
-onMounted(() => {
+onMounted(async () => {
+  const res = await axios.get('https://api.studying1v1.com/video/objectFileList')
+  ObjFiles.value = res.data as ObjItem[];
+  worldApi.ObjFileTypes = ObjFiles.value;
+
   worldApi.onChange(() => {
     changeCamera2State(activeCameraIndex.value)
   })
@@ -1391,7 +1395,7 @@ function changeCurrentTool(type: 'wall' | 'door' | 'window' | 'camera' | 'outFil
   if (allFileKeys.includes(type as any)) {
     console.log('changeTool---2---nearest---2---clear')
     if (type === 'outFile') {
-      const findObjInfo = ObjFiles[1];
+      const findObjInfo = worldApi.ObjFileTypes[1];
       const data: OutFileData = {
         fileTypeId: findObjInfo.id,
         id: Date.now().toString(),
@@ -1423,10 +1427,10 @@ function changeCurrentTool(type: 'wall' | 'door' | 'window' | 'camera' | 'outFil
   currentTool.value = type
 }
 
-function changeCurrentToolToOutFile(id: string) {
-  const index = ObjFiles.findIndex(item => item.id === id);
+async function changeCurrentToolToOutFile(id: string) {
+  const index = worldApi.ObjFileTypes.findIndex(item => item.id === id);
   if (index === -1) return
-  const findObjInfo = ObjFiles.find(item => item.id === id);
+  const findObjInfo = worldApi.ObjFileTypes.find(item => item.id === id);
   if (!findObjInfo) return
   const data: OutFileData = {
     fileTypeId: findObjInfo.id,

@@ -9,7 +9,6 @@ import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
 import { MTLLoader } from 'three/addons/loaders/MTLLoader.js';
 
 import { ObjDataClass } from '../objData'
-import ObjFiles from '../allObjs'
 import { getMaterialById } from '@/material'
 
 export class OutFileDataClass extends ObjDataClass<OutFileData> {
@@ -26,7 +25,8 @@ export class OutFileDataClass extends ObjDataClass<OutFileData> {
 }
 
 export function createOutFileData(): OutFileDataClass {
-  const findObjInfo = ObjFiles[0];
+  // @ts-ignore
+  const findObjInfo = window.ObjFiles[0];
   const data: OutFileData = {
     fileTypeId: findObjInfo.id,
     id: Date.now().toString(),
@@ -49,7 +49,7 @@ export class OutFileEntity extends EntityClass<OutFileData> {
 
   init(): Promise<void> {
     const img = new Image()
-    const findObjInfo = ObjFiles.find(item => item.id === this.getData().fileTypeId)
+    const findObjInfo = this.world.ObjFileTypes.find(item => item.id === this.getData().fileTypeId)
     const preImg = findObjInfo?.preImg || ''
     img.src = preImg
     return new Promise((resolve, reject) => {
@@ -66,7 +66,7 @@ export class OutFileEntity extends EntityClass<OutFileData> {
     const screenX = data.x * zoomLevel + panOffset.x
     const screenY = data.y * zoomLevel + panOffset.y
     const angleY = data.angleY;// * -1 + Math.PI / 2
-    const findObjInfo = ObjFiles.find(item => item.id === data.fileTypeId)
+    const findObjInfo = this.world.ObjFileTypes.find(item => item.id === data.fileTypeId)
     const preImg = findObjInfo?.preImg || ''
     const img = new Image()
     img.src = preImg
@@ -103,7 +103,7 @@ export class OutFileEntity extends EntityClass<OutFileData> {
     ctx.fill()
     ctx.stroke()
 
-    const findObjInfo = ObjFiles.find(item => item.id === data.fileTypeId)
+    const findObjInfo = this.world.ObjFileTypes.find(item => item.id === data.fileTypeId)
     const drawAngelLength = findObjInfo?.drawAngelLength || this.baseDrawAngelLength
 
     // 控制点向着angleY角度延伸10个单位后的坐标
@@ -172,8 +172,7 @@ export class OutFileEntity extends EntityClass<OutFileData> {
     const data = this.getData();
     const group = new THREE.Group()
     const { fileTypeId, bm } = data
-
-    const findObjInfo = ObjFiles.find(item => item.id === fileTypeId)
+    const findObjInfo = this.world.ObjFileTypes.find(item => item.id === fileTypeId)
 
     if (!findObjInfo) {
       console.error('未找到对应的文件类型:', fileTypeId)
@@ -282,7 +281,7 @@ export class OutFileEntity extends EntityClass<OutFileData> {
         dist: dist,
       }
     }
-    const findObjInfo = ObjFiles.find(item => item.id === data.fileTypeId)
+    const findObjInfo = this.world.ObjFileTypes.find(item => item.id === data.fileTypeId)
     const drawAngelLength = findObjInfo?.drawAngelLength || this.baseDrawAngelLength
     // 控制点向着angleY角度延伸10个单位后的坐标
     const rotatedXAdd = data.x + Math.cos(data.angleY) * drawAngelLength
