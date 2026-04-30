@@ -1460,6 +1460,7 @@ async function changeCurrentToolToOutFile(id: string) {
   const insertTempObjData = new OutFileDataClass(data)
   console.log('changeTool---3---nearest---2---clear')
   insertTempObj = new OutFileEntity(worldApi, insertTempObjData)
+  insertTempObj.init()
   currentTool.value = 'outFile'
 }
 

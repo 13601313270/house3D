@@ -46,17 +46,17 @@ export class OutFileEntity extends EntityClass<OutFileData> {
   color3D: string = '#0c7f25'
   colorOpacity: string = '#14b737a5'
   private baseDrawAngelLength = 40;
+  img: HTMLImageElement = new Image()
 
   init(): Promise<void> {
-    const img = new Image()
     const findObjInfo = this.world.ObjFileTypes.find(item => item.id === this.getData().fileTypeId)
     const preImg = findObjInfo?.preImg || ''
-    img.src = preImg
+    this.img.src = preImg
     return new Promise((resolve, reject) => {
-      img.onload = () => {
+      this.img.onload = () => {
         resolve()
       }
-      img.onerror = () => {
+      this.img.onerror = () => {
         reject(new Error('图片加载失败'))
       }
     })
@@ -71,16 +71,13 @@ export class OutFileEntity extends EntityClass<OutFileData> {
     const screenY = data.y * zoomLevel + panOffset.y
     const angleY = data.angleY;// * -1 + Math.PI / 2
     const findObjInfo = this.world.ObjFileTypes.find(item => item.id === data.fileTypeId)
-    const preImg = findObjInfo?.preImg || ''
-    const img = new Image()
-    img.src = preImg
     const preImgScale = findObjInfo?.preImgScale || 1
     ctx.save(); // 保存当前状态
-    const { width, height } = img;
+    const { width, height } = this.img;
     ctx.translate(screenX, screenY); // 移动原点到目标中心
     ctx.rotate(angleY * -1); // 围绕新原点旋转
     ctx.drawImage(
-      img,
+      this.img,
       preImgScale / -2 * width * zoomLevel,
       preImgScale / -2 * height * zoomLevel,
       preImgScale * width * zoomLevel,
