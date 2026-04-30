@@ -628,7 +628,9 @@ function changeCamera2State(activeIndex: number = 0) {
   }
 }
 onMounted(() => {
-  worldApi.onChange(changeCamera2State)
+  worldApi.onChange(() => {
+    changeCamera2State(activeCameraIndex.value)
+  })
   const canvas = canvasRef.value
   if (canvas) {
     const ctx = canvas.getContext('2d')
