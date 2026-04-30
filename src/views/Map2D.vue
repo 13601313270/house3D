@@ -15,11 +15,13 @@
             </div>
             <div class="splitLine"></div>
             <div>
-              <div v-for="item in ObjFiles" :key="item.id">
-                <div>{{ item.name }}</div>
-                <div v-for="item2 in item.child" class="childItem" :key="item2.id"
-                  @click="changeCurrentToolToOutFile(item2.id)">
-                  {{ item2.name }}
+              <div v-for="item in ObjFileTypes" :key="item.id" class="typeItemContent">
+                <div class="typeName" @mouseenter="mouseEnterType(item)">{{ item.name }}</div>
+                <div class="childItemList" v-if="item.child && item.child.length > 0">
+                  <div v-for="item2 in item.child" class="childItem" :key="item2.id"
+                    @click="changeCurrentToolToOutFile(item2.id)">
+                    {{ item2.name }}
+                  </div>
                 </div>
               </div>
             </div>
@@ -162,7 +164,7 @@ const cameraState = ref<CameraState>({
 })
 const allCamera = ref<CameraState[]>([])
 const cameraState2 = ref<CameraState | null>(null)
-const ObjFiles = ref<Array<{
+type ObjFileType = {
   id: number,
   name: string,
   child: {
@@ -170,7 +172,8 @@ const ObjFiles = ref<Array<{
     name: string,
     type: number,
   }[]
-}>>([])
+}
+const ObjFileTypes = ref<Array<ObjFileType>>([])
 
 let insertTempObj: EntityClass<any> | null = null
 
@@ -639,7 +642,7 @@ function changeCamera2State(activeIndex: number = 0) {
   }
 }
 onMounted(async () => {
-  const res = await axios.get('https://api.studying1v1.com/video/objectFileList')
+  const res = await axios.get('https://api.studying1v1.com/video/objectFileType')
   const data = res.data as Array<{
     id: number,
     name: string,
@@ -649,7 +652,7 @@ onMounted(async () => {
       type: number,
     }[]
   }>;
-  ObjFiles.value = data;
+  ObjFileTypes.value = data;
 
   worldApi.onChange(() => {
     changeCamera2State(activeCameraIndex.value)
@@ -1455,6 +1458,21 @@ async function changeCurrentToolToOutFile(id: string) {
   currentTool.value = 'outFile'
 }
 
+async function mouseEnterType(type: ObjFileType) {
+  console.log(111, type)
+  if (!type.child || type.child.length === 0) {
+    type.child = [];
+    const { data: res } = await axios.get('https://api.studying1v1.com/video/objectFileListByType/' + type.id)
+    res.forEach((v: {
+      id: string,
+      name: string,
+      type: number,
+    }) => {
+      type.child.push(v)
+    })
+  }
+}
+
 watch(() => editPropInputInfo.value, () => {
   if (contextMenu.value?.visible) {
     editPropConfigEditCallback(editPropInputInfo.value)
@@ -1509,7 +1527,50 @@ function exportImage() {
       border-radius: 8px;
       z-index: 1000;
       max-height: 80vh;
-      overflow: auto;
+      // overflow: auto;
+
+      .typeItemContent {
+        position: relative;
+
+        &:hover {
+          .typeName {
+            background-color: #1890ff;
+            color: white;
+            font-weight: bold;
+          }
+
+          .childItemList {
+            display: block;
+          }
+        }
+
+        .typeName {
+          padding: 4px 0;
+          cursor: default;
+        }
+
+        .childItemList {
+          position: absolute;
+          display: none;
+          top: -8px;
+          left: 100%;
+          width: 100px;
+          background: white;
+          border: 1px solid #d9d9d9;
+          box-sizing: border-box;
+          border-radius: 8px;
+          padding: 7px 0;
+          z-index: 1001;
+
+          .childItem {
+            &:hover {
+              background-color: #1890ff;
+              color: white;
+              font-weight: bold;
+            }
+          }
+        }
+      }
 
       .childItem {
         padding: 4px 0;
