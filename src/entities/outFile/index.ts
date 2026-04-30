@@ -197,6 +197,8 @@ export class OutFileEntity extends EntityClass<OutFileData> {
       function render(object: THREE.Group) {
         object.scale.set(scaleX, scaleY, scaleZ)
         object.rotation.y = angleY
+        // @ts-ignore
+        object.material = material
 
         // 添加默认材质（如果模型没有材质）
         object.traverse((child) => {

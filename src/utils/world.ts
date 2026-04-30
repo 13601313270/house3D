@@ -65,6 +65,33 @@ export class World {
     const axesHelper = new THREE.AxesHelper(100)
     axesHelper.layers.set(2)
     this.scene.add(axesHelper)
+
+    // === 加载 JPG 全景 ===
+    const loader = new THREE.TextureLoader();
+    loader.load('sky.jpg', (texture) => {
+      texture.mapping = THREE.EquirectangularReflectionMapping;
+
+      this.scene.background = texture;
+      this.scene.environment = texture; // 可选：简单环境光
+    });
+
+    const loader2 = new THREE.TextureLoader();
+    loader2.load('grand.jpg', (texture) => {
+      // 增加一个地面平面
+      const groundGeometry = new THREE.PlaneGeometry(20000, 20000, 1, 1)
+      // 设置纹理重复两次
+      texture.wrapS = THREE.RepeatWrapping;
+      texture.wrapT = THREE.RepeatWrapping;
+      texture.repeat.set(12, 12);
+      
+      const groundMaterial = new THREE.MeshBasicMaterial({
+        map: texture,
+      })
+      const ground = new THREE.Mesh(groundGeometry, groundMaterial)
+      ground.rotation.x = -Math.PI / 2
+      ground.position.y = -10
+      this.scene.add(ground)
+    });
   }
 
   draw2DWorld(
