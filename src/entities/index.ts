@@ -3,7 +3,7 @@ import { WallData } from './wall/index.d'
 import { WindowData } from './window/index.d'
 import { CameraData } from './camera/index.d'
 import { OutFileData } from './outFile/index.d'
-import { WallDataClass, WallEntity } from './wall'
+import { createWallData, WallDataClass, WallEntity } from './wall'
 import { DoorEntity, createDoorData } from './door'
 import { WindowEntity, createWindowData } from './window'
 import { CameraEntity, createCameraData } from './camera'
@@ -71,26 +71,4 @@ export const createInitData: Record<allFileKeysEnum, () => any> = {
   window: createWindowData,
   camera: createCameraData,
   outFile: createOutFileData,
-}
-
-function createWallData(): WallDataClass {
-  const wall: WallData = {
-    id: Date.now().toString(),
-    x: 0,
-    y: 0,
-    z: 0,
-    height: 180,
-    color: '#e67e22',
-    thickness: 10,
-    points: [],
-    wmt: 0,
-    hb: false,
-    bc: '#000',
-    bmt: 0,
-    ht: false,
-    tc: '#000',
-    tmt: 0,
-    td: false,
-  }
-  return new WallDataClass(wall)
 }

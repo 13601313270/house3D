@@ -8,6 +8,28 @@ import { getMaterialById } from '@/material'
 import { ObjDataClass } from '../objData'
 import { World } from '@/utils/world'
 
+export function createWallData(): WallDataClass {
+  const wall: WallData = {
+    id: Date.now().toString(),
+    x: 0,
+    y: 0,
+    z: 0,
+    height: 180,
+    color: '#e67e22',
+    thickness: 10,
+    points: [],
+    wmt: 0,
+    hb: false,
+    bc: '#000',
+    bmt: 0,
+    ht: false,
+    tc: '#000',
+    tmt: 0,
+    td: false,
+  }
+  return new WallDataClass(wall)
+}
+
 export class WallDataClass extends ObjDataClass<WallData> {
   points: WallPoint[]
   thickness: number
