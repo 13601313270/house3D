@@ -15,9 +15,12 @@
             </div>
             <div class="splitLine"></div>
             <div>
-              <div v-for="item in ObjFiles" :key="item.id" class="childItem"
-                @click="changeCurrentToolToOutFile(item.id)">
-                {{ item.name }}
+              <div v-for="item in ObjFiles" :key="item.id">
+                <div>{{ item.name }}</div>
+                <div v-for="item2 in item.child" class="childItem" :key="item2.id"
+                  @click="changeCurrentToolToOutFile(item2.id)">
+                  {{ item2.name }}
+                </div>
               </div>
             </div>
           </div>
@@ -159,7 +162,15 @@ const cameraState = ref<CameraState>({
 })
 const allCamera = ref<CameraState[]>([])
 const cameraState2 = ref<CameraState | null>(null)
-const ObjFiles = ref<ObjItem[]>([])
+const ObjFiles = ref<Array<{
+  id: number,
+  name: string,
+  child: {
+    id: string,
+    name: string,
+    type: number,
+  }[]
+}>>([])
 
 let insertTempObj: EntityClass<any> | null = null
 
@@ -629,8 +640,16 @@ function changeCamera2State(activeIndex: number = 0) {
 }
 onMounted(async () => {
   const res = await axios.get('https://api.studying1v1.com/video/objectFileList')
-  ObjFiles.value = res.data as ObjItem[];
-  worldApi.ObjFileTypes = ObjFiles.value;
+  const data = res.data as Array<{
+    id: number,
+    name: string,
+    child: {
+      id: string,
+      name: string,
+      type: number,
+    }[]
+  }>;
+  ObjFiles.value = data;
 
   worldApi.onChange(() => {
     changeCamera2State(activeCameraIndex.value)
@@ -746,6 +765,23 @@ const handleFileChange = (e: Event) => {
         cameraState: CameraState
         activeCameraIndex: number
       } = JSON.parse(event.target?.result as string)
+
+      const allFileTypeId = new Set()
+      data.outFile.forEach(v => {
+        allFileTypeId.add(v.fileTypeId)
+      })
+
+      const fileTypes = Array.from(allFileTypeId)
+
+      const { data: res } = await axios.post('https://api.studying1v1.com/video/objectFileByIds', {
+        ids: fileTypes
+      })
+
+      res.forEach((v: ObjItem) => {
+        worldApi.ObjFileTypes.push(v)
+      })
+
+      console.log('data------', res)
 
       for (let i = 0; i < allFileKeys.length; i++) {
         const key = allFileKeys[i]
@@ -1398,7 +1434,10 @@ function changeCurrentTool(type: 'wall' | 'door' | 'window' | 'camera' | 'outFil
 
 async function changeCurrentToolToOutFile(id: string) {
   const index = worldApi.ObjFileTypes.findIndex(item => item.id === id);
-  if (index === -1) return
+  if (index === -1) {
+    const { data: res } = await axios.get('https://api.studying1v1.com/video/objectFileById/' + id)
+    worldApi.ObjFileTypes.push(res)
+  }
   const findObjInfo = worldApi.ObjFileTypes.find(item => item.id === id);
   if (!findObjInfo) return
   const data: OutFileData = {
