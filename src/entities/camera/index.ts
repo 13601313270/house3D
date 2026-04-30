@@ -43,6 +43,9 @@ export function createCameraData(): CameraDataClass {
   return new CameraDataClass(camera)
 }
 
+const img = new Image()
+img.src = kamera || ''
+
 export class CameraEntity extends EntityClass<CameraData> {
   type: EntityType = 'camera'
   isPointObj: boolean = true
@@ -61,9 +64,6 @@ export class CameraEntity extends EntityClass<CameraData> {
     const screenX = data.x * zoomLevel + panOffset.x
     const screenY = data.y * zoomLevel + panOffset.y
     const angleY = Math.atan2(data.targetPositionY - data.y, data.targetPositionX - data.x);
-    const preImg = kamera || ''
-    const img = new Image()
-    img.src = preImg
     const preImgScale = 0.2
     ctx.save(); // 保存当前状态
     const { width, height } = img;

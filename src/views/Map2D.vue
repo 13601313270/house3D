@@ -711,6 +711,11 @@ onMounted(async () => {
           tempDrawWall.value = null
           lastPoint.value = null
           hoverPoint.value = null
+        } else {
+          if (insertTempObj && currentTool.value !== 'drag') {
+            console.log('insertTempObj----1111')
+            insertTempObj = null;
+          }
         }
         drawWrapper()
         currentTool.value = 'drag'
