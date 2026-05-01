@@ -2,6 +2,7 @@
   <div class="map2d-container">
     <div class="left-panel" :style="{ width: panel1SplitWidthPer * 100 + '%' }">
       <div class="toolbar">
+        <div style="flex-shrink: 0;">布局图</div>
         <div class="toolbar-item" @mouseleave="activeToolsIndex = -1">
           <button type="button" @mouseenter="activeToolsIndex = 0">
             文件
@@ -75,6 +76,9 @@
     <div class="split-bar" @mousedown.prevent="startSplit(1)" title="拖动调整左右比例"></div>
 
     <div class="right-panel" :style="{ width: panel2SplitWidthPer * 100 + '%' }">
+      <div class="tools">
+        <div style="flex-shrink: 0;">全景图</div>
+      </div>
       <!-- {{ insertTempDoor }} -->
       <div class="right-panel-content">
         <Canvas3D ref="canvas3DRef" :world="worldApi" v-model:cameraState="cameraState" :aspectRatio="1"
@@ -1508,8 +1512,10 @@ function exportImage() {
 .toolbar {
   display: flex;
   padding: 4px 8px;
+  align-items: center;
   background: white;
   gap: 8px;
+  height: 40px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   width: 100%;
   box-sizing: border-box;
@@ -1660,6 +1666,7 @@ button {
     box-sizing: border-box;
     padding: 4px;
     background-color: white;
+    height: 40px;
   }
 
   .right-panel-content {
