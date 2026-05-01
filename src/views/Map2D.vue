@@ -54,8 +54,7 @@
         <div v-if="contextMenu?.visible" class="context-menu"
           :style="{ top: contextMenu.y + 'px', left: contextMenu.x + 'px' }">
           <!-- {{ editPropConfigInfo }} -->
-          {{ editPropInputInfo }}
-          =========
+          <!-- {{ editPropInputInfo }} -->
           <div class="configList">
             <div v-for="item in editPropConfigInfo" :key="item.id" class="configItem">
               <div>
@@ -148,8 +147,8 @@ const dragStartPoint = ref<Point | null>(null)
 const panOffset = ref<Point>({ x: 0, y: 0 })
 const isPanning = ref(false)
 const panStart = ref<Point | null>(null)
-const panel1SplitWidthPer = ref(0.3)
-const panel2SplitWidthPer = ref(0.3)
+const panel1SplitWidthPer = ref(0.35)
+const panel2SplitWidthPer = ref(0.35)
 const isSplitting = ref(false)
 const canvasSize = ref({ width: 0, height: 0 })
 const zoomLevel = ref(1)
@@ -858,13 +857,12 @@ const handleContextMenu = (e: MouseEvent) => {
   editPropConfigInfo.value = []
   editPropInputInfo.value = {}
   editPropTypeIndex.value = -1
+  const sortAllFileKeys = ([...allFileKeys]).reverse();
 
-  for (let i = 0; i < allFileKeys.length; i++) {
-    const type = allFileKeys[i]
-    if (allFileKeys.includes(type)) {
+  for (let i = 0; i < sortAllFileKeys.length; i++) {
+    const type = sortAllFileKeys[i]
+    if (sortAllFileKeys.includes(type)) {
       for (let j = 0; j < worldApi.getObjects(type).length; j++) {
-        const item = worldApi.getObjects(type)[j]
-        console.log('api', worldApi.allFileMapObjects)
         const api: EntityClass<any> = worldApi.allFileMapObjects[type][j]
         const snapPoint = api.matchHandelInfo(x, y, zoomLevel.value)
         if (snapPoint) {
@@ -894,15 +892,6 @@ const handleContextMenu = (e: MouseEvent) => {
               }
               editPropConfigEditCallback = (val: any) => {
                 callback(val)
-                // if (editPropTypeKey.value && editPropTypeIndex.value > -1) {
-                //   const api: EntityClass<any> = worldApi.allFileMapObjects[editPropTypeKey.value][editPropTypeIndex.value]
-                //   if (api && editSnapPoint.value) {
-                //     api.editPropConfig(editSnapPoint.value, (propConfig) => {
-                //       editPropConfigInfo.value = propConfig
-                //       console.log('editPropConfigInfo.value---3', editPropConfigInfo.value)
-                //     })
-                //   }
-                // }
                 drawWrapper()
               }
               nextTick(() => {
