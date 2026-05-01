@@ -124,6 +124,8 @@ import { OutFileDataClass, OutFileEntity } from '@/entities/outFile'
 import { OutFileData } from '@/entities/outFile/index.d'
 import DataTypeEdit from './DataTypeEdit.vue'
 import { CameraEntity } from '@/entities/camera'
+// @ts-ignore
+import initDefaultFile from './initDefaultFile.json'
 
 const canvasRef = ref<HTMLCanvasElement | null>(null)
 const canvas3DRef = ref<typeof Canvas3D | null>(null)
@@ -146,8 +148,8 @@ const dragStartPoint = ref<Point | null>(null)
 const panOffset = ref<Point>({ x: 0, y: 0 })
 const isPanning = ref(false)
 const panStart = ref<Point | null>(null)
-const panel1SplitWidthPer = ref(0.4)
-const panel2SplitWidthPer = ref(0.4)
+const panel1SplitWidthPer = ref(0.3)
+const panel2SplitWidthPer = ref(0.3)
 const isSplitting = ref(false)
 const canvasSize = ref({ width: 0, height: 0 })
 const zoomLevel = ref(1)
@@ -645,6 +647,7 @@ function changeCamera2State(activeIndex: number = 0) {
     cameraState2.value = null
   }
 }
+
 onMounted(async () => {
   const res = await axios.get('https://api.studying1v1.com/video/objectFileType')
   const data = res.data as Array<{
@@ -728,6 +731,14 @@ onMounted(async () => {
 
     window.addEventListener('keydown', handleKeyDown)
 
+    setTimeout(() => {
+      try {
+        initWorldByData(initDefaultFile)
+      } catch (error) {
+        console.error(error)
+      }
+    }, 0)
+
     return () => {
       window.removeEventListener('keydown', handleKeyDown)
     }
@@ -761,6 +772,7 @@ const saveDrawing = () => {
 }
 
 const loadDrawing = () => {
+  worldApi.clearAll()
   activeToolsIndex.value = -1
   fileInputRef.value?.click()
 }
@@ -780,46 +792,55 @@ const handleFileChange = (e: Event) => {
         activeCameraIndex: number
       } = JSON.parse(event.target?.result as string)
 
-      const allFileTypeId = new Set()
-      data.outFile.forEach(v => {
-        allFileTypeId.add(v.fileTypeId)
-      })
-
-      const fileTypes = Array.from(allFileTypeId)
-
-      const { data: res } = await axios.post('https://api.studying1v1.com/video/objectFileByIds', {
-        ids: fileTypes
-      })
-
-      res.forEach((v: ObjItem) => {
-        worldApi.ObjFileTypes.push(v)
-      })
-
-      console.log('data------', res)
-
-      for (let i = 0; i < allFileKeys.length; i++) {
-        const key = allFileKeys[i]
-        const key2 = key as EntityType
-        console.log('key2', key2, data[key2])
-        await worldApi.add(key2, data[key2] || [])
-      }
-
-      panOffset.value = data.panOffset || { x: 0, y: 0 }
-      zoomLevel.value = data.zoomLevel || 1
-      if (data.cameraState) {
-        cameraState.value = data.cameraState
-      }
-      if (data.activeCameraIndex !== undefined) {
-        changeCamera2State(data.activeCameraIndex)
-      }
-      history.value = []
-      drawWrapper()
+      await initWorldByData(data)
     } catch (error) {
       console.error(error)
     }
   }
   reader.readAsText(file)
   input.value = ''
+}
+
+async function initWorldByData(data: fileData & {
+  panOffset: Point
+  zoomLevel: number
+  cameraState: CameraState
+  activeCameraIndex: number
+}) {
+  const allFileTypeId = new Set()
+  data.outFile.forEach(v => {
+    allFileTypeId.add(v.fileTypeId)
+  })
+
+  const fileTypes = Array.from(allFileTypeId)
+
+  const { data: res } = await axios.post('https://api.studying1v1.com/video/objectFileByIds', {
+    ids: fileTypes
+  })
+
+  res.forEach((v: ObjItem) => {
+    worldApi.ObjFileTypes.push(v)
+  })
+
+  console.log('data------', res)
+
+  for (let i = 0; i < allFileKeys.length; i++) {
+    const key = allFileKeys[i]
+    const key2 = key as EntityType
+    console.log('key2', key2, data[key2])
+    await worldApi.add(key2, data[key2] || [])
+  }
+
+  panOffset.value = data.panOffset || { x: 0, y: 0 }
+  zoomLevel.value = data.zoomLevel || 1
+  if (data.cameraState) {
+    cameraState.value = data.cameraState
+  }
+  if (data.activeCameraIndex !== undefined) {
+    changeCamera2State(data.activeCameraIndex)
+  }
+  history.value = []
+  drawWrapper()
 }
 
 const handleContextMenu = (e: MouseEvent) => {

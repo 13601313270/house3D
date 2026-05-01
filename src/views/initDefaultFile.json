@@ -1,0 +1,99 @@
+{
+  "wall": [
+    {
+      "id": "1777605350732",
+      "x": 0,
+      "y": 0,
+      "z": 0,
+      "color": "#fff",
+      "wmt": 1,
+      "height": 280,
+      "points": [
+        {
+          "x": -140,
+          "y": -75,
+          "snw": false
+        },
+        {
+          "x": 144,
+          "y": -75,
+          "index": 1,
+          "snw": false
+        }
+      ],
+      "thickness": 20,
+      "hb": true,
+      "bc": "#aaa",
+      "bmt": 2,
+      "ht": true,
+      "tc": "#fff",
+      "tmt": 2,
+      "td": false
+    }
+  ],
+  "door": [],
+  "window": [
+    {
+      "id": "1777605364282",
+      "x": 9.1875,
+      "y": -75,
+      "z": 0,
+      "wallId": "1777605350732",
+      "wallPointId": 0,
+      "bottom": 40,
+      "angle": 0,
+      "width": 120,
+      "height": 120,
+      "bqc": "#3498db",
+      "bmt": 1,
+      "tc": "#3498db",
+      "tmt": 1,
+      "ic": "#3498db",
+      "icmt": 1,
+      "hasBorder": false,
+      "rightOpenAngle": 0,
+      "leftOpenAngle": 0
+    }
+  ],
+  "camera": [
+    {
+      "id": "1777605390198",
+      "x": -20.8125,
+      "y": 189.25,
+      "z": 100,
+      "targetPositionX": -0.8125,
+      "targetPositionY": -11.75,
+      "targetPositionZ": 100,
+      "fov": 55,
+      "aspectW": 9,
+      "aspectH": 16
+    }
+  ],
+  "outFile": [
+    {
+      "id": "1777605385156",
+      "x": -0.8125,
+      "y": -11.75,
+      "z": 0,
+      "fileTypeId": 4,
+      "angleY": 0,
+      "bm": null
+    }
+  ],
+  "panOffset": {
+    "x": 275.8125,
+    "y": 324.25
+  },
+  "zoomLevel": 1,
+  "cameraState": {
+    "targetPositionX": 9.611972670432209,
+    "targetPositionY": 0,
+    "targetPositionZ": -18.807715949820803,
+    "radius": 1485.5413809660047,
+    "angleX": 0.01999999999999999,
+    "angleY": 1.085398163397448,
+    "aspectW": 1,
+    "aspectH": 1
+  },
+  "activeCameraIndex": 0
+}
