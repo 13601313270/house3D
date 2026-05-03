@@ -130,7 +130,6 @@ export class WindowEntity extends EntityClassInWall<WindowData> {
     ctx.fillStyle = '#fff'
     ctx.strokeStyle = '#3498db'
     ctx.lineWidth = 2
-    ctx.beginPath()
     ctx.arc(screenX, screenY, 6 * zoomLevel, 0, Math.PI * 2)
     ctx.fill()
     ctx.stroke()

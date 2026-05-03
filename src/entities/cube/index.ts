@@ -51,6 +51,19 @@ export class CubeEntity extends EntityClass<CubeData> {
   }
 
   draw2DPreviewByData(ctx: CanvasRenderingContext2D, data: CubeData, panOffset: Point, zoomLevel: number): void {
+    const { width, height, depth } = data;
+    // 实现门的2D绘制逻辑
+    const screenX = data.x * zoomLevel + panOffset.x
+    const screenY = data.y * zoomLevel + panOffset.y
+
+    // 绘制一个方块
+    ctx.fillStyle = data.color
+    ctx.fillRect(
+      screenX - width / 2 * zoomLevel,
+      screenY - depth / 2 * zoomLevel,
+      width * zoomLevel,
+      depth * zoomLevel
+    )
   }
 
   draw2DByData(

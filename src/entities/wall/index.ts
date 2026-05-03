@@ -86,6 +86,7 @@ export class WallEntity extends EntityClass<WallData> {
       }
       ctx.stroke()
       ctx.fill()
+      ctx.setLineDash([])
     }
     const wallBoxList = createAllWallFromPoints([data]);
 
@@ -118,6 +119,7 @@ export class WallEntity extends EntityClass<WallData> {
       ctx.stroke();
       ctx.fill()
     }
+    ctx.setLineDash([])
   }
 
   draw2DByData(
