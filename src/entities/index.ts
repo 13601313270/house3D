@@ -3,22 +3,23 @@ import { WallData } from './wall/index.d'
 import { WindowData } from './window/index.d'
 import { CameraData } from './camera/index.d'
 import { OutFileData } from './outFile/index.d'
-import { createWallData, WallDataClass, WallEntity } from './wall'
-import { DoorEntity, createDoorData } from './door'
-import { WindowEntity, createWindowData } from './window'
-import { CameraEntity, createCameraData } from './camera'
-import { OutFileEntity, createOutFileData } from './outFile/index'
-import { EntityClass } from '@/types/entity'
-import { ObjData } from '@/types'
+import { WallEntity } from './wall'
+import { DoorEntity } from './door'
+import { WindowEntity } from './window'
+import { CameraEntity } from './camera'
+import { OutFileEntity } from './outFile/index'
+import { CubeEntity } from './cube'
+import { EntityClass, EntityType } from '@/types/entity'
+import { CubeData } from './cube/index.d'
 
-export type allFileKeysEnum = 'wall' | 'door' | 'window' | 'camera' | 'outFile';
-export const allFileKeys: allFileKeysEnum[] = ['wall', 'door', 'window', 'camera', 'outFile']
+export const allFileKeys: EntityType[] = ['wall', 'door', 'window', 'camera', 'cube', 'outFile']
 
-export const allFileKeysName: Record<allFileKeysEnum, string> = {
+export const allFileKeysName: Record<EntityType, string> = {
   wall: '墙体',
   door: '门',
   window: '窗户',
   camera: '相机',
+  cube: '方块',
   outFile: '外部文件',
 }
 
@@ -27,6 +28,7 @@ export type fileData = {
   door: DoorData[],
   window: WindowData[],
   camera: CameraData[],
+  cube: CubeData[],
   outFile: OutFileData[],
 }
 
@@ -36,17 +38,19 @@ export const defaultFileData: () => fileData = () => {
     door: [],
     window: [],
     camera: [],
+    cube: [],
     outFile: [],
   }
 }
 
 type EntityConstructor = new (...args: any[]) => EntityClass<any>;
 
-export const fileDataKeyToClass: Record<allFileKeysEnum, EntityConstructor> = {
+export const fileDataKeyToClass: Record<EntityType, EntityConstructor> = {
   wall: WallEntity,
   door: DoorEntity,
   window: WindowEntity,
   camera: CameraEntity,
+  cube: CubeEntity,
   outFile: OutFileEntity,
 }
 

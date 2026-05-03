@@ -13,6 +13,7 @@ import { EntityClass, EntityClassInWall } from '@/types/entity'
 import { ObjDataClass } from '@/entities/objData'
 import { OutFileEntity } from '@/entities/outFile';
 import { ObjItem } from '@/entities/allObjs';
+import { CubeEntity } from '@/entities/cube';
 
 export const canvasHeight = 600
 export const snapThreshold = 20
@@ -23,12 +24,14 @@ export class World {
     door: DoorEntity[],
     window: WindowEntity[],
     camera: CameraEntity[],
+    cube: CubeEntity[],
     outFile: OutFileEntity[],
   } = {
       wall: [],
       door: [],
       window: [],
       camera: [],
+      cube: [],
       outFile: [],
     }
 
@@ -301,6 +304,7 @@ export class World {
       door: [],
       window: [],
       camera: [],
+      cube: [],
       outFile: [],
     };
     allFileKeys.forEach((key) => {
