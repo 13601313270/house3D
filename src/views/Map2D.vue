@@ -134,7 +134,7 @@ const canvasRef = ref<HTMLCanvasElement | null>(null)
 const canvas3DRef = ref<typeof Canvas3D | null>(null)
 const canvas3DRef2 = ref<typeof Canvas3D | null>(null)
 const activeToolsIndex = ref(-1)
-const currentTool = ref<'wall' | 'door' | 'window' | 'camera' | 'outFile' | 'drag'>('drag')
+const currentTool = ref<EntityType | 'drag'>('drag')
 const tempDrawWall = ref<WallDataClass | null>(null)
 const hoverPoint = ref<Point | null>(null)
 const lastPoint = ref<Point | null>(null)
@@ -1414,7 +1414,7 @@ const handleWheel = (e: WheelEvent) => {
 
   drawWrapper()
 }
-function changeCurrentTool(type: 'wall' | 'door' | 'window' | 'camera' | 'outFile' | 'drag') {
+function changeCurrentTool(type: EntityType | 'drag') {
   activeToolsIndex.value = -1
   insertTempObj = null
 
