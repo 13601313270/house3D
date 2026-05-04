@@ -32,17 +32,6 @@ export type fileData = {
   outFile: OutFileData[],
 }
 
-export const defaultFileData: () => fileData = () => {
-  return {
-    wall: [],
-    door: [],
-    window: [],
-    camera: [],
-    cube: [],
-    outFile: [],
-  }
-}
-
 type EntityConstructor = new (...args: any[]) => EntityClass<any>;
 
 export const fileDataKeyToClass: Record<EntityType, EntityConstructor> = {

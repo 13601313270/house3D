@@ -26,14 +26,7 @@ export class World {
     camera?: CameraEntity[],
     cube?: CubeEntity[],
     outFile?: OutFileEntity[],
-  } = {
-      // wall: [],
-      // door: [],
-      // window: [],
-      // camera: [],
-      // cube: [],
-      // outFile: [],
-    }
+  } = {}
 
   allObjFiles: {
     id: string
@@ -115,8 +108,6 @@ export class World {
     if (!ctx) return
 
     const fileData: fileData = this.getAllFileObjects()
-
-    const { wall: walls, door: doors, window: windows, camera: cameras } = fileData
     ctx.clearRect(0, 0, canvasWidth, canvasHeight)
 
     ctx.fillStyle = '#f5f5f5'
@@ -124,18 +115,6 @@ export class World {
     // 绘制墙体
     if (!this.allFileMapObjects.wall) {
       this.allFileMapObjects.wall = []
-    }
-    for (let index = 0; index < walls.length; index++) {
-      const wallApi: WallEntity = this.allFileMapObjects.wall[index]
-      if (wallApi) {
-        wallApi.draw2DPreview(ctx, panOffset, zoomLevel)
-      }
-    }
-    for (let index = 0; index < walls.length; index++) {
-      const wallApi: WallEntity = this.allFileMapObjects.wall[index]
-      if (wallApi) {
-        wallApi.draw2D(ctx, panOffset, zoomLevel)
-      }
     }
 
     if (currentTool === 'wall' && tempWallPoints.length > 0) {
@@ -218,11 +197,7 @@ export class World {
         }
       }
     }
-
     allFileKeys.forEach((key) => {
-      if (key === 'wall') {
-        return;
-      }
       fileData[key].forEach((item, index) => {
         // @ts-ignore
         const itemApi: DoorEntity = this.allFileMapObjects[key][index];
@@ -231,10 +206,8 @@ export class World {
         }
       })
     })
+
     allFileKeys.forEach((key) => {
-      if (key === 'wall') {
-        return;
-      }
       fileData[key].forEach((item, index) => {
         // @ts-ignore
         const itemApi: DoorEntity = this.allFileMapObjects[key][index];
