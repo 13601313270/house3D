@@ -2,7 +2,7 @@ import { HandelInfo, Point } from '@/types/map2d'
 import * as THREE from 'three'
 import { CameraData } from './index.d'
 import { EntityClass, MatchSnapPoint, OrigionSnapPoint } from '@/types/entity'
-import { editItem, EntityType } from '..'
+import { editItem } from '..'
 // @ts-ignore
 import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
 // @ts-ignore
@@ -13,7 +13,7 @@ const img = new Image()
 img.src = kamera || ''
 
 export class CameraEntity extends EntityClass<CameraData> {
-  type: EntityType = 'camera'
+  type: string = 'camera'
   isPointObj: boolean = true
   color: string = '#0c7f25'
   color3D: string = '#0c7f25'

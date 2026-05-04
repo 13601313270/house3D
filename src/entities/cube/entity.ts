@@ -2,12 +2,12 @@ import { HandelInfo, Point } from '@/types/map2d'
 import * as THREE from 'three'
 import { CubeData } from './index.d'
 import { allSnapFromType, EntityClass, MatchSnapPoint } from '@/types/entity'
-import { editItem, EntityType } from '..';
+import { editItem } from '..';
 import { getMaterialById } from '@/material';
 import { DoorCubeClass } from './dataClass'
 
 export class CubeEntity extends EntityClass<CubeData> {
-  type: EntityType = 'cube'
+  type: string = 'cube'
   isPointObj: boolean = true
 
   defaultValue(): CubeData {

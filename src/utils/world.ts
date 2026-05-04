@@ -3,7 +3,7 @@ import { Point } from '../types'
 import { DoorEntity } from '@/entities/door/entity'
 import { drawPoint } from './drawPoint'
 import { calculateAngle } from './calculateAngle'
-import { allFileKeys, EntityType, fileData, fileDataKeyToClass } from '@/entities/index'
+import { allFileKeys, fileData, fileDataKeyToClass } from '@/entities/index'
 import { EntityClass, EntityClassInWall } from '@/types/entity'
 import { ObjDataClass } from '@/entities/objData'
 import { ObjItem } from '@/entities/allObjs';
@@ -13,7 +13,7 @@ export const snapThreshold = 20
 
 export class World {
   allFileMapObjects: {
-    [key in EntityType]?: EntityClass<any>[]
+    [key in string]?: EntityClass<any>[]
   } = {}
 
   allObjFiles: {
@@ -282,7 +282,7 @@ export class World {
     return returnData
   }
 
-  getObjects(type: EntityType) {
+  getObjects(type: string) {
     const returnData: ObjDataClass<any>[] = [];
     if (!this.allFileMapObjects[type]) {
       this.allFileMapObjects[type] = []
@@ -293,7 +293,7 @@ export class World {
     return returnData
   }
 
-  async add(type: EntityType, data: ObjDataClass<any>[]) {
+  async add(type: string, data: ObjDataClass<any>[]) {
     const EntityClassItem: EntityClass<any> = fileDataKeyToClass[type] as any;
     if (!this.allFileMapObjects[type]) {
       this.allFileMapObjects[type] = []
@@ -319,7 +319,7 @@ export class World {
     this.changeBindList.forEach(callback => callback())
   }
 
-  splice(type: EntityType, index: number, count: number = 1) {
+  splice(type: string, index: number, count: number = 1) {
     if (this.allFileMapObjects[type]) {
       this.allFileMapObjects[type][index].beforeRemove()
       this.allFileMapObjects[type].splice(index, count)

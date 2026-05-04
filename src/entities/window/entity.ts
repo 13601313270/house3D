@@ -4,12 +4,12 @@ import { WindowData } from './index.d'
 import * as THREE from 'three'
 import { Brush, Evaluator, SUBTRACTION } from 'three-bvh-csg';
 import { World } from '@/utils/world';
-import { editItem, EntityType } from '..';
+import { editItem } from '..';
 import { getMaterialById } from '@/material';
 import { WindowDataClass } from './dataClass';
 
 export class WindowEntity extends EntityClassInWall<WindowData> {
-  type: EntityType = 'window'
+  type: string = 'window'
   isPointObj: boolean = true
 
   constructor(world: World, window?: WindowData) {

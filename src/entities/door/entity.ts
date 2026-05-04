@@ -5,13 +5,13 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { DoorData } from './index.d'
 import { Brush, Evaluator, SUBTRACTION } from 'three-bvh-csg';
 import { allSnapFromType, EntityClassInWall } from '@/types/entity'
-import { editItem, EntityType } from '..';
+import { editItem } from '..';
 import { World } from '@/utils/world';
 import { getMaterialById } from '@/material';
 import { DoorDataClass } from './dataClass';
 
 export class DoorEntity extends EntityClassInWall<DoorData> {
-  type: EntityType = 'door'
+  type: string = 'door'
   isPointObj: boolean = true
 
   constructor(world: World, door?: DoorData) {

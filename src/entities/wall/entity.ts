@@ -3,12 +3,12 @@ import { allSnapFromType, EntityClass, MatchSnapPoint } from '@/types/entity'
 import { WallData } from './index.d'
 import { createAllWallFromPoints } from '@/utils/createAllWallFromPoints'
 import * as THREE from 'three'
-import { editItem, EntityType } from '..'
+import { editItem } from '..'
 import { getMaterialById } from '@/material'
 import { WallDataClass } from './dataClass'
 
 export class WallEntity extends EntityClass<WallData> {
-  type: EntityType = 'wall'
+  type: string = 'wall'
   isPointObj: boolean = false
 
   defaultValue(): WallData {
@@ -314,7 +314,7 @@ export class WallEntity extends EntityClass<WallData> {
     return lines;
   }
 
-  inSceneSnapLineArea(obj: { type: EntityType }, line: [Point, Point]) {
+  inSceneSnapLineArea(obj: { type: string }, line: [Point, Point]) {
     return false;
   }
 

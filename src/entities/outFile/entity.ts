@@ -2,7 +2,7 @@ import { HandelInfo, Point } from '@/types/map2d'
 import * as THREE from 'three'
 import { OutFileData } from './index.d'
 import { EntityClass, MatchSnapPoint, OrigionSnapPoint } from '@/types/entity'
-import { editItem, EntityType } from '..'
+import { editItem } from '..'
 // @ts-ignore
 import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
 // @ts-ignore
@@ -11,7 +11,7 @@ import { getMaterialById } from '@/material'
 import { OutFileDataClass } from './dataClass';
 
 export class OutFileEntity extends EntityClass<OutFileData> {
-  type: EntityType = 'outFile'
+  type: string = 'outFile'
   isPointObj: boolean = true
   color: string = '#0c7f25'
   color3D: string = '#0c7f25'

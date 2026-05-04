@@ -126,7 +126,7 @@ import { ObjData, Point } from '../types'
 import { snapThreshold, World } from '../utils/world'
 import Canvas3D, { CameraState } from '../components/Canvas3D.vue'
 import { WallData } from '@/entities/wall/index.d'
-import { allFileKeys, fileData, editItem, allFileKeysName, fileDataKeyToClass, EntityType } from '@/entities'
+import { allFileKeys, fileData, editItem, allFileKeysName, fileDataKeyToClass } from '@/entities'
 import { EntityClass, EntityClassInWall, MatchSnapPoint } from '@/types/entity'
 import { HandelInfo, PointWithIndex } from '@/types/map2d'
 import pointToLineDistance from '@/utils/pointToLineDistance'
@@ -147,13 +147,13 @@ const canvasRef = ref<HTMLCanvasElement | null>(null)
 const canvas3DRef = ref<typeof Canvas3D | null>(null)
 const canvas3DRef2 = ref<typeof Canvas3D | null>(null)
 const activeToolsIndex = ref(-1)
-const currentTool = ref<EntityType | 'drag'>('drag')
+const currentTool = ref<string | 'drag'>('drag')
 const tempDrawWall = ref<WallDataClass | null>(null)
 const hoverPoint = ref<Point | null>(null)
 const lastPoint = ref<Point | null>(null)
 const history = ref<WallDataClass[][]>([])
-const xAxisSnappedY = ref<{ objType: EntityType; number: number } | null>(null)
-const yAxisSnappedX = ref<{ objType: EntityType; number: number } | null>(null)
+const xAxisSnappedY = ref<{ objType: string; number: number } | null>(null)
+const yAxisSnappedX = ref<{ objType: string; number: number } | null>(null)
 const draggedPoint = ref<
   { objType: 'wall'; wallIndex: number; pointIndex: number } |
   { type: 'door'; doorIndex: number } |
@@ -249,7 +249,7 @@ const contextMenu = ref<{
 
 const editPropConfigInfo = ref<editItem[]>([])
 const editPropInputInfo = ref<any>({})
-const editPropTypeKey = ref<EntityType>()
+const editPropTypeKey = ref<string>()
 const editSnapPoint = ref<HandelInfo>()
 const editPropTypeIndex = ref<number>(-1)
 
@@ -399,12 +399,12 @@ const getSnapPoint = (
   // 2. 第二优先级：角度+轴对齐组合（计算交点）
   // 3. 计算轴对齐磁吸数据
   let xAxisSnappedYVal: {
-    objType: EntityType,
+    objType: string,
     objId: string,
     number: number
   } | null = null // 命中的y坐标值（水平对齐，即y值与某个点一致）
   let yAxisSnappedXVal: {
-    objType: EntityType,
+    objType: string,
     objId: string,
     number: number
   } | null = null // 命中的x坐标值（垂直对齐，即x值与某个点一致）
@@ -456,7 +456,7 @@ const getSnapPoint = (
     }
     // 1. 计算角度磁吸数据
     let angleSnapped: {
-      objType: EntityType,
+      objType: string,
       objId: string,
       point: Point
     } | null = null
@@ -847,9 +847,7 @@ async function initWorldByData(data: fileData & {
 
   for (let i = 0; i < allFileKeys.length; i++) {
     const key = allFileKeys[i]
-    const key2 = key as EntityType
-    console.log('key2', key2, data[key2])
-    await worldApi.add(key2, data[key2] || [])
+    await worldApi.add(key, data[key] || [])
   }
 
   panOffset.value = data.panOffset || { x: 0, y: 0 }
@@ -1443,7 +1441,7 @@ const handleWheel = (e: WheelEvent) => {
 
   drawWrapper()
 }
-function changeCurrentTool(type: EntityType | 'drag') {
+function changeCurrentTool(type: string | 'drag') {
   activeToolsIndex.value = -1
   insertTempObj = null
 

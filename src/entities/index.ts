@@ -7,38 +7,32 @@ import cameraPlugin from './camera'
 import cubePlugin from './cube'
 import outFilePlugin from './outFile'
 
-export type EntityType = 'wall' | 'door' | 'window' | 'camera' | 'outFile' | 'cube'
-export const allFileKeys: EntityType[] = [
-  wallPlugin.key,
-  doorPlugin.key,
-  windowPlugin.key,
-  cameraPlugin.key,
-  cubePlugin.key,
-  outFilePlugin.key,
-]
-
-export const allFileKeysName: Record<EntityType, string> = {
-  wall: wallPlugin.name,
-  door: doorPlugin.name,
-  window: windowPlugin.name,
-  camera: cameraPlugin.name,
-  cube: cubePlugin.name,
-  outFile: outFilePlugin.name,
-}
-
-export type fileData = {
-  [key in EntityType]?: ObjData[]
-}
-
 type EntityConstructor = new (...args: any[]) => EntityClass<any>;
 
-export const fileDataKeyToClass: Record<EntityType, EntityConstructor> = {
-  wall: wallPlugin.entity,
-  door: doorPlugin.entity,
-  window: windowPlugin.entity,
-  camera: cameraPlugin.entity,
-  cube: cubePlugin.entity,
-  outFile: outFilePlugin.entity,
+export const allFileKeys: string[] = [
+]
+
+export const allFileKeysName: Record<string, string> = {
+}
+
+export const fileDataKeyToClass: Record<string, EntityConstructor> = {
+};
+
+([
+  wallPlugin,
+  doorPlugin,
+  windowPlugin,
+  cameraPlugin,
+  cubePlugin,
+  outFilePlugin,
+].forEach(v => {
+  allFileKeys.push(v.key)
+  allFileKeysName[v.key] = v.name
+  fileDataKeyToClass[v.key] = v.entity
+}))
+
+export type fileData = {
+  [key in string]?: ObjData[]
 }
 
 export type editItem = {
