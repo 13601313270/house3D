@@ -1,31 +1,19 @@
 import * as THREE from 'three'
-import { ObjData, EntityType, Point } from '../types'
-// @ts-ignore
-import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
-import { WallEntity } from '@/entities/wall/index'
+import { EntityType, Point } from '../types'
 import { DoorEntity } from '@/entities/door/index'
-import { WindowEntity } from '@/entities/window'
 import { drawPoint } from './drawPoint'
 import { calculateAngle } from './calculateAngle'
-import { CameraEntity } from '@/entities/camera'
 import { allFileKeys, fileData, fileDataKeyToClass } from '@/entities/index'
 import { EntityClass, EntityClassInWall } from '@/types/entity'
 import { ObjDataClass } from '@/entities/objData'
-import { OutFileEntity } from '@/entities/outFile';
 import { ObjItem } from '@/entities/allObjs';
-import { CubeEntity } from '@/entities/cube';
 
 export const canvasHeight = 600
 export const snapThreshold = 20
 
 export class World {
   allFileMapObjects: {
-    wall?: WallEntity[],
-    door?: DoorEntity[],
-    window?: WindowEntity[],
-    camera?: CameraEntity[],
-    cube?: CubeEntity[],
-    outFile?: OutFileEntity[],
+    [key in EntityType]?: EntityClass<any>[]
   } = {}
 
   allObjFiles: {
