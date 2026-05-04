@@ -127,6 +127,7 @@ export class WindowEntity extends EntityClassInWall<WindowData> {
     ctx.fillStyle = hasBorder ? bqc : tc
     ctx.strokeStyle = hasBorder ? bqc : tc
     ctx.lineWidth = 3
+    ctx.beginPath()
     ctx.fillRect(-width / 2, -thickness / 2, width, thickness)
     ctx.setLineDash([5, 5])
     ctx.stroke()
@@ -139,6 +140,7 @@ export class WindowEntity extends EntityClassInWall<WindowData> {
     ctx.arc(screenX, screenY, 6 * zoomLevel, 0, Math.PI * 2)
     ctx.fill()
     ctx.stroke()
+    ctx.closePath()
   }
 
   // 命中可拖拽具柄
