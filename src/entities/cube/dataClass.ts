@@ -1,0 +1,19 @@
+import { CubeData } from "./index.d"
+import { ObjDataClass } from "../objData"
+
+export class DoorCubeClass extends ObjDataClass<CubeData> {
+  width: number
+  height: number
+  depth: number
+  color: string
+  mt: number
+
+  constructor(data: CubeData) {
+    super(data)
+    this.width = data.width
+    this.height = data.height
+    this.depth = data.depth
+    this.color = data.color
+    this.mt = data.mt
+  }
+}

@@ -1,72 +1,12 @@
 import { Point, HandelInfo } from '@/types/map2d'
-import { allSnapFromType, EntityClass, EntityClassInWall, MatchSnapPoint } from '@/types/entity'
-import { WindowData } from './index.d'
+import { allSnapFromType, EntityClassInWall } from '@/types/entity'
+import { WindowData } from '.'
 import * as THREE from 'three'
 import { Brush, Evaluator, SUBTRACTION } from 'three-bvh-csg';
 import { World } from '@/utils/world';
-import woodenMaterial from '@/material/wooden'
 import { editItem, EntityType } from '..';
 import { getMaterialById } from '@/material';
-
-import { ObjDataClass, ObjInWallDataClass } from '../objData'
-
-export class WindowDataClass extends ObjInWallDataClass<WindowData> {
-  width: number
-  height: number
-  angle: number
-  bqc: string // 包墙颜色
-  bmt: number // 包墙材质
-  tc: string // 门框颜色
-  tmt: number // 门框材质
-  ic: string // 玻璃框颜色
-  icmt: number // 玻璃框材质
-  hasBorder: boolean // 是否有门框
-  rightOpenAngle: number // 右门打开角度
-  leftOpenAngle: number // 左门打开角度
-  constructor(data: WindowData) {
-    super(data)
-    this.wallId = data.wallId
-    this.wallPointId = data.wallPointId
-    this.width = data.width
-    this.height = data.height
-    this.angle = data.angle
-    this.bottom = data.bottom
-    this.bqc = data.bqc
-    this.bmt = data.bmt
-    this.tc = data.tc
-    this.tmt = data.tmt
-    this.ic = data.ic
-    this.icmt = data.icmt
-    this.hasBorder = data.hasBorder
-    this.rightOpenAngle = data.rightOpenAngle
-    this.leftOpenAngle = data.leftOpenAngle
-  }
-}
-
-export function createWindowData(): WindowDataClass {
-  const window: WindowData = {
-    id: Date.now().toString(),
-    wallPointId: -1,
-    wallId: '',
-    x: 0,
-    y: 0,
-    z: 0,
-    width: 120,
-    height: 120,
-    angle: 0,
-    bottom: 40,
-    bqc: '#3498db',
-    bmt: 1,
-    tc: '#3498db',
-    tmt: 1,
-    ic: '#3498db',
-    icmt: 1,
-    hasBorder: false,// 是否有窗户框
-    rightOpenAngle: 0, // 右门打开角度
-    leftOpenAngle: 0, // 左门打开角度
-  }
-  return new WindowDataClass(window)
-}
+import { WindowDataClass } from './dataClass';
 
 export class WindowEntity extends EntityClassInWall<WindowData> {
   type: EntityType = 'window'
@@ -89,7 +29,28 @@ export class WindowEntity extends EntityClassInWall<WindowData> {
   }
 
   defaultValue(): WindowData {
-    return createWindowData()
+    const window: WindowData = {
+      id: Date.now().toString(),
+      wallPointId: -1,
+      wallId: '',
+      x: 0,
+      y: 0,
+      z: 0,
+      width: 120,
+      height: 120,
+      angle: 0,
+      bottom: 40,
+      bqc: '#3498db',
+      bmt: 1,
+      tc: '#3498db',
+      tmt: 1,
+      ic: '#3498db',
+      icmt: 1,
+      hasBorder: false,// 是否有窗户框
+      rightOpenAngle: 0, // 右门打开角度
+      leftOpenAngle: 0, // 左门打开角度
+    }
+    return new WindowDataClass(window)
   }
 
   draw2DPreviewByData(ctx: CanvasRenderingContext2D, data: WindowData, panOffset: Point, zoomLevel: number): void {

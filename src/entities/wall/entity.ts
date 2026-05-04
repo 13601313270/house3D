@@ -1,72 +1,36 @@
 import { Point, HandelInfo } from '@/types/map2d'
 import { allSnapFromType, EntityClass, MatchSnapPoint } from '@/types/entity'
-import { WallData, WallPoint } from './index.d'
+import { WallData } from '.'
 import { createAllWallFromPoints } from '@/utils/createAllWallFromPoints'
 import * as THREE from 'three'
 import { editItem, EntityType } from '..'
 import { getMaterialById } from '@/material'
-import { ObjDataClass } from '../objData'
-import { World } from '@/utils/world'
-
-export function createWallData(): WallDataClass {
-  const wall: WallData = {
-    id: Date.now().toString(),
-    x: 0,
-    y: 0,
-    z: 0,
-    height: 180,
-    color: '#e67e22',
-    thickness: 10,
-    points: [],
-    wmt: 0,
-    hb: false,
-    bc: '#000',
-    bmt: 0,
-    ht: false,
-    tc: '#000',
-    tmt: 0,
-    td: false,
-  }
-  return new WallDataClass(wall)
-}
-
-export class WallDataClass extends ObjDataClass<WallData> {
-  points: WallPoint[]
-  thickness: number
-  color: string
-  height: number
-  wmt: number // 墙材质
-  hb: boolean // 是否有地板
-  bc: string // 地板颜色
-  bmt: number // 地板材质
-  ht: boolean // 是否有天花板
-  tc: string // 天花板颜色
-  tmt: number // 天花板材质
-  td: boolean // 天花板是否是双面
-
-  constructor(data: WallData) {
-    super(data)
-    this.points = data.points
-    this.thickness = data.thickness
-    this.height = data.height
-    this.color = data.color
-    this.wmt = data.wmt
-    this.hb = data.hb
-    this.bc = data.bc
-    this.bmt = data.bmt
-    this.ht = data.ht
-    this.tc = data.tc
-    this.tmt = data.tmt
-    this.td = data.td
-  }
-}
+import { WallDataClass } from './dataClass'
 
 export class WallEntity extends EntityClass<WallData> {
   type: EntityType = 'wall'
   isPointObj: boolean = false
 
   defaultValue(): WallData {
-    return createWallData()
+    const wall: WallData = {
+      id: Date.now().toString(),
+      x: 0,
+      y: 0,
+      z: 0,
+      height: 180,
+      color: '#e67e22',
+      thickness: 10,
+      points: [],
+      wmt: 0,
+      hb: false,
+      bc: '#000',
+      bmt: 0,
+      ht: false,
+      tc: '#000',
+      tmt: 0,
+      td: false,
+    }
+    return new WallDataClass(wall)
   }
 
   draw2DPreviewByData(ctx: CanvasRenderingContext2D, data: WallData, panOffset: Point, zoomLevel: number): void {

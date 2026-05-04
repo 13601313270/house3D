@@ -2,58 +2,13 @@ import { HandelInfo, Point } from '@/types/map2d'
 import * as THREE from 'three'
 // @ts-ignore
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-import { DoorData } from './index.d'
+import { DoorData } from '.'
 import { Brush, Evaluator, SUBTRACTION } from 'three-bvh-csg';
 import { allSnapFromType, EntityClassInWall } from '@/types/entity'
 import { editItem, EntityType } from '..';
 import { World } from '@/utils/world';
-import { WallData } from '../wall/index.d';
 import { getMaterialById } from '@/material';
-import { ObjDataClass, ObjInWallDataClass } from '../objData'
-
-export class DoorDataClass extends ObjInWallDataClass<DoorData> {
-  width: number
-  height: number
-  openAngle: number
-  angle: number
-  hasBorder: boolean
-  color: string
-  mt: number
-  openType: number
-
-  constructor(data: DoorData) {
-    super(data)
-    this.wallId = data.wallId
-    this.width = data.width
-    this.height = data.height
-    this.openAngle = data.openAngle
-    this.angle = data.angle
-    this.hasBorder = data.hasBorder
-    this.color = data.color
-    this.mt = data.mt
-    this.openType = data.openType
-  }
-}
-
-export function createDoorData(): DoorDataClass {
-  const door: DoorData = {
-    id: Date.now().toString(),
-    wallPointId: -1,
-    x: 0,
-    y: 0,
-    z: 0,
-    width: 110,
-    height: 180,
-    bottom: 0,
-    openAngle: 0,
-    angle: 0,
-    hasBorder: true,
-    color: '#e67e22',
-    mt: 3,
-    openType: 1,
-  }
-  return new DoorDataClass(door)
-}
+import { DoorDataClass } from './dataClass';
 
 export class DoorEntity extends EntityClassInWall<DoorData> {
   type: EntityType = 'door'
@@ -74,7 +29,23 @@ export class DoorEntity extends EntityClassInWall<DoorData> {
   }
 
   defaultValue(): DoorData {
-    return createDoorData()
+    const door: DoorData = {
+      id: Date.now().toString(),
+      wallPointId: -1,
+      x: 0,
+      y: 0,
+      z: 0,
+      width: 110,
+      height: 180,
+      bottom: 0,
+      openAngle: 0,
+      angle: 0,
+      hasBorder: true,
+      color: '#e67e22',
+      mt: 3,
+      openType: 1,
+    }
+    return new DoorDataClass(door)
   }
 
   draw2DPreviewByData(ctx: CanvasRenderingContext2D, data: DoorData, panOffset: Point, zoomLevel: number): void {

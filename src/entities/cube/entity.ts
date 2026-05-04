@@ -1,53 +1,28 @@
 import { HandelInfo, Point } from '@/types/map2d'
 import * as THREE from 'three'
-// @ts-ignore
-import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-import { CubeData } from './index.d'
-import { Brush, Evaluator, SUBTRACTION } from 'three-bvh-csg';
-import { allSnapFromType, EntityClass, EntityClassInWall, MatchSnapPoint } from '@/types/entity'
+import { CubeData } from '.'
+import { allSnapFromType, EntityClass, MatchSnapPoint } from '@/types/entity'
 import { editItem, EntityType } from '..';
-import { World } from '@/utils/world';
 import { getMaterialById } from '@/material';
-import { ObjDataClass, ObjInWallDataClass } from '../objData'
-
-export class DoorCubeClass extends ObjDataClass<CubeData> {
-  width: number
-  height: number
-  depth: number
-  color: string
-  mt: number
-
-  constructor(data: CubeData) {
-    super(data)
-    this.width = data.width
-    this.height = data.height
-    this.depth = data.depth
-    this.color = data.color
-    this.mt = data.mt
-  }
-}
-
-export function createCubeData(): DoorCubeClass {
-  const door: CubeData = {
-    id: Date.now().toString(),
-    x: 0,
-    y: 0,
-    z: 0,
-    width: 110,
-    height: 180,
-    depth: 100,
-    color: '#e67e22',
-    mt: 3,
-  }
-  return new DoorCubeClass(door)
-}
+import { DoorCubeClass } from './dataClass'
 
 export class CubeEntity extends EntityClass<CubeData> {
   type: EntityType = 'cube'
   isPointObj: boolean = true
 
   defaultValue(): CubeData {
-    return createCubeData()
+    const door: CubeData = {
+      id: Date.now().toString(),
+      x: 0,
+      y: 0,
+      z: 0,
+      width: 110,
+      height: 180,
+      depth: 100,
+      color: '#e67e22',
+      mt: 3,
+    }
+    return new DoorCubeClass(door)
   }
 
   draw2DPreviewByData(ctx: CanvasRenderingContext2D, data: CubeData, panOffset: Point, zoomLevel: number): void {

@@ -1,6 +1,6 @@
 import * as THREE from 'three'
 import { Point } from '../types'
-import { DoorEntity } from '@/entities/door/index'
+import { DoorEntity } from '@/entities/door/entity'
 import { drawPoint } from './drawPoint'
 import { calculateAngle } from './calculateAngle'
 import { allFileKeys, EntityType, fileData, fileDataKeyToClass } from '@/entities/index'

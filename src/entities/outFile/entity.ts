@@ -1,43 +1,14 @@
 import { HandelInfo, Point } from '@/types/map2d'
 import * as THREE from 'three'
-import { OutFileData } from './index.d'
+import { OutFileData } from '.'
 import { EntityClass, MatchSnapPoint, OrigionSnapPoint } from '@/types/entity'
 import { editItem, EntityType } from '..'
 // @ts-ignore
 import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
 // @ts-ignore
 import { MTLLoader } from 'three/addons/loaders/MTLLoader.js';
-
-import { ObjDataClass } from '../objData'
 import { getMaterialById } from '@/material'
-
-export class OutFileDataClass extends ObjDataClass<OutFileData> {
-  fileTypeId: string
-  angleY: number
-  bm: number | null // 材质
-
-  constructor(data: OutFileData) {
-    super(data)
-    this.fileTypeId = data.fileTypeId
-    this.angleY = data.angleY
-    this.bm = data.bm
-  }
-}
-
-export function createOutFileData(): OutFileDataClass {
-  // @ts-ignore
-  const findObjInfo = window.ObjFiles[0];
-  const data: OutFileData = {
-    fileTypeId: findObjInfo.id,
-    id: Date.now().toString(),
-    angleY: 0,
-    bm: null,
-    x: 0,
-    y: 0,
-    z: 0,
-  }
-  return new OutFileDataClass(data)
-}
+import { OutFileDataClass } from './dataClass';
 
 export class OutFileEntity extends EntityClass<OutFileData> {
   type: EntityType = 'outFile'
@@ -63,7 +34,18 @@ export class OutFileEntity extends EntityClass<OutFileData> {
   }
 
   defaultValue(): OutFileData {
-    return createOutFileData()
+    // @ts-ignore
+    const findObjInfo = window.ObjFiles[0];
+    const data: OutFileData = {
+      fileTypeId: findObjInfo.id,
+      id: Date.now().toString(),
+      angleY: 0,
+      bm: null,
+      x: 0,
+      y: 0,
+      z: 0,
+    }
+    return new OutFileDataClass(data)
   }
 
   draw2DPreviewByData(ctx: CanvasRenderingContext2D, data: OutFileData, panOffset: Point, zoomLevel: number): void {

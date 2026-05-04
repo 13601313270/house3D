@@ -2,7 +2,6 @@ import * as THREE from 'three'
 import { ObjData, HandelInfo, Point, PointWithIndex, ObjInWallData } from './map2d'
 import { World } from '@/utils/world'
 import { WallData } from '@/entities/wall/index.d'
-import { OutFileDataClass, OutFileEntity } from '@/entities/outFile'
 import { editItem, EntityType } from '@/entities'
 
 interface NearestWallResult {

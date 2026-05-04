@@ -1,47 +1,13 @@
 import { HandelInfo, Point } from '@/types/map2d'
 import * as THREE from 'three'
-import { CameraData } from './index.d'
+import { CameraData } from '.'
 import { EntityClass, MatchSnapPoint, OrigionSnapPoint } from '@/types/entity'
 import { editItem, EntityType } from '..'
-import { ObjDataClass } from '../objData'
 // @ts-ignore
 import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
 // @ts-ignore
 import kamera from './kamera.png'
-
-export class CameraDataClass extends ObjDataClass<CameraData> {
-  targetPositionX: number
-  targetPositionY: number
-  targetPositionZ: number
-  fov: number
-  aspectW: number
-  aspectH: number
-  constructor(data: CameraData) {
-    super(data)
-    this.targetPositionX = 0
-    this.targetPositionY = 0
-    this.targetPositionZ = 100
-    this.fov = 55
-    this.aspectW = 9
-    this.aspectH = 16
-  }
-}
-export function createCameraData(): CameraDataClass {
-  const camera: CameraData = {
-    id: Date.now().toString(),
-    x: 0,
-    y: 0,
-    z: 100,
-    aspectW: 9,
-    aspectH: 16,
-    // 相机目标位置
-    targetPositionX: 0,
-    targetPositionY: 0,
-    targetPositionZ: 100,
-    fov: 55,
-  }
-  return new CameraDataClass(camera)
-}
+import { CameraDataClass } from './dataClass'
 
 const img = new Image()
 img.src = kamera || ''
@@ -57,7 +23,20 @@ export class CameraEntity extends EntityClass<CameraData> {
   active: boolean = false // 这个不存在数据库里，只是在前端动态调整
 
   defaultValue(): CameraData {
-    return createCameraData()
+    const camera: CameraData = {
+      id: Date.now().toString(),
+      x: 0,
+      y: 0,
+      z: 100,
+      aspectW: 9,
+      aspectH: 16,
+      // 相机目标位置
+      targetPositionX: 0,
+      targetPositionY: 0,
+      targetPositionZ: 100,
+      fov: 55,
+    }
+    return new CameraDataClass(camera)
   }
 
   draw2DPreviewByData(ctx: CanvasRenderingContext2D, data: CameraData, panOffset: Point, zoomLevel: number): void {
