@@ -1,49 +1,54 @@
 import { HandelInfo, Point } from '@/types/map2d'
 import * as THREE from 'three'
-import { CubeData } from './index.d'
+import { SphereData } from './index.d'
 import { allSnapFromType, EntityClass, MatchSnapPoint } from '@/types/entity'
 import { editItem } from '..';
 import { getMaterialById } from '@/material';
-import { CubeDataClass } from './dataClass'
+import { SphereDataClass } from './dataClass'
 
-export class CubeEntity extends EntityClass<CubeData> {
-  type: string = 'cube'
+export class SphereEntity extends EntityClass<SphereData> {
+  type: string = 'sphere'
   isPointObj: boolean = true
 
-  defaultValue(): CubeData {
-    const door: CubeData = {
+  defaultValue(): SphereData {
+    const door: SphereData = {
       id: Date.now().toString(),
       x: 0,
       y: 0,
       z: 0,
-      width: 110,
-      height: 180,
-      depth: 100,
+      r: 50,
       color: '#e67e22',
-      mt: 3,
+      mt: null,
     }
-    return new CubeDataClass(door)
+    return new SphereDataClass(door)
   }
 
-  draw2DPreviewByData(ctx: CanvasRenderingContext2D, data: CubeData, panOffset: Point, zoomLevel: number): void {
-    const { width, height, depth } = data;
+  draw2DPreviewByData(ctx: CanvasRenderingContext2D, data: SphereData, panOffset: Point, zoomLevel: number): void {
+    const { r } = data;
     // 实现门的2D绘制逻辑
     const screenX = data.x * zoomLevel + panOffset.x
     const screenY = data.y * zoomLevel + panOffset.y
 
-    // 绘制一个方块
+    // 绘制一个圆形
     ctx.fillStyle = data.color
-    ctx.fillRect(
-      screenX - width / 2 * zoomLevel,
-      screenY - depth / 2 * zoomLevel,
-      width * zoomLevel,
-      depth * zoomLevel
+    ctx.strokeStyle = 'grey'
+    ctx.lineWidth = 1
+    ctx.beginPath()
+    ctx.arc(
+      screenX,
+      screenY,
+      r,
+      0,
+      Math.PI * 2
     )
+    ctx.fill()
+    ctx.stroke()
+    ctx.closePath()
   }
 
   draw2DByData(
     ctx: CanvasRenderingContext2D,
-    data: CubeData,
+    data: SphereData,
     panOffset: Point,
     zoomLevel: number,
   ): void {
@@ -67,20 +72,19 @@ export class CubeEntity extends EntityClass<CubeData> {
     const data = this.getData();
     const group = new THREE.Group()
 
-    const { width, height, depth, color, mt } = data;
+    const { r, color, mt } = data;
 
-    // group添加门框
-    const geometryRight = new THREE.BoxGeometry(
-      width,
-      height,
-      depth
+    const geometryRight = new THREE.SphereGeometry(
+      r,
+      32,
+      32
     );
-    const material = data.mt ? (getMaterialById(data.mt)?.material(new THREE.Vector3(0, 0, 1))) : (new THREE.MeshStandardMaterial({ color: data.color }));
+    const material = mt ? (getMaterialById(mt)?.material(new THREE.Vector3(0, 0, 1))) : (new THREE.MeshStandardMaterial({ color: color }));
     const doorMeshRight = new THREE.Mesh(geometryRight, material)
-    doorMeshRight.position.setY(data.height / 2)
+    doorMeshRight.position.setY(data.r)
     group.add(doorMeshRight);
 
-    // group.position.set(data.x, data.height / 2, data.y)
+    // group.position.set(data.x, data.r, data.y)
     // group.rotateY(data.angle * -1);
     return [
       group
@@ -124,7 +128,7 @@ export class CubeEntity extends EntityClass<CubeData> {
     return []
   }
 
-  setData(data: CubeData) {
+  setData(data: SphereData) {
     // 双向去除原有的关联对象
     this.associationEntity.forEach(entity => {
       if (entity.associationEntity.includes(this)) {
@@ -138,31 +142,13 @@ export class CubeEntity extends EntityClass<CubeData> {
     const data = this.getData();
     editShow([
       {
-        id: 'width',
-        label: '长度',
+        id: 'r',
+        label: '半径',
         dataType: 'number',
         min: 1,
         max: Infinity,
         step: 10,
-        value: data.width,
-      },
-      {
-        id: 'depth',
-        label: '宽度',
-        dataType: 'number',
-        min: 0,
-        max: Infinity,
-        step: 10,
-        value: data.depth,
-      },
-      {
-        id: 'height',
-        label: '高度',
-        dataType: 'number',
-        min: 0,
-        max: Infinity,
-        step: 10,
-        value: data.height,
+        value: data.r,
       },
       {
         id: 'mt',
@@ -188,7 +174,7 @@ export class CubeEntity extends EntityClass<CubeData> {
     return false
   }
 
-  inSceneSnapLineArea(obj: EntityClass<CubeData>, line: [Point, Point]) {
+  inSceneSnapLineArea(obj: EntityClass<SphereData>, line: [Point, Point]) {
     return false
   }
 

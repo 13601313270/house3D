@@ -1,7 +1,7 @@
 import { CubeData } from "./index.d"
 import { ObjDataClass } from "../objData"
 
-export class DoorCubeClass extends ObjDataClass<CubeData> {
+export class CubeDataClass extends ObjDataClass<CubeData> {
   width: number
   height: number
   depth: number
