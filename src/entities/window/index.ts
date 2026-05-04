@@ -1,11 +1,11 @@
 import { Point, HandelInfo } from '@/types/map2d'
-import { allSnapFromType, EntityClass, EntityClassInWall, EntityType, MatchSnapPoint } from '@/types/entity'
+import { allSnapFromType, EntityClass, EntityClassInWall, MatchSnapPoint } from '@/types/entity'
 import { WindowData } from './index.d'
 import * as THREE from 'three'
 import { Brush, Evaluator, SUBTRACTION } from 'three-bvh-csg';
 import { World } from '@/utils/world';
 import woodenMaterial from '@/material/wooden'
-import { editItem } from '..';
+import { editItem, EntityType } from '..';
 import { getMaterialById } from '@/material';
 
 import { ObjDataClass, ObjInWallDataClass } from '../objData'

@@ -1,9 +1,9 @@
 import * as THREE from 'three'
-import { EntityType, Point } from '../types'
+import { Point } from '../types'
 import { DoorEntity } from '@/entities/door/index'
 import { drawPoint } from './drawPoint'
 import { calculateAngle } from './calculateAngle'
-import { allFileKeys, fileData, fileDataKeyToClass } from '@/entities/index'
+import { allFileKeys, EntityType, fileData, fileDataKeyToClass } from '@/entities/index'
 import { EntityClass, EntityClassInWall } from '@/types/entity'
 import { ObjDataClass } from '@/entities/objData'
 import { ObjItem } from '@/entities/allObjs';

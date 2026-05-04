@@ -9,10 +9,11 @@ import { WindowEntity } from './window'
 import { CameraEntity } from './camera'
 import { OutFileEntity } from './outFile/index'
 import { CubeEntity } from './cube'
-import { EntityClass, EntityType } from '@/types/entity'
+import { EntityClass } from '@/types/entity'
 import { CubeData } from './cube/index.d'
 import { ObjData } from '@/types/map2d'
 
+export type EntityType = 'wall' | 'door' | 'window' | 'camera' | 'outFile' | 'cube'
 export const allFileKeys: EntityType[] = ['wall', 'door', 'window', 'camera', 'cube', 'outFile']
 
 export const allFileKeysName: Record<EntityType, string> = {

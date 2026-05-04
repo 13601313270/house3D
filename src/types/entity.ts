@@ -3,7 +3,7 @@ import { ObjData, HandelInfo, Point, PointWithIndex, ObjInWallData } from './map
 import { World } from '@/utils/world'
 import { WallData } from '@/entities/wall/index.d'
 import { OutFileDataClass, OutFileEntity } from '@/entities/outFile'
-import { editItem } from '@/entities'
+import { editItem, EntityType } from '@/entities'
 
 interface NearestWallResult {
   wall: WallData
@@ -12,7 +12,6 @@ interface NearestWallResult {
   angle: number
 }
 
-export type EntityType = 'wall' | 'door' | 'window' | 'camera' | 'outFile' | 'cube'
 export type allSnapFromType = 'point' | 'line' | 'axis'
 // 磁吸点
 export type OrigionSnapPoint = {

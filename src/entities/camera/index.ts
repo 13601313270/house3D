@@ -1,8 +1,8 @@
 import { HandelInfo, Point } from '@/types/map2d'
 import * as THREE from 'three'
 import { CameraData } from './index.d'
-import { EntityClass, EntityType, MatchSnapPoint, OrigionSnapPoint } from '@/types/entity'
-import { editItem } from '..'
+import { EntityClass, MatchSnapPoint, OrigionSnapPoint } from '@/types/entity'
+import { editItem, EntityType } from '..'
 import { ObjDataClass } from '../objData'
 // @ts-ignore
 import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';

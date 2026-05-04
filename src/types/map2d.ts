@@ -1,4 +1,4 @@
-import { EntityType } from "./entity"
+import { EntityType } from "@/entities"
 
 export interface Point {
   x: number
