@@ -24,7 +24,7 @@
             <div>
               <div class="childItem" v-for="value in allFileKeys.filter(item => item !== 'outFile')" :key="value"
                 :class="{ active: currentTool === value }" @click="changeCurrentTool(value)">
-                {{ allFileKeysName[value] }}||{{ fileDataKeyToClass[value]?.name }}
+                {{ allFileKeysName[value] }}
               </div>
             </div>
             <div class="splitLine"></div>
