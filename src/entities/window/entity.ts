@@ -1,6 +1,6 @@
 import { Point, HandelInfo } from '@/types/map2d'
 import { allSnapFromType, EntityClassInWall } from '@/types/entity'
-import { WindowData } from '.'
+import { WindowData } from './index.d'
 import * as THREE from 'three'
 import { Brush, Evaluator, SUBTRACTION } from 'three-bvh-csg';
 import { World } from '@/utils/world';

@@ -2,7 +2,7 @@ import { HandelInfo, Point } from '@/types/map2d'
 import * as THREE from 'three'
 // @ts-ignore
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-import { DoorData } from '.'
+import { DoorData } from './index.d'
 import { Brush, Evaluator, SUBTRACTION } from 'three-bvh-csg';
 import { allSnapFromType, EntityClassInWall } from '@/types/entity'
 import { editItem, EntityType } from '..';

@@ -1,6 +1,6 @@
 import { Point, HandelInfo } from '@/types/map2d'
 import { allSnapFromType, EntityClass, MatchSnapPoint } from '@/types/entity'
-import { WallData } from '.'
+import { WallData } from './index.d'
 import { createAllWallFromPoints } from '@/utils/createAllWallFromPoints'
 import * as THREE from 'three'
 import { editItem, EntityType } from '..'

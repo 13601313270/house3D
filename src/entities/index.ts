@@ -1,22 +1,29 @@
-import { WallEntity } from './wall/entity'
-import { DoorEntity } from './door/entity'
-import { WindowEntity } from './window/entity'
-import { CameraEntity } from './camera/entity'
-import { OutFileEntity } from './outFile/entity'
-import { CubeEntity } from './cube/entity'
 import { EntityClass } from '@/types/entity'
 import { ObjData } from '@/types/map2d'
+import wallPlugin from './wall'
+import windowPlugin from './window'
+import doorPlugin from './door'
+import cameraPlugin from './camera'
+import cubePlugin from './cube'
+import outFilePlugin from './outFile'
 
 export type EntityType = 'wall' | 'door' | 'window' | 'camera' | 'outFile' | 'cube'
-export const allFileKeys: EntityType[] = ['wall', 'door', 'window', 'camera', 'cube', 'outFile']
+export const allFileKeys: EntityType[] = [
+  wallPlugin.key,
+  doorPlugin.key,
+  windowPlugin.key,
+  cameraPlugin.key,
+  cubePlugin.key,
+  outFilePlugin.key,
+]
 
 export const allFileKeysName: Record<EntityType, string> = {
-  wall: '墙体',
-  door: '门',
-  window: '窗户',
-  camera: '相机',
-  cube: '方块',
-  outFile: '外部文件',
+  wall: wallPlugin.name,
+  door: doorPlugin.name,
+  window: windowPlugin.name,
+  camera: cameraPlugin.name,
+  cube: cubePlugin.name,
+  outFile: outFilePlugin.name,
 }
 
 export type fileData = {
@@ -26,12 +33,12 @@ export type fileData = {
 type EntityConstructor = new (...args: any[]) => EntityClass<any>;
 
 export const fileDataKeyToClass: Record<EntityType, EntityConstructor> = {
-  wall: WallEntity,
-  door: DoorEntity,
-  window: WindowEntity,
-  camera: CameraEntity,
-  cube: CubeEntity,
-  outFile: OutFileEntity,
+  wall: wallPlugin.entity,
+  door: doorPlugin.entity,
+  window: windowPlugin.entity,
+  camera: cameraPlugin.entity,
+  cube: cubePlugin.entity,
+  outFile: outFilePlugin.entity,
 }
 
 export type editItem = {

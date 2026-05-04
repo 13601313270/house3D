@@ -1,6 +1,6 @@
 import { HandelInfo, Point } from '@/types/map2d'
 import * as THREE from 'three'
-import { CubeData } from '.'
+import { CubeData } from './index.d'
 import { allSnapFromType, EntityClass, MatchSnapPoint } from '@/types/entity'
 import { editItem, EntityType } from '..';
 import { getMaterialById } from '@/material';
