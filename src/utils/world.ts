@@ -20,19 +20,19 @@ export const snapThreshold = 20
 
 export class World {
   allFileMapObjects: {
-    wall: WallEntity[],
-    door: DoorEntity[],
-    window: WindowEntity[],
-    camera: CameraEntity[],
-    cube: CubeEntity[],
-    outFile: OutFileEntity[],
+    wall?: WallEntity[],
+    door?: DoorEntity[],
+    window?: WindowEntity[],
+    camera?: CameraEntity[],
+    cube?: CubeEntity[],
+    outFile?: OutFileEntity[],
   } = {
-      wall: [],
-      door: [],
-      window: [],
-      camera: [],
-      cube: [],
-      outFile: [],
+      // wall: [],
+      // door: [],
+      // window: [],
+      // camera: [],
+      // cube: [],
+      // outFile: [],
     }
 
   allObjFiles: {
@@ -86,7 +86,7 @@ export class World {
       texture.wrapS = THREE.RepeatWrapping;
       texture.wrapT = THREE.RepeatWrapping;
       texture.repeat.set(12, 12);
-      
+
       const groundMaterial = new THREE.MeshBasicMaterial({
         map: texture,
       })
@@ -122,6 +122,9 @@ export class World {
     ctx.fillStyle = '#f5f5f5'
     ctx.fillRect(0, 0, canvasWidth, canvasHeight)
     // 绘制墙体
+    if (!this.allFileMapObjects.wall) {
+      this.allFileMapObjects.wall = []
+    }
     for (let index = 0; index < walls.length; index++) {
       const wallApi: WallEntity = this.allFileMapObjects.wall[index]
       if (wallApi) {
@@ -291,10 +294,12 @@ export class World {
 
   draw3D() {
     allFileKeys.forEach((key) => {
-      (this.allFileMapObjects[key] as EntityClass<any>[]).forEach((item) => {
-        item.reCreate3DMeshIfNeed()
-        item.change3DMeshState()
-      });
+      if (this.allFileMapObjects[key]) {
+        (this.allFileMapObjects[key] as EntityClass<any>[]).forEach((item) => {
+          item.reCreate3DMeshIfNeed()
+          item.change3DMeshState()
+        });
+      }
     });
   }
 
@@ -308,28 +313,31 @@ export class World {
       outFile: [],
     };
     allFileKeys.forEach((key) => {
-      (this.allFileMapObjects[key] as EntityClass<any>[]).forEach((item) => {
-        returnData[key].push(item.getData())
-      })
+      if (this.allFileMapObjects[key]) {
+        (this.allFileMapObjects[key] as EntityClass<any>[]).forEach((item) => {
+          returnData[key].push(item.getData())
+        })
+      }
     })
     return returnData
   }
 
   getObjects(type: EntityType) {
     const returnData: ObjDataClass<any>[] = [];
+    if (!this.allFileMapObjects[type]) {
+      this.allFileMapObjects[type] = []
+    }
     this.allFileMapObjects[type].forEach((item) => {
       returnData.push(item.getData())
     })
     return returnData
   }
 
-  // replaceObjects(type: EntityType, index: number, data: ObjDataClass<any>) {
-  //   this.allFileMapObjects[type][index].setData(data as any)
-  //   // this.changeBindList.forEach(callback => callback())
-  // }
-
   async add(type: EntityType, data: ObjDataClass<any>[]) {
     const EntityClassItem: EntityClass<any> = fileDataKeyToClass[type] as any;
+    if (!this.allFileMapObjects[type]) {
+      this.allFileMapObjects[type] = []
+    }
     for (let i = 0; i < data.length; i++) {
       // @ts-ignore
       const api: EntityClass<any> = new EntityClassItem(this, data[i]);

@@ -62,6 +62,9 @@ export class DoorEntity extends EntityClassInWall<DoorData> {
   constructor(world: World, door?: DoorData) {
     super(world, door)
     if (door && door.wallId) {
+      if (!this.world.allFileMapObjects.wall) {
+        this.world.allFileMapObjects.wall = []
+      }
       const wall = this.world.allFileMapObjects.wall.find((entity) => entity.getData().id === door.wallId);
       if (wall) {
         this.associationEntity.push(wall)
@@ -83,6 +86,9 @@ export class DoorEntity extends EntityClassInWall<DoorData> {
     panOffset: Point,
     zoomLevel: number,
   ): void {
+    if (!this.world.allFileMapObjects.wall) {
+      this.world.allFileMapObjects.wall = []
+    }
     const findWall = this.world.allFileMapObjects.wall.find((entity) => entity.getData().id === data.wallId);
     let wallThickness = 10;
     if (findWall) {
@@ -123,6 +129,9 @@ export class DoorEntity extends EntityClassInWall<DoorData> {
     // 加载 https://video-obj.oss-cn-beijing.aliyuncs.com/door.glb
     const data = this.getData();
     const group = new THREE.Group()
+    if (!this.world.allFileMapObjects.wall) {
+      this.world.allFileMapObjects.wall = []
+    }
     const wall = this.world.allFileMapObjects.wall.find((entity) => {
       return entity.getData().id === data.wallId
     })

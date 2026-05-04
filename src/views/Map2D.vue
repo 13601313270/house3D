@@ -24,10 +24,21 @@
             <div>
               <div class="childItem" v-for="value in allFileKeys.filter(item => item !== 'outFile')" :key="value"
                 :class="{ active: currentTool === value }" @click="changeCurrentTool(value)">
-                {{ allFileKeysName[value] }}
+                {{ allFileKeysName[value] }}||{{ fileDataKeyToClass[value]?.name }}
               </div>
             </div>
             <div class="splitLine"></div>
+            <!-- <div class="typeItemContent">
+              <div class="typeName">基础对象</div>
+              <div class="childItemList">
+                <div class="childItem">方块</div>
+                <div class="childItem">球体</div>
+                <div class="childItem">圆柱体</div>
+                <div class="childItem">圆锥体</div>
+                <div class="childItem">平面</div>
+              </div>
+            </div>
+            <div class="splitLine"></div> -->
             <div>
               <div v-for="item in ObjFileTypes" :key="item.id" class="typeItemContent">
                 <div class="typeName" @mouseenter="mouseEnterType(item)">{{ item.name }}</div>
@@ -631,20 +642,22 @@ function changeCamera2State(activeIndex: number = 0) {
     cameraState2.value = allCameraList[activeIndex]
     activeCameraIndex.value = activeIndex
     worldApi.activeCameraIndex = activeIndex
-    worldApi.allFileMapObjects.camera.forEach((camera, index) => {
-      if (index === activeIndex) {
-        if (camera.active === false) {
-          camera.active = true
-          camera.remove3DCache()
+    if (worldApi.allFileMapObjects.camera) {
+      worldApi.allFileMapObjects.camera.forEach((camera, index) => {
+        if (index === activeIndex) {
+          if (camera.active === false) {
+            camera.active = true
+            camera.remove3DCache()
+          }
+        } else {
+          if (camera.active === true) {
+            camera.active = false
+            camera.remove3DCache()
+          }
         }
-      } else {
-        if (camera.active === true) {
-          camera.active = false
-          camera.remove3DCache()
-        }
-      }
-    })
-    drawWrapper()
+      })
+      drawWrapper()
+    }
   } else {
     allCamera.value = []
     cameraState2.value = null
@@ -866,6 +879,9 @@ const handleContextMenu = (e: MouseEvent) => {
   for (let i = 0; i < sortAllFileKeys.length; i++) {
     const type = sortAllFileKeys[i]
     if (sortAllFileKeys.includes(type)) {
+      if (!worldApi.allFileMapObjects[type]) {
+        continue
+      }
       for (let j = 0; j < worldApi.getObjects(type).length; j++) {
         const api: EntityClass<any> = worldApi.allFileMapObjects[type][j]
         const snapPoint = api.matchHandelInfo(x, y, zoomLevel.value)
@@ -1149,13 +1165,16 @@ const handleMouseMove = (e: MouseEvent) => {
       }
       return false;
     }
-    for (let i = 0; i < worldApi.getObjects('wall').length; i++) {
-      // const wall = worldApi.getObjects('wall')[i] as Wall
-      const api: WallEntity = worldApi.allFileMapObjects.wall[i] as WallEntity;
-      if (temp(api)) {
-        return;
+    if (worldApi.allFileMapObjects.wall) {
+      for (let i = 0; i < worldApi.getObjects('wall').length; i++) {
+        // const wall = worldApi.getObjects('wall')[i] as Wall
+        const api: WallEntity = worldApi.allFileMapObjects.wall[i] as WallEntity;
+        if (temp(api)) {
+          return;
+        }
       }
     }
+
     matchHandelObj.notInSceneSnapLineArea()
     matchHandelObj.matchHandelMoveCallback(x, y, matchHandelInfo)
     drawWrapper()
@@ -1264,23 +1283,28 @@ const handleMouseDown = (e: MouseEvent) => {
       dist: number,
     }> = []
     // 检查已绘制的墙上的点
-    for (let i = 0; i < worldApi.getObjects('wall').length; i++) {
-      // const wall = worldApi.getObjects('wall')[i]
-      const api: WallEntity = worldApi.allFileMapObjects.wall[i] as WallEntity;
-      const matchInfo = api.matchHandelInfo(x, y, zoomLevel.value)
-      if (matchInfo) {
-        matchHandelInfoList.push({
-          classInfo: api,
-          handle: matchInfo,
-          startPooint: { x, y },
-          dist: matchInfo.dist,
-        })
+    if (worldApi.allFileMapObjects.wall) {
+      for (let i = 0; i < worldApi.getObjects('wall').length; i++) {
+        // const wall = worldApi.getObjects('wall')[i]
+        const api: WallEntity = worldApi.allFileMapObjects.wall[i] as WallEntity;
+        const matchInfo = api.matchHandelInfo(x, y, zoomLevel.value)
+        if (matchInfo) {
+          matchHandelInfoList.push({
+            classInfo: api,
+            handle: matchInfo,
+            startPooint: { x, y },
+            dist: matchInfo.dist,
+          })
+        }
       }
     }
 
     for (let i = 0; i < allFileKeys.length; i++) {
       const key = allFileKeys[i];
       if (key === 'wall') continue;
+      if (!worldApi.allFileMapObjects[key]) {
+        continue
+      }
       for (let j = 0; j < worldApi.getObjects(key).length; j++) {
         const api: DoorEntity = worldApi.allFileMapObjects[key][j] as DoorEntity;
         const matchInfo = api.matchHandelInfo(x, y, zoomLevel.value)
