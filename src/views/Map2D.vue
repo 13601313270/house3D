@@ -647,12 +647,16 @@ function changeCamera2State(activeIndex: number = 0) {
     if (worldApi.allFileMapObjects.camera) {
       worldApi.allFileMapObjects.camera.forEach((camera, index) => {
         if (index === activeIndex) {
+          // @ts-ignore
           if (camera.active === false) {
+            // @ts-ignore
             camera.active = true
             camera.remove3DCache()
           }
         } else {
+          // @ts-ignore
           if (camera.active === true) {
+            // @ts-ignore
             camera.active = false
             camera.remove3DCache()
           }
@@ -773,7 +777,7 @@ const saveDrawing = () => {
     cameraState: CameraState
     activeCameraIndex: number
   } = {
-    ...worldApi.getAllFileObjects(),
+    ...worldApi.getAllFileObjects() as any,
     panOffset: panOffset.value,
     zoomLevel: zoomLevel.value,
     cameraState: cameraState.value,
