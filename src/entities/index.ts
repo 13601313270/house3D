@@ -11,6 +11,7 @@ import { OutFileEntity } from './outFile/index'
 import { CubeEntity } from './cube'
 import { EntityClass, EntityType } from '@/types/entity'
 import { CubeData } from './cube/index.d'
+import { ObjData } from '@/types/map2d'
 
 export const allFileKeys: EntityType[] = ['wall', 'door', 'window', 'camera', 'cube', 'outFile']
 
@@ -24,12 +25,7 @@ export const allFileKeysName: Record<EntityType, string> = {
 }
 
 export type fileData = {
-  wall: WallData[],
-  door: DoorData[],
-  window: WindowData[],
-  camera: CameraData[],
-  cube: CubeData[],
-  outFile: OutFileData[],
+  [key in EntityType]?: ObjData[]
 }
 
 type EntityConstructor = new (...args: any[]) => EntityClass<any>;

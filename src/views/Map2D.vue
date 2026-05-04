@@ -824,9 +824,12 @@ async function initWorldByData(data: fileData & {
   activeCameraIndex: number
 }) {
   const allFileTypeId = new Set()
-  data.outFile.forEach(v => {
-    allFileTypeId.add(v.fileTypeId)
-  })
+  if (data.outFile) {
+    data.outFile.forEach(v => {
+      // @ts-ignore
+      allFileTypeId.add(v.fileTypeId)
+    })
+  }
 
   const fileTypes = Array.from(allFileTypeId)
 

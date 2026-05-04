@@ -186,23 +186,27 @@ export class World {
       }
     }
     allFileKeys.forEach((key) => {
-      fileData[key].forEach((item, index) => {
-        // @ts-ignore
-        const itemApi: DoorEntity = this.allFileMapObjects[key][index];
-        if (itemApi) {
-          itemApi.draw2DPreview(ctx, panOffset, zoomLevel)
-        }
-      })
+      if (fileData[key]) {
+        fileData[key].forEach((item, index) => {
+          // @ts-ignore
+          const itemApi: DoorEntity = this.allFileMapObjects[key][index];
+          if (itemApi) {
+            itemApi.draw2DPreview(ctx, panOffset, zoomLevel)
+          }
+        })
+      }
     })
 
     allFileKeys.forEach((key) => {
-      fileData[key].forEach((item, index) => {
-        // @ts-ignore
-        const itemApi: DoorEntity = this.allFileMapObjects[key][index];
-        if (itemApi) {
-          itemApi.draw2D(ctx, panOffset, zoomLevel)
-        }
-      })
+      if (fileData[key]) {
+        fileData[key].forEach((item, index) => {
+          // @ts-ignore
+          const itemApi: DoorEntity = this.allFileMapObjects[key][index];
+          if (itemApi) {
+            itemApi.draw2D(ctx, panOffset, zoomLevel)
+          }
+        })
+      }
     })
 
     if (insertTempObj) {
@@ -265,17 +269,12 @@ export class World {
   }
 
   getAllFileObjects(): fileData {
-    const returnData: fileData = {
-      wall: [],
-      door: [],
-      window: [],
-      camera: [],
-      cube: [],
-      outFile: [],
-    };
+    const returnData: fileData = {};
     allFileKeys.forEach((key) => {
+      returnData[key] = []
       if (this.allFileMapObjects[key]) {
         (this.allFileMapObjects[key] as EntityClass<any>[]).forEach((item) => {
+          // @ts-ignore
           returnData[key].push(item.getData())
         })
       }
