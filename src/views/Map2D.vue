@@ -21,6 +21,12 @@
             添加
           </button>
           <div class="list" v-show="activeToolsIndex === 1">
+            <template v-if="lastChooseOutFile">
+              <div class="childItem" @click="changeCurrentToolToOutFile(lastChooseOutFile.id)">
+                最近使用：{{ lastChooseOutFile.name }}
+              </div>
+              <div class="splitLine"></div>
+            </template>
             <div>
               <div class="childItem" v-for="value in allFileKeys.filter(item => item !== 'outFile')" :key="value"
                 :class="{ active: currentTool === value }" @click="changeCurrentTool(value)">
@@ -108,7 +114,7 @@
   </div>
   <div v-if="showDemos" class="allDemosContent">
     <div class="allDemosContentInner">
-      <div class="title">欢迎来到「摄影棚」，请选择创建场景的模板</div>
+      <div class="title">欢迎来到<span class="p">「摄影棚」</span>，请选择创建场景的模板</div>
       <div class="demoList">
         <div v-if="demoIniting" class="loading">...</div>
         <div class="demoItem" @click="showDemos = false">
@@ -1492,12 +1498,18 @@ function changeCurrentTool(type: string | 'drag') {
   currentTool.value = type
 }
 
+const lastChooseOutFile = ref<ObjItem>()
+
 async function changeCurrentToolToOutFile(id: string) {
   activeToolsIndex.value = -1
   const index = worldApi.ObjFileTypes.findIndex(item => item.id === id);
   if (index === -1) {
-    const { data: res } = await axios.get('https://api.studying1v1.com/video/objectFileById/' + id)
+    const { data } = await axios.get('https://api.studying1v1.com/video/objectFileById/' + id)
+    const res: ObjItem = data;
+    lastChooseOutFile.value = res;
     worldApi.ObjFileTypes.push(res)
+  } else {
+    lastChooseOutFile.value = worldApi.ObjFileTypes[index];
   }
   const findObjInfo = worldApi.ObjFileTypes.find(item => item.id === id);
   if (!findObjInfo) return
@@ -1583,7 +1595,7 @@ function chooseDemo(id: number) {
     .list {
       position: absolute;
       top: 100%;
-      width: 100px;
+      width: 160px;
       left: 0;
       background: white;
       border: 1px solid #d9d9d9;
@@ -1867,6 +1879,11 @@ button {
       line-height: 40px;
       color: #666;
       margin-bottom: 8px;
+
+      .p {
+        font-weight: bold;
+        color: black;
+      }
     }
 
     .demoList {
