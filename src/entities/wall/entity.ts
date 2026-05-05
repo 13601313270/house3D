@@ -29,6 +29,7 @@ export class WallEntity extends EntityClass<WallData> {
       tc: '#000',
       tmt: 0,
       td: false,
+      bottom: 0,
     }
     return new WallDataClass(wall)
   }
@@ -133,6 +134,7 @@ export class WallEntity extends EntityClass<WallData> {
     const meshList: THREE.Group[] = []
     const wallBoxList = createAllWallFromPoints([data]);
     const wallHeight = data.height
+    const bottom = data.bottom || 0
     const extrudeSettings = {
       steps: 1,
       depth: wallHeight,
@@ -170,6 +172,7 @@ export class WallEntity extends EntityClass<WallData> {
       // console.log('this.getData() ', this.getData())
       wallMesh.castShadow = true
       wallMesh.receiveShadow = true
+      wallMesh.position.setY(bottom)
       const group = new THREE.Group()
       group.add(wallMesh)
       meshList.push(group)
@@ -195,7 +198,7 @@ export class WallEntity extends EntityClass<WallData> {
         side: THREE.DoubleSide
       }));
       const floorMesh = new THREE.Mesh(geometry, materialBottom)
-      floorMesh.position.set(0, floorDepth * -1 + 1, 0)
+      floorMesh.position.set(0, floorDepth * -1 + 1 + bottom, 0)
       const group = new THREE.Group()
       group.add(floorMesh)
       meshList.push(group)
@@ -214,7 +217,7 @@ export class WallEntity extends EntityClass<WallData> {
         side: data.td ? THREE.DoubleSide : THREE.BackSide
       }));
       const topMesh = new THREE.Mesh(geometryTop, materialTop)
-      topMesh.position.set(0, wallHeight + 1, 0)
+      topMesh.position.set(0, wallHeight + 1 + bottom, 0)
       const group2 = new THREE.Group()
       group2.add(topMesh)
       meshList.push(group2)
@@ -398,6 +401,15 @@ export class WallEntity extends EntityClass<WallData> {
           label: '天花板是否是双面',
           dataType: 'boolean',
           value: data.td,
+        },
+        {
+          id: 'bottom',
+          label: '距离地面距离',
+          dataType: 'number',
+          min: 0,
+          max: Infinity,
+          step: 1,
+          value: data.bottom,
         },
       ];
       editShow(configList, (val) => {

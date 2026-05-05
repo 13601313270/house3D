@@ -22,4 +22,5 @@ export type WallData = ObjData & {
   tc: string // 天花板颜色
   tmt: number // 天花板材质
   td: boolean // 天花板是否是双面
+  bottom: number // 距离地面距离
 }
