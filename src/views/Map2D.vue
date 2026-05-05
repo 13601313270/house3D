@@ -106,6 +106,21 @@
       </div>
     </div>
   </div>
+  <div v-if="showDemos" class="allDemosContent">
+    <div class="allDemosContentInner">
+      <div class="title">欢迎来到「摄影棚」，请选择创建场景的模板</div>
+      <div class="demoList">
+        <div v-if="demoIniting" class="loading">...</div>
+        <div class="demoItem" @click="showDemos = false">
+          <div>空文件</div>
+        </div>
+        <div v-for="item in allDemos" :key="item.id" class="demoItem" @click="chooseDemo(item.id)">
+          <div>{{ item.name }}</div>
+          <img :src="item.img" alt="demo cover" />
+        </div>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script lang="ts" setup>
@@ -128,9 +143,6 @@ import { OutFileDataClass } from '@/entities/outFile/dataClass'
 import { OutFileEntity } from '@/entities/outFile/entity'
 import { OutFileData } from '@/entities/outFile/index.d'
 import DataTypeEdit from './DataTypeEdit.vue'
-import { CameraEntity } from '@/entities/camera/entity'
-// @ts-ignore
-import initDefaultFile from './initDefaultFile.json'
 
 const canvasRef = ref<HTMLCanvasElement | null>(null)
 const canvas3DRef = ref<typeof Canvas3D | null>(null)
@@ -162,6 +174,9 @@ const wallThickness = ref<number>(20)
 
 const allMaterialShow = ref(false)
 const allMaterialShowPropId = ref<string>()
+const showDemos = ref(false)
+const allDemos = ref<any[]>([])
+const demoIniting = ref(false)
 
 const cameraState = ref<CameraState>({
   targetPositionX: 0,
@@ -670,6 +685,13 @@ onMounted(async () => {
       type: number,
     }[]
   }>;
+  axios.get('https://api.studying1v1.com/video/scene/demoList').then(res => {
+    console.log('res.data', res.data)
+    allDemos.value = res.data
+    if (res.data.length) {
+      showDemos.value = true
+    }
+  })
   ObjFileTypes.value = data;
 
   worldApi.onChange(() => {
@@ -743,13 +765,13 @@ onMounted(async () => {
 
     window.addEventListener('keydown', handleKeyDown)
 
-    setTimeout(() => {
-      try {
-        initWorldByData(initDefaultFile)
-      } catch (error) {
-        console.error(error)
-      }
-    }, 0)
+    // setTimeout(() => {
+    //   try {
+    //     initWorldByData(initDefaultFile)
+    //   } catch (error) {
+    //     console.error(error)
+    //   }
+    // }, 0)
 
     return () => {
       window.removeEventListener('keydown', handleKeyDown)
@@ -1522,6 +1544,18 @@ function exportImage() {
     canvas.exportImage()
   }
 }
+
+function chooseDemo(id: number) {
+  demoIniting.value = true
+  axios.get('https://api.studying1v1.com/video/scene/demo/' + id).then(res => {
+    console.log('res.data', res.data.json)
+    const initDefaultFile = res.data.json
+    initWorldByData(initDefaultFile).finally(() => {
+      showDemos.value = false
+      demoIniting.value = false
+    })
+  })
+}
 </script>
 
 <style scoped lang="less">
@@ -1804,5 +1838,92 @@ button {
   justify-content: center;
   width: 100%;
   height: 100%;
+}
+
+.allDemosContent {
+  position: fixed;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: #00000094;
+  z-index: 200;
+
+  .allDemosContentInner {
+    margin: 0 auto;
+    border: 1px solid #d9d9d9;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    background-color: white;
+    padding: 16px;
+    box-sizing: border-box;
+    position: relative;
+
+    .title {
+      font-size: 22px;
+      line-height: 40px;
+      color: #666;
+      margin-bottom: 8px;
+    }
+
+    .demoList {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+
+      .loading {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        font-size: 16px;
+        color: #666;
+        display: flex;
+        background: #00000038;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 36px;
+        cursor: default;
+      }
+    }
+
+    @media (min-width: 680px) {
+      .demoList {
+        grid-template-columns: repeat(3, 1fr);
+        /* 对应4列宽度 */
+      }
+    }
+
+    /* ≥1000px 时，一行4个 */
+    @media (min-width: 1000px) {
+      .demoList {
+        grid-template-columns: repeat(4, 1fr);
+        /* 对应4列宽度 */
+      }
+    }
+
+    .demoItem {
+      width: 200px;
+      cursor: default;
+      font-size: 16px;
+      color: #666;
+      border: 1px solid #d9d9d9;
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      overflow: hidden;
+      box-sizing: border-box;
+
+      >img {
+        width: 100%;
+      }
+    }
+  }
 }
 </style>
