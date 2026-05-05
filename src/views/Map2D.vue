@@ -28,17 +28,6 @@
               </div>
             </div>
             <div class="splitLine"></div>
-            <!-- <div class="typeItemContent">
-              <div class="typeName">基础对象</div>
-              <div class="childItemList">
-                <div class="childItem">方块</div>
-                <div class="childItem">球体</div>
-                <div class="childItem">圆柱体</div>
-                <div class="childItem">圆锥体</div>
-                <div class="childItem">平面</div>
-              </div>
-            </div>
-            <div class="splitLine"></div> -->
             <div>
               <div v-for="item in ObjFileTypes" :key="item.id" class="typeItemContent">
                 <div class="typeName" @mouseenter="mouseEnterType(item)">{{ item.name }}</div>
