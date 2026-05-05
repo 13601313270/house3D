@@ -8,6 +8,7 @@ import cubePlugin from './cube'
 import spherePlugin from './sphere'
 import outFilePlugin from './outFile'
 import cylinderPlugin from './cylinder'
+import planePlugin from './plane'
 import conePlugin from './cone'
 
 type EntityConstructor = new (...args: any[]) => EntityClass<any>;
@@ -30,6 +31,7 @@ export const fileDataKeyToClass: Record<string, EntityConstructor> = {
   spherePlugin,
   cylinderPlugin,
   conePlugin,
+  planePlugin,
   outFilePlugin,
 ].forEach(v => {
   allFileKeys.push(v.key)
