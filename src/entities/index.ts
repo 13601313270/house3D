@@ -7,6 +7,7 @@ import cameraPlugin from './camera'
 import cubePlugin from './cube'
 import spherePlugin from './sphere'
 import outFilePlugin from './outFile'
+import cylinderPlugin from './cylinder'
 
 type EntityConstructor = new (...args: any[]) => EntityClass<any>;
 
@@ -26,6 +27,7 @@ export const fileDataKeyToClass: Record<string, EntityConstructor> = {
   cameraPlugin,
   cubePlugin,
   spherePlugin,
+  cylinderPlugin,
   outFilePlugin,
 ].forEach(v => {
   allFileKeys.push(v.key)
