@@ -122,7 +122,7 @@
         </div>
         <div v-for="item in allDemos" :key="item.id" class="demoItem" @click="chooseDemo(item.id)">
           <div>{{ item.name }}</div>
-          <img :src="item.img" alt="demo cover" />
+          <img :src="item.img + '?x-oss-process=image/resize,m_fill,h_300,w_300'" alt="demo cover" />
         </div>
       </div>
     </div>
