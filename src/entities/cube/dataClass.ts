@@ -7,6 +7,7 @@ export class CubeDataClass extends ObjDataClass<CubeData> {
   depth: number
   color: string
   mt: number
+  angleY: number
 
   constructor(data: CubeData) {
     super(data)
@@ -15,5 +16,6 @@ export class CubeDataClass extends ObjDataClass<CubeData> {
     this.depth = data.depth
     this.color = data.color
     this.mt = data.mt
+    this.angleY = data.angleY
   }
 }

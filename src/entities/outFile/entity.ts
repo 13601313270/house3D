@@ -54,8 +54,8 @@ export class OutFileEntity extends EntityClass<OutFileData> {
     const angleY = data.angleY;// * -1 + Math.PI / 2
     const findObjInfo = this.world.ObjFileTypes.find(item => item.id === data.fileTypeId)
     const preImgScale = findObjInfo?.preImgScale || 1
-    ctx.save(); // 保存当前状态
     const { width, height } = this.img;
+    ctx.save(); // 保存当前状态
     ctx.translate(screenX, screenY); // 移动原点到目标中心
     ctx.rotate(angleY * -1); // 围绕新原点旋转
     ctx.drawImage(
