@@ -722,6 +722,7 @@ onMounted(async () => {
               tc: '#fff', // 天花板颜色，默认白色
               tmt: 2, // 天花板材质，默认水泥墙
               td: false, // 天花板是否是双面，默认否
+              bottom: 0, // 距离地面距离，默认0
             }
             await worldApi.add('wall', [newWall])
             history.value.push(JSON.parse(JSON.stringify(worldApi.getObjects('wall'))))
@@ -1022,6 +1023,7 @@ const handleCanvasClick = async (e: MouseEvent) => {
               tc: '#fff', // 天花板颜色，默认白色
               tmt: 2, // 天花板材质，默认水泥墙
               td: false, // 天花板是否是双面，默认否
+              bottom: 0, // 距离地面距离，默认0
             }
             await worldApi.add('wall', [newWall])
             history.value.push(JSON.parse(JSON.stringify(worldApi.getObjects('wall'))))
@@ -1057,6 +1059,7 @@ const handleCanvasClick = async (e: MouseEvent) => {
         tc: '#fff', // 天花板颜色，默认白色
         tmt: 2, // 天花板材质，默认水泥墙
         td: false, // 天花板是否是双面，默认否
+        bottom: 0, // 距离地面距离，默认0
       }
     }
     lastPoint.value = clickPoint
