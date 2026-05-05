@@ -1480,6 +1480,7 @@ function changeCurrentTool(type: string | 'drag') {
         x: 0,
         y: 0,
         z: 0,
+        color: findObjInfo.defaultColor,
       }
       const insertTempObjData = new OutFileDataClass(data)
       insertTempObj = new OutFileEntity(worldApi, insertTempObjData)
