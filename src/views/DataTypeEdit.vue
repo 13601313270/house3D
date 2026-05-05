@@ -31,7 +31,7 @@
         <div class="title">所有材质</div>
         <div class="list">
           <div class="materialItem"
-            @click="updateEditPropInputNumberInfo(allMaterialShowPropId, 0), allMaterialShow = false">
+            @click="updateEditPropInputNumberInfo(allMaterialShowPropId, null), allMaterialShow = false">
             <div class="imgOuting">
               <img src="../assets/Empty.png" alt="noMaterial" class="img"
                 style="width: 50px;background-color: white;" />
@@ -72,7 +72,7 @@ const allMaterialShowPropId = ref<string>()
 
 const emit = defineEmits(['update:modelValue'])
 
-function updateEditPropInputNumberInfo(id: string, event: Event | number) {
+function updateEditPropInputNumberInfo(id: string, event: Event | number | null) {
   if (event instanceof Event && id) {
     if (event.target !== null) {
       emit('update:modelValue', {

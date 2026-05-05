@@ -44,6 +44,7 @@ export class OutFileEntity extends EntityClass<OutFileData> {
       x: 0,
       y: 0,
       z: 0,
+      color: '#0c7f25',
     }
     return new OutFileDataClass(data)
   }
@@ -154,7 +155,7 @@ export class OutFileEntity extends EntityClass<OutFileData> {
   create3DMesh(scene: THREE.Scene): THREE.Group[] {
     const data = this.getData();
     const group = new THREE.Group()
-    const { fileTypeId, bm } = data
+    const { fileTypeId, bm, color } = data
     const findObjInfo = this.world.ObjFileTypes.find(item => item.id === fileTypeId)
 
     if (!findObjInfo) {
@@ -162,8 +163,10 @@ export class OutFileEntity extends EntityClass<OutFileData> {
       return []
     }
     const { scaleX, scaleY, scaleZ, url, materialUrl, angleY, materialVec } = findObjInfo
-    // console.log('materialId', bm);
-    const materialId = bm === null ? (findObjInfo.materialId || -1) : bm
+    console.log('materialVec', materialVec)
+    console.log('materialId', bm);
+    const materialId = (bm === null) ? (findObjInfo.materialId || -1) : bm
+    console.log('materialId', color);
     console.log('scaleX', scaleX, 'scaleY', scaleY, 'scaleZ', scaleZ)
     if (url.endsWith('.obj')) {
       const loader = new OBJLoader()
@@ -171,24 +174,35 @@ export class OutFileEntity extends EntityClass<OutFileData> {
 
       // 将方向向量旋转90度
       const rotatedDirection = materialVec ? new THREE.Vector3(...materialVec) : new THREE.Vector3(-1, 1, 1)
-      const material = getMaterialById(materialId)?.material(rotatedDirection) || new THREE.MeshStandardMaterial({
-        color: 0x888888,
-        roughness: 0.7,
-        metalness: 0.1
-      })
+      let material: THREE.Material | undefined = (() => {
+        if (materialId !== -1 && materialId !== null) {
+          const mater = getMaterialById(materialId);
+          if (mater) {
+            return mater.material(rotatedDirection)
+          }
+        }
+        return new THREE.MeshStandardMaterial({
+          color: color,
+          roughness: 0.7,
+          metalness: 0.1
+        });
+      })();
       function render(object: THREE.Group) {
         object.scale.set(scaleX, scaleY, scaleZ)
         object.rotation.y = angleY
-        // @ts-ignore
-        object.material = material
+
+        if (!materialUrl) {
+          // @ts-ignore
+          object.material = material
+        }
 
         // 添加默认材质（如果模型没有材质）
         object.traverse((child) => {
           if (child instanceof THREE.Mesh) {
-            if (materialId !== -1) {
+            if (materialId !== -1 && materialId !== null) {
               child.material = material
             } else {
-              if (!child.material) {
+              if (!materialUrl) {
                 child.material = material
               }
             }
@@ -355,6 +369,12 @@ export class OutFileEntity extends EntityClass<OutFileData> {
         max: 100,
         step: 1,
         value: data.z,
+      },
+      {
+        id: 'color',
+        label: '颜色',
+        dataType: 'color',
+        value: data.color,
       }
     ]
     editShow(configList, (val) => {

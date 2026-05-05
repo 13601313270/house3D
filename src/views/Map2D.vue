@@ -1521,6 +1521,7 @@ async function changeCurrentToolToOutFile(id: string) {
     z: 0,
     bm: findObjInfo.materialId,
     angleY: 0,
+    color: findObjInfo.defaultColor,
   }
   const insertTempObjData = new OutFileDataClass(data)
   insertTempObj = new OutFileEntity(worldApi, insertTempObjData)
