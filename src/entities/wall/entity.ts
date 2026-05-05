@@ -59,7 +59,6 @@ export class WallEntity extends EntityClass<WallData> {
     ctx.fillStyle = data.color
     ctx.lineWidth = 2
     ctx.setLineDash([])
-    ctx.beginPath();
 
     for (let i = 0; i < wallBoxList.length; i++) {
       const box = wallBoxList[i]

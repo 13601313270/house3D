@@ -32,11 +32,12 @@ export class PlaneEntity extends EntityClass<PlaneData> {
 
     // 绘制一个平面
     ctx.fillStyle = data.color
+    ctx.beginPath()
     ctx.fillRect(
-      screenX - width / 2,
-      screenY - length / 2,
-      width,
-      length,
+      screenX - width / 2 * zoomLevel,
+      screenY - length / 2 * zoomLevel,
+      width * zoomLevel,
+      length * zoomLevel,
     )
     ctx.fill()
     ctx.closePath()
@@ -60,6 +61,7 @@ export class PlaneEntity extends EntityClass<PlaneData> {
     ctx.arc(screenX, screenY, 6 * zoomLevel, 0, Math.PI * 2)
     ctx.fill()
     ctx.stroke()
+    ctx.closePath()
   }
 
   glbObj: THREE.Group | null = null;
@@ -148,6 +150,15 @@ export class PlaneEntity extends EntityClass<PlaneData> {
         max: Infinity,
         step: 10,
         value: data.length,
+      },
+      {
+        id: 'z',
+        label: '距离地面高度',
+        dataType: 'number',
+        min: -Infinity,
+        max: Infinity,
+        step: 1,
+        value: data.z,
       },
       {
         id: 'mt',
