@@ -11,7 +11,7 @@ import kamera from './kamera.png'
 import { PeopleDataClass } from './dataClass'
 
 const img = new Image()
-img.src = kamera || ''
+img.src = 'people.png'
 
 export class PeopleEntity extends EntityClass<PeopleData> {
   type: string = 'people'
@@ -39,11 +39,11 @@ export class PeopleEntity extends EntityClass<PeopleData> {
     const screenX = data.x * zoomLevel + panOffset.x
     const screenY = data.y * zoomLevel + panOffset.y
     const angleY = data.angle
-    const preImgScale = 0.2
+    const preImgScale = 0.24
     ctx.save(); // 保存当前状态
     const { width, height } = img;
     ctx.translate(screenX, screenY); // 移动原点到目标中心
-    ctx.rotate(angleY - Math.PI / 2); // 围绕新原点旋转
+    ctx.rotate(angleY); // 围绕新原点旋转
     ctx.drawImage(
       img,
       preImgScale / -2 * width * zoomLevel,

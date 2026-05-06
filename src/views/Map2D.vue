@@ -119,7 +119,10 @@
       <div class="demoList">
         <div v-if="demoIniting" class="loading">...</div>
         <div class="demoItem" @click="showDemos = false">
-          <div>空文件</div>
+          <div>新建空场景</div>
+        </div>
+        <div class="demoItem" @click="showDemos = false, loadDrawing()">
+          <div>加载文件</div>
         </div>
         <div v-for="item in allDemos" :key="item.id" class="demoItem" @click="chooseDemo(item.id)">
           <div>{{ item.name }}</div>
