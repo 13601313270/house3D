@@ -60,8 +60,19 @@ export class OutFileInWallEntity extends EntityClassInWall<OutFileInWallData> {
     const findObjInfo = this.world.ObjFileTypes.find(item => item.id === data.fileTypeId)
     const preImgScale = findObjInfo?.preImgScale || 1
     const { width, height } = this.img;
+    if (!this.world.allFileMapObjects.wall) {
+      this.world.allFileMapObjects.wall = []
+    }
+    const wall = this.world.allFileMapObjects.wall.find((entity) => {
+      return entity.getData().id === data.wallId;
+    })
+    const wallThickness = wall ? wall.getData().thickness : 10;
+    // 沿着angleY角度移动10像素的偏移量
+    const offsetX = Math.cos(angleY + Math.PI / 2) * wallThickness * zoomLevel;
+    const offsetY = Math.sin(angleY + Math.PI / 2) * wallThickness * zoomLevel;
+    // console.log('=======', angleY, offsetX, offsetY)
     ctx.save(); // 保存当前状态
-    ctx.translate(screenX, screenY); // 移动原点到目标中心
+    ctx.translate(screenX + offsetX, screenY + offsetY); // 移动原点到目标中心
     ctx.rotate(angleY); // 围绕新原点旋转
     ctx.drawImage(
       this.img,
@@ -69,7 +80,7 @@ export class OutFileInWallEntity extends EntityClassInWall<OutFileInWallData> {
       preImgScale / -2 * height * zoomLevel,
       preImgScale * width * zoomLevel,
       preImgScale * height * zoomLevel
-    ); // 以新原点为中心绘制
+    );
     ctx.restore(); // 恢复原始状态
   }
 
@@ -95,13 +106,20 @@ export class OutFileInWallEntity extends EntityClassInWall<OutFileInWallData> {
   create3DMesh(scene: THREE.Scene): THREE.Group[] {
     const data = this.getData();
     const group = new THREE.Group()
-    const { fileTypeId, bm, color } = data
+    const { fileTypeId, bm, color, wallId } = data
     const findObjInfo = this.world.ObjFileTypes.find(item => item.id === fileTypeId)
 
     if (!findObjInfo) {
       console.error('未找到对应的文件类型:', fileTypeId)
       return []
     }
+    if (!this.world.allFileMapObjects.wall) {
+      this.world.allFileMapObjects.wall = []
+    }
+    const wall = this.world.allFileMapObjects.wall.find((entity) => {
+      return entity.getData().id === wallId;
+    })
+    const wallThickness = wall ? wall.getData().thickness : 10;
     const { scaleX, scaleY, scaleZ, url, materialUrl, angleY, materialVec } = findObjInfo
     console.log('materialVec', materialVec)
     console.log('materialId', bm);
@@ -127,9 +145,14 @@ export class OutFileInWallEntity extends EntityClassInWall<OutFileInWallData> {
           metalness: 0.1
         });
       })();
+
+      const offsetX = Math.cos(angleY + Math.PI / 2) * wallThickness;
+      const offsetY = Math.sin(angleY + Math.PI / 2) * wallThickness;
+
       function render(object: THREE.Group) {
         object.scale.set(scaleX, scaleY, scaleZ)
         object.rotation.y = angleY * -1
+        object.position.set(offsetX, 0, offsetY)
 
         if (!materialUrl) {
           // @ts-ignore
