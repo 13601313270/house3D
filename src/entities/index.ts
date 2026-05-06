@@ -7,6 +7,7 @@ import cameraPlugin from './camera'
 import cubePlugin from './cube'
 import spherePlugin from './sphere'
 import outFilePlugin from './outFile'
+import outFileInWallPlugin from './outFileInWall'
 import cylinderPlugin from './cylinder'
 import planePlugin from './plane'
 import conePlugin from './cone'
@@ -33,6 +34,7 @@ export const fileDataKeyToClass: Record<string, EntityConstructor> = {
   conePlugin,
   planePlugin,
   outFilePlugin,
+  outFileInWallPlugin,
 ].forEach(v => {
   allFileKeys.push(v.key)
   allFileKeysName[v.key] = v.name

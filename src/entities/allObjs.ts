@@ -13,5 +13,6 @@ type ObjItem = {
   materialVec?: [number, number, number]
   drawAngelLength: number
   defaultColor: string
+  inWall: boolean
 }
 export type { ObjItem }

@@ -28,7 +28,8 @@
               <div class="splitLine"></div>
             </template>
             <div>
-              <div class="childItem" v-for="value in allFileKeys.filter(item => item !== 'outFile')" :key="value"
+              <div class="childItem"
+                v-for="value in allFileKeys.filter(item => item !== 'outFile' && item !== 'outFileInWall')" :key="value"
                 :class="{ active: currentTool === value }" @click="changeCurrentTool(value)">
                 {{ allFileKeysName[value] }}
               </div>
@@ -149,6 +150,11 @@ import { ObjItem } from '@/entities/allObjs'
 import { OutFileDataClass } from '@/entities/outFile/dataClass'
 import { OutFileEntity } from '@/entities/outFile/entity'
 import { OutFileData } from '@/entities/outFile/index.d'
+
+import { OutFileInWallDataClass } from '@/entities/outFileInWall/dataClass'
+import { OutFileInWallEntity } from '@/entities/outFileInWall/entity'
+import { OutFileInWallData } from '@/entities/outFileInWall/index.d'
+
 import DataTypeEdit from './DataTypeEdit.vue'
 
 const canvasRef = ref<HTMLCanvasElement | null>(null)
@@ -855,6 +861,12 @@ async function initWorldByData(data: fileData & {
       allFileTypeId.add(v.fileTypeId)
     })
   }
+  if (data.outFileInWall) {
+    data.outFileInWall.forEach(v => {
+      // @ts-ignore
+      allFileTypeId.add(v.fileTypeId)
+    })
+  }
 
   const fileTypes = Array.from(allFileTypeId)
 
@@ -1471,21 +1483,40 @@ function changeCurrentTool(type: string | 'drag') {
   insertTempObj = null
 
   if (allFileKeys.includes(type as any)) {
-    if (type === 'outFile') {
+    if (type === 'outFile' || type === 'outFileInWall') {
       const findObjInfo = worldApi.ObjFileTypes[1];
-      const data: OutFileData = {
-        fileTypeId: findObjInfo.id,
-        id: Date.now().toString(),
-        bm: findObjInfo.materialId,
-        angleY: 0,
-        x: 0,
-        y: 0,
-        z: 0,
-        color: findObjInfo.defaultColor,
+      if (type === 'outFileInWall') {
+        const data: OutFileInWallData = {
+          fileTypeId: findObjInfo.id,
+          id: Date.now().toString(),
+          bm: findObjInfo.materialId,
+          angleY: 0,
+          x: 0,
+          y: 0,
+          z: 0,
+          angle: 0,
+          wallPointId: -1,
+          bottom: 40,
+          color: findObjInfo.defaultColor,
+        }
+        const insertTempObjData = new OutFileInWallDataClass(data)
+        insertTempObj = new OutFileInWallEntity(worldApi, insertTempObjData)
+        insertTempObj.init()
+      } else {
+        const data: OutFileData = {
+          fileTypeId: findObjInfo.id,
+          id: Date.now().toString(),
+          bm: findObjInfo.materialId,
+          angleY: 0,
+          x: 0,
+          y: 0,
+          z: 0,
+          color: findObjInfo.defaultColor,
+        }
+        const insertTempObjData = new OutFileDataClass(data)
+        insertTempObj = new OutFileEntity(worldApi, insertTempObjData)
+        insertTempObj.init()
       }
-      const insertTempObjData = new OutFileDataClass(data)
-      insertTempObj = new OutFileEntity(worldApi, insertTempObjData)
-      insertTempObj.init()
     } else {
       // @ts-ignore
       const ClassName = fileDataKeyToClass[type];
@@ -1515,20 +1546,41 @@ async function changeCurrentToolToOutFile(id: string) {
   }
   const findObjInfo = worldApi.ObjFileTypes.find(item => item.id === id);
   if (!findObjInfo) return
-  const data: OutFileData = {
-    fileTypeId: findObjInfo.id,
-    id: Date.now().toString(),
-    x: 0,
-    y: 0,
-    z: 0,
-    bm: findObjInfo.materialId,
-    angleY: 0,
-    color: findObjInfo.defaultColor,
+
+  if (findObjInfo.inWall) {
+    const data: OutFileInWallData = {
+      fileTypeId: findObjInfo.id,
+      id: Date.now().toString(),
+      bm: findObjInfo.materialId,
+      angleY: 0,
+      x: 0,
+      y: 0,
+      z: 0,
+      angle: 0,
+      wallPointId: -1,
+      bottom: 40,
+      color: findObjInfo.defaultColor,
+    }
+    const insertTempObjData = new OutFileInWallDataClass(data)
+    insertTempObj = new OutFileInWallEntity(worldApi, insertTempObjData)
+    insertTempObj.init()
+    currentTool.value = 'outFileInWall'
+  } else {
+    const data: OutFileData = {
+      fileTypeId: findObjInfo.id,
+      id: Date.now().toString(),
+      x: 0,
+      y: 0,
+      z: 0,
+      bm: findObjInfo.materialId,
+      angleY: 0,
+      color: findObjInfo.defaultColor,
+    }
+    const insertTempObjData = new OutFileDataClass(data)
+    insertTempObj = new OutFileEntity(worldApi, insertTempObjData)
+    insertTempObj.init()
+    currentTool.value = 'outFile'
   }
-  const insertTempObjData = new OutFileDataClass(data)
-  insertTempObj = new OutFileEntity(worldApi, insertTempObjData)
-  insertTempObj.init()
-  currentTool.value = 'outFile'
 }
 
 async function mouseEnterType(type: ObjFileType) {
