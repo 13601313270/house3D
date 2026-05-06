@@ -174,7 +174,7 @@ export class OutFileEntity extends EntityClass<OutFileData> {
 
       // 将方向向量旋转90度
       const rotatedDirection = materialVec ? new THREE.Vector3(...materialVec) : new THREE.Vector3(-1, 1, 1)
-      let material: THREE.Material | undefined = (() => {
+      const material: THREE.Material | undefined = (() => {
         if (materialId !== -1 && materialId !== null) {
           const mater = getMaterialById(materialId);
           if (mater) {

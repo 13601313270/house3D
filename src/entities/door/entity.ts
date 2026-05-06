@@ -4,7 +4,8 @@ import * as THREE from 'three'
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { DoorData } from './index.d'
 import { Brush, Evaluator, SUBTRACTION } from 'three-bvh-csg';
-import { allSnapFromType, EntityClassInWall } from '@/types/entity'
+import { allSnapFromType } from '@/types/entity'
+import { EntityClassInWall } from '@/types/entityInWall'
 import { editItem } from '..';
 import { World } from '@/utils/world';
 import { getMaterialById } from '@/material';
