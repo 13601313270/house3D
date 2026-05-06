@@ -1496,6 +1496,7 @@ function changeCurrentTool(type: string | 'drag') {
           angle: 0,
           wallPointId: -1,
           bottom: 40,
+          isOuter: false,
           color: findObjInfo.defaultColor,
         }
         const insertTempObjData = new OutFileInWallDataClass(data)
@@ -1558,6 +1559,7 @@ async function changeCurrentToolToOutFile(id: string) {
       wallPointId: -1,
       bottom: 40,
       color: findObjInfo.defaultColor,
+      isOuter: false,
     }
     const insertTempObjData = new OutFileInWallDataClass(data)
     insertTempObj = new OutFileInWallEntity(worldApi, insertTempObjData)
@@ -1763,7 +1765,7 @@ button {
   flex-direction: column;
   align-items: center;
   box-sizing: border-box;
-  overflow: hidden;
+  // overflow: hidden; // 不能添加overflow: hidden;不然添加弹窗向右展开二级，被隐藏
 }
 
 .right-panel {

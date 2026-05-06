@@ -11,6 +11,7 @@ import outFileInWallPlugin from './outFileInWall'
 import cylinderPlugin from './cylinder'
 import planePlugin from './plane'
 import conePlugin from './cone'
+import peoplePlugin from './people'
 
 type EntityConstructor = new (...args: any[]) => EntityClass<any>;
 
@@ -35,6 +36,7 @@ export const fileDataKeyToClass: Record<string, EntityConstructor> = {
   planePlugin,
   outFilePlugin,
   outFileInWallPlugin,
+  peoplePlugin,
 ].forEach(v => {
   allFileKeys.push(v.key)
   allFileKeysName[v.key] = v.name
