@@ -1,7 +1,7 @@
-import { HandelInfo, Point } from '@/types/map2d'
+import { HandelInfo, ObjData, Point } from '@/types/map2d'
 import * as THREE from 'three'
 import { OutFileInWallData } from './index.d'
-import { MatchSnapPoint, OrigionSnapPoint } from '@/types/entity'
+import { EntityClass, MatchSnapPoint, OrigionSnapPoint } from '@/types/entity'
 import { editItem } from '..'
 // @ts-ignore
 import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
@@ -192,6 +192,9 @@ export class OutFileInWallEntity extends EntityClassInWall<OutFileInWallData> {
       x: undefined,
       y: undefined,
       z: undefined,
+      wallId: undefined,
+      wallPointId: undefined,
+      angle: undefined,
     }
     // console.log('dddd', this.type + JSON.stringify(cacheData))
     return this.type + JSON.stringify(cacheData)
@@ -203,7 +206,7 @@ export class OutFileInWallEntity extends EntityClassInWall<OutFileInWallData> {
     const data = this.getData();
     this.meshList.forEach(v => {
       v.position.set(data.x, data.z, data.y)
-      v.rotation.y = data.angle
+      v.rotation.y = data.angle * -1
     })
   }
 
@@ -219,37 +222,12 @@ export class OutFileInWallEntity extends EntityClassInWall<OutFileInWallData> {
         dist: dist,
       }
     }
-    const findObjInfo = this.world.ObjFileTypes.find(item => item.id === data.fileTypeId)
-    const drawAngelLength = findObjInfo?.drawAngelLength || this.baseDrawAngelLength
-    // 控制点向着angleY角度延伸10个单位后的坐标
-    const rotatedXAdd = data.x + Math.cos(data.angle) * drawAngelLength
-    const rotatedYAdd = data.y - Math.sin(data.angle) * drawAngelLength
-
-    const dist2 = Math.hypot(x - rotatedXAdd, y - rotatedYAdd)
-    console.log('dist2', dist2)
-    if (dist2 < 10) {
-      return {
-        index: 1,
-        type: this.type,
-        id: data.id,
-        dist: dist2,
-      }
-    }
     return null;
   }
 
   matchHandelMoveCallback(x: number, y: number, matchHandelInfo: HandelInfo) {
     if (matchHandelInfo.index === 0) {
       this.changePosition({ x, y })
-    } else if (matchHandelInfo.index === 1) {
-      const data = this.getData();
-      // 根据x,y计算angle
-      const angle = Math.atan2(y - data.y, x - data.x)
-      console.log(angle)
-      this.setData({
-        ...this.getData(),
-        angle: angle * -1,
-      })
     }
   }
 
@@ -306,5 +284,42 @@ export class OutFileInWallEntity extends EntityClassInWall<OutFileInWallData> {
         ...val,
       })
     })
+  }
+
+  inSceneSnapLineArea(obj: EntityClass<ObjData>, line: [Point, Point], point: Point) {
+    if (obj.type === 'wall') {
+      const p1 = line[0]
+      const p2 = line[1]
+      const nearestAngle = Math.atan2(p2.y - p1.y, p2.x - p1.x)
+
+      const allLineKey = obj.getMineBeSnapLines().map(v => [v[0].x, v[0].y, v[1].x, v[1].y].join(','))
+      const lineKey = [p1.x, p1.y, p2.x, p2.y].join(',')
+      const index = allLineKey.indexOf(lineKey)
+      const data = this.getData();
+      const objData = obj.getData()
+      this.setData({
+        ...data,
+        x: point.x,
+        y: point.y,
+        angle: nearestAngle,
+        wallId: objData.id,
+        wallPointId: index,
+      })
+      return true;
+    }
+    return false;
+  }
+
+  notInSceneSnapLineArea() {
+    const data = this.getData();
+    if (data.wallId) {
+      const data = this.getData();
+      this.setData({
+        ...data,
+        wallId: undefined,
+        wallPointId: -1,
+      })
+      return true;
+    }
   }
 }
