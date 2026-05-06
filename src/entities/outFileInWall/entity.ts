@@ -49,31 +49,32 @@ export class OutFileInWallEntity extends EntityClassInWall<OutFileInWallData> {
       y: 0,
       z: 0,
       color: '#0c7f25',
+      isOuter: false,
     }
     return new OutFileInWallDataClass(data)
   }
 
   draw2DPreviewByData(ctx: CanvasRenderingContext2D, data: OutFileInWallData, panOffset: Point, zoomLevel: number): void {
-    const screenX = data.x * zoomLevel + panOffset.x
-    const screenY = data.y * zoomLevel + panOffset.y
-    const angleY = data.angle;// * -1 + Math.PI / 2
-    const findObjInfo = this.world.ObjFileTypes.find(item => item.id === data.fileTypeId)
+    const { x, y, isOuter, angle, wallId, fileTypeId } = data
+    const screenX = x * zoomLevel + panOffset.x
+    const screenY = y * zoomLevel + panOffset.y
+    const findObjInfo = this.world.ObjFileTypes.find(item => item.id === fileTypeId)
     const preImgScale = findObjInfo?.preImgScale || 1
     const { width, height } = this.img;
     if (!this.world.allFileMapObjects.wall) {
       this.world.allFileMapObjects.wall = []
     }
     const wall = this.world.allFileMapObjects.wall.find((entity) => {
-      return entity.getData().id === data.wallId;
+      return entity.getData().id === wallId;
     })
     const wallThickness = wall ? wall.getData().thickness : 10;
     // 沿着angleY角度移动10像素的偏移量
-    const offsetX = Math.cos(angleY + Math.PI / 2) * wallThickness * zoomLevel;
-    const offsetY = Math.sin(angleY + Math.PI / 2) * wallThickness * zoomLevel;
+    const offsetX = Math.cos(angle + (isOuter ? Math.PI / -2 : Math.PI / 2)) * wallThickness * zoomLevel;
+    const offsetY = Math.sin(angle + (isOuter ? Math.PI / -2 : Math.PI / 2)) * wallThickness * zoomLevel;
     // console.log('=======', angleY, offsetX, offsetY)
     ctx.save(); // 保存当前状态
     ctx.translate(screenX + offsetX, screenY + offsetY); // 移动原点到目标中心
-    ctx.rotate(angleY); // 围绕新原点旋转
+    ctx.rotate(isOuter ? angle + Math.PI : angle); // 围绕新原点旋转
     ctx.drawImage(
       this.img,
       preImgScale / -2 * width * zoomLevel,
@@ -106,7 +107,7 @@ export class OutFileInWallEntity extends EntityClassInWall<OutFileInWallData> {
   create3DMesh(scene: THREE.Scene): THREE.Group[] {
     const data = this.getData();
     const group = new THREE.Group()
-    const { fileTypeId, bm, color, wallId } = data
+    const { fileTypeId, bm, color, wallId, isOuter } = data
     const findObjInfo = this.world.ObjFileTypes.find(item => item.id === fileTypeId)
 
     if (!findObjInfo) {
@@ -146,12 +147,12 @@ export class OutFileInWallEntity extends EntityClassInWall<OutFileInWallData> {
         });
       })();
 
-      const offsetX = Math.cos(angleY + Math.PI / 2) * wallThickness;
-      const offsetY = Math.sin(angleY + Math.PI / 2) * wallThickness;
+      const offsetX = Math.cos(angleY + (isOuter ? Math.PI / -2 : Math.PI / 2)) * wallThickness;
+      const offsetY = Math.sin(angleY + (isOuter ? Math.PI / -2 : Math.PI / 2)) * wallThickness;
 
       function render(object: THREE.Group) {
         object.scale.set(scaleX, scaleY, scaleZ)
-        object.rotation.y = angleY * -1
+        object.rotation.y = angleY * -1 + (isOuter ? Math.PI : 0)
         object.position.set(offsetX, 0, offsetY)
 
         if (!materialUrl) {
@@ -299,7 +300,13 @@ export class OutFileInWallEntity extends EntityClassInWall<OutFileInWallData> {
         label: '颜色',
         dataType: 'color',
         value: data.color,
-      }
+      },
+      {
+        id: 'isOuter',
+        label: '是否挂在外墙',
+        dataType: 'boolean',
+        value: data.isOuter,
+      },
     ]
     editShow(configList, (val) => {
       this.setData({
