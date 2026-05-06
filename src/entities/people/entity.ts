@@ -153,8 +153,18 @@ export class PeopleEntity extends EntityClass<PeopleData> {
       gltf.scene.rotateX(Math.PI);  // 如果需要绕 X 轴翻转 180 度
       gltf.scene.rotateY(Math.PI)
       gltf.scene.rotateZ(Math.PI);  // 如果需要绕 Y 轴翻转 180 度
+      gltf.scene.traverse((child: any) => {
+        if (child.isBone) {
+          console.log(`🦴 发现骨骼: ${child.name}`);
+          if (child.name === 'upper_armL') {
+            child.rotation.z = Math.PI * -0.85
+          }
+          if (child.name === 'upper_armR') {
+            child.rotation.z = Math.PI * 0.85
+          }
+        }
+      });
       group.add(gltf.scene)
-      // console.log('OBJ文件加载成功:', url)
     }, (progress: any) => {
       // 加载进度
       const percent = (progress.loaded / progress.total * 100).toFixed(2)
@@ -175,6 +185,13 @@ export class PeopleEntity extends EntityClass<PeopleData> {
       v.position.set(data.x, data.z, data.y)
       v.scale.set(singleHeight * height, singleHeight * height, singleHeight * height)
       v.rotation.set(0, angle * -1, 0)
+
+      // v.traverse((child: any) => {
+      //   console.log(`🦴 发现骨骼: ============`);
+      //   if (child.isBone) {
+      //     console.log(`🦴 发现骨骼: ${child.name}`);
+      //   }
+      // });
     })
   }
 
