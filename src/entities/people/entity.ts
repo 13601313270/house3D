@@ -22,6 +22,7 @@ export class PeopleEntity extends EntityClass<PeopleData> {
   colorOpacity: string = '#14b737a5'
   colorOpacityActive: string = 'red'
   active: boolean = false // 这个不存在数据库里，只是在前端动态调整
+  drawAngelLength: number = 40
 
   defaultValue(): PeopleData {
     const people: PeopleData = {
@@ -60,6 +61,8 @@ export class PeopleEntity extends EntityClass<PeopleData> {
     panOffset: Point,
     zoomLevel: number
   ): void {
+    const { angle: angleY } = data
+    const angle = angleY * -1
     const screenX = data.x * zoomLevel + panOffset.x
     const screenY = data.y * zoomLevel + panOffset.y
 
@@ -69,6 +72,69 @@ export class PeopleEntity extends EntityClass<PeopleData> {
     ctx.lineWidth = 2
     ctx.beginPath()
     ctx.arc(screenX, screenY, 6 * zoomLevel, 0, Math.PI * 2)
+    ctx.fill()
+    ctx.stroke()
+
+    const drawAngelLength = this.drawAngelLength
+
+    // 控制点向着angle角度延伸10个单位后的坐标
+    const rotatedXAdd = data.x + Math.cos(angle) * drawAngelLength
+    const rotatedYAdd = data.y - Math.sin(angle) * drawAngelLength
+
+    function ttt(angel: number, drawAngelLength: number) {
+      const tempX = data.x + Math.cos(angel) * drawAngelLength;
+      const tempY = data.y - Math.sin(angel) * drawAngelLength;
+      return [tempX * zoomLevel + panOffset.x, tempY * zoomLevel + panOffset.y]
+    }
+
+    // 绘制双向箭头表示旋转角度
+    ctx.strokeStyle = '#e67e22'
+    ctx.fillStyle = '#e67e22'
+    ctx.lineWidth = 2 * zoomLevel
+    // 绘制双向箭头的主线（圆弧）
+    ctx.beginPath();
+    ctx.arc(screenX, screenY, drawAngelLength * zoomLevel, angle * -1 - Math.PI / 4, angle * -1 + Math.PI / 4);
+    ctx.stroke();
+
+    // 左侧箭头
+    (() => {
+      ctx.beginPath()
+      const [p1X, p1Y] = ttt(angle + 0.1 + Math.PI / 4, drawAngelLength)
+      const [p2X, p2Y] = ttt(angle + Math.PI / 4, drawAngelLength + 5)
+      const [p3X, p3Y] = ttt(angle + Math.PI / 4, drawAngelLength - 5)
+      ctx.moveTo(
+        p1X,
+        p1Y
+      )
+      ctx.lineTo(p2X, p2Y)
+      ctx.lineTo(p3X, p3Y)
+      ctx.closePath()
+      ctx.fill()
+    })();
+
+    // 右侧箭头
+    ctx.beginPath()
+    const [p1X, p1Y] = ttt(angle - 0.1 - Math.PI / 4, drawAngelLength)
+    const [p2X, p2Y] = ttt(angle - Math.PI / 4, drawAngelLength + 5)
+    const [p3X, p3Y] = ttt(angle - Math.PI / 4, drawAngelLength - 5)
+    ctx.moveTo(
+      p1X,
+      p1Y
+    )
+    ctx.lineTo(p2X, p2Y)
+    ctx.lineTo(p3X, p3Y)
+    ctx.closePath()
+    ctx.fill()
+
+    // 在(rotatedXAdd, rotatedYAdd)位置绘制一个圆圈
+    const circleX = rotatedXAdd * zoomLevel + panOffset.x
+    const circleY = rotatedYAdd * zoomLevel + panOffset.y
+    const circleRadius = 5 * zoomLevel
+    ctx.fillStyle = '#fff'
+    ctx.strokeStyle = '#e67e22'
+    ctx.lineWidth = 2 * zoomLevel
+    ctx.beginPath()
+    ctx.arc(circleX, circleY, circleRadius, 0, Math.PI * 2)
     ctx.fill()
     ctx.stroke()
   }
@@ -104,10 +170,11 @@ export class PeopleEntity extends EntityClass<PeopleData> {
   change3DMeshState(): void {
     const data = this.getData();
     const singleHeight = 0.213
-    const { height } = data
+    const { height, angle } = data
     this.meshList.forEach(v => {
       v.position.set(data.x, data.z, data.y)
       v.scale.set(singleHeight * height, singleHeight * height, singleHeight * height)
+      v.rotation.set(0, angle * -1, 0)
     })
   }
 
@@ -119,12 +186,15 @@ export class PeopleEntity extends EntityClass<PeopleData> {
       y: undefined,
       z: undefined,
       height: undefined,
+      angle: undefined,
     }
     return this.type + JSON.stringify(cacheData)
   }
 
   matchHandelInfo(x: number, y: number) {
     const data = this.getData();
+    const { angle } = data
+    const angleY = angle * -1
     const dist = Math.hypot(x - data.x, y - data.y)
     if (dist < 10) {
       return {
@@ -134,11 +204,35 @@ export class PeopleEntity extends EntityClass<PeopleData> {
         dist: dist,
       }
     }
+    // 控制点向着angle角度延伸10个单位后的坐标
+    const rotatedXAdd = data.x + Math.cos(angleY) * this.drawAngelLength
+    const rotatedYAdd = data.y - Math.sin(angleY) * this.drawAngelLength
+
+    const dist2 = Math.hypot(x - rotatedXAdd, y - rotatedYAdd)
+    console.log('dist2', dist2)
+    if (dist2 < 10) {
+      return {
+        index: 1,
+        type: this.type,
+        id: data.id,
+        dist: dist2,
+      }
+    }
     return null;
   }
 
   matchHandelMoveCallback(x: number, y: number, matchHandelInfo: HandelInfo) {
-    this.changePosition({ x, y })
+    if (matchHandelInfo.index === 0) {
+      this.changePosition({ x, y })
+    } else if (matchHandelInfo.index === 1) {
+      const data = this.getData();
+      // 根据x,y计算angleY
+      const angleY = Math.atan2(y - data.y, x - data.x)
+      this.setData({
+        ...this.getData(),
+        angle: angleY,
+      })
+    }
   }
 
   inSceneSnapPointArea(newPosition: MatchSnapPoint) {
