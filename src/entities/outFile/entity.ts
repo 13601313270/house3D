@@ -269,8 +269,8 @@ export class OutFileEntity extends EntityClass<OutFileData> {
               }
             }
           })
+          gltf.scene.material = material
         }
-        // gltf.scene.material = material
         group.add(gltf.scene)
       }, (progress: any) => {
         // 加载进度
