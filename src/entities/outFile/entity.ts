@@ -164,10 +164,10 @@ export class OutFileEntity extends EntityClass<OutFileData> {
       console.error('未找到对应的文件类型:', fileTypeId)
       return []
     }
-    const { scaleX, scaleY, scaleZ, url, materialUrl, angleY, materialVec } = findObjInfo
+    const { scaleX, scaleY, scaleZ, url, materialUrl, angleY, materialVec, defaultColor, materialId } = findObjInfo
     console.log('materialVec', materialVec)
     console.log('materialId', bm);
-    const materialId = (bm === null) ? (findObjInfo.materialId || -1) : bm
+    const materialUseId = (bm === null) ? (materialId || -1) : bm
     console.log('materialId', color);
     console.log('scaleX', scaleX, 'scaleY', scaleY, 'scaleZ', scaleZ)
     if (url.endsWith('.obj')) {
@@ -177,8 +177,8 @@ export class OutFileEntity extends EntityClass<OutFileData> {
       // 将方向向量旋转90度
       const rotatedDirection = materialVec ? new THREE.Vector3(...materialVec) : new THREE.Vector3(-1, 1, 1)
       const material: THREE.Material | undefined = (() => {
-        if (materialId !== -1 && materialId !== null) {
-          const mater = getMaterialById(materialId);
+        if (materialUseId !== -1 && materialUseId !== null) {
+          const mater = getMaterialById(materialUseId);
           if (mater) {
             return mater.material(rotatedDirection)
           }
@@ -201,7 +201,7 @@ export class OutFileEntity extends EntityClass<OutFileData> {
         // 添加默认材质（如果模型没有材质）
         object.traverse((child) => {
           if (child instanceof THREE.Mesh) {
-            if (materialId !== -1 && materialId !== null) {
+            if (materialUseId !== -1 && materialUseId !== null) {
               child.material = material
             } else {
               if (!materialUrl) {
@@ -241,8 +241,36 @@ export class OutFileEntity extends EntityClass<OutFileData> {
       }
     } else if (url.endsWith('.glb')) {
       const loader = new GLTFLoader()
+      const rotatedDirection = materialVec ? new THREE.Vector3(...materialVec) : new THREE.Vector3(-1, 1, 1)
+      const material: THREE.Material | undefined = (() => {
+        if (materialUseId !== -1 && materialUseId !== null) {
+          const mater = getMaterialById(materialUseId);
+          if (mater) {
+            return mater.material(rotatedDirection)
+          }
+        }
+        return new THREE.MeshStandardMaterial({
+          color: color,
+          roughness: 0.7,
+          metalness: 0.1
+        });
+      })();
       loader.load(url, (gltf: any) => {
         gltf.scene.scale.set(scaleX, scaleY, scaleZ)
+        if (defaultColor || materialId) {
+          // @ts-ignore
+          gltf.scene.material = material
+          gltf.scene.traverse((child: any) => {
+            if (child instanceof THREE.Mesh) {
+              if (materialUseId !== -1 && materialUseId !== null) {
+                child.material = material
+              } else {
+                child.material = material
+              }
+            }
+          })
+        }
+        // gltf.scene.material = material
         group.add(gltf.scene)
       }, (progress: any) => {
         // 加载进度
