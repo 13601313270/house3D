@@ -7,6 +7,8 @@ import { editItem } from '..'
 import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
 // @ts-ignore
 import { MTLLoader } from 'three/addons/loaders/MTLLoader.js';
+// @ts-ignore
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { getMaterialById } from '@/material'
 import { OutFileDataClass } from './dataClass';
 
@@ -237,6 +239,18 @@ export class OutFileEntity extends EntityClass<OutFileData> {
           console.error('OBJ文件加载失败:', error)
         })
       }
+    } else if (url.endsWith('.glb')) {
+      const loader = new GLTFLoader()
+      loader.load(url, (gltf: any) => {
+        gltf.scene.scale.set(scaleX, scaleY, scaleZ)
+        group.add(gltf.scene)
+      }, (progress: any) => {
+        // 加载进度
+        const percent = (progress.loaded / progress.total * 100).toFixed(2)
+        console.log('加载进度:', percent + '%')
+      }, (error: any) => {
+        console.error('OBJ文件加载失败:', error)
+      })
     }
     // group.position.set(data.x, data.z, data.y)
 
