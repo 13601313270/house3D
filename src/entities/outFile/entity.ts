@@ -241,6 +241,7 @@ export class OutFileEntity extends EntityClass<OutFileData> {
     } else if (url.endsWith('.glb')) {
       const loader = new GLTFLoader()
       loader.load(url, (gltf: any) => {
+        gltf.scene.rotation.y = angleY
         gltf.scene.scale.set(scaleX, scaleY, scaleZ)
         if (defaultColor || materialId) {
           // @ts-ignore
