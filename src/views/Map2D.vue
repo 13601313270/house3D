@@ -1487,39 +1487,40 @@ function changeCurrentTool(type: string | 'drag') {
 
   if (allFileKeys.includes(type as any)) {
     if (type === 'outFile' || type === 'outFileInWall') {
-      const findObjInfo = worldApi.ObjFileTypes[1];
-      if (type === 'outFileInWall') {
-        const data: OutFileInWallData = {
-          fileTypeId: findObjInfo.id,
-          id: Date.now().toString(),
-          bm: findObjInfo.materialId,
-          x: 0,
-          y: 0,
-          z: 0,
-          angle: 0,
-          wallPointId: -1,
-          bottom: 40,
-          isOuter: false,
-          color: findObjInfo.defaultColor,
-        }
-        const insertTempObjData = new OutFileInWallDataClass(data)
-        insertTempObj = new OutFileInWallEntity(worldApi, insertTempObjData)
-        insertTempObj.init()
-      } else {
-        const data: OutFileData = {
-          fileTypeId: findObjInfo.id,
-          id: Date.now().toString(),
-          bm: findObjInfo.materialId,
-          angleY: 0,
-          x: 0,
-          y: 0,
-          z: 0,
-          color: findObjInfo.defaultColor,
-        }
-        const insertTempObjData = new OutFileDataClass(data)
-        insertTempObj = new OutFileEntity(worldApi, insertTempObjData)
-        insertTempObj.init()
-      }
+      // 不该进入这里
+      // const findObjInfo = worldApi.ObjFileTypes[1];
+      // if (type === 'outFileInWall') {
+      //   const data: OutFileInWallData = {
+      //     fileTypeId: findObjInfo.id,
+      //     id: Date.now().toString(),
+      //     bm: findObjInfo.materialId,
+      //     x: 0,
+      //     y: 0,
+      //     z: findObjInfo.defaultZ || 0,
+      //     angle: 0,
+      //     wallPointId: -1,
+      //     bottom: 40,
+      //     isOuter: false,
+      //     color: findObjInfo.defaultColor,
+      //   }
+      //   const insertTempObjData = new OutFileInWallDataClass(data)
+      //   insertTempObj = new OutFileInWallEntity(worldApi, insertTempObjData)
+      //   insertTempObj.init()
+      // } else {
+      //   const data: OutFileData = {
+      //     fileTypeId: findObjInfo.id,
+      //     id: Date.now().toString(),
+      //     bm: findObjInfo.materialId,
+      //     angleY: 0,
+      //     x: 0,
+      //     y: 0,
+      //     z: 0,
+      //     color: findObjInfo.defaultColor,
+      //   }
+      //   const insertTempObjData = new OutFileDataClass(data)
+      //   insertTempObj = new OutFileEntity(worldApi, insertTempObjData)
+      //   insertTempObj.init()
+      // }
     } else {
       // @ts-ignore
       const ClassName = fileDataKeyToClass[type];
@@ -1552,12 +1553,12 @@ async function changeCurrentToolToOutFile(id: string) {
 
   if (findObjInfo.inWall) {
     const data: OutFileInWallData = {
-      fileTypeId: findObjInfo.id,
       id: Date.now().toString(),
+      fileTypeId: findObjInfo.id,
       bm: findObjInfo.materialId,
       x: 0,
       y: 0,
-      z: 0,
+      z: findObjInfo.defaultZ || 0,
       angle: 0,
       wallPointId: -1,
       bottom: 40,

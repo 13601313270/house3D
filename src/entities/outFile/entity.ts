@@ -45,7 +45,7 @@ export class OutFileEntity extends EntityClass<OutFileData> {
       bm: null,
       x: 0,
       y: 0,
-      z: 0,
+      z: findObjInfo.defaultZ || 0,
       color: '#0c7f25',
     }
     return new OutFileDataClass(data)

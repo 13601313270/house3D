@@ -14,5 +14,6 @@ type ObjItem = {
   drawAngelLength: number
   defaultColor: string
   inWall: boolean
+  defaultZ: number
 }
 export type { ObjItem }
