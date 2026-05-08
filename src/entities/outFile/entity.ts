@@ -393,7 +393,7 @@ export class OutFileEntity extends EntityClass<OutFileData> {
         id: 'z',
         label: '高度',
         dataType: 'number',
-        min: 0,
+        min: -100,
         max: 100,
         step: 1,
         value: data.z,
