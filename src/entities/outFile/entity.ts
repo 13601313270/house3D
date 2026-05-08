@@ -170,25 +170,24 @@ export class OutFileEntity extends EntityClass<OutFileData> {
     const materialUseId = (bm === null) ? (materialId || -1) : bm
     console.log('materialId', color);
     console.log('scaleX', scaleX, 'scaleY', scaleY, 'scaleZ', scaleZ)
+    // 将方向向量旋转90度
+    const rotatedDirection = materialVec ? new THREE.Vector3(...materialVec) : new THREE.Vector3(-1, 1, 1)
+    const material: THREE.Material | undefined = (() => {
+      if (materialUseId !== -1 && materialUseId !== null) {
+        const mater = getMaterialById(materialUseId);
+        if (mater) {
+          return mater.material(rotatedDirection)
+        }
+      }
+      return new THREE.MeshStandardMaterial({
+        color: color,
+        roughness: 0.7,
+        metalness: 0.1
+      });
+    })();
     if (url.endsWith('.obj')) {
       const loader = new OBJLoader()
       const materLoader = new MTLLoader()
-
-      // 将方向向量旋转90度
-      const rotatedDirection = materialVec ? new THREE.Vector3(...materialVec) : new THREE.Vector3(-1, 1, 1)
-      const material: THREE.Material | undefined = (() => {
-        if (materialUseId !== -1 && materialUseId !== null) {
-          const mater = getMaterialById(materialUseId);
-          if (mater) {
-            return mater.material(rotatedDirection)
-          }
-        }
-        return new THREE.MeshStandardMaterial({
-          color: color,
-          roughness: 0.7,
-          metalness: 0.1
-        });
-      })();
       function render(object: THREE.Group) {
         object.scale.set(scaleX, scaleY, scaleZ)
         object.rotation.y = angleY
@@ -241,20 +240,6 @@ export class OutFileEntity extends EntityClass<OutFileData> {
       }
     } else if (url.endsWith('.glb')) {
       const loader = new GLTFLoader()
-      const rotatedDirection = materialVec ? new THREE.Vector3(...materialVec) : new THREE.Vector3(-1, 1, 1)
-      const material: THREE.Material | undefined = (() => {
-        if (materialUseId !== -1 && materialUseId !== null) {
-          const mater = getMaterialById(materialUseId);
-          if (mater) {
-            return mater.material(rotatedDirection)
-          }
-        }
-        return new THREE.MeshStandardMaterial({
-          color: color,
-          roughness: 0.7,
-          metalness: 0.1
-        });
-      })();
       loader.load(url, (gltf: any) => {
         gltf.scene.scale.set(scaleX, scaleY, scaleZ)
         if (defaultColor || materialId) {

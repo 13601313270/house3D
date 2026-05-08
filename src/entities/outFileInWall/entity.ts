@@ -7,6 +7,8 @@ import { editItem } from '..'
 import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
 // @ts-ignore
 import { MTLLoader } from 'three/addons/loaders/MTLLoader.js';
+// @ts-ignore
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { getMaterialById } from '@/material'
 import { OutFileInWallDataClass } from './dataClass';
 import { EntityClassInWall } from '@/types/entityInWall'
@@ -121,34 +123,32 @@ export class OutFileInWallEntity extends EntityClassInWall<OutFileInWallData> {
       return entity.getData().id === wallId;
     })
     const wallThickness = wall ? wall.getData().thickness : 10;
-    const { scaleX, scaleY, scaleZ, url, materialUrl, angleY, materialVec } = findObjInfo
+    const { scaleX, scaleY, scaleZ, url, materialUrl, angleY, materialVec, defaultColor, materialId } = findObjInfo
     console.log('materialVec', materialVec)
     console.log('materialId', bm);
-    const materialId = (bm === null) ? (findObjInfo.materialId || -1) : bm
+    const materialUseId = (bm === null) ? (materialId || -1) : bm
     console.log('materialId', color);
     console.log('scaleX', scaleX, 'scaleY', scaleY, 'scaleZ', scaleZ)
+    const offsetX = Math.cos(angleY + (isOuter ? Math.PI / -2 : Math.PI / 2)) * wallThickness;
+    const offsetY = Math.sin(angleY + (isOuter ? Math.PI / -2 : Math.PI / 2)) * wallThickness;
+    // 将方向向量旋转90度
+    const rotatedDirection = materialVec ? new THREE.Vector3(...materialVec) : new THREE.Vector3(-1, 1, 1)
+    const material: THREE.Material | undefined = (() => {
+      if (materialId !== -1 && materialId !== null) {
+        const mater = getMaterialById(materialId);
+        if (mater) {
+          return mater.material(rotatedDirection)
+        }
+      }
+      return new THREE.MeshStandardMaterial({
+        color: color,
+        roughness: 0.7,
+        metalness: 0.1
+      });
+    })();
     if (url.endsWith('.obj')) {
       const loader = new OBJLoader()
       const materLoader = new MTLLoader()
-
-      // 将方向向量旋转90度
-      const rotatedDirection = materialVec ? new THREE.Vector3(...materialVec) : new THREE.Vector3(-1, 1, 1)
-      const material: THREE.Material | undefined = (() => {
-        if (materialId !== -1 && materialId !== null) {
-          const mater = getMaterialById(materialId);
-          if (mater) {
-            return mater.material(rotatedDirection)
-          }
-        }
-        return new THREE.MeshStandardMaterial({
-          color: color,
-          roughness: 0.7,
-          metalness: 0.1
-        });
-      })();
-
-      const offsetX = Math.cos(angleY + (isOuter ? Math.PI / -2 : Math.PI / 2)) * wallThickness;
-      const offsetY = Math.sin(angleY + (isOuter ? Math.PI / -2 : Math.PI / 2)) * wallThickness;
 
       function render(object: THREE.Group) {
         object.scale.set(scaleX, scaleY, scaleZ)
@@ -201,6 +201,35 @@ export class OutFileInWallEntity extends EntityClassInWall<OutFileInWallData> {
           console.error('OBJ文件加载失败:', error)
         })
       }
+    } else if (url.endsWith('.glb')) {
+      const loader = new GLTFLoader()
+      loader.load(url, (gltf: any) => {
+        gltf.scene.scale.set(scaleX, scaleY, scaleZ)
+        console.log('offsetX', offsetX, 'offsetY', offsetY)
+        gltf.scene.rotation.y = angleY * -1 + (isOuter ? Math.PI : 0)
+        gltf.scene.position.set(offsetX, 0, offsetY)
+        if (defaultColor || materialId) {
+          // @ts-ignore
+          gltf.scene.material = material
+          gltf.scene.traverse((child: any) => {
+            if (child instanceof THREE.Mesh) {
+              if (materialUseId !== -1 && materialUseId !== null) {
+                child.material = material
+              } else {
+                child.material = material
+              }
+            }
+          })
+          gltf.scene.material = material
+        }
+        group.add(gltf.scene)
+      }, (progress: any) => {
+        // 加载进度
+        const percent = (progress.loaded / progress.total * 100).toFixed(2)
+        console.log('加载进度:', percent + '%')
+      }, (error: any) => {
+        console.error('OBJ文件加载失败:', error)
+      })
     }
     // group.position.set(data.x, data.z, data.y)
 
