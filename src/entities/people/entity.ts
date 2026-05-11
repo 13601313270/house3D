@@ -298,6 +298,15 @@ export class PeopleEntity extends EntityClass<PeopleData> {
         step: 15,
         value: data.height,
       },
+      {
+        id: 'z',
+        label: 'z',
+        dataType: 'number',
+        min: -100,
+        max: 100,
+        step: 1,
+        value: data.z,
+      }
     ], (val) => {
       this.setData({
         ...data,
