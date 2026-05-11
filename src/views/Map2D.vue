@@ -1,5 +1,5 @@
 <template>
-  <div class="map2d-container">
+  <div class="map2d-container" @dragover.prevent="onDragOver" @dragleave="onDragLeave" @drop.prevent="onDrop">
     <div class="left-panel" :style="{ width: panel1SplitWidthPer * 100 + '%' }">
       <div class="toolbar">
         <div style="flex-shrink: 0;">布局图</div>
@@ -54,6 +54,21 @@
         <input type="file" id="fileInput" ref="fileInputRef" accept=".json" style="display: none"
           @change="handleFileChange" />
       </div>
+
+      <!-- 拖拽上传区域 -->
+      <!-- <div 
+        class="drop-zone"
+        @dragover.prevent="onDragOver"
+        @dragleave="onDragLeave"
+        @drop.prevent="onDrop"
+        :class="{ 'drag-over': isDragOver }"
+      >
+        <div class="drop-zone-content">
+          <div class="drop-icon">📦</div>
+          <div class="drop-text">拖拽 FBX 或 OBJ 文件到此处</div>
+          <div class="drop-hint">支持 .fbx 和 .obj 格式</div>
+        </div>
+      </div> -->
 
       <div class="canvas-container">
         <canvas ref="canvasRef" @click="handleCanvasClick" @mousedown="handleMouseDown" @mousemove="handleMouseMove"
@@ -136,6 +151,11 @@
 <script lang="ts" setup>
 import { ref, onMounted, onUnmounted, nextTick, watch } from 'vue'
 import axios from 'axios'
+import * as THREE from 'three'
+// @ts-ignore
+import { OBJLoader } from 'three/addons/loaders/OBJLoader.js'
+// @ts-ignore
+import { FBXLoader } from 'three/addons/loaders/FBXLoader.js'
 import { ObjData, Point } from '../types'
 import { snapThreshold, World } from '../utils/world'
 import Canvas3D, { CameraState } from '../components/Canvas3D.vue'
@@ -193,6 +213,10 @@ const allMaterialShowPropId = ref<string>()
 const showDemos = ref(false)
 const allDemos = ref<any[]>([])
 const demoIniting = ref(false)
+
+// 拖拽上传相关状态
+const isDragOver = ref(false)
+const isUploading = ref(false)
 
 const cameraState = ref<CameraState>({
   targetPositionX: 0,
@@ -1627,6 +1651,174 @@ function chooseDemo(id: number) {
     })
   })
 }
+
+// 拖拽上传相关方法
+const onDragOver = (e: DragEvent) => {
+  isDragOver.value = true
+}
+
+const onDragLeave = (e: DragEvent) => {
+  const target = e.currentTarget as HTMLElement
+  if (!target.contains(e.relatedTarget as Node)) {
+    isDragOver.value = false
+  }
+}
+
+const onDrop = async (e: DragEvent) => {
+  isDragOver.value = false
+  
+  const files = e.dataTransfer?.files
+  if (!files || files.length === 0) return
+  
+  const file = files[0]
+  const fileName = file.name.toLowerCase()
+  
+  // 检查文件类型
+  if (!fileName.endsWith('.fbx') && !fileName.endsWith('.obj')) {
+    alert('请上传 FBX 或 OBJ 格式的文件')
+    return
+  }
+  
+  // 检查文件大小
+  if (file.size === 0) {
+    alert(`文件 "${file.name}" 大小为 0 字节，请检查文件是否损坏或为空`)
+    return
+  }
+  
+  // 检查文件大小限制（例如 100MB）
+  const maxSize = 100 * 1024 * 1024 // 100MB
+  if (file.size > maxSize) {
+    alert(`文件 "${file.name}" 太大（${(file.size / 1024 / 1024).toFixed(2)} MB），请上传小于 100MB 的文件`)
+    return
+  }
+  
+  isUploading.value = true
+  
+  try {
+    await processUploadedFile(file)
+    alert('文件上传成功！')
+  } catch (error) {
+    console.error('文件处理失败:', error)
+    alert('文件处理失败，请重试')
+  } finally {
+    isUploading.value = false
+  }
+}
+
+const processUploadedFile = async (file: File): Promise<void> => {
+  return new Promise((resolve, reject) => {
+    const fileName = file.name.toLowerCase()
+    
+    if (fileName.endsWith('.obj')) {
+      const objectUrl = URL.createObjectURL(file)
+      const loader = new OBJLoader()
+      loader.load(
+        objectUrl,
+        (object: THREE.Group) => {
+          handleLoadedObject(object, file.name)
+          URL.revokeObjectURL(objectUrl)
+          resolve()
+        },
+        (xhr: any) => {
+          console.log(`OBJ 加载进度: ${(xhr.loaded / xhr.total * 100).toFixed(2)}%`)
+        },
+        (error: any) => {
+          console.error('OBJ 文件加载失败:', error)
+          URL.revokeObjectURL(objectUrl)
+          reject(error)
+        }
+      )
+    } else if (fileName.endsWith('.fbx')) {
+      console.log('开始读取 FBX 文件:', file.name, '大小:', file.size, 'bytes')
+      const reader = new FileReader()
+      reader.onload = (event) => {
+        try {
+          console.log('FBX 文件读取成功，开始解析')
+          const arrayBuffer = event.target?.result as ArrayBuffer
+          if (!arrayBuffer) {
+            reject(new Error('文件读取失败'))
+            return
+          }
+          
+          console.log('ArrayBuffer 大小:', arrayBuffer.byteLength)
+          const loader = new FBXLoader()
+          const object = loader.parse(arrayBuffer, '')
+          console.log('FBX 文件解析成功，对象:', object)
+          handleLoadedObject(object, file.name)
+          resolve()
+        } catch (error) {
+          console.error('FBX 文件解析失败:', error)
+          reject(error)
+        }
+      }
+      reader.onerror = (error) => {
+        console.error('FBX 文件读取失败:', error)
+        console.error('文件信息:', {
+          name: file.name,
+          size: file.size,
+          type: file.type,
+          lastModified: new Date(file.lastModified)
+        })
+        reject(new Error('文件读取失败'))
+      }
+      reader.readAsArrayBuffer(file)
+    } else {
+      reject(new Error('不支持的文件格式'))
+    }
+  })
+}
+
+const handleLoadedObject = (object: THREE.Group, fileName: string) => {
+  // 计算模型的包围盒以确定尺寸
+  const box = new THREE.Box3().setFromObject(object)
+  const size = box.getSize(new THREE.Vector3())
+
+  // 计算缩放因子，使模型适应场景
+  const maxDimension = Math.max(size.x, size.y, size.z)
+  const scaleFactor = maxDimension > 0 ? 50 / maxDimension : 1
+
+  // 创建自定义的 ObjItem 用于 worldApi
+  const customObjItem: ObjItem = {
+    id: `custom_${Date.now()}`,
+    name: fileName.replace(/\.(fbx|obj)$/i, ''),
+    url: '', // 本地文件没有URL
+    scaleX: scaleFactor,
+    scaleY: scaleFactor,
+    scaleZ: scaleFactor,
+    angleY: 0,
+    preImg: '',
+    preImgScale: 1,
+    materialId: null,
+    drawAngelLength: 40,
+    defaultColor: '#0c7f25',
+    inWall: false,
+    defaultZ: 0,
+  }
+
+  // 添加到 ObjFileTypes
+  worldApi.ObjFileTypes.push(customObjItem)
+
+  // 创建 outFile 数据并添加到场景
+  const data: OutFileData = {
+    fileTypeId: customObjItem.id,
+    id: Date.now().toString(),
+    x: 0,
+    y: 0,
+    z: 0,
+    bm: null,
+    angleY: 0,
+    color: customObjItem.defaultColor,
+  }
+
+  // 将 THREE.Group 存储到自定义属性中供后续使用
+  // @ts-ignore
+  customObjItem._threeObject = object
+
+  // 使用 worldApi 添加对象
+  worldApi.add('outFile', [new OutFileDataClass(data)])
+
+  drawWrapper()
+}
 </script>
 
 <style scoped lang="less">
@@ -2000,6 +2192,54 @@ button {
         width: 100%;
       }
     }
+  }
+}
+
+/* 拖拽上传区域样式 */
+.drop-zone {
+  width: calc(100% - 16px);
+  margin: 8px;
+  height: 120px;
+  border: 2px dashed #d9d9d9;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: #fafafa;
+
+  &:hover {
+    border-color: #1890ff;
+    background: #e6f7ff;
+  }
+
+  &.drag-over {
+    border-color: #1890ff;
+    background: #e6f7ff;
+    box-shadow: 0 0 12px rgba(24, 144, 255, 0.4);
+  }
+
+  .drop-zone-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .drop-icon {
+    font-size: 36px;
+  }
+
+  .drop-text {
+    font-size: 16px;
+    color: #666;
+    font-weight: 500;
+  }
+
+  .drop-hint {
+    font-size: 12px;
+    color: #999;
   }
 }
 </style>
