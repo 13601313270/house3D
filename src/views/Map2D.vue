@@ -849,6 +849,17 @@ const saveDrawing = async () => {
     json
   );
 
+  const allImportFiles = worldApi.allImportFiles
+  console.log('allImportFiles', allImportFiles)
+
+  // 保存资源文件
+  const assetsFolder = zip.folder('assets');
+  if (assetsFolder) {
+    for (const file of allImportFiles) {
+      assetsFolder.file(file.fileTypeId, file.file);
+    }
+  }
+
   // 生成 ZIP
   const blob = await zip.generateAsync({
     type: 'blob'
@@ -859,13 +870,7 @@ const saveDrawing = async () => {
   a.href = url
   a.download = 'floor-plan.devt'
   a.click()
-  URL.revokeObjectURL(url)
-  const allImportFile = worldApi.getObjects('importFile')
-  console.log('allImportFile', allImportFile)
-  // @ts-ignore
-  window.sss = allImportFile
-  return;
-
+  // URL.revokeObjectURL(url)
   // const blob = new Blob([json], { type: 'application/json' })
   // const url = URL.createObjectURL(blob)
   // const a = document.createElement('a')
@@ -894,6 +899,24 @@ const handleFileChange = async (e: Event) => {
   // 2. 读取 scene.json
   const sceneJsonText = await t.async('string');
   const sceneData = JSON.parse(sceneJsonText);
+
+  console.log(sceneData)
+  if (sceneData.importFile && sceneData.importFile.length) {
+    for (const v of sceneData.importFile) {
+      const { fileTypeId } = v
+      const read = await zip.file(`assets/${fileTypeId}`);
+      const extension = fileTypeId.split('.').pop()?.toLowerCase();
+      if (!read) continue
+      const blob = await read.async('blob');
+      const url = URL.createObjectURL(blob);
+      const file = new File([blob], fileTypeId, { type: blob.type || 'application/octet-stream' })
+
+      // // console.log('blob', blob, url)
+      // const fileExtension = v.fileName ? v.fileName.split('.').pop()?.toLowerCase() || '' : '';
+      console.log('blob', blob, url, file, file.name, extension)
+      processUploadedFile(file)
+    }
+  }
 
   // // 3. 遍历场景对象
   // for (const obj of sceneData.objects) {
@@ -1774,7 +1797,7 @@ const processUploadedFile = async (file: File): Promise<void> => {
       loader.load(
         objectUrl,
         (object: THREE.Group) => {
-          handleLoadedObject(object, file.name)
+          handleLoadedObject(object, file, 'obj')
           URL.revokeObjectURL(objectUrl)
           resolve()
         },
@@ -1803,7 +1826,7 @@ const processUploadedFile = async (file: File): Promise<void> => {
           const loader = new FBXLoader()
           const object = loader.parse(arrayBuffer, '')
           console.log('FBX 文件解析成功，对象:', object)
-          handleLoadedObject(object, file.name)
+          handleLoadedObject(object, file, 'fbx')
           resolve()
         } catch (error) {
           console.error('FBX 文件解析失败:', error)
@@ -1827,7 +1850,7 @@ const processUploadedFile = async (file: File): Promise<void> => {
   })
 }
 
-const handleLoadedObject = (object: THREE.Group, fileName: string) => {
+const handleLoadedObject = (object: THREE.Group, file: File, type: string) => {
   // 计算模型的包围盒以确定尺寸
   const box = new THREE.Box3().setFromObject(object)
   const size = box.getSize(new THREE.Vector3())
@@ -1841,11 +1864,13 @@ const handleLoadedObject = (object: THREE.Group, fileName: string) => {
   console.log(`最大边: ${maxDimension.toFixed(2)}, 缩放因子: ${scaleFactor.toFixed(4)}`)
   console.log(`缩放后尺寸: x=${(size.x * scaleFactor).toFixed(2)}, y=${(size.y * scaleFactor).toFixed(2)}, z=${(size.z * scaleFactor).toFixed(2)}`)
 
-  const fileTypeId = `custom_${Date.now()}`
+  const fileTypeId = `custom_${Date.now()}.${type}`
+  console.log('fileTypeId', fileTypeId)
   // 创建自定义的 ObjItem 用于 worldApi
   const customObjItem: ImportFileType = {
     fileTypeId,
-    file: object,
+    mesh: object,
+    file,
   }
 
   // 添加到 ObjFileTypes

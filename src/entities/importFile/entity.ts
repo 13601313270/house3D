@@ -168,7 +168,7 @@ export class ImportFileEntity extends EntityClass<ImportFileData> {
     // const { scaleX, scaleY, scaleZ, url, materialUrl, angleY, materialVec, defaultColor, materialId } = findObjInfo
 
     // @ts-ignore
-    const threeObject = findObjInfo.file as THREE.Group | undefined;
+    const threeObject = findObjInfo.mesh as THREE.Group | undefined;
 
     // console.log('materialVec', materialVec)
     console.log('materialId', bm);
