@@ -180,6 +180,7 @@ import { OutFileInWallEntity } from '@/entities/outFileInWall/entity'
 import { OutFileInWallData } from '@/entities/outFileInWall/index.d'
 
 import DataTypeEdit from './DataTypeEdit.vue'
+import { ImportFileDataClass } from '@/entities/importFile/dataClass';
 
 const canvasRef = ref<HTMLCanvasElement | null>(null)
 const canvas3DRef = ref<typeof Canvas3D | null>(null)
@@ -1873,10 +1874,10 @@ const handleLoadedObject = (object: THREE.Group, fileName: string) => {
 
   // @ts-ignore
   // window.sss = object;
-  object.scale.set(scaleFactor, scaleFactor, scaleFactor)
-  worldApi.scene.add(object)
+  // object.scale.set(scaleFactor, scaleFactor, scaleFactor)
+  // worldApi.scene.add(object)
   // 使用 worldApi 添加对象
-  // worldApi.add('outFile', [new OutFileDataClass(data)])
+  worldApi.add('importFile', [new ImportFileDataClass(data)])
 
   drawWrapper()
 }
