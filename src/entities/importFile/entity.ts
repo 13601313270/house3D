@@ -43,6 +43,7 @@ export class ImportFileEntity extends EntityClass<ImportFileData> {
       id: Date.now().toString(),
       angleY: 0,
       bm: null,
+      scale: 1,
       x: 0,
       y: 0,
       z: findObjInfo.defaultZ || 0,
@@ -157,25 +158,25 @@ export class ImportFileEntity extends EntityClass<ImportFileData> {
   create3DMesh(scene: THREE.Scene): THREE.Group[] {
     const data = this.getData();
     const group = new THREE.Group()
-    const { fileTypeId, bm, color } = data
-    const findObjInfo = this.world.ObjFileTypes.find(item => item.id === fileTypeId)
+    const { fileTypeId, bm, color, scale } = data
+    const findObjInfo = this.world.allImportFiles.find(item => item.fileTypeId === fileTypeId)
 
     if (!findObjInfo) {
       console.error('未找到对应的文件类型:', fileTypeId)
       return []
     }
-    const { scaleX, scaleY, scaleZ, url, materialUrl, angleY, materialVec, defaultColor, materialId } = findObjInfo
-    
-    // @ts-ignore
-    const threeObject = findObjInfo._threeObject as THREE.Group | undefined;
+    // const { scaleX, scaleY, scaleZ, url, materialUrl, angleY, materialVec, defaultColor, materialId } = findObjInfo
 
-    console.log('materialVec', materialVec)
+    // @ts-ignore
+    const threeObject = findObjInfo.file as THREE.Group | undefined;
+
+    // console.log('materialVec', materialVec)
     console.log('materialId', bm);
-    const materialUseId = (bm === null) ? (materialId || -1) : bm
+    const materialUseId = bm || -1
     console.log('materialId', color);
-    console.log('scaleX', scaleX, 'scaleY', scaleY, 'scaleZ', scaleZ)
+    // console.log('scaleX', scaleX, 'scaleY', scaleY, 'scaleZ', scaleZ)
     // 将方向向量旋转90度
-    const rotatedDirection = materialVec ? new THREE.Vector3(...materialVec) : new THREE.Vector3(-1, 1, 1)
+    const rotatedDirection = new THREE.Vector3(-1, 1, 1);// materialVec ? new THREE.Vector3(...materialVec) : new THREE.Vector3(-1, 1, 1)
     const material: THREE.Material | undefined = (() => {
       if (materialUseId !== -1 && materialUseId !== null) {
         const mater = getMaterialById(materialUseId);
@@ -193,8 +194,8 @@ export class ImportFileEntity extends EntityClass<ImportFileData> {
     // 如果有预加载的本地模型对象，直接使用
     if (threeObject) {
       const clonedObject = threeObject.clone()
-      clonedObject.scale.set(scaleX, scaleY, scaleZ)
-      clonedObject.rotation.y = angleY
+      clonedObject.scale.set(scale, scale, scale)
+      // clonedObject.rotation.y = angleY
 
       // 添加默认材质（如果模型没有材质）
       clonedObject.traverse((child) => {
@@ -205,91 +206,91 @@ export class ImportFileEntity extends EntityClass<ImportFileData> {
         }
       })
       group.add(clonedObject)
-      console.log('本地模型加载成功')
+      console.log('本地模型加载成功---')
       return [group]
     }
 
-    if (url && url.endsWith('.obj')) {
-      const loader = new OBJLoader()
-      const materLoader = new MTLLoader()
-      function render(object: THREE.Group) {
-        object.scale.set(scaleX, scaleY, scaleZ)
-        object.rotation.y = angleY
+    // if (url && url.endsWith('.obj')) {
+    //   const loader = new OBJLoader()
+    //   const materLoader = new MTLLoader()
+    //   function render(object: THREE.Group) {
+    //     object.scale.set(scaleX, scaleY, scaleZ)
+    //     object.rotation.y = angleY
 
-        if (!materialUrl) {
-          // @ts-ignore
-          object.material = material
-        }
+    //     if (!materialUrl) {
+    //       // @ts-ignore
+    //       object.material = material
+    //     }
 
-        // 添加默认材质（如果模型没有材质）
-        object.traverse((child) => {
-          if (child instanceof THREE.Mesh) {
-            if (materialUseId !== -1 && materialUseId !== null) {
-              child.material = material
-            } else {
-              if (!materialUrl) {
-                child.material = material
-              }
-            }
-          }
-        })
-        group.add(object)
-        console.log('OBJ文件加载成功:', url)
-      }
-      // console.log('material-material', getMaterialById(materialId))
-      if (materialUrl) {
-        materLoader.load(materialUrl, (mtl: any) => {
-          mtl.preload();
-          loader.setMaterials(mtl);
-          loader.load(url, (object: THREE.Group) => {
-            render(object)
-          }, (progress: any) => {
-            // 加载进度
-            const percent = (progress.loaded / progress.total * 100).toFixed(2)
-            console.log('加载进度:', percent + '%')
-          }, (error: any) => {
-            console.error('OBJ文件加载失败:', error)
-          })
-        })
-      } else {
-        loader.load(url, (object: THREE.Group) => {
-          render(object)
-        }, (progress: any) => {
-          // 加载进度
-          const percent = (progress.loaded / progress.total * 100).toFixed(2)
-          console.log('加载进度:', percent + '%')
-        }, (error: any) => {
-          console.error('OBJ文件加载失败:', error)
-        })
-      }
-    } else if (url.endsWith('.glb')) {
-      const loader = new GLTFLoader()
-      loader.load(url, (gltf: any) => {
-        gltf.scene.rotation.y = angleY
-        gltf.scene.scale.set(scaleX, scaleY, scaleZ)
-        if (defaultColor || materialId) {
-          // @ts-ignore
-          gltf.scene.material = material
-          gltf.scene.traverse((child: any) => {
-            if (child instanceof THREE.Mesh) {
-              if (materialUseId !== -1 && materialUseId !== null) {
-                child.material = material
-              } else {
-                child.material = material
-              }
-            }
-          })
-          gltf.scene.material = material
-        }
-        group.add(gltf.scene)
-      }, (progress: any) => {
-        // 加载进度
-        const percent = (progress.loaded / progress.total * 100).toFixed(2)
-        console.log('加载进度:', percent + '%')
-      }, (error: any) => {
-        console.error('OBJ文件加载失败:', error)
-      })
-    }
+    //     // 添加默认材质（如果模型没有材质）
+    //     object.traverse((child) => {
+    //       if (child instanceof THREE.Mesh) {
+    //         if (materialUseId !== -1 && materialUseId !== null) {
+    //           child.material = material
+    //         } else {
+    //           if (!materialUrl) {
+    //             child.material = material
+    //           }
+    //         }
+    //       }
+    //     })
+    //     group.add(object)
+    //     console.log('OBJ文件加载成功:', url)
+    //   }
+    //   // console.log('material-material', getMaterialById(materialId))
+    //   if (materialUrl) {
+    //     materLoader.load(materialUrl, (mtl: any) => {
+    //       mtl.preload();
+    //       loader.setMaterials(mtl);
+    //       loader.load(url, (object: THREE.Group) => {
+    //         render(object)
+    //       }, (progress: any) => {
+    //         // 加载进度
+    //         const percent = (progress.loaded / progress.total * 100).toFixed(2)
+    //         console.log('加载进度:', percent + '%')
+    //       }, (error: any) => {
+    //         console.error('OBJ文件加载失败:', error)
+    //       })
+    //     })
+    //   } else {
+    //     loader.load(url, (object: THREE.Group) => {
+    //       render(object)
+    //     }, (progress: any) => {
+    //       // 加载进度
+    //       const percent = (progress.loaded / progress.total * 100).toFixed(2)
+    //       console.log('加载进度:', percent + '%')
+    //     }, (error: any) => {
+    //       console.error('OBJ文件加载失败:', error)
+    //     })
+    //   }
+    // } else if (url.endsWith('.glb')) {
+    //   const loader = new GLTFLoader()
+    //   loader.load(url, (gltf: any) => {
+    //     gltf.scene.rotation.y = angleY
+    //     gltf.scene.scale.set(scaleX, scaleY, scaleZ)
+    //     if (defaultColor || materialId) {
+    //       // @ts-ignore
+    //       gltf.scene.material = material
+    //       gltf.scene.traverse((child: any) => {
+    //         if (child instanceof THREE.Mesh) {
+    //           if (materialUseId !== -1 && materialUseId !== null) {
+    //             child.material = material
+    //           } else {
+    //             child.material = material
+    //           }
+    //         }
+    //       })
+    //       gltf.scene.material = material
+    //     }
+    //     group.add(gltf.scene)
+    //   }, (progress: any) => {
+    //     // 加载进度
+    //     const percent = (progress.loaded / progress.total * 100).toFixed(2)
+    //     console.log('加载进度:', percent + '%')
+    //   }, (error: any) => {
+    //     console.error('OBJ文件加载失败:', error)
+    //   })
+    // }
     // group.position.set(data.x, data.z, data.y)
 
     return [

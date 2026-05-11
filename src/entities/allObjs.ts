@@ -1,3 +1,5 @@
+import * as THREE from 'three'
+
 type ObjOutputFileType = {
   id: string
   name: string
@@ -16,4 +18,10 @@ type ObjOutputFileType = {
   inWall: boolean
   defaultZ: number
 }
-export type { ObjOutputFileType }
+
+type ImportFileType = {
+  fileTypeId: string,
+  file: THREE.Group
+}
+
+export type { ObjOutputFileType, ImportFileType }

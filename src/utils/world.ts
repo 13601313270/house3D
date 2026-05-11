@@ -7,7 +7,7 @@ import { allFileKeys, fileData, fileDataKeyToClass } from '@/entities/index'
 import { EntityClass } from '@/types/entity'
 import { EntityClassInWall } from '@/types/entityInWall'
 import { ObjDataClass } from '@/entities/objData'
-import { ObjOutputFileType } from '@/entities/allObjs';
+import { ImportFileType, ObjOutputFileType } from '@/entities/allObjs';
 
 export const canvasHeight = 600
 export const snapThreshold = 20
@@ -27,6 +27,8 @@ export class World {
   }[] = []
 
   ObjFileTypes: ObjOutputFileType[] = []
+
+  allImportFiles: ImportFileType[] = []
 
   activeCameraIndex: number = -1
 

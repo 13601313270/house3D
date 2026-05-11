@@ -170,7 +170,7 @@ import { DoorEntity } from '@/entities/door/entity'
 import { CameraData } from '@/entities/camera/index.d'
 import { WallDataClass } from '@/entities/wall/dataClass'
 import { WallEntity } from '@/entities/wall/entity'
-import { ObjOutputFileType } from '@/entities/allObjs'
+import { ImportFileType, ObjOutputFileType } from '@/entities/allObjs'
 import { OutFileDataClass } from '@/entities/outFile/dataClass'
 import { OutFileEntity } from '@/entities/outFile/entity'
 import { OutFileData } from '@/entities/outFile/index.d'
@@ -1841,42 +1841,32 @@ const handleLoadedObject = (object: THREE.Group, fileName: string) => {
   console.log(`最大边: ${maxDimension.toFixed(2)}, 缩放因子: ${scaleFactor.toFixed(4)}`)
   console.log(`缩放后尺寸: x=${(size.x * scaleFactor).toFixed(2)}, y=${(size.y * scaleFactor).toFixed(2)}, z=${(size.z * scaleFactor).toFixed(2)}`)
 
+  const fileTypeId = `custom_${Date.now()}`
   // 创建自定义的 ObjItem 用于 worldApi
-  const customObjItem: ObjOutputFileType = {
-    id: `custom_${Date.now()}`,
-    name: fileName.replace(/\.(fbx|obj)$/i, ''),
-    url: '', // 本地文件没有URL
-    scaleX: scaleFactor,
-    scaleY: scaleFactor,
-    scaleZ: scaleFactor,
-    angleY: 0,
-    preImg: '',
-    preImgScale: 1,
-    materialId: null,
-    drawAngelLength: 40,
-    defaultColor: '#0c7f25',
-    inWall: false,
-    defaultZ: 0,
+  const customObjItem: ImportFileType = {
+    fileTypeId,
+    file: object,
   }
 
   // 添加到 ObjFileTypes
-  // worldApi.ObjFileTypes.push(customObjItem)
+  worldApi.allImportFiles.push(customObjItem)
 
   // 创建 outFile 数据并添加到场景
   const data: ImportFileData = {
-    fileTypeId: customObjItem.id,
+    fileTypeId,
     id: Date.now().toString(),
     x: 0,
     y: 0,
     z: 0,
     bm: null,
     angleY: 0,
-    color: customObjItem.defaultColor,
+    color: '#0c7f25',
+    scale: scaleFactor,
   }
 
   // 将 THREE.Group 存储到自定义属性中供后续使用
   // @ts-ignore
-  customObjItem._threeObject = object
+  // customObjItem._threeObject = object
 
   // @ts-ignore
   // window.sss = object;

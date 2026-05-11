@@ -6,6 +6,7 @@ export class ImportFileDataClass extends ObjDataClass<ImportFileData> {
   angleY: number
   bm: number | null // 材质
   color: string
+  scale: number
 
   constructor(data: ImportFileData) {
     super(data)
@@ -13,5 +14,6 @@ export class ImportFileDataClass extends ObjDataClass<ImportFileData> {
     this.angleY = data.angleY
     this.bm = data.bm
     this.color = data.color
+    this.scale = data.scale
   }
 }
