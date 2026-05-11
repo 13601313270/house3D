@@ -1,4 +1,4 @@
-type ObjItem = {
+type ObjOutputFileType = {
   id: string
   name: string
   url: string
@@ -16,4 +16,4 @@ type ObjItem = {
   inWall: boolean
   defaultZ: number
 }
-export type { ObjItem }
+export type { ObjOutputFileType }

@@ -170,7 +170,7 @@ import { DoorEntity } from '@/entities/door/entity'
 import { CameraData } from '@/entities/camera/index.d'
 import { WallDataClass } from '@/entities/wall/dataClass'
 import { WallEntity } from '@/entities/wall/entity'
-import { ObjItem } from '@/entities/allObjs'
+import { ObjOutputFileType } from '@/entities/allObjs'
 import { OutFileDataClass } from '@/entities/outFile/dataClass'
 import { OutFileEntity } from '@/entities/outFile/entity'
 import { OutFileData } from '@/entities/outFile/index.d'
@@ -181,6 +181,7 @@ import { OutFileInWallData } from '@/entities/outFileInWall/index.d'
 
 import DataTypeEdit from './DataTypeEdit.vue'
 import { ImportFileDataClass } from '@/entities/importFile/dataClass';
+import { ImportFileData } from '@/entities/importFile/index.d';
 
 const canvasRef = ref<HTMLCanvasElement | null>(null)
 const canvas3DRef = ref<typeof Canvas3D | null>(null)
@@ -859,6 +860,11 @@ const saveDrawing = async () => {
   a.download = 'floor-plan.devt'
   a.click()
   URL.revokeObjectURL(url)
+  const allImportFile = worldApi.getObjects('importFile')
+  console.log('allImportFile', allImportFile)
+  // @ts-ignore
+  window.sss = allImportFile
+  return;
 
   // const blob = new Blob([json], { type: 'application/json' })
   // const url = URL.createObjectURL(blob)
@@ -950,7 +956,7 @@ async function initWorldByData(data: fileData & {
     ids: fileTypes
   })
 
-  res.forEach((v: ObjItem) => {
+  res.forEach((v: ObjOutputFileType) => {
     worldApi.ObjFileTypes.push(v)
   })
 
@@ -1608,14 +1614,14 @@ function changeCurrentTool(type: string | 'drag') {
   currentTool.value = type
 }
 
-const lastChooseOutFile = ref<ObjItem>()
+const lastChooseOutFile = ref<ObjOutputFileType>()
 
 async function changeCurrentToolToOutFile(id: string) {
   activeToolsIndex.value = -1
   const index = worldApi.ObjFileTypes.findIndex(item => item.id === id);
   if (index === -1) {
     const { data } = await axios.get('https://api.studying1v1.com/video/objectFileById/' + id)
-    const res: ObjItem = data;
+    const res: ObjOutputFileType = data;
     lastChooseOutFile.value = res;
     worldApi.ObjFileTypes.push(res)
   } else {
@@ -1836,7 +1842,7 @@ const handleLoadedObject = (object: THREE.Group, fileName: string) => {
   console.log(`缩放后尺寸: x=${(size.x * scaleFactor).toFixed(2)}, y=${(size.y * scaleFactor).toFixed(2)}, z=${(size.z * scaleFactor).toFixed(2)}`)
 
   // 创建自定义的 ObjItem 用于 worldApi
-  const customObjItem: ObjItem = {
+  const customObjItem: ObjOutputFileType = {
     id: `custom_${Date.now()}`,
     name: fileName.replace(/\.(fbx|obj)$/i, ''),
     url: '', // 本地文件没有URL
@@ -1854,10 +1860,10 @@ const handleLoadedObject = (object: THREE.Group, fileName: string) => {
   }
 
   // 添加到 ObjFileTypes
-  worldApi.ObjFileTypes.push(customObjItem)
+  // worldApi.ObjFileTypes.push(customObjItem)
 
   // 创建 outFile 数据并添加到场景
-  const data: OutFileData = {
+  const data: ImportFileData = {
     fileTypeId: customObjItem.id,
     id: Date.now().toString(),
     x: 0,
