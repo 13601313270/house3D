@@ -428,6 +428,15 @@ export class ImportFileEntity extends EntityClass<ImportFileData> {
         label: '颜色',
         dataType: 'color',
         value: data.color,
+      },
+      {
+        id: 'scale',
+        label: '缩放',
+        dataType: 'number',
+        min: 0.1,
+        max: 10,
+        step: 0.1,
+        value: data.scale,
       }
     ]
     editShow(configList, (val) => {

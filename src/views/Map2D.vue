@@ -903,7 +903,7 @@ const handleFileChange = async (e: Event) => {
   console.log(sceneData)
   if (sceneData.importFile && sceneData.importFile.length) {
     for (const v of sceneData.importFile) {
-      const { fileTypeId } = v
+      const { fileTypeId, scale, color } = v
       const read = await zip.file(`assets/${fileTypeId}`);
       const extension = fileTypeId.split('.').pop()?.toLowerCase();
       if (!read) continue
@@ -914,7 +914,7 @@ const handleFileChange = async (e: Event) => {
       // // console.log('blob', blob, url)
       // const fileExtension = v.fileName ? v.fileName.split('.').pop()?.toLowerCase() || '' : '';
       console.log('blob', blob, url, file, file.name, extension)
-      processUploadedFile(file)
+      processUploadedFile(file, v)
     }
   }
 
@@ -1787,7 +1787,7 @@ const onDrop = async (e: DragEvent) => {
   }
 }
 
-const processUploadedFile = async (file: File): Promise<void> => {
+const processUploadedFile = async (file: File, v?: ImportFileData): Promise<void> => {
   return new Promise((resolve, reject) => {
     const fileName = file.name.toLowerCase()
 
@@ -1797,7 +1797,7 @@ const processUploadedFile = async (file: File): Promise<void> => {
       loader.load(
         objectUrl,
         (object: THREE.Group) => {
-          handleLoadedObject(object, file, 'obj')
+          handleLoadedObject(object, file, 'obj', v)
           URL.revokeObjectURL(objectUrl)
           resolve()
         },
@@ -1826,7 +1826,7 @@ const processUploadedFile = async (file: File): Promise<void> => {
           const loader = new FBXLoader()
           const object = loader.parse(arrayBuffer, '')
           console.log('FBX 文件解析成功，对象:', object)
-          handleLoadedObject(object, file, 'fbx')
+          handleLoadedObject(object, file, 'fbx', v)
           resolve()
         } catch (error) {
           console.error('FBX 文件解析失败:', error)
@@ -1850,21 +1850,21 @@ const processUploadedFile = async (file: File): Promise<void> => {
   })
 }
 
-const handleLoadedObject = (object: THREE.Group, file: File, type: string) => {
-  // 计算模型的包围盒以确定尺寸
-  const box = new THREE.Box3().setFromObject(object)
-  const size = box.getSize(new THREE.Vector3())
-
-  // 计算缩放因子，使模型最大边为 100
-  const maxDimension = Math.max(size.x, size.y, size.z)
-  const targetMaxSize = 100 // 最大边目标尺寸
-  const scaleFactor = maxDimension > 0 ? targetMaxSize / maxDimension : 1
-
-  console.log(`模型原始尺寸: x=${size.x.toFixed(2)}, y=${size.y.toFixed(2)}, z=${size.z.toFixed(2)}`)
-  console.log(`最大边: ${maxDimension.toFixed(2)}, 缩放因子: ${scaleFactor.toFixed(4)}`)
-  console.log(`缩放后尺寸: x=${(size.x * scaleFactor).toFixed(2)}, y=${(size.y * scaleFactor).toFixed(2)}, z=${(size.z * scaleFactor).toFixed(2)}`)
-
-  const fileTypeId = `custom_${Date.now()}.${type}`
+const handleLoadedObject = (object: THREE.Group, file: File, type: string, v?: ImportFileData) => {
+  const scaleFactor = (() => {
+    if (v) {
+      return v.scale
+    } else {
+      // 计算模型的包围盒以确定尺寸
+      const box = new THREE.Box3().setFromObject(object)
+      const size = box.getSize(new THREE.Vector3())
+      // 计算缩放因子，使模型最大边为 100
+      const maxDimension = Math.max(size.x, size.y, size.z)
+      const targetMaxSize = 100 // 最大边目标尺寸
+      return maxDimension > 0 ? targetMaxSize / maxDimension : 1
+    }
+  })();
+  const fileTypeId = v?.fileTypeId || `custom_${Date.now()}.${type}`
   console.log('fileTypeId', fileTypeId)
   // 创建自定义的 ObjItem 用于 worldApi
   const customObjItem: ImportFileType = {
