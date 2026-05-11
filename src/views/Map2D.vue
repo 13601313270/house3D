@@ -51,7 +51,7 @@
         <button @click="clearDrawing" type="button">
           清空
         </button>
-        <input type="file" id="fileInput" ref="fileInputRef" accept=".json" style="display: none"
+        <input type="file" id="fileInput" ref="fileInputRef" accept=".devt" style="display: none"
           @change="handleFileChange" />
       </div>
 
@@ -152,6 +152,7 @@
 import { ref, onMounted, onUnmounted, nextTick, watch } from 'vue'
 import axios from 'axios'
 import * as THREE from 'three'
+import JSZip from 'jszip';
 // @ts-ignore
 import { OBJLoader } from 'three/addons/loaders/OBJLoader.js'
 // @ts-ignore
@@ -821,7 +822,7 @@ onMounted(async () => {
 
 const fileInputRef = ref<HTMLInputElement | null>(null)
 
-const saveDrawing = () => {
+const saveDrawing = async () => {
   activeToolsIndex.value = -1
   const data: fileData & {
     panOffset: Point
@@ -835,14 +836,36 @@ const saveDrawing = () => {
     cameraState: cameraState.value,
     activeCameraIndex: activeCameraIndex.value
   }
+
+  const zip = new JSZip();
+
   const json = JSON.stringify(data, null, 2)
-  const blob = new Blob([json], { type: 'application/json' })
+
+  // 保存 JSON 配置
+  zip.file(
+    'scene.json',
+    json
+  );
+
+  // 生成 ZIP
+  const blob = await zip.generateAsync({
+    type: 'blob'
+  });
+
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
   a.href = url
-  a.download = 'floor-plan.json'
+  a.download = 'floor-plan.devt'
   a.click()
   URL.revokeObjectURL(url)
+
+  // const blob = new Blob([json], { type: 'application/json' })
+  // const url = URL.createObjectURL(blob)
+  // const a = document.createElement('a')
+  // a.href = url
+  // a.download = 'floor-plan.json'
+  // a.click()
+  // URL.revokeObjectURL(url)
 }
 
 const loadDrawing = () => {
@@ -851,10 +874,35 @@ const loadDrawing = () => {
   fileInputRef.value?.click()
 }
 
-const handleFileChange = (e: Event) => {
+const handleFileChange = async (e: Event) => {
   const input = e.target as HTMLInputElement
   const file = input.files?.[0]
   if (!file) return
+
+  // 1. 解压 ZIP
+  const zip = await JSZip.loadAsync(file);
+
+  const t = await zip.file('scene.json');
+  if (!t) return
+  // 2. 读取 scene.json
+  const sceneJsonText = await t.async('string');
+  const sceneData = JSON.parse(sceneJsonText);
+
+  // // 3. 遍历场景对象
+  // for (const obj of sceneData.objects) {
+  //   const path = obj.file; // 如 assets/house.fbx
+
+  //   // 4. 从 ZIP 中读取二进制
+  //   const assetBlob = await zip.file(path).async('blob');
+
+  //   // 5. 创建临时 URL
+  //   const url = URL.createObjectURL(assetBlob);
+
+  //   // 6. 用 Three.js 加载
+  //   loadModel(url, obj);
+
+  //   // 7. 模型加载完成后记得 URL.revokeObjectURL(url)
+  // }
 
   const reader = new FileReader()
   reader.onload = async (event) => {
@@ -864,7 +912,7 @@ const handleFileChange = (e: Event) => {
         zoomLevel: number
         cameraState: CameraState
         activeCameraIndex: number
-      } = JSON.parse(event.target?.result as string)
+      } = JSON.parse(sceneJsonText as string)
 
       await initWorldByData(data)
     } catch (error) {
@@ -1666,37 +1714,41 @@ const onDragLeave = (e: DragEvent) => {
 
 const onDrop = async (e: DragEvent) => {
   isDragOver.value = false
-  
+
   const files = e.dataTransfer?.files
   if (!files || files.length === 0) return
-  
+
   const file = files[0]
   const fileName = file.name.toLowerCase()
-  
+
+  // if (fileName.endsWith('.devt')) {
+  //   alert('请上传 DEVT 格式的文件~~~~~')
+  //   return
+  // }
+
   // 检查文件类型
   if (!fileName.endsWith('.fbx') && !fileName.endsWith('.obj')) {
     alert('请上传 FBX 或 OBJ 格式的文件')
     return
   }
-  
+
   // 检查文件大小
   if (file.size === 0) {
     alert(`文件 "${file.name}" 大小为 0 字节，请检查文件是否损坏或为空`)
     return
   }
-  
+
   // 检查文件大小限制（例如 100MB）
   const maxSize = 100 * 1024 * 1024 // 100MB
   if (file.size > maxSize) {
     alert(`文件 "${file.name}" 太大（${(file.size / 1024 / 1024).toFixed(2)} MB），请上传小于 100MB 的文件`)
     return
   }
-  
+
   isUploading.value = true
-  
+
   try {
     await processUploadedFile(file)
-    alert('文件上传成功！')
   } catch (error) {
     console.error('文件处理失败:', error)
     alert('文件处理失败，请重试')
@@ -1708,7 +1760,7 @@ const onDrop = async (e: DragEvent) => {
 const processUploadedFile = async (file: File): Promise<void> => {
   return new Promise((resolve, reject) => {
     const fileName = file.name.toLowerCase()
-    
+
     if (fileName.endsWith('.obj')) {
       const objectUrl = URL.createObjectURL(file)
       const loader = new OBJLoader()
@@ -1739,7 +1791,7 @@ const processUploadedFile = async (file: File): Promise<void> => {
             reject(new Error('文件读取失败'))
             return
           }
-          
+
           console.log('ArrayBuffer 大小:', arrayBuffer.byteLength)
           const loader = new FBXLoader()
           const object = loader.parse(arrayBuffer, '')
@@ -1773,9 +1825,14 @@ const handleLoadedObject = (object: THREE.Group, fileName: string) => {
   const box = new THREE.Box3().setFromObject(object)
   const size = box.getSize(new THREE.Vector3())
 
-  // 计算缩放因子，使模型适应场景
+  // 计算缩放因子，使模型最大边为 100
   const maxDimension = Math.max(size.x, size.y, size.z)
-  const scaleFactor = maxDimension > 0 ? 50 / maxDimension : 1
+  const targetMaxSize = 100 // 最大边目标尺寸
+  const scaleFactor = maxDimension > 0 ? targetMaxSize / maxDimension : 1
+
+  console.log(`模型原始尺寸: x=${size.x.toFixed(2)}, y=${size.y.toFixed(2)}, z=${size.z.toFixed(2)}`)
+  console.log(`最大边: ${maxDimension.toFixed(2)}, 缩放因子: ${scaleFactor.toFixed(4)}`)
+  console.log(`缩放后尺寸: x=${(size.x * scaleFactor).toFixed(2)}, y=${(size.y * scaleFactor).toFixed(2)}, z=${(size.z * scaleFactor).toFixed(2)}`)
 
   // 创建自定义的 ObjItem 用于 worldApi
   const customObjItem: ObjItem = {
@@ -1814,8 +1871,12 @@ const handleLoadedObject = (object: THREE.Group, fileName: string) => {
   // @ts-ignore
   customObjItem._threeObject = object
 
+  // @ts-ignore
+  // window.sss = object;
+  object.scale.set(scaleFactor, scaleFactor, scaleFactor)
+  worldApi.scene.add(object)
   // 使用 worldApi 添加对象
-  worldApi.add('outFile', [new OutFileDataClass(data)])
+  // worldApi.add('outFile', [new OutFileDataClass(data)])
 
   drawWrapper()
 }
