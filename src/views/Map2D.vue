@@ -130,7 +130,7 @@
   </div>
   <div v-if="showDemos" class="allDemosContent">
     <div class="allDemosContentInner">
-      <div class="title">欢迎来到<span class="p">「摄影棚」</span>，请选择创建场景的模板</div>
+      <div class="title"><img class="icon" src="/favicon.ico" />欢迎来到<span class="p">「摄影棚」</span>，请选择创建场景的模板</div>
       <div class="demoList">
         <div v-if="demoIniting" class="loading">...</div>
         <div class="demoItem" @click="showDemos = false">
@@ -2213,6 +2213,14 @@ button {
       line-height: 40px;
       color: #666;
       margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      .icon {
+        margin-right: 8px;
+        border-radius: 4px;
+      }
 
       .p {
         font-weight: bold;
