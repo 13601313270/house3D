@@ -28,9 +28,18 @@
               <div class="splitLine"></div>
             </template>
             <div>
+              <div v-for="item in allFileKeysGroup.filter(item => item.id !== 'other')" :key="item.id"
+                class="typeItemContent">
+                <div class="typeName">{{ item.name }}</div>
+                <div class="childItemList" v-if="item.child && item.child.length > 0">
+                  <div v-for="item2 in item.child" class="childItem" :key="item2" @click="changeCurrentTool(item2)">
+                    {{ allFileKeysName[item2] }}
+                  </div>
+                </div>
+              </div>
               <div class="childItem"
-                v-for="value in allFileKeys.filter(item => item !== 'outFile' && item !== 'outFileInWall')" :key="value"
-                :class="{ active: currentTool === value }" @click="changeCurrentTool(value)">
+                v-for="value in (allFileKeysGroup.find(item => item.id === 'other') || { child: [] }).child.filter(item => item !== 'outFile' && item !== 'outFileInWall')"
+                :key="value" :class="{ active: currentTool === value }" @click="changeCurrentTool(value)">
                 {{ allFileKeysName[value] }}
               </div>
             </div>
@@ -161,7 +170,7 @@ import { ObjData, Point } from '../types'
 import { snapThreshold, World } from '../utils/world'
 import Canvas3D, { CameraState } from '../components/Canvas3D.vue'
 import { WallData } from '@/entities/wall/index.d'
-import { allFileKeys, fileData, editItem, allFileKeysName, fileDataKeyToClass } from '@/entities'
+import { allFileKeys, fileData, editItem, allFileKeysName, fileDataKeyToClass, allFileKeysGroup } from '@/entities'
 import { EntityClass, MatchSnapPoint } from '@/types/entity'
 import { EntityClassInWall } from '@/types/entityInWall'
 import { HandelInfo, PointWithIndex } from '@/types/map2d'
@@ -1948,6 +1957,11 @@ const handleLoadedObject = (object: THREE.Group, file: File, type: string, v?: I
             background-color: #1890ff;
             color: white;
             font-weight: bold;
+            position: relative;
+
+            &::after {
+              color: white;
+            }
           }
 
           .childItemList {
@@ -1958,6 +1972,19 @@ const handleLoadedObject = (object: THREE.Group, file: File, type: string, v?: I
         .typeName {
           padding: 4px 0;
           cursor: default;
+
+          &::after {
+            content: '>';
+            position: absolute;
+            height: 100%;
+            line-height: 22px;
+            right: 4px;
+            width: 10px;
+            height: 10px;
+            color: black;
+            font-size: 12px;
+            border-radius: 50%;
+          }
         }
 
         .childItemList {

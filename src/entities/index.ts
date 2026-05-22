@@ -18,6 +18,23 @@ type EntityConstructor = new (...args: any[]) => EntityClass<any>;
 
 export const allFileKeys: string[] = [
 ]
+type TypeGroup = Array<{
+  id: string,
+  name: string,
+  child: string[]
+}>;
+export const allFileKeysGroup: TypeGroup = [
+  {
+    id: 'base',
+    name: '基础对象',
+    child: []
+  },
+  {
+    id: 'other',
+    name: '其他类型',
+    child: [],
+  }
+]
 
 export const allFileKeysName: Record<string, string> = {
 }
@@ -41,6 +58,11 @@ export const fileDataKeyToClass: Record<string, EntityConstructor> = {
   importFilePlugin,
 ].forEach(v => {
   allFileKeys.push(v.key)
+  if (v.type === 'base') {
+    allFileKeysGroup[0].child.push(v.key)
+  } else {
+    allFileKeysGroup[1].child.push(v.key)
+  }
   allFileKeysName[v.key] = v.name
   fileDataKeyToClass[v.key] = v.entity
 }))

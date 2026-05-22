@@ -4,6 +4,7 @@ import PluginType from "../pluginType"
 const ConePlugin: PluginType = {
   name: '圆锥体',
   key: 'cone',
+  type: 'base',
   entity: ConeEntity,
 }
 export default ConePlugin
