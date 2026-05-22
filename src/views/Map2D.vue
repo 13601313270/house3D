@@ -38,7 +38,7 @@
                 </div>
               </div>
               <div class="childItem"
-                v-for="value in (allFileKeysGroup.find(item => item.id === 'other') || { child: [] }).child.filter(item => item !== 'outFile' && item !== 'outFileInWall')"
+                v-for="value in (allFileKeysGroup.find(item => item.id === 'other') || { child: [] }).child.filter(item => item !== 'outFile' && item !== 'outFileInWall' && item !== 'importFile')"
                 :key="value" :class="{ active: currentTool === value }" @click="changeCurrentTool(value)">
                 {{ allFileKeysName[value] }}
               </div>
