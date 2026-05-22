@@ -1,8 +1,8 @@
 <template>
-  <div class="map2d-container" @dragover.prevent="onDragOver" @dragleave="onDragLeave" @drop.prevent="onDrop">
-    <div class="left-panel" :style="{ width: panel1SplitWidthPer * 100 + '%' }">
+  <div class="map2d-app">
+    <div class="headTools">
       <div class="toolbar">
-        <div style="flex-shrink: 0;">布局图</div>
+        <img class="icon" src="/favicon.ico" />
         <div class="toolbar-item" @mouseleave="activeToolsIndex = -1">
           <button type="button" @mouseenter="activeToolsIndex = 0">
             文件
@@ -16,56 +16,68 @@
             </div>
           </div>
         </div>
-        <div class="toolbar-item" @mouseleave="activeToolsIndex = -1">
-          <button type="button" @mouseenter="activeToolsIndex = 1">
-            添加
+        <div class="toolbar-item" @click="onlyDemos = true, showDemos = true">
+          <button type="button">
+            示例
           </button>
-          <div class="list" v-show="activeToolsIndex === 1">
-            <template v-if="lastChooseOutFile">
-              <div class="childItem" @click="changeCurrentToolToOutFile(lastChooseOutFile.id)">
-                最近使用：{{ lastChooseOutFile.name }}
-              </div>
-              <div class="splitLine"></div>
-            </template>
-            <div>
-              <div v-for="item in allFileKeysGroup.filter(item => item.id !== 'other')" :key="item.id"
-                class="typeItemContent">
-                <div class="typeName">{{ item.name }}</div>
-                <div class="childItemList" v-if="item.child && item.child.length > 0">
-                  <div v-for="item2 in item.child" class="childItem" :key="item2" @click="changeCurrentTool(item2)">
-                    {{ allFileKeysName[item2] }}
+        </div>
+      </div>
+    </div>
+    <div class="map2d-container" @dragover.prevent="onDragOver" @dragleave="onDragLeave" @drop.prevent="onDrop">
+      <div class="left-panel" :style="{ width: panel1SplitWidthPer * 100 + '%' }">
+        <div class="toolbar">
+          <div style="flex-shrink: 0;">布局图</div>
+
+          <div class="toolbar-item" @mouseleave="activeToolsIndex = -1">
+            <button type="button" @mouseenter="activeToolsIndex = 1">
+              添加
+            </button>
+            <div class="list" v-show="activeToolsIndex === 1">
+              <template v-if="lastChooseOutFile">
+                <div class="childItem" @click="changeCurrentToolToOutFile(lastChooseOutFile.id)">
+                  最近使用：{{ lastChooseOutFile.name }}
+                </div>
+                <div class="splitLine"></div>
+              </template>
+              <div>
+                <div v-for="item in allFileKeysGroup.filter(item => item.id !== 'other')" :key="item.id"
+                  class="typeItemContent">
+                  <div class="typeName">{{ item.name }}</div>
+                  <div class="childItemList" v-if="item.child && item.child.length > 0">
+                    <div v-for="item2 in item.child" class="childItem" :key="item2" @click="changeCurrentTool(item2)">
+                      {{ allFileKeysName[item2] }}
+                    </div>
                   </div>
                 </div>
+                <div class="childItem"
+                  v-for="value in (allFileKeysGroup.find(item => item.id === 'other') || { child: [] }).child.filter(item => item !== 'outFile' && item !== 'outFileInWall' && item !== 'importFile')"
+                  :key="value" :class="{ active: currentTool === value }" @click="changeCurrentTool(value)">
+                  {{ allFileKeysName[value] }}
+                </div>
               </div>
-              <div class="childItem"
-                v-for="value in (allFileKeysGroup.find(item => item.id === 'other') || { child: [] }).child.filter(item => item !== 'outFile' && item !== 'outFileInWall' && item !== 'importFile')"
-                :key="value" :class="{ active: currentTool === value }" @click="changeCurrentTool(value)">
-                {{ allFileKeysName[value] }}
-              </div>
-            </div>
-            <div class="splitLine"></div>
-            <div>
-              <div v-for="item in ObjFileTypes" :key="item.id" class="typeItemContent">
-                <div class="typeName" @mouseenter="mouseEnterType(item)">{{ item.name }}</div>
-                <div class="childItemList" v-if="item.child && item.child.length > 0">
-                  <div v-for="item2 in item.child" class="childItem" :key="item2.id"
-                    @click="changeCurrentToolToOutFile(item2.id)">
-                    {{ item2.name }}
+              <div class="splitLine"></div>
+              <div>
+                <div v-for="item in ObjFileTypes" :key="item.id" class="typeItemContent">
+                  <div class="typeName" @mouseenter="mouseEnterType(item)">{{ item.name }}</div>
+                  <div class="childItemList" v-if="item.child && item.child.length > 0">
+                    <div v-for="item2 in item.child" class="childItem" :key="item2.id"
+                      @click="changeCurrentToolToOutFile(item2.id)">
+                      {{ item2.name }}
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
+          <button @click="clearDrawing" type="button">
+            清空
+          </button>
+          <input type="file" id="fileInput" ref="fileInputRef" accept=".devt" style="display: none"
+            @change="handleFileChange" />
         </div>
-        <button @click="clearDrawing" type="button">
-          清空
-        </button>
-        <input type="file" id="fileInput" ref="fileInputRef" accept=".devt" style="display: none"
-          @change="handleFileChange" />
-      </div>
 
-      <!-- 拖拽上传区域 -->
-      <!-- <div 
+        <!-- 拖拽上传区域 -->
+        <!-- <div 
         class="drop-zone"
         @dragover.prevent="onDragOver"
         @dragleave="onDragLeave"
@@ -79,73 +91,78 @@
         </div>
       </div> -->
 
-      <div class="canvas-container">
-        <canvas ref="canvasRef" @click="handleCanvasClick" @mousedown="handleMouseDown" @mousemove="handleMouseMove"
-          @mouseup="handleMouseUp" @contextmenu="handleContextMenu" class="drawing-canvas"
-          :style="{ display: isSplitting ? 'none' : 'block' }" />
-        <div v-if="contextMenu?.visible" class="context-menu"
-          :style="{ top: contextMenu.y + 'px', left: contextMenu.x + 'px' }">
-          <!-- {{ editPropConfigInfo }} -->
-          <!-- {{ editPropInputInfo }} -->
-          <div class="configList">
-            <div v-for="item in editPropConfigInfo" :key="item.id" class="configItem">
-              <div>
-                {{ item.label }}：
-                <!-- {{ editPropInputInfo[item.id] }} -->
-              </div>
-              <div>
-                <!-- {{ item }} -->
-                <DataTypeEdit :item="item" v-model="editPropInputInfo" />
+        <div class="canvas-container">
+          <canvas ref="canvasRef" @click="handleCanvasClick" @mousedown="handleMouseDown" @mousemove="handleMouseMove"
+            @mouseup="handleMouseUp" @contextmenu="handleContextMenu" class="drawing-canvas"
+            :style="{ display: isSplitting ? 'none' : 'block' }" />
+          <div v-if="contextMenu?.visible" class="context-menu"
+            :style="{ top: contextMenu.y + 'px', left: contextMenu.x + 'px' }">
+            <!-- {{ editPropConfigInfo }} -->
+            <!-- {{ editPropInputInfo }} -->
+            <div class="configList">
+              <div v-for="item in editPropConfigInfo" :key="item.id" class="configItem">
+                <div>
+                  {{ item.label }}：
+                  <!-- {{ editPropInputInfo[item.id] }} -->
+                </div>
+                <div>
+                  <!-- {{ item }} -->
+                  <DataTypeEdit :item="item" v-model="editPropInputInfo" />
+                </div>
               </div>
             </div>
-          </div>
-          <button @click="deleteContextMenuEntity">删除</button>
-        </div>
-      </div>
-    </div>
-
-    <div class="split-bar" @mousedown.prevent="startSplit(1)" title="拖动调整左右比例"></div>
-
-    <div class="right-panel" :style="{ width: panel2SplitWidthPer * 100 + '%' }">
-      <div class="tools">
-        <div style="flex-shrink: 0;">全景图</div>
-      </div>
-      <!-- {{ insertTempDoor }} -->
-      <div class="right-panel-content">
-        <Canvas3D ref="canvas3DRef" :world="worldApi" v-model:cameraState="cameraState" :aspectRatio="1"
-          :showCamera="true" />
-      </div>
-    </div>
-
-    <div class="split-bar" @mousedown.prevent="startSplit(2)" title="拖动调整左右比例"></div>
-    <div class="right-panel" :style="{ width: (1 - panel1SplitWidthPer - panel2SplitWidthPer) * 100 + '%' }">
-      <div class="tools">
-        <div style="flex-shrink: 0;">摄像机：</div>
-        <div class="cameraList">
-          <div v-for="(item, index) in allCamera" @click="changeCamera2State(index)"
-            :class="{ active: activeCameraIndex === index }" class="cameraItem">{{ index }}
+            <button @click="deleteContextMenuEntity">删除</button>
           </div>
         </div>
-        <div v-if="allCamera.length && cameraState2">
-          <button type="button" @click="exportImage">导出图片</button>
+      </div>
+
+      <div class="split-bar" @mousedown.prevent="startSplit(1)" title="拖动调整左右比例"></div>
+
+      <div class="right-panel" :style="{ width: panel2SplitWidthPer * 100 + '%' }">
+        <div class="tools">
+          <div style="flex-shrink: 0;">全景图</div>
+        </div>
+        <!-- {{ insertTempDoor }} -->
+        <div class="right-panel-content">
+          <Canvas3D ref="canvas3DRef" :world="worldApi" v-model:cameraState="cameraState" :aspectRatio="1"
+            :showCamera="true" />
         </div>
       </div>
-      <div class="right-panel-content">
-        <Canvas3D v-if="allCamera.length && cameraState2" ref="canvas3DRef2" :world="worldApi"
-          :cameraState="cameraState2" :aspectRatio="cameraState2.aspectW / cameraState2.aspectH" :showCamera="false" />
-        <div v-else class="noCamera">请至少在场景中添加一个摄像机</div>
+
+      <div class="split-bar" @mousedown.prevent="startSplit(2)" title="拖动调整左右比例"></div>
+      <div class="right-panel" :style="{ width: (1 - panel1SplitWidthPer - panel2SplitWidthPer) * 100 + '%' }">
+        <div class="tools">
+          <div style="flex-shrink: 0;">摄像机：</div>
+          <div class="cameraList">
+            <div v-for="(item, index) in allCamera" @click="changeCamera2State(index)"
+              :class="{ active: activeCameraIndex === index }" class="cameraItem">{{ index }}
+            </div>
+          </div>
+          <div v-if="allCamera.length && cameraState2">
+            <button type="button" @click="exportImage">导出图片</button>
+          </div>
+        </div>
+        <div class="right-panel-content">
+          <Canvas3D v-if="allCamera.length && cameraState2" ref="canvas3DRef2" :world="worldApi"
+            :cameraState="cameraState2" :aspectRatio="cameraState2.aspectW / cameraState2.aspectH"
+            :showCamera="false" />
+          <div v-else class="noCamera">请至少在场景中添加一个摄像机</div>
+        </div>
       </div>
     </div>
   </div>
   <div v-if="showDemos" class="allDemosContent">
     <div class="allDemosContentInner">
       <div class="title"><img class="icon" src="/favicon.ico" />欢迎来到<span class="p">「摄影棚」</span>，请选择创建场景的模板</div>
+      <div v-if="onlyDemos" class="closeBtn" @click="showDemos = false">
+        <img src="../assets/close.svg" alt="close" />
+      </div>
       <div class="demoList">
         <div v-if="demoIniting" class="loading">...</div>
-        <div class="demoItem" @click="showDemos = false">
+        <div class="demoItem" v-if="!onlyDemos" @click="showDemos = false">
           <div>新建空场景</div>
         </div>
-        <div class="demoItem" @click="showDemos = false, loadDrawing()">
+        <div class="demoItem" v-if="!onlyDemos" @click="showDemos = false, loadDrawing()">
           <div>加载文件</div>
         </div>
         <div v-for="item in allDemos" :key="item.id" class="demoItem" @click="chooseDemo(item.id)">
@@ -223,6 +240,7 @@ const wallThickness = ref<number>(20)
 const allMaterialShow = ref(false)
 const allMaterialShowPropId = ref<string>()
 const showDemos = ref(false)
+const onlyDemos = ref(false)
 const allDemos = ref<any[]>([])
 const demoIniting = ref(false)
 
@@ -1914,10 +1932,51 @@ const handleLoadedObject = (object: THREE.Group, file: File, type: string, v?: I
 </script>
 
 <style scoped lang="less">
+.map2d-app {
+  display: flex;
+  flex-direction: column;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.headTools {
+  background: linear-gradient(90deg, #1f2a6b 0%, #340da8 100%);
+
+  .toolbar {
+    display: flex;
+    padding: 0;
+
+    .icon {
+      width: 40px;
+      height: 40px;
+      margin-right: 8px;
+    }
+
+    .toolbar-item {
+
+      button {
+        padding: 4px 8px;
+        border: none;
+        border-radius: 4px;
+        background: transparent;
+        color: white;
+        cursor: pointer;
+        font-size: 16px;
+        transition: all 0.3s;
+      }
+
+      .list {
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.7);
+      }
+    }
+  }
+}
+
 .map2d-container {
   display: flex;
   width: 100vw;
-  height: 100vh;
+  flex: 1;
   overflow: hidden;
 }
 
@@ -1925,7 +1984,7 @@ const handleLoadedObject = (object: THREE.Group, file: File, type: string, v?: I
   display: flex;
   padding: 4px 8px;
   align-items: center;
-  background: white;
+  // background: white;
   gap: 8px;
   height: 40px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
@@ -1974,13 +2033,18 @@ const handleLoadedObject = (object: THREE.Group, file: File, type: string, v?: I
           cursor: default;
 
           &::after {
-            content: '>';
+            content: '';
+            background-image: url('../assets/right.svg');
+            background-size: cover;
+            background-position: center;
             position: absolute;
             height: 100%;
             line-height: 22px;
+            top: 10px;
             right: 4px;
             width: 10px;
             height: 10px;
+            opacity: 0.7;
             color: black;
             font-size: 12px;
             border-radius: 50%;
@@ -2252,6 +2316,19 @@ button {
       .p {
         font-weight: bold;
         color: black;
+      }
+    }
+
+    .closeBtn {
+      position: absolute;
+      top: 24px;
+      right: 24px;
+      width: 24px;
+      height: 24px;
+      cursor: pointer;
+
+      img {
+        height: 100%;
       }
     }
 
