@@ -22,6 +22,11 @@
           </button>
         </div>
       </div>
+      <div class="toolbar toolbar-right">
+        <button type="button" class="login-btn" @click="showLogin = true">
+          登录
+        </button>
+      </div>
     </div>
     <div class="map2d-container" @dragover.prevent="onDragOver" @dragleave="onDragLeave" @drop.prevent="onDrop">
       <div class="left-panel" :style="{ width: panel1SplitWidthPer * 100 + '%' }">
@@ -172,6 +177,7 @@
       </div>
     </div>
   </div>
+  <Login v-if="showLogin" @close="showLogin = false" @login="handleLogin" />
 </template>
 
 <script lang="ts" setup>
@@ -208,6 +214,7 @@ import { OutFileInWallData } from '@/entities/outFileInWall/index.d'
 import DataTypeEdit from './DataTypeEdit.vue'
 import { ImportFileDataClass } from '@/entities/importFile/dataClass';
 import { ImportFileData } from '@/entities/importFile/index.d';
+import Login from '@/components/Login.vue'
 
 const canvasRef = ref<HTMLCanvasElement | null>(null)
 const canvas3DRef = ref<typeof Canvas3D | null>(null)
@@ -239,6 +246,7 @@ const wallThickness = ref<number>(20)
 
 const allMaterialShow = ref(false)
 const allMaterialShowPropId = ref<string>()
+const showLogin = ref(false)
 const showDemos = ref(false)
 const onlyDemos = ref(false)
 const allDemos = ref<any[]>([])
@@ -1261,6 +1269,11 @@ const clearDrawing = () => {
   }
 }
 
+const handleLogin = (email: string, password: string) => {
+  console.log('Login attempt:', email, password)
+  showLogin.value = false
+}
+
 // const undo = () => {
 //   if (history.value.length > 0) {
 //     worldApi.allFileObjects.wall = history.value.pop() || []
@@ -1941,11 +1954,16 @@ const handleLoadedObject = (object: THREE.Group, file: File, type: string, v?: I
 }
 
 .headTools {
-  background: linear-gradient(90deg, #1f2a6b 0%, #340da8 100%);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: linear-gradient(90deg, #141b44 0%, #190554 100%);
+  padding-right: 8px;
 
   .toolbar {
     display: flex;
     padding: 0;
+    width: auto;
 
     .icon {
       width: 40px;
