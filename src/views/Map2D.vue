@@ -22,13 +22,20 @@
           </button>
         </div>
       </div>
-      <div class="toolbar toolbar-right">
-        <div v-if="store.state.main.userInfo" class="userInfo">
-          欢迎登录：{{ store.state.main.userInfo.email }}
+      <div class="toolbar">
+        <div class="toolbar-item" @mouseleave="activeToolsIndex = -1">
+          <div v-if="store.state.main.userInfo">
+            <div class="userInfo" @mouseenter="activeToolsIndex = 2">欢迎登录：{{ store.state.main.userInfo.email }}</div>
+            <div class="list" v-show="activeToolsIndex === 2">
+              <div @click="logout" class="childItem">
+                退出
+              </div>
+            </div>
+          </div>
+          <button v-else type="button" class="login-btn" @click="showLogin = true">
+            登录
+          </button>
         </div>
-        <button v-else type="button" class="login-btn" @click="showLogin = true">
-          登录
-        </button>
       </div>
     </div>
     <div class="map2d-container" @dragover.prevent="onDragOver" @dragleave="onDragLeave" @drop.prevent="onDrop">
@@ -1961,6 +1968,10 @@ const handleLoadedObject = (object: THREE.Group, file: File, type: string, v?: I
 
   drawWrapper()
 }
+function logout() {
+  store.dispatch('main/setUserInfo', null)
+  localStorage.removeItem('token')
+}
 </script>
 
 <style scoped lang="less">
@@ -2005,12 +2016,15 @@ const handleLoadedObject = (object: THREE.Group, file: File, type: string, v?: I
 
       .list {
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.7);
+        left: auto;
+        right: 0;
       }
     }
   }
 
   .userInfo {
     color: white;
+    cursor: pointer;
   }
 }
 

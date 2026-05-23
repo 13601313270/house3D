@@ -185,7 +185,6 @@ const handleSubmit = async () => {
     })
     if (result.status === 200) {
       if (result.data.result) {
-        alert(result.data.token)
         localStorage.setItem('token', result.data.token)
         emit('login', email.value, password.value)
       } else {
