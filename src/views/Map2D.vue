@@ -23,7 +23,10 @@
         </div>
       </div>
       <div class="toolbar toolbar-right">
-        <button type="button" class="login-btn" @click="showLogin = true">
+        <div v-if="store.state.main.userInfo" class="userInfo">
+          欢迎登录：{{ store.state.main.userInfo.email }}
+        </div>
+        <button v-else type="button" class="login-btn" @click="showLogin = true">
           登录
         </button>
       </div>
@@ -185,6 +188,7 @@ import { ref, onMounted, onUnmounted, nextTick, watch } from 'vue'
 import axios from 'axios'
 import * as THREE from 'three'
 import JSZip from 'jszip';
+import request from '@/utils/request'
 // @ts-ignore
 import { OBJLoader } from 'three/addons/loaders/OBJLoader.js'
 // @ts-ignore
@@ -215,6 +219,8 @@ import DataTypeEdit from './DataTypeEdit.vue'
 import { ImportFileDataClass } from '@/entities/importFile/dataClass';
 import { ImportFileData } from '@/entities/importFile/index.d';
 import Login from '@/components/Login.vue'
+import { useStore } from 'vuex';
+import { Store } from '@/store';
 
 const canvasRef = ref<HTMLCanvasElement | null>(null)
 const canvas3DRef = ref<typeof Canvas3D | null>(null)
@@ -255,6 +261,8 @@ const demoIniting = ref(false)
 // 拖拽上传相关状态
 const isDragOver = ref(false)
 const isUploading = ref(false)
+
+const store = useStore<Store>()
 
 const cameraState = ref<CameraState>({
   targetPositionX: 0,
@@ -1272,6 +1280,16 @@ const clearDrawing = () => {
 const handleLogin = (email: string, password: string) => {
   console.log('Login attempt:', email, password)
   showLogin.value = false
+  loginByToken();
+}
+
+const loginByToken = () => {
+  request.get('/video/user/info').then(res => {
+    console.log(res)
+    if (res.status === 200) {
+      store.dispatch('main/setUserInfo', res.data)
+    }
+  })
 }
 
 // const undo = () => {
@@ -1582,6 +1600,7 @@ const handleMouseUpSplit = () => {
 }
 
 onMounted(() => {
+  loginByToken();
   window.addEventListener('mousemove', handleMouseMoveSplit)
   window.addEventListener('mouseup', handleMouseUpSplit)
 
@@ -1988,6 +2007,10 @@ const handleLoadedObject = (object: THREE.Group, file: File, type: string, v?: I
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.7);
       }
     }
+  }
+
+  .userInfo {
+    color: white;
   }
 }
 
