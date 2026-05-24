@@ -5,4 +5,5 @@ export type OutFileInWallData = ObjInWallData & {
   bm: number | null // 材质
   color: string,
   isOuter: boolean,// 是否挂在外墙
+  canAngelZ: boolean,// 是否可以旋转Z轴角度
 }

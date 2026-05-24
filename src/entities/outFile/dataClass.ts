@@ -6,6 +6,7 @@ export class OutFileDataClass extends ObjDataClass<OutFileData> {
   angleY: number
   bm: number | null // 材质
   color: string
+  canAngelZ: boolean// 是否可以旋转Z轴角度
 
   constructor(data: OutFileData) {
     super(data)
@@ -13,5 +14,6 @@ export class OutFileDataClass extends ObjDataClass<OutFileData> {
     this.angleY = data.angleY
     this.bm = data.bm
     this.color = data.color
+    this.canAngelZ = data.canAngelZ
   }
 }

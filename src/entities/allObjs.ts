@@ -17,6 +17,7 @@ type ObjOutputFileType = {
   defaultColor: string
   inWall: boolean
   defaultZ: number
+  canAngelZ: boolean,// 是否可以旋转Z轴角度
 }
 
 type ImportFileType = {

@@ -1732,6 +1732,7 @@ async function changeCurrentToolToOutFile(id: string) {
       bottom: 40,
       color: findObjInfo.defaultColor,
       isOuter: false,
+      canAngelZ: findObjInfo.canAngelZ,
     }
     const insertTempObjData = new OutFileInWallDataClass(data)
     insertTempObj = new OutFileInWallEntity(worldApi, insertTempObjData)
@@ -1747,6 +1748,7 @@ async function changeCurrentToolToOutFile(id: string) {
       bm: findObjInfo.materialId,
       angleY: 0,
       color: findObjInfo.defaultColor,
+      canAngelZ: findObjInfo.canAngelZ,
     }
     const insertTempObjData = new OutFileDataClass(data)
     insertTempObj = new OutFileEntity(worldApi, insertTempObjData)

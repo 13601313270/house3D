@@ -52,6 +52,7 @@ export class OutFileInWallEntity extends EntityClassInWall<OutFileInWallData> {
       z: 0,
       color: '#0c7f25',
       isOuter: false,
+      canAngelZ: findObjInfo.canAngelZ,
     }
     return new OutFileInWallDataClass(data)
   }

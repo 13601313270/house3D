@@ -47,6 +47,7 @@ export class OutFileEntity extends EntityClass<OutFileData> {
       y: 0,
       z: findObjInfo.defaultZ || 0,
       color: '#0c7f25',
+      canAngelZ: findObjInfo.canAngelZ,
     }
     return new OutFileDataClass(data)
   }
@@ -90,6 +91,9 @@ export class OutFileEntity extends EntityClass<OutFileData> {
     ctx.stroke()
 
     const findObjInfo = this.world.ObjFileTypes.find(item => item.id === data.fileTypeId)
+    if (findObjInfo && !findObjInfo.canAngelZ) {
+      return;
+    }
     const drawAngelLength = findObjInfo?.drawAngelLength || this.baseDrawAngelLength
 
     // 控制点向着angleY角度延伸10个单位后的坐标
