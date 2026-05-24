@@ -22,7 +22,7 @@
           </button>
         </div>
       </div>
-      <div class="toolbar">
+      <div class="toolbar right">
         <div class="toolbar-item" @mouseleave="activeToolsIndex = -1">
           <div v-if="store.state.main.userInfo">
             <div class="userInfo" @mouseenter="activeToolsIndex = 2">欢迎登录：{{ store.state.main.userInfo.email }}</div>
@@ -2016,8 +2016,15 @@ function logout() {
 
       .list {
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.7);
-        left: auto;
-        right: 0;
+      }
+    }
+
+    &.right {
+      .toolbar-item {
+        .list {
+          left: auto;
+          right: 0;
+        }
       }
     }
   }
