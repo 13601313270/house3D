@@ -816,6 +816,17 @@ onMounted(async () => {
     window.addEventListener('resize', () => updateCanvasSize())
     updateCanvasSize()
 
+    function bindSave(event: any) {
+      console.log('event', event)
+      // 检测 Ctrl+S (Windows/Linux) 或 Command+S (Mac)
+      if ((event.ctrlKey || event.metaKey) && event.key === 's') {
+        event.preventDefault(); // 阻止浏览器保存网页
+        saveDrawing();
+      }
+    }
+    // 劫持Ctrl+S保存事件
+    window.addEventListener('keydown', bindSave);
+
     const handleKeyDown = async (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         if (tempDrawWall.value?.points?.length && tempDrawWall.value.points.length > 0) {
@@ -868,6 +879,7 @@ onMounted(async () => {
 
     return () => {
       window.removeEventListener('keydown', handleKeyDown)
+      window.removeEventListener('keydown', bindSave);
     }
   }
 })
