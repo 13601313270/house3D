@@ -89,6 +89,10 @@
                       @click="changeCurrentToolToOutFile(item2.id)">
                       {{ item2.name }}
                     </div>
+                    <div class="childItem" @click="showHelpModal = true">
+                      <div>联系售后添加</div>
+                      <div class="desc">（24小时内添加）</div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -198,7 +202,7 @@
     </div>
   </div>
   <Login v-if="showLogin" @close="showLogin = false" @login="handleLogin" />
-  <Help v-if="showHelpModal" @close="showHelpModal = false"/>
+  <Help v-if="showHelpModal" @close="showHelpModal = false" />
 </template>
 
 <script lang="ts" setup>
@@ -2144,7 +2148,7 @@ function logout() {
           display: none;
           top: -8px;
           left: 100%;
-          width: 130px;
+          width: 140px;
           background: white;
           border: 1px solid #d9d9d9;
           box-sizing: border-box;
@@ -2153,10 +2157,26 @@ function logout() {
           z-index: 1001;
 
           .childItem {
+            border-bottom: 1px solid #f1f1f1;
+            margin: 0 8px;
+
+            &:last-child {
+              border-bottom: none;
+            }
+
             &:hover {
               background-color: #1890ff;
               color: white;
               font-weight: bold;
+
+              .desc {
+                color: white;
+              }
+            }
+
+            .desc {
+              font-size: 14px;
+              color: #666;
             }
           }
         }

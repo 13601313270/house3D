@@ -2,7 +2,7 @@
   <div class="help-modal" @click.self="emits('close')">
     <div class="help-modal-content">
       <div class="help-modal-header">
-        <span>帮助</span>
+        <span>帮助支持</span>
         <button class="close-btn" @click="emits('close')">×</button>
       </div>
       <div class="help-modal-body">
