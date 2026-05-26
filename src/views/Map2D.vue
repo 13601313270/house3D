@@ -11,7 +11,7 @@
             <div @click="saveDrawing" class="childItem">
               保存
             </div>
-            <div @click="loadDrawing" class="childItem">
+            <div @click="loadProgramFile" class="childItem">
               加载
             </div>
           </div>
@@ -99,33 +99,19 @@
             </div>
           </div>
           <button @click="triggerImportFile" type="button">
-            导入
+            导入模型
           </button>
           <button @click="clearDrawing" type="button">
             清空
           </button>
-          <input type="file" id="fileInput" ref="fileInputRef" accept=".devt" style="display: none"
-            @change="handleFileChange" />
+          <input type="file" id="fileInput" ref="loadProgramFileInputRef" accept=".devt" style="display: none"
+            @change="handleLoadProgramFileChange" />
           <input type="file" id="importFileInput" ref="importFileInputRef" accept=".fbx,.obj" style="display: none"
             @change="handleImportFileChange" />
         </div>
-
-        <!-- 拖拽上传区域 -->
-        <!-- <div 
-        class="drop-zone"
-        @dragover.prevent="onDragOver"
-        @dragleave="onDragLeave"
-        @drop.prevent="onDrop"
-        :class="{ 'drag-over': isDragOver }"
-      >
-        <div class="drop-zone-content">
-          <div class="drop-icon">📦</div>
-          <div class="drop-text">拖拽 FBX 或 OBJ 文件到此处</div>
-          <div class="drop-hint">支持 .fbx 和 .obj 格式</div>
-        </div>
-      </div> -->
-
         <div class="canvas-container">
+          <!-- <Canvas3D ref="canvas3DRef" :world="worldApi" v-model:cameraState="cameraStateLeft" :aspectRatio="1"
+            :showCamera="true" cameraType="orthographic" /> -->
           <canvas ref="canvasRef" @click="handleCanvasClick" @mousedown="handleMouseDown" @mousemove="handleMouseMove"
             @mouseup="handleMouseUp" @contextmenu="handleContextMenu" class="drawing-canvas"
             :style="{ display: isSplitting ? 'none' : 'block' }" />
@@ -158,8 +144,8 @@
         </div>
         <!-- {{ insertTempDoor }} -->
         <div class="right-panel-content">
-          <Canvas3D ref="canvas3DRef" :world="worldApi" v-model:cameraState="cameraState" :aspectRatio="1"
-            :showCamera="true" />
+          <Canvas3D ref="canvas3DRef" :world="worldApi" v-model:cameraState="cameraStateCenter" :aspectRatio="1"
+            :showCamera="true" cameraType="perspective" />
         </div>
       </div>
 
@@ -178,9 +164,9 @@
         </div>
         <div class="right-panel-content">
           <Canvas3D v-if="allCamera.length && cameraState2" ref="canvas3DRef2" :world="worldApi"
-            :cameraState="cameraState2" :aspectRatio="cameraState2.aspectW / cameraState2.aspectH"
-            :showCamera="false" />
-          <div v-else class="noCamera">请至少在场景中添加一个摄像机</div>
+            :cameraState="cameraState2" :aspectRatio="cameraState2.aspectW / cameraState2.aspectH" :showCamera="false"
+            cameraType="perspective" />
+          <!-- <div v-else class="noCamera">请至少在场景中添加一个摄像机</div> -->
         </div>
       </div>
     </div>
@@ -196,7 +182,7 @@
         <div class="demoItem" v-if="!onlyDemos" @click="showDemos = false">
           <div>新建空场景</div>
         </div>
-        <div class="demoItem" v-if="!onlyDemos" @click="showDemos = false, loadDrawing()">
+        <div class="demoItem" v-if="!onlyDemos" @click="showDemos = false, loadProgramFile()">
           <div>加载文件</div>
         </div>
         <div v-for="item in allDemos" :key="item.id" class="demoItem" @click="chooseDemo(item.id)">
@@ -222,7 +208,7 @@ import { OBJLoader } from 'three/addons/loaders/OBJLoader.js'
 import { FBXLoader } from 'three/addons/loaders/FBXLoader.js'
 import { ObjData, Point } from '../types'
 import { snapThreshold, World } from '../utils/world'
-import Canvas3D, { CameraState } from '../components/Canvas3D.vue'
+import Canvas3D, { CameraState, OrthographicCamera } from '../components/Canvas3D.vue'
 import { WallData } from '@/entities/wall/index.d'
 import { allFileKeys, fileData, editItem, allFileKeysName, fileDataKeyToClass, allFileKeysGroup } from '@/entities'
 import { EntityClass, MatchSnapPoint } from '@/types/entity'
@@ -291,8 +277,15 @@ const isDragOver = ref(false)
 const isUploading = ref(false)
 
 const store = useStore<Store>()
+const cameraStateLeft = ref<OrthographicCamera>({
+  targetPositionX: 0,
+  targetPositionY: 0,
+  targetPositionZ: 0,
+  size: 300,
+  length: 300,
+})
 
-const cameraState = ref<CameraState>({
+const cameraStateCenter = ref<CameraState>({
   targetPositionX: 0,
   targetPositionY: 0,
   targetPositionZ: 0,
@@ -905,7 +898,7 @@ onMounted(async () => {
   }
 })
 
-const fileInputRef = ref<HTMLInputElement | null>(null)
+const loadProgramFileInputRef = ref<HTMLInputElement | null>(null)
 const importFileInputRef = ref<HTMLInputElement | null>(null)
 
 const triggerImportFile = () => {
@@ -917,38 +910,7 @@ const handleImportFileChange = async (e: Event) => {
   const file = input.files?.[0]
   if (!file) return
 
-  const fileName = file.name.toLowerCase()
-
-  // 检查文件类型
-  if (!fileName.endsWith('.fbx') && !fileName.endsWith('.obj')) {
-    alert('请上传 FBX 或 OBJ 格式的文件')
-    return
-  }
-
-  // 检查文件大小
-  if (file.size === 0) {
-    alert(`文件 "${file.name}" 大小为 0 字节，请检查文件是否损坏或为空`)
-    return
-  }
-
-  // 检查文件大小限制（例如 100MB）
-  const maxSize = 100 * 1024 * 1024 // 100MB
-  if (file.size > maxSize) {
-    alert(`文件 "${file.name}" 太大（${(file.size / 1024 / 1024).toFixed(2)} MB），请上传小于 100MB 的文件`)
-    return
-  }
-
-  isUploading.value = true
-
-  try {
-    await processUploadedFile(file)
-  } catch (error) {
-    console.error('文件处理失败:', error)
-    alert('文件处理失败，请重试')
-  } finally {
-    isUploading.value = false
-    input.value = ''
-  }
+  await importOutObj(file)
 }
 
 const saveDrawing = async () => {
@@ -962,7 +924,7 @@ const saveDrawing = async () => {
     ...worldApi.getAllFileObjects() as any,
     panOffset: panOffset.value,
     zoomLevel: zoomLevel.value,
-    cameraState: cameraState.value,
+    cameraState: cameraStateCenter.value,
     activeCameraIndex: activeCameraIndex.value
   }
 
@@ -1007,13 +969,13 @@ const saveDrawing = async () => {
   // URL.revokeObjectURL(url)
 }
 
-const loadDrawing = () => {
+const loadProgramFile = () => {
   worldApi.clearAll()
   activeToolsIndex.value = -1
-  fileInputRef.value?.click()
+  loadProgramFileInputRef.value?.click()
 }
 
-const handleFileChange = async (e: Event) => {
+const handleLoadProgramFileChange = async (e: Event) => {
   const input = e.target as HTMLInputElement
   const file = input.files?.[0]
   if (!file) return
@@ -1041,7 +1003,15 @@ const handleFileChange = async (e: Event) => {
       // // console.log('blob', blob, url)
       // const fileExtension = v.fileName ? v.fileName.split('.').pop()?.toLowerCase() || '' : '';
       console.log('blob', blob, url, file, file.name, extension)
-      processUploadedFile(file, v)
+      processUploadedFile(file, (object: THREE.Group, file: File, type: string) => {
+        const customObjItem: ImportFileType = {
+          fileTypeId: v.fileTypeId,
+          mesh: object,
+          file,
+        }
+        // 添加到 ObjFileTypes
+        worldApi.allImportFiles.push(customObjItem)
+      }, v)
     }
   }
 
@@ -1120,7 +1090,7 @@ async function initWorldByData(data: fileData & {
   panOffset.value = data.panOffset || { x: 0, y: 0 }
   zoomLevel.value = data.zoomLevel || 1
   if (data.cameraState) {
-    cameraState.value = data.cameraState
+    cameraStateCenter.value = data.cameraState
   }
   if (data.activeCameraIndex !== undefined) {
     changeCamera2State(data.activeCameraIndex)
@@ -1887,19 +1857,9 @@ const onDragLeave = (e: DragEvent) => {
   }
 }
 
-const onDrop = async (e: DragEvent) => {
-  isDragOver.value = false
-
-  const files = e.dataTransfer?.files
-  if (!files || files.length === 0) return
-
-  const file = files[0]
+// 导入外部模型
+async function importOutObj(file: File) {
   const fileName = file.name.toLowerCase()
-
-  // if (fileName.endsWith('.devt')) {
-  //   alert('请上传 DEVT 格式的文件~~~~~')
-  //   return
-  // }
 
   // 检查文件类型
   if (!fileName.endsWith('.fbx') && !fileName.endsWith('.obj')) {
@@ -1923,7 +1883,9 @@ const onDrop = async (e: DragEvent) => {
   isUploading.value = true
 
   try {
-    await processUploadedFile(file)
+    await processUploadedFile(file, (object, file, type) => {
+      handleLoadedObject(object, file, type)
+    })
   } catch (error) {
     console.error('文件处理失败:', error)
     alert('文件处理失败，请重试')
@@ -1931,8 +1893,17 @@ const onDrop = async (e: DragEvent) => {
     isUploading.value = false
   }
 }
+const onDrop = async (e: DragEvent) => {
+  isDragOver.value = false
 
-const processUploadedFile = async (file: File, v?: ImportFileData): Promise<void> => {
+  const files = e.dataTransfer?.files
+  if (!files || files.length === 0) return
+
+  const file = files[0]
+  importOutObj(file)
+}
+
+const processUploadedFile = async (file: File, callback: (object: THREE.Group, file: File, type: string) => void, v?: ImportFileData): Promise<void> => {
   return new Promise((resolve, reject) => {
     const fileName = file.name.toLowerCase()
 
@@ -1942,7 +1913,7 @@ const processUploadedFile = async (file: File, v?: ImportFileData): Promise<void
       loader.load(
         objectUrl,
         (object: THREE.Group) => {
-          handleLoadedObject(object, file, 'obj', v)
+          callback(object, file, 'obj')
           URL.revokeObjectURL(objectUrl)
           resolve()
         },
@@ -1971,7 +1942,7 @@ const processUploadedFile = async (file: File, v?: ImportFileData): Promise<void
           const loader = new FBXLoader()
           const object = loader.parse(arrayBuffer, '')
           console.log('FBX 文件解析成功，对象:', object)
-          handleLoadedObject(object, file, 'fbx', v)
+          callback(object, file, 'fbx')
           resolve()
         } catch (error) {
           console.error('FBX 文件解析失败:', error)
@@ -1995,21 +1966,17 @@ const processUploadedFile = async (file: File, v?: ImportFileData): Promise<void
   })
 }
 
-const handleLoadedObject = (object: THREE.Group, file: File, type: string, v?: ImportFileData) => {
+const handleLoadedObject = (object: THREE.Group, file: File, type: string) => {
   const scaleFactor = (() => {
-    if (v) {
-      return v.scale
-    } else {
-      // 计算模型的包围盒以确定尺寸
-      const box = new THREE.Box3().setFromObject(object)
-      const size = box.getSize(new THREE.Vector3())
-      // 计算缩放因子，使模型最大边为 100
-      const maxDimension = Math.max(size.x, size.y, size.z)
-      const targetMaxSize = 100 // 最大边目标尺寸
-      return maxDimension > 0 ? targetMaxSize / maxDimension : 1
-    }
+    // 计算模型的包围盒以确定尺寸
+    const box = new THREE.Box3().setFromObject(object)
+    const size = box.getSize(new THREE.Vector3())
+    // 计算缩放因子，使模型最大边为 100
+    const maxDimension = Math.max(size.x, size.y, size.z)
+    const targetMaxSize = 100 // 最大边目标尺寸
+    return maxDimension > 0 ? targetMaxSize / maxDimension : 1
   })();
-  const fileTypeId = v?.fileTypeId || `custom_${Date.now()}.${type}`
+  const fileTypeId = `custom_${Date.now()}.${type}`
   console.log('fileTypeId', fileTypeId)
   // 创建自定义的 ObjItem 用于 worldApi
   const customObjItem: ImportFileType = {
@@ -2033,16 +2000,6 @@ const handleLoadedObject = (object: THREE.Group, file: File, type: string, v?: I
     color: '#0c7f25',
     scale: scaleFactor,
   }
-
-  // 将 THREE.Group 存储到自定义属性中供后续使用
-  // @ts-ignore
-  // customObjItem._threeObject = object
-
-  // @ts-ignore
-  // window.sss = object;
-  // object.scale.set(scaleFactor, scaleFactor, scaleFactor)
-  // worldApi.scene.add(object)
-  // 使用 worldApi 添加对象
   worldApi.add('importFile', [new ImportFileDataClass(data)])
 
   drawWrapper()

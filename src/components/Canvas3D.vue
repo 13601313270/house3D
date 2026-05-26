@@ -8,7 +8,8 @@ import { ref, onMounted, onUnmounted, watch, nextTick } from 'vue'
 import * as THREE from 'three'
 import { World } from '@/utils/world'
 
-export type CameraState = {
+// 位置+角度
+type camera1 = {
   targetPositionX: number
   targetPositionY: number
   targetPositionZ: number
@@ -17,7 +18,9 @@ export type CameraState = {
   angleY: number
   aspectW: number,
   aspectH: number,
-} | {
+};
+// 位置+目标位置
+type camera2 = {
   targetPositionX: number
   targetPositionY: number
   targetPositionZ: number
@@ -28,23 +31,34 @@ export type CameraState = {
   aspectW: number,
   aspectH: number,
 }
+// 正交相机
+export type OrthographicCamera = {
+  targetPositionX: number
+  targetPositionY: number
+  targetPositionZ: number
+  size: number,
+  length: number,
+}
+
+export type CameraState = camera1 | camera2
 
 const props = defineProps<{
   world: World,
-  cameraState?: CameraState,
+  cameraState: CameraState | OrthographicCamera,
   aspectRatio?: number
   showCamera: boolean
+  cameraType: 'perspective' | 'orthographic'
 }>()
 
-const emit = defineEmits<{ (e: 'update:cameraState', value: CameraState): void }>()
+const emit = defineEmits<{ (e: 'update:cameraState', value: CameraState | OrthographicCamera): void }>()
 
 const containerRef = ref<HTMLDivElement | null>(null)
 
 // let scene: THREE.Scene | null = null
-let camera: THREE.PerspectiveCamera | null = null
+let camera: THREE.PerspectiveCamera | THREE.OrthographicCamera | null = null
 let renderer: THREE.WebGLRenderer | null = null
 
-const cameraState = ref<CameraState>({
+const cameraStateZ = ref<CameraState | OrthographicCamera>({
   targetPositionX: 0,
   targetPositionY: 0,
   targetPositionZ: 0,
@@ -56,44 +70,56 @@ const cameraState = ref<CameraState>({
 })
 
 function updateCameraAngel() {
-  if ('radius' in cameraState.value && cameraState.value.radius) {
-    const camera1X = cameraState.value.radius * Math.sin(cameraState.value.angleX) * Math.cos(cameraState.value.angleY) * -1;
-    const camera1Y = cameraState.value.radius * Math.sin(cameraState.value.angleY);
-    const camera1Z = cameraState.value.radius * Math.cos(cameraState.value.angleX) * Math.cos(cameraState.value.angleY);
+  if (props.cameraType === 'orthographic') {
+    if ('size' in cameraStateZ.value) {
+      if (camera instanceof THREE.OrthographicCamera) {
+        camera.left = -cameraStateZ.value.size * 1;
+        camera.right = cameraStateZ.value.size * 1;
+        camera.top = cameraStateZ.value.size * 1;
+        camera.bottom = -cameraStateZ.value.size * 1;
+        camera.updateProjectionMatrix()
+        camera.position.set(
+          cameraStateZ.value.targetPositionX,
+          cameraStateZ.value.targetPositionZ + cameraStateZ.value.length,
+          cameraStateZ.value.targetPositionY,
+        );
+        camera.lookAt(
+          cameraStateZ.value.targetPositionX,
+          cameraStateZ.value.targetPositionZ,
+          cameraStateZ.value.targetPositionY
+        );
+        camera.updateProjectionMatrix()
+      }
+    }
+  }
+  else if ('radius' in cameraStateZ.value && cameraStateZ.value.radius) {
+    const camera1X = cameraStateZ.value.radius * Math.sin(cameraStateZ.value.angleX) * Math.cos(cameraStateZ.value.angleY) * -1;
+    const camera1Y = cameraStateZ.value.radius * Math.sin(cameraStateZ.value.angleY);
+    const camera1Z = cameraStateZ.value.radius * Math.cos(cameraStateZ.value.angleX) * Math.cos(cameraStateZ.value.angleY);
 
     if (camera) {
       camera.position.set(
-        cameraState.value.targetPositionX + camera1X, // 镜头左右摇摆
-        cameraState.value.targetPositionY + camera1Y,
-        cameraState.value.targetPositionZ + camera1Z
+        cameraStateZ.value.targetPositionX + camera1X, // 镜头左右摇摆
+        cameraStateZ.value.targetPositionY + camera1Y,
+        cameraStateZ.value.targetPositionZ + camera1Z
       );
       camera.lookAt(
-        cameraState.value.targetPositionX,
-        cameraState.value.targetPositionY,
-        cameraState.value.targetPositionZ
+        cameraStateZ.value.targetPositionX,
+        cameraStateZ.value.targetPositionY,
+        cameraStateZ.value.targetPositionZ
       );
     }
-  } else if ('positionX' in cameraState.value) {
+  } else if ('fov' in cameraStateZ.value) {
     if (camera) {
-      // const fov = cameraState.value.fov
-      // if (fov > 10 && fov < 180) {
-      //   if (!containerRef.value || !renderer || !camera) return
-      //   const width = containerRef.value.clientWidth
-      //   const height = containerRef.value.clientHeight
-      //   const vFov = calcVerticalFovByHorizontalFov(fov, width / height)
-      //   // console.log('distance', vFov)
-      //   camera.fov = vFov
-      // }
-
       camera.position.set(
-        cameraState.value.positionX,
-        cameraState.value.positionZ,
-        cameraState.value.positionY,
+        cameraStateZ.value.positionX,
+        cameraStateZ.value.positionZ,
+        cameraStateZ.value.positionY,
       );
       camera.lookAt(
-        cameraState.value.targetPositionX,
-        cameraState.value.targetPositionZ,
-        cameraState.value.targetPositionY
+        cameraStateZ.value.targetPositionX,
+        cameraStateZ.value.targetPositionZ,
+        cameraStateZ.value.targetPositionY
       );
       camera.updateProjectionMatrix()
     }
@@ -108,9 +134,22 @@ const initThree = () => {
 
   const scene = props.world.scene
   const maxCamera1Radius = 10000;
-  camera = new THREE.PerspectiveCamera(45, width / height, 0.1, maxCamera1Radius)
-  camera.position.set(0, 800, 1200)
-  camera.lookAt(0, 0, 0);
+  if (props.cameraType === 'orthographic' && ('size' in props.cameraState)) {
+    camera = new THREE.OrthographicCamera(
+      -props.cameraState.size * 1,
+      props.cameraState.size * 1,
+      props.cameraState.size,
+      -props.cameraState.size,
+      0.1,
+      1000
+    )
+    camera.position.set(props.cameraState.targetPositionX, props.cameraState.targetPositionZ + props.cameraState.length, props.cameraState.targetPositionY)
+    camera.lookAt(props.cameraState.targetPositionX, props.cameraState.targetPositionZ, props.cameraState.targetPositionY)
+  } else {
+    camera = new THREE.PerspectiveCamera(45, props.aspectRatio, 0.1, maxCamera1Radius)
+    camera.position.set(0, 800, 1200)
+    camera.lookAt(0, 0, 0);
+  }
 
   if (props.showCamera) {
     camera.layers.enable(2);
@@ -134,28 +173,39 @@ const initThree = () => {
     updateCameraAngel()
 
     const emitCameraState = () => {
-      if ('radius' in cameraState.value) {
+      if (props.cameraType === 'orthographic') {
+        if ('size' in cameraStateZ.value) {
+          emit('update:cameraState', {
+            targetPositionX: cameraStateZ.value.targetPositionX,
+            targetPositionY: cameraStateZ.value.targetPositionY,
+            targetPositionZ: cameraStateZ.value.targetPositionZ,
+            size: cameraStateZ.value.size,
+            length: cameraStateZ.value.length,
+          })
+        }
+      }
+      else if ('radius' in cameraStateZ.value) {
         emit('update:cameraState', {
-          targetPositionX: cameraState.value.targetPositionX,
-          targetPositionY: cameraState.value.targetPositionY,
-          targetPositionZ: cameraState.value.targetPositionZ,
-          radius: cameraState.value.radius,
-          angleX: cameraState.value.angleX,
-          angleY: cameraState.value.angleY,
-          aspectW: cameraState.value.aspectW,
-          aspectH: cameraState.value.aspectH,
+          targetPositionX: cameraStateZ.value.targetPositionX,
+          targetPositionY: cameraStateZ.value.targetPositionY,
+          targetPositionZ: cameraStateZ.value.targetPositionZ,
+          radius: cameraStateZ.value.radius,
+          angleX: cameraStateZ.value.angleX,
+          angleY: cameraStateZ.value.angleY,
+          aspectW: cameraStateZ.value.aspectW,
+          aspectH: cameraStateZ.value.aspectH,
         })
-      } else if ('positionX' in cameraState.value) {
+      } else if ('fov' in cameraStateZ.value) {
         emit('update:cameraState', {
-          targetPositionX: cameraState.value.targetPositionX,
-          targetPositionY: cameraState.value.targetPositionZ,
-          targetPositionZ: cameraState.value.targetPositionY,
-          positionX: cameraState.value.positionX,
-          positionY: cameraState.value.positionZ,
-          positionZ: cameraState.value.positionY,
-          fov: cameraState.value.fov,
-          aspectW: cameraState.value.aspectW,
-          aspectH: cameraState.value.aspectH,
+          targetPositionX: cameraStateZ.value.targetPositionX,
+          targetPositionY: cameraStateZ.value.targetPositionZ,
+          targetPositionZ: cameraStateZ.value.targetPositionY,
+          positionX: cameraStateZ.value.positionX,
+          positionY: cameraStateZ.value.positionZ,
+          positionZ: cameraStateZ.value.positionY,
+          fov: cameraStateZ.value.fov,
+          aspectW: cameraStateZ.value.aspectW,
+          aspectH: cameraStateZ.value.aspectH,
         })
       }
     }
@@ -164,20 +214,33 @@ const initThree = () => {
     if (!container) return
 
     container.addEventListener('mousedown', (e) => {
-      if ('radius' in cameraState.value) {
+      if (props.cameraType === 'orthographic') {
+        if (e.button === 2) {
+        } else if (e.button === 0) {
+          // 移动
+          camera1TargetPositionStartX = cameraStateZ.value.targetPositionX;
+          camera1TargetPositionStartY = cameraStateZ.value.targetPositionY;
+          camera1TargetPositionStartZ = cameraStateZ.value.targetPositionZ;
+          canvas1IsMouseMove = true;
+          canvas1LastMouseX = e.clientX;
+          canvas1LastMouseY = e.clientY;
+          e.preventDefault();
+        }
+      }
+      else if ('radius' in cameraStateZ.value) {
         if (e.button === 2) {
           // 旋转
-          camera1AngelStartX = cameraState.value.angleX;
-          camera1AngelStartY = cameraState.value.angleY;
+          camera1AngelStartX = cameraStateZ.value.angleX;
+          camera1AngelStartY = cameraStateZ.value.angleY;
           canvas1IsMouseAngel = true;
           canvas1LastMouseX = e.clientX;
           canvas1LastMouseY = e.clientY;
           e.preventDefault();
         } else if (e.button === 0) {
           // 移动
-          camera1TargetPositionStartX = cameraState.value.targetPositionX;
-          camera1TargetPositionStartY = cameraState.value.targetPositionY;
-          camera1TargetPositionStartZ = cameraState.value.targetPositionZ;
+          camera1TargetPositionStartX = cameraStateZ.value.targetPositionX;
+          camera1TargetPositionStartY = cameraStateZ.value.targetPositionY;
+          camera1TargetPositionStartZ = cameraStateZ.value.targetPositionZ;
           canvas1IsMouseMove = true;
           canvas1LastMouseX = e.clientX;
           canvas1LastMouseY = e.clientY;
@@ -186,43 +249,74 @@ const initThree = () => {
       }
     })
     container.addEventListener('mousemove', (e) => {
-      if ('radius' in cameraState.value) {
+      if (props.cameraType === 'orthographic') {
+        if (canvas1IsMouseAngel) {
+
+        }
+        else if (canvas1IsMouseMove) {
+          if ('size' in cameraStateZ.value) {
+            const deltaX = e.clientX - canvas1LastMouseX;
+            const deltaY = e.clientY - canvas1LastMouseY;
+            const sensitivity = cameraStateZ.value.size / 200;
+
+            cameraStateZ.value.targetPositionX = camera1TargetPositionStartX - deltaX * sensitivity;
+            cameraStateZ.value.targetPositionY = camera1TargetPositionStartY - deltaY * sensitivity;
+            updateCameraAngel()
+          }
+        }
+      }
+      else if ('radius' in cameraStateZ.value) {
         if (canvas1IsMouseAngel) {
           // 镜头旋转
           const delta2DDiffX = e.clientX - canvas1LastMouseX;
           const delta2DDiffY = e.clientY - canvas1LastMouseY;
-          cameraState.value.angleX = camera1AngelStartX + delta2DDiffX * 0.01;
+          cameraStateZ.value.angleX = camera1AngelStartX + delta2DDiffX * 0.01;
           const angleY = camera1AngelStartY + delta2DDiffY * 0.01;
-          cameraState.value.angleY = Math.max(-Math.PI / 2 + 0.05, Math.min(Math.PI / 2 - 0.05, angleY)); // 因为camera，是采用控制position和lookat的逻辑，所以在angleY==Math.PI/2的定点的时候，无法控制方向，所以这里限制一下，只允许angleY在[-Math.PI/2+0.05, Math.PI/2-0.05]之间
+          cameraStateZ.value.angleY = Math.max(-Math.PI / 2 + 0.05, Math.min(Math.PI / 2 - 0.05, angleY)); // 因为camera，是采用控制position和lookat的逻辑，所以在angleY==Math.PI/2的定点的时候，无法控制方向，所以这里限制一下，只允许angleY在[-Math.PI/2+0.05, Math.PI/2-0.05]之间
           updateCameraAngel()
         } else if (canvas1IsMouseMove) {
           const deltaX = e.clientX - canvas1LastMouseX;
           const deltaY = e.clientY - canvas1LastMouseY;
-          const sensitivity = 1;
-
-          cameraState.value.targetPositionX = camera1TargetPositionStartX - (deltaX * Math.cos(cameraState.value.angleX) - deltaY * Math.sin(cameraState.value.angleX)) * sensitivity;
-          cameraState.value.targetPositionZ = camera1TargetPositionStartZ - (deltaX * Math.sin(cameraState.value.angleX) + deltaY * Math.cos(cameraState.value.angleX)) * sensitivity;
+          console.log('cameraStateZ.value.radius', cameraStateZ.value.radius)
+          const sensitivity = cameraStateZ.value.radius / 450;
+          cameraStateZ.value.targetPositionX = camera1TargetPositionStartX - (deltaX * Math.cos(cameraStateZ.value.angleX) - deltaY * Math.sin(cameraStateZ.value.angleX)) * sensitivity;
+          cameraStateZ.value.targetPositionZ = camera1TargetPositionStartZ - (deltaX * Math.sin(cameraStateZ.value.angleX) + deltaY * Math.cos(cameraStateZ.value.angleX)) * sensitivity;
           updateCameraAngel()
         }
       }
     })
     container.addEventListener('mouseup', (e) => {
-      if (e.button === 2) {
-        canvas1IsMouseAngel = false
-        emitCameraState()
-      } else if (e.button === 0) {
+      if (props.cameraType === 'orthographic') {
         canvas1IsMouseMove = false
         emitCameraState()
+      } else {
+        if (e.button === 2) {
+          canvas1IsMouseAngel = false
+          emitCameraState()
+        } else if (e.button === 0) {
+          canvas1IsMouseMove = false
+          emitCameraState()
+        }
       }
     });
 
     container.addEventListener('wheel', (e) => {
       e.preventDefault();
-      if ('radius' in cameraState.value) {
+      if (props.cameraType === 'orthographic') {
+        if ('size' in cameraStateZ.value) {
+          const zoomSpeed = 0.001;
+          const delta = e.deltaY * zoomSpeed;
+          const newSize = Math.max(1, Math.min(1000, cameraStateZ.value.size * (1 + delta)));
+          cameraStateZ.value.size = newSize;
+          console.log(newSize)
+          updateCameraAngel();
+          emitCameraState()
+        }
+      } else if ('radius' in cameraStateZ.value) {
         const zoomSpeed = 0.001;
         const delta = e.deltaY * zoomSpeed;
-        const newRadius = Math.max(5, Math.min(maxCamera1Radius, cameraState.value.radius * (1 + delta)));
-        cameraState.value.radius = newRadius;
+        const newRadius = Math.max(5, Math.min(maxCamera1Radius, cameraStateZ.value.radius * (1 + delta)));
+        cameraStateZ.value.radius = newRadius;
         updateCameraAngel();
         emitCameraState()
       }
@@ -252,7 +346,7 @@ const animate = () => {
 
 const resize = () => {
   if (!containerRef.value || !renderer || !camera) return
-  if (!cameraState.value) return;
+  if (!cameraStateZ.value) return;
   updateContainerHeight(renderer)
 }
 
@@ -289,17 +383,34 @@ const updateContainerHeight = (renderer: THREE.WebGLRenderer) => {
     hasChangeCamera = true
   }
   const newAspect = renderWidth / renderHeight
-  if (camera.aspect !== newAspect) {
-    camera.aspect = newAspect
-    hasChangeCamera = true
-  }
-  if ('fov' in cameraState.value) {
-    const vFov = calcVerticalFovByHorizontalFov(cameraState.value.fov, newAspect)
-    // console.log('distance', vFov)
-    if (camera.fov !== vFov) {
-      camera.fov = vFov
+  if (camera instanceof THREE.PerspectiveCamera) {
+    if (camera.aspect !== newAspect) {
+      camera.aspect = newAspect
       hasChangeCamera = true
     }
+    if ('fov' in cameraStateZ.value) {
+      const vFov = calcVerticalFovByHorizontalFov(cameraStateZ.value.fov, newAspect)
+      // console.log('distance', vFov)
+      if (camera.fov !== vFov) {
+        camera.fov = vFov
+        hasChangeCamera = true
+      }
+    }
+  } else if (camera instanceof THREE.OrthographicCamera) {
+    // if ('size' in cameraState.value) {
+    //   const newLeft = -cameraState.value.size * newAspect
+    //   const newRight = cameraState.value.size * newAspect
+    //   const newTop = -cameraState.value.size
+    //   const newBottom = cameraState.value.size
+
+    //   if (camera.left !== newLeft || camera.right !== newRight || camera.top !== newTop || camera.bottom !== newBottom) {
+    //     camera.left = newLeft
+    //     camera.right = newRight
+    //     camera.top = newTop
+    //     camera.bottom = newBottom
+    //     hasChangeCamera = true
+    //   }
+    // }
   }
   if (hasChangeCamera) {
     console.log('renderWidth', renderWidth, 'renderHeight', renderHeight)
@@ -315,7 +426,7 @@ onMounted(() => {
     }
     initThree()
     if (props.cameraState) {
-      cameraState.value = { ...props.cameraState }
+      cameraStateZ.value = { ...props.cameraState }
       updateCameraAngel()
     }
     updateScene()
@@ -354,7 +465,7 @@ onUnmounted(() => {
 
 watch(() => props.cameraState, (newVal) => {
   if (newVal) {
-    cameraState.value = { ...newVal }
+    cameraStateZ.value = { ...newVal }
     updateCameraAngel()
     updateScene()
   }
