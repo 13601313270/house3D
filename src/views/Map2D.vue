@@ -2132,7 +2132,7 @@ function logout() {
           display: none;
           top: -8px;
           left: 100%;
-          width: 100px;
+          width: 130px;
           background: white;
           border: 1px solid #d9d9d9;
           box-sizing: border-box;
