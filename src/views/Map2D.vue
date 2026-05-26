@@ -98,11 +98,16 @@
               </div>
             </div>
           </div>
+          <button @click="triggerImportFile" type="button">
+            导入
+          </button>
           <button @click="clearDrawing" type="button">
             清空
           </button>
           <input type="file" id="fileInput" ref="fileInputRef" accept=".devt" style="display: none"
             @change="handleFileChange" />
+          <input type="file" id="importFileInput" ref="importFileInputRef" accept=".fbx,.obj" style="display: none"
+            @change="handleImportFileChange" />
         </div>
 
         <!-- 拖拽上传区域 -->
@@ -901,6 +906,50 @@ onMounted(async () => {
 })
 
 const fileInputRef = ref<HTMLInputElement | null>(null)
+const importFileInputRef = ref<HTMLInputElement | null>(null)
+
+const triggerImportFile = () => {
+  importFileInputRef.value?.click()
+}
+
+const handleImportFileChange = async (e: Event) => {
+  const input = e.target as HTMLInputElement
+  const file = input.files?.[0]
+  if (!file) return
+
+  const fileName = file.name.toLowerCase()
+
+  // 检查文件类型
+  if (!fileName.endsWith('.fbx') && !fileName.endsWith('.obj')) {
+    alert('请上传 FBX 或 OBJ 格式的文件')
+    return
+  }
+
+  // 检查文件大小
+  if (file.size === 0) {
+    alert(`文件 "${file.name}" 大小为 0 字节，请检查文件是否损坏或为空`)
+    return
+  }
+
+  // 检查文件大小限制（例如 100MB）
+  const maxSize = 100 * 1024 * 1024 // 100MB
+  if (file.size > maxSize) {
+    alert(`文件 "${file.name}" 太大（${(file.size / 1024 / 1024).toFixed(2)} MB），请上传小于 100MB 的文件`)
+    return
+  }
+
+  isUploading.value = true
+
+  try {
+    await processUploadedFile(file)
+  } catch (error) {
+    console.error('文件处理失败:', error)
+    alert('文件处理失败，请重试')
+  } finally {
+    isUploading.value = false
+    input.value = ''
+  }
+}
 
 const saveDrawing = async () => {
   activeToolsIndex.value = -1
