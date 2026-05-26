@@ -21,6 +21,16 @@
             示例
           </button>
         </div>
+        <div class="toolbar-item" @mouseleave="activeToolsIndex = -1">
+          <button type="button" @mouseenter="activeToolsIndex = 3">
+            帮助
+          </button>
+          <div class="list" v-show="activeToolsIndex === 3">
+            <div @click="showHelpModal = true" class="childItem">
+              支持
+            </div>
+          </div>
+        </div>
       </div>
       <div class="toolbar right">
         <div class="toolbar-item" @mouseleave="activeToolsIndex = -1">
@@ -188,6 +198,7 @@
     </div>
   </div>
   <Login v-if="showLogin" @close="showLogin = false" @login="handleLogin" />
+  <Help v-if="showHelpModal" @close="showHelpModal = false"/>
 </template>
 
 <script lang="ts" setup>
@@ -228,6 +239,7 @@ import { ImportFileData } from '@/entities/importFile/index.d';
 import Login from '@/components/Login.vue'
 import { useStore } from 'vuex';
 import { Store } from '@/store';
+import Help from '@/components/help.vue'
 
 const canvasRef = ref<HTMLCanvasElement | null>(null)
 const canvas3DRef = ref<typeof Canvas3D | null>(null)
@@ -257,11 +269,11 @@ const canvasSize = ref({ width: 0, height: 0 })
 const zoomLevel = ref(1)
 const wallThickness = ref<number>(20)
 
-const allMaterialShow = ref(false)
-const allMaterialShowPropId = ref<string>()
 const showLogin = ref(false)
 const showDemos = ref(false)
 const onlyDemos = ref(false)
+const showHelpModal = ref(false)
+
 const allDemos = ref<any[]>([])
 const demoIniting = ref(false)
 
