@@ -194,6 +194,7 @@
   </div>
   <Login v-if="showLogin" @close="showLogin = false" @login="handleLogin" />
   <Help v-if="showHelpModal" @close="showHelpModal = false" />
+  <div v-if="initWorldLoading" class="globalLoading">...</div>
 </template>
 
 <script lang="ts" setup>
@@ -235,6 +236,7 @@ import Login from '@/components/Login.vue'
 import { useStore } from 'vuex';
 import { Store } from '@/store';
 import Help from '@/components/help.vue'
+import { sleep } from '@/utils/sleep';
 
 const canvasRef = ref<HTMLCanvasElement | null>(null)
 const canvas3DRef = ref<typeof Canvas3D | null>(null)
@@ -268,6 +270,7 @@ const showLogin = ref(false)
 const showDemos = ref(false)
 const onlyDemos = ref(false)
 const showHelpModal = ref(false)
+const initWorldLoading = ref(false)
 
 const allDemos = ref<any[]>([])
 const demoIniting = ref(false)
@@ -976,15 +979,22 @@ const loadProgramFile = () => {
 }
 
 const handleLoadProgramFileChange = async (e: Event) => {
+  initWorldLoading.value = true
   const input = e.target as HTMLInputElement
   const file = input.files?.[0]
-  if (!file) return
+  if (!file) {
+    initWorldLoading.value = false
+    return
+  }
 
   // 1. 解压 ZIP
   const zip = await JSZip.loadAsync(file);
 
   const t = await zip.file('scene.json');
-  if (!t) return
+  if (!t) {
+    initWorldLoading.value = false
+    return
+  }
   // 2. 读取 scene.json
   const sceneJsonText = await t.async('string');
   const sceneData = JSON.parse(sceneJsonText);
@@ -1040,9 +1050,11 @@ const handleLoadProgramFileChange = async (e: Event) => {
         cameraState: CameraState
         activeCameraIndex: number
       } = JSON.parse(sceneJsonText as string)
-
+      initWorldLoading.value = true
       await initWorldByData(data)
+      initWorldLoading.value = false
     } catch (error) {
+      initWorldLoading.value = false
       console.error(error)
     }
   }
@@ -1883,8 +1895,62 @@ async function importOutObj(file: File) {
   isUploading.value = true
 
   try {
-    await processUploadedFile(file, (object, file, type) => {
-      handleLoadedObject(object, file, type)
+    await processUploadedFile(file, async (object, file, type) => {
+      console.log('导入---object', object.children)
+      const scaleFactor = (() => {
+        // 计算模型的包围盒以确定尺寸
+        const box = new THREE.Box3().setFromObject(object)
+        const size = box.getSize(new THREE.Vector3())
+        // 计算缩放因子，使模型最大边为 100
+        const maxDimension = Math.max(size.x, size.y, size.z)
+        const targetMaxSize = 100 // 最大边目标尺寸
+        return maxDimension > 0 ? targetMaxSize / maxDimension : 1
+      })();
+      if (object.children && object.children.length > 10000000) {
+        for (let i = 0; i < object.children.length; i++) {
+          const v = object.children[i]
+          console.log('导入---object', v.scale)
+          if (v instanceof THREE.Mesh) {
+            const vertices: any = v.geometry.attributes.position.array;
+            let centerX = 0;
+            let centerY = 0;
+            let centerZ = 0;
+            vertices.forEach((v: number, i: number) => {
+              if (i % 3 === 0) {
+                centerX += v
+              } else if (i % 3 === 1) {
+                centerY += v
+              } else if (i % 3 === 2) {
+                centerZ += v
+              }
+            })
+            centerX /= vertices.length / 3
+            console.log('centerX', centerX)
+            centerY /= vertices.length / 3
+            centerZ /= vertices.length / 3
+            vertices.forEach((v: number, i: number) => {
+              if (i % 3 === 0) {
+                vertices[i] -= centerX
+              } else if (i % 3 === 1) {
+                // vertices[i] -= centerY
+              }
+            })
+            // v.geometry.attributes.position.array = vertices;
+            v.geometry.vertices = vertices;
+            const zoomTemp = 100;
+            const newPosition = new THREE.Vector3(
+              centerX * zoomTemp,
+              centerY * zoomTemp,
+              v.position.z
+            )
+            // v.position.copy(newPosition)
+            await handleLoadedObject(v, file, type, scaleFactor * v.scale.x, newPosition)
+            await sleep(100)
+          }
+        }
+      } else {
+        await handleLoadedObject(object, file, type, scaleFactor, new THREE.Vector3())
+      }
     })
   } catch (error) {
     console.error('文件处理失败:', error)
@@ -1966,16 +2032,7 @@ const processUploadedFile = async (file: File, callback: (object: THREE.Group, f
   })
 }
 
-const handleLoadedObject = (object: THREE.Group, file: File, type: string) => {
-  const scaleFactor = (() => {
-    // 计算模型的包围盒以确定尺寸
-    const box = new THREE.Box3().setFromObject(object)
-    const size = box.getSize(new THREE.Vector3())
-    // 计算缩放因子，使模型最大边为 100
-    const maxDimension = Math.max(size.x, size.y, size.z)
-    const targetMaxSize = 100 // 最大边目标尺寸
-    return maxDimension > 0 ? targetMaxSize / maxDimension : 1
-  })();
+const handleLoadedObject = async (object: THREE.Group | THREE.Mesh, file: File, type: string, scaleFactor: number, position: THREE.Vector3) => {
   const fileTypeId = `custom_${Date.now()}.${type}`
   console.log('fileTypeId', fileTypeId)
   // 创建自定义的 ObjItem 用于 worldApi
@@ -1992,15 +2049,15 @@ const handleLoadedObject = (object: THREE.Group, file: File, type: string) => {
   const data: ImportFileData = {
     fileTypeId,
     id: Date.now().toString(),
-    x: 0,
-    y: 0,
-    z: 0,
+    x: position.x,
+    y: position.y,
+    z: position.z,
     bm: null,
     angleY: 0,
     color: '#0c7f25',
     scale: scaleFactor,
   }
-  worldApi.add('importFile', [new ImportFileDataClass(data)])
+  await worldApi.add('importFile', [new ImportFileDataClass(data)])
 
   drawWrapper()
 }
@@ -2550,5 +2607,23 @@ button {
     font-size: 12px;
     color: #999;
   }
+}
+
+.globalLoading {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1000;
+  font-size: 16px;
+  color: #666;
+  display: flex;
+  background: #00000038;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 36px;
+  cursor: default;
 }
 </style>

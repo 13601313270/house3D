@@ -22,7 +22,7 @@ type ObjOutputFileType = {
 
 type ImportFileType = {
   fileTypeId: string,
-  mesh: THREE.Group,
+  mesh: THREE.Group | THREE.Mesh,
   file: File
 }
 
