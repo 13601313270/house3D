@@ -9,6 +9,7 @@ import { ConeDataClass } from './dataClass'
 export class ConeEntity extends EntityClass<ConeData> {
   type: string = 'cone'
   isPointObj: boolean = true
+  private circleRadius = 12
 
   defaultValue(): ConeData {
     const data: ConeData = {
@@ -38,7 +39,7 @@ export class ConeEntity extends EntityClass<ConeData> {
     ctx.arc(
       screenX,
       screenY,
-      r,
+      r * zoomLevel,
       0,
       Math.PI * 2
     )
@@ -62,7 +63,7 @@ export class ConeEntity extends EntityClass<ConeData> {
     ctx.strokeStyle = '#e67e22'
     ctx.lineWidth = 2
     ctx.beginPath()
-    ctx.arc(screenX, screenY, 6 * zoomLevel, 0, Math.PI * 2)
+    ctx.arc(screenX, screenY, this.circleRadius * zoomLevel + 3, 0, Math.PI * 2)
     ctx.fill()
     ctx.stroke()
   }
@@ -96,7 +97,7 @@ export class ConeEntity extends EntityClass<ConeData> {
   matchHandelInfo(x: number, y: number, zoomLevel: number) {
     const data = this.getData();
     const dist = Math.hypot(x - data.x, y - data.y)
-    if (dist < 6 * zoomLevel) {
+    if (dist < this.circleRadius + 3) {
       return {
         index: 0,
         type: this.type,

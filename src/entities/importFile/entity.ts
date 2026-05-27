@@ -18,6 +18,7 @@ export class ImportFileEntity extends EntityClass<ImportFileData> {
   color: string = '#0c7f25'
   color3D: string = '#0c7f25'
   colorOpacity: string = '#14b737a5'
+  private circleRadius = 12
   private baseDrawAngelLength = 40;
   img: HTMLImageElement = new Image()
 
@@ -86,7 +87,7 @@ export class ImportFileEntity extends EntityClass<ImportFileData> {
     ctx.strokeStyle = '#e67e22'
     ctx.lineWidth = 2
     ctx.beginPath()
-    ctx.arc(screenX, screenY, 5 * zoomLevel, 0, Math.PI * 2)
+    ctx.arc(screenX, screenY, this.circleRadius * zoomLevel + 3, 0, Math.PI * 2)
     ctx.fill()
     ctx.stroke()
 
@@ -145,7 +146,7 @@ export class ImportFileEntity extends EntityClass<ImportFileData> {
     // 在(rotatedXAdd, rotatedYAdd)位置绘制一个圆圈
     const circleX = rotatedXAdd * zoomLevel + panOffset.x
     const circleY = rotatedYAdd * zoomLevel + panOffset.y
-    const circleRadius = 5 * zoomLevel
+    const circleRadius = this.circleRadius * zoomLevel + 3
     ctx.fillStyle = '#fff'
     ctx.strokeStyle = '#e67e22'
     ctx.lineWidth = 2 * zoomLevel
@@ -325,7 +326,7 @@ export class ImportFileEntity extends EntityClass<ImportFileData> {
     const data = this.getData();
     const dist = Math.hypot(x - data.x, y - data.y)
     // console.log('dist', dist)
-    if (dist < 10) {
+    if (dist < this.circleRadius + 3) {
       return {
         index: 0,
         type: this.type,
@@ -341,7 +342,7 @@ export class ImportFileEntity extends EntityClass<ImportFileData> {
 
     const dist2 = Math.hypot(x - rotatedXAdd, y - rotatedYAdd)
     // console.log('dist2', dist2)
-    if (dist2 < 10) {
+    if (dist2 < this.circleRadius + 3) {
       return {
         index: 1,
         type: this.type,

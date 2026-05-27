@@ -23,6 +23,7 @@ export class PeopleEntity extends EntityClass<PeopleData> {
   colorOpacityActive: string = 'red'
   active: boolean = false // 这个不存在数据库里，只是在前端动态调整
   drawAngelLength: number = 40
+  private circleRadius = 12
 
   defaultValue(): PeopleData {
     const people: PeopleData = {
@@ -71,7 +72,7 @@ export class PeopleEntity extends EntityClass<PeopleData> {
     ctx.strokeStyle = '#e67e22'
     ctx.lineWidth = 2
     ctx.beginPath()
-    ctx.arc(screenX, screenY, 6 * zoomLevel, 0, Math.PI * 2)
+    ctx.arc(screenX, screenY, this.circleRadius * zoomLevel + 3, 0, Math.PI * 2)
     ctx.fill()
     ctx.stroke()
 
@@ -129,7 +130,7 @@ export class PeopleEntity extends EntityClass<PeopleData> {
     // 在(rotatedXAdd, rotatedYAdd)位置绘制一个圆圈
     const circleX = rotatedXAdd * zoomLevel + panOffset.x
     const circleY = rotatedYAdd * zoomLevel + panOffset.y
-    const circleRadius = 5 * zoomLevel
+    const circleRadius = this.circleRadius * zoomLevel + 3
     ctx.fillStyle = '#fff'
     ctx.strokeStyle = '#e67e22'
     ctx.lineWidth = 2 * zoomLevel
@@ -213,7 +214,7 @@ export class PeopleEntity extends EntityClass<PeopleData> {
     const { angle } = data
     const angleY = angle * -1
     const dist = Math.hypot(x - data.x, y - data.y)
-    if (dist < 10) {
+    if (dist < this.circleRadius + 3) {
       return {
         index: 0,
         type: this.type,
@@ -227,7 +228,7 @@ export class PeopleEntity extends EntityClass<PeopleData> {
 
     const dist2 = Math.hypot(x - rotatedXAdd, y - rotatedYAdd)
     // console.log('dist2', dist2)
-    if (dist2 < 10) {
+    if (dist2 < this.circleRadius + 3) {
       return {
         index: 1,
         type: this.type,

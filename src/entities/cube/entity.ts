@@ -9,6 +9,7 @@ import { CubeDataClass } from './dataClass'
 export class CubeEntity extends EntityClass<CubeData> {
   type: string = 'cube'
   isPointObj: boolean = true
+  private circleRadius = 12
 
   defaultValue(): CubeData {
     const door: CubeData = {
@@ -63,17 +64,17 @@ export class CubeEntity extends EntityClass<CubeData> {
     ctx.strokeStyle = '#e67e22'
     ctx.lineWidth = 2
     ctx.beginPath()
-    ctx.arc(screenX, screenY, 6 * zoomLevel, 0, Math.PI * 2)
+    ctx.arc(screenX, screenY, this.circleRadius * zoomLevel + 3, 0, Math.PI * 2)
     ctx.fill()
     ctx.stroke()
 
-    const drawAngelLength = this.drawAngelLength;
+    const drawAngelLength = Math.max(this.getData().width / 2, this.circleRadius * 2);
     // 控制点向着angleY角度延伸10个单位后的坐标
     const rotatedXAdd = data.x + Math.cos(data.angleY) * drawAngelLength
     const rotatedYAdd = data.y - Math.sin(data.angleY) * drawAngelLength
     const circleX = rotatedXAdd * zoomLevel + panOffset.x
     const circleY = rotatedYAdd * zoomLevel + panOffset.y
-    const circleRadius = 5 * zoomLevel
+    const circleRadius = this.circleRadius * zoomLevel + 3
 
     function ttt(angel: number, drawAngelLength: number) {
       const tempX = data.x + Math.cos(angel) * drawAngelLength;
@@ -82,8 +83,8 @@ export class CubeEntity extends EntityClass<CubeData> {
     }
 
     // 绘制双向箭头表示旋转角度
+    ctx.fillStyle = '#fff'
     ctx.strokeStyle = '#e67e22'
-    ctx.fillStyle = '#e67e22'
     ctx.lineWidth = 2 * zoomLevel
     // 绘制双向箭头的主线（圆弧）
     ctx.beginPath();
@@ -154,7 +155,7 @@ export class CubeEntity extends EntityClass<CubeData> {
   matchHandelInfo(x: number, y: number, zoomLevel: number) {
     const data = this.getData();
     const dist = Math.hypot(x - data.x, y - data.y)
-    if (dist < 6 * zoomLevel) {
+    if (dist < this.circleRadius + 3) {
       return {
         index: 0,
         type: this.type,
@@ -162,14 +163,14 @@ export class CubeEntity extends EntityClass<CubeData> {
         dist: dist,
       }
     }
-    const drawAngelLength = this.drawAngelLength
+    const drawAngelLength = Math.max(this.getData().width / 2, this.circleRadius * 2);
     // 控制点向着angleY角度延伸10个单位后的坐标
     const rotatedXAdd = data.x + Math.cos(data.angleY) * drawAngelLength
     const rotatedYAdd = data.y - Math.sin(data.angleY) * drawAngelLength
 
     const dist2 = Math.hypot(x - rotatedXAdd, y - rotatedYAdd)
     // console.log('dist2', dist2)
-    if (dist2 < 10) {
+    if (dist2 < this.circleRadius + 3) {
       return {
         index: 1,
         type: this.type,

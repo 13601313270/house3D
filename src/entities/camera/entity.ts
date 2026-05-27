@@ -21,6 +21,7 @@ export class CameraEntity extends EntityClass<CameraData> {
   colorOpacity: string = '#14b737a5'
   colorOpacityActive: string = 'red'
   active: boolean = false // 这个不存在数据库里，只是在前端动态调整
+  private circleRadius = 12
 
   defaultValue(): CameraData {
     const camera: CameraData = {
@@ -56,16 +57,7 @@ export class CameraEntity extends EntityClass<CameraData> {
       preImgScale * height * zoomLevel
     ); // 以新原点为中心绘制
     ctx.restore(); // 恢复原始状态
-  }
 
-  draw2DByData(
-    ctx: CanvasRenderingContext2D,
-    data: CameraData,
-    panOffset: Point,
-    zoomLevel: number
-  ): void {
-    const screenX = data.x * zoomLevel + panOffset.x
-    const screenY = data.y * zoomLevel + panOffset.y
     const targetX = data.targetPositionX * zoomLevel + panOffset.x
     const targetY = data.targetPositionY * zoomLevel + panOffset.y
     const distance = Math.hypot(targetX - screenX, targetY - screenY)
@@ -109,13 +101,66 @@ export class CameraEntity extends EntityClass<CameraData> {
     ctx.closePath()
     // ctx.fill()
     ctx.stroke()
+  }
+
+  draw2DByData(
+    ctx: CanvasRenderingContext2D,
+    data: CameraData,
+    panOffset: Point,
+    zoomLevel: number
+  ): void {
+    const screenX = data.x * zoomLevel + panOffset.x
+    const screenY = data.y * zoomLevel + panOffset.y
+    // const targetX = data.targetPositionX * zoomLevel + panOffset.x
+    // const targetY = data.targetPositionY * zoomLevel + panOffset.y
+    // const distance = Math.hypot(targetX - screenX, targetY - screenY)
+    // const radius = distance
+
+    // 计算FOV的半角
+    // const halfFov = (data.fov * Math.PI) / 360
+
+    // // 绘制三角形
+    // ctx.fillStyle = this.colorOpacity
+    // ctx.strokeStyle = this.active ? this.colorOpacityActive : this.colorOpacity
+    // ctx.lineWidth = 1
+    // ctx.beginPath()
+    // ctx.moveTo(screenX, screenY)
+
+    // // 计算方向向量
+    // const dirX = targetX - screenX
+    // const dirY = targetY - screenY
+    // const dirLength = Math.sqrt(dirX * dirX + dirY * dirY)
+    // const unitDirX = dirX / dirLength
+    // const unitDirY = dirY / dirLength
+
+    // // 计算垂直方向向量
+    // const perpX = -unitDirY
+    // const perpY = unitDirX
+
+    // // 计算三角形底边长
+    // const baseHalfLength = radius * Math.tan(halfFov)
+
+    // // 计算三角形的两个底点
+    // const midX = screenX + unitDirX * radius
+    // const midY = screenY + unitDirY * radius
+    // const p1X = midX + perpX * baseHalfLength
+    // const p1Y = midY + perpY * baseHalfLength
+    // const p2X = midX - perpX * baseHalfLength
+    // const p2Y = midY - perpY * baseHalfLength
+
+    // // 绘制三角形
+    // ctx.lineTo(p1X, p1Y)
+    // ctx.lineTo(p2X, p2Y)
+    // ctx.closePath()
+    // // ctx.fill()
+    // ctx.stroke()
 
     // 控制点
     ctx.fillStyle = '#fff'
     ctx.strokeStyle = '#e67e22'
     ctx.lineWidth = 2
     ctx.beginPath()
-    ctx.arc(screenX, screenY, 6 * zoomLevel, 0, Math.PI * 2)
+    ctx.arc(screenX, screenY, this.circleRadius * zoomLevel, 0, Math.PI * 2)
     ctx.fill()
     ctx.stroke()
 
@@ -127,7 +172,7 @@ export class CameraEntity extends EntityClass<CameraData> {
     ctx.arc(
       data.targetPositionX * zoomLevel + panOffset.x,
       data.targetPositionY * zoomLevel + panOffset.y,
-      6 * zoomLevel, 0, Math.PI * 2)
+      this.circleRadius * zoomLevel + 3, 0, Math.PI * 2)
     ctx.fill()
     ctx.stroke()
   }
@@ -317,7 +362,7 @@ export class CameraEntity extends EntityClass<CameraData> {
   matchHandelInfo(x: number, y: number) {
     const data = this.getData();
     const dist = Math.hypot(x - data.x, y - data.y)
-    if (dist < 10) {
+    if (dist < this.circleRadius + 3) {
       return {
         index: 0,
         type: this.type,
@@ -326,7 +371,7 @@ export class CameraEntity extends EntityClass<CameraData> {
       }
     }
     const distToTarget = Math.hypot(x - data.targetPositionX, y - data.targetPositionY)
-    if (distToTarget < 10) {
+    if (distToTarget < this.circleRadius + 3) {
       return {
         index: 1,
         type: this.type,

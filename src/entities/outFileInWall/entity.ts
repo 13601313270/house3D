@@ -21,6 +21,7 @@ export class OutFileInWallEntity extends EntityClassInWall<OutFileInWallData> {
   colorOpacity: string = '#14b737a5'
   private baseDrawAngelLength = 40;
   img: HTMLImageElement = new Image()
+  private circleRadius = 12
 
   init(): Promise<void> {
     const findObjInfo = this.world.ObjFileTypes.find(item => item.id === this.getData().fileTypeId)
@@ -102,7 +103,7 @@ export class OutFileInWallEntity extends EntityClassInWall<OutFileInWallData> {
     ctx.strokeStyle = '#e67e22'
     ctx.lineWidth = 2
     ctx.beginPath()
-    ctx.arc(screenX, screenY, 5 * zoomLevel, 0, Math.PI * 2)
+    ctx.arc(screenX, screenY, this.circleRadius * zoomLevel + 3, 0, Math.PI * 2)
     ctx.fill()
     ctx.stroke()
   }
@@ -268,7 +269,7 @@ export class OutFileInWallEntity extends EntityClassInWall<OutFileInWallData> {
     const data = this.getData();
     const dist = Math.hypot(x - data.x, y - data.y)
     // console.log('dist', dist)
-    if (dist < 10) {
+    if (dist < this.circleRadius + 3) {
       return {
         index: 0,
         type: this.type,

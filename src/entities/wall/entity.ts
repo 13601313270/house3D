@@ -10,6 +10,7 @@ import { WallDataClass } from './dataClass'
 export class WallEntity extends EntityClass<WallData> {
   type: string = 'wall'
   isPointObj: boolean = false
+  private circleRadius = 12
 
   defaultValue(): WallData {
     const wall: WallData = {
@@ -102,7 +103,7 @@ export class WallEntity extends EntityClass<WallData> {
         const screenX = point.x * zoomLevel + panOffset.x
         const screenY = point.y * zoomLevel + panOffset.y
         ctx.beginPath()
-        ctx.arc(screenX, screenY, 6 * zoomLevel, 0, Math.PI * 2)
+        ctx.arc(screenX, screenY, this.circleRadius * zoomLevel + 3, 0, Math.PI * 2)
         ctx.stroke()
         ctx.fill()
       })
@@ -121,7 +122,7 @@ export class WallEntity extends EntityClass<WallData> {
         ctx.fillStyle = 'lightgray'
         ctx.lineWidth = 2
         ctx.beginPath()
-        ctx.arc(screenX, screenY, 4 * zoomLevel, 0, Math.PI * 2)
+        ctx.arc(screenX, screenY, this.circleRadius * zoomLevel + 3, 0, Math.PI * 2)
         ctx.stroke()
         ctx.fill()
       }
@@ -230,7 +231,7 @@ export class WallEntity extends EntityClass<WallData> {
     for (let i = 0; i < this.getData().points.length; i++) {
       const point = this.getData().points[i]
       const dist = Math.hypot(x - point.x, y - point.y)
-      if (dist < this.getData().thickness * zoomLevel) {
+      if (dist < this.getData().thickness) {
         return {
           id: data.id,
           type: this.type,
@@ -247,7 +248,7 @@ export class WallEntity extends EntityClass<WallData> {
       const midX = (p1.x + p2.x) / 2
       const midY = (p1.y + p2.y) / 2
       const dist = Math.hypot(x - midX, y - midY)
-      if (dist < this.getData().thickness * zoomLevel) {
+      if (dist < this.getData().thickness) {
         return {
           id: data.id,
           type: this.type,

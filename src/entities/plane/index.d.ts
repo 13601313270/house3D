@@ -5,4 +5,5 @@ export type PlaneData = ObjData & {
   length: number
   color: string
   mt: number | null // 方块材质
+  angleY: number // 旋转角度
 }

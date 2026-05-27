@@ -12,6 +12,7 @@ import { WindowDataClass } from './dataClass';
 export class WindowEntity extends EntityClassInWall<WindowData> {
   type: string = 'window'
   isPointObj: boolean = true
+  private circleRadius = 12
 
   constructor(world: World, window?: WindowData) {
     super(world, window)
@@ -55,14 +56,6 @@ export class WindowEntity extends EntityClassInWall<WindowData> {
   }
 
   draw2DPreviewByData(ctx: CanvasRenderingContext2D, data: WindowData, panOffset: Point, zoomLevel: number): void {
-  }
-
-  draw2DByData(
-    ctx: CanvasRenderingContext2D,
-    data: WindowData,
-    panOffset: Point,
-    zoomLevel: number,
-  ): void {
     if (!this.world.allFileMapObjects.wall) {
       this.world.allFileMapObjects.wall = []
     }
@@ -94,12 +87,23 @@ export class WindowEntity extends EntityClassInWall<WindowData> {
     ctx.setLineDash([5, 5])
     ctx.stroke()
     ctx.restore()
+  }
 
+  draw2DByData(
+    ctx: CanvasRenderingContext2D,
+    data: WindowData,
+    panOffset: Point,
+    zoomLevel: number,
+  ): void {
+    // 实现门的2D绘制逻辑
+    const screenX = data.x * zoomLevel + panOffset.x
+    const screenY = data.y * zoomLevel + panOffset.y
+    ctx.beginPath()
     // 控制点
     ctx.fillStyle = '#fff'
     ctx.strokeStyle = '#3498db'
     ctx.lineWidth = 2
-    ctx.arc(screenX, screenY, 6 * zoomLevel, 0, Math.PI * 2)
+    ctx.arc(screenX, screenY, this.circleRadius * zoomLevel + 3, 0, Math.PI * 2)
     ctx.fill()
     ctx.stroke()
     ctx.closePath()
@@ -109,7 +113,7 @@ export class WindowEntity extends EntityClassInWall<WindowData> {
   matchHandelInfo(x: number, y: number, zoomLevel: number): HandelInfo | null {
     const data = this.getData();
     const dist = Math.hypot(x - data.x, y - data.y)
-    if (dist < 6 * zoomLevel) {
+    if (dist < this.circleRadius * zoomLevel + 3) {
       return {
         index: 0,
         id: data.id,

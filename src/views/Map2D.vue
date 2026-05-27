@@ -1487,6 +1487,9 @@ const handleMouseMove = (e: MouseEvent) => {
           // const wall = worldApi.getObjects('wall')[i] as Wall
           const api: WallEntity = worldApi.allFileMapObjects.wall[i] as WallEntity;
           if (temp(api)) {
+            // 绘制操作句柄
+            ctxAction.clearRect(0, 0, canvasAction.width, canvasAction.height)
+            matchHandelObj.draw2D(ctxAction, panOffset.value, zoom2DLevel.value)
             return;
           }
         }
@@ -1497,6 +1500,8 @@ const handleMouseMove = (e: MouseEvent) => {
       drawWrapper2D(fileData);
       // 绘制操作句柄
       ctxAction.clearRect(0, 0, canvasAction.width, canvasAction.height)
+      matchHandelObj.draw2D(ctxAction, panOffset.value, zoom2DLevel.value)
+
       // worldApi.draw2DWorldActionHandle(canvasAction, fileData, panOffset.value, zoom2DLevel.value);
       worldApi.draw3D()
       return;
@@ -1613,6 +1618,7 @@ const handleMouseDown = (e: MouseEvent) => {
       const canvasAction = canvas2D2Ref.value!;
       const ctxAction = canvasAction.getContext('2d')!
       ctxAction.clearRect(0, 0, canvasAction.width, canvasAction.height)
+      matchHandelObj.draw2D(ctxAction, panOffset.value, zoom2DLevel.value)
     } else {
       // 如果没有拖拽到任何点，开始平移
       if (!draggedPoint.value) {
