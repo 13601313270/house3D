@@ -322,7 +322,7 @@ export class ImportFileEntity extends EntityClass<ImportFileData> {
     })
   }
 
-  showMatchHandel(x: number, y: number) {
+  showMatchHandel(ctx: CanvasRenderingContext2D, x: number, y: number) {
     return this.matchHandelInfo(x, y)
   }
 

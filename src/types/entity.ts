@@ -100,7 +100,7 @@ export abstract class EntityClass<T extends ObjData> {
   }
 
   // 显示可拖拽具柄
-  abstract showMatchHandel(x: number, y: number): void;
+  abstract showMatchHandel(ctx: CanvasRenderingContext2D, x: number, y: number): void;
 
   // 命中可拖拽具柄
   abstract matchHandelInfo(x: number, y: number): HandelInfo | null;

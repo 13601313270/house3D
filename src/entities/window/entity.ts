@@ -109,7 +109,7 @@ export class WindowEntity extends EntityClassInWall<WindowData> {
     ctx.closePath()
   }
 
-  showMatchHandel(x: number, y: number) {
+  showMatchHandel(ctx: CanvasRenderingContext2D, x: number, y: number) {
     const data = this.getData();
     const dist = Math.hypot(x - data.x, y - data.y)
     if (dist < data.width / 2) {

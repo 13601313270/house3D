@@ -1644,6 +1644,8 @@ function getHandleInfoByXY(x: number, y: number, showMatchHandel: boolean = fals
     startPooint: Point,
     dist: number,
   }> = []
+  const canvasAction = canvas2D2Ref.value!;
+  const ctxAction = canvasAction.getContext('2d')!
   // 检查已绘制的墙上的点
   if (worldApi.allFileMapObjects.wall) {
     for (let i = 0; i < worldApi.getObjects('wall').length; i++) {
@@ -1656,7 +1658,7 @@ function getHandleInfoByXY(x: number, y: number, showMatchHandel: boolean = fals
         dist: number;
       } | null
       if (showMatchHandel) {
-        matchInfo = api.showMatchHandel(x, y)
+        matchInfo = api.showMatchHandel(ctxAction, x, y)
       } else {
         matchInfo = api.matchHandelInfo(x, y)
       }
@@ -1686,7 +1688,7 @@ function getHandleInfoByXY(x: number, y: number, showMatchHandel: boolean = fals
         dist: number;
       } | null
       if (showMatchHandel) {
-        matchInfo = api.showMatchHandel(x, y)
+        matchInfo = api.showMatchHandel(ctxAction, x, y)
       } else {
         matchInfo = api.matchHandelInfo(x, y)
       }

@@ -230,7 +230,7 @@ export class DoorEntity extends EntityClassInWall<DoorData> {
     }
   }
 
-  showMatchHandel(x: number, y: number) {
+  showMatchHandel(ctx: CanvasRenderingContext2D, x: number, y: number) {
     const data = this.getData();
     const dist = Math.hypot(x - data.x, y - data.y)
     // console.log('zoomLevel---2', zoomLevel)

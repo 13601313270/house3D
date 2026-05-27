@@ -209,7 +209,7 @@ export class PeopleEntity extends EntityClass<PeopleData> {
     return this.type + JSON.stringify(cacheData)
   }
 
-  showMatchHandel(x: number, y: number) {
+  showMatchHandel(ctx: CanvasRenderingContext2D, x: number, y: number) {
     const data = this.getData();
     const { angle } = data
     const angleY = angle * -1
