@@ -17,14 +17,14 @@ export class World {
     [key in string]?: EntityClass<any>[]
   } = {}
 
-  allObjFiles: {
-    id: string
-    url: string
-    scale: number,
-    x: number,
-    y: number,
-    z: number,
-  }[] = []
+  // private allObjFiles: {
+  //   id: string
+  //   url: string
+  //   scale: number,
+  //   x: number,
+  //   y: number,
+  //   z: number,
+  // }[] = []
 
   ObjFileTypes: ObjOutputFileType[] = []
 
@@ -82,7 +82,8 @@ export class World {
   }
 
   draw2DWorld(
-    canvasRef: HTMLCanvasElement | null,
+    canvasBgRef: HTMLCanvasElement | null,
+    fileData: fileData,
     tempWallPoints: Point[],
     hoverPoint: Point | null,
     currentTool: string,
@@ -94,11 +95,10 @@ export class World {
     zoomLevel: number = 1,
     insertTempObj: EntityClass<any> | null = null,
   ) {
-    if (!canvasRef) return
-    const ctx = canvasRef.getContext('2d')
+    if (!canvasBgRef) return
+    const ctx = canvasBgRef.getContext('2d')
     if (!ctx) return
 
-    const fileData: fileData = this.getAllFileObjects()
     ctx.clearRect(0, 0, canvasWidth, canvasHeight)
 
     ctx.fillStyle = '#f5f5f5'
@@ -200,18 +200,6 @@ export class World {
       }
     })
 
-    allFileKeys.forEach((key) => {
-      if (fileData[key]) {
-        fileData[key].forEach((item, index) => {
-          // @ts-ignore
-          const itemApi: DoorEntity = this.allFileMapObjects[key][index];
-          if (itemApi) {
-            itemApi.draw2D(ctx, panOffset, zoomLevel)
-          }
-        })
-      }
-    })
-
     if (insertTempObj) {
       if (insertTempObj instanceof EntityClassInWall) {
         if (hoverPoint) {
@@ -225,9 +213,9 @@ export class World {
     }
 
     // 绘制所有ObjFile的中心点
-    this.allObjFiles.forEach((item) => {
-      drawPoint(ctx, item.x * zoomLevel + panOffset.x, item.y * zoomLevel + panOffset.y, '#42b983')
-    })
+    // this.allObjFiles.forEach((item) => {
+    //   drawPoint(ctx, item.x * zoomLevel + panOffset.x, item.y * zoomLevel + panOffset.y, '#42b983')
+    // })
 
     // 绘制轴
     drawAxes(ctx, panOffset, zoomLevel, canvasWidth, canvasHeight)
@@ -258,6 +246,28 @@ export class World {
         ctx.stroke()
       }
     }
+  }
+
+  // 绘制操作句柄
+  draw2DWorldActionHandle(
+    canvasActionRef: HTMLCanvasElement,
+    fileData: fileData,
+    panOffset: Point = { x: 0, y: 0 },
+    zoomLevel: number = 1,
+  ) {
+    const ctxAction = canvasActionRef.getContext('2d')!
+    ctxAction.clearRect(0, 0, canvasActionRef.width, canvasActionRef.height)
+    allFileKeys.forEach((key) => {
+      if (fileData[key]) {
+        fileData[key].forEach((item, index) => {
+          // @ts-ignore
+          const itemApi: DoorEntity = this.allFileMapObjects[key][index];
+          if (itemApi) {
+            itemApi.draw2D(ctxAction, panOffset, zoomLevel)
+          }
+        })
+      }
+    })
   }
 
   draw3D() {

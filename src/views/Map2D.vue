@@ -112,9 +112,10 @@
         <div class="canvas-container">
           <!-- <Canvas3D ref="canvas3DRef1" :world="worldApi" v-model:cameraState="cameraStateLeft"
             :aspectRatio="aspectRatio1" :showCamera="true" cameraType="orthographic" /> -->
-          <canvas ref="canvas2DRef" @click="handleCanvasClick" @mousedown="handleMouseDown" @mousemove="handleMouseMove"
-            @mouseup="handleMouseUp" @contextmenu="handleContextMenu" class="drawing-canvas"
-            :style="{ display: isSplitting ? 'none' : 'block' }" />
+          <canvas ref="canvas2DRef" class="drawing-canvas" :style="{ display: isSplitting ? 'none' : 'block' }" />
+          <canvas ref="canvas2D2Ref" @click="handleCanvasClick" @mousedown="handleMouseDown"
+            @mousemove="handleMouseMove" @mouseup="handleMouseUp" @contextmenu="handleContextMenu" @wheel="handleWheel"
+            class="drawing-canvas" :style="{ display: isSplitting ? 'none' : 'block' }" />
           <div v-if="contextMenu?.visible" class="context-menu"
             :style="{ top: contextMenu.y + 'px', left: contextMenu.x + 'px' }">
             <!-- {{ editPropConfigInfo }} -->
@@ -239,6 +240,7 @@ import Help from '@/components/help.vue'
 import { sleep } from '@/utils/sleep';
 
 const canvas2DRef = ref<HTMLCanvasElement | null>(null)
+const canvas2D2Ref = ref<HTMLCanvasElement | null>(null)
 const canvas3DRef1 = ref<typeof Canvas3D | null>(null)
 const canvas3DRef = ref<typeof Canvas3D | null>(null)
 const canvas3DRef2 = ref<typeof Canvas3D | null>(null)
@@ -264,7 +266,7 @@ const panel1SplitWidthPer = ref(0.35)
 const panel2SplitWidthPer = ref(0.35)
 const isSplitting = ref(false)
 const canvasSize = ref({ width: 0, height: 0 })
-const zoomLevel = ref(1)
+const zoom2DLevel = ref(1)
 const wallThickness = ref<number>(20)
 
 const showLogin = ref(false)
@@ -324,23 +326,26 @@ const updateCanvasSize = () => {
   const container = document.querySelector('.map2d-container')
   if (!container) return
   console.log('===width===', 2)
-  const canvas = canvas2DRef.value
-  const canvas3D1Panel = canvas3DRef1.value
-  if (canvas) {
-    const canvasContainer = document.querySelector('.canvas-container')
-    if (canvasContainer) {
-      const canvasRect = canvasContainer.getBoundingClientRect()
-      const width = Math.floor(canvasRect.width)
-      const height = Math.floor(canvasRect.height)
+  const ctxList = [
+    canvas2DRef.value!,
+    canvas2D2Ref.value!
+  ];
+  const canvasContainer = document.querySelector('.canvas-container')
+  if (canvasContainer) {
+    const canvasRect = canvasContainer.getBoundingClientRect()
+    const width = Math.floor(canvasRect.width)
+    const height = Math.floor(canvasRect.height)
 
-      if (width > 0 && height > 0) {
-        canvas.width = width
-        canvas.height = height
-        canvasSize.value = { width, height }
-      }
+    if (width > 0 && height > 0) {
+      ctxList.forEach(ctx => {
+        ctx.width = width
+        ctx.height = height
+      })
+      canvasSize.value = { width, height }
     }
   }
   console.log('===width===', 3)
+  const canvas3D1Panel = canvas3DRef1.value
   if (canvas3D1Panel) {
     const leftCanvasContainer = document.querySelector('.canvas-container')
     if (leftCanvasContainer) {
@@ -756,9 +761,12 @@ const drawWrapper2DAnd3D = () => {
 }
 const drawWrapper2D = () => {
   const canvas = canvas2DRef.value
-  if (canvas) {
+  const canvasAction = canvas2D2Ref.value;
+  if (canvas && canvasAction) {
+    const fileData: fileData = worldApi.getAllFileObjects()
     worldApi.draw2DWorld(
       canvas,
+      fileData,
       tempDrawWall.value?.points || [],
       hoverPoint.value,
       currentTool.value,
@@ -767,9 +775,12 @@ const drawWrapper2D = () => {
       panOffset.value,
       canvasSize.value.width,
       canvasSize.value.height,
-      zoomLevel.value,
+      zoom2DLevel.value,
       insertTempObj,
     )
+
+    // 绘制操作句柄
+    worldApi.draw2DWorldActionHandle(canvasAction, fileData, panOffset.value, zoom2DLevel.value);
   }
 }
 
@@ -844,29 +855,26 @@ onMounted(async () => {
   worldApi.onChange(() => {
     changeCamera2State(activeCameraIndex.value)
   })
-  const canvas = canvas2DRef.value
-  if (canvas) {
-    const ctx = canvas.getContext('2d')
-    if (ctx) {
-      ctx.canvas.width = 800
-      ctx.canvas.height = 600;
-      nextTick(() => {
-        // (0,0)位移到中央
-        const canvasContainer = document.querySelector('.canvas-container')
-        if (canvasContainer) {
-          const canvasRect = canvasContainer.getBoundingClientRect()
-          const dx = canvasRect.width / 2
-          const dy = canvasRect.height / 2
-          panOffset.value.x += dx
-          panOffset.value.y += dy
-          panStartScreenX = screenX
-          panStartScreenY = screenY
-          drawWrapper2DAnd3D()
-        }
-      })
+  // const canvas2 = canvas2D2Ref.value
+  // ctxList.forEach(ctx => {
+  //   ctx.canvas.width = 800
+  //   ctx.canvas.height = 600;
+  // })
+  nextTick(() => {
+    // (0,0)位移到中央
+    const canvasContainer = document.querySelector('.canvas-container')
+    if (canvasContainer) {
+      const canvasRect = canvasContainer.getBoundingClientRect()
+      const dx = canvasRect.width / 2
+      const dy = canvasRect.height / 2
+      panOffset.value.x += dx
+      panOffset.value.y += dy
+      panStartScreenX = screenX
+      panStartScreenY = screenY
       drawWrapper2DAnd3D()
     }
-  }
+  })
+  drawWrapper2DAnd3D()
   window.addEventListener('resize', () => updateCanvasSize())
   updateCanvasSize()
   function bindSave(event: any) {
@@ -961,7 +969,7 @@ const saveDrawing = async () => {
   } = {
     ...worldApi.getAllFileObjects() as any,
     panOffset: panOffset.value,
-    zoomLevel: zoomLevel.value,
+    zoomLevel: zoom2DLevel.value,
     cameraState: cameraStateCenter.value,
     activeCameraIndex: activeCameraIndex.value
   }
@@ -1135,7 +1143,7 @@ async function initWorldByData(data: fileData & {
   }
 
   panOffset.value = data.panOffset || { x: 0, y: 0 }
-  zoomLevel.value = data.zoomLevel || 1
+  zoom2DLevel.value = data.zoomLevel || 1
   if (data.cameraState) {
     cameraStateCenter.value = data.cameraState
   }
@@ -1155,8 +1163,8 @@ const handleContextMenu = (e: MouseEvent) => {
   const rect = canvas.getBoundingClientRect()
   const screenX = Math.round(e.clientX - rect.left)
   const screenY = Math.round(e.clientY - rect.top)
-  const x = (screenX - panOffset.value.x) / zoomLevel.value
-  const y = (screenY - panOffset.value.y) / zoomLevel.value
+  const x = (screenX - panOffset.value.x) / zoom2DLevel.value
+  const y = (screenY - panOffset.value.y) / zoom2DLevel.value
 
   editPropConfigInfo.value = []
   editPropInputInfo.value = {}
@@ -1171,7 +1179,7 @@ const handleContextMenu = (e: MouseEvent) => {
       }
       for (let j = 0; j < worldApi.getObjects(type).length; j++) {
         const api: EntityClass<any> = worldApi.allFileMapObjects[type][j]
-        const snapPoint = api.matchHandelInfo(x, y, zoomLevel.value)
+        const snapPoint = api.matchHandelInfo(x, y, zoom2DLevel.value)
         if (snapPoint) {
           api.editPropConfig(snapPoint, (propConfig, callback) => {
             console.log('dist', propConfig)
@@ -1245,8 +1253,8 @@ const handleCanvasClick = async (e: MouseEvent) => {
   const rect = canvas.getBoundingClientRect()
   const screenX = Math.round(e.clientX - rect.left)
   const screenY = Math.round(e.clientY - rect.top)
-  const x = (screenX - panOffset.value.x) / zoomLevel.value
-  const y = (screenY - panOffset.value.y) / zoomLevel.value
+  const x = (screenX - panOffset.value.x) / zoom2DLevel.value
+  const y = (screenY - panOffset.value.y) / zoom2DLevel.value
 
   // 点击空白处隐藏 context menu
   if (contextMenu.value) {
@@ -1294,7 +1302,7 @@ const handleCanvasClick = async (e: MouseEvent) => {
         }
         const dist = Math.hypot(snapped.point.x - last.x, snapped.point.y - last.y)
 
-        if (dist < 10 * zoomLevel.value) {
+        if (dist < 10 * zoom2DLevel.value) {
           if (tempDrawWall.value?.points?.length && tempDrawWall.value.points.length > 1) {
             const newWall: WallData = {
               id: Date.now().toString(),
@@ -1407,8 +1415,8 @@ const handleMouseMove = (e: MouseEvent) => {
   const rect = canvas.getBoundingClientRect()
   const screenX = e.clientX - rect.left
   const screenY = e.clientY - rect.top
-  const x = (screenX - panOffset.value.x) / zoomLevel.value
-  const y = (screenY - panOffset.value.y) / zoomLevel.value
+  const x = (screenX - panOffset.value.x) / zoom2DLevel.value
+  const y = (screenY - panOffset.value.y) / zoom2DLevel.value
 
   // 如果正在拖拽，处理拖拽逻辑（即使当前工具不是 drag）
   if (matchHandelObj && matchHandelInfo) {
@@ -1573,8 +1581,8 @@ const handleMouseDown = (e: MouseEvent) => {
   const rect = canvas.getBoundingClientRect()
   const screenX = e.clientX - rect.left
   const screenY = e.clientY - rect.top
-  const x = (screenX - panOffset.value.x) / zoomLevel.value
-  const y = (screenY - panOffset.value.y) / zoomLevel.value
+  const x = (screenX - panOffset.value.x) / zoom2DLevel.value
+  const y = (screenY - panOffset.value.y) / zoom2DLevel.value
 
   // 只有在拖拽模式下才能拖拽点
   if (currentTool.value === 'drag') {
@@ -1591,7 +1599,7 @@ const handleMouseDown = (e: MouseEvent) => {
       for (let i = 0; i < worldApi.getObjects('wall').length; i++) {
         // const wall = worldApi.getObjects('wall')[i]
         const api: WallEntity = worldApi.allFileMapObjects.wall[i] as WallEntity;
-        const matchInfo = api.matchHandelInfo(x, y, zoomLevel.value)
+        const matchInfo = api.matchHandelInfo(x, y, zoom2DLevel.value)
         if (matchInfo) {
           matchHandelInfoList.push({
             classInfo: api,
@@ -1611,7 +1619,7 @@ const handleMouseDown = (e: MouseEvent) => {
       }
       for (let j = 0; j < worldApi.getObjects(key).length; j++) {
         const api: DoorEntity = worldApi.allFileMapObjects[key][j] as DoorEntity;
-        const matchInfo = api.matchHandelInfo(x, y, zoomLevel.value)
+        const matchInfo = api.matchHandelInfo(x, y, zoom2DLevel.value)
         if (matchInfo) {
           matchHandelInfoList.push({
             classInfo: api,
@@ -1704,21 +1712,11 @@ onMounted(() => {
   loginByToken();
   window.addEventListener('mousemove', handleMouseMoveSplit)
   window.addEventListener('mouseup', handleMouseUpSplit)
-
-  const canvas = canvas2DRef.value
-  if (canvas) {
-    canvas.addEventListener('wheel', handleWheel)
-  }
 })
 
 onUnmounted(() => {
   window.removeEventListener('mousemove', handleMouseMoveSplit)
   window.removeEventListener('mouseup', handleMouseUpSplit)
-
-  const canvas = canvas2DRef.value
-  if (canvas) {
-    canvas.removeEventListener('wheel', handleWheel)
-  }
 })
 
 const handleWheel = (e: WheelEvent) => {
@@ -1732,13 +1730,13 @@ const handleWheel = (e: WheelEvent) => {
   const mouseY = e.clientY - rect.top
 
   const zoomFactor = e.deltaY < 0 ? 1.1 : 0.9
-  const newZoomLevel = Math.max(0.1, Math.min(5, zoomLevel.value * zoomFactor))
+  const newZoomLevel = Math.max(0.1, Math.min(5, zoom2DLevel.value * zoomFactor))
 
-  const zoomRatio = newZoomLevel / zoomLevel.value
+  const zoomRatio = newZoomLevel / zoom2DLevel.value
   const newPanX = mouseX - (mouseX - panOffset.value.x) * zoomRatio
   const newPanY = mouseY - (mouseY - panOffset.value.y) * zoomRatio
 
-  zoomLevel.value = newZoomLevel
+  zoom2DLevel.value = newZoomLevel
   panOffset.value = { x: newPanX, y: newPanY }
 
   drawWrapper2DAnd3D()
@@ -2329,12 +2327,13 @@ button {
 }
 
 .drawing-canvas {
-  background: white;
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   cursor: crosshair;
   width: 100%;
   height: 100%;
+  position: absolute;
+  top: 0;
 }
 
 .left-panel {
