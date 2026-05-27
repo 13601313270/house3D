@@ -114,8 +114,9 @@
             :aspectRatio="aspectRatio1" :showCamera="true" cameraType="orthographic" /> -->
           <canvas ref="canvas2DRef" class="drawing-canvas" :style="{ display: isSplitting ? 'none' : 'block' }" />
           <canvas ref="canvas2D2Ref" @click="handleCanvasClick" @mousedown="handleMouseDown"
-            @mousemove="handleMouseMove" @mouseup="handleMouseUp" @contextmenu="handleContextMenu" @wheel="handleWheel"
-            class="drawing-canvas" :style="{ display: isSplitting ? 'none' : 'block' }" />
+            @mousemove="handleMouseMove" @mouseleave="handleMouseLeave" @mouseup="handleMouseUp"
+            @contextmenu="handleContextMenu" @wheel="handleWheel" class="drawing-canvas"
+            :style="{ display: isSplitting ? 'none' : 'block' }" />
           <div v-if="contextMenu?.visible" class="context-menu"
             :style="{ top: contextMenu.y + 'px', left: contextMenu.x + 'px' }">
             <!-- {{ editPropConfigInfo }} -->
@@ -1721,6 +1722,11 @@ const handleMouseUp = () => {
     isPanning.value = false
     drawWrapper2DAnd3D()
   }
+}
+const handleMouseLeave = () => {
+  const canvasAction = canvas2D2Ref.value!;
+  const ctxAction = canvasAction.getContext('2d')!
+  ctxAction.clearRect(0, 0, canvasAction.width, canvasAction.height)
 }
 
 const dragSplitIndex = ref(0)
