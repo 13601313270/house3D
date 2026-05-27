@@ -109,18 +109,13 @@ export class WindowEntity extends EntityClassInWall<WindowData> {
     ctx.closePath()
   }
 
-  showMatchHandel(ctx: CanvasRenderingContext2D, x: number, y: number) {
+  showMatchHandel(x: number, y: number) {
     const data = this.getData();
     const dist = Math.hypot(x - data.x, y - data.y)
     if (dist < data.width / 2) {
-      return {
-        index: 0,
-        id: data.id,
-        type: this.type,
-        dist: dist,
-      }
+      return true
     }
-    return null;
+    return false;
   }
 
   // 命中可拖拽具柄

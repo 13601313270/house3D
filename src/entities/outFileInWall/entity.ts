@@ -265,8 +265,8 @@ export class OutFileInWallEntity extends EntityClassInWall<OutFileInWallData> {
     })
   }
 
-  showMatchHandel(ctx: CanvasRenderingContext2D, x: number, y: number) {
-    return this.matchHandelInfo(x, y)
+  showMatchHandel(x: number, y: number) {
+    return this.matchHandelInfo(x, y) !== null
   }
 
   matchHandelInfo(x: number, y: number) {

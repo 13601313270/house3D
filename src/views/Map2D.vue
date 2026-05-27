@@ -1521,9 +1521,11 @@ const handleMouseMove = (e: MouseEvent) => {
     } else {
       // 鼠标浮动而过
       ctxAction.clearRect(0, 0, canvasAction.width, canvasAction.height)
-      let handleInfoList = getHandleInfoByXY(x, y)
+      let handleInfoList: Array<{
+        classInfo: EntityClass<any>
+      }> = getHandleInfoByXY(x, y)
       if (handleInfoList.length === 0) {
-        handleInfoList = getHandleInfoByXY(x, y, true)
+        handleInfoList = getHandleInAreaInfoByXY(x, y)
       }
       handleInfoList.forEach(v => {
         const { classInfo } = v
@@ -1632,7 +1634,7 @@ const handleMouseDown = (e: MouseEvent) => {
   }
 }
 
-function getHandleInfoByXY(x: number, y: number, showMatchHandel: boolean = false): Array<{
+function getHandleInfoByXY(x: number, y: number): Array<{
   classInfo: EntityClass<any>
   handle: HandelInfo,
   startPooint: Point,
@@ -1651,17 +1653,7 @@ function getHandleInfoByXY(x: number, y: number, showMatchHandel: boolean = fals
     for (let i = 0; i < worldApi.getObjects('wall').length; i++) {
       // const wall = worldApi.getObjects('wall')[i]
       const api: WallEntity = worldApi.allFileMapObjects.wall[i] as WallEntity;
-      let matchInfo: {
-        id: string;
-        type: string;
-        index: number;
-        dist: number;
-      } | null
-      if (showMatchHandel) {
-        matchInfo = api.showMatchHandel(ctxAction, x, y)
-      } else {
-        matchInfo = api.matchHandelInfo(x, y)
-      }
+      const matchInfo = api.matchHandelInfo(x, y)
       if (matchInfo) {
         matchHandelInfoList.push({
           classInfo: api,
@@ -1681,17 +1673,7 @@ function getHandleInfoByXY(x: number, y: number, showMatchHandel: boolean = fals
     }
     for (let j = 0; j < worldApi.getObjects(key).length; j++) {
       const api: DoorEntity = worldApi.allFileMapObjects[key][j] as DoorEntity;
-      let matchInfo: {
-        id: string;
-        type: string;
-        index: number;
-        dist: number;
-      } | null
-      if (showMatchHandel) {
-        matchInfo = api.showMatchHandel(ctxAction, x, y)
-      } else {
-        matchInfo = api.matchHandelInfo(x, y)
-      }
+      const matchInfo = api.matchHandelInfo(x, y)
       if (matchInfo) {
         matchHandelInfoList.push({
           classInfo: api,
@@ -1707,6 +1689,47 @@ function getHandleInfoByXY(x: number, y: number, showMatchHandel: boolean = fals
     return a.dist - b.dist
   })
   return sortedMatchAllObjList;
+}
+
+function getHandleInAreaInfoByXY(x: number, y: number): Array<{
+  classInfo: EntityClass<any>
+}> {
+  const matchHandelInfoList: Array<{
+    classInfo: EntityClass<any>
+  }> = []
+  const canvasAction = canvas2D2Ref.value!;
+  const ctxAction = canvasAction.getContext('2d')!
+  // 检查已绘制的墙上的点
+  if (worldApi.allFileMapObjects.wall) {
+    for (let i = 0; i < worldApi.getObjects('wall').length; i++) {
+      // const wall = worldApi.getObjects('wall')[i]
+      const api: WallEntity = worldApi.allFileMapObjects.wall[i] as WallEntity;
+      const matchInfo = api.showMatchHandel(x, y)
+      if (matchInfo) {
+        matchHandelInfoList.push({
+          classInfo: api,
+        })
+      }
+    }
+  }
+
+  for (let i = 0; i < allFileKeys.length; i++) {
+    const key = allFileKeys[i];
+    if (key === 'wall') continue;
+    if (!worldApi.allFileMapObjects[key]) {
+      continue
+    }
+    for (let j = 0; j < worldApi.getObjects(key).length; j++) {
+      const api: EntityClass<any> = worldApi.allFileMapObjects[key][j] as EntityClass<any>;
+      const matchInfo = api.showMatchHandel(x, y)
+      if (matchInfo) {
+        matchHandelInfoList.push({
+          classInfo: api,
+        })
+      }
+    }
+  }
+  return matchHandelInfoList;
 }
 
 const handleMouseUp = () => {

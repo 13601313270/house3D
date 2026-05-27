@@ -316,7 +316,7 @@ export class CameraEntity extends EntityClass<CameraData> {
     return "neverChange";
   }
 
-  showMatchHandel(ctx: CanvasRenderingContext2D, x: number, y: number) {
+  showMatchHandel(x: number, y: number) {
     const data = this.getData();
     const screenX = data.x;//  * zoomLevel + panOffset.x
     const screenY = data.y;// * zoomLevel + panOffset.y
@@ -357,32 +357,17 @@ export class CameraEntity extends EntityClass<CameraData> {
       y < Math.max(p1Y, p2Y) &&
       y > Math.min(p1Y, p2Y)
     ) {
-      return {
-        index: 0,
-        type: this.type,
-        id: data.id,
-        dist: dist,
-      }
+      return true
     }
 
     if (dist < this.circleRadius + 3) {
-      return {
-        index: 0,
-        type: this.type,
-        id: data.id,
-        dist: dist,
-      }
+      return true
     }
     const distToTarget = Math.hypot(x - data.targetPositionX, y - data.targetPositionY)
     if (distToTarget < this.circleRadius + 3) {
-      return {
-        index: 1,
-        type: this.type,
-        id: data.id,
-        dist: distToTarget,
-      }
+      return true
     }
-    return null;
+    return false;
   }
 
   matchHandelInfo(x: number, y: number) {

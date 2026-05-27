@@ -230,19 +230,14 @@ export class DoorEntity extends EntityClassInWall<DoorData> {
     }
   }
 
-  showMatchHandel(ctx: CanvasRenderingContext2D, x: number, y: number) {
+  showMatchHandel(x: number, y: number) {
     const data = this.getData();
     const dist = Math.hypot(x - data.x, y - data.y)
     // console.log('zoomLevel---2', zoomLevel)
     if (dist < data.width / 2) {
-      return {
-        index: 0,
-        type: this.type,
-        id: data.id,
-        dist: dist,
-      }
+      return true
     }
-    return null;
+    return false;
   }
 
   matchHandelInfo(x: number, y: number) {

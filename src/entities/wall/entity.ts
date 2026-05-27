@@ -225,8 +225,8 @@ export class WallEntity extends EntityClass<WallData> {
     return meshList
   }
 
-  showMatchHandel(ctx: CanvasRenderingContext2D, x: number, y: number) {
-    return this.matchHandelInfo(x, y)
+  showMatchHandel(x: number, y: number) {
+    return this.matchHandelInfo(x, y) !== null
   }
 
   // 命中可拖拽具柄
