@@ -316,7 +316,7 @@ export class CameraEntity extends EntityClass<CameraData> {
     return "neverChange";
   }
 
-  showMatchHandel(x: number, y: number, zoomLevel: number) {
+  showMatchHandel(x: number, y: number) {
     return this.matchHandelInfo(x, y)
   }
 

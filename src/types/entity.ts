@@ -100,10 +100,10 @@ export abstract class EntityClass<T extends ObjData> {
   }
 
   // 显示可拖拽具柄
-  abstract showMatchHandel(x: number, y: number, zoomLevel: number): void;
+  abstract showMatchHandel(x: number, y: number): void;
 
   // 命中可拖拽具柄
-  abstract matchHandelInfo(x: number, y: number, zoomLevel: number): HandelInfo | null;
+  abstract matchHandelInfo(x: number, y: number): HandelInfo | null;
 
   // 命中可拖拽具柄被移动移动
   abstract matchHandelMoveCallback(x: number, y: number, matchHandelInfo: HandelInfo): void;

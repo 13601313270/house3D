@@ -1178,7 +1178,7 @@ const handleContextMenu = (e: MouseEvent) => {
       }
       for (let j = 0; j < worldApi.getObjects(type).length; j++) {
         const api: EntityClass<any> = worldApi.allFileMapObjects[type][j]
-        const snapPoint = api.matchHandelInfo(x, y, zoom2DLevel.value)
+        const snapPoint = api.matchHandelInfo(x, y)
         if (snapPoint) {
           api.editPropConfig(snapPoint, (propConfig, callback) => {
             console.log('dist', propConfig)
@@ -1647,7 +1647,7 @@ function getHandleInfoByXY(x: number, y: number): Array<{
     for (let i = 0; i < worldApi.getObjects('wall').length; i++) {
       // const wall = worldApi.getObjects('wall')[i]
       const api: WallEntity = worldApi.allFileMapObjects.wall[i] as WallEntity;
-      const matchInfo = api.matchHandelInfo(x, y, zoom2DLevel.value)
+      const matchInfo = api.matchHandelInfo(x, y)
       if (matchInfo) {
         matchHandelInfoList.push({
           classInfo: api,
@@ -1667,7 +1667,7 @@ function getHandleInfoByXY(x: number, y: number): Array<{
     }
     for (let j = 0; j < worldApi.getObjects(key).length; j++) {
       const api: DoorEntity = worldApi.allFileMapObjects[key][j] as DoorEntity;
-      const matchInfo = api.matchHandelInfo(x, y, zoom2DLevel.value)
+      const matchInfo = api.matchHandelInfo(x, y)
       if (matchInfo) {
         matchHandelInfoList.push({
           classInfo: api,
