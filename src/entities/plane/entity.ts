@@ -5,6 +5,7 @@ import { allSnapFromType, EntityClass, MatchSnapPoint } from '@/types/entity'
 import { editItem } from '..';
 import { getMaterialById } from '@/material';
 import { PlaneDataClass } from './dataClass'
+import { isPointInRotatedRect } from '@/utils/isPointInRotatedRect';
 
 export class PlaneEntity extends EntityClass<PlaneData> {
   type: string = 'plane'
@@ -150,7 +151,23 @@ export class PlaneEntity extends EntityClass<PlaneData> {
   }
 
   showMatchHandel(x: number, y: number) {
-    return this.matchHandelInfo(x, y)
+    const data = this.getData();
+    const dist = Math.hypot(x - data.x, y - data.y)
+    const angleY = data.angleY || 0;// 历史数据问题，有的数据不存在angleY，所以用了一个【|| 0】给予默认值
+    if (isPointInRotatedRect(x, y, {
+      x: data.x,
+      y: data.y,
+      width: data.width,
+      depth: data.length,
+      angleY: angleY * -1,
+    })) {
+      return {
+        index: 0,
+        type: this.type,
+        id: data.id,
+        dist: dist,
+      }
+    }
   }
 
   matchHandelInfo(x: number, y: number) {

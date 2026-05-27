@@ -1520,15 +1520,13 @@ const handleMouseMove = (e: MouseEvent) => {
       // worldApi.draw2DWorldActionHandle(canvasAction, fileData, panOffset.value, zoom2DLevel.value);
     } else {
       // 鼠标浮动而过
-      console.log('鼠标浮动而过')
       ctxAction.clearRect(0, 0, canvasAction.width, canvasAction.height)
       let handleInfoList = getHandleInfoByXY(x, y)
       if (handleInfoList.length === 0) {
         handleInfoList = getHandleInfoByXY(x, y, true)
       }
       handleInfoList.forEach(v => {
-        const { classInfo, startPooint } = v
-        hoverPoint.value = startPooint
+        const { classInfo } = v
         classInfo.draw2D(ctxAction, panOffset.value, zoom2DLevel.value)
       })
     }

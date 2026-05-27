@@ -5,6 +5,7 @@ import { allSnapFromType, EntityClass, MatchSnapPoint } from '@/types/entity'
 import { editItem } from '..';
 import { getMaterialById } from '@/material';
 import { CubeDataClass } from './dataClass'
+import { isPointInRotatedRect } from '@/utils/isPointInRotatedRect'
 
 export class CubeEntity extends EntityClass<CubeData> {
   type: string = 'cube'
@@ -154,9 +155,8 @@ export class CubeEntity extends EntityClass<CubeData> {
 
   showMatchHandel(x: number, y: number) {
     const data = this.getData();
-    const { width, depth } = data
     const dist = Math.hypot(x - data.x, y - data.y)
-    if (x < data.x + width / 2 && x > data.x - width / 2 && y < data.y + depth / 2 && y > data.y - depth / 2) {
+    if (isPointInRotatedRect(x, y, data)) {
       return {
         index: 0,
         type: this.type,
