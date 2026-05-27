@@ -226,7 +226,7 @@ export class PeopleEntity extends EntityClass<PeopleData> {
     const rotatedYAdd = data.y - Math.sin(angleY) * this.drawAngelLength
 
     const dist2 = Math.hypot(x - rotatedXAdd, y - rotatedYAdd)
-    console.log('dist2', dist2)
+    // console.log('dist2', dist2)
     if (dist2 < 10) {
       return {
         index: 1,

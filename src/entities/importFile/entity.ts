@@ -324,7 +324,7 @@ export class ImportFileEntity extends EntityClass<ImportFileData> {
   matchHandelInfo(x: number, y: number) {
     const data = this.getData();
     const dist = Math.hypot(x - data.x, y - data.y)
-    console.log('dist', dist)
+    // console.log('dist', dist)
     if (dist < 10) {
       return {
         index: 0,
@@ -340,7 +340,7 @@ export class ImportFileEntity extends EntityClass<ImportFileData> {
     const rotatedYAdd = data.y - Math.sin(data.angleY) * drawAngelLength
 
     const dist2 = Math.hypot(x - rotatedXAdd, y - rotatedYAdd)
-    console.log('dist2', dist2)
+    // console.log('dist2', dist2)
     if (dist2 < 10) {
       return {
         index: 1,

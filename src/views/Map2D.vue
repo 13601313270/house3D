@@ -261,7 +261,6 @@ const dragOffset = ref<Point | null>(null)
 const dragStartPoint = ref<Point | null>(null)
 const panOffset = ref<Point>({ x: 0, y: 0 })
 const isPanning = ref(false)
-const panStart = ref<Point | null>(null)
 const panel1SplitWidthPer = ref(0.35)
 const panel2SplitWidthPer = ref(0.35)
 const isSplitting = ref(false)
@@ -756,14 +755,14 @@ function roundNumberList(point: { x: number, y: number }) {
 }
 const worldApi = new World()
 const drawWrapper2DAnd3D = () => {
-  drawWrapper2D();
+  const fileData: fileData = worldApi.getAllFileObjects()
+  drawWrapper2D(fileData);
   worldApi.draw3D()
 }
-const drawWrapper2D = () => {
+const drawWrapper2D = (fileData: fileData) => {
   const canvas = canvas2DRef.value
   const canvasAction = canvas2D2Ref.value;
   if (canvas && canvasAction) {
-    const fileData: fileData = worldApi.getAllFileObjects()
     worldApi.draw2DWorld(
       canvas,
       fileData,
@@ -780,7 +779,7 @@ const drawWrapper2D = () => {
     )
 
     // 绘制操作句柄
-    worldApi.draw2DWorldActionHandle(canvasAction, fileData, panOffset.value, zoom2DLevel.value);
+    // worldApi.draw2DWorldActionHandle(canvasAction, fileData, panOffset.value, zoom2DLevel.value);
   }
 }
 
@@ -1418,99 +1417,113 @@ const handleMouseMove = (e: MouseEvent) => {
   const x = (screenX - panOffset.value.x) / zoom2DLevel.value
   const y = (screenY - panOffset.value.y) / zoom2DLevel.value
 
-  // 如果正在拖拽，处理拖拽逻辑（即使当前工具不是 drag）
-  if (matchHandelObj && matchHandelInfo) {
-    function temp(api: EntityClass<ObjData>): boolean {
-      if (matchHandelObj && matchHandelInfo) {
-        let beMatchPoints = api.getMineBeSnapPoints()
-        // 排出掉和自己磁吸
-        beMatchPoints = beMatchPoints.filter(v => {
-          if (v.snapFromType === 'point') {
-            if (v.point.index === matchHandelInfo?.index) {
-              return false;
+  if (currentTool.value === 'drag') {
+    const fileData: fileData = worldApi.getAllFileObjects()
+    const canvasAction = canvas2D2Ref.value!;
+    // 绘制操作句柄
+    const ctxAction = canvasAction.getContext('2d')!
+    // 如果正在拖拽，处理拖拽逻辑（即使当前工具不是 drag）
+    if (matchHandelObj && matchHandelInfo) {
+      console.log('matchHandelObj', currentTool.value)
+      function temp(api: EntityClass<ObjData>): boolean {
+        if (matchHandelObj && matchHandelInfo) {
+          let beMatchPoints = api.getMineBeSnapPoints()
+          // 排出掉和自己磁吸
+          beMatchPoints = beMatchPoints.filter(v => {
+            if (v.snapFromType === 'point') {
+              if (v.point.index === matchHandelInfo?.index) {
+                return false;
+              }
             }
-          }
-          return true;
-        })
-        if (beMatchPoints.length > 0) {
-          const snapped = getSnapPoint([], { x, y }, beMatchPoints)
-          if (snapped !== null) {
-            const result = matchHandelObj.inSceneSnapPointArea(
-              {
-                objType: api.type,
-                objId: snapped.objId,
-                snapFromType: 'point',
-                point: snapped.point
-              },
-              matchHandelInfo,
-            )
-            if (result) {
-              drawWrapper2DAnd3D()
-              return true;
-            }
-          }
-        }
-        const beMatchLines = api.getMineBeSnapLines()
-        if (beMatchLines.length > 0) {
-          let nearestPoint: Point | null = null
-          let minDistance = Infinity
-          let matchLine = null;
-          for (let j = 0; j < beMatchLines.length; j++) {
-            const line = beMatchLines[j]
-            const distance = pointToLineDistance({ x, y }, line[0], line[1])
-            if (distance < minDistance) {
-              matchLine = line
-              minDistance = distance
-              nearestPoint = getClosestPointOnLine({ x, y }, line[0], line[1])
-            }
-          }
-          if (nearestPoint && minDistance < snapThreshold) {
-            if (matchLine) {
-              const result2 = matchHandelObj.inSceneSnapLineArea(api, matchLine, nearestPoint)
-              if (result2) {
+            return true;
+          })
+          if (beMatchPoints.length > 0) {
+            const snapped = getSnapPoint([], { x, y }, beMatchPoints)
+            if (snapped !== null) {
+              const result = matchHandelObj.inSceneSnapPointArea(
+                {
+                  objType: api.type,
+                  objId: snapped.objId,
+                  snapFromType: 'point',
+                  point: snapped.point
+                },
+                matchHandelInfo,
+              )
+              if (result) {
                 drawWrapper2DAnd3D()
                 return true;
               }
             }
           }
+          const beMatchLines = api.getMineBeSnapLines()
+          if (beMatchLines.length > 0) {
+            let nearestPoint: Point | null = null
+            let minDistance = Infinity
+            let matchLine = null;
+            for (let j = 0; j < beMatchLines.length; j++) {
+              const line = beMatchLines[j]
+              const distance = pointToLineDistance({ x, y }, line[0], line[1])
+              if (distance < minDistance) {
+                matchLine = line
+                minDistance = distance
+                nearestPoint = getClosestPointOnLine({ x, y }, line[0], line[1])
+              }
+            }
+            if (nearestPoint && minDistance < snapThreshold) {
+              if (matchLine) {
+                const result2 = matchHandelObj.inSceneSnapLineArea(api, matchLine, nearestPoint)
+                if (result2) {
+                  drawWrapper2DAnd3D()
+                  return true;
+                }
+              }
+            }
+          }
+        }
+        return false;
+      }
+      if (worldApi.allFileMapObjects.wall) {
+        for (let i = 0; i < worldApi.getObjects('wall').length; i++) {
+          // const wall = worldApi.getObjects('wall')[i] as Wall
+          const api: WallEntity = worldApi.allFileMapObjects.wall[i] as WallEntity;
+          if (temp(api)) {
+            return;
+          }
         }
       }
-      return false;
+
+      matchHandelObj.notInSceneSnapLineArea()
+      matchHandelObj.matchHandelMoveCallback(x, y, matchHandelInfo)
+      drawWrapper2D(fileData);
+      // 绘制操作句柄
+      ctxAction.clearRect(0, 0, canvasAction.width, canvasAction.height)
+      // worldApi.draw2DWorldActionHandle(canvasAction, fileData, panOffset.value, zoom2DLevel.value);
+      worldApi.draw3D()
+      return;
     }
-    if (worldApi.allFileMapObjects.wall) {
-      for (let i = 0; i < worldApi.getObjects('wall').length; i++) {
-        // const wall = worldApi.getObjects('wall')[i] as Wall
-        const api: WallEntity = worldApi.allFileMapObjects.wall[i] as WallEntity;
-        if (temp(api)) {
-          return;
-        }
+    if (isPanning.value) {
+      const dx = screenX - panStartScreenX
+      const dy = screenY - panStartScreenY
+      panOffset.value.x += dx
+      panOffset.value.y += dy
+      panStartScreenX = screenX
+      panStartScreenY = screenY
+      drawWrapper2D(fileData)
+      // 绘制操作句柄
+      ctxAction.clearRect(0, 0, canvasAction.width, canvasAction.height)
+      // worldApi.draw2DWorldActionHandle(canvasAction, fileData, panOffset.value, zoom2DLevel.value);
+    } else {
+      // 鼠标浮动而过
+      console.log('鼠标浮动而过')
+      ctxAction.clearRect(0, 0, canvasAction.width, canvasAction.height)
+      const handleInfoList = getHandleInfoByXY(x, y)
+      if (handleInfoList.length > 0) {
+        const { classInfo, startPooint } = handleInfoList[0]
+        hoverPoint.value = startPooint
+        classInfo.draw2D(ctxAction, panOffset.value, zoom2DLevel.value)
       }
     }
-
-    matchHandelObj.notInSceneSnapLineArea()
-    matchHandelObj.matchHandelMoveCallback(x, y, matchHandelInfo)
-    drawWrapper2DAnd3D()
-  }
-
-  // 如果正在平移画布
-  if (isPanning.value && panStart.value) {
-    const dx = screenX - panStartScreenX
-    const dy = screenY - panStartScreenY
-    panOffset.value.x += dx
-    panOffset.value.y += dy
-    panStart.value = { x, y }
-    panStartScreenX = screenX
-    panStartScreenY = screenY
-    drawWrapper2D()
-    return
-  }
-
-  // 如果当前是拖拽模式，处理拖拽逻辑
-  if (currentTool.value === 'drag') {
-    return
-  }
-
-  if (currentTool.value === 'wall') {
+  } else if (currentTool.value === 'wall') {
     if (tempDrawWall.value && tempDrawWall.value?.points?.length && tempDrawWall.value.points.length > 0) {
       const last = tempDrawWall.value.points[tempDrawWall.value.points.length - 1]
       const dist = Math.hypot(x - last.x, y - last.y)
@@ -1587,75 +1600,83 @@ const handleMouseDown = (e: MouseEvent) => {
   // 只有在拖拽模式下才能拖拽点
   if (currentTool.value === 'drag') {
     if (e.button !== 0) return
-
-    const matchHandelInfoList: Array<{
-      classInfo: EntityClass<any>
-      handle: HandelInfo,
-      startPooint: Point,
-      dist: number,
-    }> = []
-    // 检查已绘制的墙上的点
-    if (worldApi.allFileMapObjects.wall) {
-      for (let i = 0; i < worldApi.getObjects('wall').length; i++) {
-        // const wall = worldApi.getObjects('wall')[i]
-        const api: WallEntity = worldApi.allFileMapObjects.wall[i] as WallEntity;
-        const matchInfo = api.matchHandelInfo(x, y, zoom2DLevel.value)
-        if (matchInfo) {
-          matchHandelInfoList.push({
-            classInfo: api,
-            handle: matchInfo,
-            startPooint: { x, y },
-            dist: matchInfo.dist,
-          })
-        }
-      }
-    }
-
-    for (let i = 0; i < allFileKeys.length; i++) {
-      const key = allFileKeys[i];
-      if (key === 'wall') continue;
-      if (!worldApi.allFileMapObjects[key]) {
-        continue
-      }
-      for (let j = 0; j < worldApi.getObjects(key).length; j++) {
-        const api: DoorEntity = worldApi.allFileMapObjects[key][j] as DoorEntity;
-        const matchInfo = api.matchHandelInfo(x, y, zoom2DLevel.value)
-        if (matchInfo) {
-          matchHandelInfoList.push({
-            classInfo: api,
-            handle: matchInfo,
-            startPooint: { x, y },
-            dist: matchInfo.dist,
-          })
-        }
-      }
-    }
-
-    const sortedMatchAllObjList = matchHandelInfoList.sort((a, b) => {
-      return a.dist - b.dist
-    })
-    if (sortedMatchAllObjList.length > 0) {
-      matchHandelObj = sortedMatchAllObjList[0].classInfo
-      matchHandelInfo = sortedMatchAllObjList[0].handle
-
+    const handleInfoList = getHandleInfoByXY(x, y)
+    if (handleInfoList.length > 0) {
+      const { classInfo, handle, startPooint } = handleInfoList[0]
+      matchHandelObj = classInfo
+      matchHandelInfo = handle
       dragOffset.value = { x: 0, y: 0 }
       dragStartPoint.value = {
-        x: sortedMatchAllObjList[0].startPooint.x,
-        y: sortedMatchAllObjList[0].startPooint.y
+        x: startPooint.x,
+        y: startPooint.y
       }
-      return;
-    }
-
-    console.log('sortedMatchAllObjList', sortedMatchAllObjList)
-
-    // 如果没有拖拽到任何点，开始平移
-    if (!draggedPoint.value) {
-      isPanning.value = true
-      panStart.value = { x, y }
-      panStartScreenX = screenX
-      panStartScreenY = screenY
+      const canvasAction = canvas2D2Ref.value!;
+      const ctxAction = canvasAction.getContext('2d')!
+      ctxAction.clearRect(0, 0, canvasAction.width, canvasAction.height)
+    } else {
+      // 如果没有拖拽到任何点，开始平移
+      if (!draggedPoint.value) {
+        isPanning.value = true
+        panStartScreenX = screenX
+        panStartScreenY = screenY
+      }
     }
   }
+}
+
+function getHandleInfoByXY(x: number, y: number): Array<{
+  classInfo: EntityClass<any>
+  handle: HandelInfo,
+  startPooint: Point,
+  dist: number,
+}> {
+  const matchHandelInfoList: Array<{
+    classInfo: EntityClass<any>
+    handle: HandelInfo,
+    startPooint: Point,
+    dist: number,
+  }> = []
+  // 检查已绘制的墙上的点
+  if (worldApi.allFileMapObjects.wall) {
+    for (let i = 0; i < worldApi.getObjects('wall').length; i++) {
+      // const wall = worldApi.getObjects('wall')[i]
+      const api: WallEntity = worldApi.allFileMapObjects.wall[i] as WallEntity;
+      const matchInfo = api.matchHandelInfo(x, y, zoom2DLevel.value)
+      if (matchInfo) {
+        matchHandelInfoList.push({
+          classInfo: api,
+          handle: matchInfo,
+          startPooint: { x, y },
+          dist: matchInfo.dist,
+        })
+      }
+    }
+  }
+
+  for (let i = 0; i < allFileKeys.length; i++) {
+    const key = allFileKeys[i];
+    if (key === 'wall') continue;
+    if (!worldApi.allFileMapObjects[key]) {
+      continue
+    }
+    for (let j = 0; j < worldApi.getObjects(key).length; j++) {
+      const api: DoorEntity = worldApi.allFileMapObjects[key][j] as DoorEntity;
+      const matchInfo = api.matchHandelInfo(x, y, zoom2DLevel.value)
+      if (matchInfo) {
+        matchHandelInfoList.push({
+          classInfo: api,
+          handle: matchInfo,
+          startPooint: { x, y },
+          dist: matchInfo.dist,
+        })
+      }
+    }
+  }
+
+  const sortedMatchAllObjList = matchHandelInfoList.sort((a, b) => {
+    return a.dist - b.dist
+  })
+  return sortedMatchAllObjList;
 }
 
 const handleMouseUp = () => {
@@ -1669,7 +1690,6 @@ const handleMouseUp = () => {
   }
   if (isPanning.value) {
     isPanning.value = false
-    panStart.value = null
     drawWrapper2DAnd3D()
   }
 }
@@ -1724,6 +1744,11 @@ const handleWheel = (e: WheelEvent) => {
 
   const canvas = canvas2DRef.value
   if (!canvas) return
+
+  // 绘制操作句柄
+  const canvasAction = canvas2D2Ref.value!;
+  const ctxAction = canvasAction.getContext('2d')!
+  ctxAction.clearRect(0, 0, canvasAction.width, canvasAction.height)
 
   const rect = canvas.getBoundingClientRect()
   const mouseX = e.clientX - rect.left

@@ -14,6 +14,7 @@ import { DoorDataClass } from './dataClass';
 export class DoorEntity extends EntityClassInWall<DoorData> {
   type: string = 'door'
   isPointObj: boolean = true
+  private circleRadius = 12
 
   constructor(world: World, door?: DoorData) {
     super(world, door)
@@ -50,14 +51,6 @@ export class DoorEntity extends EntityClassInWall<DoorData> {
   }
 
   draw2DPreviewByData(ctx: CanvasRenderingContext2D, data: DoorData, panOffset: Point, zoomLevel: number): void {
-  }
-
-  draw2DByData(
-    ctx: CanvasRenderingContext2D,
-    data: DoorData,
-    panOffset: Point,
-    zoomLevel: number,
-  ): void {
     if (!this.world.allFileMapObjects.wall) {
       this.world.allFileMapObjects.wall = []
     }
@@ -84,13 +77,23 @@ export class DoorEntity extends EntityClassInWall<DoorData> {
     ctx.arc(0, 0, width / 2, -Math.PI / 4, Math.PI / 4)
     ctx.stroke()
     ctx.restore()
+  }
 
+  draw2DByData(
+    ctx: CanvasRenderingContext2D,
+    data: DoorData,
+    panOffset: Point,
+    zoomLevel: number,
+  ): void {
+    const screenX = data.x * zoomLevel + panOffset.x
+    const screenY = data.y * zoomLevel + panOffset.y
     // 控制点
     ctx.fillStyle = '#fff'
     ctx.strokeStyle = '#e67e22'
     ctx.lineWidth = 2
     ctx.beginPath()
-    ctx.arc(screenX, screenY, 6 * zoomLevel, 0, Math.PI * 2)
+    // console.log('zoomLevel---1', zoomLevel)
+    ctx.arc(screenX, screenY, this.circleRadius * zoomLevel + 3, 0, Math.PI * 2)
     ctx.fill()
     ctx.stroke()
   }
@@ -230,7 +233,8 @@ export class DoorEntity extends EntityClassInWall<DoorData> {
   matchHandelInfo(x: number, y: number, zoomLevel: number) {
     const data = this.getData();
     const dist = Math.hypot(x - data.x, y - data.y)
-    if (dist < 6 * zoomLevel) {
+    // console.log('zoomLevel---2', zoomLevel)
+    if (dist < this.circleRadius * 2 * zoomLevel + 3) {
       return {
         index: 0,
         type: this.type,
