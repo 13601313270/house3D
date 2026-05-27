@@ -210,7 +210,18 @@ export class PeopleEntity extends EntityClass<PeopleData> {
   }
 
   showMatchHandel(x: number, y: number) {
-    return this.matchHandelInfo(x, y)
+    const data = this.getData();
+    const { angle } = data
+    const angleY = angle * -1
+    const dist = Math.hypot(x - data.x, y - data.y)
+    if (dist < data.height * 0.3) {
+      return {
+        index: 0,
+        type: this.type,
+        id: data.id,
+        dist: dist,
+      }
+    }
   }
 
   matchHandelInfo(x: number, y: number) {

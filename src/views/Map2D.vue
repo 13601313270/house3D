@@ -1521,12 +1521,15 @@ const handleMouseMove = (e: MouseEvent) => {
       // 鼠标浮动而过
       console.log('鼠标浮动而过')
       ctxAction.clearRect(0, 0, canvasAction.width, canvasAction.height)
-      const handleInfoList = getHandleInfoByXY(x, y)
-      if (handleInfoList.length > 0) {
-        const { classInfo, startPooint } = handleInfoList[0]
+      let handleInfoList = getHandleInfoByXY(x, y)
+      if (handleInfoList.length === 0) {
+        handleInfoList = getHandleInfoByXY(x, y, true)
+      }
+      handleInfoList.forEach(v => {
+        const { classInfo, startPooint } = v
         hoverPoint.value = startPooint
         classInfo.draw2D(ctxAction, panOffset.value, zoom2DLevel.value)
-      }
+      })
     }
   } else if (currentTool.value === 'wall') {
     if (tempDrawWall.value && tempDrawWall.value?.points?.length && tempDrawWall.value.points.length > 0) {
@@ -1630,7 +1633,7 @@ const handleMouseDown = (e: MouseEvent) => {
   }
 }
 
-function getHandleInfoByXY(x: number, y: number): Array<{
+function getHandleInfoByXY(x: number, y: number, showMatchHandel: boolean = false): Array<{
   classInfo: EntityClass<any>
   handle: HandelInfo,
   startPooint: Point,
@@ -1647,7 +1650,17 @@ function getHandleInfoByXY(x: number, y: number): Array<{
     for (let i = 0; i < worldApi.getObjects('wall').length; i++) {
       // const wall = worldApi.getObjects('wall')[i]
       const api: WallEntity = worldApi.allFileMapObjects.wall[i] as WallEntity;
-      const matchInfo = api.matchHandelInfo(x, y)
+      let matchInfo: {
+        id: string;
+        type: string;
+        index: number;
+        dist: number;
+      } | null
+      if (showMatchHandel) {
+        matchInfo = api.showMatchHandel(x, y)
+      } else {
+        matchInfo = api.matchHandelInfo(x, y)
+      }
       if (matchInfo) {
         matchHandelInfoList.push({
           classInfo: api,
@@ -1667,7 +1680,17 @@ function getHandleInfoByXY(x: number, y: number): Array<{
     }
     for (let j = 0; j < worldApi.getObjects(key).length; j++) {
       const api: DoorEntity = worldApi.allFileMapObjects[key][j] as DoorEntity;
-      const matchInfo = api.matchHandelInfo(x, y)
+      let matchInfo: {
+        id: string;
+        type: string;
+        index: number;
+        dist: number;
+      } | null
+      if (showMatchHandel) {
+        matchInfo = api.showMatchHandel(x, y)
+      } else {
+        matchInfo = api.matchHandelInfo(x, y)
+      }
       if (matchInfo) {
         matchHandelInfoList.push({
           classInfo: api,

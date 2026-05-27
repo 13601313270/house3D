@@ -93,7 +93,17 @@ export class SphereEntity extends EntityClass<SphereData> {
   }
 
   showMatchHandel(x: number, y: number) {
-    return this.matchHandelInfo(x, y)
+    const data = this.getData();
+    const dist = Math.hypot(x - data.x, y - data.y)
+    if (dist < data.r) {
+      return {
+        index: 0,
+        type: this.type,
+        id: data.id,
+        dist: dist,
+      }
+    }
+    return null;
   }
 
   matchHandelInfo(x: number, y: number) {

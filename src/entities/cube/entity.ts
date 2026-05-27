@@ -153,7 +153,41 @@ export class CubeEntity extends EntityClass<CubeData> {
   }
 
   showMatchHandel(x: number, y: number) {
-    return this.matchHandelInfo(x, y)
+    const data = this.getData();
+    const { width, depth } = data
+    const dist = Math.hypot(x - data.x, y - data.y)
+    if (x < data.x + width / 2 && x > data.x - width / 2 && y < data.y + depth / 2 && y > data.y - depth / 2) {
+      return {
+        index: 0,
+        type: this.type,
+        id: data.id,
+        dist: dist,
+      }
+    }
+    if (dist < this.circleRadius + 3) {
+      return {
+        index: 0,
+        type: this.type,
+        id: data.id,
+        dist: dist,
+      }
+    }
+    // const drawAngelLength = Math.max(this.getData().width / 2, this.circleRadius * 2);
+    // // 控制点向着angleY角度延伸10个单位后的坐标
+    // const rotatedXAdd = data.x + Math.cos(data.angleY) * drawAngelLength
+    // const rotatedYAdd = data.y - Math.sin(data.angleY) * drawAngelLength
+
+    // const dist2 = Math.hypot(x - rotatedXAdd, y - rotatedYAdd)
+    // // console.log('dist2', dist2)
+    // if (dist2 < this.circleRadius + 3) {
+    //   return {
+    //     index: 1,
+    //     type: this.type,
+    //     id: data.id,
+    //     dist: dist2,
+    //   }
+    // }
+    return null;
   }
 
   matchHandelInfo(x: number, y: number) {

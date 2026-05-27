@@ -317,7 +317,72 @@ export class CameraEntity extends EntityClass<CameraData> {
   }
 
   showMatchHandel(x: number, y: number) {
-    return this.matchHandelInfo(x, y)
+    const data = this.getData();
+    const screenX = data.x;//  * zoomLevel + panOffset.x
+    const screenY = data.y;// * zoomLevel + panOffset.y
+    const targetX = data.targetPositionX;// * zoomLevel + panOffset.x
+    const targetY = data.targetPositionY;// * zoomLevel + panOffset.y
+    const distance = Math.hypot(targetX - screenX, targetY - screenY)
+    const radius = distance
+
+    // 计算FOV的半角
+    const halfFov = (data.fov * Math.PI) / 360
+
+    // 计算方向向量
+    const dirX = targetX - screenX
+    const dirY = targetY - screenY
+    const dirLength = Math.sqrt(dirX * dirX + dirY * dirY)
+    const unitDirX = dirX / dirLength
+    const unitDirY = dirY / dirLength
+
+    // 计算垂直方向向量
+    const perpX = -unitDirY
+    const perpY = unitDirX
+
+    // 计算三角形底边长
+    const baseHalfLength = radius * Math.tan(halfFov)
+
+    // 计算三角形的两个底点
+    const midX = screenX + unitDirX * radius
+    const midY = screenY + unitDirY * radius
+    const p1X = midX + perpX * baseHalfLength
+    const p1Y = midY + perpY * baseHalfLength
+    const p2X = midX - perpX * baseHalfLength
+    const p2Y = midY - perpY * baseHalfLength
+
+    const dist = Math.hypot(x - data.x, y - data.y)
+    if (
+      x < Math.max(p1X, p2X) &&
+      x > Math.min(p1X, p2X) &&
+      y < Math.max(p1Y, p2Y) &&
+      y > Math.min(p1Y, p2Y)
+    ) {
+      return {
+        index: 0,
+        type: this.type,
+        id: data.id,
+        dist: dist,
+      }
+    }
+    
+    if (dist < this.circleRadius + 3) {
+      return {
+        index: 0,
+        type: this.type,
+        id: data.id,
+        dist: dist,
+      }
+    }
+    const distToTarget = Math.hypot(x - data.targetPositionX, y - data.targetPositionY)
+    if (distToTarget < this.circleRadius + 3) {
+      return {
+        index: 1,
+        type: this.type,
+        id: data.id,
+        dist: distToTarget,
+      }
+    }
+    return null;
   }
 
   matchHandelInfo(x: number, y: number) {

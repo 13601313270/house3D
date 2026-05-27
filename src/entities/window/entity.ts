@@ -110,7 +110,17 @@ export class WindowEntity extends EntityClassInWall<WindowData> {
   }
 
   showMatchHandel(x: number, y: number) {
-    return this.matchHandelInfo(x, y)
+    const data = this.getData();
+    const dist = Math.hypot(x - data.x, y - data.y)
+    if (dist < data.width / 2) {
+      return {
+        index: 0,
+        id: data.id,
+        type: this.type,
+        dist: dist,
+      }
+    }
+    return null;
   }
 
   // 命中可拖拽具柄
