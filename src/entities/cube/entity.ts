@@ -156,7 +156,13 @@ export class CubeEntity extends EntityClass<CubeData> {
   showMatchHandel(x: number, y: number) {
     const data = this.getData();
     const dist = Math.hypot(x - data.x, y - data.y)
-    if (isPointInRotatedRect(x, y, data)) {
+    if (isPointInRotatedRect(x, y, {
+      x: data.x,
+      y: data.y,
+      width: data.width,
+      depth: data.depth,
+      angleY: data.angleY * -1,
+    })) {
       return {
         index: 0,
         type: this.type,
