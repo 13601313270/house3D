@@ -109,11 +109,15 @@ export class WindowEntity extends EntityClassInWall<WindowData> {
     ctx.closePath()
   }
 
+  showMatchHandel(x: number, y: number) {
+    return this.matchHandelInfo(x, y)
+  }
+
   // 命中可拖拽具柄
-  matchHandelInfo(x: number, y: number, zoomLevel: number): HandelInfo | null {
+  matchHandelInfo(x: number, y: number): HandelInfo | null {
     const data = this.getData();
     const dist = Math.hypot(x - data.x, y - data.y)
-    if (dist < this.circleRadius * zoomLevel + 3) {
+    if (dist < this.circleRadius + 3) {
       return {
         index: 0,
         id: data.id,

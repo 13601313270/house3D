@@ -94,7 +94,11 @@ export class CylinderEntity extends EntityClass<CylinderData> {
     ]
   }
 
-  matchHandelInfo(x: number, y: number, zoomLevel: number) {
+  showMatchHandel(x: number, y: number) {
+    return this.matchHandelInfo(x, y)
+  }
+
+  matchHandelInfo(x: number, y: number) {
     const data = this.getData();
     const dist = Math.hypot(x - data.x, y - data.y)
     if (dist < this.circleRadius + 3) {

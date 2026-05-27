@@ -265,6 +265,10 @@ export class OutFileInWallEntity extends EntityClassInWall<OutFileInWallData> {
     })
   }
 
+  showMatchHandel(x: number, y: number) {
+    return this.matchHandelInfo(x, y)
+  }
+
   matchHandelInfo(x: number, y: number) {
     const data = this.getData();
     const dist = Math.hypot(x - data.x, y - data.y)

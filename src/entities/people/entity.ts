@@ -209,6 +209,10 @@ export class PeopleEntity extends EntityClass<PeopleData> {
     return this.type + JSON.stringify(cacheData)
   }
 
+  showMatchHandel(x: number, y: number) {
+    return this.matchHandelInfo(x, y)
+  }
+
   matchHandelInfo(x: number, y: number) {
     const data = this.getData();
     const { angle } = data

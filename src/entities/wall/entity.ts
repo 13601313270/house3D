@@ -225,8 +225,12 @@ export class WallEntity extends EntityClass<WallData> {
     return meshList
   }
 
+  showMatchHandel(x: number, y: number) {
+    return this.matchHandelInfo(x, y)
+  }
+
   // 命中可拖拽具柄
-  matchHandelInfo(x: number, y: number, zoomLevel: number) {
+  matchHandelInfo(x: number, y: number) {
     const data = this.getData();
     for (let i = 0; i < this.getData().points.length; i++) {
       const point = this.getData().points[i]
