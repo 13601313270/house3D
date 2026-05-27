@@ -45,7 +45,7 @@ export type CameraState = camera1 | camera2
 const props = defineProps<{
   world: World,
   cameraState: CameraState | OrthographicCamera,
-  aspectRatio?: number
+  aspectRatio: number
   showCamera: boolean
   cameraType: 'perspective' | 'orthographic'
 }>()
@@ -73,10 +73,10 @@ function updateCameraAngel() {
   if (props.cameraType === 'orthographic') {
     if ('size' in cameraStateZ.value) {
       if (camera instanceof THREE.OrthographicCamera) {
-        camera.left = -cameraStateZ.value.size * 1;
-        camera.right = cameraStateZ.value.size * 1;
-        camera.top = cameraStateZ.value.size * 1;
-        camera.bottom = -cameraStateZ.value.size * 1;
+        camera.left = -cameraStateZ.value.size * props.aspectRatio;
+        camera.right = cameraStateZ.value.size * props.aspectRatio;
+        camera.top = cameraStateZ.value.size;
+        camera.bottom = -cameraStateZ.value.size;
         camera.updateProjectionMatrix()
         camera.position.set(
           cameraStateZ.value.targetPositionX,
@@ -136,8 +136,8 @@ const initThree = () => {
   const maxCamera1Radius = 10000;
   if (props.cameraType === 'orthographic' && ('size' in props.cameraState)) {
     camera = new THREE.OrthographicCamera(
-      -props.cameraState.size * 1,
-      props.cameraState.size * 1,
+      -props.cameraState.size * props.aspectRatio,
+      props.cameraState.size * props.aspectRatio,
       props.cameraState.size,
       -props.cameraState.size,
       0.1,
@@ -175,6 +175,7 @@ const initThree = () => {
     const emitCameraState = () => {
       if (props.cameraType === 'orthographic') {
         if ('size' in cameraStateZ.value) {
+          // alert(cameraStateZ.value.length);
           emit('update:cameraState', {
             targetPositionX: cameraStateZ.value.targetPositionX,
             targetPositionY: cameraStateZ.value.targetPositionY,
@@ -471,6 +472,22 @@ watch(() => props.cameraState, (newVal) => {
   }
 }, {
   deep: true
+})
+
+watch(() => props.aspectRatio, (newVal) => {
+  if (newVal) {
+    // emit('update:cameraState', {
+    //   targetPositionX: cameraStateZ.value.targetPositionX,
+    //   targetPositionY: cameraStateZ.value.targetPositionY,
+    //   targetPositionZ: cameraStateZ.value.targetPositionZ,
+    //   size: cameraStateZ.value.size,
+    //   length: cameraStateZ.value.length,
+    // })
+    updateCameraAngel()
+    updateScene()
+  }
+}, {
+  immediate: true
 })
 
 defineExpose({

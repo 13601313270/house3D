@@ -110,8 +110,8 @@
             @change="handleImportFileChange" />
         </div>
         <div class="canvas-container">
-          <!-- <Canvas3D ref="canvas3DRef" :world="worldApi" v-model:cameraState="cameraStateLeft" :aspectRatio="1"
-            :showCamera="true" cameraType="orthographic" /> -->
+          <!-- <Canvas3D ref="canvas3DRef1" :world="worldApi" v-model:cameraState="cameraStateLeft"
+            :aspectRatio="aspectRatio1" :showCamera="true" cameraType="orthographic" /> -->
           <canvas ref="canvasRef" @click="handleCanvasClick" @mousedown="handleMouseDown" @mousemove="handleMouseMove"
             @mouseup="handleMouseUp" @contextmenu="handleContextMenu" class="drawing-canvas"
             :style="{ display: isSplitting ? 'none' : 'block' }" />
@@ -136,7 +136,7 @@
         </div>
       </div>
 
-      <div class="split-bar" @mousedown.prevent="startSplit(1)" title="拖动调整左右比例"></div>
+      <div class="split-bar" @mousedown.prevent="startSplit(1)"></div>
 
       <div class="right-panel" :style="{ width: panel2SplitWidthPer * 100 + '%' }">
         <div class="tools">
@@ -144,12 +144,12 @@
         </div>
         <!-- {{ insertTempDoor }} -->
         <div class="right-panel-content">
-          <Canvas3D ref="canvas3DRef" :world="worldApi" v-model:cameraState="cameraStateCenter" :aspectRatio="1"
-            :showCamera="true" cameraType="perspective" />
+          <Canvas3D ref="canvas3DRef" :world="worldApi" v-model:cameraState="cameraStateCenter"
+            :aspectRatio="aspectRatio2" :showCamera="true" cameraType="perspective" />
         </div>
       </div>
 
-      <div class="split-bar" @mousedown.prevent="startSplit(2)" title="拖动调整左右比例"></div>
+      <div class="split-bar" @mousedown.prevent="startSplit(2)"></div>
       <div class="right-panel" :style="{ width: (1 - panel1SplitWidthPer - panel2SplitWidthPer) * 100 + '%' }">
         <div class="tools">
           <div style="flex-shrink: 0;">摄像机：</div>
@@ -239,6 +239,7 @@ import Help from '@/components/help.vue'
 import { sleep } from '@/utils/sleep';
 
 const canvasRef = ref<HTMLCanvasElement | null>(null)
+const canvas3DRef1 = ref<typeof Canvas3D | null>(null)
 const canvas3DRef = ref<typeof Canvas3D | null>(null)
 const canvas3DRef2 = ref<typeof Canvas3D | null>(null)
 const activeToolsIndex = ref(-1)
@@ -287,6 +288,8 @@ const cameraStateLeft = ref<OrthographicCamera>({
   size: 300,
   length: 300,
 })
+const aspectRatio1 = ref(1)
+const aspectRatio2 = ref(1)
 
 const cameraStateCenter = ref<CameraState>({
   targetPositionX: 0,
@@ -317,22 +320,53 @@ let panStartScreenX = 0
 let panStartScreenY = 0
 
 const updateCanvasSize = () => {
+  console.log('===width===', 1)
   const container = document.querySelector('.map2d-container')
   if (!container) return
-
+  console.log('===width===', 2)
   const canvas = canvasRef.value
+  const canvas3D1Panel = canvas3DRef1.value
   if (canvas) {
     const canvasContainer = document.querySelector('.canvas-container')
     if (canvasContainer) {
       const canvasRect = canvasContainer.getBoundingClientRect()
       const width = Math.floor(canvasRect.width)
       const height = Math.floor(canvasRect.height)
-      // console.log('===width---', width)
 
       if (width > 0 && height > 0) {
         canvas.width = width
         canvas.height = height
         canvasSize.value = { width, height }
+      }
+    }
+  }
+  console.log('===width===', 3)
+  if (canvas3D1Panel) {
+    const leftCanvasContainer = document.querySelector('.canvas-container')
+    if (leftCanvasContainer) {
+      console.log('===width===', 4)
+      const canvasRect = leftCanvasContainer.getBoundingClientRect()
+      const width = Math.floor(canvasRect.width)
+      const height = Math.floor(canvasRect.height)
+      // console.log('===width---', width)
+
+      if (width > 0 && height > 0) {
+        console.log('===width===', 5, width / height)
+        aspectRatio1.value = width / height
+        // aspectRatio2.value = width / height
+      }
+    }
+    const centerPanelContainer = document.querySelector('.right-panel-content')
+    if (centerPanelContainer) {
+      const canvasRect = centerPanelContainer.getBoundingClientRect()
+      const width = Math.floor(canvasRect.width)
+      const height = Math.floor(canvasRect.height)
+      // console.log('===width---', width)
+
+      if (width > 0 && height > 0) {
+        console.log('===width===', 5, width / height)
+        // aspectRatio1.value = width / height
+        aspectRatio2.value = width / height
       }
     }
   }
@@ -829,75 +863,73 @@ onMounted(async () => {
       })
       drawWrapper()
     }
-
-    window.addEventListener('resize', () => updateCanvasSize())
-    updateCanvasSize()
-
-    function bindSave(event: any) {
-      console.log('event', event)
-      // 检测 Ctrl+S (Windows/Linux) 或 Command+S (Mac)
-      if ((event.ctrlKey || event.metaKey) && event.key === 's') {
-        event.preventDefault(); // 阻止浏览器保存网页
-        saveDrawing();
-      }
+  }
+  window.addEventListener('resize', () => updateCanvasSize())
+  updateCanvasSize()
+  function bindSave(event: any) {
+    console.log('event', event)
+    // 检测 Ctrl+S (Windows/Linux) 或 Command+S (Mac)
+    if ((event.ctrlKey || event.metaKey) && event.key === 's') {
+      event.preventDefault(); // 阻止浏览器保存网页
+      saveDrawing();
     }
-    // 劫持Ctrl+S保存事件
-    window.addEventListener('keydown', bindSave);
+  }
+  // 劫持Ctrl+S保存事件
+  window.addEventListener('keydown', bindSave);
 
-    const handleKeyDown = async (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        if (tempDrawWall.value?.points?.length && tempDrawWall.value.points.length > 0) {
-          if (tempDrawWall.value?.points.length > 1) {
-            const newWall: WallData = {
-              id: tempDrawWall.value.id,
-              x: tempDrawWall.value.x,
-              y: tempDrawWall.value.y,
-              z: tempDrawWall.value.z,
-              color: '#fff',
-              wmt: 0, // 墙材质
-              height: 280, // 墙高，默认280
-              points: [...tempDrawWall.value.points],
-              thickness: wallThickness.value,
-              hb: true,// 有地板，默认有
-              bc: '#aaa', // 地板颜色，默认灰色
-              bmt: 2, // 地板材质，默认砖墙
-              ht: true,// 有天花板，默认有
-              tc: '#fff', // 天花板颜色，默认白色
-              tmt: 2, // 天花板材质，默认水泥墙
-              td: false, // 天花板是否是双面，默认否
-              bottom: 0, // 距离地面距离，默认0
-            }
-            await worldApi.add('wall', [newWall])
-            history.value.push(JSON.parse(JSON.stringify(worldApi.getObjects('wall'))))
+  const handleKeyDown = async (e: KeyboardEvent) => {
+    if (e.key === 'Escape') {
+      if (tempDrawWall.value?.points?.length && tempDrawWall.value.points.length > 0) {
+        if (tempDrawWall.value?.points.length > 1) {
+          const newWall: WallData = {
+            id: tempDrawWall.value.id,
+            x: tempDrawWall.value.x,
+            y: tempDrawWall.value.y,
+            z: tempDrawWall.value.z,
+            color: '#fff',
+            wmt: 0, // 墙材质
+            height: 280, // 墙高，默认280
+            points: [...tempDrawWall.value.points],
+            thickness: wallThickness.value,
+            hb: true,// 有地板，默认有
+            bc: '#aaa', // 地板颜色，默认灰色
+            bmt: 2, // 地板材质，默认砖墙
+            ht: true,// 有天花板，默认有
+            tc: '#fff', // 天花板颜色，默认白色
+            tmt: 2, // 天花板材质，默认水泥墙
+            td: false, // 天花板是否是双面，默认否
+            bottom: 0, // 距离地面距离，默认0
           }
-          tempDrawWall.value = null
-          lastPoint.value = null
-          hoverPoint.value = null
-        } else {
-          if (insertTempObj && currentTool.value !== 'drag') {
-            console.log('insertTempObj----1111')
-            insertTempObj = null;
-          }
+          await worldApi.add('wall', [newWall])
+          history.value.push(JSON.parse(JSON.stringify(worldApi.getObjects('wall'))))
         }
-        drawWrapper()
-        currentTool.value = 'drag'
+        tempDrawWall.value = null
+        lastPoint.value = null
+        hoverPoint.value = null
+      } else {
+        if (insertTempObj && currentTool.value !== 'drag') {
+          console.log('insertTempObj----1111')
+          insertTempObj = null;
+        }
       }
+      drawWrapper()
+      currentTool.value = 'drag'
     }
+  }
 
-    window.addEventListener('keydown', handleKeyDown)
+  window.addEventListener('keydown', handleKeyDown)
 
-    // setTimeout(() => {
-    //   try {
-    //     initWorldByData(initDefaultFile)
-    //   } catch (error) {
-    //     console.error(error)
-    //   }
-    // }, 0)
+  // setTimeout(() => {
+  //   try {
+  //     initWorldByData(initDefaultFile)
+  //   } catch (error) {
+  //     console.error(error)
+  //   }
+  // }, 0)
 
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown)
-      window.removeEventListener('keydown', bindSave);
-    }
+  return () => {
+    window.removeEventListener('keydown', handleKeyDown)
+    window.removeEventListener('keydown', bindSave);
   }
 })
 
@@ -2287,8 +2319,10 @@ button {
 .canvas-container {
   flex-grow: 1;
   width: 100%;
+  // padding: 8px;
   box-sizing: border-box;
   overflow: hidden;
+  position: relative;
 }
 
 .drawing-canvas {
