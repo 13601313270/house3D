@@ -112,7 +112,7 @@
         <div class="canvas-container">
           <!-- <Canvas3D ref="canvas3DRef1" :world="worldApi" v-model:cameraState="cameraStateLeft"
             :aspectRatio="aspectRatio1" :showCamera="true" cameraType="orthographic" /> -->
-          <canvas ref="canvasRef" @click="handleCanvasClick" @mousedown="handleMouseDown" @mousemove="handleMouseMove"
+          <canvas ref="canvas2DRef" @click="handleCanvasClick" @mousedown="handleMouseDown" @mousemove="handleMouseMove"
             @mouseup="handleMouseUp" @contextmenu="handleContextMenu" class="drawing-canvas"
             :style="{ display: isSplitting ? 'none' : 'block' }" />
           <div v-if="contextMenu?.visible" class="context-menu"
@@ -238,7 +238,7 @@ import { Store } from '@/store';
 import Help from '@/components/help.vue'
 import { sleep } from '@/utils/sleep';
 
-const canvasRef = ref<HTMLCanvasElement | null>(null)
+const canvas2DRef = ref<HTMLCanvasElement | null>(null)
 const canvas3DRef1 = ref<typeof Canvas3D | null>(null)
 const canvas3DRef = ref<typeof Canvas3D | null>(null)
 const canvas3DRef2 = ref<typeof Canvas3D | null>(null)
@@ -324,7 +324,7 @@ const updateCanvasSize = () => {
   const container = document.querySelector('.map2d-container')
   if (!container) return
   console.log('===width===', 2)
-  const canvas = canvasRef.value
+  const canvas = canvas2DRef.value
   const canvas3D1Panel = canvas3DRef1.value
   if (canvas) {
     const canvasContainer = document.querySelector('.canvas-container')
@@ -380,7 +380,7 @@ const updateCanvasSize = () => {
     canvas3DPanel2.resize();
   }
   setTimeout(() => {
-    drawWrapper()
+    drawWrapper2DAnd3D()
   }, 30)
 }
 
@@ -750,8 +750,12 @@ function roundNumberList(point: { x: number, y: number }) {
   return { x: Math.round(point.x), y: Math.round(point.y) }
 }
 const worldApi = new World()
-const drawWrapper = () => {
-  const canvas = canvasRef.value
+const drawWrapper2DAnd3D = () => {
+  drawWrapper2D();
+  worldApi.draw3D()
+}
+const drawWrapper2D = () => {
+  const canvas = canvas2DRef.value
   if (canvas) {
     worldApi.draw2DWorld(
       canvas,
@@ -766,7 +770,6 @@ const drawWrapper = () => {
       zoomLevel.value,
       insertTempObj,
     )
-    worldApi.draw3D()
   }
 }
 
@@ -810,7 +813,7 @@ function changeCamera2State(activeIndex: number = 0) {
           }
         }
       })
-      drawWrapper()
+      drawWrapper2DAnd3D()
     }
   } else {
     allCamera.value = []
@@ -841,7 +844,7 @@ onMounted(async () => {
   worldApi.onChange(() => {
     changeCamera2State(activeCameraIndex.value)
   })
-  const canvas = canvasRef.value
+  const canvas = canvas2DRef.value
   if (canvas) {
     const ctx = canvas.getContext('2d')
     if (ctx) {
@@ -858,10 +861,10 @@ onMounted(async () => {
           panOffset.value.y += dy
           panStartScreenX = screenX
           panStartScreenY = screenY
-          drawWrapper()
+          drawWrapper2DAnd3D()
         }
       })
-      drawWrapper()
+      drawWrapper2DAnd3D()
     }
   }
   window.addEventListener('resize', () => updateCanvasSize())
@@ -912,7 +915,7 @@ onMounted(async () => {
           insertTempObj = null;
         }
       }
-      drawWrapper()
+      drawWrapper2DAnd3D()
       currentTool.value = 'drag'
     }
   }
@@ -1140,13 +1143,13 @@ async function initWorldByData(data: fileData & {
     changeCamera2State(data.activeCameraIndex)
   }
   history.value = []
-  drawWrapper()
+  drawWrapper2DAnd3D()
 }
 
 const handleContextMenu = (e: MouseEvent) => {
   e.preventDefault()
 
-  const canvas = canvasRef.value
+  const canvas = canvas2DRef.value
   if (!canvas) return
 
   const rect = canvas.getBoundingClientRect()
@@ -1196,7 +1199,7 @@ const handleContextMenu = (e: MouseEvent) => {
               }
               editPropConfigEditCallback = (val: any) => {
                 callback(val)
-                drawWrapper()
+                drawWrapper2DAnd3D()
               }
               nextTick(() => {
                 const height = document.querySelector('.context-menu')?.clientHeight
@@ -1228,7 +1231,7 @@ const deleteContextMenuEntity = () => {
     worldApi.splice(type, contextMenu.value.index)
   }
   contextMenu.value = null
-  drawWrapper()
+  drawWrapper2DAnd3D()
 }
 
 const handleCanvasClick = async (e: MouseEvent) => {
@@ -1236,7 +1239,7 @@ const handleCanvasClick = async (e: MouseEvent) => {
   if (currentTool.value === 'drag') {
     return
   }
-  const canvas = canvasRef.value
+  const canvas = canvas2DRef.value
   if (!canvas) return
 
   const rect = canvas.getBoundingClientRect()
@@ -1364,14 +1367,14 @@ const handleCanvasClick = async (e: MouseEvent) => {
     }
   }
 
-  drawWrapper()
+  drawWrapper2DAnd3D()
 }
 
 const clearDrawing = () => {
   if (confirm('确定要清空所有绘制内容吗？')) {
     worldApi.clearAll();
     history.value = []
-    drawWrapper()
+    drawWrapper2DAnd3D()
   }
 }
 
@@ -1398,7 +1401,7 @@ const loginByToken = () => {
 // }
 
 const handleMouseMove = (e: MouseEvent) => {
-  const canvas = canvasRef.value
+  const canvas = canvas2DRef.value
   if (!canvas) return
 
   const rect = canvas.getBoundingClientRect()
@@ -1434,7 +1437,7 @@ const handleMouseMove = (e: MouseEvent) => {
               matchHandelInfo,
             )
             if (result) {
-              drawWrapper()
+              drawWrapper2DAnd3D()
               return true;
             }
           }
@@ -1457,7 +1460,7 @@ const handleMouseMove = (e: MouseEvent) => {
             if (matchLine) {
               const result2 = matchHandelObj.inSceneSnapLineArea(api, matchLine, nearestPoint)
               if (result2) {
-                drawWrapper()
+                drawWrapper2DAnd3D()
                 return true;
               }
             }
@@ -1478,7 +1481,7 @@ const handleMouseMove = (e: MouseEvent) => {
 
     matchHandelObj.notInSceneSnapLineArea()
     matchHandelObj.matchHandelMoveCallback(x, y, matchHandelInfo)
-    drawWrapper()
+    drawWrapper2DAnd3D()
   }
 
   // 如果正在平移画布
@@ -1490,7 +1493,7 @@ const handleMouseMove = (e: MouseEvent) => {
     panStart.value = { x, y }
     panStartScreenX = screenX
     panStartScreenY = screenY
-    drawWrapper()
+    drawWrapper2D()
     return
   }
 
@@ -1538,7 +1541,7 @@ const handleMouseMove = (e: MouseEvent) => {
         }
       }
     }
-    drawWrapper()
+    drawWrapper2DAnd3D()
   } else {
     const nearest = getNearestWall({ x, y })
     if (nearest) {
@@ -1549,12 +1552,12 @@ const handleMouseMove = (e: MouseEvent) => {
     if (insertTempObj instanceof EntityClassInWall) {
       if (nearest) {
         insertTempObj.setPrepareState(x, y, nearest)
-        drawWrapper()
+        drawWrapper2DAnd3D()
       }
     } else if (insertTempObj instanceof EntityClass) {
       // console.log('nearest---1', nearest)
       insertTempObj.setPrepareState(x, y)
-      drawWrapper()
+      drawWrapper2DAnd3D()
     }
   }
 }
@@ -1564,7 +1567,7 @@ let matchHandelInfo: HandelInfo | null = null;
 const handleMouseDown = (e: MouseEvent) => {
   contextMenu.value = null;
 
-  const canvas = canvasRef.value
+  const canvas = canvas2DRef.value
   if (!canvas) return
 
   const rect = canvas.getBoundingClientRect()
@@ -1654,12 +1657,12 @@ const handleMouseUp = () => {
     history.value.push(JSON.parse(JSON.stringify(worldApi.getObjects('wall'))))
     draggedPoint.value = null
     dragOffset.value = null
-    drawWrapper()
+    drawWrapper2DAnd3D()
   }
   if (isPanning.value) {
     isPanning.value = false
     panStart.value = null
-    drawWrapper()
+    drawWrapper2DAnd3D()
   }
 }
 
@@ -1702,7 +1705,7 @@ onMounted(() => {
   window.addEventListener('mousemove', handleMouseMoveSplit)
   window.addEventListener('mouseup', handleMouseUpSplit)
 
-  const canvas = canvasRef.value
+  const canvas = canvas2DRef.value
   if (canvas) {
     canvas.addEventListener('wheel', handleWheel)
   }
@@ -1712,7 +1715,7 @@ onUnmounted(() => {
   window.removeEventListener('mousemove', handleMouseMoveSplit)
   window.removeEventListener('mouseup', handleMouseUpSplit)
 
-  const canvas = canvasRef.value
+  const canvas = canvas2DRef.value
   if (canvas) {
     canvas.removeEventListener('wheel', handleWheel)
   }
@@ -1721,7 +1724,7 @@ onUnmounted(() => {
 const handleWheel = (e: WheelEvent) => {
   e.preventDefault()
 
-  const canvas = canvasRef.value
+  const canvas = canvas2DRef.value
   if (!canvas) return
 
   const rect = canvas.getBoundingClientRect()
@@ -1738,7 +1741,7 @@ const handleWheel = (e: WheelEvent) => {
   zoomLevel.value = newZoomLevel
   panOffset.value = { x: newPanX, y: newPanY }
 
-  drawWrapper()
+  drawWrapper2DAnd3D()
 }
 function changeCurrentTool(type: string | 'drag') {
   activeToolsIndex.value = -1
@@ -2091,7 +2094,7 @@ const handleLoadedObject = async (object: THREE.Group | THREE.Mesh, file: File, 
   }
   await worldApi.add('importFile', [new ImportFileDataClass(data)])
 
-  drawWrapper()
+  drawWrapper2DAnd3D()
 }
 function logout() {
   store.dispatch('main/setUserInfo', null)
