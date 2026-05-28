@@ -6,6 +6,7 @@ import { editItem } from '..';
 import { getMaterialById } from '@/material';
 import { PlaneDataClass } from './dataClass'
 import { isPointInRotatedRect } from '@/utils/isPointInRotatedRect';
+import { MatchRectArea } from '@/utils/matchArea';
 
 export class PlaneEntity extends EntityClass<PlaneData> {
   type: string = 'plane'
@@ -152,18 +153,24 @@ export class PlaneEntity extends EntityClass<PlaneData> {
 
   showMatchHandel(x: number, y: number) {
     const data = this.getData();
-    const dist = Math.hypot(x - data.x, y - data.y)
+    // const dist = Math.hypot(x - data.x, y - data.y)
     const angleY = data.angleY || 0;// 历史数据问题，有的数据不存在angleY，所以用了一个【|| 0】给予默认值
     if (isPointInRotatedRect(x, y, {
       x: data.x,
       y: data.y,
-      width: data.width,
-      depth: data.length,
+      width: Math.max(data.width, data.length),
+      depth: Math.max(data.width, data.length),
       angleY: angleY * -1,
     })) {
-      return true
+      return new MatchRectArea({
+        x: data.x,
+        y: data.y,
+        width: data.width,
+        depth: data.length,
+        angleY: angleY * -1,
+      })
     }
-    return false;
+    return null;
   }
 
   matchHandelInfo(x: number, y: number) {

@@ -1,10 +1,4 @@
-export interface RectData {
-  x: number
-  y: number
-  width: number
-  depth: number
-  angleY: number
-}
+import { RectData } from "./matchArea"
 
 export function isPointInRotatedRect(x: number, y: number, rect: RectData): boolean {
   const { x: centerX, y: centerY, width, depth, angleY } = rect

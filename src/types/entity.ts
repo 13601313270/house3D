@@ -2,6 +2,7 @@ import * as THREE from 'three'
 import { ObjData, HandelInfo, Point, PointWithIndex } from './map2d'
 import { World } from '@/utils/world'
 import { editItem } from '@/entities'
+import { MatchRectArea, MatchCircleArea } from '@/utils/matchArea'
 
 export type allSnapFromType = 'point' | 'line' | 'axis'
 // 磁吸点
@@ -100,7 +101,7 @@ export abstract class EntityClass<T extends ObjData> {
   }
 
   // 显示可拖拽具柄
-  abstract showMatchHandel(x: number, y: number): boolean;
+  abstract showMatchHandel(x: number, y: number): MatchRectArea | MatchCircleArea | null;
 
   // 命中可拖拽具柄
   abstract matchHandelInfo(x: number, y: number): HandelInfo | null;

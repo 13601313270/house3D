@@ -18,6 +18,10 @@ type ObjOutputFileType = {
   inWall: boolean
   defaultZ: number
   canAngelZ: boolean,// 是否可以旋转Z轴角度
+  matchAreaType: 1 | 2,// 1方形 2圆形
+  matchAreaNumber1: number, // 方形代表宽，圆形代表半径
+  matchAreaNumber2: number,// 方形代表高，圆形无
+  matchAreaOffsetX: number,// 占地范围数字offsetX
 }
 
 type ImportFileType = {

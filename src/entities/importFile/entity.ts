@@ -11,6 +11,7 @@ import { MTLLoader } from 'three/addons/loaders/MTLLoader.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { getMaterialById } from '@/material'
 import { ImportFileDataClass } from './dataClass';
+import { MatchCircleArea } from '@/utils/matchArea'
 
 export class ImportFileEntity extends EntityClass<ImportFileData> {
   type: string = 'importFile'
@@ -323,7 +324,13 @@ export class ImportFileEntity extends EntityClass<ImportFileData> {
   }
 
   showMatchHandel(x: number, y: number) {
-    return this.matchHandelInfo(x, y) !== null
+    const data = this.getData();
+    const dist = Math.hypot(x - data.x, y - data.y)
+    // console.log('dist', dist)
+    if (dist < this.circleRadius + 3) {
+      return new MatchCircleArea({ x: data.x, y: data.y, r: this.circleRadius })
+    }
+    return null;
   }
 
   matchHandelInfo(x: number, y: number) {

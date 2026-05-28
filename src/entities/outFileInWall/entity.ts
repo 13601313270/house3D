@@ -12,6 +12,8 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { getMaterialById } from '@/material'
 import { OutFileInWallDataClass } from './dataClass';
 import { EntityClassInWall } from '@/types/entityInWall'
+import { MatchCircleArea, MatchRectArea } from '@/utils/matchArea'
+import { isPointInRotatedRect } from '@/utils/isPointInRotatedRect'
 
 export class OutFileInWallEntity extends EntityClassInWall<OutFileInWallData> {
   type: string = 'outFileInWall'
@@ -266,7 +268,55 @@ export class OutFileInWallEntity extends EntityClassInWall<OutFileInWallData> {
   }
 
   showMatchHandel(x: number, y: number) {
-    return this.matchHandelInfo(x, y) !== null
+    const data = this.getData();
+    const dist = Math.hypot(x - data.x, y - data.y)
+    const { fileTypeId, angle, isOuter, wallId } = data
+    const findObjInfo = this.world.ObjFileTypes.find(item => item.id === fileTypeId)
+    if (findObjInfo) {
+      const { matchAreaType, matchAreaNumber1, matchAreaNumber2 } = findObjInfo
+      if (matchAreaType === 1) {
+        if (!this.world.allFileMapObjects.wall) {
+          this.world.allFileMapObjects.wall = []
+        }
+        const wall = this.world.allFileMapObjects.wall.find((entity) => {
+          return entity.getData().id === wallId;
+        })
+        const wallThickness = wall ? wall.getData().thickness : 10;
+        const offsetX = Math.cos(angle + (isOuter ? Math.PI / -2 : Math.PI / 2)) * wallThickness;
+        const offsetY = Math.sin(angle + (isOuter ? Math.PI / -2 : Math.PI / 2)) * wallThickness;
+        const dataX = data.x + offsetX;
+        const dataY = data.y + offsetY;
+        if (isPointInRotatedRect(x, y, {
+          x: dataX,
+          y: dataY,
+          width: Math.max(matchAreaNumber1, 30),
+          depth: Math.max(matchAreaNumber2 + wallThickness * 4, 30),
+          angleY: data.angle,
+        })) {
+          return new MatchRectArea({
+            x: dataX,
+            y: dataY,
+            width: Math.max(matchAreaNumber1, 10),
+            depth: Math.max(matchAreaNumber2 + wallThickness * 4, 30),
+            angleY: data.angle * -1,
+          })
+        }
+      } else if (matchAreaType === 2) {
+        if (dist < matchAreaNumber1) {
+          return new MatchCircleArea({
+            x: data.x,
+            y: data.y,
+            r: matchAreaNumber1
+          })
+        }
+      }
+      return null;
+    } else {
+      if (dist < this.circleRadius + 3) {
+        return new MatchCircleArea({ x: data.x, y: data.y, r: this.circleRadius })
+      }
+      return null;
+    }
   }
 
   matchHandelInfo(x: number, y: number) {

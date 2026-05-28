@@ -8,6 +8,8 @@ import { World } from '@/utils/world';
 import { editItem } from '..';
 import { getMaterialById } from '@/material';
 import { WindowDataClass } from './dataClass';
+import { MatchRectArea } from '@/utils/matchArea'
+import { isPointInRotatedRect } from '@/utils/isPointInRotatedRect'
 
 export class WindowEntity extends EntityClassInWall<WindowData> {
   type: string = 'window'
@@ -111,11 +113,30 @@ export class WindowEntity extends EntityClassInWall<WindowData> {
 
   showMatchHandel(x: number, y: number) {
     const data = this.getData();
-    const dist = Math.hypot(x - data.x, y - data.y)
-    if (dist < data.width / 2) {
-      return true
+    if (!this.world.allFileMapObjects.wall) {
+      this.world.allFileMapObjects.wall = []
     }
-    return false;
+    const wall = this.world.allFileMapObjects.wall.find((entity) => {
+      return entity.getData().id === data.wallId;
+    })
+    const wallThickness = wall ? wall.getData().thickness : 10;
+    // const dist = Math.hypot(x - data.x, y - data.y)
+    if (isPointInRotatedRect(x, y, {
+      x: data.x,
+      y: data.y,
+      width: data.width,
+      depth: Math.max(wallThickness + 20, 20),
+      angleY: data.angle,
+    })) {
+      return new MatchRectArea({
+        x: data.x,
+        y: data.y,
+        width: data.width,
+        depth: Math.max(wallThickness + 20, 20),
+        angleY: data.angle * -1,
+      })
+    }
+    return null;
   }
 
   // 命中可拖拽具柄

@@ -11,6 +11,8 @@ import { MTLLoader } from 'three/addons/loaders/MTLLoader.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { getMaterialById } from '@/material'
 import { OutFileDataClass } from './dataClass';
+import { MatchCircleArea, MatchRectArea } from '@/utils/matchArea'
+import { isPointInRotatedRect } from '@/utils/isPointInRotatedRect'
 
 export class OutFileEntity extends EntityClass<OutFileData> {
   type: string = 'outFile'
@@ -302,7 +304,45 @@ export class OutFileEntity extends EntityClass<OutFileData> {
   }
 
   showMatchHandel(x: number, y: number) {
-    return this.matchHandelInfo(x, y) !== null
+    const data = this.getData();
+    const dist = Math.hypot(x - data.x, y - data.y)
+    const { fileTypeId } = data
+    const findObjInfo = this.world.ObjFileTypes.find(item => item.id === fileTypeId)
+
+    if (findObjInfo) {
+      const { matchAreaType, matchAreaNumber1, matchAreaNumber2 } = findObjInfo
+      if (matchAreaType === 1) {
+        if (isPointInRotatedRect(x, y, {
+          x: data.x,
+          y: data.y,
+          width: Math.max(matchAreaNumber1, 30),
+          depth: Math.max(matchAreaNumber2, 30),
+          angleY: data.angleY * -1,
+        })) {
+          return new MatchRectArea({
+            x: data.x,
+            y: data.y,
+            width: Math.max(matchAreaNumber1, 30),
+            depth: Math.max(matchAreaNumber2, 30),
+            angleY: data.angleY,
+          })
+        }
+      } else if (matchAreaType === 2) {
+        if (dist < matchAreaNumber1) {
+          return new MatchCircleArea({
+            x: data.x,
+            y: data.y,
+            r: matchAreaNumber1
+          })
+        }
+      }
+      return null
+    } else {
+      if (dist < this.circleRadius + 10) {
+        return new MatchCircleArea({ x: data.x, y: data.y, r: this.circleRadius })
+      }
+      return null;
+    }
   }
 
   matchHandelInfo(x: number, y: number) {

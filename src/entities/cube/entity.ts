@@ -6,6 +6,7 @@ import { editItem } from '..';
 import { getMaterialById } from '@/material';
 import { CubeDataClass } from './dataClass'
 import { isPointInRotatedRect } from '@/utils/isPointInRotatedRect'
+import { MatchRectArea } from '@/utils/matchArea';
 
 export class CubeEntity extends EntityClass<CubeData> {
   type: string = 'cube'
@@ -159,13 +160,13 @@ export class CubeEntity extends EntityClass<CubeData> {
     if (isPointInRotatedRect(x, y, {
       x: data.x,
       y: data.y,
-      width: data.width,
-      depth: data.depth,
+      width: Math.max(data.width, data.depth),
+      depth: Math.max(data.width, data.depth),
       angleY: data.angleY * -1,
     })) {
-      return true
+      return new MatchRectArea(data)
     }
-    return false;
+    return null;
   }
 
   matchHandelInfo(x: number, y: number) {

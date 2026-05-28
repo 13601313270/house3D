@@ -8,6 +8,7 @@ import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
 // @ts-ignore
 import kamera from './kamera.png'
 import { CameraDataClass } from './dataClass'
+import { MatchRectArea } from '@/utils/matchArea'
 
 const img = new Image()
 img.src = kamera || ''
@@ -357,17 +358,23 @@ export class CameraEntity extends EntityClass<CameraData> {
       y < Math.max(p1Y, p2Y) &&
       y > Math.min(p1Y, p2Y)
     ) {
-      return true
+      return new MatchRectArea({
+        x: data.x,
+        y: data.y,
+        width: 30,
+        depth: 30,
+        angleY: 0,
+      })
     }
 
-    if (dist < this.circleRadius + 3) {
-      return true
-    }
-    const distToTarget = Math.hypot(x - data.targetPositionX, y - data.targetPositionY)
-    if (distToTarget < this.circleRadius + 3) {
-      return true
-    }
-    return false;
+    // if (dist < this.circleRadius + 3) {
+    //   return true
+    // }
+    // const distToTarget = Math.hypot(x - data.targetPositionX, y - data.targetPositionY)
+    // if (distToTarget < this.circleRadius + 3) {
+    //   return true
+    // }
+    return null;
   }
 
   matchHandelInfo(x: number, y: number) {

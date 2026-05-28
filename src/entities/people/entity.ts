@@ -9,6 +9,7 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 // @ts-ignore
 import kamera from './kamera.png'
 import { PeopleDataClass } from './dataClass'
+import { MatchCircleArea } from '@/utils/matchArea'
 
 const img = new Image()
 img.src = 'people.png'
@@ -44,14 +45,15 @@ export class PeopleEntity extends EntityClass<PeopleData> {
     const preImgScale = 0.24
     ctx.save(); // 保存当前状态
     const { width, height } = img;
+    const zoom = data.height / 170
     ctx.translate(screenX, screenY); // 移动原点到目标中心
     ctx.rotate(angleY); // 围绕新原点旋转
     ctx.drawImage(
       img,
-      preImgScale / -2 * width * zoomLevel,
-      preImgScale / -2 * height * zoomLevel,
-      preImgScale * width * zoomLevel,
-      preImgScale * height * zoomLevel
+      preImgScale / -2 * width * zoomLevel * zoom,
+      preImgScale / -2 * height * zoomLevel * zoom,
+      preImgScale * width * zoomLevel * zoom,
+      preImgScale * height * zoomLevel * zoom
     ); // 以新原点为中心绘制
     ctx.restore(); // 恢复原始状态
   }
@@ -211,13 +213,12 @@ export class PeopleEntity extends EntityClass<PeopleData> {
 
   showMatchHandel(x: number, y: number) {
     const data = this.getData();
-    const { angle } = data
-    const angleY = angle * -1
     const dist = Math.hypot(x - data.x, y - data.y)
+    // console.log('dist', dist)
     if (dist < data.height * 0.3) {
-      return true
+      return new MatchCircleArea({ x: data.x, y: data.y, r: data.height * 0.3 })
     }
-    return false;
+    return null;
   }
 
   matchHandelInfo(x: number, y: number) {

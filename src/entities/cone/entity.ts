@@ -5,6 +5,7 @@ import { allSnapFromType, EntityClass, MatchSnapPoint } from '@/types/entity'
 import { editItem } from '..';
 import { getMaterialById } from '@/material';
 import { ConeDataClass } from './dataClass'
+import { MatchCircleArea } from '@/utils/matchArea';
 
 export class ConeEntity extends EntityClass<ConeData> {
   type: string = 'cone'
@@ -98,9 +99,9 @@ export class ConeEntity extends EntityClass<ConeData> {
     const data = this.getData();
     const dist = Math.hypot(x - data.x, y - data.y)
     if (dist < data.r) {
-      return true
+      return new MatchCircleArea({ x: data.x, y: data.y, r: data.r })
     }
-    return false;
+    return null;
   }
 
   matchHandelInfo(x: number, y: number) {

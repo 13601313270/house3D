@@ -226,7 +226,8 @@ export class WallEntity extends EntityClass<WallData> {
   }
 
   showMatchHandel(x: number, y: number) {
-    return this.matchHandelInfo(x, y) !== null
+    return null;
+    // return this.matchHandelInfo(x, y) !== null
   }
 
   // 命中可拖拽具柄

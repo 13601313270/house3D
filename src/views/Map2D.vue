@@ -239,6 +239,7 @@ import { useStore } from 'vuex';
 import { Store } from '@/store';
 import Help from '@/components/help.vue'
 import { sleep } from '@/utils/sleep';
+import { MatchCircleArea, MatchRectArea } from '@/utils/matchArea';
 
 const canvas2DRef = ref<HTMLCanvasElement | null>(null)
 const canvas2D2Ref = ref<HTMLCanvasElement | null>(null)
@@ -1521,14 +1522,52 @@ const handleMouseMove = (e: MouseEvent) => {
     } else {
       // 鼠标浮动而过
       ctxAction.clearRect(0, 0, canvasAction.width, canvasAction.height)
-      let handleInfoList: Array<{
-        classInfo: EntityClass<any>
-      }> = getHandleInfoByXY(x, y)
-      if (handleInfoList.length === 0) {
-        handleInfoList = getHandleInAreaInfoByXY(x, y)
-      }
+      // let handleInfoList: Array<{
+      //   classInfo: EntityClass<any>
+      // }> = getHandleInfoByXY(x, y)
+      // if (handleInfoList.length === 0) {
+        
+      // }
+      const handleInfoList = getHandleInAreaInfoByXY(x, y)
       handleInfoList.forEach(v => {
-        const { classInfo } = v
+        const { classInfo, matchArea } = v
+        if (matchArea instanceof MatchRectArea) {
+          ctxAction.lineWidth = 2
+          ctxAction.strokeStyle = 'red'
+          ctxAction.save(); // 保存当前状态
+          ctxAction.translate(
+            matchArea.data.x * zoom2DLevel.value + panOffset.value.x,
+            matchArea.data.y * zoom2DLevel.value + panOffset.value.y
+          ); // 移动原点到目标中心
+          ctxAction.rotate(matchArea.data.angleY * -1); // 围绕新原点旋转
+          // 绘制一个方块
+          ctxAction.strokeRect(
+            matchArea.data.width / -2 * zoom2DLevel.value,
+            matchArea.data.depth / -2 * zoom2DLevel.value,
+            matchArea.data.width * zoom2DLevel.value,
+            matchArea.data.depth * zoom2DLevel.value,
+          )
+          ctxAction.restore(); // 恢复原始状态
+        } else if (matchArea instanceof MatchCircleArea) {
+          ctxAction.lineWidth = 2
+          ctxAction.strokeStyle = 'red'
+          ctxAction.save(); // 保存当前状态
+          ctxAction.translate(
+            matchArea.data.x * zoom2DLevel.value + panOffset.value.x,
+            matchArea.data.y * zoom2DLevel.value + panOffset.value.y
+          );
+          // 绘制一个圆
+          ctxAction.beginPath()
+          ctxAction.arc(
+            0,
+            0,
+            matchArea.data.r * zoom2DLevel.value,
+            0,
+            Math.PI * 2,
+          )
+          ctxAction.stroke()
+          ctxAction.restore(); // 恢复原始状态
+        }
         classInfo.draw2D(ctxAction, panOffset.value, zoom2DLevel.value)
       })
     }
@@ -1692,10 +1731,12 @@ function getHandleInfoByXY(x: number, y: number): Array<{
 }
 
 function getHandleInAreaInfoByXY(x: number, y: number): Array<{
-  classInfo: EntityClass<any>
+  classInfo: EntityClass<any>,
+  matchArea: MatchRectArea | MatchCircleArea
 }> {
   const matchHandelInfoList: Array<{
-    classInfo: EntityClass<any>
+    classInfo: EntityClass<any>,
+    matchArea: MatchRectArea | MatchCircleArea
   }> = []
   const canvasAction = canvas2D2Ref.value!;
   const ctxAction = canvasAction.getContext('2d')!
@@ -1708,6 +1749,7 @@ function getHandleInAreaInfoByXY(x: number, y: number): Array<{
       if (matchInfo) {
         matchHandelInfoList.push({
           classInfo: api,
+          matchArea: matchInfo,
         })
       }
     }
@@ -1725,6 +1767,7 @@ function getHandleInAreaInfoByXY(x: number, y: number): Array<{
       if (matchInfo) {
         matchHandelInfoList.push({
           classInfo: api,
+          matchArea: matchInfo,
         })
       }
     }

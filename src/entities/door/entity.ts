@@ -10,6 +10,8 @@ import { editItem } from '..';
 import { World } from '@/utils/world';
 import { getMaterialById } from '@/material';
 import { DoorDataClass } from './dataClass';
+import { MatchRectArea } from '@/utils/matchArea';
+import { isPointInRotatedRect } from '@/utils/isPointInRotatedRect';
 
 export class DoorEntity extends EntityClassInWall<DoorData> {
   type: string = 'door'
@@ -232,12 +234,25 @@ export class DoorEntity extends EntityClassInWall<DoorData> {
 
   showMatchHandel(x: number, y: number) {
     const data = this.getData();
-    const dist = Math.hypot(x - data.x, y - data.y)
-    // console.log('zoomLevel---2', zoomLevel)
-    if (dist < data.width / 2) {
-      return true
+    if (!this.world.allFileMapObjects.wall) {
+      this.world.allFileMapObjects.wall = []
     }
-    return false;
+    const wall = this.world.allFileMapObjects.wall.find((entity) => {
+      return entity.getData().id === data.wallId;
+    })
+    const wallThickness = wall ? wall.getData().thickness : 10;
+    // const dist = Math.hypot(x - data.x, y - data.y)
+    // console.log('zoomLevel---2', zoomLevel)
+    if (isPointInRotatedRect(x, y, {
+      x: data.x,
+      y: data.y,
+      width: data.width,
+      depth: Math.max(wallThickness + 20, 20),
+      angleY: data.angle,
+    })) {
+      return new MatchRectArea({ x: data.x, y: data.y, width: data.width, depth: Math.max(wallThickness + 20, 20), angleY: data.angle * -1 })
+    }
+    return null;
   }
 
   matchHandelInfo(x: number, y: number) {
