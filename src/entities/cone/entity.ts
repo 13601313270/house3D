@@ -10,7 +10,7 @@ import { MatchCircleArea } from '@/utils/matchArea';
 export class ConeEntity extends EntityClass<ConeData> {
   type: string = 'cone'
   isPointObj: boolean = true
-  private circleRadius = 12
+  private circleRadius = 6
 
   defaultValue(): ConeData {
     const data: ConeData = {

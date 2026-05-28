@@ -22,7 +22,7 @@ export class OutFileEntity extends EntityClass<OutFileData> {
   colorOpacity: string = '#14b737a5'
   private baseDrawAngelLength = 40;
   img: HTMLImageElement = new Image()
-  private circleRadius = 12
+  private circleRadius = 6
 
   init(): Promise<void> {
     const findObjInfo = this.world.ObjFileTypes.find(item => item.id === this.getData().fileTypeId)
@@ -310,18 +310,18 @@ export class OutFileEntity extends EntityClass<OutFileData> {
     const findObjInfo = this.world.ObjFileTypes.find(item => item.id === fileTypeId)
 
     if (findObjInfo) {
-      const { matchAreaType, matchAreaNumber1, matchAreaNumber2 } = findObjInfo
+      const { matchAreaType, matchAreaNumber1, matchAreaNumber2, matchAreaOffsetX } = findObjInfo
       if (matchAreaType === 1) {
         if (isPointInRotatedRect(x, y, {
-          x: data.x,
-          y: data.y,
+          x: data.x + matchAreaOffsetX * Math.cos(data.angleY),
+          y: data.y - matchAreaOffsetX * Math.sin(data.angleY),
           width: Math.max(matchAreaNumber1, 30),
           depth: Math.max(matchAreaNumber2, 30),
           angleY: data.angleY * -1,
         })) {
           return new MatchRectArea({
-            x: data.x,
-            y: data.y,
+            x: data.x + matchAreaOffsetX * Math.cos(data.angleY),
+            y: data.y - matchAreaOffsetX * Math.sin(data.angleY),
             width: Math.max(matchAreaNumber1, 30),
             depth: Math.max(matchAreaNumber2, 30),
             angleY: data.angleY,

@@ -14,7 +14,7 @@ import { isPointInRotatedRect } from '@/utils/isPointInRotatedRect'
 export class WindowEntity extends EntityClassInWall<WindowData> {
   type: string = 'window'
   isPointObj: boolean = true
-  private circleRadius = 12
+  private circleRadius = 6
 
   constructor(world: World, window?: WindowData) {
     super(world, window)

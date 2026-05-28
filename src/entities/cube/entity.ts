@@ -11,7 +11,7 @@ import { MatchRectArea } from '@/utils/matchArea';
 export class CubeEntity extends EntityClass<CubeData> {
   type: string = 'cube'
   isPointObj: boolean = true
-  private circleRadius = 12
+  private circleRadius = 6
 
   defaultValue(): CubeData {
     const door: CubeData = {
@@ -156,7 +156,6 @@ export class CubeEntity extends EntityClass<CubeData> {
 
   showMatchHandel(x: number, y: number) {
     const data = this.getData();
-    const dist = Math.hypot(x - data.x, y - data.y)
     if (isPointInRotatedRect(x, y, {
       x: data.x,
       y: data.y,

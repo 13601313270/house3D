@@ -23,7 +23,7 @@ export class OutFileInWallEntity extends EntityClassInWall<OutFileInWallData> {
   colorOpacity: string = '#14b737a5'
   private baseDrawAngelLength = 40;
   img: HTMLImageElement = new Image()
-  private circleRadius = 12
+  private circleRadius = 6
 
   init(): Promise<void> {
     const findObjInfo = this.world.ObjFileTypes.find(item => item.id === this.getData().fileTypeId)

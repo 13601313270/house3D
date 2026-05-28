@@ -10,7 +10,7 @@ import { MatchCircleArea } from '@/utils/matchArea';
 export class CylinderEntity extends EntityClass<CylinderData> {
   type: string = 'cylinder'
   isPointObj: boolean = true
-  private circleRadius = 12
+  private circleRadius = 6
 
   defaultValue(): CylinderData {
     const door: CylinderData = {

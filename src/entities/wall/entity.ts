@@ -6,11 +6,12 @@ import * as THREE from 'three'
 import { editItem } from '..'
 import { getMaterialById } from '@/material'
 import { WallDataClass } from './dataClass'
+import { MatchCircleArea } from '@/utils/matchArea'
 
 export class WallEntity extends EntityClass<WallData> {
   type: string = 'wall'
   isPointObj: boolean = false
-  private circleRadius = 12
+  private circleRadius = 6
 
   defaultValue(): WallData {
     const wall: WallData = {
@@ -226,8 +227,48 @@ export class WallEntity extends EntityClass<WallData> {
   }
 
   showMatchHandel(x: number, y: number) {
-    return null;
-    // return this.matchHandelInfo(x, y) !== null
+    const data = this.getData();
+    for (let i = 0; i < this.getData().points.length; i++) {
+      const point = this.getData().points[i]
+      const dist = Math.hypot(x - point.x, y - point.y)
+      if (dist < this.getData().thickness) {
+        return new MatchCircleArea({
+          x: point.x,
+          y: point.y,
+          r: this.getData().thickness,
+        })
+
+        // return {
+        //   id: data.id,
+        //   type: this.type,
+        //   index: i * 2,
+        //   dist: dist,
+        // }
+      }
+    }
+
+    // 每两个点之间，再绘制一个点，代表边的控制器
+    for (let i = 0; i < this.getData().points.length - 1; i++) {
+      const p1 = this.getData().points[i]
+      const p2 = this.getData().points[i + 1]
+      const midX = (p1.x + p2.x) / 2
+      const midY = (p1.y + p2.y) / 2
+      const dist = Math.hypot(x - midX, y - midY)
+      if (dist < this.getData().thickness) {
+        return new MatchCircleArea({
+          x: midX,
+          y: midY,
+          r: this.getData().thickness,
+        })
+        // return {
+        //   id: data.id,
+        //   type: this.type,
+        //   index: i * 2 + 1,
+        //   dist: dist,
+        // }
+      }
+    }
+    return null
   }
 
   // 命中可拖拽具柄

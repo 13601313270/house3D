@@ -19,7 +19,7 @@ export class ImportFileEntity extends EntityClass<ImportFileData> {
   color: string = '#0c7f25'
   color3D: string = '#0c7f25'
   colorOpacity: string = '#14b737a5'
-  private circleRadius = 12
+  private circleRadius = 6
   private baseDrawAngelLength = 40;
   img: HTMLImageElement = new Image()
 

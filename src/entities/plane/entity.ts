@@ -11,7 +11,7 @@ import { MatchRectArea } from '@/utils/matchArea';
 export class PlaneEntity extends EntityClass<PlaneData> {
   type: string = 'plane'
   isPointObj: boolean = true
-  private circleRadius = 12
+  private circleRadius = 6
 
   defaultValue(): PlaneData {
     const data: PlaneData = {

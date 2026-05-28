@@ -10,7 +10,7 @@ import { MatchCircleArea } from '@/utils/matchArea';
 export class SphereEntity extends EntityClass<SphereData> {
   type: string = 'sphere'
   isPointObj: boolean = true
-  private circleRadius = 12
+  private circleRadius = 6
 
   defaultValue(): SphereData {
     const door: SphereData = {

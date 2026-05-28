@@ -24,7 +24,7 @@ export class PeopleEntity extends EntityClass<PeopleData> {
   colorOpacityActive: string = 'red'
   active: boolean = false // 这个不存在数据库里，只是在前端动态调整
   drawAngelLength: number = 40
-  private circleRadius = 12
+  private circleRadius = 6
 
   defaultValue(): PeopleData {
     const people: PeopleData = {

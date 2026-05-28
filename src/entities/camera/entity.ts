@@ -8,7 +8,8 @@ import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
 // @ts-ignore
 import kamera from './kamera.png'
 import { CameraDataClass } from './dataClass'
-import { MatchRectArea } from '@/utils/matchArea'
+import { MatchCircleArea, MatchRectArea } from '@/utils/matchArea'
+import { isPointInRotatedRect } from '@/utils/isPointInRotatedRect'
 
 const img = new Image()
 img.src = kamera || ''
@@ -22,7 +23,7 @@ export class CameraEntity extends EntityClass<CameraData> {
   colorOpacity: string = '#14b737a5'
   colorOpacityActive: string = 'red'
   active: boolean = false // 这个不存在数据库里，只是在前端动态调整
-  private circleRadius = 12
+  private circleRadius = 6
 
   defaultValue(): CameraData {
     const camera: CameraData = {
@@ -352,24 +353,27 @@ export class CameraEntity extends EntityClass<CameraData> {
     const p2Y = midY - perpY * baseHalfLength
 
     const dist = Math.hypot(x - data.x, y - data.y)
-    if (
-      x < Math.max(p1X, p2X) &&
-      x > Math.min(p1X, p2X) &&
-      y < Math.max(p1Y, p2Y) &&
-      y > Math.min(p1Y, p2Y)
-    ) {
-      return new MatchRectArea({
-        x: data.x,
-        y: data.y,
-        width: 30,
-        depth: 30,
-        angleY: 0,
+    if (isPointInRotatedRect(x, y, {
+      x: midX,
+      y: midY,
+      width: 30,
+      depth: 30,
+      angleY: 0,
+    })) {
+      return new MatchCircleArea({
+        x: midX,
+        y: midY,
+        r: 30,
       })
     }
 
-    // if (dist < this.circleRadius + 3) {
-    //   return true
-    // }
+    if (dist < this.circleRadius + 3) {
+      return new MatchCircleArea({
+        x: data.x,
+        y: data.y,
+        r: 30,
+      })
+    }
     // const distToTarget = Math.hypot(x - data.targetPositionX, y - data.targetPositionY)
     // if (distToTarget < this.circleRadius + 3) {
     //   return true
