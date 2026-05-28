@@ -63,13 +63,13 @@ export class OutFileEntity extends EntityClass<OutFileData> {
   draw2DPreviewByData(ctx: CanvasRenderingContext2D, data: OutFileData, panOffset: Point, zoomLevel: number): void {
     const screenX = data.x * zoomLevel + panOffset.x
     const screenY = data.y * zoomLevel + panOffset.y
-    const angleY = data.angleY;// * -1 + Math.PI / 2
+    const previewAngleY = data.angleY;
     const findObjInfo = this.world.ObjFileTypes.find(item => item.id === data.fileTypeId)
     const preImgScale = findObjInfo?.preImgScale || 1
     const { width, height } = this.img;
     ctx.save(); // 保存当前状态
     ctx.translate(screenX, screenY); // 移动原点到目标中心
-    ctx.rotate(angleY * -1); // 围绕新原点旋转
+    ctx.rotate(previewAngleY * -1); // 围绕新原点旋转
     ctx.drawImage(
       this.img,
       preImgScale / -2 * width * zoomLevel,
@@ -93,7 +93,7 @@ export class OutFileEntity extends EntityClass<OutFileData> {
     let centerCircleRadius = this.circleRadius
     if (findObjInfo) {
       if (findObjInfo.matchAreaType === 1) {
-        centerCircleRadius = Math.max(findObjInfo.matchAreaNumber1, findObjInfo.matchAreaNumber2) / 10
+        centerCircleRadius = Math.max(findObjInfo.matchAreaNumber1, findObjInfo.matchAreaNumber2) / 20
       } else if (findObjInfo.matchAreaType === 2) {
         centerCircleRadius = findObjInfo.matchAreaNumber1 / 10
       }
@@ -114,9 +114,11 @@ export class OutFileEntity extends EntityClass<OutFileData> {
     }
     const drawAngelLength = Math.max(findObjInfo?.drawAngelLength || this.baseDrawAngelLength, this.circleRadius * 2)
 
+    const drawAngelHandelAngel = data.angleY + (findObjInfo?.drawAngelAngel || 0);
+
     // 控制点向着angleY角度延伸10个单位后的坐标
-    const rotatedXAdd = data.x + Math.cos(data.angleY) * drawAngelLength
-    const rotatedYAdd = data.y - Math.sin(data.angleY) * drawAngelLength
+    const rotatedXAdd = data.x + Math.cos(drawAngelHandelAngel) * drawAngelLength
+    const rotatedYAdd = data.y - Math.sin(drawAngelHandelAngel) * drawAngelLength
 
     function ttt(angel: number, drawAngelLength: number) {
       const tempX = data.x + Math.cos(angel) * drawAngelLength;
@@ -130,15 +132,15 @@ export class OutFileEntity extends EntityClass<OutFileData> {
     ctx.lineWidth = 2 * zoomLevel
     // 绘制双向箭头的主线（圆弧）
     ctx.beginPath();
-    ctx.arc(screenX, screenY, drawAngelLength * zoomLevel, data.angleY * -1 - Math.PI / 4, data.angleY * -1 + Math.PI / 4);
+    ctx.arc(screenX, screenY, drawAngelLength * zoomLevel, drawAngelHandelAngel * -1 - Math.PI / 4, drawAngelHandelAngel * -1 + Math.PI / 4);
     ctx.stroke();
 
     // 左侧箭头
     (() => {
       ctx.beginPath()
-      const [p1X, p1Y] = ttt(data.angleY + 0.1 + Math.PI / 4, drawAngelLength)
-      const [p2X, p2Y] = ttt(data.angleY + Math.PI / 4, drawAngelLength + 5)
-      const [p3X, p3Y] = ttt(data.angleY + Math.PI / 4, drawAngelLength - 5)
+      const [p1X, p1Y] = ttt(drawAngelHandelAngel + 0.1 + Math.PI / 4, drawAngelLength)
+      const [p2X, p2Y] = ttt(drawAngelHandelAngel + Math.PI / 4, drawAngelLength + 5)
+      const [p3X, p3Y] = ttt(drawAngelHandelAngel + Math.PI / 4, drawAngelLength - 5)
       ctx.moveTo(
         p1X,
         p1Y
@@ -151,9 +153,9 @@ export class OutFileEntity extends EntityClass<OutFileData> {
 
     // 右侧箭头
     ctx.beginPath()
-    const [p1X, p1Y] = ttt(data.angleY - 0.1 - Math.PI / 4, drawAngelLength)
-    const [p2X, p2Y] = ttt(data.angleY - Math.PI / 4, drawAngelLength + 5)
-    const [p3X, p3Y] = ttt(data.angleY - Math.PI / 4, drawAngelLength - 5)
+    const [p1X, p1Y] = ttt(drawAngelHandelAngel - 0.1 - Math.PI / 4, drawAngelLength)
+    const [p2X, p2Y] = ttt(drawAngelHandelAngel - Math.PI / 4, drawAngelLength + 5)
+    const [p3X, p3Y] = ttt(drawAngelHandelAngel - Math.PI / 4, drawAngelLength - 5)
     ctx.moveTo(
       p1X,
       p1Y
@@ -383,10 +385,11 @@ export class OutFileEntity extends EntityClass<OutFileData> {
         dist: dist,
       }
     }
+    const drawAngelHandelAngel = data.angleY + (findObjInfo?.drawAngelAngel || 0);
     const drawAngelLength = Math.max(findObjInfo?.drawAngelLength || this.baseDrawAngelLength, centerCircleRadius * 2)
     // 控制点向着angleY角度延伸10个单位后的坐标
-    const rotatedXAdd = data.x + Math.cos(data.angleY) * drawAngelLength
-    const rotatedYAdd = data.y - Math.sin(data.angleY) * drawAngelLength
+    const rotatedXAdd = data.x + Math.cos(drawAngelHandelAngel) * drawAngelLength
+    const rotatedYAdd = data.y - Math.sin(drawAngelHandelAngel) * drawAngelLength
 
     const dist2 = Math.hypot(x - rotatedXAdd, y - rotatedYAdd)
     // console.log('dist2', dist2)
@@ -408,10 +411,11 @@ export class OutFileEntity extends EntityClass<OutFileData> {
       const data = this.getData();
       // 根据x,y计算angleY
       const angleY = Math.atan2(y - data.y, x - data.x)
+      const findObjInfo = this.world.ObjFileTypes.find(item => item.id === data.fileTypeId)
       console.log(angleY)
       this.setData({
         ...this.getData(),
-        angleY: angleY * -1,
+        angleY: angleY * -1 - (findObjInfo?.drawAngelAngel || 0),
       })
     }
   }

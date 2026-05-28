@@ -50,8 +50,6 @@ export class CubeEntity extends EntityClass<CubeData> {
     ctx.restore(); // 恢复原始状态
   }
 
-  private drawAngelLength = 40;
-
   draw2DByData(
     ctx: CanvasRenderingContext2D,
     data: CubeData,
@@ -71,7 +69,7 @@ export class CubeEntity extends EntityClass<CubeData> {
     ctx.fill()
     ctx.stroke()
 
-    const drawAngelLength = Math.max(this.getData().width / 2, this.circleRadius * 2);
+    const drawAngelLength = Math.max(this.getData().width / 2, this.circleRadius * 2) * 0.9;// 0.9避免超过方块范围
     // 控制点向着angleY角度延伸10个单位后的坐标
     const rotatedXAdd = data.x + Math.cos(data.angleY) * drawAngelLength
     const rotatedYAdd = data.y - Math.sin(data.angleY) * drawAngelLength
@@ -111,19 +109,22 @@ export class CubeEntity extends EntityClass<CubeData> {
     })();
 
     // 右侧箭头
-    ctx.beginPath()
-    const [p1X, p1Y] = ttt(data.angleY - 0.1 - Math.PI / 4, drawAngelLength)
-    const [p2X, p2Y] = ttt(data.angleY - Math.PI / 4, drawAngelLength + 5)
-    const [p3X, p3Y] = ttt(data.angleY - Math.PI / 4, drawAngelLength - 5)
-    ctx.moveTo(
-      p1X,
-      p1Y
-    )
-    ctx.lineTo(p2X, p2Y)
-    ctx.lineTo(p3X, p3Y)
-    ctx.closePath()
-    ctx.fill()
-    // 绘制旋转角度线
+    (() => {
+      ctx.beginPath()
+      const [p1X, p1Y] = ttt(data.angleY - 0.1 - Math.PI / 4, drawAngelLength)
+      const [p2X, p2Y] = ttt(data.angleY - Math.PI / 4, drawAngelLength + 5)
+      const [p3X, p3Y] = ttt(data.angleY - Math.PI / 4, drawAngelLength - 5)
+      ctx.moveTo(
+        p1X,
+        p1Y
+      )
+      ctx.lineTo(p2X, p2Y)
+      ctx.lineTo(p3X, p3Y)
+      ctx.closePath()
+      ctx.fill()
+    })();
+
+    // 绘制旋转角度控制
     ctx.beginPath()
     ctx.arc(circleX, circleY, circleRadius, 0, Math.PI * 2)
     ctx.fill()
@@ -180,7 +181,7 @@ export class CubeEntity extends EntityClass<CubeData> {
         dist: dist,
       }
     }
-    const drawAngelLength = Math.max(this.getData().width / 2, this.circleRadius * 2);
+    const drawAngelLength = Math.max(this.getData().width / 2, this.circleRadius * 2) * 0.9;// 0.9避免超过方块范围
     // 控制点向着angleY角度延伸10个单位后的坐标
     const rotatedXAdd = data.x + Math.cos(data.angleY) * drawAngelLength
     const rotatedYAdd = data.y - Math.sin(data.angleY) * drawAngelLength

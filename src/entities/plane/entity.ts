@@ -70,7 +70,7 @@ export class PlaneEntity extends EntityClass<PlaneData> {
     ctx.fill()
     ctx.stroke()
 
-    const drawAngelLength = Math.max(this.getData().width / 2, this.circleRadius * 2);
+    const drawAngelLength = Math.max(this.getData().width / 2, this.circleRadius * 2) * 0.9;// 0.9避免超过方块范围
     // alert(drawAngelLength)
     console.log('drawAngelLength', angleY, drawAngelLength)
     // 控制点向着angleY角度延伸10个单位后的坐标
@@ -168,7 +168,7 @@ export class PlaneEntity extends EntityClass<PlaneData> {
         y: data.y,
         width: data.width,
         depth: data.length,
-        angleY: angleY * -1,
+        angleY: angleY,
       })
     }
     return null;
@@ -186,7 +186,7 @@ export class PlaneEntity extends EntityClass<PlaneData> {
         dist: dist,
       }
     }
-    const drawAngelLength = Math.max(this.getData().width / 2, this.circleRadius * 2);
+    const drawAngelLength = Math.max(this.getData().width / 2, this.circleRadius * 2) * 0.9;// 0.9避免超过方块范围
     // 控制点向着angleY角度延伸10个单位后的坐标
     const rotatedXAdd = data.x + Math.cos(angleY) * drawAngelLength
     const rotatedYAdd = data.y - Math.sin(angleY) * drawAngelLength

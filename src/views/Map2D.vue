@@ -1574,10 +1574,19 @@ const handleMouseMove = (e: MouseEvent) => {
           ctxAction.restore(); // 恢复原始状态
         }
         classInfo.draw2D(ctxAction, panOffset.value, zoom2DLevel.value)
-        // 绘制文字
+        // 绘制文字（带边框）
         ctxAction.font = `${Math.max(14 * zoom2DLevel.value, 14)}px '微软雅黑'`
-        ctxAction.fillStyle = 'black'
         ctxAction.textAlign = 'center'
+        // 设置边框样式
+        ctxAction.strokeStyle = 'white'
+        ctxAction.lineWidth = 2
+        ctxAction.strokeText(
+          `${classInfo.name}`,
+          textPositionX * zoom2DLevel.value + panOffset.value.x,
+          textPositionY * zoom2DLevel.value + panOffset.value.y
+        )
+        // 设置填充样式
+        ctxAction.fillStyle = 'black'
         ctxAction.fillText(
           `${classInfo.name}`,
           textPositionX * zoom2DLevel.value + panOffset.value.x,

@@ -29,6 +29,9 @@ export class OutFileInWallEntity extends EntityClassInWall<OutFileInWallData> {
   init(): Promise<void> {
     const findObjInfo = this.world.ObjFileTypes.find(item => item.id === this.getData().fileTypeId)
     const preImg = findObjInfo?.preImg || ''
+    if (findObjInfo?.name) {
+      this.name = findObjInfo.name
+    }
     this.img.src = preImg
     return new Promise((resolve, reject) => {
       this.img.onload = () => {
