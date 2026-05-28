@@ -84,16 +84,26 @@ export class OutFileEntity extends EntityClass<OutFileData> {
     const screenX = data.x * zoomLevel + panOffset.x
     const screenY = data.y * zoomLevel + panOffset.y
 
+    const findObjInfo = this.world.ObjFileTypes.find(item => item.id === data.fileTypeId)
+    let centerCircleRadius = this.circleRadius
+    if (findObjInfo) {
+      if (findObjInfo.matchAreaType === 1) {
+        centerCircleRadius = Math.max(findObjInfo.matchAreaNumber1, findObjInfo.matchAreaNumber2) / 10
+      } else if (findObjInfo.matchAreaType === 2) {
+        centerCircleRadius = findObjInfo.matchAreaNumber1 / 10
+      }
+    }
+    centerCircleRadius = Math.max(centerCircleRadius, this.circleRadius)
+
     // 控制点
     ctx.fillStyle = '#fff'
     ctx.strokeStyle = '#e67e22'
     ctx.lineWidth = 2
     ctx.beginPath()
-    ctx.arc(screenX, screenY, this.circleRadius * zoomLevel + 3, 0, Math.PI * 2)
+    ctx.arc(screenX, screenY, centerCircleRadius * zoomLevel + 3, 0, Math.PI * 2)
     ctx.fill()
     ctx.stroke()
 
-    const findObjInfo = this.world.ObjFileTypes.find(item => item.id === data.fileTypeId)
     if (findObjInfo && !findObjInfo.canAngelZ) {
       return;
     }
@@ -151,7 +161,7 @@ export class OutFileEntity extends EntityClass<OutFileData> {
     // 在(rotatedXAdd, rotatedYAdd)位置绘制一个圆圈
     const circleX = rotatedXAdd * zoomLevel + panOffset.x
     const circleY = rotatedYAdd * zoomLevel + panOffset.y
-    const circleRadius = this.circleRadius * zoomLevel + 3
+    const circleRadius = centerCircleRadius * zoomLevel + 3
     ctx.fillStyle = '#fff'
     ctx.strokeStyle = '#e67e22'
     ctx.lineWidth = 2 * zoomLevel
@@ -348,8 +358,19 @@ export class OutFileEntity extends EntityClass<OutFileData> {
   matchHandelInfo(x: number, y: number) {
     const data = this.getData();
     const dist = Math.hypot(x - data.x, y - data.y)
+
+    const findObjInfo = this.world.ObjFileTypes.find(item => item.id === data.fileTypeId)
+    let centerCircleRadius = this.circleRadius
+    if (findObjInfo) {
+      if (findObjInfo.matchAreaType === 1) {
+        centerCircleRadius = Math.max(findObjInfo.matchAreaNumber1, findObjInfo.matchAreaNumber2) / 10
+      } else if (findObjInfo.matchAreaType === 2) {
+        centerCircleRadius = findObjInfo.matchAreaNumber1 / 10
+      }
+    }
+    centerCircleRadius = Math.max(centerCircleRadius, this.circleRadius)
     // console.log('dist', dist)
-    if (dist < this.circleRadius + 3) {
+    if (dist < centerCircleRadius + 3) {
       return {
         index: 0,
         type: this.type,
@@ -357,15 +378,14 @@ export class OutFileEntity extends EntityClass<OutFileData> {
         dist: dist,
       }
     }
-    const findObjInfo = this.world.ObjFileTypes.find(item => item.id === data.fileTypeId)
-    const drawAngelLength = Math.max(findObjInfo?.drawAngelLength || this.baseDrawAngelLength, this.circleRadius * 2)
+    const drawAngelLength = Math.max(findObjInfo?.drawAngelLength || this.baseDrawAngelLength, centerCircleRadius * 2)
     // 控制点向着angleY角度延伸10个单位后的坐标
     const rotatedXAdd = data.x + Math.cos(data.angleY) * drawAngelLength
     const rotatedYAdd = data.y - Math.sin(data.angleY) * drawAngelLength
 
     const dist2 = Math.hypot(x - rotatedXAdd, y - rotatedYAdd)
     // console.log('dist2', dist2)
-    if (dist2 < this.circleRadius + 3) {
+    if (dist2 < centerCircleRadius + 3) {
       return {
         index: 1,
         type: this.type,

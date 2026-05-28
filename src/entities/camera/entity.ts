@@ -103,6 +103,16 @@ export class CameraEntity extends EntityClass<CameraData> {
     ctx.closePath()
     // ctx.fill()
     ctx.stroke()
+
+    // ctx.strokeStyle = '#e67e22'
+    ctx.lineWidth = 1
+    ctx.beginPath()
+    ctx.arc(
+      data.targetPositionX * zoomLevel + panOffset.x,
+      data.targetPositionY * zoomLevel + panOffset.y,
+      this.circleRadius * zoomLevel + 3, 0, Math.PI * 2)
+    // ctx.fill()
+    ctx.stroke()
   }
 
   draw2DByData(
