@@ -21,6 +21,7 @@ export type MatchSnapPoint = OrigionSnapPoint | {
 }
 
 export abstract class EntityClass<T extends ObjData> {
+  abstract name: string
   abstract type: string
   abstract isPointObj: boolean // 点状对象，如窗户/门。非点状的如墙
   world: World;

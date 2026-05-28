@@ -8,6 +8,7 @@ import { SphereDataClass } from './dataClass'
 import { MatchCircleArea } from '@/utils/matchArea';
 
 export class SphereEntity extends EntityClass<SphereData> {
+  name: string = '球体'
   type: string = 'sphere'
   isPointObj: boolean = true
   private circleRadius = 6

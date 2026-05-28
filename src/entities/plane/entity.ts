@@ -9,6 +9,7 @@ import { isPointInRotatedRect } from '@/utils/isPointInRotatedRect';
 import { MatchRectArea } from '@/utils/matchArea';
 
 export class PlaneEntity extends EntityClass<PlaneData> {
+  name: string = '平面'
   type: string = 'plane'
   isPointObj: boolean = true
   private circleRadius = 6

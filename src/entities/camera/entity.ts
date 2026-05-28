@@ -15,6 +15,7 @@ const img = new Image()
 img.src = kamera || ''
 
 export class CameraEntity extends EntityClass<CameraData> {
+  name: string = '相机'
   type: string = 'camera'
   isPointObj: boolean = true
   color: string = '#0c7f25'

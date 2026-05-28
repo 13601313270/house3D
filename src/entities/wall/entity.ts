@@ -9,6 +9,7 @@ import { WallDataClass } from './dataClass'
 import { MatchCircleArea } from '@/utils/matchArea'
 
 export class WallEntity extends EntityClass<WallData> {
+  name: string = '墙'
   type: string = 'wall'
   isPointObj: boolean = false
   private circleRadius = 6
@@ -237,13 +238,6 @@ export class WallEntity extends EntityClass<WallData> {
           y: point.y,
           r: this.getData().thickness,
         })
-
-        // return {
-        //   id: data.id,
-        //   type: this.type,
-        //   index: i * 2,
-        //   dist: dist,
-        // }
       }
     }
 
@@ -260,12 +254,6 @@ export class WallEntity extends EntityClass<WallData> {
           y: midY,
           r: this.getData().thickness,
         })
-        // return {
-        //   id: data.id,
-        //   type: this.type,
-        //   index: i * 2 + 1,
-        //   dist: dist,
-        // }
       }
     }
     return null

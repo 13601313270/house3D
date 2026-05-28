@@ -14,6 +14,7 @@ import { ImportFileDataClass } from './dataClass';
 import { MatchCircleArea } from '@/utils/matchArea'
 
 export class ImportFileEntity extends EntityClass<ImportFileData> {
+  name: string = '导入文件'
   type: string = 'importFile'
   isPointObj: boolean = true
   color: string = '#0c7f25'

@@ -15,6 +15,7 @@ const img = new Image()
 img.src = 'people.png'
 
 export class PeopleEntity extends EntityClass<PeopleData> {
+  name: string = '人物'
   type: string = 'people'
   isPointObj: boolean = true
   color: string = '#0c7f25'

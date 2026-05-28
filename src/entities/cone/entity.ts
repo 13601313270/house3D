@@ -8,6 +8,7 @@ import { ConeDataClass } from './dataClass'
 import { MatchCircleArea } from '@/utils/matchArea';
 
 export class ConeEntity extends EntityClass<ConeData> {
+  name: string = '圆锥体'
   type: string = 'cone'
   isPointObj: boolean = true
   private circleRadius = 6

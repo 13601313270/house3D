@@ -9,6 +9,7 @@ import { isPointInRotatedRect } from '@/utils/isPointInRotatedRect'
 import { MatchRectArea } from '@/utils/matchArea';
 
 export class CubeEntity extends EntityClass<CubeData> {
+  name: string = '方块'
   type: string = 'cube'
   isPointObj: boolean = true
   private circleRadius = 6

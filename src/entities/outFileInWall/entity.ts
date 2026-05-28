@@ -16,6 +16,7 @@ import { MatchCircleArea, MatchRectArea } from '@/utils/matchArea'
 import { isPointInRotatedRect } from '@/utils/isPointInRotatedRect'
 
 export class OutFileInWallEntity extends EntityClassInWall<OutFileInWallData> {
+  name: string = '外部文件'
   type: string = 'outFileInWall'
   isPointObj: boolean = true
   color: string = '#0c7f25'

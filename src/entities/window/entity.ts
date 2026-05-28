@@ -12,6 +12,7 @@ import { MatchRectArea } from '@/utils/matchArea'
 import { isPointInRotatedRect } from '@/utils/isPointInRotatedRect'
 
 export class WindowEntity extends EntityClassInWall<WindowData> {
+  name: string = '窗户'
   type: string = 'window'
   isPointObj: boolean = true
   private circleRadius = 6

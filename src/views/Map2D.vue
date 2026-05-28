@@ -1526,11 +1526,16 @@ const handleMouseMove = (e: MouseEvent) => {
       //   classInfo: EntityClass<any>
       // }> = getHandleInfoByXY(x, y)
       // if (handleInfoList.length === 0) {
-        
+
       // }
       const handleInfoList = getHandleInAreaInfoByXY(x, y)
-      handleInfoList.forEach(v => {
+      handleInfoList.forEach((v, index) => {
+        if (index !== 0) {
+          return
+        }
         const { classInfo, matchArea } = v
+        const textPositionX = x;
+        const textPositionY = y - 10;
         if (matchArea instanceof MatchRectArea) {
           ctxAction.lineWidth = 2
           ctxAction.strokeStyle = 'red'
@@ -1569,6 +1574,15 @@ const handleMouseMove = (e: MouseEvent) => {
           ctxAction.restore(); // 恢复原始状态
         }
         classInfo.draw2D(ctxAction, panOffset.value, zoom2DLevel.value)
+        // 绘制文字
+        ctxAction.font = `${Math.max(14 * zoom2DLevel.value, 14)}px '微软雅黑'`
+        ctxAction.fillStyle = 'black'
+        ctxAction.textAlign = 'center'
+        ctxAction.fillText(
+          `${classInfo.name}`,
+          textPositionX * zoom2DLevel.value + panOffset.value.x,
+          textPositionY * zoom2DLevel.value + panOffset.value.y
+        )
       })
     }
   } else if (currentTool.value === 'wall') {
@@ -1732,14 +1746,14 @@ function getHandleInfoByXY(x: number, y: number): Array<{
 
 function getHandleInAreaInfoByXY(x: number, y: number): Array<{
   classInfo: EntityClass<any>,
-  matchArea: MatchRectArea | MatchCircleArea
+  matchArea: MatchRectArea | MatchCircleArea,
+  dist: number,
 }> {
   const matchHandelInfoList: Array<{
     classInfo: EntityClass<any>,
     matchArea: MatchRectArea | MatchCircleArea
+    dist: number,
   }> = []
-  const canvasAction = canvas2D2Ref.value!;
-  const ctxAction = canvasAction.getContext('2d')!
   // 检查已绘制的墙上的点
   if (worldApi.allFileMapObjects.wall) {
     for (let i = 0; i < worldApi.getObjects('wall').length; i++) {
@@ -1747,9 +1761,12 @@ function getHandleInAreaInfoByXY(x: number, y: number): Array<{
       const api: WallEntity = worldApi.allFileMapObjects.wall[i] as WallEntity;
       const matchInfo = api.showMatchHandel(x, y)
       if (matchInfo) {
+        const data = api.getData();
+        const dist = Math.hypot(x - data.x, y - data.y)
         matchHandelInfoList.push({
           classInfo: api,
           matchArea: matchInfo,
+          dist: dist,
         })
       }
     }
@@ -1765,14 +1782,20 @@ function getHandleInAreaInfoByXY(x: number, y: number): Array<{
       const api: EntityClass<any> = worldApi.allFileMapObjects[key][j] as EntityClass<any>;
       const matchInfo = api.showMatchHandel(x, y)
       if (matchInfo) {
+        const data = api.getData();
+        const dist = Math.hypot(x - data.x, y - data.y)
         matchHandelInfoList.push({
           classInfo: api,
           matchArea: matchInfo,
+          dist: dist,
         })
       }
     }
   }
-  return matchHandelInfoList;
+  const sortedMatchAllObjList = matchHandelInfoList.sort((a, b) => {
+    return a.dist - b.dist
+  })
+  return sortedMatchAllObjList;
 }
 
 const handleMouseUp = () => {

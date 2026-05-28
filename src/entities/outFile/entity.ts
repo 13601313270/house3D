@@ -15,6 +15,7 @@ import { MatchCircleArea, MatchRectArea } from '@/utils/matchArea'
 import { isPointInRotatedRect } from '@/utils/isPointInRotatedRect'
 
 export class OutFileEntity extends EntityClass<OutFileData> {
+  name: string = '外部文件'
   type: string = 'outFile'
   isPointObj: boolean = true
   color: string = '#0c7f25'
@@ -27,6 +28,10 @@ export class OutFileEntity extends EntityClass<OutFileData> {
   init(): Promise<void> {
     const findObjInfo = this.world.ObjFileTypes.find(item => item.id === this.getData().fileTypeId)
     const preImg = findObjInfo?.preImg || ''
+    if (findObjInfo?.name) {
+      this.name = findObjInfo.name
+    }
+
     this.img.src = preImg
     return new Promise((resolve, reject) => {
       this.img.onload = () => {

@@ -8,6 +8,7 @@ import { CylinderDataClass } from './dataClass'
 import { MatchCircleArea } from '@/utils/matchArea';
 
 export class CylinderEntity extends EntityClass<CylinderData> {
+  name: string = '圆柱体'
   type: string = 'cylinder'
   isPointObj: boolean = true
   private circleRadius = 6
