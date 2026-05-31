@@ -327,18 +327,18 @@ export class OutFileEntity extends EntityClass<OutFileData> {
     const findObjInfo = this.world.ObjFileTypes.find(item => item.id === fileTypeId)
 
     if (findObjInfo) {
-      const { matchAreaType, matchAreaNumber1, matchAreaNumber2, matchAreaOffsetX } = findObjInfo
+      const { matchAreaType, matchAreaNumber1, matchAreaNumber2, matchAreaOffsetX, matchAreaOffsetY } = findObjInfo
       if (matchAreaType === 1) {
         if (isPointInRotatedRect(x, y, {
-          x: data.x + matchAreaOffsetX * Math.cos(data.angleY),
-          y: data.y - matchAreaOffsetX * Math.sin(data.angleY),
+          x: data.x + matchAreaOffsetX * Math.cos(data.angleY) + matchAreaOffsetY * Math.sin(data.angleY),
+          y: data.y - matchAreaOffsetX * Math.sin(data.angleY) + matchAreaOffsetY * Math.cos(data.angleY),
           width: Math.max(matchAreaNumber1, 30),
           depth: Math.max(matchAreaNumber2, 30),
           angleY: data.angleY * -1,
         })) {
           return new MatchRectArea({
-            x: data.x + matchAreaOffsetX * Math.cos(data.angleY),
-            y: data.y - matchAreaOffsetX * Math.sin(data.angleY),
+            x: data.x + matchAreaOffsetX * Math.cos(data.angleY) + matchAreaOffsetY * Math.sin(data.angleY),
+            y: data.y - matchAreaOffsetX * Math.sin(data.angleY) + matchAreaOffsetY * Math.cos(data.angleY),
             width: Math.max(matchAreaNumber1, 30),
             depth: Math.max(matchAreaNumber2, 30),
             angleY: data.angleY,
