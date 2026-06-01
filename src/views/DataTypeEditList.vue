@@ -2,7 +2,9 @@
   <div class="context-menu" :style="{ top: position.y + 'px', left: position.x + 'px' }">
     <div class="configContainer">
       <div class="head">
-        <img class="moveIcon" src="../assets/move2.svg" alt="move" />
+        <div class="moveIcon">
+          <img src="../assets/move2.svg" alt="move" />
+        </div>
         <div class="title">{{ allFileKeysName[typeKey] }}</div>
         <div class="closeIcon"></div>
       </div>
@@ -42,6 +44,7 @@ const props = defineProps<{
 const emit = defineEmits<{
   (e: 'update:modelValue', value: Record<string, any>): void
   (e: 'deleteContextMenuEntity'): void
+  (e: 'changePosition', position: { x: number, y: number }): void
 }>()
 
 function handleUpdate(id: string, value: any) {
@@ -76,16 +79,25 @@ function deleteContextMenuEntity() {
       margin-bottom: 12px;
       background: black;
       color: white;
-      padding: 8px 16px;
 
       .moveIcon {
-        width: 24px;
-        height: 24px;
+        width: 32px;
+        height: 32px;
         cursor: move;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        >img {
+          width: 24px;
+          height: 24px;
+        }
       }
 
       .title {
         font-size: 16px;
+        line-height: 32px;
+        height: 32px;
         text-align: center;
         flex-grow: 1;
       }
