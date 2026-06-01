@@ -22,7 +22,9 @@
           </div>
         </div>
       </div>
-      <button @click="deleteContextMenuEntity">删除</button>
+      <div>
+        <button @click="deleteContextMenuEntity">删除</button>
+      </div>
     </div>
     <!-- <button @click="deleteContextMenuEntity">删除</button> -->
   </div>
@@ -30,7 +32,7 @@
 <script setup lang="ts">
 import { editItem, allFileKeysName } from '@/entities/index';
 import DataTypeEdit from './DataTypeEdit.vue'
-import { ref } from 'vue';
+import { onMounted, ref } from 'vue';
 
 const props = defineProps<{
   typeKey: string
@@ -43,6 +45,21 @@ const props = defineProps<{
 }>()
 
 const position = ref(props.initPosition)
+const EDGE_PADDING = 6
+
+onMounted(() => {
+  const contextMenuEl = document.querySelector('.context-menu') as HTMLElement
+  if (contextMenuEl) {
+    const parentEl = contextMenuEl.parentElement
+    if (parentEl) {
+      const parentRect = parentEl.getBoundingClientRect()
+      const contextMenuRect = contextMenuEl.getBoundingClientRect()
+      const maxTop = parentRect.height - contextMenuRect.height - EDGE_PADDING
+      const clampedTop = Math.max(EDGE_PADDING, Math.min(position.value.y, maxTop))
+      position.value = { ...position.value, y: clampedTop }
+    }
+  }
+})
 
 const emit = defineEmits<{
   (e: 'update:modelValue', value: Record<string, any>): void
@@ -83,31 +100,31 @@ function startDrag(e: MouseEvent) {
 
 function onMouseMove(e: MouseEvent) {
   if (!isDragging) return
-  
+
   const contextMenuEl = document.querySelector('.context-menu') as HTMLElement
   if (!contextMenuEl) return
-  
+
   const parentEl = contextMenuEl.parentElement
   if (!parentEl) return
-  
+
   const parentRect = parentEl.getBoundingClientRect()
   const contextMenuRect = contextMenuEl.getBoundingClientRect()
-  
+
   const mouseXInParent = e.clientX - parentRect.left
   const mouseYInParent = e.clientY - parentRect.top
-  
+
   const newLeft = mouseXInParent - offsetX
   const newTop = mouseYInParent - offsetY
-  
+
   const panelWidth = contextMenuRect.width
   const panelHeight = contextMenuRect.height
-  
-  const maxLeft = parentRect.width - panelWidth
-  const maxTop = parentRect.height - panelHeight
-  
-  const clampedLeft = Math.max(0, Math.min(newLeft, maxLeft))
-  const clampedTop = Math.max(0, Math.min(newTop, maxTop))
-  
+
+  const maxLeft = parentRect.width - panelWidth - EDGE_PADDING
+  const maxTop = parentRect.height - panelHeight - EDGE_PADDING
+
+  const clampedLeft = Math.max(EDGE_PADDING, Math.min(newLeft, maxLeft))
+  const clampedTop = Math.max(EDGE_PADDING, Math.min(newTop, maxTop))
+
   position.value = { x: clampedLeft, y: clampedTop }
 }
 
@@ -188,7 +205,6 @@ function onMouseUp() {
 
   button {
     display: block;
-    width: 100%;
     padding: 8px 16px;
     border: none;
     background: transparent;
