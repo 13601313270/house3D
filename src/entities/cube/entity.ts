@@ -156,6 +156,14 @@ export class CubeEntity extends EntityClass<CubeData> {
     ]
   }
 
+  createBoundingBox(): [THREE.Vector3, THREE.Vector3] {
+    const { width, height, depth } = this.getData();
+    return [
+      new THREE.Vector3(width, height, depth),
+      new THREE.Vector3(0, height / 2, 0)
+    ]
+  }
+
   showMatchHandel(x: number, y: number) {
     const data = this.getData();
     if (isPointInRotatedRect(x, y, {

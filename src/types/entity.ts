@@ -27,6 +27,7 @@ export abstract class EntityClass<T extends ObjData> {
   world: World;
   private data: T
   meshList: THREE.Group[] = []
+  boundingBox: THREE.LineSegments | null = null
   // eslint-disable-next-line
   associationEntity: EntityClass<any>[] = []// 关联对象，就是本对象渲染，需要联动修改的对象。（比如：墙壁上被窗户挖洞，那么墙修改，需要重新挖洞）
 
@@ -53,13 +54,37 @@ export abstract class EntityClass<T extends ObjData> {
   // 生成3D模型
   abstract create3DMesh(scene: THREE.Scene, ...args: any[]): THREE.Group[]
 
+  // 创建包裹立方体
+  abstract createBoundingBox(): [THREE.Vector3, THREE.Vector3] | null // 第一个是尺寸，第二个是位置偏移
+
   private cacheKeyStr = '';
   reCreate3DMeshIfNeed(): void {
     const newKeyByData = this.meshNeedChangeKey();
     if (this.cacheKeyStr !== newKeyByData) {
       const scene: THREE.Scene = this.world.scene
       this.meshList.forEach(mesh => scene.remove(mesh))
-      this.meshList = this.create3DMesh(scene)
+      this.meshList = this.create3DMesh(scene);
+      // 容器包裹立方体
+      // (() => {
+      //   if (this.boundingBox) {
+      //     scene.remove(this.boundingBox)
+      //     this.boundingBox = null
+      //   }
+      //   const boundingBox = this.createBoundingBox();
+      //   if (!boundingBox) {
+      //     return;
+      //   }
+      //   const [boxVector3, offsetVector3] = boundingBox;
+      //   const geometry = new THREE.BoxGeometry(1, 1, 1);
+      //   const edges = new THREE.EdgesGeometry(geometry);
+      //   const lineMaterial = new THREE.LineBasicMaterial({ color: 0x000000, transparent: true, opacity: 1 });
+      //   const box = new THREE.LineSegments(edges, lineMaterial);
+      //   // 设置立方体尺寸
+      //   box.scale.set(boxVector3.x, boxVector3.y, boxVector3.z);
+      //   box.position.set(offsetVector3.x, offsetVector3.y, offsetVector3.z);
+      //   this.meshList[0].add(box);
+      //   this.boundingBox = box;
+      // })();
       this.meshList.forEach(mesh => scene.add(mesh))
       this.cacheKeyStr = newKeyByData
     }
@@ -71,6 +96,10 @@ export abstract class EntityClass<T extends ObjData> {
     if (this.meshList.length) {
       this.meshList.forEach(mesh => this.world.scene.remove(mesh))
       this.meshList = []
+      if (this.boundingBox) {
+        this.world.scene.remove(this.boundingBox)
+        this.boundingBox = null
+      }
     }
     if (this.cacheKeyStr) {
       this.cacheKeyStr = ''
@@ -175,6 +204,10 @@ export abstract class EntityClass<T extends ObjData> {
     const scene: THREE.Scene = this.world.scene
     this.remove3DCache()
     this.meshList.forEach(mesh => scene.remove(mesh))
+    if (this.boundingBox) {
+      scene.remove(this.boundingBox)
+      this.boundingBox = null
+    }
 
     if (this.associationEntity.length > 0) {
       this.associationEntity.forEach(entity => {

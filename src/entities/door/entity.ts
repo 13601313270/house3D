@@ -233,6 +233,15 @@ export class DoorEntity extends EntityClassInWall<DoorData> {
     }
   }
 
+  createBoundingBox(): [THREE.Vector3, THREE.Vector3] {
+    const { width, height, bottom, z } = this.getData();
+    const thickness = 20;
+    return [
+      new THREE.Vector3(width, height, thickness + 10),
+      new THREE.Vector3(0, height / 2 + (bottom || 0) + z, 0)
+    ]
+  }
+
   showMatchHandel(x: number, y: number) {
     const data = this.getData();
     if (!this.world.allFileMapObjects.wall) {

@@ -181,6 +181,13 @@ export class PeopleEntity extends EntityClass<PeopleData> {
     ]
   }
 
+  createBoundingBox(): [THREE.Vector3, THREE.Vector3] {
+    return [
+      new THREE.Vector3(2, 5, 1),
+      new THREE.Vector3(0, 2.5, 0)
+    ]
+  }
+
   change3DMeshState(): void {
     const data = this.getData();
     const singleHeight = 0.213

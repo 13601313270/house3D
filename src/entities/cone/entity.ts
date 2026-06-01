@@ -96,6 +96,14 @@ export class ConeEntity extends EntityClass<ConeData> {
     ]
   }
 
+  createBoundingBox(): [THREE.Vector3, THREE.Vector3] {
+    const { r, h } = this.getData();
+    return [
+      new THREE.Vector3(r * 2, h, r * 2),
+      new THREE.Vector3(0, h / 2, 0)
+    ]
+  }
+
   showMatchHandel(x: number, y: number) {
     const data = this.getData();
     const dist = Math.hypot(x - data.x, y - data.y)

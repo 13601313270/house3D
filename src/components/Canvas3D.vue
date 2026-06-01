@@ -50,13 +50,19 @@ const props = defineProps<{
   cameraType: 'perspective' | 'orthographic'
 }>()
 
-const emit = defineEmits<{ (e: 'update:cameraState', value: CameraState | OrthographicCamera): void }>()
+const emit = defineEmits<{ 
+  (e: 'update:cameraState', value: CameraState | OrthographicCamera): void 
+  (e: 'objectHover', object: THREE.Object3D | null): void
+  (e: 'objectClick', object: THREE.Object3D | null): void
+}>()
 
 const containerRef = ref<HTMLDivElement | null>(null)
 
 // let scene: THREE.Scene | null = null
 let camera: THREE.PerspectiveCamera | THREE.OrthographicCamera | null = null
 let renderer: THREE.WebGLRenderer | null = null
+const raycaster: THREE.Raycaster = new THREE.Raycaster()
+const mouse: THREE.Vector2 = new THREE.Vector2()
 
 const cameraStateZ = ref<CameraState | OrthographicCamera>({
   targetPositionX: 0,
@@ -68,6 +74,32 @@ const cameraStateZ = ref<CameraState | OrthographicCamera>({
   aspectW: 1,
   aspectH: 1,
 })
+
+function raycastObjects(event: MouseEvent): THREE.Object3D | null {
+  if (!camera || !containerRef.value || !renderer) return null
+  
+  const rect = containerRef.value.getBoundingClientRect()
+  const canvasRect = renderer.domElement.getBoundingClientRect()
+  
+  const scaleX = canvasRect.width / rect.width
+  const scaleY = canvasRect.height / rect.height
+  
+  const x = ((event.clientX - rect.left) * scaleX / canvasRect.width) * 2 - 1
+  const y = -((event.clientY - rect.top) * scaleY / canvasRect.height) * 2 + 1
+  
+  mouse.set(x, y)
+  raycaster.setFromCamera(mouse, camera)
+  
+  const scene = props.world.scene
+  if (!scene) return null
+  
+  const intersects = raycaster.intersectObjects(scene.children, true)
+  
+  if (intersects.length > 0) {
+    return intersects[0].object
+  }
+  return null
+}
 
 function updateCameraAngel() {
   if (props.cameraType === 'orthographic') {
@@ -264,6 +296,10 @@ const initThree = () => {
             cameraStateZ.value.targetPositionY = camera1TargetPositionStartY - deltaY * sensitivity;
             updateCameraAngel()
           }
+        } else {
+          const hoveredObject = raycastObjects(e)
+          // console.log('hoveredObject', hoveredObject)
+          emit('objectHover', hoveredObject)
         }
       }
       else if ('radius' in cameraStateZ.value) {
@@ -283,6 +319,9 @@ const initThree = () => {
           cameraStateZ.value.targetPositionX = camera1TargetPositionStartX - (deltaX * Math.cos(cameraStateZ.value.angleX) - deltaY * Math.sin(cameraStateZ.value.angleX)) * sensitivity;
           cameraStateZ.value.targetPositionZ = camera1TargetPositionStartZ - (deltaX * Math.sin(cameraStateZ.value.angleX) + deltaY * Math.cos(cameraStateZ.value.angleX)) * sensitivity;
           updateCameraAngel()
+        } else {
+          const hoveredObject = raycastObjects(e)
+          emit('objectHover', hoveredObject)
         }
       }
     })
@@ -325,6 +364,13 @@ const initThree = () => {
 
     container.addEventListener('contextmenu', (e) => {
       e.preventDefault();
+    });
+
+    container.addEventListener('click', (e) => {
+      if (!canvas1IsMouseMove && !canvas1IsMouseAngel) {
+        const clickedObject = raycastObjects(e)
+        emit('objectClick', clickedObject)
+      }
     });
   })();
 

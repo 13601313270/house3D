@@ -188,7 +188,17 @@ export class OutFileEntity extends EntityClass<OutFileData> {
       console.error('未找到对应的文件类型:', fileTypeId)
       return []
     }
-    const { scaleX, scaleY, scaleZ, url, materialUrl, angleY, materialVec, defaultColor, materialId } = findObjInfo
+    const {
+      scaleX,
+      scaleY,
+      scaleZ,
+      url,
+      materialUrl,
+      angleY,
+      materialVec,
+      defaultColor,
+      materialId,
+    } = findObjInfo
     console.log('materialVec', materialVec)
     console.log('materialId', bm);
     const materialUseId = (bm === null) ? (materialId || -1) : bm
@@ -290,10 +300,62 @@ export class OutFileEntity extends EntityClass<OutFileData> {
         console.error('OBJ文件加载失败:', error)
       })
     }
-    // group.position.set(data.x, data.z, data.y)
 
     return [
       group
+    ]
+  }
+
+  createBoundingBox(): [THREE.Vector3, THREE.Vector3] {
+    const data = this.getData();
+
+    const { fileTypeId } = data
+    const findObjInfo = this.world.ObjFileTypes.find(item => item.id === fileTypeId)
+    if (!findObjInfo) {
+      console.error('未找到对应的文件类型:', fileTypeId)
+      return [
+        new THREE.Vector3(0, 0, 0),
+        new THREE.Vector3(0, 0, 0)
+      ]
+    }
+
+    const {
+      matchAreaType,
+      matchAreaNumber1,
+      matchAreaNumber2,
+      matchAreaDepth,
+      matchAreaOffsetX,
+      matchAreaOffsetY
+    } = findObjInfo
+
+    let width = 0;
+    const height = Math.max(matchAreaDepth || 0, 30);
+    let depth = 0;
+    let offsetX = 0;
+    let offsetZ = 0;
+
+    if (matchAreaType === 1) {
+      // 矩形区域
+      width = Math.max(matchAreaNumber1 || 0, 30);
+      depth = Math.max(matchAreaNumber2 || 0, 30);
+      offsetX = matchAreaOffsetX || 0;
+      offsetZ = matchAreaOffsetY || 0;
+    } else if (matchAreaType === 2) {
+      // 圆形区域，使用外接正方形
+      const radius = matchAreaNumber1 || 0;
+      width = radius * 2;
+      depth = radius * 2;
+      offsetX = matchAreaOffsetX || 0;
+      offsetZ = matchAreaOffsetY || 0;
+    }
+
+    // 计算偏移位置（考虑旋转）
+    const finalOffsetX = offsetX * Math.cos(data.angleY) + offsetZ * Math.sin(data.angleY);
+    const finalOffsetZ = -offsetX * Math.sin(data.angleY) + offsetZ * Math.cos(data.angleY);
+
+    return [
+      new THREE.Vector3(width, height, depth),
+      new THREE.Vector3(finalOffsetX, height / 2, finalOffsetZ)
     ]
   }
 

@@ -246,6 +246,37 @@ export class OutFileInWallEntity extends EntityClassInWall<OutFileInWallData> {
     ]
   }
 
+  createBoundingBox(): [THREE.Vector3, THREE.Vector3] {
+    const { wallId, fileTypeId, isOuter } = this.getData()
+    if (!this.world.allFileMapObjects.wall) {
+      this.world.allFileMapObjects.wall = []
+    }
+    const wall = this.world.allFileMapObjects.wall.find((entity) => {
+      return entity.getData().id === wallId;
+    })
+    const wallThickness = wall ? wall.getData().thickness : 10;
+
+    const findObjInfo = this.world.ObjFileTypes.find(item => item.id === fileTypeId)
+
+    if (!findObjInfo) {
+      console.error('未找到对应的文件类型:', fileTypeId)
+      return [
+        new THREE.Vector3(10, 10, wallThickness),
+        new THREE.Vector3(0, 0, 0)
+      ]
+    }
+
+    const {
+      matchAreaNumber1,
+      matchAreaDepth,
+    } = findObjInfo
+
+    return [
+      new THREE.Vector3(matchAreaNumber1, matchAreaDepth, wallThickness),
+      new THREE.Vector3(0, matchAreaDepth / 2, isOuter ? -wallThickness : wallThickness)
+    ]
+  }
+
   // 当前对象是否需要重新生成3D模型状态
   meshNeedChangeKey(): string {
     const cacheData = {

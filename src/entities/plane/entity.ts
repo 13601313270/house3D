@@ -152,6 +152,14 @@ export class PlaneEntity extends EntityClass<PlaneData> {
     ]
   }
 
+  createBoundingBox(): [THREE.Vector3, THREE.Vector3] {
+    const { width, length } = this.getData();
+    return [
+      new THREE.Vector3(width, 1, length),
+      new THREE.Vector3(0, 0, 0)
+    ]
+  }
+
   showMatchHandel(x: number, y: number) {
     const data = this.getData();
     // const dist = Math.hypot(x - data.x, y - data.y)

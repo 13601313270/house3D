@@ -20,7 +20,8 @@ type ObjOutputFileType = {
   canAngelZ: boolean,// 是否可以旋转Z轴角度
   matchAreaType: 1 | 2,// 1方形 2圆形
   matchAreaNumber1: number, // 方形代表宽，圆形代表半径
-  matchAreaNumber2: number,// 方形代表高，圆形无
+  matchAreaNumber2: number,// 方形代表宽，圆形无
+  matchAreaDepth: number, // 方形代表高，圆形无
   matchAreaOffsetX: number, // 占地范围数字offsetX
   matchAreaOffsetY: number, // 占地范围数字offsetY
   drawAngelAngel: number, // 旋转角度具柄的初始角度

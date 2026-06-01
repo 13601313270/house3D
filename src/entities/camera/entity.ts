@@ -232,6 +232,8 @@ export class CameraEntity extends EntityClass<CameraData> {
           child.material = material
         }
       })
+      // @ts-ignore
+      object.isCameraObj = true;
       group.add(object)
       // console.log('OBJ文件加载成功:', url)
     }, (progress: any) => {
@@ -243,6 +245,14 @@ export class CameraEntity extends EntityClass<CameraData> {
     })
     return [
       group
+    ]
+  }
+
+  createBoundingBox(): [THREE.Vector3, THREE.Vector3] {
+    // const { width, height, bottom, z } = this.getData();
+    return [
+      new THREE.Vector3(60, 60, 60),
+      new THREE.Vector3(0, 0, 0)
     ]
   }
 
@@ -315,7 +325,11 @@ export class CameraEntity extends EntityClass<CameraData> {
     oldLine.geometry = edges
     oldLine.position.set(-data.x, -data.z, -data.y)
 
-    const object = this.meshList[0].children[1] as THREE.Group
+    console.log('children', this.meshList[0].children)
+
+    // @ts-ignore
+    const object: THREE.Group | undefined = this.meshList[0].children.find(v => v.isCameraObj)
+
     if (object) {
       object.lookAt(center);
     }

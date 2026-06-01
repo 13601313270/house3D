@@ -147,7 +147,8 @@
         <!-- {{ insertTempDoor }} -->
         <div class="right-panel-content">
           <Canvas3D ref="canvas3DRef" :world="worldApi" v-model:cameraState="cameraStateCenter"
-            :aspectRatio="aspectRatio2" :showCamera="true" cameraType="perspective" />
+            :aspectRatio="aspectRatio2" :showCamera="true" cameraType="perspective" @objectHover="handleObjectHover"
+            @objectClick="handleObjectClick" />
         </div>
       </div>
 
@@ -323,10 +324,8 @@ let panStartScreenX = 0
 let panStartScreenY = 0
 
 const updateCanvasSize = () => {
-  console.log('===width===', 1)
   const container = document.querySelector('.map2d-container')
   if (!container) return
-  console.log('===width===', 2)
   const ctxList = [
     canvas2DRef.value!,
     canvas2D2Ref.value!
@@ -345,19 +344,16 @@ const updateCanvasSize = () => {
       canvasSize.value = { width, height }
     }
   }
-  console.log('===width===', 3)
   const canvas3D1Panel = canvas3DRef1.value
   if (canvas3D1Panel) {
     const leftCanvasContainer = document.querySelector('.canvas-container')
     if (leftCanvasContainer) {
-      console.log('===width===', 4)
       const canvasRect = leftCanvasContainer.getBoundingClientRect()
       const width = Math.floor(canvasRect.width)
       const height = Math.floor(canvasRect.height)
       // console.log('===width---', width)
 
       if (width > 0 && height > 0) {
-        console.log('===width===', 5, width / height)
         aspectRatio1.value = width / height
         // aspectRatio2.value = width / height
       }
@@ -370,7 +366,6 @@ const updateCanvasSize = () => {
       // console.log('===width---', width)
 
       if (width > 0 && height > 0) {
-        console.log('===width===', 5, width / height)
         // aspectRatio1.value = width / height
         aspectRatio2.value = width / height
       }
@@ -2255,6 +2250,12 @@ const handleLoadedObject = async (object: THREE.Group | THREE.Mesh, file: File, 
 function logout() {
   store.dispatch('main/setUserInfo', null)
   localStorage.removeItem('token')
+}
+function handleObjectHover() {
+
+}
+function handleObjectClick(object: THREE.Object3D | null) {
+  console.log('object', object)
 }
 </script>
 

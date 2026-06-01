@@ -227,6 +227,10 @@ export class WallEntity extends EntityClass<WallData> {
     return meshList
   }
 
+  createBoundingBox(): [THREE.Vector3, THREE.Vector3] | null {
+    return null
+  }
+
   showMatchHandel(x: number, y: number) {
     const data = this.getData();
     for (let i = 0; i < this.getData().points.length; i++) {

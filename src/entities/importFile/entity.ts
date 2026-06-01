@@ -301,6 +301,13 @@ export class ImportFileEntity extends EntityClass<ImportFileData> {
     ]
   }
 
+  createBoundingBox(): [THREE.Vector3, THREE.Vector3] {
+    return [
+      new THREE.Vector3(10, 10, 0),
+      new THREE.Vector3(0, 0, 0)
+    ]
+  }
+
   // 当前对象是否需要重新生成3D模型状态
   meshNeedChangeKey(): string {
     const cacheData = {

@@ -428,6 +428,15 @@ export class WindowEntity extends EntityClassInWall<WindowData> {
     }
   }
 
+  createBoundingBox(): [THREE.Vector3, THREE.Vector3] | null {
+    const { width, height, bottom, z } = this.getData();
+    const thickness = 20;
+    return [
+      new THREE.Vector3(width, height, thickness),
+      new THREE.Vector3(0, height / 2 + (bottom || 0) + z, 0)
+    ]
+  }
+
   getMineBeSnapPoints() {
     const key: allSnapFromType = 'point';
     const data = this.getData();
