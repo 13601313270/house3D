@@ -120,7 +120,7 @@
           <div v-if="contextMenu?.visible" class="context-menu"
             :style="{ top: contextMenu.y + 'px', left: contextMenu.x + 'px' }">
             <!-- {{ editPropConfigInfo }} -->
-            <!-- {{ editPropInputInfo }} -->
+            {{ editPropTypeKey }}
             <div class="configList">
               <div v-for="item in editPropConfigInfo" :key="item.id" class="configItem">
                 <div class="label">
@@ -206,10 +206,6 @@ import axios from 'axios'
 import * as THREE from 'three'
 import JSZip from 'jszip';
 import request from '@/utils/request'
-// @ts-ignore
-import { OBJLoader } from 'three/addons/loaders/OBJLoader.js'
-// @ts-ignore
-import { FBXLoader } from 'three/addons/loaders/FBXLoader.js'
 import { ObjData, Point } from '../types'
 import { snapThreshold, World } from '../utils/world'
 import Canvas3D, { CameraState, OrthographicCamera } from '../components/Canvas3D.vue'
@@ -222,7 +218,7 @@ import pointToLineDistance from '@/utils/pointToLineDistance'
 import { DoorEntity } from '@/entities/door/entity'
 import { CameraData } from '@/entities/camera/index.d'
 import { WallDataClass } from '@/entities/wall/dataClass'
-import { WallEntity } from '@/entities/wall/entity'
+import { defaultWallData, WallEntity } from '@/entities/wall/entity'
 import { ImportFileType, ObjOutputFileType } from '@/entities/allObjs'
 import { OutFileDataClass } from '@/entities/outFile/dataClass'
 import { OutFileEntity } from '@/entities/outFile/entity'
@@ -241,6 +237,7 @@ import { Store } from '@/store';
 import Help from '@/components/help.vue'
 import { sleep } from '@/utils/sleep';
 import { MatchCircleArea, MatchRectArea } from '@/utils/matchArea';
+import processUploadedFile from '@/utils/processUploadedFile';
 
 const canvas2DRef = ref<HTMLCanvasElement | null>(null)
 const canvas2D2Ref = ref<HTMLCanvasElement | null>(null)
@@ -889,23 +886,13 @@ onMounted(async () => {
       if (tempDrawWall.value?.points?.length && tempDrawWall.value.points.length > 0) {
         if (tempDrawWall.value?.points.length > 1) {
           const newWall: WallData = {
+            ...defaultWallData,
             id: tempDrawWall.value.id,
             x: tempDrawWall.value.x,
             y: tempDrawWall.value.y,
             z: tempDrawWall.value.z,
-            color: '#fff',
-            wmt: 0, // 墙材质
-            height: 280, // 墙高，默认280
             points: [...tempDrawWall.value.points],
             thickness: wallThickness.value,
-            hb: true,// 有地板，默认有
-            bc: '#aaa', // 地板颜色，默认灰色
-            bmt: 2, // 地板材质，默认砖墙
-            ht: true,// 有天花板，默认有
-            tc: '#fff', // 天花板颜色，默认白色
-            tmt: 2, // 天花板材质，默认水泥墙
-            td: false, // 天花板是否是双面，默认否
-            bottom: 0, // 距离地面距离，默认0
           }
           await worldApi.add('wall', [newWall])
           history.value.push(JSON.parse(JSON.stringify(worldApi.getObjects('wall'))))
@@ -1301,23 +1288,9 @@ const handleCanvasClick = async (e: MouseEvent) => {
         if (dist < 10 * zoom2DLevel.value) {
           if (tempDrawWall.value?.points?.length && tempDrawWall.value.points.length > 1) {
             const newWall: WallData = {
-              id: Date.now().toString(),
+              ...defaultWallData,
               points: [...tempDrawWall.value.points],
-              x: 0,
-              y: 0,
-              color: '#fff',
-              wmt: 0, // 墙材质
-              height: 280, // 墙高
-              z: 0,
               thickness: wallThickness.value,
-              hb: true,// 有地板，默认有
-              bc: '#aaa', // 地板颜色，默认灰色
-              bmt: 2, // 地板材质，默认砖墙
-              ht: true,// 有天花板，默认有
-              tc: '#fff', // 天花板颜色，默认白色
-              tmt: 2, // 天花板材质，默认水泥墙
-              td: false, // 天花板是否是双面，默认否
-              bottom: 0, // 距离地面距离，默认0
             }
             await worldApi.add('wall', [newWall])
             history.value.push(JSON.parse(JSON.stringify(worldApi.getObjects('wall'))))
@@ -2153,69 +2126,6 @@ const onDrop = async (e: DragEvent) => {
 
   const file = files[0]
   importOutObj(file)
-}
-
-const processUploadedFile = async (file: File, callback: (object: THREE.Group, file: File, type: string) => void, v?: ImportFileData): Promise<void> => {
-  return new Promise((resolve, reject) => {
-    const fileName = file.name.toLowerCase()
-
-    if (fileName.endsWith('.obj')) {
-      const objectUrl = URL.createObjectURL(file)
-      const loader = new OBJLoader()
-      loader.load(
-        objectUrl,
-        (object: THREE.Group) => {
-          callback(object, file, 'obj')
-          URL.revokeObjectURL(objectUrl)
-          resolve()
-        },
-        (xhr: any) => {
-          console.log(`OBJ 加载进度: ${(xhr.loaded / xhr.total * 100).toFixed(2)}%`)
-        },
-        (error: any) => {
-          console.error('OBJ 文件加载失败:', error)
-          URL.revokeObjectURL(objectUrl)
-          reject(error)
-        }
-      )
-    } else if (fileName.endsWith('.fbx')) {
-      console.log('开始读取 FBX 文件:', file.name, '大小:', file.size, 'bytes')
-      const reader = new FileReader()
-      reader.onload = (event) => {
-        try {
-          console.log('FBX 文件读取成功，开始解析')
-          const arrayBuffer = event.target?.result as ArrayBuffer
-          if (!arrayBuffer) {
-            reject(new Error('文件读取失败'))
-            return
-          }
-
-          console.log('ArrayBuffer 大小:', arrayBuffer.byteLength)
-          const loader = new FBXLoader()
-          const object = loader.parse(arrayBuffer, '')
-          console.log('FBX 文件解析成功，对象:', object)
-          callback(object, file, 'fbx')
-          resolve()
-        } catch (error) {
-          console.error('FBX 文件解析失败:', error)
-          reject(error)
-        }
-      }
-      reader.onerror = (error) => {
-        console.error('FBX 文件读取失败:', error)
-        console.error('文件信息:', {
-          name: file.name,
-          size: file.size,
-          type: file.type,
-          lastModified: new Date(file.lastModified)
-        })
-        reject(new Error('文件读取失败'))
-      }
-      reader.readAsArrayBuffer(file)
-    } else {
-      reject(new Error('不支持的文件格式'))
-    }
-  })
 }
 
 const handleLoadedObject = async (object: THREE.Group | THREE.Mesh, file: File, type: string, scaleFactor: number, position: THREE.Vector3) => {

@@ -15,25 +15,7 @@ export class WallEntity extends EntityClass<WallData> {
   private circleRadius = 6
 
   defaultValue(): WallData {
-    const wall: WallData = {
-      id: Date.now().toString(),
-      x: 0,
-      y: 0,
-      z: 0,
-      height: 180,
-      color: '#e67e22',
-      thickness: 10,
-      points: [],
-      wmt: 0,
-      hb: false,
-      bc: '#000',
-      bmt: 0,
-      ht: false,
-      tc: '#000',
-      tmt: 0,
-      td: false,
-      bottom: 0,
-    }
+    const wall: WallData = defaultWallData
     return new WallDataClass(wall)
   }
 
@@ -481,3 +463,27 @@ export class WallEntity extends EntityClass<WallData> {
     }
   }
 }
+
+const defaultWallData: WallData = {
+  id: Date.now().toString(),
+  x: 0,
+  y: 0,
+  z: 0,
+  height: 280,
+  color: '#fff',
+  wmt: 0,
+  points: [],
+  thickness: 10,
+  hb: true,
+  bc: '#aaa',
+  bmt: 2,
+  ht: true,
+  tc: '#fff',
+  tmt: 2,
+  td: false,
+  bottom: 0,
+}
+
+export {
+  defaultWallData
+};
