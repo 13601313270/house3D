@@ -1,6 +1,20 @@
 <template>
   <div class="context-menu" :style="{ top: position.y + 'px', left: position.x + 'px' }">
-    <div class="configContainer">
+    <div class="configContainer" v-if="showBoneEdit">
+      <div class="head">
+        <div class="moveIcon" @mousedown="startDrag">
+          <img src="../assets/move2.svg" alt="move" @mousedown.prevent />
+        </div>
+        <div class="title">骨骼姿势编辑</div>
+        <div class="closeIcon" @click="showBoneEdit = false">
+          <img src="../assets/close.svg" alt="close" />
+        </div>
+      </div>
+      <div>
+        <BoneEdit v-if="showBoneEdit" />
+      </div>
+    </div>
+    <div class="configContainer" v-else>
       <div class="head">
         <div class="moveIcon" @mousedown="startDrag">
           <img src="../assets/move2.svg" alt="move" @mousedown.prevent />
@@ -8,7 +22,6 @@
         <div class="title">{{ allFileKeysName[typeKey] }}</div>
         <div class="closeIcon"></div>
       </div>
-      <!-- {{ typeKey }} -->
       <!-- {{ modelValue }} -->
       <div class="configItemList">
         <div v-for="item in editPropConfigInfo" :key="item.id" class="configItem">
@@ -22,17 +35,20 @@
           </div>
         </div>
       </div>
-      <div>
-        <button @click="deleteContextMenuEntity">删除</button>
+      <div class="buttonGroup">
+        <button v-if="typeKey === 'people'" @click="showBoneEdit = true">骨骼编辑</button>
+        <div style="flex-grow: 1;"></div>
+        <button class="deleteButton" @click="deleteContextMenuEntity">删除</button>
       </div>
     </div>
     <!-- <button @click="deleteContextMenuEntity">删除</button> -->
   </div>
 </template>
 <script setup lang="ts">
+import { onMounted, ref } from 'vue';
 import { editItem, allFileKeysName } from '@/entities/index';
 import DataTypeEdit from './DataTypeEdit.vue'
-import { onMounted, ref } from 'vue';
+import BoneEdit from './boneEdit.vue'
 
 const props = defineProps<{
   typeKey: string
@@ -43,6 +59,7 @@ const props = defineProps<{
     y: number
   }
 }>()
+const showBoneEdit = ref(false)
 
 const position = ref(props.initPosition)
 const EDGE_PADDING = 6
@@ -180,8 +197,16 @@ function onMouseUp() {
       }
 
       .closeIcon {
-        width: 24px;
-        height: 24px;
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        >img {
+          height: 24px;
+          width: 100%;
+        }
       }
     }
 
@@ -201,20 +226,44 @@ function onMouseUp() {
         }
       }
     }
-  }
 
-  button {
-    display: block;
-    padding: 8px 16px;
-    border: none;
-    background: transparent;
-    text-align: left;
-    cursor: pointer;
-    font-size: 14px;
-    color: #ff4d4f;
+    .buttonGroup {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 12px;
+      padding: 8px;
 
-    &:hover {
-      background: #f5f5f5;
+      button {
+        padding: 4px 8px;
+        border: none;
+        border-radius: 4px;
+        background: #e4e6eb;
+        cursor: pointer;
+        font-size: 16px;
+        transition: all 0.3s;
+
+        // display: block;
+        // padding: 8px 16px;
+        // border: none;
+        // background: transparent;
+        // text-align: left;
+        // cursor: pointer;
+        // font-size: 14px;
+        // color: #ff4d4f;
+        // border: solid 1px #ff4d4f;
+
+        &:hover {
+          background: #f5f5f5;
+        }
+
+        &.deleteButton {
+          color: #ff4d4f;
+          background-color: transparent;
+          border: solid 1px #ff4d4f;
+        }
+      }
     }
   }
 }
