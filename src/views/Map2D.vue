@@ -119,20 +119,8 @@
             :style="{ display: isSplitting ? 'none' : 'block' }" />
           <div v-if="contextMenu?.visible" class="context-menu"
             :style="{ top: contextMenu.y + 'px', left: contextMenu.x + 'px' }">
-            <!-- {{ editPropConfigInfo }} -->
-            {{ editPropTypeKey }}
-            <div class="configList">
-              <div v-for="item in editPropConfigInfo" :key="item.id" class="configItem">
-                <div class="label">
-                  {{ item.label }}：
-                  <!-- {{ editPropInputInfo[item.id] }} -->
-                </div>
-                <div>
-                  <!-- {{ item }} -->
-                  <DataTypeEdit :item="item" v-model="editPropInputInfo" />
-                </div>
-              </div>
-            </div>
+            <DataTypeEditList :typeKey="editPropTypeKey" :editPropConfigInfo="editPropConfigInfo"
+              v-model="editPropInputInfo" />
             <button @click="deleteContextMenuEntity">删除</button>
           </div>
         </div>
@@ -169,7 +157,7 @@
           <Canvas3D v-if="allCamera.length && cameraState2" ref="canvas3DRef2" :world="worldApi"
             :cameraState="cameraState2" :aspectRatio="cameraState2.aspectW / cameraState2.aspectH" :showCamera="false"
             cameraType="perspective" />
-          <!-- <div v-else class="noCamera">请至少在场景中添加一个摄像机</div> -->
+          <div v-else class="noCamera">请至少在场景中添加一个摄像机</div>
         </div>
       </div>
     </div>
@@ -228,7 +216,6 @@ import { OutFileInWallDataClass } from '@/entities/outFileInWall/dataClass'
 import { OutFileInWallEntity } from '@/entities/outFileInWall/entity'
 import { OutFileInWallData } from '@/entities/outFileInWall/index.d'
 
-import DataTypeEdit from './DataTypeEdit.vue'
 import { ImportFileDataClass } from '@/entities/importFile/dataClass';
 import { ImportFileData } from '@/entities/importFile/index.d';
 import Login from '@/components/Login.vue'
@@ -238,6 +225,7 @@ import Help from '@/components/help.vue'
 import { sleep } from '@/utils/sleep';
 import { MatchCircleArea, MatchRectArea } from '@/utils/matchArea';
 import processUploadedFile from '@/utils/processUploadedFile';
+import DataTypeEditList from './DataTypeEditList.vue'
 
 const canvas2DRef = ref<HTMLCanvasElement | null>(null)
 const canvas2D2Ref = ref<HTMLCanvasElement | null>(null)
@@ -1307,26 +1295,12 @@ const handleCanvasClick = async (e: MouseEvent) => {
       })
     } else {
       tempDrawWall.value = {
-        id: Date.now().toString(),
-        x: 0,
-        y: 0,
-        z: 0,
-        color: '#fff',
-        wmt: 0, // 墙材质
-        height: 280, // 墙高
+        ...defaultWallData,
         points: [{
           ...clickPoint,
           snw: false,
         }],
         thickness: wallThickness.value,
-        hb: true,// 有地板，默认有
-        bc: '#aaa', // 地板颜色，默认灰色
-        bmt: 2, // 地板材质，默认砖墙
-        ht: true,// 有天花板，默认有
-        tc: '#fff', // 天花板颜色，默认白色
-        tmt: 2, // 天花板材质，默认水泥墙
-        td: false, // 天花板是否是双面，默认否
-        bottom: 0, // 距离地面距离，默认0
       }
     }
     lastPoint.value = clickPoint
@@ -1677,7 +1651,6 @@ function getHandleInfoByXY(x: number, y: number): Array<{
     dist: number,
   }> = []
   const canvasAction = canvas2D2Ref.value!;
-  const ctxAction = canvasAction.getContext('2d')!
   // 检查已绘制的墙上的点
   if (worldApi.allFileMapObjects.wall) {
     for (let i = 0; i < worldApi.getObjects('wall').length; i++) {
@@ -2490,22 +2463,6 @@ button {
   z-index: 1000;
   max-height: 80vh;
   overflow: auto;
-
-  .configList {
-    padding: 8px;
-
-    .configItem {
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-      justify-content: space-between;
-      margin: 12px 0;
-
-      .label {
-        flex-shrink: 0;
-      }
-    }
-  }
 
   button {
     display: block;
