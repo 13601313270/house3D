@@ -79,7 +79,7 @@ export class PeopleEntity extends EntityClass<PeopleData> {
     ctx.fill()
     ctx.stroke()
 
-    const drawAngelLength = this.drawAngelLength
+    const drawAngelLength = this.drawAngelLength * data.height / 170
 
     // 控制点向着angle角度延伸10个单位后的坐标
     const rotatedXAdd = data.x + Math.cos(angle) * drawAngelLength
@@ -223,8 +223,8 @@ export class PeopleEntity extends EntityClass<PeopleData> {
     const data = this.getData();
     const dist = Math.hypot(x - data.x, y - data.y)
     // console.log('dist', dist)
-    if (dist < data.height * 0.3) {
-      return new MatchCircleArea({ x: data.x, y: data.y, r: data.height * 0.3 })
+    if (dist < data.height * 0.3 + 10) {
+      return new MatchCircleArea({ x: data.x, y: data.y, r: data.height * 0.3 + 10 })
     }
     return null;
   }
