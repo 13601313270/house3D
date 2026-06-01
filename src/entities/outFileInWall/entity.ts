@@ -408,10 +408,10 @@ export class OutFileInWallEntity extends EntityClassInWall<OutFileInWallData> {
       },
       {
         id: 'z',
-        label: '高度',
+        label: '距离地面',
         dataType: 'number',
         min: 0,
-        max: 100,
+        max: 200,
         step: 1,
         value: data.z,
       },

@@ -531,10 +531,10 @@ export class OutFileEntity extends EntityClass<OutFileData> {
       },
       {
         id: 'z',
-        label: '高度',
+        label: '距离地面',
         dataType: 'number',
         min: -100,
-        max: 100,
+        max: 200,
         step: 1,
         value: data.z,
       },

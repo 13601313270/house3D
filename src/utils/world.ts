@@ -270,11 +270,17 @@ export class World {
     })
   }
 
+  // boundingBoxList: THREE.LineSegments[] = []
+
   draw3D() {
+    // this.boundingBoxList = []
     allFileKeys.forEach((key) => {
       if (this.allFileMapObjects[key]) {
         (this.allFileMapObjects[key] as EntityClass<any>[]).forEach((item) => {
           item.reCreate3DMeshIfNeed()
+          // if (item.boundingBox) {
+          //   this.boundingBoxList.push(item.boundingBox)
+          // }
           item.change3DMeshState()
         });
       }

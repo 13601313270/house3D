@@ -123,7 +123,7 @@
             <!-- {{ editPropInputInfo }} -->
             <div class="configList">
               <div v-for="item in editPropConfigInfo" :key="item.id" class="configItem">
-                <div>
+                <div class="label">
                   {{ item.label }}：
                   <!-- {{ editPropInputInfo[item.id] }} -->
                 </div>
@@ -1180,8 +1180,8 @@ const handleContextMenu = (e: MouseEvent) => {
           api.editPropConfig(snapPoint, (propConfig, callback) => {
             console.log('dist', propConfig)
             let contextMenuX = e.clientX
-            if (contextMenuX + 320 > panel1SplitWidthPer.value * window.innerWidth) {
-              contextMenuX = panel1SplitWidthPer.value * window.innerWidth - 320
+            if (contextMenuX + 340 > panel1SplitWidthPer.value * window.innerWidth) {
+              contextMenuX = panel1SplitWidthPer.value * window.innerWidth - 340
             }
             editSnapPoint.value = snapPoint
             editPropTypeKey.value = type
@@ -2251,8 +2251,11 @@ function logout() {
   store.dispatch('main/setUserInfo', null)
   localStorage.removeItem('token')
 }
-function handleObjectHover() {
-
+function handleObjectHover(object: THREE.Object3D | null) {
+  if (object) {
+    // @ts-ignore
+    // console.log('object', object.entity)
+  }
 }
 function handleObjectClick(object: THREE.Object3D | null) {
   console.log('object', object)
@@ -2568,7 +2571,7 @@ button {
 
 .context-menu {
   position: absolute;
-  width: 320px;
+  width: 340px;
   background: white;
   border: 1px solid #d9d9d9;
   box-sizing: border-box;
@@ -2586,7 +2589,11 @@ button {
       flex-direction: row;
       align-items: center;
       justify-content: space-between;
-      margin: 4px 0;
+      margin: 12px 0;
+
+      .label {
+        flex-shrink: 0;
+      }
     }
   }
 

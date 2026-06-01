@@ -1,8 +1,11 @@
 <template>
   <div>
-    <input v-if="item.dataType === 'number'" type="number" :value="modelValue[item.id]"
-      @change="updateEditPropInputNumberInfo(item.id, $event)" :min="item.min" :max="item.max" :step="item.step"
-      class="numberInput" />
+    <div v-if="item.dataType === 'number'" class="numberEdit">
+      <input type="range" :value="modelValue[item.id]" @input="updateEditPropInputNumberInfo(item.id, $event)"
+        :min="item.min" :max="item.max" :step="item.step" class="numberInputRange" />
+      <input type="number" :value="modelValue[item.id]" @change="updateEditPropInputNumberInfo(item.id, $event)"
+        :step="item.step" class="numberInput" />
+    </div>
     <input v-else-if="item.dataType === 'color'" type="color" class="colorInput" :value="modelValue[item.id]"
       @change="updateEditPropInputInfo(item.id, $event)" />
     <input v-else-if="item.dataType === 'boolean'" type="checkbox" :checked="modelValue[item.id]"
@@ -117,8 +120,18 @@ function updateEditPropInputInfoBoolean(id: string, event: Event) {
   width: 130px;
 }
 
-.numberInput {
-  width: 100px;
+.numberEdit {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  .numberInputRange {
+    flex-grow: 1;
+  }
+
+  .numberInput {
+    width: 50px;
+  }
 }
 
 .materialList {

@@ -93,7 +93,7 @@ function raycastObjects(event: MouseEvent): THREE.Object3D | null {
   const scene = props.world.scene
   if (!scene) return null
   
-  const intersects = raycaster.intersectObjects(scene.children, true)
+  const intersects = raycaster.intersectObjects(props.world.boundingBoxList, true)
   
   if (intersects.length > 0) {
     return intersects[0].object
@@ -297,9 +297,9 @@ const initThree = () => {
             updateCameraAngel()
           }
         } else {
-          const hoveredObject = raycastObjects(e)
-          // console.log('hoveredObject', hoveredObject)
-          emit('objectHover', hoveredObject)
+          // const hoveredObject = raycastObjects(e)
+          // // console.log('hoveredObject', hoveredObject)
+          // emit('objectHover', hoveredObject)
         }
       }
       else if ('radius' in cameraStateZ.value) {
@@ -320,8 +320,8 @@ const initThree = () => {
           cameraStateZ.value.targetPositionZ = camera1TargetPositionStartZ - (deltaX * Math.sin(cameraStateZ.value.angleX) + deltaY * Math.cos(cameraStateZ.value.angleX)) * sensitivity;
           updateCameraAngel()
         } else {
-          const hoveredObject = raycastObjects(e)
-          emit('objectHover', hoveredObject)
+          // const hoveredObject = raycastObjects(e)
+          // emit('objectHover', hoveredObject)
         }
       }
     })
@@ -368,8 +368,8 @@ const initThree = () => {
 
     container.addEventListener('click', (e) => {
       if (!canvas1IsMouseMove && !canvas1IsMouseAngel) {
-        const clickedObject = raycastObjects(e)
-        emit('objectClick', clickedObject)
+        // const clickedObject = raycastObjects(e)
+        // emit('objectClick', clickedObject)
       }
     });
   })();

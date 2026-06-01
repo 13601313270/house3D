@@ -83,6 +83,8 @@ export abstract class EntityClass<T extends ObjData> {
       //   box.scale.set(boxVector3.x, boxVector3.y, boxVector3.z);
       //   box.position.set(offsetVector3.x, offsetVector3.y, offsetVector3.z);
       //   this.meshList[0].add(box);
+      //   // @ts-ignore
+      //   box.entity = this;
       //   this.boundingBox = box;
       // })();
       this.meshList.forEach(mesh => scene.add(mesh))
