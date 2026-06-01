@@ -487,7 +487,7 @@ export class CameraEntity extends EntityClass<CameraData> {
         dataType: 'number',
         min: 0,
         max: 180,
-        step: 15,
+        step: 1,
         value: data.fov,
       },
       {
