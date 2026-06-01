@@ -2,8 +2,8 @@
   <div class="context-menu" :style="{ top: position.y + 'px', left: position.x + 'px' }">
     <div class="configContainer">
       <div class="head">
-        <div class="moveIcon">
-          <img src="../assets/move2.svg" alt="move" />
+        <div class="moveIcon" @mousedown="startDrag">
+          <img src="../assets/move2.svg" alt="move" @mousedown.prevent />
         </div>
         <div class="title">{{ allFileKeysName[typeKey] }}</div>
         <div class="closeIcon"></div>
@@ -30,21 +30,23 @@
 <script setup lang="ts">
 import { editItem, allFileKeysName } from '@/entities/index';
 import DataTypeEdit from './DataTypeEdit.vue'
+import { ref } from 'vue';
 
 const props = defineProps<{
   typeKey: string
   editPropConfigInfo: editItem[]
   modelValue: Record<string, any>,
-  position: {
+  initPosition: {
     x: number,
     y: number
   }
 }>()
 
+const position = ref(props.initPosition)
+
 const emit = defineEmits<{
   (e: 'update:modelValue', value: Record<string, any>): void
   (e: 'deleteContextMenuEntity'): void
-  (e: 'changePosition', position: { x: number, y: number }): void
 }>()
 
 function handleUpdate(id: string, value: any) {
@@ -55,6 +57,64 @@ function handleUpdate(id: string, value: any) {
 }
 function deleteContextMenuEntity() {
   emit('deleteContextMenuEntity')
+}
+
+let isDragging = false
+let offsetX = 0
+let offsetY = 0
+
+function startDrag(e: MouseEvent) {
+  isDragging = true
+  const contextMenuEl = document.querySelector('.context-menu') as HTMLElement
+  if (contextMenuEl) {
+    const parentEl = contextMenuEl.parentElement
+    if (parentEl) {
+      const parentRect = parentEl.getBoundingClientRect()
+      const contextMenuRect = contextMenuEl.getBoundingClientRect()
+      const mouseXInParent = e.clientX - parentRect.left
+      const mouseYInParent = e.clientY - parentRect.top
+      offsetX = mouseXInParent - position.value.x
+      offsetY = mouseYInParent - position.value.y
+    }
+  }
+  document.addEventListener('mousemove', onMouseMove)
+  document.addEventListener('mouseup', onMouseUp)
+}
+
+function onMouseMove(e: MouseEvent) {
+  if (!isDragging) return
+  
+  const contextMenuEl = document.querySelector('.context-menu') as HTMLElement
+  if (!contextMenuEl) return
+  
+  const parentEl = contextMenuEl.parentElement
+  if (!parentEl) return
+  
+  const parentRect = parentEl.getBoundingClientRect()
+  const contextMenuRect = contextMenuEl.getBoundingClientRect()
+  
+  const mouseXInParent = e.clientX - parentRect.left
+  const mouseYInParent = e.clientY - parentRect.top
+  
+  const newLeft = mouseXInParent - offsetX
+  const newTop = mouseYInParent - offsetY
+  
+  const panelWidth = contextMenuRect.width
+  const panelHeight = contextMenuRect.height
+  
+  const maxLeft = parentRect.width - panelWidth
+  const maxTop = parentRect.height - panelHeight
+  
+  const clampedLeft = Math.max(0, Math.min(newLeft, maxLeft))
+  const clampedTop = Math.max(0, Math.min(newTop, maxTop))
+  
+  position.value = { x: clampedLeft, y: clampedTop }
+}
+
+function onMouseUp() {
+  isDragging = false
+  document.removeEventListener('mousemove', onMouseMove)
+  document.removeEventListener('mouseup', onMouseUp)
 }
 </script>
 <style scoped lang="less">

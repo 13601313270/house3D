@@ -156,7 +156,7 @@
       </div>
       <DataTypeEditList v-if="contextMenu?.visible && editPropTypeKey" :typeKey="editPropTypeKey"
         :editPropConfigInfo="editPropConfigInfo" v-model="editPropInputInfo"
-        :position="{ x: contextMenu.x, y: contextMenu.y }" @deleteContextMenuEntity="deleteContextMenuEntity" />
+        :initPosition="{ x: contextMenu.x, y: contextMenu.y }" @deleteContextMenuEntity="deleteContextMenuEntity" />
     </div>
   </div>
   <div v-if="showDemos" class="allDemosContent">
@@ -1151,10 +1151,8 @@ const handleContextMenu = (e: MouseEvent) => {
         if (snapPoint) {
           api.editPropConfig(snapPoint, (propConfig, callback) => {
             console.log('dist', propConfig)
-            let contextMenuX = e.clientX
-            if (contextMenuX + 350 > panel1SplitWidthPer.value * window.innerWidth) {
-              contextMenuX = panel1SplitWidthPer.value * window.innerWidth - 350
-            }
+            const contextMenuX = e.clientX
+            const contextMenuY = e.clientY
             editSnapPoint.value = snapPoint
             editPropTypeKey.value = type
             editPropTypeIndex.value = j
@@ -1168,7 +1166,7 @@ const handleContextMenu = (e: MouseEvent) => {
               contextMenu.value = {
                 visible: true,
                 x: contextMenuX,
-                y: e.clientY,
+                y: contextMenuY,
                 // @ts-ignore
                 type,
                 index: j
@@ -2208,6 +2206,7 @@ function handleObjectClick(object: THREE.Object3D | null) {
   width: 100vw;
   flex: 1;
   overflow: hidden;
+  position: relative;
 }
 
 .toolbar {
