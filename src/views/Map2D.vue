@@ -117,12 +117,6 @@
             @mousemove="handleMouseMove" @mouseleave="handleMouseLeave" @mouseup="handleMouseUp"
             @contextmenu="handleContextMenu" @wheel="handleWheel" class="drawing-canvas"
             :style="{ display: isSplitting ? 'none' : 'block' }" />
-          <div v-if="contextMenu?.visible" class="context-menu"
-            :style="{ top: contextMenu.y + 'px', left: contextMenu.x + 'px' }">
-            <DataTypeEditList :typeKey="editPropTypeKey" :editPropConfigInfo="editPropConfigInfo"
-              v-model="editPropInputInfo" />
-            <button @click="deleteContextMenuEntity">删除</button>
-          </div>
         </div>
       </div>
 
@@ -160,6 +154,9 @@
           <div v-else class="noCamera">请至少在场景中添加一个摄像机</div>
         </div>
       </div>
+      <DataTypeEditList v-if="contextMenu?.visible && editPropTypeKey" :typeKey="editPropTypeKey"
+        :editPropConfigInfo="editPropConfigInfo" v-model="editPropInputInfo"
+        :position="{ x: contextMenu.x, y: contextMenu.y }" @deleteContextMenuEntity="deleteContextMenuEntity" />
     </div>
   </div>
   <div v-if="showDemos" class="allDemosContent">
@@ -1155,8 +1152,8 @@ const handleContextMenu = (e: MouseEvent) => {
           api.editPropConfig(snapPoint, (propConfig, callback) => {
             console.log('dist', propConfig)
             let contextMenuX = e.clientX
-            if (contextMenuX + 340 > panel1SplitWidthPer.value * window.innerWidth) {
-              contextMenuX = panel1SplitWidthPer.value * window.innerWidth - 340
+            if (contextMenuX + 350 > panel1SplitWidthPer.value * window.innerWidth) {
+              contextMenuX = panel1SplitWidthPer.value * window.innerWidth - 350
             }
             editSnapPoint.value = snapPoint
             editPropTypeKey.value = type
@@ -2450,35 +2447,6 @@ button {
   width: 100%;
   height: 100%;
   border-radius: 8px;
-}
-
-.context-menu {
-  position: absolute;
-  width: 340px;
-  background: white;
-  border: 1px solid #d9d9d9;
-  box-sizing: border-box;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-  z-index: 1000;
-  max-height: 80vh;
-  overflow: auto;
-
-  button {
-    display: block;
-    width: 100%;
-    padding: 8px 16px;
-    border: none;
-    background: transparent;
-    text-align: left;
-    cursor: pointer;
-    font-size: 14px;
-    color: #ff4d4f;
-
-    &:hover {
-      background: #f5f5f5;
-    }
-  }
 }
 
 .cameraList {
