@@ -1,14 +1,15 @@
 <template>
   <div class="configList">
     {{ typeKey }}
+    <!-- {{ modelValue }} -->
     <div v-for="item in editPropConfigInfo" :key="item.id" class="configItem">
       <div class="label">
         {{ item.label }}：
-        <!-- {{ editPropInputInfo[item.id] }} -->
       </div>
       <div>
         <!-- {{ item }} -->
-        <DataTypeEdit :item="item" :modelValue="modelValue" @update:modelValue="handleUpdate" />
+        <DataTypeEdit :item="item" :modelValue="modelValue[item.id]"
+          @update:modelValue="handleUpdate(item.id, $event)" />
       </div>
     </div>
   </div>
@@ -17,7 +18,7 @@
 import { editItem } from '@/entities/index.js';
 import DataTypeEdit from './DataTypeEdit.vue'
 
-defineProps({
+const props = defineProps({
   typeKey: {
     type: String,
     default: ''
@@ -34,8 +35,11 @@ defineProps({
 
 const emit = defineEmits(['update:modelValue'])
 
-function handleUpdate(value: object) {
-  emit('update:modelValue', value)
+function handleUpdate(id: string, value: any) {
+  emit('update:modelValue', {
+    ...props.modelValue,
+    [id]: value
+  })
 }
 </script>
 <style scoped lang="less">

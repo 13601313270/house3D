@@ -1,26 +1,25 @@
 <template>
   <div>
     <div v-if="item.dataType === 'number'" class="numberEdit">
-      <input type="range" :value="modelValue[item.id]" @input="updateEditPropInputNumberInfo(item.id, $event)"
+      <input type="range" :value="modelValue" @input="updateEditPropInputNumberInfo"
         :min="item.min === -Infinity ? -500 : item.min" :max="item.max === Infinity ? 500 : item.max" :step="item.step"
         class="numberInputRange" />
-      <input type="number" :value="modelValue[item.id]" @change="updateEditPropInputNumberInfo(item.id, $event)"
+      <input type="number" :value="modelValue" @change="updateEditPropInputNumberInfo"
         :step="item.step" class="numberInput" />
     </div>
-    <input v-else-if="item.dataType === 'color'" type="color" class="colorInput" :value="modelValue[item.id]"
+    <input v-else-if="item.dataType === 'color'" type="color" class="colorInput" :value="modelValue"
       @change="updateEditPropInputInfo(item.id, $event)" />
-    <input v-else-if="item.dataType === 'boolean'" type="checkbox" :checked="modelValue[item.id]"
+    <input v-else-if="item.dataType === 'boolean'" type="checkbox" :checked="modelValue"
       @change="updateEditPropInputInfoBoolean(item.id, $event)" />
     <div v-else-if="item.dataType === 'material'" class="materialList">
-      <!-- {{ modelValue[item.id] }} -->
       <div @click="allMaterialShow = true, allMaterialShowPropId = item.id">
-        <div class="materialItem" v-if="!modelValue[item.id]">
+        <div class="materialItem" v-if="!modelValue">
           <div class="imgOuting">
             <img src="../assets/Empty.png" alt="noMaterial" class="img" style="width: 50px;background-color: white;" />
           </div>
           <div class="name">无</div>
         </div>
-        <div v-for="item2 in allMaterial.filter(item2 => modelValue[item.id] === item2.id)" :key="item2.id"
+        <div v-for="item2 in allMaterial.filter(item2 => modelValue === item2.id)" :key="item2.id"
           class="materialItem">
           <div class="imgOuting">
             <img :src="item2.img" alt="material" class="img" />
@@ -35,7 +34,7 @@
         <div class="title">所有材质</div>
         <div class="list">
           <div class="materialItem"
-            @click="updateEditPropInputNumberInfo(allMaterialShowPropId, null), allMaterialShow = false">
+            @click="updateEditPropInputNumberInfo(null), allMaterialShow = false">
             <div class="imgOuting">
               <img src="../assets/Empty.png" alt="noMaterial" class="img"
                 style="width: 50px;background-color: white;" />
@@ -43,8 +42,8 @@
             <div class="name">无</div>
           </div>
           <div v-for="item2 in allMaterial" :key="item2.id" class="materialItem"
-            :class="{ active: modelValue[item2.id] === item2.id }"
-            @click="updateEditPropInputNumberInfo(allMaterialShowPropId, item2.id), allMaterialShow = false">
+            :class="{ active: modelValue === item2.id }"
+            @click="updateEditPropInputNumberInfo(item2.id), allMaterialShow = false">
             <div class="imgOuting">
               <img :src="item2.img" alt="material" class="img" />
             </div>
@@ -60,59 +59,38 @@ import { editItem } from '@/entities';
 import { allMaterial } from '@/material';
 import { ref } from 'vue'
 
-const props = defineProps({
-  item: {
-    type: Object as () => editItem,
-    default: () => ({})
-  },
-  modelValue: {
-    type: Object,
-    default: () => ({})
-  }
-})
+const props = defineProps<{
+  item: editItem,
+  modelValue: any
+}>()
 
 const allMaterialShow = ref(false)
 const allMaterialShowPropId = ref<string>()
 
 const emit = defineEmits(['update:modelValue'])
 
-function updateEditPropInputNumberInfo(id: string, event: Event | number | null) {
-  if (event instanceof Event && id) {
+function updateEditPropInputNumberInfo(event: Event | number | null) {
+  if (event instanceof Event) {
     if (event.target !== null) {
-      emit('update:modelValue', {
-        ...props.modelValue,
-        // @ts-ignore
-        [id]: +(+event.target.value)
-      })
+      // @ts-ignore
+      emit('update:modelValue', +(+event.target.value))
     } else {
-      emit('update:modelValue', {
-        ...props.modelValue,
-        [id]: null
-      })
+      emit('update:modelValue', null)
     }
   } else {
-    emit('update:modelValue', {
-      ...props.modelValue,
-      [id]: event
-    })
+    emit('update:modelValue', event)
   }
 }
 function updateEditPropInputInfo(id: string, event: Event) {
   if (event.target) {
-    emit('update:modelValue', {
-      ...props.modelValue,
-      // @ts-ignore
-      [id]: event.target.value as string
-    })
+    // @ts-ignore
+    emit('update:modelValue', event.target.value as string)
   }
 }
 function updateEditPropInputInfoBoolean(id: string, event: Event) {
   if (event.target) {
-    emit('update:modelValue', {
-      ...props.modelValue,
-      // @ts-ignore
-      [id]: event.target.checked
-    })
+    // @ts-ignore
+    emit('update:modelValue', event.target.checked)
   }
 }
 </script>
@@ -231,7 +209,7 @@ function updateEditPropInputInfoBoolean(id: string, event: Event) {
 
         &.active {
           border: solid 1px #1890ff;
-          box-shadow: inset 0 0 0px 2px #1890ff;
+          box-shadow: 0 0 0px 2px #1890ff;
         }
 
         .imgOuting {
