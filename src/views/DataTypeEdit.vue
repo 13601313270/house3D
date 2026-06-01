@@ -2,7 +2,8 @@
   <div>
     <div v-if="item.dataType === 'number'" class="numberEdit">
       <input type="range" :value="modelValue[item.id]" @input="updateEditPropInputNumberInfo(item.id, $event)"
-        :min="item.min" :max="item.max" :step="item.step" class="numberInputRange" />
+        :min="item.min === -Infinity ? -500 : item.min" :max="item.max === Infinity ? 500 : item.max" :step="item.step"
+        class="numberInputRange" />
       <input type="number" :value="modelValue[item.id]" @change="updateEditPropInputNumberInfo(item.id, $event)"
         :step="item.step" class="numberInput" />
     </div>
