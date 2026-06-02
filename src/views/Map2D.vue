@@ -156,7 +156,7 @@
       </div>
       <DataTypeEditList v-if="contextMenu?.visible && editPropTypeKey" :typeKey="editPropTypeKey"
         :editPropConfigInfo="editPropConfigInfo" v-model="editPropInputInfo"
-        :initPosition="{ x: contextMenu.x, y: contextMenu.y }" @deleteContextMenuEntity="deleteContextMenuEntity" />
+        :initPosition="{ x: contextMenu.x, y: contextMenu.y }" @deleteContextMenuEntity="deleteContextMenuEntity" @close="contextMenu = null" />
     </div>
   </div>
   <div v-if="showDemos" class="allDemosContent">

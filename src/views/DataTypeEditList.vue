@@ -7,7 +7,7 @@
         </div>
         <div class="title">骨骼姿势编辑</div>
         <div class="closeIcon" @click="boneEditIsShow = false">
-          <img src="../assets/close.svg" alt="close" />
+          <img src="../assets/closeWhite.svg" alt="close" />
         </div>
       </div>
       <div>
@@ -20,23 +20,22 @@
           <img src="../assets/move2.svg" alt="move" @mousedown.prevent />
         </div>
         <div class="title">{{ allFileKeysName[typeKey] }}</div>
-        <div class="closeIcon"></div>
+        <div class="closeIcon" @click="emit('close')">
+          <img src="../assets/closeWhite.svg" alt="close" />
+        </div>
       </div>
       <!-- {{ modelValue }} -->
       <div class="configItemList">
         <div v-for="item in editPropConfigInfo" :key="item.id" class="configItem">
           <div class="label">
-            {{ item.label }}：
+            {{ item.label }}
           </div>
-          <div>
-            <!-- {{ item }} -->
-            <DataTypeEdit :item="item" :modelValue="modelValue[item.id]"
-              @update:modelValue="handleUpdate(item.id, $event)" />
-          </div>
+          <DataTypeEdit class="edit" :item="item" :modelValue="modelValue[item.id]"
+            @update:modelValue="handleUpdate(item.id, $event)" />
         </div>
       </div>
       <div class="buttonGroup">
-        <button v-if="typeKey === 'people'" @click="showBoneEdit">骨骼编辑</button>
+        <!-- <button v-if="typeKey === 'people'" @click="showBoneEdit">骨骼编辑</button> -->
         <div style="flex-grow: 1;"></div>
         <button class="deleteButton" @click="deleteContextMenuEntity">删除</button>
       </div>
@@ -71,28 +70,7 @@ function showBoneEdit() {
     removeIfOutside();
   })
 }
-// 重新修正位置，防止超出父元素范围
-function removeIfOutside() {
-  const contextMenuEl = document.querySelector('.context-menu') as HTMLElement
-  if (!contextMenuEl) return
 
-  const parentEl = contextMenuEl.parentElement
-  if (!parentEl) return
-
-  const parentRect = parentEl.getBoundingClientRect()
-
-  const contextMenuRect = contextMenuEl.getBoundingClientRect()
-  const panelWidth = contextMenuRect.width
-  const panelHeight = contextMenuRect.height
-  const maxLeft = parentRect.width - panelWidth - EDGE_PADDING
-  const maxTop = parentRect.height - panelHeight - EDGE_PADDING
-  console.log('maxTop', maxTop, position.value.y)
-
-  const clampedLeft = Math.max(EDGE_PADDING, Math.min(position.value.x, maxLeft))
-  const clampedTop = Math.max(EDGE_PADDING, Math.min(position.value.y, maxTop))
-  console.log('maxTop', clampedTop)
-  position.value = { x: clampedLeft, y: clampedTop }
-}
 onMounted(() => {
   const contextMenuEl = document.querySelector('.context-menu') as HTMLElement
   if (contextMenuEl) {
@@ -110,6 +88,7 @@ onMounted(() => {
 const emit = defineEmits<{
   (e: 'update:modelValue', value: Record<string, any>): void
   (e: 'deleteContextMenuEntity'): void
+  (e: 'close'): void
 }>()
 
 function handleUpdate(id: string, value: any) {
@@ -168,7 +147,6 @@ function onMouseMove(e: MouseEvent) {
   const maxLeft = parentRect.width - panelWidth - EDGE_PADDING
   const maxTop = parentRect.height - panelHeight - EDGE_PADDING
 
-  console.log('maxTop', maxTop, position.value.y)
   const clampedLeft = Math.max(EDGE_PADDING, Math.min(newLeft, maxLeft))
   const clampedTop = Math.max(EDGE_PADDING, Math.min(newTop, maxTop))
 
@@ -179,6 +157,26 @@ function onMouseUp() {
   isDragging = false
   document.removeEventListener('mousemove', onMouseMove)
   document.removeEventListener('mouseup', onMouseUp)
+}
+// 重新修正位置，防止超出父元素范围
+function removeIfOutside() {
+  const contextMenuEl = document.querySelector('.context-menu') as HTMLElement
+  if (!contextMenuEl) return
+
+  const parentEl = contextMenuEl.parentElement
+  if (!parentEl) return
+
+  const parentRect = parentEl.getBoundingClientRect()
+
+  const contextMenuRect = contextMenuEl.getBoundingClientRect()
+  const panelWidth = contextMenuRect.width
+  const panelHeight = contextMenuRect.height
+  const maxLeft = parentRect.width - panelWidth - EDGE_PADDING
+  const maxTop = parentRect.height - panelHeight - EDGE_PADDING
+
+  const clampedLeft = Math.max(EDGE_PADDING, Math.min(position.value.x, maxLeft))
+  const clampedTop = Math.max(EDGE_PADDING, Math.min(position.value.y, maxTop))
+  position.value = { x: clampedLeft, y: clampedTop }
 }
 </script>
 <style scoped lang="less">
@@ -200,7 +198,6 @@ function onMouseUp() {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-bottom: 12px;
       background: black;
       color: white;
 
@@ -241,7 +238,7 @@ function onMouseUp() {
     }
 
     .configItemList {
-      padding: 8px;
+      padding: 12px 12px 4px 12px;
       // border: 1px solid red; // #d9d9d9;
 
       .configItem {
@@ -249,10 +246,20 @@ function onMouseUp() {
         flex-direction: row;
         align-items: center;
         justify-content: space-between;
-        margin: 12px 0;
+        margin-bottom: 12px;
+
+        &:last-child {
+          margin-bottom: 0;
+        }
 
         .label {
           flex-shrink: 0;
+          min-width: 70px;
+          text-align: left;
+        }
+
+        .edit {
+          flex-grow: 1;
         }
       }
     }
@@ -262,8 +269,7 @@ function onMouseUp() {
       flex-direction: row;
       align-items: center;
       justify-content: space-between;
-      margin-top: 12px;
-      padding: 8px;
+      padding: 12px;
 
       button {
         padding: 4px 8px;

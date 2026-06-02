@@ -106,6 +106,7 @@ function updateEditPropInputInfoBoolean(id: string, event: Event) {
 
   .numberInputRange {
     flex-grow: 1;
+    margin-right: 8px;
   }
 
   .numberInput {
