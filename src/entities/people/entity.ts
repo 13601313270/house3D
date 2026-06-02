@@ -35,21 +35,7 @@ export class PeopleEntity extends EntityClass<PeopleData> {
       z: 0,
       angle: 0,
       height: 170,
-      bone: [{
-        name: 'upper_armL',
-        value: {
-          x: 1.3053721400935037,
-          y: 1.108676994056402,
-          z: Math.PI * -0.85,
-        },
-      }, {
-        name: 'upper_armR',
-        value: {
-          x: 1.3240509292872764,
-          y: -1.1183614020188568,
-          z: Math.PI * 0.85,
-        },
-      }],
+      bone: [],
     }
     return new PeopleDataClass(people)
   }
@@ -170,7 +156,7 @@ export class PeopleEntity extends EntityClass<PeopleData> {
     //   roughness: 0.7,
     //   metalness: 0.1
     // })
-    loader.load('./ManClean.glb', (gltf: any) => {
+    loader.load('./ManClean3.glb', (gltf: any) => {
       gltf.scene.rotateX(Math.PI);  // 如果需要绕 X 轴翻转 180 度
       gltf.scene.rotateY(Math.PI)
       gltf.scene.rotateZ(Math.PI);  // 如果需要绕 Y 轴翻转 180 度
@@ -364,7 +350,7 @@ export class PeopleEntity extends EntityClass<PeopleData> {
         id: 'bone',
         label: '骨骼',
         dataType: 'hidden',
-        value: data.bone,
+        value: data.bone || [],
       },
     ], (val) => {
       this.setData({

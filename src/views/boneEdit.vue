@@ -22,9 +22,24 @@
       <div class="viewport-label">主视角</div>
       <div class="canvas-bone-3d-container" ref="containerRef">
       </div>
+      <div class="animationControls">
+        <div class="progressContainer">
+          <div class="progressBar" @click="seekTo">
+            <div class="progressFill" :style="{ width: progressPercent + '%' }"></div>
+            <div class="progressThumb" :style="{ left: progressPercent + '%' }"></div>
+          </div>
+          <div class="timeDisplay">
+            {{ formatTime(currentTime) }} / {{ formatTime(totalDuration) }}
+          </div>
+        </div>
+        <div class="controlButtons">
+          <button @click="togglePlay" class="controlBtn">
+            {{ isPlaying ? '⏸ 暂停' : '▶ 播放' }}
+          </button>
+        </div>
+      </div>
     </div>
     <div class="boneListPanel">
-      <div>所有骨骼</div>
       <div class="boneItemList">
         <div v-for="item in allBones" :key="item.name" class="boneItem">
           <div class="label">
@@ -32,31 +47,36 @@
               {{ nameToConfig[item.name]?.title || item.name }}
             </div>
             <div>
-              <!-- {{ item.value }} -->
               <button
                 @click="changeBoneValue(item, 'x', item.basicValue.x), changeBoneValue(item, 'y', item.basicValue.y), changeBoneValue(item, 'z', item.basicValue.z)">初始值</button>
             </div>
           </div>
           <div class="editList">
-            {{ item.value.x }}
             <div class="editRange">
               <div>x:</div>
+              {{ item.value.x }}
               <input class="editRangeInput" @input="changeBoneValue(item, 'x', $event)" type="range"
-                v-model="item.value.x" step="0.01" :min="nameToConfig[item.name].minX"
-                :max="nameToConfig[item.name].maxX" />
+                v-model="item.value.x" step="0.01" :min="nameToConfig[item.name]?.minX || -3.14"
+                :max="nameToConfig[item.name]?.maxX || 3.14" />
+              <input type="number" :value="item.value.x" @input="changeBoneValue(item, 'x', $event)" />
             </div>
             <div class="editRange" v-if="item.name !== 'spine'">
               <div>y</div>
               <input class="editRangeInput" @input="changeBoneValue(item, 'y', $event)" type="range"
                 v-model="item.value.y" step="0.01" min="-3.14" max="3.14" />
+              <input type="number" :value="item.value.y" @input="changeBoneValue(item, 'y', $event)" />
             </div>
             <div class="editRange">
               <div>z</div>
               <input class="editRangeInput" @input="changeBoneValue(item, 'z', $event)" type="range"
                 v-model="item.value.z" step="0.01" min="-3.14" max="3.14" />
+              <input type="number" :value="item.value.z" @input="changeBoneValue(item, 'z', $event)" />
             </div>
           </div>
         </div>
+      </div>
+      <div class="bottomActions">
+        <div class="saveBtn" @click="save">应用</div>
       </div>
     </div>
   </div>
@@ -68,6 +88,8 @@ import * as THREE from 'three'
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
 // @ts-ignore
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
+// @ts-ignore
+import { FBXLoader } from 'three/addons/loaders/FBXLoader.js'
 
 const viewportRef = ref<HTMLDivElement | null>(null)
 const containerRef = ref<HTMLDivElement | null>(null)
@@ -77,6 +99,8 @@ const containerLeftRef = ref<HTMLDivElement | null>(null)
 
 let scene = new THREE.Scene()
 let animationId: number | null = null
+let mixer: THREE.AnimationMixer | null = null
+const clock = new THREE.Clock()
 
 const props = defineProps<{
   modelValue: Array<{
@@ -115,6 +139,98 @@ const emit = defineEmits<{
   }>): void
 }>()
 
+const isPlaying = ref(false)
+const currentTime = ref(0)
+const totalDuration = ref(0)
+let currentAction: THREE.AnimationAction | null = null
+
+const progressPercent = ref(0)
+
+function formatTime(seconds: number): string {
+  const mins = Math.floor(seconds / 60)
+  const secs = Math.floor(seconds % 60)
+  return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
+}
+
+function togglePlay() {
+  if (!currentAction || !mixer) return
+
+  if (isPlaying.value) {
+    currentAction.paused = true
+    isPlaying.value = false
+  } else {
+    currentAction.paused = false
+    isPlaying.value = true
+  }
+}
+
+function seekTo(event: MouseEvent) {
+  if (!currentAction || !mixer || totalDuration.value === 0) return
+
+  const target = event.currentTarget as HTMLElement
+  const rect = target.getBoundingClientRect()
+  const percent = (event.clientX - rect.left) / rect.width
+  const clampedPercent = Math.max(0, Math.min(1, percent))
+
+  const newTime = clampedPercent * totalDuration.value
+  currentTime.value = newTime
+  progressPercent.value = clampedPercent * 100
+
+  currentAction.time = newTime
+}
+
+async function applyPreset() {
+  // if (['stand', 'sit', 'walk'].includes(preset.name)) {
+  //   // const json = await import(`./peoplePose/${preset.name}.json`)
+  //   // const jsonDefault = JSON.parse(JSON.stringify(json.default))
+  //   // if (jsonDefault) {
+  //   //   allBones.value.forEach(v => {
+  //   //     const find = jsonDefault.find((item: any) => item.name === v.name)
+  //   //     if (find) {
+  //   //       v.value = find.value
+  //   //       changeBoneValue(v, 'x', v.value.x)
+  //   //       changeBoneValue(v, 'y', v.value.y)
+  //   //       changeBoneValue(v, 'z', v.value.z)
+  //   //     }
+  //   //   })
+  //   // }
+  // } else {
+  //   allBones.value.forEach(v => {
+  //     const find = preset.bones.find((item: any) => item.name === v.name)
+  //     if (find) {
+  //       v.value = find.value
+  //       changeBoneValue(v, 'x', v.value.x)
+  //       changeBoneValue(v, 'y', v.value.y)
+  //       changeBoneValue(v, 'z', v.value.z)
+  //     }
+  //   })
+  //   // allBones.value = preset.bones.map(v => {
+  //   //   const bondMesh = scene.getObjectByName(v.name) as THREE.Mesh
+  //   //   bondMesh.rotation.x = v.value.x
+  //   //   bondMesh.rotation.y = v.value.y
+  //   //   bondMesh.rotation.z = v.value.z
+
+  //   //   return {
+  //   //     name: v.name,
+  //   //     basicValue: v.value,
+  //   //     value: v.value,
+  //   //   }
+  //   // });
+  // }
+  // const newBones = [];
+  // preset.bones.forEach(boneData => {
+  //   newBones.push({
+  //     ...allBones.value.find(b => b.name === boneData.name),
+  //     value: boneData.value,
+  //   })
+  //   // if (bone) {
+  //   //   changeBoneValue(bone, 'x', boneData.value.x)
+  //   //   changeBoneValue(bone, 'y', boneData.value.y)
+  //   //   changeBoneValue(bone, 'z', boneData.value.z)
+  //   // }
+  // })
+}
+
 const allBones = ref<Array<{
   name: string,
   basicValue: {
@@ -143,6 +259,8 @@ const nameToConfig = ref<{
     title: string,
     minX: number,
     maxX: number,
+    minY?: number,
+    maxY?: number,
   }
 }>({
   'spine': {
@@ -179,6 +297,8 @@ const nameToConfig = ref<{
     title: '肩头(右)',
     minX: -3.14,
     maxX: 3.14,
+    minY: -3.14,
+    maxY: 3.14,
   },
   'shoulderR': {
     title: '肩头(左)',
@@ -330,12 +450,12 @@ function initThree() {
     }
   })
 
-  const loader = new GLTFLoader()
+  const gltfLoader = new GLTFLoader()
+  const fbxLoader = new FBXLoader()
 
-  loader.load('/ManClean.glb', (gltf: any) => {
-    console.log('模型加载成功:', gltf)
+  gltfLoader.load('/ManClean3.glb', (gltf: any) => {
+    console.log('GLB模型加载成功:', gltf)
 
-    // allBones.value = []
     const allBonesData: Array<{
       name: string,
       basicValue: {
@@ -357,13 +477,9 @@ function initThree() {
         }
       }
       if (child.isBone) {
-        console.log(`🦴 发现骨骼: ${child.name}`)
-        // if (child.name === 'upper_armL') {
-        //   child.rotation.z = Math.PI * -0.85
-        // }
-        // if (child.name === 'upper_armR') {
-        //   child.rotation.z = Math.PI * 0.85
-        // }
+        if (child.name === 'mixamorigHips') {
+          console.log(`🦴 GLB骨骼: ${child.name}`, child.rotation)
+        }
         const findProp = allBones.value.find((item) => item.name === child.name)
         if (![
           'spine004', 'breastL',
@@ -386,9 +502,9 @@ function initThree() {
             },
           })
         }
-        if (findProp) {
-          child.rotation.set(findProp.value.x, findProp.value.y, findProp.value.z)
-        }
+        // if (findProp) {
+        //   child.rotation.set(findProp.value.x, findProp.value.y, findProp.value.z)
+        // }
       }
     })
     allBones.value = allBonesData;
@@ -398,25 +514,71 @@ function initThree() {
     const size = box.getSize(new THREE.Vector3())
     console.log('模型包围盒 - 中心:', center, '尺寸:', size)
 
-    gltf.scene.position.sub(center)
+    // gltf.scene.position.sub(center)
+    // gltf.scene.rotation.set(0, 0, 0)
 
     const maxDim = Math.max(size.x, size.y, size.z)
     const scale = 200 / maxDim
     gltf.scene.scale.set(scale, scale, scale)
     console.log('模型缩放:', scale)
 
+    // gltf.scene.rotation.x = -Math.PI / 2
+
     scene.add(gltf.scene)
-    animate()
+
+    fbxLoader.load('/sit.fbx', (fbxScene: any) => {
+      console.log('FBX动画加载成功:', fbxScene)
+
+      if (fbxScene.animations && fbxScene.animations.length > 0) {
+        console.log('FBX发现动画:', fbxScene.animations.length, '个')
+        fbxScene.animations.forEach((anim: any, index: number) => {
+          console.log(`动画 ${index}: ${anim.name}, 时长: ${anim.duration.toFixed(2)}s`)
+        })
+
+        mixer = new THREE.AnimationMixer(gltf.scene)
+
+        const clip = fbxScene.animations[0]
+        currentAction = mixer.clipAction(clip, gltf.scene)
+        totalDuration.value = clip.duration
+        currentAction.play()
+        isPlaying.value = true
+        console.log(`播放动画: ${clip.name}`)
+      } else {
+        console.log('FBX文件没有包含动画数据')
+      }
+
+      animate()
+    }, (progress: any) => {
+      const percent = (progress.loaded / progress.total * 100).toFixed(2)
+      console.log('FBX加载进度:', percent + '%')
+    }, (error: any) => {
+      console.error('FBX文件加载失败:', error)
+      animate()
+    })
   }, (progress: any) => {
     const percent = (progress.loaded / progress.total * 100).toFixed(2)
-    console.log('加载进度:', percent + '%')
+    console.log('GLB加载进度:', percent + '%')
   }, (error: any) => {
-    console.error('OBJ文件加载失败:', error)
+    console.error('GLB文件加载失败:', error)
   })
 }
 
 function animate() {
   animationId = requestAnimationFrame(animate)
+
+  const delta = clock.getDelta()
+  mixer?.update(delta)
+
+  if (currentAction && totalDuration.value > 0) {
+    currentTime.value = currentAction.time
+    progressPercent.value = (currentTime.value / totalDuration.value) * 100
+
+    if (currentTime.value >= totalDuration.value) {
+      currentAction.time = 0
+      currentTime.value = 0
+      progressPercent.value = 0
+    }
+  }
 
   controls?.update()
 
@@ -438,6 +600,8 @@ onUnmounted(() => {
   if (animationId) {
     cancelAnimationFrame(animationId)
   }
+  mixer?.stopAllAction()
+  mixer = null;
   controls?.dispose()
   allPanel.forEach((panel) => {
     panel.renderer.dispose()
@@ -462,7 +626,34 @@ function changeBoneValue(item: {
   item.value[editRotation] = newValue;
   const bondMesh = scene.getObjectByName(item.name) as THREE.Mesh
   bondMesh.rotation[editRotation] = item.value[editRotation]
-  emit('update:modelValue', allBones.value)
+}
+function save() {
+  if (currentAction && isPlaying.value) {
+    currentAction.paused = true
+    isPlaying.value = false
+  }
+
+  allBones.value.forEach(bone => {
+    const boneObject = scene.getObjectByName(bone.name)
+    if (boneObject && boneObject.isBone) {
+      if (bone.name === 'mixamorigHips') {
+        bone.value.x = -1.557879613085354
+      } else {
+        bone.value.x = boneObject.rotation.x
+      }
+      bone.value.y = boneObject.rotation.y
+      bone.value.z = boneObject.rotation.z
+    }
+  })
+
+  const saveVal = allBones.value.map(v => {
+    return {
+      name: v.name,
+      value: v.value,
+    }
+  })
+  console.log('保存数据', JSON.stringify(saveVal))
+  emit('update:modelValue', saveVal)
 }
 </script>
 <style scoped lang="less">
@@ -471,7 +662,10 @@ function changeBoneValue(item: {
   flex-wrap: wrap;
   gap: 6px;
   height: 100%;
+  padding: 6px;
   overflow: hidden;
+  position: relative;
+  flex-wrap: nowrap;
 }
 
 .leftPanel {
@@ -513,6 +707,22 @@ function changeBoneValue(item: {
 .canvas-bone-3d-container {
   width: 100%;
   height: 100%;
+}
+
+.bottomActions {
+  padding-top: 12px;
+  border-top: 1px solid #d9d9d9;
+
+  .saveBtn {
+    padding: 4px 8px;
+    border: none;
+    border-radius: 4px;
+    background: #409eff;
+    color: white;
+    // border: 1px solid #409eff;
+    cursor: pointer;
+    font-size: 14px;
+  }
 }
 
 .boneListPanel {
@@ -559,6 +769,124 @@ function changeBoneValue(item: {
             flex-grow: 1;
           }
         }
+      }
+    }
+  }
+
+  .presetPanel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 8px;
+    overflow-y: auto;
+
+    .presetItem {
+      button {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #d9d9d9;
+        border-radius: 8px;
+        background: white;
+        cursor: pointer;
+        font-size: 16px;
+        transition: all 0.2s;
+
+        &:hover {
+          border-color: #409eff;
+          background: #e8f4ff;
+        }
+
+        &:active {
+          transform: scale(0.98);
+        }
+      }
+    }
+  }
+}
+
+.animationControls {
+  padding: 12px;
+  background: #f5f5f5;
+  border-radius: 4px;
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+
+  .progressContainer {
+    flex-grow: 1;
+
+    .progressBar {
+      position: relative;
+      height: 8px;
+      background: #e0e0e0;
+      border-radius: 4px;
+      cursor: pointer;
+      overflow: visible;
+
+      &:hover {
+        background: #d0d0d0;
+      }
+
+      .progressFill {
+        position: absolute;
+        left: 0;
+        top: 0;
+        height: 100%;
+        background: #409eff;
+        border-radius: 4px;
+        transition: width 0.1s;
+      }
+
+      .progressThumb {
+        position: absolute;
+        top: 50%;
+        width: 16px;
+        height: 16px;
+        background: #409eff;
+        border-radius: 50%;
+        transform: translate(-50%, -50%);
+        border: 2px solid white;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        transition: left 0.1s;
+      }
+    }
+
+    .timeDisplay {
+      margin-top: 8px;
+      text-align: center;
+      font-size: 12px;
+      color: #666;
+    }
+  }
+
+  .controlButtons {
+    display: flex;
+    gap: 8px;
+    margin-left: 12px;
+
+    .controlBtn {
+      flex: 1;
+      padding: 8px 12px;
+      border: none;
+      border-radius: 4px;
+      background: #409eff;
+      color: white;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.2s;
+
+      &:hover {
+        background: #66b1ff;
+      }
+
+      &:active {
+        transform: scale(0.98);
       }
     }
   }

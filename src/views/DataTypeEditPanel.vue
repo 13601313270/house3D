@@ -11,10 +11,7 @@
           <img src="../assets/closeWhite.svg" alt="close" />
         </div>
       </div>
-      <div class="configItemList">
-        <!-- {{ modelValue }} -->
-        <BoneEdit v-if="boneEditIsShow" :modelValue="modelValue.bone" @update:modelValue="handleUpdateBone" />
-      </div>
+      <BoneEdit v-if="boneEditIsShow" :modelValue="modelValue.bone" @update:modelValue="handleUpdateBone" />
     </div>
     <div class="configContainer" v-else>
       <div class="head">
@@ -173,6 +170,10 @@ function handleUpdateBone(value: Array<{
   emit('update:modelValue', {
     ...props.modelValue,
     bone: value
+  })
+  nextTick(() => {
+    boneEditIsShow.value = false;
+    emit('close')
   })
 }
 // 重新修正位置，防止超出父元素范围
