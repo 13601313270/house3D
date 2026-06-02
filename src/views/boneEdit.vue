@@ -26,10 +26,23 @@
       <div>所有骨骼</div>
       <div class="boneItemList">
         <div v-for="item in allBones" :key="item.name" class="boneItem">
-          <div class="label">{{ item.name }} {{ item.value }}</div>
+          <div class="label">
+            <div>
+              {{ nameToTitle[item.name] || item.name }}
+            </div>
+            <div>
+              <!-- {{ item.value }} -->
+              <button
+                @click="changeBoneValue(item, 'x', item.basicValue.x), changeBoneValue(item, 'y', item.basicValue.y), changeBoneValue(item, 'z', item.basicValue.z)">初始值</button>
+            </div>
+          </div>
           <div>
-            <input @input="changeBoneValue(item, $event)" type="range" v-model="item.value" step="0.01" min="-3.14"
-              max="3.14" />
+            <input @input="changeBoneValue(item, 'x', $event)" type="range" v-model="item.value.x" step="0.01"
+              min="-3.14" max="3.14" />
+            <input @input="changeBoneValue(item, 'y', $event)" type="range" v-model="item.value.y" step="0.01"
+              min="-3.14" max="3.14" />
+            <input @input="changeBoneValue(item, 'z', $event)" type="range" v-model="item.value.z" step="0.01"
+              min="-3.14" max="3.14" />
           </div>
         </div>
       </div>
@@ -41,6 +54,8 @@ import { ref, onMounted, onUnmounted, nextTick } from 'vue'
 import * as THREE from 'three'
 // @ts-ignore
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
+// @ts-ignore
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 
 const viewportRef = ref<HTMLDivElement | null>(null)
 const containerRef = ref<HTMLDivElement | null>(null)
@@ -68,14 +83,41 @@ type ViewportConfig = {
 
 const allBones = ref<Array<{
   name: string,
-  value: number,
+  basicValue: {
+    x: number,
+    y: number,
+    z: number,
+  }
+  value: {
+    x: number,
+    y: number,
+    z: number,
+  },
 }>>([])
 
+const nameToTitle = ref<Record<string, string>>({
+  'spine001': '腰',
+  'spine005': '脖子',
+  'thighR': '大腿(右)',
+  'shinR': '小腿(右)',
+  'footR': '脚踝(左)',
+  'Generate_Rig': '肩头(右)',
+  'shoulderR': '肩头(左)',
+  'upper_armL': '大臂(右)',
+  'upper_armR': '大臂(左)',
+  'forearmL': '小臂(右)',
+  'forearmR': '小臂(左)',
+  'handL': '手腕(右)',
+  'handR': '手腕(左)',
+  'thighL': '大腿(右)',
+  'shinL': '小腿(右)',
+  'footL': '脚踝(右)',
+})
 const viewportConfigs: ViewportConfig[] = [
   {
     id: 'main',
     type: 'perspective',
-    position: [0, 300, 400],
+    position: [-300, 300, 400],
     fov: 45,
     aspect: 1,
     getContainer: () => containerRef.value
@@ -107,6 +149,7 @@ let allPanel: Array<{
   camera: THREE.Camera
   renderer: THREE.WebGLRenderer
 }>
+let controls: OrbitControls | null = null
 const allPanelHeight = ref(0)
 
 function initThree() {
@@ -154,6 +197,15 @@ function initThree() {
     }
 
     container.appendChild(renderer.domElement)
+
+    if (index === 0 && config.type === 'perspective') {
+      controls = new OrbitControls(camera, renderer.domElement)
+      controls.target.set(0, 100, 0)
+      controls.enableDamping = true
+      controls.dampingFactor = 0.05
+      controls.enablePan = false
+    }
+
     return {
       camera,
       renderer,
@@ -168,7 +220,16 @@ function initThree() {
     // allBones.value = []
     const allBonesData: Array<{
       name: string,
-      value: number,
+      basicValue: {
+        x: number,
+        y: number,
+        z: number,
+      },
+      value: {
+        x: number,
+        y: number,
+        z: number,
+      },
     }> = [];
     gltf.scene.traverse((child: any) => {
       if (child.isMesh) {
@@ -185,10 +246,27 @@ function initThree() {
         if (child.name === 'upper_armR') {
           child.rotation.z = Math.PI * 0.85
         }
-        allBonesData.push({
-          name: child.name,
-          value: 0,
-        })
+        if (![
+          'spine', 'spine004', 'breastL',
+          'breastR', 'pelvisL', 'pelvisR',
+          'toeL', 'toeR', 'heel02L',
+          'heel02R', 'spine002', 'spine003',
+          'spine006'
+        ].includes(child.name)) {
+          allBonesData.push({
+            name: child.name,
+            basicValue: {
+              x: child.rotation.x,
+              y: child.rotation.y,
+              z: child.rotation.z,
+            },
+            value: {
+              x: child.rotation.x,
+              y: child.rotation.y,
+              z: child.rotation.z,
+            },
+          })
+        }
       }
     })
     allBones.value = allBonesData;
@@ -218,6 +296,8 @@ function initThree() {
 function animate() {
   animationId = requestAnimationFrame(animate)
 
+  controls?.update()
+
   allPanel.forEach((panel) => {
     panel.renderer.render(scene, panel.camera!)
   })
@@ -236,20 +316,30 @@ onUnmounted(() => {
   if (animationId) {
     cancelAnimationFrame(animationId)
   }
+  controls?.dispose()
   allPanel.forEach((panel) => {
     panel.renderer.dispose()
   })
 })
 function changeBoneValue(item: {
   name: string,
-  value: number,
-}, event: InputEvent) {
-  if (!event.target) return
-
-  // @ts-ignore
-  item.value = event.target.value
+  value: {
+    x: number,
+    y: number,
+    z: number,
+  },
+}, editRotation: 'x' | 'y' | 'z', event: InputEvent | number) {
+  let newValue = 0;
+  if (typeof event === 'number') {
+    newValue = event
+  } else {
+    if (!event.target) return
+    // @ts-ignore
+    newValue = event.target.value;
+  }
+  item.value[editRotation] = newValue;
   const bondMesh = scene.getObjectByName(item.name) as THREE.Mesh
-  bondMesh.rotation.z = item.value
+  bondMesh.rotation[editRotation] = item.value[editRotation]
 }
 </script>
 <style scoped lang="less">
