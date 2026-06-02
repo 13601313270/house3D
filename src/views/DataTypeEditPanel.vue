@@ -1,5 +1,6 @@
 <template>
-  <div class="context-menu" :style="{ top: position.y + 'px', left: position.x + 'px' }">
+  <div class="context-menu" :class="{ fallHeight: boneEditIsShow }"
+    :style="{ top: position.y + 'px', left: position.x + 'px' }">
     <div class="configContainer" v-if="boneEditIsShow" style="width: auto;height: auto;">
       <div class="head">
         <div class="moveIcon" @mousedown="startDrag">
@@ -10,7 +11,7 @@
           <img src="../assets/closeWhite.svg" alt="close" />
         </div>
       </div>
-      <div>
+      <div class="configItemList">
         <BoneEdit v-if="boneEditIsShow" />
       </div>
     </div>
@@ -64,6 +65,7 @@ const position = ref(props.initPosition)
 const EDGE_PADDING = 6
 
 function showBoneEdit() {
+  position.value = { x: 0, y: 0 }
   boneEditIsShow.value = true
 
   nextTick(() => {
@@ -187,13 +189,25 @@ function removeIfOutside() {
   box-sizing: border-box;
   border-radius: 8px;
   box-shadow: 0 0 14px 3px rgba(0, 0, 0, 0.65);
-
   z-index: 1000;
-  max-height: 80vh;
-  overflow: auto;
+  max-height: 85vh;
+  overflow: hidden;
+  display: flex;
+
+  &.fallHeight {
+    height: 85vh;
+
+    .configContainer {
+      height: 100%;
+    }
+  }
 
   .configContainer {
     width: 340px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
 
     .head {
       display: flex;
@@ -239,7 +253,9 @@ function removeIfOutside() {
     }
 
     .configItemList {
-      padding: 12px 12px 4px 12px;
+      padding: 12px;
+      overflow-y: auto;
+      flex-grow: 1;
       // border: 1px solid red; // #d9d9d9;
 
       .configItem {
@@ -261,6 +277,9 @@ function removeIfOutside() {
 
         .edit {
           flex-grow: 1;
+          display: flex;
+          align-items: center;
+          justify-content: end;
         }
       }
     }

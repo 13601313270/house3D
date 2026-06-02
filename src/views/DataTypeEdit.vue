@@ -4,8 +4,8 @@
       <input type="range" :value="modelValue" @input="updateEditPropInputNumberInfo"
         :min="item.min === -Infinity ? -500 : item.min" :max="item.max === Infinity ? 500 : item.max" :step="item.step"
         class="numberInputRange" />
-      <input type="number" :value="modelValue" @change="updateEditPropInputNumberInfo"
-        :step="item.step" class="numberInput" />
+      <input type="number" :value="modelValue" @change="updateEditPropInputNumberInfo" :step="item.step"
+        class="numberInput" />
     </div>
     <input v-else-if="item.dataType === 'color'" type="color" class="colorInput" :value="modelValue"
       @change="updateEditPropInputInfo(item.id, $event)" />
@@ -19,8 +19,7 @@
           </div>
           <div class="name">无</div>
         </div>
-        <div v-for="item2 in allMaterial.filter(item2 => modelValue === item2.id)" :key="item2.id"
-          class="materialItem">
+        <div v-for="item2 in allMaterial.filter(item2 => modelValue === item2.id)" :key="item2.id" class="materialItem">
           <div class="imgOuting">
             <img :src="item2.img" alt="material" class="img" />
           </div>
@@ -33,8 +32,7 @@
       <div class="allMaterialPanelInner">
         <div class="title">所有材质</div>
         <div class="list">
-          <div class="materialItem"
-            @click="updateEditPropInputNumberInfo(null), allMaterialShow = false">
+          <div class="materialItem" @click="updateEditPropInputNumberInfo(null), allMaterialShow = false">
             <div class="imgOuting">
               <img src="../assets/Empty.png" alt="noMaterial" class="img"
                 style="width: 50px;background-color: white;" />
@@ -103,6 +101,7 @@ function updateEditPropInputInfoBoolean(id: string, event: Event) {
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 100%;
 
   .numberInputRange {
     flex-grow: 1;
