@@ -35,6 +35,21 @@ export class PeopleEntity extends EntityClass<PeopleData> {
       z: 0,
       angle: 0,
       height: 170,
+      bone: [{
+        name: 'upper_armL',
+        value: {
+          x: 1.3053721400935037,
+          y: 1.108676994056402,
+          z: Math.PI * -0.85,
+        },
+      }, {
+        name: 'upper_armR',
+        value: {
+          x: 1.3240509292872764,
+          y: -1.1183614020188568,
+          z: Math.PI * 0.85,
+        },
+      }],
     }
     return new PeopleDataClass(people)
   }
@@ -144,6 +159,8 @@ export class PeopleEntity extends EntityClass<PeopleData> {
   }
 
   create3DMesh(scene: THREE.Scene): THREE.Group[] {
+    console.log('create3DMesh', 1)
+
     const data = this.getData();
     const loader = new GLTFLoader()
     const group = new THREE.Group()
@@ -157,15 +174,22 @@ export class PeopleEntity extends EntityClass<PeopleData> {
       gltf.scene.rotateX(Math.PI);  // 如果需要绕 X 轴翻转 180 度
       gltf.scene.rotateY(Math.PI)
       gltf.scene.rotateZ(Math.PI);  // 如果需要绕 Y 轴翻转 180 度
+      const boneListConfig = data.bone || [];
       gltf.scene.traverse((child: any) => {
         if (child.isBone) {
           console.log(`🦴 发现骨骼: ${child.name}`);
-          if (child.name === 'upper_armL') {
-            child.rotation.z = Math.PI * -0.85
+          const findProp = boneListConfig.find((item) => item.name === child.name)
+          if (findProp) {
+            child.rotation.set(findProp.value.x, findProp.value.y, findProp.value.z)
+            // child.rotation.z = findProp.value.z
           }
-          if (child.name === 'upper_armR') {
-            child.rotation.z = Math.PI * 0.85
-          }
+          console.log(`🦴 发现骨骼-1:${child.name}: ${child.rotation.x}, ${child.rotation.y}, ${child.rotation.z}`);
+          // if (child.name === 'upper_armL') {
+          //   child.rotation.z = Math.PI * -0.85
+          // }
+          // if (child.name === 'upper_armR') {
+          //   child.rotation.z = Math.PI * 0.85
+          // }
         }
       });
       group.add(gltf.scene)
@@ -189,6 +213,7 @@ export class PeopleEntity extends EntityClass<PeopleData> {
   }
 
   change3DMeshState(): void {
+    console.log('create3DMesh', 2, this.meshList)
     const data = this.getData();
     const singleHeight = 0.213
     const { height, angle } = data
@@ -196,14 +221,20 @@ export class PeopleEntity extends EntityClass<PeopleData> {
       v.position.set(data.x, data.z, data.y)
       v.scale.set(singleHeight * height, singleHeight * height, singleHeight * height)
       v.rotation.set(0, angle * -1, 0)
-
-      // v.traverse((child: any) => {
-      //   console.log(`🦴 发现骨骼: ============`);
-      //   if (child.isBone) {
-      //     console.log(`🦴 发现骨骼: ${child.name}`);
-      //   }
-      // });
     })
+    if (this.meshList?.[0]?.children[0] && data.bone && data.bone?.length > 0) {
+      const boneListConfig = data.bone
+      this.meshList?.[0]?.children[0].traverse((child: any) => {
+        if (child.isBone) {
+          console.log(`🦴 发现骨骼: ${child.name}`);
+          const findProp = boneListConfig.find((item) => item.name === child.name)
+          if (findProp) {
+            child.rotation.set(findProp.value.x, findProp.value.y, findProp.value.z)
+            // child.rotation.z = findProp.value.z
+          }
+        }
+      })
+    }
   }
 
   // 当前对象是否需要重新生成3D模型状态
@@ -215,6 +246,7 @@ export class PeopleEntity extends EntityClass<PeopleData> {
       z: undefined,
       height: undefined,
       angle: undefined,
+      bone: undefined,
     }
     return this.type + JSON.stringify(cacheData)
   }
@@ -327,7 +359,13 @@ export class PeopleEntity extends EntityClass<PeopleData> {
         max: 200,
         step: 1,
         value: data.z,
-      }
+      },
+      {
+        id: 'bone',
+        label: '骨骼',
+        dataType: 'hidden',
+        value: data.bone,
+      },
     ], (val) => {
       this.setData({
         ...data,
@@ -335,4 +373,23 @@ export class PeopleEntity extends EntityClass<PeopleData> {
       })
     })
   }
+}
+
+export function changePeopleBone(gltfScene: THREE.Group, boneListConfig: Array<{
+  name: string
+  value: {
+    x: number
+    y: number
+    z: number
+  }
+}>): void {
+  gltfScene.traverse((child: any) => {
+    if (child.isBone) {
+      console.log(`🦴 发现骨骼: ${child.name}`)
+      const findProp = boneListConfig.find((item) => item.name === child.name)
+      if (findProp) {
+        child.rotation.set(findProp.value.x, findProp.value.y, findProp.value.z)
+      }
+    }
+  })
 }

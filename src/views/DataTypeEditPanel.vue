@@ -7,12 +7,13 @@
           <img src="../assets/move2.svg" alt="move" @mousedown.prevent />
         </div>
         <div class="title">骨骼姿势编辑</div>
-        <div class="closeIcon" @click="boneEditIsShow = false">
+        <div class="closeIcon" @click="boneEditIsShow = false, emit('close')">
           <img src="../assets/closeWhite.svg" alt="close" />
         </div>
       </div>
       <div class="configItemList">
-        <BoneEdit v-if="boneEditIsShow" />
+        <!-- {{ modelValue }} -->
+        <BoneEdit v-if="boneEditIsShow" :modelValue="modelValue.bone" @update:modelValue="handleUpdateBone" />
       </div>
     </div>
     <div class="configContainer" v-else>
@@ -159,6 +160,20 @@ function onMouseUp() {
   isDragging = false
   document.removeEventListener('mousemove', onMouseMove)
   document.removeEventListener('mouseup', onMouseUp)
+}
+function handleUpdateBone(value: Array<{
+  name: string,
+  value: {
+    x: number,
+    y: number,
+    z: number,
+  },
+}>) {
+  console.log('vvvvv', value)
+  emit('update:modelValue', {
+    ...props.modelValue,
+    bone: value
+  })
 }
 // 重新修正位置，防止超出父元素范围
 function removeIfOutside() {

@@ -156,7 +156,8 @@
       </div>
       <DataTypeEditPanel v-if="contextMenu?.visible && editPropTypeKey" :typeKey="editPropTypeKey"
         :editPropConfigInfo="editPropConfigInfo" v-model="editPropInputInfo"
-        :initPosition="{ x: contextMenu.x, y: contextMenu.y }" @deleteContextMenuEntity="deleteContextMenuEntity" @close="contextMenu = null" />
+        :initPosition="{ x: contextMenu.x, y: contextMenu.y }" @deleteContextMenuEntity="deleteContextMenuEntity"
+        @close="contextMenu = null" />
     </div>
   </div>
   <div v-if="showDemos" class="allDemosContent">
@@ -1161,6 +1162,7 @@ const handleContextMenu = (e: MouseEvent) => {
             propConfig.forEach(v => {
               inputData[v.id] = v.value
             })
+            console.log('初始化数据', inputData)
             editPropInputInfo.value = inputData;
             nextTick(() => {
               contextMenu.value = {

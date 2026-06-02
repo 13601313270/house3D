@@ -1,5 +1,6 @@
 <template>
   <div class="viewport-container" ref="viewportRef">
+    <!-- {{ modelValue }} -->
     <div class="leftPanel">
       <div class="viewportSmall">
         <div class="viewport-label">俯视</div>
@@ -39,8 +40,8 @@
           <div>
             <input @input="changeBoneValue(item, 'x', $event)" type="range" v-model="item.value.x" step="0.01"
               min="-3.14" max="3.14" />
-            <input @input="changeBoneValue(item, 'y', $event)" type="range" v-model="item.value.y" step="0.01"
-              min="-3.14" max="3.14" />
+            <input v-if="item.name !== 'spine'" @input="changeBoneValue(item, 'y', $event)" type="range"
+              v-model="item.value.y" step="0.01" min="-3.14" max="3.14" />
             <input @input="changeBoneValue(item, 'z', $event)" type="range" v-model="item.value.z" step="0.01"
               min="-3.14" max="3.14" />
           </div>
@@ -66,6 +67,17 @@ const containerLeftRef = ref<HTMLDivElement | null>(null)
 let scene = new THREE.Scene()
 let animationId: number | null = null
 
+const props = defineProps<{
+  modelValue: Array<{
+    name: string,
+    value: {
+      x: number,
+      y: number,
+      z: number,
+    },
+  }>
+}>()
+
 type ViewportConfig = {
   id: string
   type: 'perspective'
@@ -81,6 +93,17 @@ type ViewportConfig = {
   getContainer: () => HTMLDivElement | null
 }
 
+const emit = defineEmits<{
+  (e: 'update:modelValue', value: Array<{
+    name: string,
+    value: {
+      x: number,
+      y: number,
+      z: number,
+    },
+  }>): void
+}>()
+
 const allBones = ref<Array<{
   name: string,
   basicValue: {
@@ -93,15 +116,25 @@ const allBones = ref<Array<{
     y: number,
     z: number,
   },
-}>>([])
+}>>((props.modelValue || []).map(item => {
+  if (item.name === 'spine001') {
+    console.log('初始化数据--1', item.value)
+  }
+  return {
+    ...item,
+    basicValue: item.value,
+    value: item.value,
+  }
+}))
 
 const nameToTitle = ref<Record<string, string>>({
+  'spine': '整个身体',
   'spine001': '腰',
   'spine005': '脖子',
-  'thighR': '大腿(右)',
-  'shinR': '小腿(右)',
+  'thighR': '大腿(左)',
+  'shinR': '小腿(左)',
   'footR': '脚踝(左)',
-  'Generate_Rig': '肩头(右)',
+  'shoulderL': '肩头(右)',
   'shoulderR': '肩头(左)',
   'upper_armL': '大臂(右)',
   'upper_armR': '大臂(左)',
@@ -240,14 +273,15 @@ function initThree() {
       }
       if (child.isBone) {
         console.log(`🦴 发现骨骼: ${child.name}`)
-        if (child.name === 'upper_armL') {
-          child.rotation.z = Math.PI * -0.85
-        }
-        if (child.name === 'upper_armR') {
-          child.rotation.z = Math.PI * 0.85
-        }
+        // if (child.name === 'upper_armL') {
+        //   child.rotation.z = Math.PI * -0.85
+        // }
+        // if (child.name === 'upper_armR') {
+        //   child.rotation.z = Math.PI * 0.85
+        // }
+        const findProp = allBones.value.find((item) => item.name === child.name)
         if (![
-          'spine', 'spine004', 'breastL',
+          'spine004', 'breastL',
           'breastR', 'pelvisL', 'pelvisR',
           'toeL', 'toeR', 'heel02L',
           'heel02R', 'spine002', 'spine003',
@@ -256,16 +290,19 @@ function initThree() {
           allBonesData.push({
             name: child.name,
             basicValue: {
-              x: child.rotation.x,
-              y: child.rotation.y,
-              z: child.rotation.z,
+              x: findProp ? findProp.basicValue.x : child.rotation.x,
+              y: findProp ? findProp.basicValue.y : child.rotation.y,
+              z: findProp ? findProp.basicValue.z : child.rotation.z,
             },
             value: {
-              x: child.rotation.x,
-              y: child.rotation.y,
-              z: child.rotation.z,
+              x: findProp ? findProp.value.x : child.rotation.x,
+              y: findProp ? findProp.value.y : child.rotation.y,
+              z: findProp ? findProp.value.z : child.rotation.z,
             },
           })
+        }
+        if (findProp) {
+          child.rotation.set(findProp.value.x, findProp.value.y, findProp.value.z)
         }
       }
     })
@@ -331,15 +368,16 @@ function changeBoneValue(item: {
 }, editRotation: 'x' | 'y' | 'z', event: InputEvent | number) {
   let newValue = 0;
   if (typeof event === 'number') {
-    newValue = event
+    newValue = +event
   } else {
     if (!event.target) return
     // @ts-ignore
-    newValue = event.target.value;
+    newValue = +event.target.value;
   }
   item.value[editRotation] = newValue;
   const bondMesh = scene.getObjectByName(item.name) as THREE.Mesh
   bondMesh.rotation[editRotation] = item.value[editRotation]
+  emit('update:modelValue', allBones.value)
 }
 </script>
 <style scoped lang="less">
