@@ -154,7 +154,7 @@
           <div v-else class="noCamera">请至少在场景中添加一个摄像机</div>
         </div>
       </div>
-      <DataTypeEditList v-if="contextMenu?.visible && editPropTypeKey" :typeKey="editPropTypeKey"
+      <DataTypeEditPanel v-if="contextMenu?.visible && editPropTypeKey" :typeKey="editPropTypeKey"
         :editPropConfigInfo="editPropConfigInfo" v-model="editPropInputInfo"
         :initPosition="{ x: contextMenu.x, y: contextMenu.y }" @deleteContextMenuEntity="deleteContextMenuEntity" @close="contextMenu = null" />
     </div>
@@ -222,7 +222,7 @@ import Help from '@/components/help.vue'
 import { sleep } from '@/utils/sleep';
 import { MatchCircleArea, MatchRectArea } from '@/utils/matchArea';
 import processUploadedFile from '@/utils/processUploadedFile';
-import DataTypeEditList from './DataTypeEditList.vue'
+import DataTypeEditPanel from './DataTypeEditPanel.vue'
 
 const canvas2DRef = ref<HTMLCanvasElement | null>(null)
 const canvas2D2Ref = ref<HTMLCanvasElement | null>(null)

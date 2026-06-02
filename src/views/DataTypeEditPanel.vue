@@ -1,6 +1,6 @@
 <template>
   <div class="context-menu" :style="{ top: position.y + 'px', left: position.x + 'px' }">
-    <div class="configContainer" v-if="boneEditIsShow" style="width: 600px;height: 600px;">
+    <div class="configContainer" v-if="boneEditIsShow" style="width: auto;height: auto;">
       <div class="head">
         <div class="moveIcon" @mousedown="startDrag">
           <img src="../assets/move2.svg" alt="move" @mousedown.prevent />
@@ -35,7 +35,7 @@
         </div>
       </div>
       <div class="buttonGroup">
-        <!-- <button v-if="typeKey === 'people'" @click="showBoneEdit">骨骼编辑</button> -->
+        <button v-if="typeKey === 'people'" @click="showBoneEdit">骨骼编辑</button>
         <div style="flex-grow: 1;"></div>
         <button class="deleteButton" @click="deleteContextMenuEntity">删除</button>
       </div>
@@ -186,7 +186,8 @@ function removeIfOutside() {
   // border: 1px solid #d9d9d9;
   box-sizing: border-box;
   border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.65);
+  box-shadow: 0 0 14px 3px rgba(0, 0, 0, 0.65);
+
   z-index: 1000;
   max-height: 80vh;
   overflow: auto;
