@@ -29,7 +29,7 @@
         <div v-for="item in allBones" :key="item.name" class="boneItem">
           <div class="label">
             <div>
-              {{ nameToTitle[item.name] || item.name }}
+              {{ nameToConfig[item.name]?.title || item.name }}
             </div>
             <div>
               <!-- {{ item.value }} -->
@@ -37,13 +37,24 @@
                 @click="changeBoneValue(item, 'x', item.basicValue.x), changeBoneValue(item, 'y', item.basicValue.y), changeBoneValue(item, 'z', item.basicValue.z)">初始值</button>
             </div>
           </div>
-          <div>
-            <input @input="changeBoneValue(item, 'x', $event)" type="range" v-model="item.value.x" step="0.01"
-              min="-3.14" max="3.14" />
-            <input v-if="item.name !== 'spine'" @input="changeBoneValue(item, 'y', $event)" type="range"
-              v-model="item.value.y" step="0.01" min="-3.14" max="3.14" />
-            <input @input="changeBoneValue(item, 'z', $event)" type="range" v-model="item.value.z" step="0.01"
-              min="-3.14" max="3.14" />
+          <div class="editList">
+            {{ item.value.x }}
+            <div class="editRange">
+              <div>x:</div>
+              <input class="editRangeInput" @input="changeBoneValue(item, 'x', $event)" type="range"
+                v-model="item.value.x" step="0.01" :min="nameToConfig[item.name].minX"
+                :max="nameToConfig[item.name].maxX" />
+            </div>
+            <div class="editRange" v-if="item.name !== 'spine'">
+              <div>y</div>
+              <input class="editRangeInput" @input="changeBoneValue(item, 'y', $event)" type="range"
+                v-model="item.value.y" step="0.01" min="-3.14" max="3.14" />
+            </div>
+            <div class="editRange">
+              <div>z</div>
+              <input class="editRangeInput" @input="changeBoneValue(item, 'z', $event)" type="range"
+                v-model="item.value.z" step="0.01" min="-3.14" max="3.14" />
+            </div>
           </div>
         </div>
       </div>
@@ -127,24 +138,98 @@ const allBones = ref<Array<{
   }
 }))
 
-const nameToTitle = ref<Record<string, string>>({
-  'spine': '整个身体',
-  'spine001': '腰',
-  'spine005': '脖子',
-  'thighR': '大腿(左)',
-  'shinR': '小腿(左)',
-  'footR': '脚踝(左)',
-  'shoulderL': '肩头(右)',
-  'shoulderR': '肩头(左)',
-  'upper_armL': '大臂(右)',
-  'upper_armR': '大臂(左)',
-  'forearmL': '小臂(右)',
-  'forearmR': '小臂(左)',
-  'handL': '手腕(右)',
-  'handR': '手腕(左)',
-  'thighL': '大腿(右)',
-  'shinL': '小腿(右)',
-  'footL': '脚踝(右)',
+const nameToConfig = ref<{
+  [key: string]: {
+    title: string,
+    minX: number,
+    maxX: number,
+  }
+}>({
+  'spine': {
+    title: '整个身体',
+    minX: -3.14,
+    maxX: 3.14,
+  },
+  'spine001': {
+    title: '腰',
+    minX: -3.14,
+    maxX: 3.14,
+  },
+  'spine005': {
+    title: '脖子',
+    minX: -3.14,
+    maxX: 3.14,
+  },
+  'thighR': {
+    title: '大腿(左)',
+    minX: 0,
+    maxX: 6.28,
+  },
+  'shinR': {
+    title: '小腿(左)',
+    minX: -3.14,
+    maxX: 3.14,
+  },
+  'footR': {
+    title: '脚踝(左)',
+    minX: -3.14,
+    maxX: 3.14,
+  },
+  'shoulderL': {
+    title: '肩头(右)',
+    minX: -3.14,
+    maxX: 3.14,
+  },
+  'shoulderR': {
+    title: '肩头(左)',
+    minX: -3.14,
+    maxX: 3.14,
+  },
+  'upper_armL': {
+    title: '大臂(右)',
+    minX: -3.14,
+    maxX: 3.14,
+  },
+  'upper_armR': {
+    title: '大臂(左)',
+    minX: -3.14,
+    maxX: 3.14,
+  },
+  'forearmL': {
+    title: '小臂(右)',
+    minX: -3.14,
+    maxX: 3.14,
+  },
+  'forearmR': {
+    title: '小臂(左)',
+    minX: -3.14,
+    maxX: 3.14,
+  },
+  'handL': {
+    title: '手腕(右)',
+    minX: -3.14,
+    maxX: 3.14,
+  },
+  'handR': {
+    title: '手腕(左)',
+    minX: -3.14,
+    maxX: 3.14,
+  },
+  'thighL': {
+    title: '大腿(右)',
+    minX: 0,
+    maxX: 6.28,
+  },
+  'shinL': {
+    title: '小腿(右)',
+    minX: -3.14,
+    maxX: 3.14,
+  },
+  'footL': {
+    title: '脚踝(右)',
+    minX: -3.14,
+    maxX: 3.14,
+  },
 })
 const viewportConfigs: ViewportConfig[] = [
   {
@@ -457,8 +542,23 @@ function changeBoneValue(item: {
 
       .label {
         flex-shrink: 0;
-        min-width: 70px;
+        min-width: 80px;
         text-align: left;
+      }
+
+      .editList {
+        flex-grow: 1;
+
+        .editRange {
+          display: flex;
+          flex-direction: row;
+          align-items: center;
+          justify-content: center;
+
+          .editRangeInput {
+            flex-grow: 1;
+          }
+        }
       }
     }
   }
