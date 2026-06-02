@@ -93,11 +93,11 @@ function raycastObjects(event: MouseEvent): THREE.Object3D | null {
   const scene = props.world.scene
   if (!scene) return null
   
-  const intersects = raycaster.intersectObjects(props.world.boundingBoxList, true)
+  // const intersects = raycaster.intersectObjects(props.world.boundingBoxList, true)
   
-  if (intersects.length > 0) {
-    return intersects[0].object
-  }
+  // if (intersects.length > 0) {
+  //   return intersects[0].object
+  // }
   return null
 }
 

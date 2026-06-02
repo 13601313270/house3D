@@ -1,17 +1,17 @@
 <template>
   <div class="context-menu" :style="{ top: position.y + 'px', left: position.x + 'px' }">
-    <div class="configContainer" v-if="showBoneEdit">
+    <div class="configContainer" v-if="boneEditIsShow" style="width: 600px;height: 600px;">
       <div class="head">
         <div class="moveIcon" @mousedown="startDrag">
           <img src="../assets/move2.svg" alt="move" @mousedown.prevent />
         </div>
         <div class="title">骨骼姿势编辑</div>
-        <div class="closeIcon" @click="showBoneEdit = false">
+        <div class="closeIcon" @click="boneEditIsShow = false">
           <img src="../assets/close.svg" alt="close" />
         </div>
       </div>
       <div>
-        <BoneEdit v-if="showBoneEdit" />
+        <BoneEdit v-if="boneEditIsShow" />
       </div>
     </div>
     <div class="configContainer" v-else>
@@ -36,7 +36,7 @@
         </div>
       </div>
       <div class="buttonGroup">
-        <button v-if="typeKey === 'people'" @click="showBoneEdit = true">骨骼编辑</button>
+        <button v-if="typeKey === 'people'" @click="showBoneEdit">骨骼编辑</button>
         <div style="flex-grow: 1;"></div>
         <button class="deleteButton" @click="deleteContextMenuEntity">删除</button>
       </div>
@@ -45,7 +45,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { nextTick, onMounted, ref } from 'vue';
 import { editItem, allFileKeysName } from '@/entities/index';
 import DataTypeEdit from './DataTypeEdit.vue'
 import BoneEdit from './boneEdit.vue'
@@ -59,11 +59,40 @@ const props = defineProps<{
     y: number
   }
 }>()
-const showBoneEdit = ref(false)
+const boneEditIsShow = ref(false)
 
 const position = ref(props.initPosition)
 const EDGE_PADDING = 6
 
+function showBoneEdit() {
+  boneEditIsShow.value = true
+
+  nextTick(() => {
+    removeIfOutside();
+  })
+}
+// 重新修正位置，防止超出父元素范围
+function removeIfOutside() {
+  const contextMenuEl = document.querySelector('.context-menu') as HTMLElement
+  if (!contextMenuEl) return
+
+  const parentEl = contextMenuEl.parentElement
+  if (!parentEl) return
+
+  const parentRect = parentEl.getBoundingClientRect()
+
+  const contextMenuRect = contextMenuEl.getBoundingClientRect()
+  const panelWidth = contextMenuRect.width
+  const panelHeight = contextMenuRect.height
+  const maxLeft = parentRect.width - panelWidth - EDGE_PADDING
+  const maxTop = parentRect.height - panelHeight - EDGE_PADDING
+  console.log('maxTop', maxTop, position.value.y)
+
+  const clampedLeft = Math.max(EDGE_PADDING, Math.min(position.value.x, maxLeft))
+  const clampedTop = Math.max(EDGE_PADDING, Math.min(position.value.y, maxTop))
+  console.log('maxTop', clampedTop)
+  position.value = { x: clampedLeft, y: clampedTop }
+}
 onMounted(() => {
   const contextMenuEl = document.querySelector('.context-menu') as HTMLElement
   if (contextMenuEl) {
@@ -139,6 +168,7 @@ function onMouseMove(e: MouseEvent) {
   const maxLeft = parentRect.width - panelWidth - EDGE_PADDING
   const maxTop = parentRect.height - panelHeight - EDGE_PADDING
 
+  console.log('maxTop', maxTop, position.value.y)
   const clampedLeft = Math.max(EDGE_PADDING, Math.min(newLeft, maxLeft))
   const clampedTop = Math.max(EDGE_PADDING, Math.min(newTop, maxTop))
 
@@ -154,7 +184,6 @@ function onMouseUp() {
 <style scoped lang="less">
 .context-menu {
   position: absolute;
-  width: 340px;
   background: white;
   // border: 1px solid #d9d9d9;
   box-sizing: border-box;
@@ -165,6 +194,7 @@ function onMouseUp() {
   overflow: auto;
 
   .configContainer {
+    width: 340px;
 
     .head {
       display: flex;
