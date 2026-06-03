@@ -20,6 +20,7 @@ export interface ObjData {
   x: number
   y: number
   z: number
+  tip?: string,// 提示信息
 }
 
 export interface ObjInWallData extends ObjData {

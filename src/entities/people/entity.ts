@@ -150,6 +150,7 @@ export class PeopleEntity extends EntityClass<PeopleData> {
     const data = this.getData();
     const loader = new FBXLoader()
     const group = new THREE.Group()
+    const { color, tip } = data
     loader.load('./ManClean.fbx', (fbxModel: any) => {
       fbxModel.rotateX(Math.PI);
       fbxModel.rotateY(Math.PI)
@@ -166,7 +167,42 @@ export class PeopleEntity extends EntityClass<PeopleData> {
           console.log(`🦴 发现骨骼-1:${child.name}: ${child.rotation.x}, ${child.rotation.y}, ${child.rotation.z}`);
         }
       });
+      // 设置人物颜色
+      fbxModel.traverse((child: any) => {
+        if (child.isMesh) {
+          child.material.color.set(color)
+        }
+      })
       group.add(fbxModel)
+      if (tip) {
+        // // 创建文字标签
+        // const canvas = document.createElement('canvas');
+        // const context = canvas.getContext('2d')!;
+        // const fontSize = 64;
+        // context.font = `bold ${fontSize}px Arial`;
+        // const textWidth = context.measureText(tip).width;
+        // canvas.width = textWidth + 40;
+        // canvas.height = fontSize + 40;
+
+        // // 重新设置字体（因为canvas resize后会重置）
+        // context.font = `bold ${fontSize}px Arial`;
+        // context.fillStyle = 'rgba(255, 255, 255, 0.9)';
+        // context.fillRect(0, 0, canvas.width, canvas.height);
+        // context.strokeStyle = '#e67e22';
+        // context.lineWidth = 4;
+        // context.strokeRect(0, 0, canvas.width, canvas.height);
+        // context.fillStyle = '#333';
+        // context.textAlign = 'center';
+        // context.textBaseline = 'middle';
+        // context.fillText(tip, canvas.width / 2, canvas.height / 2);
+
+        // const texture = new THREE.CanvasTexture(canvas);
+        // const spriteMaterial = new THREE.SpriteMaterial({ map: texture });
+        // const sprite = new THREE.Sprite(spriteMaterial);
+        // sprite.scale.set(canvas.width / 50, canvas.height / 50, 1);
+        // sprite.position.set(0, 2.5, 0); // 在模型上方
+        // group.add(sprite);
+      }
     }, (progress: any) => {
       const percent = (progress.loaded / progress.total * 100).toFixed(2)
       console.log('加载进度:', percent + '%')
@@ -189,7 +225,7 @@ export class PeopleEntity extends EntityClass<PeopleData> {
     console.log('create3DMesh', 2, this.meshList)
     const data = this.getData();
     const singleHeight = 0.213
-    const { height, angle } = data
+    const { height, angle, tip } = data
     this.meshList.forEach(v => {
       v.position.set(data.x, data.z, data.y)
       v.scale.set(singleHeight * height, singleHeight * height, singleHeight * height)
@@ -339,6 +375,18 @@ export class PeopleEntity extends EntityClass<PeopleData> {
         dataType: 'hidden',
         value: data.bone || [],
       },
+      {
+        id: 'color',
+        label: '颜色',
+        dataType: 'color',
+        value: data.color || '#fff',
+      },
+      {
+        id: 'tips',
+        label: '提示信息',
+        dataType: 'string',
+        value: data.tip || '',
+      }
     ], (val) => {
       this.setData({
         ...data,

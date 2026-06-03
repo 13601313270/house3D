@@ -6,7 +6,7 @@
           <div class="name">{{ item.name }}</div>
           <img :src="item.img" alt="animation" />
         </div>
-        <div class="moreBtn">
+        <div class="moreBtn" @click="showModelPanel">
           更多
         </div>
       </div>
@@ -17,8 +17,8 @@
       <div class="animationControls">
         <div class="progressContainer">
           <div class="progressBar" @click="seekTo">
-            <div class="progressFill" :style="{ width: progressPercent + '%' }"></div>
-            <div class="progressThumb" :style="{ left: progressPercent + '%' }"></div>
+            <div class="progressFill" v-if="totalDuration >= 0.06" :style="{ width: progressPercent + '%' }"></div>
+            <div class="progressThumb" v-if="totalDuration >= 0.06" :style="{ left: progressPercent + '%' }"></div>
           </div>
           <div class="timeDisplay">
             {{ formatTime(currentTime) }} / {{ formatTime(totalDuration) }}
@@ -73,6 +73,21 @@
       </div>
     </div>
   </div>
+
+  <div v-if="showModal" class="modal-overlay" @click.self="showModal = false">
+    <div class="modal-content">
+      <div class="modal-header">
+        <span class="modal-title">所有动画</span>
+        <span class="modal-close" @click="showModal = false">×</span>
+      </div>
+      <div class="modal-body">
+        <div v-for="item in allDemoList" :key="item.file" class="modal-item" @click="handleModalItemClick(item.file)">
+          <img :src="item.img" alt="animation" />
+          <span class="modal-item-name">{{ item.name }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
 </template>
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, nextTick } from 'vue'
@@ -93,6 +108,8 @@ let mixer: THREE.AnimationMixer | null = null
 const clock = new THREE.Clock()
 let rootBone: THREE.Object3D | null = null
 const originalPosition = new THREE.Vector3()
+
+const showModal = ref(false)
 
 const props = defineProps<{
   modelValue: Array<{
@@ -124,6 +141,11 @@ const allDemoList = ref<Array<{
     file: 'plank.fbx',
   },
   {
+    name: '跑',
+    img: 'https://d99n9xvb9513w.cloudfront.net/thumbnails/motions/128630905/animated.gif',
+    file: 'run.fbx',
+  },
+  {
     name: '托马斯',
     img: 'https://d99n9xvb9513w.cloudfront.net/thumbnails/motions/121780901/animated.gif',
     file: 'flair.fbx',
@@ -137,6 +159,26 @@ const allDemoList = ref<Array<{
     name: '侧躺',
     img: 'https://d99n9xvb9513w.cloudfront.net/thumbnails/motions/140400905/animated.gif',
     file: 'layingPose.fbx',
+  },
+  {
+    name: '坐',
+    img: 'https://d99n9xvb9513w.cloudfront.net/thumbnails/motions/137570901/animated.gif',
+    file: 'sit.fbx',
+  },
+  {
+    name: '翘腿坐',
+    img: 'https://d99n9xvb9513w.cloudfront.net/thumbnails/motions/126490902/animated.gif',
+    file: 'sit2.fbx',
+  },
+  {
+    name: '倚靠坐',
+    img: 'https://d99n9xvb9513w.cloudfront.net/thumbnails/motions/140600901/animated.gif',
+    file: 'sit3.fbx',
+  },
+  {
+    name: '蹲下',
+    img: 'https://d99n9xvb9513w.cloudfront.net/thumbnails/motions/137630901/animated.gif',
+    file: 'squat.fbx',
   }
 ])
 
@@ -656,6 +698,11 @@ function save() {
 function playAnimation(file: string) {
   runPostAnimation('./pose/' + file)
 }
+
+function handleModalItemClick(file: string) {
+  playAnimation(file)
+  showModal.value = false
+}
 function runPostAnimation(file: string) {
   console.log('runPostAnimation', file)
   if (currentAction) {
@@ -677,6 +724,13 @@ function runPostAnimation(file: string) {
       totalDuration.value = clip.duration
       currentAction.play()
       isPlaying.value = true
+
+      if (totalDuration.value < 0.06) {
+        setTimeout(() => {
+          currentAction!.paused = true
+          isPlaying.value = false
+        }, 30)
+      }
       console.log(`播放动画: ${clip.name}`)
     } else {
       console.log('FBX文件没有包含动画数据')
@@ -690,6 +744,9 @@ function runPostAnimation(file: string) {
     console.error('FBX文件加载失败:', error)
     animate()
   })
+}
+function showModelPanel() {
+  showModal.value = true
 }
 </script>
 <style scoped lang="less">
@@ -743,7 +800,6 @@ function runPostAnimation(file: string) {
       font-size: 14px;
       font-weight: bold;
       z-index: 10;
-      pointer-events: none;
       height: 102px;
       box-sizing: border-box;
       display: flex;
@@ -952,6 +1008,95 @@ function runPostAnimation(file: string) {
         transform: scale(0.98);
       }
     }
+  }
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: #fff;
+  border-radius: 8px;
+  width: 80%;
+  max-width: 700px;
+  max-height: 70vh;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid #eee;
+  background: #f5f5f5;
+}
+
+.modal-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+}
+
+.modal-close {
+  font-size: 24px;
+  cursor: pointer;
+  color: #999;
+  line-height: 1;
+
+  &:hover {
+    color: #666;
+  }
+}
+
+.modal-body {
+  padding: 16px;
+  overflow-y: auto;
+  max-height: calc(70vh - 60px);
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.modal-item {
+  padding: 5px 10px;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid #d9d9d9;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    background: #f0f0f0;
+    border-color: #66b1ff;
+  }
+
+  .modal-item-name {
+    font-size: 12px;
+    display: block;
+    text-align: center;
+    margin-bottom: 4px;
+  }
+
+  img {
+    width: 68px;
+    height: 68px;
+    display: block;
   }
 }
 </style>

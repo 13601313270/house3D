@@ -11,6 +11,8 @@
       @change="updateEditPropInputInfo(item.id, $event)" />
     <input v-else-if="item.dataType === 'boolean'" type="checkbox" :checked="modelValue"
       @change="updateEditPropInputInfoBoolean(item.id, $event)" />
+    <input v-else-if="item.dataType === 'string'" type="text" :value="modelValue"
+      @change="updateEditPropInputInfo(item.id, $event)" />
     <div v-else-if="item.dataType === 'material'" class="materialList">
       <div @click="allMaterialShow = true, allMaterialShowPropId = item.id">
         <div class="materialItem" v-if="!modelValue">
