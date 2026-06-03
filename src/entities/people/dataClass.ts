@@ -4,6 +4,7 @@ import { ObjDataClass } from "../objData"
 export class PeopleDataClass extends ObjDataClass<PeopleData> {
   angle: number
   height: number
+  color: string
   bone?: Array<{
     name: string
     value: {
@@ -21,5 +22,6 @@ export class PeopleDataClass extends ObjDataClass<PeopleData> {
     this.angle = data.angle
     this.height = data.height
     this.bone = data.bone || []
+    this.color = data.color || '#DEDEDE'
   }
 }

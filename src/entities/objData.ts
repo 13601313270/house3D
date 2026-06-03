@@ -5,12 +5,14 @@ class ObjDataClass<T extends ObjData> {
   x: number
   y: number
   z: number
+  tip?: string // 提示信息
 
   constructor(data: T) {
     this.id = data.id
     this.x = data.x
     this.y = data.y
     this.z = data.z
+    this.tip = data.tip
   }
 }
 

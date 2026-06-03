@@ -34,6 +34,7 @@ export class PeopleEntity extends EntityClass<PeopleData> {
       y: 0,
       z: 0,
       angle: 0,
+      color: '#DEDEDE',
       height: 170,
       bone: [],
     }
@@ -173,36 +174,23 @@ export class PeopleEntity extends EntityClass<PeopleData> {
           child.material.color.set(color)
         }
       })
+
+      // const canvas = document.createElement('canvas');
+      // const ctx = canvas.getContext('2d');
+      // ctx!.fillText('标签文字', 10, 20);
+      // const texture = new THREE.CanvasTexture(canvas);
+      // const spriteMaterial = new THREE.SpriteMaterial({ map: texture });
+      // const sprite = new THREE.Sprite(spriteMaterial);
+      // // sprite.position.y = 17 // 在模型上方
+      // // @ts-ignore
+      // window.ssss = sprite
+      // // @ts-ignore
+      // window.ddd = () => {
+      //   sprite.position.y++
+      // }
+      // group.add(sprite);
+
       group.add(fbxModel)
-      if (tip) {
-        // // 创建文字标签
-        // const canvas = document.createElement('canvas');
-        // const context = canvas.getContext('2d')!;
-        // const fontSize = 64;
-        // context.font = `bold ${fontSize}px Arial`;
-        // const textWidth = context.measureText(tip).width;
-        // canvas.width = textWidth + 40;
-        // canvas.height = fontSize + 40;
-
-        // // 重新设置字体（因为canvas resize后会重置）
-        // context.font = `bold ${fontSize}px Arial`;
-        // context.fillStyle = 'rgba(255, 255, 255, 0.9)';
-        // context.fillRect(0, 0, canvas.width, canvas.height);
-        // context.strokeStyle = '#e67e22';
-        // context.lineWidth = 4;
-        // context.strokeRect(0, 0, canvas.width, canvas.height);
-        // context.fillStyle = '#333';
-        // context.textAlign = 'center';
-        // context.textBaseline = 'middle';
-        // context.fillText(tip, canvas.width / 2, canvas.height / 2);
-
-        // const texture = new THREE.CanvasTexture(canvas);
-        // const spriteMaterial = new THREE.SpriteMaterial({ map: texture });
-        // const sprite = new THREE.Sprite(spriteMaterial);
-        // sprite.scale.set(canvas.width / 50, canvas.height / 50, 1);
-        // sprite.position.set(0, 2.5, 0); // 在模型上方
-        // group.add(sprite);
-      }
     }, (progress: any) => {
       const percent = (progress.loaded / progress.total * 100).toFixed(2)
       console.log('加载进度:', percent + '%')
@@ -222,7 +210,6 @@ export class PeopleEntity extends EntityClass<PeopleData> {
   }
 
   change3DMeshState(): void {
-    console.log('create3DMesh', 2, this.meshList)
     const data = this.getData();
     const singleHeight = 0.213
     const { height, angle, tip } = data
@@ -379,7 +366,7 @@ export class PeopleEntity extends EntityClass<PeopleData> {
         id: 'color',
         label: '颜色',
         dataType: 'color',
-        value: data.color || '#fff',
+        value: data.color || '#DEDEDE',
       },
       {
         id: 'tips',
