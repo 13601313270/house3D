@@ -4,7 +4,7 @@ import { PeopleData } from './index.d'
 import { EntityClass, MatchSnapPoint, OrigionSnapPoint } from '@/types/entity'
 import { editItem } from '..'
 // @ts-ignore
-import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { FBXLoader } from 'three/addons/loaders/FBXLoader.js';
 
 // @ts-ignore
 import kamera from './kamera.png'
@@ -148,43 +148,30 @@ export class PeopleEntity extends EntityClass<PeopleData> {
     console.log('create3DMesh', 1)
 
     const data = this.getData();
-    const loader = new GLTFLoader()
+    const loader = new FBXLoader()
     const group = new THREE.Group()
-    // 将方向向量旋转90度
-    // const material = new THREE.MeshStandardMaterial({
-    //   color: 0x888888,
-    //   roughness: 0.7,
-    //   metalness: 0.1
-    // })
-    loader.load('./ManClean3.glb', (gltf: any) => {
-      gltf.scene.rotateX(Math.PI);  // 如果需要绕 X 轴翻转 180 度
-      gltf.scene.rotateY(Math.PI)
-      gltf.scene.rotateZ(Math.PI);  // 如果需要绕 Y 轴翻转 180 度
+    loader.load('./ManClean.fbx', (fbxModel: any) => {
+      fbxModel.rotateX(Math.PI);
+      fbxModel.rotateY(Math.PI)
+      fbxModel.rotateZ(Math.PI);
+      fbxModel.scale.set(0.0261, 0.0261, 0.0261)
       const boneListConfig = data.bone || [];
-      gltf.scene.traverse((child: any) => {
+      fbxModel.traverse((child: any) => {
         if (child.isBone) {
           console.log(`🦴 发现骨骼: ${child.name}`);
           const findProp = boneListConfig.find((item) => item.name === child.name)
           if (findProp) {
             child.rotation.set(findProp.value.x, findProp.value.y, findProp.value.z)
-            // child.rotation.z = findProp.value.z
           }
           console.log(`🦴 发现骨骼-1:${child.name}: ${child.rotation.x}, ${child.rotation.y}, ${child.rotation.z}`);
-          // if (child.name === 'upper_armL') {
-          //   child.rotation.z = Math.PI * -0.85
-          // }
-          // if (child.name === 'upper_armR') {
-          //   child.rotation.z = Math.PI * 0.85
-          // }
         }
       });
-      group.add(gltf.scene)
+      group.add(fbxModel)
     }, (progress: any) => {
-      // 加载进度
       const percent = (progress.loaded / progress.total * 100).toFixed(2)
       console.log('加载进度:', percent + '%')
     }, (error: any) => {
-      console.error('OBJ文件加载失败:', error)
+      console.error('FBX文件加载失败:', error)
     })
     return [
       group
@@ -212,11 +199,11 @@ export class PeopleEntity extends EntityClass<PeopleData> {
       const boneListConfig = data.bone
       this.meshList?.[0]?.children[0].traverse((child: any) => {
         if (child.isBone) {
-          console.log(`🦴 发现骨骼: ${child.name}`);
           const findProp = boneListConfig.find((item) => item.name === child.name)
           if (findProp) {
+            console.log(`🦴 发现骨骼-1: ${child.name}`, findProp.value);
             child.rotation.set(findProp.value.x, findProp.value.y, findProp.value.z)
-            // child.rotation.z = findProp.value.z
+            child.position.set(findProp.value.px, findProp.value.py, findProp.value.pz)
           }
         }
       })

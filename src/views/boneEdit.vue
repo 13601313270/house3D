@@ -1,25 +1,17 @@
 <template>
   <div class="viewport-container" ref="viewportRef">
-    <!-- {{ modelValue }} -->
-    <div class="leftPanel">
-      <div class="viewportSmall">
-        <div class="viewport-label">俯视</div>
-        <div class="canvas-bone-3d-container" ref="containerTopRef">
+    <div class="topPanel">
+      <div class="postList">
+        <div v-for="item in allDemoList.slice(0, 4)" :key="item.file" class="item" @click="playAnimation(item.file)">
+          <div class="name">{{ item.name }}</div>
+          <img :src="item.img" alt="animation" />
         </div>
-      </div>
-      <div class="viewportSmall">
-        <div class="viewport-label">正前</div>
-        <div class="canvas-bone-3d-container" ref="containerFrontRef">
-        </div>
-      </div>
-      <div class="viewportSmall">
-        <div class="viewport-label">左视</div>
-        <div class="canvas-bone-3d-container" ref="containerLeftRef">
+        <div class="moreBtn">
+          更多
         </div>
       </div>
     </div>
     <div class="viewport">
-      <div class="viewport-label">主视角</div>
       <div class="canvas-bone-3d-container" ref="containerRef">
       </div>
       <div class="animationControls">
@@ -33,13 +25,14 @@
           </div>
         </div>
         <div class="controlButtons">
-          <button @click="togglePlay" class="controlBtn">
+          <div @click="togglePlay" class="controlBtn">
             {{ isPlaying ? '⏸ 暂停' : '▶ 播放' }}
-          </button>
+          </div>
+          <div class="controlBtn" @click="save">应用本帧</div>
         </div>
       </div>
     </div>
-    <div class="boneListPanel">
+    <div class="boneListPanel" style="display: none;">
       <div class="boneItemList">
         <div v-for="item in allBones" :key="item.name" class="boneItem">
           <div class="label">
@@ -93,14 +86,13 @@ import { FBXLoader } from 'three/addons/loaders/FBXLoader.js'
 
 const viewportRef = ref<HTMLDivElement | null>(null)
 const containerRef = ref<HTMLDivElement | null>(null)
-const containerTopRef = ref<HTMLDivElement | null>(null)
-const containerFrontRef = ref<HTMLDivElement | null>(null)
-const containerLeftRef = ref<HTMLDivElement | null>(null)
 
 let scene = new THREE.Scene()
 let animationId: number | null = null
 let mixer: THREE.AnimationMixer | null = null
 const clock = new THREE.Clock()
+let rootBone: THREE.Object3D | null = null
+const originalPosition = new THREE.Vector3()
 
 const props = defineProps<{
   modelValue: Array<{
@@ -109,9 +101,44 @@ const props = defineProps<{
       x: number,
       y: number,
       z: number,
+      px: number,
+      py: number,
+      pz: number,
     },
   }>
 }>()
+
+const allDemoList = ref<Array<{
+  name: string,
+  img: string,
+  file: string,
+}>>([
+  {
+    name: '走路1',
+    img: 'https://d99n9xvb9513w.cloudfront.net/thumbnails/motions/102230901/animated.gif',
+    file: 'walk.fbx',
+  },
+  {
+    name: '趴下',
+    img: 'https://d99n9xvb9513w.cloudfront.net/thumbnails/motions/120040901/animated.gif',
+    file: 'plank.fbx',
+  },
+  {
+    name: '托马斯',
+    img: 'https://d99n9xvb9513w.cloudfront.net/thumbnails/motions/121780901/animated.gif',
+    file: 'flair.fbx',
+  },
+  {
+    name: '游泳',
+    img: 'https://d99n9xvb9513w.cloudfront.net/thumbnails/motions/110800901/animated.gif',
+    file: 'swimming.fbx',
+  },
+  {
+    name: '侧躺',
+    img: 'https://d99n9xvb9513w.cloudfront.net/thumbnails/motions/140400905/animated.gif',
+    file: 'layingPose.fbx',
+  }
+])
 
 type ViewportConfig = {
   id: string
@@ -237,11 +264,17 @@ const allBones = ref<Array<{
     x: number,
     y: number,
     z: number,
+    px: number,
+    py: number,
+    pz: number,
   }
   value: {
     x: number,
     y: number,
     z: number,
+    px: number,
+    py: number,
+    pz: number,
   },
 }>>((props.modelValue || []).map(item => {
   if (item.name === 'spine001') {
@@ -360,27 +393,6 @@ const viewportConfigs: ViewportConfig[] = [
     aspect: 1,
     getContainer: () => containerRef.value
   },
-  {
-    id: 'top',
-    type: 'orthographic',
-    position: [0, 500, 0],
-    orthoSize: 120,
-    getContainer: () => containerTopRef.value
-  },
-  {
-    id: 'front',
-    type: 'orthographic',
-    position: [0, 100, 500],
-    orthoSize: 120,
-    getContainer: () => containerFrontRef.value
-  },
-  {
-    id: 'left',
-    type: 'orthographic',
-    position: [-500, 100, 0],
-    orthoSize: 120,
-    getContainer: () => containerLeftRef.value
-  }
 ]
 
 let allPanel: Array<{
@@ -389,6 +401,9 @@ let allPanel: Array<{
 }>
 let controls: OrbitControls | null = null
 const allPanelHeight = ref(0)
+
+const fbxLoader = new FBXLoader()
+let fbxModel: THREE.Group | null = null
 
 function initThree() {
   scene = new THREE.Scene()
@@ -450,11 +465,9 @@ function initThree() {
     }
   })
 
-  const gltfLoader = new GLTFLoader()
-  const fbxLoader = new FBXLoader()
-
-  gltfLoader.load('/ManClean3.glb', (gltf: any) => {
-    console.log('GLB模型加载成功:', gltf)
+  fbxLoader.load('/ManClean.fbx', (fbxModel_: any) => {
+    console.log('FBX模型加载成功:', fbxModel_)
+    fbxModel = fbxModel_ as THREE.Group
 
     const allBonesData: Array<{
       name: string,
@@ -462,14 +475,20 @@ function initThree() {
         x: number,
         y: number,
         z: number,
+        px: number,
+        py: number,
+        pz: number,
       },
       value: {
         x: number,
         y: number,
         z: number,
+        px: number,
+        py: number,
+        pz: number,
       },
     }> = [];
-    gltf.scene.traverse((child: any) => {
+    fbxModel.traverse((child: any) => {
       if (child.isMesh) {
         console.log('网格对象:', child.name, '材质:', child.material)
         if (!child.material || child.material.type === 'MeshBasicMaterial') {
@@ -478,7 +497,7 @@ function initThree() {
       }
       if (child.isBone) {
         if (child.name === 'mixamorigHips') {
-          console.log(`🦴 GLB骨骼: ${child.name}`, child.rotation)
+          console.log(`🦴 骨骼: ${child.name}`, child.rotation)
         }
         const findProp = allBones.value.find((item) => item.name === child.name)
         if (![
@@ -494,72 +513,45 @@ function initThree() {
               x: findProp ? findProp.basicValue.x : child.rotation.x,
               y: findProp ? findProp.basicValue.y : child.rotation.y,
               z: findProp ? findProp.basicValue.z : child.rotation.z,
+              px: findProp ? findProp.basicValue.px : child.position.x,
+              py: findProp ? findProp.basicValue.py : child.position.y,
+              pz: findProp ? findProp.basicValue.pz : child.position.z,
             },
             value: {
               x: findProp ? findProp.value.x : child.rotation.x,
               y: findProp ? findProp.value.y : child.rotation.y,
               z: findProp ? findProp.value.z : child.rotation.z,
+              px: findProp ? findProp.value.px : child.position.x,
+              py: findProp ? findProp.value.py : child.position.y,
+              pz: findProp ? findProp.value.pz : child.position.z,
             },
           })
         }
-        // if (findProp) {
-        //   child.rotation.set(findProp.value.x, findProp.value.y, findProp.value.z)
-        // }
       }
     })
     allBones.value = allBonesData;
 
-    const box = new THREE.Box3().setFromObject(gltf.scene)
+    const box = new THREE.Box3().setFromObject(fbxModel)
     const center = box.getCenter(new THREE.Vector3())
     const size = box.getSize(new THREE.Vector3())
     console.log('模型包围盒 - 中心:', center, '尺寸:', size)
 
-    // gltf.scene.position.sub(center)
-    // gltf.scene.rotation.set(0, 0, 0)
-
     const maxDim = Math.max(size.x, size.y, size.z)
     const scale = 200 / maxDim
-    gltf.scene.scale.set(scale, scale, scale)
+    fbxModel.scale.set(scale, scale, scale)
     console.log('模型缩放:', scale)
 
-    // gltf.scene.rotation.x = -Math.PI / 2
+    rootBone = fbxModel.getObjectByName('Armature') || fbxModel.children[0]
+    originalPosition.copy(rootBone.position)
 
-    scene.add(gltf.scene)
+    scene.add(fbxModel)
 
-    fbxLoader.load('/sit.fbx', (fbxScene: any) => {
-      console.log('FBX动画加载成功:', fbxScene)
-
-      if (fbxScene.animations && fbxScene.animations.length > 0) {
-        console.log('FBX发现动画:', fbxScene.animations.length, '个')
-        fbxScene.animations.forEach((anim: any, index: number) => {
-          console.log(`动画 ${index}: ${anim.name}, 时长: ${anim.duration.toFixed(2)}s`)
-        })
-
-        mixer = new THREE.AnimationMixer(gltf.scene)
-
-        const clip = fbxScene.animations[0]
-        currentAction = mixer.clipAction(clip, gltf.scene)
-        totalDuration.value = clip.duration
-        currentAction.play()
-        isPlaying.value = true
-        console.log(`播放动画: ${clip.name}`)
-      } else {
-        console.log('FBX文件没有包含动画数据')
-      }
-
-      animate()
-    }, (progress: any) => {
-      const percent = (progress.loaded / progress.total * 100).toFixed(2)
-      console.log('FBX加载进度:', percent + '%')
-    }, (error: any) => {
-      console.error('FBX文件加载失败:', error)
-      animate()
-    })
+    runPostAnimation('/walk.fbx')
   }, (progress: any) => {
     const percent = (progress.loaded / progress.total * 100).toFixed(2)
-    console.log('GLB加载进度:', percent + '%')
+    console.log('FBX加载进度:', percent + '%')
   }, (error: any) => {
-    console.error('GLB文件加载失败:', error)
+    console.error('FBX文件加载失败:', error)
   })
 }
 
@@ -570,6 +562,9 @@ function animate() {
   mixer?.update(delta)
 
   if (currentAction && totalDuration.value > 0) {
+    // scene.children.forEach((child: any) => {
+    //   child.position.set(0, 0, 0)
+    // })
     currentTime.value = currentAction.time
     progressPercent.value = (currentTime.value / totalDuration.value) * 100
 
@@ -578,6 +573,7 @@ function animate() {
       currentTime.value = 0
       progressPercent.value = 0
     }
+    // save();
   }
 
   controls?.update()
@@ -590,7 +586,7 @@ function animate() {
 onMounted(() => {
   if (!viewportRef.value) return
   const { width, height } = viewportRef.value.getBoundingClientRect()
-  allPanelHeight.value = height;
+  allPanelHeight.value = 428;
   nextTick(() => {
     initThree()
   })
@@ -635,14 +631,16 @@ function save() {
 
   allBones.value.forEach(bone => {
     const boneObject = scene.getObjectByName(bone.name)
-    if (boneObject && boneObject.isBone) {
-      if (bone.name === 'mixamorigHips') {
-        bone.value.x = -1.557879613085354
-      } else {
-        bone.value.x = boneObject.rotation.x
-      }
+    if (boneObject) {
+      // if (bone.name === 'mixamorigHips') {
+      //   console.log('boneObject', boneObject.position.y)
+      // }
+      bone.value.x = boneObject.rotation.x
       bone.value.y = boneObject.rotation.y
       bone.value.z = boneObject.rotation.z
+      bone.value.px = boneObject.position.x
+      bone.value.py = boneObject.position.y
+      bone.value.pz = boneObject.position.z
     }
   })
 
@@ -655,31 +653,102 @@ function save() {
   console.log('保存数据', JSON.stringify(saveVal))
   emit('update:modelValue', saveVal)
 }
+function playAnimation(file: string) {
+  runPostAnimation('./pose/' + file)
+}
+function runPostAnimation(file: string) {
+  console.log('runPostAnimation', file)
+  if (currentAction) {
+    currentAction.stop()
+  }
+  fbxLoader.load(file, (fbxScene: any) => {
+    console.log('FBX动画加载成功:', fbxScene)
+
+    if (fbxScene.animations && fbxScene.animations.length > 0) {
+      console.log('FBX发现动画:', fbxScene.animations.length, '个')
+      fbxScene.animations.forEach((anim: any, index: number) => {
+        console.log(`动画 ${index}: ${anim.name}, 时长: ${anim.duration.toFixed(2)}s`)
+      })
+
+      mixer = new THREE.AnimationMixer(fbxModel as THREE.Group)
+
+      const clip = fbxScene.animations[0]
+      currentAction = mixer.clipAction(clip, fbxModel as THREE.Group)
+      totalDuration.value = clip.duration
+      currentAction.play()
+      isPlaying.value = true
+      console.log(`播放动画: ${clip.name}`)
+    } else {
+      console.log('FBX文件没有包含动画数据')
+    }
+
+    animate()
+  }, (progress: any) => {
+    const percent = (progress.loaded / progress.total * 100).toFixed(2)
+    console.log('FBX加载进度:', percent + '%')
+  }, (error: any) => {
+    console.error('FBX文件加载失败:', error)
+    animate()
+  })
+}
 </script>
 <style scoped lang="less">
 .viewport-container {
   display: flex;
+  flex-direction: column;
   flex-wrap: wrap;
   gap: 6px;
-  height: 100%;
+  // height: 100%;
   padding: 6px;
   overflow: hidden;
   position: relative;
   flex-wrap: nowrap;
 }
 
-.leftPanel {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
+.topPanel {
+  .postList {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 4px;
 
-  .viewportSmall {
-    position: relative;
-    background-color: #f0f0f0;
-    border: 1px solid #ccc;
-    box-sizing: border-box;
-    border-radius: 8px;
-    overflow: hidden;
+    .item {
+      top: 4px;
+      left: 4px;
+      padding: 5px 10px;
+      background: rgba(255, 255, 255, 0.9);
+      border: 1px solid #d9d9d9;
+      border-radius: 4px;
+      font-size: 14px;
+      font-weight: bold;
+      z-index: 10;
+
+      .name {
+        font-size: 12px;
+      }
+
+      >img {
+        width: 68px;
+        height: 68px;
+      }
+    }
+
+    .moreBtn {
+      top: 4px;
+      left: 4px;
+      padding: 5px 10px;
+      background: rgba(255, 255, 255, 0.9);
+      border: 1px solid #d9d9d9;
+      border-radius: 4px;
+      font-size: 14px;
+      font-weight: bold;
+      z-index: 10;
+      pointer-events: none;
+      height: 102px;
+      box-sizing: border-box;
+      display: flex;
+      align-items: center;
+    }
   }
 }
 
@@ -689,19 +758,6 @@ function save() {
   box-sizing: border-box;
   border-radius: 8px;
   overflow: hidden;
-}
-
-.viewport-label {
-  position: absolute;
-  top: 4px;
-  left: 4px;
-  padding: 5px 10px;
-  background: rgba(255, 255, 255, 0.9);
-  border-radius: 4px;
-  font-size: 14px;
-  font-weight: bold;
-  z-index: 10;
-  pointer-events: none;
 }
 
 .canvas-bone-3d-container {
@@ -819,7 +875,10 @@ function save() {
   justify-content: center;
 
   .progressContainer {
+    display: flex;
+    width: 100%;
     flex-grow: 1;
+    align-items: center;
 
     .progressBar {
       position: relative;
@@ -828,6 +887,7 @@ function save() {
       border-radius: 4px;
       cursor: pointer;
       overflow: visible;
+      flex-grow: 1;
 
       &:hover {
         background: #d0d0d0;
@@ -858,7 +918,7 @@ function save() {
     }
 
     .timeDisplay {
-      margin-top: 8px;
+      margin-left: 8px;
       text-align: center;
       font-size: 12px;
       color: #666;
@@ -867,11 +927,14 @@ function save() {
 
   .controlButtons {
     display: flex;
+    align-items: center;
+    justify-content: center;
     gap: 8px;
     margin-left: 12px;
+    flex-shrink: 0;
 
     .controlBtn {
-      flex: 1;
+      flex-shrink: 0;
       padding: 8px 12px;
       border: none;
       border-radius: 4px;

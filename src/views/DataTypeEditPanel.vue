@@ -1,5 +1,5 @@
 <template>
-  <div class="context-menu" :class="{ fallHeight: boneEditIsShow }"
+  <div class="context-menu"
     :style="{ top: position.y + 'px', left: position.x + 'px' }">
     <div class="configContainer" v-if="boneEditIsShow" style="width: auto;height: auto;">
       <div class="head">
@@ -171,10 +171,10 @@ function handleUpdateBone(value: Array<{
     ...props.modelValue,
     bone: value
   })
-  nextTick(() => {
-    boneEditIsShow.value = false;
-    emit('close')
-  })
+  // nextTick(() => {
+  //   boneEditIsShow.value = false;
+  //   emit('close')
+  // })
 }
 // 重新修正位置，防止超出父元素范围
 function removeIfOutside() {

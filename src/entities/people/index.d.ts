@@ -9,6 +9,9 @@ export type PeopleData = ObjData & {
       x: number
       y: number
       z: number
+      px: number
+      py: number
+      pz: number
     }
   }>
 }
