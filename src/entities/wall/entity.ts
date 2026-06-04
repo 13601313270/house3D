@@ -78,8 +78,8 @@ export class WallEntity extends EntityClass<WallData> {
     zoomLevel: number,
   ): void {
     // 绘制墙上的点
-    [data].forEach((wall) => {
-      if (!wall.points || wall.points.length < 2) return
+    const wall = data;
+    if (wall.points && wall.points.length >= 2) {
       ctx.strokeStyle = 'black'
       ctx.fillStyle = 'white'
       ctx.lineWidth = 2
@@ -90,11 +90,10 @@ export class WallEntity extends EntityClass<WallData> {
         ctx.arc(screenX, screenY, this.circleRadius * zoomLevel + 3, 0, Math.PI * 2)
         ctx.stroke()
         ctx.fill()
-      })
-    });
+      });
+    }
     // 每两个点之间，再绘制一个点，代表边的控制器
-    [data].forEach((wall) => {
-      if (!wall.points || wall.points.length < 2) return
+    if (wall.points && wall.points.length >= 2) {
       for (let i = 0; i < wall.points.length - 1; i++) {
         const p1 = wall.points[i]
         const p2 = wall.points[i + 1]
@@ -110,7 +109,7 @@ export class WallEntity extends EntityClass<WallData> {
         ctx.stroke()
         ctx.fill()
       }
-    })
+    }
   }
 
   create3DMesh(scene: THREE.Scene) {
