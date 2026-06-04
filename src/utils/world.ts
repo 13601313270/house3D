@@ -138,18 +138,22 @@ export class World {
           const prevScreenX = prev.x * zoomLevel + panOffset.x
           const prevScreenY = prev.y * zoomLevel + panOffset.y
           ctx.fillStyle = isDragged ? '#1890ff' : '#42b983'
-          ctx.font = '12px Arial'
+          ctx.font = '20px Arial'
           const dist = Math.round(Math.hypot(point.x - prev.x, point.y - prev.y))
           const midX = (screenX + prevScreenX) / 2
           const midY = (screenY + prevScreenY) / 2
-          ctx.fillText(`${dist}px`, midX, midY - 5)
+          ctx.fillText(`${dist}cm`, midX, midY - 5)
 
           // 绘制角度标记
           if (index > 1) {
             const prev2 = tempWallPoints[index - 2]
             const prev2ScreenX = prev2.x * zoomLevel + panOffset.x
             const prev2ScreenY = prev2.y * zoomLevel + panOffset.y
-            const angleResult = calculateAngle({ x: prev2ScreenX, y: prev2ScreenY }, { x: prevScreenX, y: prevScreenY }, { x: screenX, y: screenY })
+            const angleResult = calculateAngle(
+              { x: prev2ScreenX, y: prev2ScreenY },
+              { x: prevScreenX, y: prevScreenY },
+              { x: screenX, y: screenY }
+            )
             if (angleResult !== null) {
               const { angle } = angleResult
               const angleText = `${Math.round(angle)}°`
@@ -165,25 +169,46 @@ export class World {
         }
       })
 
+      // console.log('tempWallPoints.length', hoverPoint)
+
       if (hoverPoint) {
         const hoverScreenX = hoverPoint.x * zoomLevel + panOffset.x
         const hoverScreenY = hoverPoint.y * zoomLevel + panOffset.y
         drawPoint(ctx, hoverScreenX, hoverScreenY, '#42b983')
         // 绘制最后一个转角的角度标记
-        if (tempWallPoints.length > 1) {
-          const last = tempWallPoints[tempWallPoints.length - 1]
-          const lastScreenX = last.x * zoomLevel + panOffset.x
-          const lastScreenY = last.y * zoomLevel + panOffset.y
-          const angleResult = calculateAngle({ x: lastScreenX, y: lastScreenY }, { x: lastScreenX, y: lastScreenY }, { x: hoverScreenX, y: hoverScreenY })
-          if (angleResult !== null) {
-            const { angle } = angleResult
-            const angleText = `${Math.round(angle)}°`
-            // 计算角度文本位置：在夹角内侧
-            // 如果夹角太小（< 30度），显示在外侧；否则显示在内侧
-            const offset = angle < 30 ? 15 : -15
-            const angleX = lastScreenX - 10
-            const angleY = lastScreenY + offset
-            ctx.fillText(angleText, angleX, angleY)
+        if (tempWallPoints.length > 0) {
+          const prev = tempWallPoints[tempWallPoints.length - 1]
+          const prevScreenX = prev.x * zoomLevel + panOffset.x
+          const prevScreenY = prev.y * zoomLevel + panOffset.y
+
+          const screenX = hoverPoint.x * zoomLevel + panOffset.x
+          const screenY = hoverPoint.y * zoomLevel + panOffset.y
+
+          ctx.fillStyle = '#42b983'
+          ctx.font = '20px Arial'
+          const dist = Math.round(Math.hypot(hoverPoint.x - prev.x, hoverPoint.y - prev.y))
+          const midX = (screenX + prevScreenX) / 2
+          const midY = (screenY + prevScreenY) / 2
+          ctx.fillText(`${dist}cm`, midX, midY - 5)
+          if (tempWallPoints.length > 1) {
+            const prev2 = tempWallPoints[tempWallPoints.length - 2]
+            const prev2ScreenX = prev2.x * zoomLevel + panOffset.x
+            const prev2ScreenY = prev2.y * zoomLevel + panOffset.y
+            const angleResult = calculateAngle(
+              { x: prev2ScreenX, y: prev2ScreenY },
+              { x: prevScreenX, y: prevScreenY },
+              { x: hoverScreenX, y: hoverScreenY }
+            )
+            if (angleResult !== null) {
+              const { angle } = angleResult
+              const angleText = `${Math.round(angle)}°`
+              // 计算角度文本位置：在夹角内侧
+              // 如果夹角太小（< 30度），显示在外侧；否则显示在内侧
+              const offset = angle < 30 ? 15 : -15
+              const angleX = prevScreenX - 10
+              const angleY = prevScreenY + offset
+              ctx.fillText(angleText, angleX, angleY)
+            }
           }
         }
       }

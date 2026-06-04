@@ -757,9 +757,6 @@ const drawWrapper2D = (fileData: fileData) => {
       zoom2DLevel.value,
       insertTempObj,
     )
-
-    // 绘制操作句柄
-    // worldApi.draw2DWorldActionHandle(canvasAction, fileData, panOffset.value, zoom2DLevel.value);
   }
 }
 
@@ -1158,12 +1155,14 @@ const handleContextMenu = (e: MouseEvent) => {
             editPropTypeKey.value = type
             editPropTypeIndex.value = j
             const modifyConfig = [...propConfig];
-            modifyConfig.push({
-              id: 'tip',
-              label: '提示信息',
-              dataType: 'string',
-              value: api.getData().tip || '',
-            })
+            if (type !== 'wall') {
+              modifyConfig.push({
+                id: 'tip',
+                label: '提示信息',
+                dataType: 'string',
+                value: api.getData().tip || '',
+              })
+            }
             editPropConfigInfo.value = modifyConfig
             const inputData: any = {}
             modifyConfig.forEach(v => {
