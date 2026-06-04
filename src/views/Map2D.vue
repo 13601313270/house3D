@@ -1192,6 +1192,8 @@ const handleContextMenu = (e: MouseEvent) => {
                 }
               })
             })
+          }, () => {
+            contextMenu.value = null
           })
           return;
         }

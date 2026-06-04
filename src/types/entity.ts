@@ -287,5 +287,9 @@ export abstract class EntityClass<T extends ObjData> {
     this.associationEntity = []
   }
 
-  abstract editPropConfig(snapPoint: HandelInfo, editShow: (editInfoList: editItem[], callback: (val: any) => void) => void): void
+  abstract editPropConfig(
+    snapPoint: HandelInfo,
+    editShow: (editInfoList: editItem[], callback: (val: any) => void) => void,
+    close: () => void,
+  ): void
 }

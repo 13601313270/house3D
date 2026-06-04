@@ -85,6 +85,7 @@ export type editItem = {
   'material' |
   'hidden' |
   'title' | /* 一个标题，纯展示使用 */
+  'button' | /* 按钮 */
   string[]/* 枚举 */
   value: any
 } | {

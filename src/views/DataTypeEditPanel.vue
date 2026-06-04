@@ -31,8 +31,11 @@
           <div class="label" v-else>
             {{ item.label }}
           </div>
-          <DataTypeEdit v-if="item.dataType !== 'title'" class="edit" :item="item" :modelValue="modelValue[item.id]"
-            @update:modelValue="handleUpdate(item.id, $event)" />
+          <div v-if="item.dataType === 'button'" class="edit">
+            <button class="actionButton" @click="item.value">{{ item.label }}</button>
+          </div>
+          <DataTypeEdit v-else-if="item.dataType !== 'title'" class="edit" :item="item"
+            :modelValue="modelValue[item.id]" @update:modelValue="handleUpdate(item.id, $event)" />
         </div>
       </div>
       <div class="buttonGroup">
@@ -306,6 +309,16 @@ function removeIfOutside() {
           display: flex;
           align-items: center;
           justify-content: end;
+
+          .actionButton {
+            padding: 4px 8px;
+            border: none;
+            border-radius: 4px;
+            background: #e4e6eb;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s;
+          }
         }
       }
     }

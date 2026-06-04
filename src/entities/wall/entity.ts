@@ -475,7 +475,7 @@ export class WallEntity extends EntityClass<WallData> {
   setPrepareState(x: number, y: number): void {
   }
 
-  editPropConfig(snapPoint: HandelInfo, editShow: (editInfoList: editItem[], callback: (val: any) => void) => void): void {
+  editPropConfig(snapPoint: HandelInfo, editShow: (editInfoList: editItem[], callback: (val: any) => void) => void, close: () => void): void {
     const data = this.getData();
     const wallBaseConfig: editItem[] = [
       {
@@ -562,7 +562,36 @@ export class WallEntity extends EntityClass<WallData> {
     ];
     if (snapPoint.index % 2 === 0) {
       const configList: editItem[] = [...wallBaseConfig]
-      editShow(configList, (val) => {
+      editShow([
+        {
+          id: 'title',
+          label: '顶点属性',
+          dataType: 'title',
+          value: '',
+        },
+        {
+          id: 'delete',
+          label: '删除顶点',
+          dataType: 'button',
+          value: () => {
+            if (data.points.length > 2) {
+              const index = snapPoint.index / 2;
+              this.setData({
+                ...data,
+                points: [...data.points.slice(0, index), ...data.points.slice(index + 1)],
+              })
+              close()
+            }
+          },
+        },
+        {
+          id: 'title',
+          label: '整个墙体属性',
+          dataType: 'title',
+          value: '',
+        },
+        ...configList,
+      ], (val) => {
         this.setData({
           ...data,
           ...val,
