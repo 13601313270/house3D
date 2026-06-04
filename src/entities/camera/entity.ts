@@ -451,7 +451,11 @@ export class CameraEntity extends EntityClass<CameraData> {
     return null;
   }
 
-  matchHandelMoveCallback(x: number, y: number, matchHandelInfo: HandelInfo) {
+  matchHandelMoveCallback(position: {
+    x: number,
+    y: number,
+  }, matchHandelInfo: HandelInfo) {
+    const { x, y } = position
     const data = this.getData();
     if (matchHandelInfo.index === 1) {
       this.setData({

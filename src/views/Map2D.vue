@@ -1371,6 +1371,7 @@ const handleMouseMove = (e: MouseEvent) => {
     const ctxAction = canvasAction.getContext('2d')!
     // 如果正在拖拽，处理拖拽逻辑（即使当前工具不是 drag）
     if (matchHandelObj && matchHandelInfo) {
+      // console.log('currentTool.value---1')
       // console.log('matchHandelObj', currentTool.value)
       function temp(api: EntityClass<ObjData>): boolean {
         if (matchHandelObj && matchHandelInfo) {
@@ -1443,7 +1444,7 @@ const handleMouseMove = (e: MouseEvent) => {
       }
 
       matchHandelObj.notInSceneSnapLineArea()
-      matchHandelObj.matchHandelMoveCallback(x, y, matchHandelInfo)
+      matchHandelObj.matchHandelMoveCallback({ x, y }, matchHandelInfo)
       drawWrapper2D(fileData);
       // 绘制操作句柄
       ctxAction.clearRect(0, 0, canvasAction.width, canvasAction.height)

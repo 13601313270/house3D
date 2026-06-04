@@ -155,7 +155,11 @@ export class WindowEntity extends EntityClassInWall<WindowData> {
     return null;
   }
 
-  matchHandelMoveCallback(x: number, y: number) {
+  matchHandelMoveCallback(position: {
+    x: number,
+    y: number,
+  }) {
+    const { x, y } = position
     this.changePosition({ x, y })
   }
 

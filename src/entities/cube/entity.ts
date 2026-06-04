@@ -207,7 +207,11 @@ export class CubeEntity extends EntityClass<CubeData> {
     return null;
   }
 
-  matchHandelMoveCallback(x: number, y: number, matchHandelInfo: HandelInfo) {
+  matchHandelMoveCallback(position: {
+    x: number,
+    y: number,
+  }, matchHandelInfo: HandelInfo) {
+    const { x, y } = position
     if (matchHandelInfo.index === 0) {
       this.changePosition({ x, y })
     } else if (matchHandelInfo.index === 1) {

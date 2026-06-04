@@ -119,6 +119,7 @@ export class WallEntity extends EntityClass<WallData> {
     const wallBoxList = createAllWallFromPoints([data]);
     const wallHeight = data.height
     const bottom = data.bottom || 0
+    console.log(1)
     const extrudeSettings = {
       steps: 1,
       depth: wallHeight,
@@ -127,7 +128,7 @@ export class WallEntity extends EntityClass<WallData> {
       // bevelSize: 2,
       // bevelSegments: 1
     }
-    console.log('wallBoxList', wallBoxList)
+    // console.log('wallBoxList', wallBoxList)
     for (let i = 0; i < wallBoxList.length; i++) {
       const box = wallBoxList[i]
 
@@ -280,12 +281,22 @@ export class WallEntity extends EntityClass<WallData> {
     return null
   }
 
-  matchHandelMoveCallback(x: number, y: number, matchHandelInfo: HandelInfo) {
+  matchHandelMoveCallback(position: {
+    x: number,
+    y: number,
+  }, matchHandelInfo: HandelInfo) {
+    const { x, y } = position
     if (matchHandelInfo.index !== undefined) {
       this.remove3DCache()
       if (matchHandelInfo.index % 2 === 0) {
         const index = matchHandelInfo.index / 2;
         this.getData().points[index] = { x, y, snw: this.getData().points[index].snw, }
+      } else {
+        const preIndex = (matchHandelInfo.index - 1) / 2;
+        const nextIndex = (matchHandelInfo.index + 1) / 2;
+        this.getData().points[preIndex] = { x, y, snw: this.getData().points[preIndex].snw, }
+        this.getData().points[nextIndex] = { x, y, snw: this.getData().points[nextIndex].snw, }
+        console.log('移动边')
       }
     }
   }

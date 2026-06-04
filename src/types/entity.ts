@@ -195,7 +195,10 @@ export abstract class EntityClass<T extends ObjData> {
   abstract matchHandelInfo(x: number, y: number): HandelInfo | null;
 
   // 命中可拖拽具柄被移动移动
-  abstract matchHandelMoveCallback(x: number, y: number, matchHandelInfo: HandelInfo): void;
+  abstract matchHandelMoveCallback(position: {
+    x: number,
+    y: number,
+  }, matchHandelInfo: HandelInfo): void;
 
   // 本对象进入一个吸附对象的区域
   abstract inSceneSnapPointArea(
