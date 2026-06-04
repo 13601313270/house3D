@@ -370,12 +370,6 @@ export class PeopleEntity extends EntityClass<PeopleData> {
         dataType: 'color',
         value: data.color || '#DEDEDE',
       },
-      {
-        id: 'tip',
-        label: '提示信息',
-        dataType: 'string',
-        value: data.tip || '',
-      }
     ], (val) => {
       this.setData({
         ...data,

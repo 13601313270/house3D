@@ -1157,9 +1157,16 @@ const handleContextMenu = (e: MouseEvent) => {
             editSnapPoint.value = snapPoint
             editPropTypeKey.value = type
             editPropTypeIndex.value = j
-            editPropConfigInfo.value = propConfig
+            const modifyConfig = [...propConfig];
+            modifyConfig.push({
+              id: 'tip',
+              label: '提示信息',
+              dataType: 'string',
+              value: api.getData().tip || '',
+            })
+            editPropConfigInfo.value = modifyConfig
             const inputData: any = {}
-            propConfig.forEach(v => {
+            modifyConfig.forEach(v => {
               inputData[v.id] = v.value
             })
             console.log('初始化数据', inputData)

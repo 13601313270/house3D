@@ -345,8 +345,6 @@ export class WallEntity extends EntityClass<WallData> {
   }
 
   editPropConfig(snapPoint: HandelInfo, editShow: (editInfoList: editItem[], callback: (val: any) => void) => void): void {
-    console.log('editPropConfig-墙体厚度', this)
-    console.log('editPropConfig-墙体信息', snapPoint)
     if (snapPoint.index % 2 === 0) {
       const data = this.getData();
       const configList: editItem[] = [
@@ -454,7 +452,6 @@ export class WallEntity extends EntityClass<WallData> {
           ...points[pointIndex],
           snw: val.hidden,
         };
-        console.log('editPropConfig-是否隐藏', val)
         this.setData({
           ...data,
           points,
