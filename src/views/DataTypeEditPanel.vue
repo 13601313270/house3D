@@ -1,6 +1,5 @@
 <template>
-  <div class="context-menu"
-    :style="{ top: position.y + 'px', left: position.x + 'px' }">
+  <div class="context-menu" :style="{ top: position.y + 'px', left: position.x + 'px' }">
     <div class="configContainer" v-if="boneEditIsShow" style="width: auto;height: auto;">
       <div class="head">
         <div class="moveIcon" @mousedown="startDrag">
@@ -34,7 +33,7 @@
         </div>
       </div>
       <div class="buttonGroup">
-        <button v-if="typeKey === 'people'" @click="showBoneEdit">骨骼编辑</button>
+        <button v-if="typeKey === 'people'" @click="showBoneEdit">姿态编辑</button>
         <div style="flex-grow: 1;"></div>
         <button class="deleteButton" @click="deleteContextMenuEntity">删除</button>
       </div>

@@ -131,6 +131,11 @@ const allDemoList = ref<Array<{
   file: string,
 }>>([
   {
+    name: '垂手站立',
+    img: 'https://d99n9xvb9513w.cloudfront.net/thumbnails/motions/131220901/animated.gif',
+    file: 'standing.fbx',
+  },
+  {
     name: '走路1',
     img: 'https://d99n9xvb9513w.cloudfront.net/thumbnails/motions/102230901/animated.gif',
     file: 'walk.fbx',
