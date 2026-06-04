@@ -28,6 +28,7 @@ export abstract class EntityClass<T extends ObjData> {
   private data: T
   meshList: THREE.Group[] = []
   boundingBox: THREE.Group | null = null
+  spriteGroup: THREE.Group | null = null
   // eslint-disable-next-line
   associationEntity: EntityClass<any>[] = []// 关联对象，就是本对象渲染，需要联动修改的对象。（比如：墙壁上被窗户挖洞，那么墙修改，需要重新挖洞）
 
@@ -67,6 +68,10 @@ export abstract class EntityClass<T extends ObjData> {
         scene.remove(this.boundingBox)
         this.boundingBox = null
       }
+      if (this.spriteGroup) {
+        scene.remove(this.spriteGroup)
+        this.spriteGroup = null
+      }
       this.meshList = this.create3DMesh(scene);
       // 容器包裹立方体
       (() => {
@@ -76,57 +81,61 @@ export abstract class EntityClass<T extends ObjData> {
         }
         const [boxVector3, offsetVector3, rotateVector3] = boundingBox;
         (() => {
-          const geometry = new THREE.BoxGeometry(1, 1, 1);
-          const edges = new THREE.EdgesGeometry(geometry);
-          const lineMaterial = new THREE.LineBasicMaterial({ color: 0x000000, transparent: true, opacity: 1 });
-          const box = new THREE.LineSegments(edges, lineMaterial);
+          // const geometry = new THREE.BoxGeometry(1, 1, 1);
+          // const edges = new THREE.EdgesGeometry(geometry);
+          // const lineMaterial = new THREE.LineBasicMaterial({ color: 0x000000, transparent: true, opacity: 1 });
+          // const box = new THREE.LineSegments(edges, lineMaterial);
 
-          // 设置立方体缩放、位置、旋转
-          box.scale.set(boxVector3.x, boxVector3.y, boxVector3.z);
-          box.position.set(offsetVector3.x, offsetVector3.y, offsetVector3.z);
-          const group = new THREE.Group()
-          group.add(box);
-          group.rotation.set(rotateVector3.x, rotateVector3.y, rotateVector3.z);
-          // @ts-ignore
-          box.entity = this;
-          this.boundingBox = group;
-          console.log('kkkkkkk-cube-add', boundingBox)
-          scene.add(group)
+          // // 设置立方体缩放、位置、旋转
+          // // box.scale.set(boxVector3.x, boxVector3.y, boxVector3.z);
+          // // box.position.set(offsetVector3.x, offsetVector3.y, offsetVector3.z);
+          // const group = new THREE.Group()
+          // group.add(box);
+          // // group.rotation.set(rotateVector3.x, rotateVector3.y, rotateVector3.z);
+          // // @ts-ignore
+          // box.entity = this;
+          // this.boundingBox = group;
+          // // console.log('kkkkkkk-cube-add', boundingBox)
+          // scene.add(group)
         })();
         (() => {
-          this.data.tip = '摄像机';
           if (this.data.tip) { // data.tip
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d')!;
 
             // 设置canvas尺寸
-            const fontSize = 24;
+            const fontSize = 96;
             ctx.font = `bold ${fontSize}px Arial`;
             const textWidth = ctx.measureText(this.data.tip).width;
+            const heightPadding = 5;
             canvas.width = textWidth + 20;  // 文字宽度 + 边距
-            canvas.height = fontSize + 10;  // 字体高度 + 边距
+            canvas.height = fontSize + heightPadding * 2;  // 字体高度 + 边距
 
             // 绘制背景和文字
-            ctx.fillStyle = 'rgba(226, 37, 37, 0.95)';
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = '#333';
+            ctx.fillStyle = '#000000ff';
             ctx.font = `bold ${fontSize}px Arial`;
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
-            ctx.fillText(this.data.tip, canvas.width / 2, canvas.height / 2);
+            ctx.fillText(this.data.tip, canvas.width / 2, canvas.height / 2 + heightPadding);
 
             const texture = new THREE.CanvasTexture(canvas);
             const spriteMaterial = new THREE.SpriteMaterial({ map: texture });
             const sprite = new THREE.Sprite(spriteMaterial);
             // const width = Math.max(boxVector3.x, boxVector3.y);
 
-            const height = fontSize;
+            const height = fontSize / 4;
             const width = height / (canvas.height / canvas.width)
 
             console.log('ccc-4', boxVector3, width, height);
             sprite.scale.set(width, height, 1);
-            sprite.position.set(0, boxVector3.y + height / 2, 0);
-            this.meshList[0].add(sprite);
+            // sprite.position.set(0, boxVector3.y + height / 2, 0);
+            // this.meshList[0].add(sprite);
+            const group = new THREE.Group()
+            group.add(sprite)
+            this.spriteGroup = group
+            scene.add(group)
           }
         })();
       })();
@@ -145,6 +154,10 @@ export abstract class EntityClass<T extends ObjData> {
     if (this.boundingBox) {
       this.world.scene.remove(this.boundingBox)
       this.boundingBox = null
+    }
+    if (this.spriteGroup) {
+      this.world.scene.remove(this.spriteGroup)
+      this.spriteGroup = null
     }
     if (this.cacheKeyStr) {
       this.cacheKeyStr = ''
@@ -252,6 +265,10 @@ export abstract class EntityClass<T extends ObjData> {
     if (this.boundingBox) {
       scene.remove(this.boundingBox)
       this.boundingBox = null
+    }
+    if (this.spriteGroup) {
+      scene.remove(this.spriteGroup)
+      this.spriteGroup = null
     }
 
     if (this.associationEntity.length > 0) {

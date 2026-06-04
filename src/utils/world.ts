@@ -270,24 +270,26 @@ export class World {
     })
   }
 
-  // boundingBoxList: THREE.LineSegments[] = []
-
   draw3D() {
-    // this.boundingBoxList = []
     allFileKeys.forEach((key) => {
       if (this.allFileMapObjects[key]) {
         (this.allFileMapObjects[key] as EntityClass<any>[]).forEach((item) => {
           item.reCreate3DMeshIfNeed()
-          // if (item.boundingBox) {
-          //   this.boundingBoxList.push(item.boundingBox)
-          // }
           item.change3DMeshState()
-          if (item.boundingBox) {
+          const boundingBox = item.createBoundingBox();
+          if (boundingBox) {
             const data = item.getData();
-            const boundingBox = item.createBoundingBox();
-            if (boundingBox) {
-              item.boundingBox.position.set(data.x, data.z, data.y)
-              item.boundingBox.rotation.y = boundingBox[2].y
+            const [boxVector3, offsetVector3, rotateVector3] = boundingBox;
+            // if (item.boundingBox) {
+            //   console.log('createBoundingBox-2', rotateVector3)
+            //   item.boundingBox.position.set(data.x, data.z, data.y)
+            //   item.boundingBox.rotation.set(rotateVector3.x, rotateVector3.y, rotateVector3.z)
+            //   item.boundingBox.children[0].scale.set(boxVector3.x, boxVector3.y, boxVector3.z)
+            //   item.boundingBox.children[0].position.set(offsetVector3.x, offsetVector3.y, offsetVector3.z)
+            // }
+            if (item.spriteGroup) {
+              item.spriteGroup.position.set(data.x, data.z, data.y)
+              item.spriteGroup.children[0].position.set(0, boxVector3.y + 12, 0)
             }
           }
         });
