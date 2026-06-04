@@ -282,6 +282,14 @@ export class World {
           //   this.boundingBoxList.push(item.boundingBox)
           // }
           item.change3DMeshState()
+          if (item.boundingBox) {
+            const data = item.getData();
+            const boundingBox = item.createBoundingBox();
+            if (boundingBox) {
+              item.boundingBox.position.set(data.x, data.z, data.y)
+              item.boundingBox.rotation.y = boundingBox[2].y
+            }
+          }
         });
       }
     });

@@ -156,7 +156,6 @@ export class PeopleEntity extends EntityClass<PeopleData> {
       fbxModel.rotateX(Math.PI);
       fbxModel.rotateY(Math.PI)
       fbxModel.rotateZ(Math.PI);
-      fbxModel.scale.set(0.0261, 0.0261, 0.0261)
       const boneListConfig = data.bone || [];
       fbxModel.traverse((child: any) => {
         if (child.isBone) {
@@ -202,17 +201,19 @@ export class PeopleEntity extends EntityClass<PeopleData> {
     ]
   }
 
+  // 第一个是尺寸，第二个是位置偏移，第三个是旋转角度
   createBoundingBox(): [THREE.Vector3, THREE.Vector3, THREE.Vector3] {
+    const data = this.getData();
     return [
-      new THREE.Vector3(2, 5, 1),
-      new THREE.Vector3(0, 2.5, 0),
+      new THREE.Vector3(data.height * 2 / 5, data.height, data.height / 5),
+      new THREE.Vector3(0, data.height / 2, 0),
       new THREE.Vector3(0, 0, 0)
     ]
   }
 
   change3DMeshState(): void {
     const data = this.getData();
-    const singleHeight = 0.213
+    const singleHeight = 0.213 * 0.0261
     const { height, angle, tip } = data
     this.meshList.forEach(v => {
       v.position.set(data.x, data.z, data.y)
@@ -345,7 +346,7 @@ export class PeopleEntity extends EntityClass<PeopleData> {
         dataType: 'number',
         min: 1,
         max: 500,
-        step: 15,
+        step: 1,
         value: data.height,
       },
       {

@@ -27,7 +27,7 @@ export abstract class EntityClass<T extends ObjData> {
   world: World;
   private data: T
   meshList: THREE.Group[] = []
-  boundingBox: THREE.LineSegments | null = null
+  boundingBox: THREE.Group | null = null
   // eslint-disable-next-line
   associationEntity: EntityClass<any>[] = []// 关联对象，就是本对象渲染，需要联动修改的对象。（比如：墙壁上被窗户挖洞，那么墙修改，需要重新挖洞）
 
@@ -63,14 +63,13 @@ export abstract class EntityClass<T extends ObjData> {
     if (this.cacheKeyStr !== newKeyByData) {
       const scene: THREE.Scene = this.world.scene
       this.meshList.forEach(mesh => scene.remove(mesh))
+      if (this.boundingBox) {
+        scene.remove(this.boundingBox)
+        this.boundingBox = null
+      }
       this.meshList = this.create3DMesh(scene);
-      console.log('ccc-1');
       // 容器包裹立方体
       (() => {
-        if (this.boundingBox) {
-          scene.remove(this.boundingBox)
-          this.boundingBox = null
-        }
         const boundingBox = this.createBoundingBox();
         if (!boundingBox) {
           return;
@@ -88,13 +87,14 @@ export abstract class EntityClass<T extends ObjData> {
           const group = new THREE.Group()
           group.add(box);
           group.rotation.set(rotateVector3.x, rotateVector3.y, rotateVector3.z);
-
-          this.meshList.push(group);
           // @ts-ignore
           box.entity = this;
-          this.boundingBox = box;
+          this.boundingBox = group;
+          console.log('kkkkkkk-cube-add', boundingBox)
+          scene.add(group)
         })();
         (() => {
+          this.data.tip = '摄像机';
           if (this.data.tip) { // data.tip
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d')!;
@@ -126,7 +126,7 @@ export abstract class EntityClass<T extends ObjData> {
             console.log('ccc-4', boxVector3, width, height);
             sprite.scale.set(width, height, 1);
             sprite.position.set(0, boxVector3.y + height / 2, 0);
-            // this.meshList[0].add(sprite);
+            this.meshList[0].add(sprite);
           }
         })();
       })();
@@ -141,10 +141,10 @@ export abstract class EntityClass<T extends ObjData> {
     if (this.meshList.length) {
       this.meshList.forEach(mesh => this.world.scene.remove(mesh))
       this.meshList = []
-      if (this.boundingBox) {
-        this.world.scene.remove(this.boundingBox)
-        this.boundingBox = null
-      }
+    }
+    if (this.boundingBox) {
+      this.world.scene.remove(this.boundingBox)
+      this.boundingBox = null
     }
     if (this.cacheKeyStr) {
       this.cacheKeyStr = ''
