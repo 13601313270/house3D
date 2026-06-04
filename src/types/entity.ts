@@ -75,15 +75,18 @@ export abstract class EntityClass<T extends ObjData> {
         if (!boundingBox) {
           return;
         }
-        const [boxVector3, offsetVector3] = boundingBox;
+        const [boxVector3, offsetVector3, rotateVector3] = boundingBox;
         (() => {
           const geometry = new THREE.BoxGeometry(1, 1, 1);
           const edges = new THREE.EdgesGeometry(geometry);
           const lineMaterial = new THREE.LineBasicMaterial({ color: 0x000000, transparent: true, opacity: 1 });
           const box = new THREE.LineSegments(edges, lineMaterial);
-          // 设置立方体尺寸
+
+          // 设置立方体缩放、位置、旋转
           box.scale.set(boxVector3.x, boxVector3.y, boxVector3.z);
           box.position.set(offsetVector3.x, offsetVector3.y, offsetVector3.z);
+          box.rotation.set(rotateVector3.x, rotateVector3.y, rotateVector3.z);
+
           const group = new THREE.Group()
           group.add(box);
           this.meshList.push(group);
