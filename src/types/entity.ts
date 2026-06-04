@@ -85,10 +85,10 @@ export abstract class EntityClass<T extends ObjData> {
           // 设置立方体缩放、位置、旋转
           box.scale.set(boxVector3.x, boxVector3.y, boxVector3.z);
           box.position.set(offsetVector3.x, offsetVector3.y, offsetVector3.z);
-          box.rotation.set(rotateVector3.x, rotateVector3.y, rotateVector3.z);
-
           const group = new THREE.Group()
           group.add(box);
+          group.rotation.set(rotateVector3.x, rotateVector3.y, rotateVector3.z);
+
           this.meshList.push(group);
           // @ts-ignore
           box.entity = this;

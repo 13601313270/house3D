@@ -156,11 +156,11 @@ export class CubeEntity extends EntityClass<CubeData> {
   }
 
   createBoundingBox(): [THREE.Vector3, THREE.Vector3, THREE.Vector3] {
-    const { width, height, depth } = this.getData();
+    const { width, height, depth, angleY } = this.getData();
     return [
       new THREE.Vector3(width, height, depth),
       new THREE.Vector3(0, height / 2, 0),
-      new THREE.Vector3(0, 0, 0)
+      new THREE.Vector3(0, angleY, 0)
     ]
   }
 
@@ -214,7 +214,6 @@ export class CubeEntity extends EntityClass<CubeData> {
       const data = this.getData();
       // 根据x,y计算angleY
       const angleY = Math.atan2(y - data.y, x - data.x)
-      console.log(angleY)
       this.setData({
         ...this.getData(),
         angleY: angleY * -1,
@@ -323,6 +322,28 @@ export class CubeEntity extends EntityClass<CubeData> {
       ...this.getData(),
       x,
       y,
+    })
+  }
+
+  meshNeedChangeKey() {
+    const data = this.getData();
+    const cacheData = {
+      ...data,
+      x: undefined,
+      y: undefined,
+      z: undefined,
+      angleY: undefined,
+    }
+    return this.type + JSON.stringify(cacheData)
+  }
+
+  // 改变3D模型的状态
+  // 例如：改变位置，旋转角度等，模型本身不变
+  change3DMeshState(): void {
+    const data = this.getData();
+    this.meshList.forEach(v => {
+      v.position.set(data.x, data.z, data.y)
+      v.rotation.y = data.angleY
     })
   }
 }
