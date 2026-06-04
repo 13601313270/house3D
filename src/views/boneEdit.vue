@@ -2,7 +2,13 @@
   <div class="viewport-container" ref="viewportRef">
     <div class="topPanel">
       <div class="postList">
-        <div v-for="item in allDemoList.slice(0, 4)" :key="item.file" class="item" @click="playAnimation(item.file)">
+        <div v-for="item in allDemoList.slice(0, 5)" :key="item.file" class="item" @click="playAnimation(item.file)">
+          <div class="name">{{ item.name }}</div>
+          <img :src="item.img" alt="animation" />
+        </div>
+      </div>
+      <div class="postList">
+        <div v-for="item in allDemoList.slice(5, 9)" :key="item.file" class="item" @click="playAnimation(item.file)">
           <div class="name">{{ item.name }}</div>
           <img :src="item.img" alt="animation" />
         </div>
@@ -136,9 +142,9 @@ const allDemoList = ref<Array<{
     file: 'standing.fbx',
   },
   {
-    name: '走路1',
-    img: 'https://d99n9xvb9513w.cloudfront.net/thumbnails/motions/102230901/animated.gif',
-    file: 'walk.fbx',
+    name: '走路',
+    img: 'https://d99n9xvb9513w.cloudfront.net/thumbnails/motions/118080901/animated.gif',
+    file: 'walking.fbx',
   },
   {
     name: '趴下',
@@ -151,9 +157,9 @@ const allDemoList = ref<Array<{
     file: 'run.fbx',
   },
   {
-    name: '托马斯',
-    img: 'https://d99n9xvb9513w.cloudfront.net/thumbnails/motions/121780901/animated.gif',
-    file: 'flair.fbx',
+    name: '躺',
+    img: 'https://d99n9xvb9513w.cloudfront.net/thumbnails/motions/130560901/animated.gif',
+    file: 'laying.fbx',
   },
   {
     name: '游泳',
@@ -171,8 +177,13 @@ const allDemoList = ref<Array<{
     file: 'sit.fbx',
   },
   {
+    name: '跳跃',
+    img: 'https://d99n9xvb9513w.cloudfront.net/thumbnails/motions/124500902/animated.gif',
+    file: 'jump.fbx',
+  },
+  {
     name: '翘腿坐',
-    img: 'https://d99n9xvb9513w.cloudfront.net/thumbnails/motions/126490902/animated.gif',
+    img: 'https://d99n9xvb9513w.cloudfront.net/thumbnails/motions/116560901/animated.gif',
     file: 'sit2.fbx',
   },
   {
@@ -181,9 +192,89 @@ const allDemoList = ref<Array<{
     file: 'sit3.fbx',
   },
   {
+    name: '倚靠坐2',
+    img: 'https://d99n9xvb9513w.cloudfront.net/thumbnails/motions/140600908/animated.gif',
+    file: 'femaleSittingPose.fbx',
+  },
+  {
     name: '蹲下',
     img: 'https://d99n9xvb9513w.cloudfront.net/thumbnails/motions/137630901/animated.gif',
     file: 'squat.fbx',
+  },
+  {
+    name: '跪下',
+    img: 'https://d99n9xvb9513w.cloudfront.net/thumbnails/motions/103130903/animated.gif',
+    file: 'praying.fbx',
+  },
+  {
+    name: '拳击',
+    img: 'https://d99n9xvb9513w.cloudfront.net/thumbnails/motions/113930901/animated.gif',
+    file: 'punchingBag.fbx',
+  },
+  {
+    name: '手撑躺',
+    img: 'https://d99n9xvb9513w.cloudfront.net/thumbnails/motions/150400906/animated.gif',
+    file: 'maleLayingPose.fbx',
+  },
+  {
+    name: '单腿俏皮站立',
+    img: 'https://d99n9xvb9513w.cloudfront.net/thumbnails/motions/140700904/animated.gif',
+    file: 'femaleStandingPose.fbx',
+  },
+  {
+    name: '踢人',
+    img: 'https://d99n9xvb9513w.cloudfront.net/thumbnails/motions/124070904/animated.gif',
+    file: 'kick.fbx',
+  },
+  {
+    name: '大摇大摆走',
+    img: 'https://d99n9xvb9513w.cloudfront.net/thumbnails/motions/102230901/animated.gif',
+    file: 'walk.fbx',
+  },
+  {
+    name: '吊',
+    img: 'https://d99n9xvb9513w.cloudfront.net/thumbnails/motions/114390901/animated.gif',
+    file: 'hanging.fbx',
+  },
+  {
+    name: '托马斯',
+    img: 'https://d99n9xvb9513w.cloudfront.net/thumbnails/motions/121780901/animated.gif',
+    file: 'flair.fbx',
+  },
+  {
+    name: '前滚翻',
+    img: 'https://d99n9xvb9513w.cloudfront.net/thumbnails/motions/130030901/animated.gif',
+    file: 'running.fbx',
+  },
+  {
+    name: '射箭',
+    img: 'https://d99n9xvb9513w.cloudfront.net/thumbnails/motions/112390901/animated.gif',
+    file: 'shootingArrow.fbx',
+  },
+  {
+    name: '棒球击打',
+    img: 'https://d99n9xvb9513w.cloudfront.net/thumbnails/motions/125420901/animated.gif',
+    file: 'baseballHit.fbx',
+  },
+  {
+    name: '街舞扫腿',
+    img: 'https://d99n9xvb9513w.cloudfront.net/thumbnails/motions/121890901/animated.gif',
+    file: 'breakdanceFreezeVar3.fbx'
+  },
+  {
+    name: '舞蹈舒展',
+    img: 'https://d99n9xvb9513w.cloudfront.net/thumbnails/motions/140200906/animated.gif',
+    file: 'femaleDancePose.fbx'
+  },
+  {
+    name: '霹雳舞波浪',
+    img: 'https://d99n9xvb9513w.cloudfront.net/thumbnails/motions/101960901/animated.gif',
+    file: 'hipHopDancing.fbx',
+  },
+  {
+    name: '单膝跪',
+    img: 'https://d99n9xvb9513w.cloudfront.net/thumbnails/motions/135940901/animated.gif',
+    file: 'kneelingDown.fbx',
   }
 ])
 
@@ -772,12 +863,14 @@ function showModelPanel() {
     display: flex;
     flex-direction: row;
     align-items: center;
-    gap: 4px;
+    justify-content: center;
+    gap: 6px;
+    margin-bottom: 4px;
 
     .item {
       top: 4px;
       left: 4px;
-      padding: 5px 10px;
+      padding: 5px;
       background: rgba(255, 255, 255, 0.9);
       border: 1px solid #d9d9d9;
       border-radius: 4px;
@@ -798,6 +891,7 @@ function showModelPanel() {
     .moreBtn {
       top: 4px;
       left: 4px;
+      width: 78px;
       padding: 5px 10px;
       background: rgba(255, 255, 255, 0.9);
       border: 1px solid #d9d9d9;
@@ -809,6 +903,7 @@ function showModelPanel() {
       box-sizing: border-box;
       display: flex;
       align-items: center;
+      justify-content: center;
     }
   }
 }
