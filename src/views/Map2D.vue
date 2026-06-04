@@ -1444,7 +1444,12 @@ const handleMouseMove = (e: MouseEvent) => {
       }
 
       matchHandelObj.notInSceneSnapLineArea()
-      matchHandelObj.matchHandelMoveCallback({ x, y }, matchHandelInfo)
+      matchHandelObj.matchHandelMoveCallback({
+        x,
+        y,
+        startX: matchHandelStartPoint ? matchHandelStartPoint.x : undefined,
+        startY: matchHandelStartPoint ? matchHandelStartPoint.y : undefined,
+      }, matchHandelInfo)
       drawWrapper2D(fileData);
       // 绘制操作句柄
       ctxAction.clearRect(0, 0, canvasAction.width, canvasAction.height)
@@ -1602,6 +1607,7 @@ const handleMouseMove = (e: MouseEvent) => {
 
 let matchHandelObj: EntityClass<any> | null = null;
 let matchHandelInfo: HandelInfo | null = null;
+let matchHandelStartPoint: Point | null = null;
 const handleMouseDown = (e: MouseEvent) => {
   contextMenu.value = null;
 
@@ -1622,6 +1628,7 @@ const handleMouseDown = (e: MouseEvent) => {
       const { classInfo, handle, startPooint } = handleInfoList[0]
       matchHandelObj = classInfo
       matchHandelInfo = handle
+      matchHandelStartPoint = { x, y }
       dragOffset.value = { x: 0, y: 0 }
       dragStartPoint.value = {
         x: startPooint.x,

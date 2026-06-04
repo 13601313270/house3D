@@ -246,6 +246,8 @@ export class WallEntity extends EntityClass<WallData> {
     return null
   }
 
+  private prePointStartPosition: Point | null = null
+  private nextPointStartPosition: Point | null = null
   // 命中可拖拽具柄
   matchHandelInfo(x: number, y: number) {
     const data = this.getData();
@@ -270,6 +272,9 @@ export class WallEntity extends EntityClass<WallData> {
       const midY = (p1.y + p2.y) / 2
       const dist = Math.hypot(x - midX, y - midY)
       if (dist < this.getData().thickness) {
+        this.prePointStartPosition = p1;
+        this.nextPointStartPosition = p2;
+
         return {
           id: data.id,
           type: this.type,
@@ -284,19 +289,35 @@ export class WallEntity extends EntityClass<WallData> {
   matchHandelMoveCallback(position: {
     x: number,
     y: number,
+    startX?: number,
+    startY?: number,
   }, matchHandelInfo: HandelInfo) {
-    const { x, y } = position
+    const { x, y, startX, startY } = position
     if (matchHandelInfo.index !== undefined) {
       this.remove3DCache()
       if (matchHandelInfo.index % 2 === 0) {
         const index = matchHandelInfo.index / 2;
         this.getData().points[index] = { x, y, snw: this.getData().points[index].snw, }
       } else {
-        const preIndex = (matchHandelInfo.index - 1) / 2;
-        const nextIndex = (matchHandelInfo.index + 1) / 2;
-        this.getData().points[preIndex] = { x, y, snw: this.getData().points[preIndex].snw, }
-        this.getData().points[nextIndex] = { x, y, snw: this.getData().points[nextIndex].snw, }
-        console.log('移动边')
+        if (startX !== undefined && startY !== undefined) {
+          const diffMouseX = x - startX
+          const diffMouseY = y - startY
+          const preIndex = (matchHandelInfo.index - 1) / 2;
+          const nextIndex = (matchHandelInfo.index + 1) / 2;
+          if (this.prePointStartPosition && this.nextPointStartPosition) {
+            this.getData().points[preIndex] = {
+              x: this.prePointStartPosition.x + diffMouseX,
+              y: this.prePointStartPosition.y + diffMouseY,
+              snw: this.getData().points[preIndex].snw,
+            }
+            this.getData().points[nextIndex] = {
+              x: this.nextPointStartPosition.x + diffMouseX,
+              y: this.nextPointStartPosition.y + diffMouseY,
+              snw: this.getData().points[nextIndex].snw,
+            }
+            console.log('移动边', startX, startY)
+          }
+        }
       }
     }
   }

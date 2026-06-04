@@ -198,6 +198,8 @@ export abstract class EntityClass<T extends ObjData> {
   abstract matchHandelMoveCallback(position: {
     x: number,
     y: number,
+    startX?: number,
+    startY?: number,
   }, matchHandelInfo: HandelInfo): void;
 
   // 本对象进入一个吸附对象的区域
