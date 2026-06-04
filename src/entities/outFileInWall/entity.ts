@@ -246,7 +246,7 @@ export class OutFileInWallEntity extends EntityClassInWall<OutFileInWallData> {
     ]
   }
 
-  createBoundingBox(): [THREE.Vector3, THREE.Vector3] {
+  createBoundingBox(): [THREE.Vector3, THREE.Vector3, THREE.Vector3] {
     const { wallId, fileTypeId, isOuter } = this.getData()
     if (!this.world.allFileMapObjects.wall) {
       this.world.allFileMapObjects.wall = []
@@ -262,6 +262,7 @@ export class OutFileInWallEntity extends EntityClassInWall<OutFileInWallData> {
       console.error('未找到对应的文件类型:', fileTypeId)
       return [
         new THREE.Vector3(10, 10, wallThickness),
+        new THREE.Vector3(0, 0, 0),
         new THREE.Vector3(0, 0, 0)
       ]
     }
@@ -273,7 +274,8 @@ export class OutFileInWallEntity extends EntityClassInWall<OutFileInWallData> {
 
     return [
       new THREE.Vector3(matchAreaNumber1, matchAreaDepth, wallThickness),
-      new THREE.Vector3(0, matchAreaDepth / 2, isOuter ? -wallThickness : wallThickness)
+      new THREE.Vector3(0, matchAreaDepth / 2, isOuter ? -wallThickness : wallThickness),
+      new THREE.Vector3(0, 0, 0)
     ]
   }
 

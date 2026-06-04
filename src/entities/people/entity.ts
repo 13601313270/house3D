@@ -202,10 +202,11 @@ export class PeopleEntity extends EntityClass<PeopleData> {
     ]
   }
 
-  createBoundingBox(): [THREE.Vector3, THREE.Vector3] {
+  createBoundingBox(): [THREE.Vector3, THREE.Vector3, THREE.Vector3] {
     return [
       new THREE.Vector3(2, 5, 1),
-      new THREE.Vector3(0, 2.5, 0)
+      new THREE.Vector3(0, 2.5, 0),
+      new THREE.Vector3(0, 0, 0)
     ]
   }
 

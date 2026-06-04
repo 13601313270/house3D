@@ -306,17 +306,14 @@ export class OutFileEntity extends EntityClass<OutFileData> {
     ]
   }
 
-  createBoundingBox(): [THREE.Vector3, THREE.Vector3] {
+  createBoundingBox(): [THREE.Vector3, THREE.Vector3, THREE.Vector3] | null {
     const data = this.getData();
 
     const { fileTypeId } = data
     const findObjInfo = this.world.ObjFileTypes.find(item => item.id === fileTypeId)
     if (!findObjInfo) {
       console.error('未找到对应的文件类型:', fileTypeId)
-      return [
-        new THREE.Vector3(0, 0, 0),
-        new THREE.Vector3(0, 0, 0)
-      ]
+      return null
     }
 
     const {
@@ -355,7 +352,8 @@ export class OutFileEntity extends EntityClass<OutFileData> {
 
     return [
       new THREE.Vector3(width, height, depth),
-      new THREE.Vector3(finalOffsetX, height / 2, finalOffsetZ)
+      new THREE.Vector3(finalOffsetX, height / 2, finalOffsetZ),
+      new THREE.Vector3(0, 0, 0)
     ]
   }
 

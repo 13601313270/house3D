@@ -6,7 +6,7 @@ export class CubeDataClass extends ObjDataClass<CubeData> {
   height: number
   depth: number
   color: string
-  mt: number
+  mt: number | null
   angleY: number
 
   constructor(data: CubeData) {

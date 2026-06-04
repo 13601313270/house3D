@@ -92,11 +92,12 @@ export class SphereEntity extends EntityClass<SphereData> {
     ]
   }
 
-  createBoundingBox(): [THREE.Vector3, THREE.Vector3] {
+  createBoundingBox(): [THREE.Vector3, THREE.Vector3, THREE.Vector3] {
     const { r } = this.getData();
     return [
       new THREE.Vector3(r * 2, r * 2, r * 2),
-      new THREE.Vector3(0, r, 0)
+      new THREE.Vector3(0, r, 0),
+      new THREE.Vector3(0, 0, 0)
     ]
   }
 

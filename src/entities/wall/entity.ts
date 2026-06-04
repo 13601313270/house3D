@@ -209,7 +209,7 @@ export class WallEntity extends EntityClass<WallData> {
     return meshList
   }
 
-  createBoundingBox(): [THREE.Vector3, THREE.Vector3] | null {
+  createBoundingBox() {
     return null
   }
 

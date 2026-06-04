@@ -55,7 +55,7 @@ export abstract class EntityClass<T extends ObjData> {
   abstract create3DMesh(scene: THREE.Scene, ...args: any[]): THREE.Group[]
 
   // 创建包裹立方体
-  abstract createBoundingBox(): [THREE.Vector3, THREE.Vector3] | null // 第一个是尺寸，第二个是位置偏移
+  abstract createBoundingBox(): [THREE.Vector3, THREE.Vector3, THREE.Vector3] | null // 第一个是尺寸，第二个是位置偏移，第三个是旋转角度
 
   private cacheKeyStr = '';
   reCreate3DMeshIfNeed(): void {
@@ -64,29 +64,69 @@ export abstract class EntityClass<T extends ObjData> {
       const scene: THREE.Scene = this.world.scene
       this.meshList.forEach(mesh => scene.remove(mesh))
       this.meshList = this.create3DMesh(scene);
+      console.log('ccc-1');
       // 容器包裹立方体
-      // (() => {
-      //   if (this.boundingBox) {
-      //     scene.remove(this.boundingBox)
-      //     this.boundingBox = null
-      //   }
-      //   const boundingBox = this.createBoundingBox();
-      //   if (!boundingBox) {
-      //     return;
-      //   }
-      //   const [boxVector3, offsetVector3] = boundingBox;
-      //   const geometry = new THREE.BoxGeometry(1, 1, 1);
-      //   const edges = new THREE.EdgesGeometry(geometry);
-      //   const lineMaterial = new THREE.LineBasicMaterial({ color: 0x000000, transparent: true, opacity: 1 });
-      //   const box = new THREE.LineSegments(edges, lineMaterial);
-      //   // 设置立方体尺寸
-      //   box.scale.set(boxVector3.x, boxVector3.y, boxVector3.z);
-      //   box.position.set(offsetVector3.x, offsetVector3.y, offsetVector3.z);
-      //   this.meshList[0].add(box);
-      //   // @ts-ignore
-      //   box.entity = this;
-      //   this.boundingBox = box;
-      // })();
+      (() => {
+        if (this.boundingBox) {
+          scene.remove(this.boundingBox)
+          this.boundingBox = null
+        }
+        const boundingBox = this.createBoundingBox();
+        if (!boundingBox) {
+          return;
+        }
+        const [boxVector3, offsetVector3] = boundingBox;
+        (() => {
+          const geometry = new THREE.BoxGeometry(1, 1, 1);
+          const edges = new THREE.EdgesGeometry(geometry);
+          const lineMaterial = new THREE.LineBasicMaterial({ color: 0x000000, transparent: true, opacity: 1 });
+          const box = new THREE.LineSegments(edges, lineMaterial);
+          // 设置立方体尺寸
+          box.scale.set(boxVector3.x, boxVector3.y, boxVector3.z);
+          box.position.set(offsetVector3.x, offsetVector3.y, offsetVector3.z);
+          const group = new THREE.Group()
+          group.add(box);
+          this.meshList.push(group);
+          // @ts-ignore
+          box.entity = this;
+          this.boundingBox = box;
+        })();
+        (() => {
+          if (this.data.tip) { // data.tip
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d')!;
+
+            // 设置canvas尺寸
+            const fontSize = 24;
+            ctx.font = `bold ${fontSize}px Arial`;
+            const textWidth = ctx.measureText(this.data.tip).width;
+            canvas.width = textWidth + 20;  // 文字宽度 + 边距
+            canvas.height = fontSize + 10;  // 字体高度 + 边距
+
+            // 绘制背景和文字
+            ctx.fillStyle = 'rgba(226, 37, 37, 0.95)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#333';
+            ctx.font = `bold ${fontSize}px Arial`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(this.data.tip, canvas.width / 2, canvas.height / 2);
+
+            const texture = new THREE.CanvasTexture(canvas);
+            const spriteMaterial = new THREE.SpriteMaterial({ map: texture });
+            const sprite = new THREE.Sprite(spriteMaterial);
+            // const width = Math.max(boxVector3.x, boxVector3.y);
+
+            const height = fontSize;
+            const width = height / (canvas.height / canvas.width)
+
+            console.log('ccc-4', boxVector3, width, height);
+            sprite.scale.set(width, height, 1);
+            sprite.position.set(0, boxVector3.y + height / 2, 0);
+            // this.meshList[0].add(sprite);
+          }
+        })();
+      })();
       this.meshList.forEach(mesh => scene.add(mesh))
       this.cacheKeyStr = newKeyByData
     }

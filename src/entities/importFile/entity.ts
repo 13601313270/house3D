@@ -301,9 +301,10 @@ export class ImportFileEntity extends EntityClass<ImportFileData> {
     ]
   }
 
-  createBoundingBox(): [THREE.Vector3, THREE.Vector3] {
+  createBoundingBox(): [THREE.Vector3, THREE.Vector3, THREE.Vector3] {
     return [
       new THREE.Vector3(10, 10, 0),
+      new THREE.Vector3(0, 0, 0),
       new THREE.Vector3(0, 0, 0)
     ]
   }
