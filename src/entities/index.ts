@@ -74,7 +74,18 @@ export type fileData = {
 export type editItem = {
   id: string,
   label: string,
-  dataType: 'string' | 'poiListAndLineCircle' | 'poiListAndLine' | 'poiList' | 'color' | 'boolean' | 'mesh' | 'area' | 'material' | 'hidden' | string[]/* 枚举 */
+  dataType: 'string' |
+  'poiListAndLineCircle' |
+  'poiListAndLine' |
+  'poiList' |
+  'color' |
+  'boolean' |
+  'mesh' |
+  'area' |
+  'material' |
+  'hidden' |
+  'title' | /* 一个标题，纯展示使用 */
+  string[]/* 枚举 */
   value: any
 } | {
   id: string,

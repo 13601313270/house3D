@@ -25,10 +25,13 @@
       <!-- {{ modelValue }} -->
       <div class="configItemList">
         <div v-for="item in editPropConfigInfo" :key="item.id" class="configItem">
-          <div class="label">
+          <div class="label title" v-if="item.dataType === 'title'">
             {{ item.label }}
           </div>
-          <DataTypeEdit class="edit" :item="item" :modelValue="modelValue[item.id]"
+          <div class="label" v-else>
+            {{ item.label }}
+          </div>
+          <DataTypeEdit v-if="item.dataType !== 'title'" class="edit" :item="item" :modelValue="modelValue[item.id]"
             @update:modelValue="handleUpdate(item.id, $event)" />
         </div>
       </div>
@@ -288,6 +291,14 @@ function removeIfOutside() {
           flex-shrink: 0;
           min-width: 70px;
           text-align: left;
+
+          &.title {
+            color: #000000;
+            font-weight: bold;
+            text-align: center;
+            width: 100%;
+            background: #e5e5e5;
+          }
         }
 
         .edit {

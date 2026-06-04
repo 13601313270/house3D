@@ -18,7 +18,7 @@ export function createAllWallFromPoints(wallList: WallData[]): wallBox[] {
   // if (cache.has(key)) return cache.get(key) || []
   const left: Point[] = [];
   const right: Point[] = [];
-  let margineds: Geometry | null = null;
+  // let margineds: Geometry | null = null;
   const allWallBox: wallBox[] = []
   // console.log('========线========')
   for (let i = 0; i < wallList.length; i++) {
@@ -88,16 +88,16 @@ export function createAllWallFromPoints(wallList: WallData[]): wallBox[] {
           { x: point3[0], y: point3[1] },
           { x: point4[0], y: point4[1] },
         ])
-        try {
-          if (margineds) {
-            margineds = union(margineds, [[point1, point2, point3, point4, point1]])
-          } else {
-            margineds = [[point1, point2, point3, point4, point1]];
-          }
-        } catch (error) {
-          console.log('error', error)
-          continue;
-        }
+        // try {
+        //   // if (margineds) {
+        //   //   margineds = union(margineds, [[point1, point2, point3, point4, point1]])
+        //   // } else {
+        //   //   margineds = [[point1, point2, point3, point4, point1]];
+        //   // }
+        // } catch (error) {
+        //   console.log('error', error)
+        //   continue;
+        // }
       }
       prev = curr;
     }

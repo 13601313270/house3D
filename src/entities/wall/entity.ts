@@ -39,16 +39,7 @@ export class WallEntity extends EntityClass<WallData> {
       ctx.fill()
       ctx.setLineDash([])
     }
-    let wallBoxList: any[]
-    try {
-      console.log('createAllWallFromPoints', 1)
-      wallBoxList = createAllWallFromPoints([data]);
-      console.log('createAllWallFromPoints', 2)
-    } catch (e) {
-      console.log('create墙失败')
-      console.log(e)
-      return;
-    }
+    const wallBoxList = createAllWallFromPoints([data])
     ctx.strokeStyle = 'black'
     ctx.fillStyle = data.color
     ctx.lineWidth = 2
@@ -182,16 +173,7 @@ export class WallEntity extends EntityClass<WallData> {
   create3DMesh(scene: THREE.Scene) {
     const data = this.getData()
     const meshList: THREE.Group[] = []
-    let wallBoxList = createAllWallFromPoints([data]);
-    try {
-      console.log('createAllWallFromPoints', 1)
-      wallBoxList = createAllWallFromPoints([data]);
-      console.log('createAllWallFromPoints', 2)
-    } catch (e) {
-      console.log('create墙失败2')
-      console.log(e)
-      return meshList;
-    }
+    const wallBoxList = createAllWallFromPoints([data]);
     const wallHeight = data.height
     const bottom = data.bottom || 0
     // console.log(1)
@@ -371,24 +353,48 @@ export class WallEntity extends EntityClass<WallData> {
     if (matchHandelInfo.index !== undefined) {
       this.remove3DCache()
       if (matchHandelInfo.index % 2 === 0) {
-        console.log(22222)
         // 拖拽点
         const index = matchHandelInfo.index / 2;
-        const prev = this.getData().points[index - 1]
-        const next = this.getData().points[index + 1]
-        // if(prev && next)
-        console.log('拖拽点', prev, next)
+        // 判断有没有非法角度
+        const wall = this.getData();
+        if (wall.points && wall.points.length >= 2) {
+          // 绘制墙上的点
+          const pointsBack: { x: number, y: number }[] = [...wall.points]
+          pointsBack[index] = { x, y }
 
-        // 计算这个点的角度
-        // const angleResult = calculateAngle(this.getData().points[index - 1], this.getData().points[index], this.getData().points[index + 1])
-        // if (angleResult) {
-        //   const { angle } = angleResult
-        //   this.setData({
-        //     ...this.getData(),
-        //     angle: angle,
-        //   })
-        // }
+          for (let i = 0; i < pointsBack.length; i++) {
+            if (i > 0 && i < pointsBack.length - 1) {
+              const prev = pointsBack[i - 1]
+              const current = pointsBack[i]
+              const next = pointsBack[i + 1]
+              const angleResult = calculateAngle(prev, current, next)
 
+              if (angleResult) {
+                const { angle } = angleResult
+                if (angle < 5) {
+                  // 计算prev到current的角度
+                  // const anglePrevToCurrent = Math.atan2(current.y - prev.y, current.x - prev.x);
+                  // console.log('角度角度', anglePrevToCurrent)
+                  // const limitAngel = anglePrevToCurrent - 30 * Math.PI / 180;
+
+                  // // 从next点做一条角度为limitAngel的直线
+                  // // 计算点{x, y}到这条直线的投影点
+                  // const cos = Math.cos(limitAngel);
+                  // const sin = Math.sin(limitAngel);
+                  // const dx = x - next.x;
+                  // const dy = y - next.y;
+                  // const t = dx * cos + dy * sin;
+                  // const projectionX = next.x + t * cos;
+                  // const projectionY = next.y + t * sin;
+                  // // const newPoint = { x: projectionX, y: projectionY };
+                  // this.getData().points[index] = { x: projectionX, y: projectionY, snw: this.getData().points[index].snw, }
+
+                  return;
+                }
+              }
+            }
+          }
+        }
         this.getData().points[index] = { x, y, snw: this.getData().points[index].snw, }
       } else {
         // 拖拽线
@@ -470,91 +476,92 @@ export class WallEntity extends EntityClass<WallData> {
   }
 
   editPropConfig(snapPoint: HandelInfo, editShow: (editInfoList: editItem[], callback: (val: any) => void) => void): void {
+    const data = this.getData();
+    const wallBaseConfig: editItem[] = [
+      {
+        id: 'thickness',
+        label: '墙体厚度',
+        dataType: 'number',
+        min: 0,
+        max: Infinity,
+        step: 1,
+        value: data.thickness,
+      },
+      {
+        id: 'height',
+        label: '墙体高度',
+        dataType: 'number',
+        min: 1,
+        max: Infinity,
+        step: 1,
+        value: data.height,
+      },
+      {
+        id: 'color',
+        label: '墙体颜色',
+        dataType: 'color',
+        value: data.color,
+      },
+      {
+        id: 'wmt',
+        label: '墙体材质',
+        dataType: 'material',
+        value: data.wmt,
+      },
+      {
+        id: 'hb',
+        label: '是否有地板',
+        dataType: 'boolean',
+        value: data.hb,
+      },
+      {
+        id: 'bc',
+        label: '地板颜色',
+        dataType: 'color',
+        value: data.bc,
+      },
+      {
+        id: 'bmt',
+        label: '地板材质',
+        dataType: 'material',
+        value: data.bmt,
+      },
+      {
+        id: 'ht',
+        label: '是否有天花板',
+        dataType: 'boolean',
+        value: data.ht,
+      },
+      {
+        id: 'tc',
+        label: '天花板颜色',
+        dataType: 'color',
+        value: data.tc,
+      },
+      {
+        id: 'tmt',
+        label: '天花板材质',
+        dataType: 'material',
+        value: data.tmt,
+      },
+      {
+        id: 'td',
+        label: '天花板是否是双面',
+        dataType: 'boolean',
+        value: data.td,
+      },
+      {
+        id: 'bottom',
+        label: '距离地面距离',
+        dataType: 'number',
+        min: 0,
+        max: Infinity,
+        step: 1,
+        value: data.bottom,
+      },
+    ];
     if (snapPoint.index % 2 === 0) {
-      const data = this.getData();
-      const configList: editItem[] = [
-        {
-          id: 'thickness',
-          label: '墙体厚度',
-          dataType: 'number',
-          min: 0,
-          max: Infinity,
-          step: 1,
-          value: data.thickness,
-        },
-        {
-          id: 'height',
-          label: '墙体高度',
-          dataType: 'number',
-          min: 1,
-          max: Infinity,
-          step: 1,
-          value: data.height,
-        },
-        {
-          id: 'color',
-          label: '墙体颜色',
-          dataType: 'color',
-          value: data.color,
-        },
-        {
-          id: 'wmt',
-          label: '墙体材质',
-          dataType: 'material',
-          value: data.wmt,
-        },
-        {
-          id: 'hb',
-          label: '是否有地板',
-          dataType: 'boolean',
-          value: data.hb,
-        },
-        {
-          id: 'bc',
-          label: '地板颜色',
-          dataType: 'color',
-          value: data.bc,
-        },
-        {
-          id: 'bmt',
-          label: '地板材质',
-          dataType: 'material',
-          value: data.bmt,
-        },
-        {
-          id: 'ht',
-          label: '是否有天花板',
-          dataType: 'boolean',
-          value: data.ht,
-        },
-        {
-          id: 'tc',
-          label: '天花板颜色',
-          dataType: 'color',
-          value: data.tc,
-        },
-        {
-          id: 'tmt',
-          label: '天花板材质',
-          dataType: 'material',
-          value: data.tmt,
-        },
-        {
-          id: 'td',
-          label: '天花板是否是双面',
-          dataType: 'boolean',
-          value: data.td,
-        },
-        {
-          id: 'bottom',
-          label: '距离地面距离',
-          dataType: 'number',
-          min: 0,
-          max: Infinity,
-          step: 1,
-          value: data.bottom,
-        },
-      ];
+      const configList: editItem[] = [...wallBaseConfig]
       editShow(configList, (val) => {
         this.setData({
           ...data,
@@ -562,23 +569,38 @@ export class WallEntity extends EntityClass<WallData> {
         })
       })
     } else {
-      const data = this.getData()
       const pointIndex = (snapPoint.index - 1) / 2;
       editShow([
+        {
+          id: 'title',
+          label: '墙面属性',
+          dataType: 'title',
+          value: '',
+        },
         {
           id: 'hidden',
           label: '隐藏墙',
           dataType: 'boolean',
           value: data.points[pointIndex].snw,
-        }
+        },
+        {
+          id: 'title',
+          label: '整个墙体属性',
+          dataType: 'title',
+          value: '',
+        },
+        ...wallBaseConfig
       ], (val) => {
         const points = [...data.points]
         points[pointIndex] = {
           ...points[pointIndex],
           snw: val.hidden,
         };
+        const saveVal = { ...val }
+        delete saveVal.hidden
         this.setData({
           ...data,
+          ...saveVal,
           points,
         })
       })
