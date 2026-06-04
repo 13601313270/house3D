@@ -44,6 +44,11 @@ export class CameraEntity extends EntityClass<CameraData> {
   }
 
   draw2DPreviewByData(ctx: CanvasRenderingContext2D, data: CameraData, panOffset: Point, zoomLevel: number): void {
+    let index: number = -1;
+    if (this.world.allFileMapObjects.camera) {
+      index = this.world.allFileMapObjects.camera.indexOf(this)
+    }
+
     const screenX = data.x * zoomLevel + panOffset.x
     const screenY = data.y * zoomLevel + panOffset.y
     const angleY = Math.atan2(data.targetPositionY - data.y, data.targetPositionX - data.x);
@@ -114,6 +119,23 @@ export class CameraEntity extends EntityClass<CameraData> {
       this.circleRadius * zoomLevel + 3, 0, Math.PI * 2)
     // ctx.fill()
     ctx.stroke()
+
+    if (index > -1 && zoomLevel > 0.4) {
+      const str = (index + 1).toString()
+      ctx.font = `${Math.max(16 * zoomLevel, 16)}px sans-serif`
+      ctx.textAlign = 'center'
+      ctx.textBaseline = 'middle'
+      const radius = Math.max(10 * zoomLevel, 10)
+      ctx.fillStyle = '#fff'
+      ctx.beginPath()
+      ctx.arc(screenX, screenY, radius, 0, Math.PI * 2)
+      ctx.fill()
+      ctx.strokeStyle = this.active ? this.colorOpacityActive : this.colorOpacity
+      ctx.lineWidth = 2 * zoomLevel
+      ctx.stroke()
+      ctx.fillStyle = this.active ? this.colorOpacityActive : this.colorOpacity
+      ctx.fillText(str, screenX, screenY)
+    }
   }
 
   draw2DByData(
@@ -326,7 +348,7 @@ export class CameraEntity extends EntityClass<CameraData> {
     oldLine.geometry = edges
     oldLine.position.set(-data.x, -data.z, -data.y)
 
-    console.log('children', this.meshList[0].children)
+    // console.log('children', this.meshList[0].children)
 
     // @ts-ignore
     const object: THREE.Group | undefined = this.meshList[0].children.find(v => v.isCameraObj)
@@ -334,7 +356,6 @@ export class CameraEntity extends EntityClass<CameraData> {
     if (object) {
       object.lookAt(center);
     }
-    console.log('222222')
     this.meshList.forEach(v => {
       v.position.set(data.x, data.z, data.y)
     })

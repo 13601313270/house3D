@@ -140,7 +140,7 @@
           <div style="flex-shrink: 0;">摄像机：</div>
           <div class="cameraList">
             <div v-for="(item, index) in allCamera" @click="changeCamera2State(index)"
-              :class="{ active: activeCameraIndex === index }" class="cameraItem">{{ index }}
+              :class="{ active: activeCameraIndex === index }" class="cameraItem">{{ index + 1 }}
             </div>
           </div>
           <div v-if="allCamera.length && cameraState2">
