@@ -7,6 +7,7 @@ import { editItem } from '..'
 import { getMaterialById } from '@/material'
 import { WallDataClass } from './dataClass'
 import { MatchCircleArea } from '@/utils/matchArea'
+import { calculateAngle } from '@/utils/calculateAngle'
 
 export class WallEntity extends EntityClass<WallData> {
   name: string = '墙'
@@ -38,8 +39,16 @@ export class WallEntity extends EntityClass<WallData> {
       ctx.fill()
       ctx.setLineDash([])
     }
-    const wallBoxList = createAllWallFromPoints([data]);
-
+    let wallBoxList: any[]
+    try {
+      console.log('createAllWallFromPoints', 1)
+      wallBoxList = createAllWallFromPoints([data]);
+      console.log('createAllWallFromPoints', 2)
+    } catch (e) {
+      console.log('create墙失败')
+      console.log(e)
+      return;
+    }
     ctx.strokeStyle = 'black'
     ctx.fillStyle = data.color
     ctx.lineWidth = 2
@@ -77,23 +86,66 @@ export class WallEntity extends EntityClass<WallData> {
     panOffset: Point,
     zoomLevel: number,
   ): void {
-    // 绘制墙上的点
     const wall = data;
     if (wall.points && wall.points.length >= 2) {
-      ctx.strokeStyle = 'black'
-      ctx.fillStyle = 'white'
+      // 绘制墙上的点
       ctx.lineWidth = 2
-      wall.points.forEach((point: Point) => {
+      wall.points.forEach((point: Point, index: number) => {
+        ctx.strokeStyle = 'black'
+        ctx.fillStyle = 'white'
         const screenX = point.x * zoomLevel + panOffset.x
         const screenY = point.y * zoomLevel + panOffset.y
         ctx.beginPath()
         ctx.arc(screenX, screenY, this.circleRadius * zoomLevel + 3, 0, Math.PI * 2)
         ctx.stroke()
         ctx.fill()
+        ctx.closePath()
+        if (index > 0 && index < wall.points.length - 1) {
+          const prev = wall.points[index - 1]
+          const next = wall.points[index + 1]
+          const angleResult = calculateAngle(prev, point, next)
+          if (angleResult) {
+            const { angle } = angleResult
+            const angleText = `${Math.round(angle)}°`
+
+            // 计算从point到prev的向量
+            const v1x = prev.x - point.x;
+            const v1y = prev.y - point.y;
+            // 计算从point到next的向量
+            const v2x = next.x - point.x;
+            const v2y = next.y - point.y;
+
+            // 归一化向量
+            const len1 = Math.sqrt(v1x * v1x + v1y * v1y);
+            const len2 = Math.sqrt(v2x * v2x + v2y * v2y);
+            const unitV1x = v1x / len1;
+            const unitV1y = v1y / len1;
+            const unitV2x = v2x / len2;
+            const unitV2y = v2y / len2;
+
+            // 角平分线方向向量（两个单位向量相加）
+            const bisectorX = unitV1x + unitV2x;
+            const bisectorY = unitV1y + unitV2y;
+
+            // 计算角平分线的角度（弧度）
+            const angleAngel = Math.atan2(bisectorY, bisectorX);
+            // console.log('angleAngel', angleAngel)
+            // 计算角度文本位置：在夹角内侧
+            const offset = {
+              x: Math.cos(angleAngel) * 20,
+              y: Math.sin(angleAngel) * 30
+            }
+            const angleX = screenX - offset.x * zoomLevel
+            const angleY = screenY - offset.y * zoomLevel
+            ctx.fillStyle = 'red'
+            ctx.font = `${Math.max(20 * zoomLevel, 20)}px Arial`
+            ctx.textBaseline = 'middle'
+            ctx.fillText(angleText, angleX, angleY)
+          }
+        }
       });
-    }
-    // 每两个点之间，再绘制一个点，代表边的控制器
-    if (wall.points && wall.points.length >= 2) {
+      ctx.fillStyle = 'white'
+      // 每两个点之间，再绘制一个点，代表边的控制器
       for (let i = 0; i < wall.points.length - 1; i++) {
         const p1 = wall.points[i]
         const p2 = wall.points[i + 1]
@@ -108,6 +160,21 @@ export class WallEntity extends EntityClass<WallData> {
         ctx.arc(screenX, screenY, this.circleRadius * zoomLevel + 3, 0, Math.PI * 2)
         ctx.stroke()
         ctx.fill()
+        ctx.closePath()
+        // 绘制p1到p2长度
+        const len = Math.sqrt((p2.x - p1.x) * (p2.x - p1.x) + (p2.y - p1.y) * (p2.y - p1.y))
+        const lenText = `${Math.round(len)}cm`
+        ctx.fillStyle = 'red'
+        ctx.font = `${Math.max(20 * zoomLevel, 20)}px Arial`
+        ctx.textBaseline = 'middle'
+        // p1到p2的角度
+        const angle = Math.atan2(p2.y - p1.y, p2.x - p1.x);
+
+        if (Math.abs(Math.tan(angle)) > 1) {
+          ctx.fillText(lenText, screenX + 30 * zoomLevel, screenY)
+        } else {
+          ctx.fillText(lenText, screenX, screenY + 20 * zoomLevel)
+        }
       }
     }
   }
@@ -115,10 +182,19 @@ export class WallEntity extends EntityClass<WallData> {
   create3DMesh(scene: THREE.Scene) {
     const data = this.getData()
     const meshList: THREE.Group[] = []
-    const wallBoxList = createAllWallFromPoints([data]);
+    let wallBoxList = createAllWallFromPoints([data]);
+    try {
+      console.log('createAllWallFromPoints', 1)
+      wallBoxList = createAllWallFromPoints([data]);
+      console.log('createAllWallFromPoints', 2)
+    } catch (e) {
+      console.log('create墙失败2')
+      console.log(e)
+      return meshList;
+    }
     const wallHeight = data.height
     const bottom = data.bottom || 0
-    console.log(1)
+    // console.log(1)
     const extrudeSettings = {
       steps: 1,
       depth: wallHeight,
@@ -295,9 +371,27 @@ export class WallEntity extends EntityClass<WallData> {
     if (matchHandelInfo.index !== undefined) {
       this.remove3DCache()
       if (matchHandelInfo.index % 2 === 0) {
+        console.log(22222)
+        // 拖拽点
         const index = matchHandelInfo.index / 2;
+        const prev = this.getData().points[index - 1]
+        const next = this.getData().points[index + 1]
+        // if(prev && next)
+        console.log('拖拽点', prev, next)
+
+        // 计算这个点的角度
+        // const angleResult = calculateAngle(this.getData().points[index - 1], this.getData().points[index], this.getData().points[index + 1])
+        // if (angleResult) {
+        //   const { angle } = angleResult
+        //   this.setData({
+        //     ...this.getData(),
+        //     angle: angle,
+        //   })
+        // }
+
         this.getData().points[index] = { x, y, snw: this.getData().points[index].snw, }
       } else {
+        // 拖拽线
         if (startX !== undefined && startY !== undefined) {
           const diffMouseX = x - startX
           const diffMouseY = y - startY
