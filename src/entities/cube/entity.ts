@@ -24,7 +24,7 @@ export class CubeEntity extends EntityClass<CubeData> {
       height: 180,
       depth: 100,
       color: '#b1b1b1',
-      mt: 3,
+      mt: null,
       angleY: 0,
     }
     return new CubeDataClass(door)
@@ -140,16 +140,15 @@ export class CubeEntity extends EntityClass<CubeData> {
     const { width, height, depth, color, mt, angleY } = data;
 
     // group添加门框
-    const geometryRight = new THREE.BoxGeometry(
+    const geometry = new THREE.BoxGeometry(
       width,
       height,
       depth
     );
-    const material = data.mt ? (getMaterialById(data.mt)?.material(new THREE.Vector3(1, 0, 1))) : (new THREE.MeshStandardMaterial({ color: data.color }));
-    const doorMeshRight = new THREE.Mesh(geometryRight, material)
-    doorMeshRight.position.setY(data.height / 2)
-    group.add(doorMeshRight);
-    // group.position.set(data.x, data.height / 2, data.y)
+    const material = mt ? (getMaterialById(mt)?.material(new THREE.Vector3(1, 0, 1))) : (new THREE.MeshStandardMaterial({ color: color }));
+    const mesh = new THREE.Mesh(geometry, material)
+    mesh.position.setY(data.height / 2)
+    group.add(mesh);
     group.rotateY(angleY);
     return [
       group

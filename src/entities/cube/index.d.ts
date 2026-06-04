@@ -5,6 +5,6 @@ export type CubeData = ObjData & {
   height: number
   depth: number
   color: string
-  mt: number // 方块材质
+  mt: number | null // 方块材质
   angleY: number
 }

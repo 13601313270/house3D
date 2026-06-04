@@ -1365,7 +1365,7 @@ const handleMouseMove = (e: MouseEvent) => {
     const ctxAction = canvasAction.getContext('2d')!
     // 如果正在拖拽，处理拖拽逻辑（即使当前工具不是 drag）
     if (matchHandelObj && matchHandelInfo) {
-      console.log('matchHandelObj', currentTool.value)
+      // console.log('matchHandelObj', currentTool.value)
       function temp(api: EntityClass<ObjData>): boolean {
         if (matchHandelObj && matchHandelInfo) {
           let beMatchPoints = api.getMineBeSnapPoints()

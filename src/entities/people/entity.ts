@@ -160,12 +160,12 @@ export class PeopleEntity extends EntityClass<PeopleData> {
       const boneListConfig = data.bone || [];
       fbxModel.traverse((child: any) => {
         if (child.isBone) {
-          console.log(`🦴 发现骨骼: ${child.name}`);
+          // console.log(`🦴 发现骨骼: ${child.name}`);
           const findProp = boneListConfig.find((item) => item.name === child.name)
           if (findProp) {
             child.rotation.set(findProp.value.x, findProp.value.y, findProp.value.z)
           }
-          console.log(`🦴 发现骨骼-1:${child.name}: ${child.rotation.x}, ${child.rotation.y}, ${child.rotation.z}`);
+          // console.log(`🦴 发现骨骼-1:${child.name}: ${child.rotation.x}, ${child.rotation.y}, ${child.rotation.z}`);
         }
       });
       // 设置人物颜色
@@ -369,7 +369,7 @@ export class PeopleEntity extends EntityClass<PeopleData> {
         value: data.color || '#DEDEDE',
       },
       {
-        id: 'tips',
+        id: 'tip',
         label: '提示信息',
         dataType: 'string',
         value: data.tip || '',
@@ -393,7 +393,7 @@ export function changePeopleBone(gltfScene: THREE.Group, boneListConfig: Array<{
 }>): void {
   gltfScene.traverse((child: any) => {
     if (child.isBone) {
-      console.log(`🦴 发现骨骼: ${child.name}`)
+      // console.log(`🦴 发现骨骼: ${child.name}`)
       const findProp = boneListConfig.find((item) => item.name === child.name)
       if (findProp) {
         child.rotation.set(findProp.value.x, findProp.value.y, findProp.value.z)

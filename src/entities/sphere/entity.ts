@@ -77,18 +77,16 @@ export class SphereEntity extends EntityClass<SphereData> {
 
     const { r, color, mt } = data;
 
-    const geometryRight = new THREE.SphereGeometry(
+    const geometry = new THREE.SphereGeometry(
       r,
       32,
       32
     );
     const material = mt ? (getMaterialById(mt)?.material(new THREE.Vector3(0, 0, 1))) : (new THREE.MeshStandardMaterial({ color: color }));
-    const doorMeshRight = new THREE.Mesh(geometryRight, material)
-    doorMeshRight.position.setY(data.r)
-    group.add(doorMeshRight);
+    const mesh = new THREE.Mesh(geometry, material)
+    mesh.position.setY(data.r)
+    group.add(mesh);
 
-    // group.position.set(data.x, data.r, data.y)
-    // group.rotateY(data.angle * -1);
     return [
       group
     ]
