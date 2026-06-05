@@ -560,6 +560,7 @@ export class WallEntity extends EntityClass<WallData> {
         max: Infinity,
         step: 1,
         value: data.bottom,
+        unit: 'cm',
       },
     ];
     if (snapPoint.index % 2 === 0) {

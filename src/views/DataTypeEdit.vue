@@ -126,6 +126,12 @@ function updateEditPropInputInfoBoolean(id: string, event: Event) {
       width: 40px;
       height: 28px;
       border: none;
+      outline: none;
+    }
+
+    .numberInput:focus {
+      outline: none;
+      box-shadow: none;
     }
 
     .unit {
