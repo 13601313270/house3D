@@ -514,7 +514,6 @@ watch(() => props.cameraState, (newVal) => {
   if (newVal) {
     cameraStateZ.value = { ...newVal }
     updateCameraAngel()
-    updateScene()
   }
 }, {
   deep: true
@@ -522,13 +521,6 @@ watch(() => props.cameraState, (newVal) => {
 
 watch(() => props.aspectRatio, (newVal) => {
   if (newVal) {
-    // emit('update:cameraState', {
-    //   targetPositionX: cameraStateZ.value.targetPositionX,
-    //   targetPositionY: cameraStateZ.value.targetPositionY,
-    //   targetPositionZ: cameraStateZ.value.targetPositionZ,
-    //   size: cameraStateZ.value.size,
-    //   length: cameraStateZ.value.length,
-    // })
     updateCameraAngel()
     updateScene()
   }
