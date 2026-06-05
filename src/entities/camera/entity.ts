@@ -362,7 +362,10 @@ export class CameraEntity extends EntityClass<CameraData> {
   }
 
   meshNeedChangeKey() {
-    return "neverChange";
+    const cacheData = {
+      tip: this.getData().tip,
+    }
+    return this.type + JSON.stringify(cacheData)
   }
 
   showMatchHandel(x: number, y: number) {
@@ -394,10 +397,6 @@ export class CameraEntity extends EntityClass<CameraData> {
     // 计算三角形的两个底点
     const midX = screenX + unitDirX * radius
     const midY = screenY + unitDirY * radius
-    const p1X = midX + perpX * baseHalfLength
-    const p1Y = midY + perpY * baseHalfLength
-    const p2X = midX - perpX * baseHalfLength
-    const p2Y = midY - perpY * baseHalfLength
 
     const dist = Math.hypot(x - data.x, y - data.y)
     const distToMid = Math.hypot(x - midX, y - midY)
@@ -531,12 +530,21 @@ export class CameraEntity extends EntityClass<CameraData> {
       },
       {
         id: 'z',
-        label: 'Z轴',
+        label: '相机Z轴',
         dataType: 'number',
         min: -Infinity,
         max: Infinity,
         step: 1,
         value: data.z,
+      },
+      {
+        id: 'targetPositionZ',
+        label: '目标Z轴',
+        dataType: 'number',
+        min: -Infinity,
+        max: Infinity,
+        step: 1,
+        value: data.targetPositionZ,
       }
     ], (val) => {
       this.setData({

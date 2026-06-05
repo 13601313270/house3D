@@ -99,6 +99,8 @@ export abstract class EntityClass<T extends ObjData> {
           // scene.add(group)
         })();
         (() => {
+          console.log('createBoundingBox-data', this.data);
+          // this.data.tip = '哈哈哈'
           if (this.data.tip) { // data.tip
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d')!;

@@ -173,8 +173,8 @@ const allDemoList = ref<Array<{
   },
   {
     name: '坐',
-    img: 'https://d99n9xvb9513w.cloudfront.net/thumbnails/motions/137570901/animated.gif',
-    file: 'sit.fbx',
+    img: 'https://d99n9xvb9513w.cloudfront.net/thumbnails/motions/116270901/animated.gif',
+    file: 'sit4.fbx',
   },
   {
     name: '跳跃',
@@ -190,6 +190,11 @@ const allDemoList = ref<Array<{
     name: '倚靠坐',
     img: 'https://d99n9xvb9513w.cloudfront.net/thumbnails/motions/140600901/animated.gif',
     file: 'sit3.fbx',
+  },
+  {
+    name: '前倾坐',
+    img: 'https://d99n9xvb9513w.cloudfront.net/thumbnails/motions/137570901/animated.gif',
+    file: 'sit.fbx',
   },
   {
     name: '倚靠坐2',
