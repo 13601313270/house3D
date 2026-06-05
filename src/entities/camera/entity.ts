@@ -400,13 +400,8 @@ export class CameraEntity extends EntityClass<CameraData> {
     const p2Y = midY - perpY * baseHalfLength
 
     const dist = Math.hypot(x - data.x, y - data.y)
-    if (isPointInRotatedRect(x, y, {
-      x: midX,
-      y: midY,
-      width: 30,
-      depth: 30,
-      angleY: 0,
-    })) {
+    const distToMid = Math.hypot(x - midX, y - midY)
+    if (distToMid < 30) {
       return new MatchCircleArea({
         x: midX,
         y: midY,
@@ -414,7 +409,7 @@ export class CameraEntity extends EntityClass<CameraData> {
       })
     }
 
-    if (dist < this.circleRadius + 3) {
+    if (dist < 30) {
       return new MatchCircleArea({
         x: data.x,
         y: data.y,
