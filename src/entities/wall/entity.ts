@@ -357,7 +357,6 @@ export class WallEntity extends EntityClass<WallData> {
           depth: this.getData().thickness + 2,
           angleY: angel * -1,
         })
-
       }
       const dist = Math.hypot(x - midX, y - midY)
       if (dist < this.getData().thickness) {
