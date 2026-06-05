@@ -79,11 +79,43 @@ export class WallEntity extends EntityClass<WallData> {
     zoomLevel: number,
   ): void {
     const wall = data;
+    // 用红色绘制墙
+    const wallBoxList = createAllWallFromPoints([data])
+    ctx.strokeStyle = 'red'
+    ctx.fillStyle = data.color
+    ctx.lineWidth = 2
+    ctx.setLineDash([])
+
+    for (let i = 0; i < wallBoxList.length; i++) {
+      const box = wallBoxList[i]
+
+      if (data.points[i].snw) {
+        ctx.setLineDash([10 * zoomLevel, 10 * zoomLevel])
+      } else {
+        ctx.setLineDash([])
+      }
+
+      ctx.beginPath()
+      for (let j = 0; j < box.length; j++) {
+        const screenX = box[j].x * zoomLevel + panOffset.x
+        const screenY = box[j].y * zoomLevel + panOffset.y
+        if (j === 0) {
+          ctx.moveTo(screenX, screenY)
+        } else {
+          ctx.lineTo(screenX, screenY)
+        }
+      }
+      ctx.closePath();
+      ctx.stroke();
+      ctx.fill()
+    }
+    ctx.setLineDash([])
+
     if (wall.points && wall.points.length >= 2) {
       // 绘制墙上的点
-      ctx.lineWidth = 2
+      ctx.lineWidth = 3
       wall.points.forEach((point: Point, index: number) => {
-        ctx.strokeStyle = 'black'
+        ctx.strokeStyle = 'red'
         ctx.fillStyle = 'white'
         const screenX = point.x * zoomLevel + panOffset.x
         const screenY = point.y * zoomLevel + panOffset.y
@@ -145,8 +177,8 @@ export class WallEntity extends EntityClass<WallData> {
         const midY = (p1.y + p2.y) / 2
         const screenX = midX * zoomLevel + panOffset.x
         const screenY = midY * zoomLevel + panOffset.y
-        ctx.strokeStyle = 'gray'
-        ctx.fillStyle = 'lightgray'
+        ctx.strokeStyle = 'red'
+        ctx.fillStyle = 'white'
         ctx.lineWidth = 2
         ctx.beginPath()
         ctx.arc(screenX, screenY, this.circleRadius * zoomLevel + 3, 0, Math.PI * 2)

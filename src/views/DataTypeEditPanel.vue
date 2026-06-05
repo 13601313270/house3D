@@ -24,7 +24,8 @@
       </div>
       <!-- {{ modelValue }} -->
       <div class="configItemList">
-        <div v-for="item in editPropConfigInfo" :key="item.id" class="configItem">
+        <div v-for="item in editPropConfigInfo" :key="item.id" class="configItem"
+          :class="{ 'title': item.dataType === 'title' }">
           <div class="label title" v-if="item.dataType === 'title'">
             {{ item.label }}
           </div>
@@ -285,9 +286,23 @@ function removeIfOutside() {
         align-items: center;
         justify-content: space-between;
         margin-bottom: 12px;
+        margin-bottom: 6px;
+        padding-bottom: 6px;
+        border-bottom: solid 1px #f3f3f3;
+
+        &.title {
+          margin-bottom: 0;
+          border-bottom: none;
+          margin-top: 16px;
+
+          &:first-child {
+            margin-top: 0;
+          }
+        }
 
         &:last-child {
           margin-bottom: 0;
+          border-bottom: none;
         }
 
         .label {
@@ -300,6 +315,8 @@ function removeIfOutside() {
             font-weight: bold;
             text-align: center;
             width: 100%;
+            font-size: 16px;
+            line-height: 30px;
             background: #e5e5e5;
           }
         }

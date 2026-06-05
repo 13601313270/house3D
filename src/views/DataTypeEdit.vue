@@ -12,7 +12,7 @@
     </div>
     <input v-else-if="item.dataType === 'color'" type="color" class="colorInput" :value="modelValue"
       @change="updateEditPropInputInfo(item.id, $event)" />
-    <input v-else-if="item.dataType === 'boolean'" type="checkbox" :checked="modelValue"
+    <input v-else-if="item.dataType === 'boolean'" type="checkbox" class="checkBox" :checked="modelValue"
       @change="updateEditPropInputInfoBoolean(item.id, $event)" />
     <input v-else-if="item.dataType === 'string'" type="text" :value="modelValue"
       @change="updateEditPropInputInfo(item.id, $event)" />
@@ -100,6 +100,11 @@ function updateEditPropInputInfoBoolean(id: string, event: Event) {
 <style scoped lang="less">
 .colorInput {
   width: 130px;
+}
+
+.checkBox {
+  width: 20px;
+  height: 20px;
 }
 
 .numberEdit {
