@@ -172,7 +172,7 @@ function handleUpdateBone(value: Array<{
     z: number,
   },
 }>) {
-  console.log('vvvvv', value)
+  // console.log('vvvvv', value)
   emit('update:modelValue', {
     ...props.modelValue,
     bone: value

@@ -305,7 +305,6 @@ export class World {
           if (boundingBox) {
             const data = item.getData();
             const [boxVector3, offsetVector3, rotateVector3] = boundingBox;
-            console.log('createBoundingBox-2', rotateVector3)
             item.boundingBox.position.set(data.x, data.z, data.y)
             item.boundingBox.rotation.set(rotateVector3.x, rotateVector3.y, rotateVector3.z)
             item.boundingBox.children[0].scale.set(boxVector3.x, boxVector3.y, boxVector3.z)

@@ -201,35 +201,111 @@ export class PeopleEntity extends EntityClass<PeopleData> {
     ]
   }
 
+  private boxSize: THREE.Vector3 = new THREE.Vector3()
+
   // 第一个是尺寸，第二个是位置偏移，第三个是旋转角度
   createBoundingBox(): [THREE.Vector3, THREE.Vector3, THREE.Vector3] {
     const data = this.getData();
     let boxHeight = 0;// = data.height;
     if (this.meshList?.[0]?.children[0] && data.bone && data.bone?.length > 0) {
-      const boneListConfig = data.bone
-      let maxY = 0;
-      this.meshList?.[0]?.children[0].traverse((child: any) => {
-        if (child.isBone) {
-          maxY = Math.max(maxY, child.position.y)
-          const findProp = boneListConfig.find((item) => item.name === child.name)
-          if (findProp) {
-            // console.log(`🦴 发现骨骼-1: ${child.name}`, findProp.value);
-            child.rotation.set(findProp.value.x, findProp.value.y, findProp.value.z)
-            child.position.set(findProp.value.px, findProp.value.py, findProp.value.pz)
-          }
-        }
-      })
-      console.log('maxY', maxY)
-      boxHeight = data.height * maxY / 103.20082222901235;
+      boxHeight = this.boxSize.y;
+      return [
+        new THREE.Vector3(this.boxSize.x, boxHeight, this.boxSize.z),
+        new THREE.Vector3(0, boxHeight / 2, 0),
+        new THREE.Vector3(0, data.angle * -1, 0)
+      ]
     } else {
       boxHeight = data.height;
+      return [
+        new THREE.Vector3(data.height * 2 / 5, boxHeight, data.height / 5),
+        new THREE.Vector3(0, boxHeight / 2, 0),
+        new THREE.Vector3(0, data.angle * -1, 0)
+      ]
     }
+  }
 
-    return [
-      new THREE.Vector3(data.height * 2 / 5, boxHeight, data.height / 5),
-      new THREE.Vector3(0, boxHeight / 2, 0),
-      new THREE.Vector3(0, data.angle * -1, 0)
-    ]
+  getSkinnedMeshBoundingBox(object: THREE.Object3D): THREE.Vector3 {
+    const box = new THREE.Box3()
+    const tempVector = new THREE.Vector3()
+    const tempMatrix = new THREE.Matrix4()
+    const weightedMatrix = new THREE.Matrix4()
+    const resultMatrix = new THREE.Matrix4()
+
+    object.updateMatrixWorld(true)
+
+    object.traverse((child: any) => {
+      if (child.isSkinnedMesh) {
+        const geometry = child.geometry
+        const positionAttribute = geometry.attributes.position
+        const skinIndex = geometry.attributes.skinIndex
+        const skinWeight = geometry.attributes.skinWeight
+        const skeleton = child.skeleton
+
+        if (positionAttribute && skinIndex && skinWeight && skeleton) {
+          skeleton.update()
+
+          const boneMatrices = skeleton.boneMatrices
+
+          for (let i = 0; i < positionAttribute.count; i++) {
+            tempVector.fromBufferAttribute(positionAttribute, i)
+
+            if (child.bindMatrix) {
+              tempVector.applyMatrix4(child.bindMatrix)
+            }
+
+            const index0 = skinIndex.getX(i)
+            const index1 = skinIndex.getY(i)
+            const index2 = skinIndex.getZ(i)
+            const index3 = skinIndex.getW(i)
+
+            const weight0 = skinWeight.getX(i)
+            const weight1 = skinWeight.getY(i)
+            const weight2 = skinWeight.getZ(i)
+            const weight3 = skinWeight.getW(i)
+
+            weightedMatrix.fromArray(boneMatrices, index0 * 16).multiplyScalar(weight0)
+            resultMatrix.copy(weightedMatrix)
+
+            if (weight1 > 0) {
+              tempMatrix.fromArray(boneMatrices, index1 * 16).multiplyScalar(weight1)
+              this.matrixAdd(resultMatrix, tempMatrix)
+            }
+            if (weight2 > 0) {
+              tempMatrix.fromArray(boneMatrices, index2 * 16).multiplyScalar(weight2)
+              this.matrixAdd(resultMatrix, tempMatrix)
+            }
+            if (weight3 > 0) {
+              tempMatrix.fromArray(boneMatrices, index3 * 16).multiplyScalar(weight3)
+              this.matrixAdd(resultMatrix, tempMatrix)
+            }
+
+            tempVector.applyMatrix4(resultMatrix)
+
+            if (child.bindMatrixInverse) {
+              tempVector.applyMatrix4(child.bindMatrixInverse)
+            }
+
+            tempVector.applyMatrix4(child.matrixWorld)
+
+            box.expandByPoint(tempVector)
+          }
+        }
+      } else if (child.isMesh && !child.isSkinnedMesh) {
+        box.expandByObject(child)
+      }
+    })
+
+    const size = new THREE.Vector3()
+    box.getSize(size)
+    return size
+  }
+
+  private matrixAdd(a: THREE.Matrix4, b: THREE.Matrix4): void {
+    const aArray = a.elements
+    const bArray = b.elements
+    for (let i = 0; i < 16; i++) {
+      aArray[i] += bArray[i]
+    }
   }
 
   change3DMeshState(): void {
@@ -404,6 +480,13 @@ export class PeopleEntity extends EntityClass<PeopleData> {
         ...data,
         ...val,
       })
+      const newData = this.getData()
+      if (this.meshList?.[0]?.children[0] && newData.bone && newData.bone?.length > 0) {
+        const boxSize = this.getSkinnedMeshBoundingBox(this.meshList[0].children[0])
+        this.boxSize.set(boxSize.x, boxSize.y, boxSize.z)
+      } else {
+        this.boxSize.set(newData.height * 2 / 5, newData.height, newData.height / 5)
+      }
     })
   }
 }
