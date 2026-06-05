@@ -793,7 +793,7 @@ function save() {
       value: v.value,
     }
   })
-  console.log('保存数据', JSON.stringify(saveVal))
+  // console.log('保存数据', JSON.stringify(saveVal))
   emit('update:modelValue', saveVal)
 }
 function playAnimation(file: string) {
@@ -810,14 +810,10 @@ function runPostAnimation(file: string) {
     currentAction.stop()
   }
   fbxLoader.load(file, (fbxScene: any) => {
-    console.log('FBX动画加载成功:', fbxScene)
-
     if (fbxScene.animations && fbxScene.animations.length > 0) {
-      console.log('FBX发现动画:', fbxScene.animations.length, '个')
-      fbxScene.animations.forEach((anim: any, index: number) => {
-        console.log(`动画 ${index}: ${anim.name}, 时长: ${anim.duration.toFixed(2)}s`)
-      })
-
+      // fbxScene.animations.forEach((anim: any, index: number) => {
+      //   console.log(`动画 ${index}: ${anim.name}, 时长: ${anim.duration.toFixed(2)}s`)
+      // })
       mixer = new THREE.AnimationMixer(fbxModel as THREE.Group)
 
       const clip = fbxScene.animations[0]
@@ -832,17 +828,17 @@ function runPostAnimation(file: string) {
           isPlaying.value = false
         }, 30)
       }
-      console.log(`播放动画: ${clip.name}`)
+      // console.log(`播放动画: ${clip.name}`)
     } else {
-      console.log('FBX文件没有包含动画数据')
+      // console.log('FBX文件没有包含动画数据')
     }
 
     animate()
   }, (progress: any) => {
     const percent = (progress.loaded / progress.total * 100).toFixed(2)
-    console.log('FBX加载进度:', percent + '%')
+    // console.log('FBX加载进度:', percent + '%')
   }, (error: any) => {
-    console.error('FBX文件加载失败:', error)
+    // console.error('FBX文件加载失败:', error)
     animate()
   })
 }

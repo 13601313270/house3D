@@ -192,9 +192,9 @@ export class PeopleEntity extends EntityClass<PeopleData> {
       group.add(fbxModel)
     }, (progress: any) => {
       const percent = (progress.loaded / progress.total * 100).toFixed(2)
-      console.log('加载进度:', percent + '%')
+      // console.log('加载进度:', percent + '%')
     }, (error: any) => {
-      console.error('FBX文件加载失败:', error)
+      // console.error('FBX文件加载失败:', error)
     })
     return [
       group
@@ -226,7 +226,7 @@ export class PeopleEntity extends EntityClass<PeopleData> {
         if (child.isBone) {
           const findProp = boneListConfig.find((item) => item.name === child.name)
           if (findProp) {
-            console.log(`🦴 发现骨骼-1: ${child.name}`, findProp.value);
+            // console.log(`🦴 发现骨骼-1: ${child.name}`, findProp.value);
             child.rotation.set(findProp.value.x, findProp.value.y, findProp.value.z)
             child.position.set(findProp.value.px, findProp.value.py, findProp.value.pz)
           }
