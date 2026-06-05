@@ -8,6 +8,7 @@ import { getMaterialById } from '@/material'
 import { WallDataClass } from './dataClass'
 import { MatchCircleArea } from '@/utils/matchArea'
 import { calculateAngle } from '@/utils/calculateAngle'
+import message from '@/utils/message'
 
 export class WallEntity extends EntityClass<WallData> {
   name: string = '墙'
@@ -584,6 +585,8 @@ export class WallEntity extends EntityClass<WallData> {
                 points: [...data.points.slice(0, index), ...data.points.slice(index + 1)],
               })
               close()
+            } else {
+              message.error('至少保留两个顶点')
             }
           },
         },
