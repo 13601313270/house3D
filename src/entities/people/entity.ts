@@ -201,8 +201,6 @@ export class PeopleEntity extends EntityClass<PeopleData> {
     ]
   }
 
-  private boxSize: THREE.Vector3 = new THREE.Vector3()
-
   // 第一个是尺寸，第二个是位置偏移，第三个是旋转角度
   createBoundingBox(): [THREE.Vector3, THREE.Vector3, THREE.Vector3] {
     const data = this.getData();
@@ -211,7 +209,7 @@ export class PeopleEntity extends EntityClass<PeopleData> {
       boxHeight = this.boxSize.y;
       return [
         new THREE.Vector3(this.boxSize.x, boxHeight, this.boxSize.z),
-        new THREE.Vector3(0, boxHeight / 2, 0),
+        new THREE.Vector3(this.boxOffset.x, this.boxOffset.y, this.boxOffset.z),//  + boxHeight / 2
         new THREE.Vector3(0, data.angle * -1, 0)
       ]
     } else {
@@ -224,7 +222,7 @@ export class PeopleEntity extends EntityClass<PeopleData> {
     }
   }
 
-  getSkinnedMeshBoundingBox(object: THREE.Object3D): THREE.Vector3 {
+  getSkinnedMeshBoundingBox(object: THREE.Object3D): [THREE.Vector3, THREE.Vector3] {
     const box = new THREE.Box3()
     const tempVector = new THREE.Vector3()
     const tempMatrix = new THREE.Matrix4()
@@ -296,8 +294,11 @@ export class PeopleEntity extends EntityClass<PeopleData> {
     })
 
     const size = new THREE.Vector3()
+    const center = new THREE.Vector3()
     box.getSize(size)
-    return size
+    box.getCenter(center)
+    
+    return [size, center]
   }
 
   private matrixAdd(a: THREE.Matrix4, b: THREE.Matrix4): void {
@@ -482,10 +483,13 @@ export class PeopleEntity extends EntityClass<PeopleData> {
       })
       const newData = this.getData()
       if (this.meshList?.[0]?.children[0] && newData.bone && newData.bone?.length > 0) {
-        const boxSize = this.getSkinnedMeshBoundingBox(this.meshList[0].children[0])
+        const [boxSize, boxCenter] = this.getSkinnedMeshBoundingBox(this.meshList[0].children[0])
         this.boxSize.set(boxSize.x, boxSize.y, boxSize.z)
+        console.log('包围盒中心点:', boxCenter.z, newData.y)
+        this.boxOffset.set(boxCenter.x - newData.x, boxCenter.y, boxCenter.z - newData.y)
       } else {
         this.boxSize.set(newData.height * 2 / 5, newData.height, newData.height / 5)
+        this.boxOffset.set(0, 0, 0)
       }
     })
   }
