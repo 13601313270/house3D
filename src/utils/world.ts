@@ -306,7 +306,7 @@ export class World {
             const data = item.getData();
             const [boxVector3, offsetVector3, rotateVector3] = boundingBox;
             item.boundingBox.position.set(data.x, data.z, data.y)
-            item.boundingBox.rotation.set(rotateVector3.x, rotateVector3.y, rotateVector3.z)
+            item.boundingBox.children[0].rotation.set(rotateVector3.x, rotateVector3.y, rotateVector3.z)
             item.boundingBox.children[0].scale.set(boxVector3.x, boxVector3.y, boxVector3.z)
             item.boundingBox.children[0].position.set(offsetVector3.x, offsetVector3.y, offsetVector3.z)
             item.boundingBox.visible = true

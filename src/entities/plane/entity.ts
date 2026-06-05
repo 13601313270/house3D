@@ -153,11 +153,11 @@ export class PlaneEntity extends EntityClass<PlaneData> {
   }
 
   createBoundingBox(): [THREE.Vector3, THREE.Vector3, THREE.Vector3] {
-    const { width, length } = this.getData();
+    const { width, length, angleY } = this.getData();
     return [
       new THREE.Vector3(width, 1, length),
       new THREE.Vector3(0, 0, 0),
-      new THREE.Vector3(0, 0, 0)
+      new THREE.Vector3(0, angleY, 0)
     ]
   }
 

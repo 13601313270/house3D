@@ -309,7 +309,7 @@ export class OutFileEntity extends EntityClass<OutFileData> {
   createBoundingBox(): [THREE.Vector3, THREE.Vector3, THREE.Vector3] | null {
     const data = this.getData();
 
-    const { fileTypeId } = data
+    const { fileTypeId, angleY } = data
     const findObjInfo = this.world.ObjFileTypes.find(item => item.id === fileTypeId)
     if (!findObjInfo) {
       console.error('未找到对应的文件类型:', fileTypeId)
@@ -347,13 +347,13 @@ export class OutFileEntity extends EntityClass<OutFileData> {
     }
 
     // 计算偏移位置（考虑旋转）
-    const finalOffsetX = offsetX * Math.cos(data.angleY) + offsetZ * Math.sin(data.angleY);
-    const finalOffsetZ = -offsetX * Math.sin(data.angleY) + offsetZ * Math.cos(data.angleY);
+    const finalOffsetX = offsetX * Math.cos(angleY) + offsetZ * Math.sin(angleY);
+    const finalOffsetZ = -offsetX * Math.sin(angleY) + offsetZ * Math.cos(angleY);
 
     return [
       new THREE.Vector3(width, height, depth),
       new THREE.Vector3(finalOffsetX, height / 2, finalOffsetZ),
-      new THREE.Vector3(0, 0, 0)
+      new THREE.Vector3(0, angleY, 0)
     ]
   }
 

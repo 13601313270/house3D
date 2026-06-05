@@ -247,7 +247,7 @@ export class OutFileInWallEntity extends EntityClassInWall<OutFileInWallData> {
   }
 
   createBoundingBox(): [THREE.Vector3, THREE.Vector3, THREE.Vector3] {
-    const { wallId, fileTypeId, isOuter } = this.getData()
+    const { wallId, fileTypeId, isOuter, angle } = this.getData()
     if (!this.world.allFileMapObjects.wall) {
       this.world.allFileMapObjects.wall = []
     }
@@ -272,10 +272,13 @@ export class OutFileInWallEntity extends EntityClassInWall<OutFileInWallData> {
       matchAreaDepth,
     } = findObjInfo
 
+    // 第一个是尺寸，第二个是位置偏移，第三个是旋转角度
+    const offsetX = Math.cos(angle + (isOuter ? Math.PI / -2 : Math.PI / 2)) * wallThickness;
+    const offsetY = Math.sin(angle + (isOuter ? Math.PI / -2 : Math.PI / 2)) * wallThickness;
     return [
       new THREE.Vector3(matchAreaNumber1, matchAreaDepth, wallThickness),
-      new THREE.Vector3(0, matchAreaDepth / 2, isOuter ? -wallThickness : wallThickness),
-      new THREE.Vector3(0, 0, 0)
+      new THREE.Vector3(offsetX, matchAreaDepth / 2, offsetY),
+      new THREE.Vector3(0, angle * -1, 0)
     ]
   }
 
