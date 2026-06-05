@@ -835,9 +835,9 @@ function runPostAnimation(file: string) {
 
     animate()
   }, (progress: any) => {
-    const percent = (progress.loaded / progress.total * 100).toFixed(2)
+    // const percent = (progress.loaded / progress.total * 100).toFixed(2)
     // console.log('FBX加载进度:', percent + '%')
-  }, (error: any) => {
+  }, () => {
     // console.error('FBX文件加载失败:', error)
     animate()
   })

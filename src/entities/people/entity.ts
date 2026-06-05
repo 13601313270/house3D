@@ -191,9 +191,9 @@ export class PeopleEntity extends EntityClass<PeopleData> {
 
       group.add(fbxModel)
     }, (progress: any) => {
-      const percent = (progress.loaded / progress.total * 100).toFixed(2)
+      // const percent = (progress.loaded / progress.total * 100).toFixed(2)
       // console.log('加载进度:', percent + '%')
-    }, (error: any) => {
+    }, () => {
       // console.error('FBX文件加载失败:', error)
     })
     return [
@@ -204,9 +204,30 @@ export class PeopleEntity extends EntityClass<PeopleData> {
   // 第一个是尺寸，第二个是位置偏移，第三个是旋转角度
   createBoundingBox(): [THREE.Vector3, THREE.Vector3, THREE.Vector3] {
     const data = this.getData();
+    let boxHeight = 0;// = data.height;
+    if (this.meshList?.[0]?.children[0] && data.bone && data.bone?.length > 0) {
+      const boneListConfig = data.bone
+      let maxY = 0;
+      this.meshList?.[0]?.children[0].traverse((child: any) => {
+        if (child.isBone) {
+          maxY = Math.max(maxY, child.position.y)
+          const findProp = boneListConfig.find((item) => item.name === child.name)
+          if (findProp) {
+            // console.log(`🦴 发现骨骼-1: ${child.name}`, findProp.value);
+            child.rotation.set(findProp.value.x, findProp.value.y, findProp.value.z)
+            child.position.set(findProp.value.px, findProp.value.py, findProp.value.pz)
+          }
+        }
+      })
+      console.log('maxY', maxY)
+      boxHeight = data.height * maxY / 103.20082222901235;
+    } else {
+      boxHeight = data.height;
+    }
+
     return [
-      new THREE.Vector3(data.height * 2 / 5, data.height, data.height / 5),
-      new THREE.Vector3(0, data.height / 2, 0),
+      new THREE.Vector3(data.height * 2 / 5, boxHeight, data.height / 5),
+      new THREE.Vector3(0, boxHeight / 2, 0),
       new THREE.Vector3(0, data.angle * -1, 0)
     ]
   }

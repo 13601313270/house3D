@@ -305,17 +305,18 @@ export class World {
           if (boundingBox) {
             const data = item.getData();
             const [boxVector3, offsetVector3, rotateVector3] = boundingBox;
-            // if (item.boundingBox) {
-            //   console.log('createBoundingBox-2', rotateVector3)
-            //   item.boundingBox.position.set(data.x, data.z, data.y)
-            //   item.boundingBox.rotation.set(rotateVector3.x, rotateVector3.y, rotateVector3.z)
-            //   item.boundingBox.children[0].scale.set(boxVector3.x, boxVector3.y, boxVector3.z)
-            //   item.boundingBox.children[0].position.set(offsetVector3.x, offsetVector3.y, offsetVector3.z)
-            // }
+            console.log('createBoundingBox-2', rotateVector3)
+            item.boundingBox.position.set(data.x, data.z, data.y)
+            item.boundingBox.rotation.set(rotateVector3.x, rotateVector3.y, rotateVector3.z)
+            item.boundingBox.children[0].scale.set(boxVector3.x, boxVector3.y, boxVector3.z)
+            item.boundingBox.children[0].position.set(offsetVector3.x, offsetVector3.y, offsetVector3.z)
+            item.boundingBox.visible = true
             if (item.spriteGroup) {
               item.spriteGroup.position.set(data.x, data.z, data.y)
               item.spriteGroup.children[0].position.set(0, boxVector3.y + 12, 0)
             }
+          } else {
+            item.boundingBox.visible = false
           }
         });
       }

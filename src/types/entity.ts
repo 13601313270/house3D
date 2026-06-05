@@ -27,14 +27,26 @@ export abstract class EntityClass<T extends ObjData> {
   world: World;
   private data: T
   meshList: THREE.Group[] = []
-  boundingBox: THREE.Group | null = null
+  boundingBox: THREE.Group
   spriteGroup: THREE.Group | null = null
   // eslint-disable-next-line
   associationEntity: EntityClass<any>[] = []// 关联对象，就是本对象渲染，需要联动修改的对象。（比如：墙壁上被窗户挖洞，那么墙修改，需要重新挖洞）
 
   constructor(world: World, data?: T) {
     this.world = world
-    this.data = data || this.defaultValue()
+    this.data = data || this.defaultValue();
+    (() => {
+      const geometry = new THREE.BoxGeometry(1, 1, 1);
+      const edges = new THREE.EdgesGeometry(geometry);
+      const lineMaterial = new THREE.LineBasicMaterial({ color: 0x000000, transparent: true, opacity: 1 });
+      const box = new THREE.LineSegments(edges, lineMaterial);
+      const group = new THREE.Group()
+      group.add(box);
+      // @ts-ignore
+      box.entity = this;
+      this.boundingBox = group;
+      this.world.scene.add(group)
+    })();
   }
 
   init(): Promise<void> {
@@ -62,12 +74,9 @@ export abstract class EntityClass<T extends ObjData> {
   reCreate3DMeshIfNeed(): void {
     const newKeyByData = this.meshNeedChangeKey();
     if (this.cacheKeyStr !== newKeyByData) {
+      console.log('reCreate3DMeshIfNeed', this.cacheKeyStr, newKeyByData)
       const scene: THREE.Scene = this.world.scene
       this.meshList.forEach(mesh => scene.remove(mesh))
-      if (this.boundingBox) {
-        scene.remove(this.boundingBox)
-        this.boundingBox = null
-      }
       if (this.spriteGroup) {
         scene.remove(this.spriteGroup)
         this.spriteGroup = null
@@ -79,25 +88,6 @@ export abstract class EntityClass<T extends ObjData> {
         if (!boundingBox) {
           return;
         }
-        const [boxVector3, offsetVector3, rotateVector3] = boundingBox;
-        (() => {
-          // const geometry = new THREE.BoxGeometry(1, 1, 1);
-          // const edges = new THREE.EdgesGeometry(geometry);
-          // const lineMaterial = new THREE.LineBasicMaterial({ color: 0x000000, transparent: true, opacity: 1 });
-          // const box = new THREE.LineSegments(edges, lineMaterial);
-
-          // // 设置立方体缩放、位置、旋转
-          // // box.scale.set(boxVector3.x, boxVector3.y, boxVector3.z);
-          // // box.position.set(offsetVector3.x, offsetVector3.y, offsetVector3.z);
-          // const group = new THREE.Group()
-          // group.add(box);
-          // // group.rotation.set(rotateVector3.x, rotateVector3.y, rotateVector3.z);
-          // // @ts-ignore
-          // box.entity = this;
-          // this.boundingBox = group;
-          // // console.log('kkkkkkk-cube-add', boundingBox)
-          // scene.add(group)
-        })();
         (() => {
           console.log('createBoundingBox-data', this.data);
           // this.data.tip = '哈哈哈'
@@ -130,7 +120,7 @@ export abstract class EntityClass<T extends ObjData> {
             const height = fontSize / 4;
             const width = height / (canvas.height / canvas.width)
 
-            console.log('ccc-4', boxVector3, width, height);
+            // console.log('ccc-4', boxVector3, width, height);
             sprite.scale.set(width, height, 1);
             // sprite.position.set(0, boxVector3.y + height / 2, 0);
             // this.meshList[0].add(sprite);
@@ -152,10 +142,6 @@ export abstract class EntityClass<T extends ObjData> {
     if (this.meshList.length) {
       this.meshList.forEach(mesh => this.world.scene.remove(mesh))
       this.meshList = []
-    }
-    if (this.boundingBox) {
-      this.world.scene.remove(this.boundingBox)
-      this.boundingBox = null
     }
     if (this.spriteGroup) {
       this.world.scene.remove(this.spriteGroup)
@@ -271,7 +257,6 @@ export abstract class EntityClass<T extends ObjData> {
     this.meshList.forEach(mesh => scene.remove(mesh))
     if (this.boundingBox) {
       scene.remove(this.boundingBox)
-      this.boundingBox = null
     }
     if (this.spriteGroup) {
       scene.remove(this.spriteGroup)
