@@ -95,5 +95,6 @@ export type editItem = {
   min: number,
   max: number,
   step: number,
-  value: any
+  value: number
+  unit?: string
 }

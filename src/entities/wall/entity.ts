@@ -486,6 +486,7 @@ export class WallEntity extends EntityClass<WallData> {
         max: Infinity,
         step: 1,
         value: data.thickness,
+        unit: 'cm',
       },
       {
         id: 'height',
@@ -495,6 +496,7 @@ export class WallEntity extends EntityClass<WallData> {
         max: Infinity,
         step: 1,
         value: data.height,
+        unit: 'cm',
       },
       {
         id: 'color',

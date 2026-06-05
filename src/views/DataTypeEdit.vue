@@ -4,8 +4,11 @@
       <input type="range" :value="modelValue" @input="updateEditPropInputNumberInfo"
         :min="item.min === -Infinity ? -500 : item.min" :max="item.max === Infinity ? 500 : item.max" :step="item.step"
         class="numberInputRange" />
-      <input type="number" :value="modelValue" @change="updateEditPropInputNumberInfo" :step="item.step"
-        class="numberInput" />
+      <div class="numberInputContainer">
+        <input type="number" :value="modelValue" @change="updateEditPropInputNumberInfo" :step="item.step"
+          class="numberInput" />
+        <div v-if="item.unit" class="unit">{{ item.unit }}</div>
+      </div>
     </div>
     <input v-else-if="item.dataType === 'color'" type="color" class="colorInput" :value="modelValue"
       @change="updateEditPropInputInfo(item.id, $event)" />
@@ -110,8 +113,25 @@ function updateEditPropInputInfoBoolean(id: string, event: Event) {
     margin-right: 8px;
   }
 
-  .numberInput {
-    width: 50px;
+  .numberInputContainer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: solid 1px #b2b2b2;
+    border-radius: 4px;
+    overflow: hidden;
+
+    .numberInput {
+      margin-left: 2px;
+      width: 40px;
+      height: 28px;
+      border: none;
+    }
+
+    .unit {
+      margin-right: 2px;
+      color: #b2b2b2;
+    }
   }
 }
 
