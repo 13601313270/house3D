@@ -432,7 +432,7 @@ export class WindowEntity extends EntityClassInWall<WindowData> {
     }
   }
 
-  createBoundingBox(): [THREE.Vector3, THREE.Vector3, THREE.Vector3] | null {
+  createBoundingBox(): [THREE.Vector3, THREE.Vector3, THREE.Vector3] {
     const { width, height, bottom, z, angle } = this.getData();
     const thickness = 20;
     return [
