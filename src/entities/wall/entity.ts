@@ -6,9 +6,10 @@ import * as THREE from 'three'
 import { editItem } from '..'
 import { getMaterialById } from '@/material'
 import { WallDataClass } from './dataClass'
-import { MatchCircleArea } from '@/utils/matchArea'
+import { MatchCircleArea, MatchRectArea } from '@/utils/matchArea'
 import { calculateAngle } from '@/utils/calculateAngle'
 import message from '@/utils/message'
+import { isPointInRotatedRect } from '@/utils/isPointInRotatedRect'
 
 export class WallEntity extends EntityClass<WallData> {
   name: string = '墙'
@@ -80,10 +81,13 @@ export class WallEntity extends EntityClass<WallData> {
   ): void {
     const wall = data;
     // 用红色绘制墙
-    const wallBoxList = createAllWallFromPoints([data])
+    const wallBoxList = createAllWallFromPoints([{
+      points: data.points,
+      thickness: data.thickness + 1,
+    }])
     ctx.strokeStyle = 'red'
     ctx.fillStyle = data.color
-    ctx.lineWidth = 2
+    ctx.lineWidth = 1
     ctx.setLineDash([])
 
     for (let i = 0; i < wallBoxList.length; i++) {
@@ -107,7 +111,7 @@ export class WallEntity extends EntityClass<WallData> {
       }
       ctx.closePath();
       ctx.stroke();
-      ctx.fill()
+      // ctx.fill()
     }
     ctx.setLineDash([])
 
@@ -156,14 +160,18 @@ export class WallEntity extends EntityClass<WallData> {
             // console.log('angleAngel', angleAngel)
             // 计算角度文本位置：在夹角内侧
             const offset = {
-              x: Math.cos(angleAngel) * 20,
-              y: Math.sin(angleAngel) * 30
+              x: Math.cos(angleAngel) * 30,
+              y: Math.sin(angleAngel) * 20
             }
             const angleX = screenX - offset.x * zoomLevel
             const angleY = screenY - offset.y * zoomLevel
-            ctx.fillStyle = 'red'
             ctx.font = `${Math.max(20 * zoomLevel, 20)}px Arial`
             ctx.textBaseline = 'middle'
+            ctx.strokeStyle = 'white'
+            ctx.lineWidth = Math.max(3 * zoomLevel, 2)
+            ctx.lineJoin = 'round'
+            ctx.strokeText(angleText, angleX, angleY)
+            ctx.fillStyle = 'red'
             ctx.fillText(angleText, angleX, angleY)
           }
         }
@@ -188,17 +196,18 @@ export class WallEntity extends EntityClass<WallData> {
         // 绘制p1到p2长度
         const len = Math.sqrt((p2.x - p1.x) * (p2.x - p1.x) + (p2.y - p1.y) * (p2.y - p1.y))
         const lenText = `${Math.round(len)}cm`
-        ctx.fillStyle = 'red'
         ctx.font = `${Math.max(20 * zoomLevel, 20)}px Arial`
         ctx.textBaseline = 'middle'
+        ctx.strokeStyle = 'white'
+        ctx.lineWidth = Math.max(3 * zoomLevel, 2)
+        ctx.lineJoin = 'round'
+        ctx.fillStyle = 'red'
         // p1到p2的角度
-        const angle = Math.atan2(p2.y - p1.y, p2.x - p1.x);
-
-        if (Math.abs(Math.tan(angle)) > 1) {
-          ctx.fillText(lenText, screenX + 30 * zoomLevel, screenY)
-        } else {
-          ctx.fillText(lenText, screenX, screenY + 20 * zoomLevel)
-        }
+        const angle = Math.atan2(p2.y - p1.y, p2.x - p1.x)
+        const textX = Math.abs(Math.tan(angle)) > 1 ? screenX + 30 * zoomLevel : screenX
+        const textY = Math.abs(Math.tan(angle)) > 1 ? screenY : screenY + 20 * zoomLevel
+        ctx.strokeText(lenText, textX, textY)
+        ctx.fillText(lenText, textX, textY)
       }
     }
   }
@@ -322,8 +331,34 @@ export class WallEntity extends EntityClass<WallData> {
     for (let i = 0; i < this.getData().points.length - 1; i++) {
       const p1 = this.getData().points[i]
       const p2 = this.getData().points[i + 1]
+
+      const [box] = createAllWallFromPoints([
+        {
+          points: [p1, p2],
+          thickness: this.getData().thickness,
+        }
+      ])
+
       const midX = (p1.x + p2.x) / 2
       const midY = (p1.y + p2.y) / 2
+      const width = Math.hypot(p2.x - p1.x, p2.y - p1.y)
+      const angel = Math.atan2(p2.y - p1.y, p2.x - p1.x)
+      if (isPointInRotatedRect(x, y, {
+        x: midX,
+        y: midY,
+        width: width,
+        depth: this.getData().thickness + 2,
+        angleY: angel,
+      })) {
+        return new MatchRectArea({
+          x: midX,
+          y: midY,
+          width: width,
+          depth: this.getData().thickness + 2,
+          angleY: angel * -1,
+        })
+
+      }
       const dist = Math.hypot(x - midX, y - midY)
       if (dist < this.getData().thickness) {
         return new MatchCircleArea({

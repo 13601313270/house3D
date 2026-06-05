@@ -4,16 +4,19 @@
  * @param { number } radius 拉伸半径(宽度)
  * @returns { THREE.Vector2[] }
  */
-// @ts-ignore
-import { Geometry, union } from 'martinez-polygon-clipping';
 import { Point } from '@/types';
-import { WallData } from '@/entities/wall/index.d';
 
 // const cache = new Map<string, [number, number][][]>();
 
 type wallBox = [{ x: number, y: number }, { x: number, y: number }, { x: number, y: number }, { x: number, y: number }]
 
-export function createAllWallFromPoints(wallList: WallData[]): wallBox[] {
+export function createAllWallFromPoints(wallList: {
+  points: {
+    x: number
+    y: number
+  }[]
+  thickness: number
+}[]): wallBox[] {
   // const key = `${wallList.map((item) => item.points.map((point: Point) => `${point.x},${point.y}`).join(',')).join(',')}`
   // if (cache.has(key)) return cache.get(key) || []
   const left: Point[] = [];
