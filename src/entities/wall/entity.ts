@@ -1,4 +1,4 @@
-import { Point, HandelInfo } from '@/types/map2d'
+import { Point, HandelInfo, PointWithIndex } from '@/types/map2d'
 import { allSnapFromType, EntityClass, MatchSnapPoint } from '@/types/entity'
 import { WallData } from './index.d'
 import { createAllWallFromPoints } from '@/utils/createAllWallFromPoints'
@@ -502,12 +502,17 @@ export class WallEntity extends EntityClass<WallData> {
       // 暂时没有考虑好怎么写磁吸到边的情况，因为暂时无法排除自己，所以只命中point磁吸
       // console.log('MatchSnapPoint-3', newPosition.point, dragHandelInfo.index)
       if (dragHandelInfo.index % 2 === 0) {
-        const index = dragHandelInfo.index / 2;
-        this.getData().points[index] = {
-          ...newPosition.point,
-          snw: this.getData().points[index].snw,
-        }
-        return true
+        // 和自己排除的逻辑，总是写不好，所以暂时注销掉。
+        // const index = dragHandelInfo.index / 2;
+        // console.log('newPosition', index, (newPosition.point as PointWithIndex))
+        // if ((newPosition.point as PointWithIndex).index && index !== (newPosition.point as PointWithIndex).index) {
+        //   this.getData().points[index] = {
+        //     x: newPosition.point.x,
+        //     y: newPosition.point.y,
+        //     snw: this.getData().points[index].snw,
+        //   }
+        //   return true
+        // }
       }
     }
     return false;
