@@ -982,12 +982,12 @@ const saveDrawing = async () => {
 }
 
 const loadProgramFile = () => {
-  worldApi.clearAll()
   activeToolsIndex.value = -1
   loadProgramFileInputRef.value?.click()
 }
 
 const handleLoadProgramFileChange = async (e: Event) => {
+  worldApi.clearAll()
   initWorldLoading.value = true
   const input = e.target as HTMLInputElement
   const file = input.files?.[0]
