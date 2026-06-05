@@ -246,7 +246,7 @@ const draggedPoint = ref<
 const dragOffset = ref<Point | null>(null)
 const dragStartPoint = ref<Point | null>(null)
 const panOffset = ref<Point>({ x: 0, y: 0 })
-const isPanning = ref(false)
+const isPanningScreen = ref(false);// 平移屏幕
 const panel1SplitWidthPer = ref(0.35)
 const panel2SplitWidthPer = ref(0.35)
 const isSplitting = ref(false)
@@ -1461,7 +1461,7 @@ const handleMouseMove = (e: MouseEvent) => {
       worldApi.draw3D()
       return;
     }
-    if (isPanning.value) {
+    if (isPanningScreen.value) {
       const dx = screenX - panStartScreenX
       const dy = screenY - panStartScreenY
       panOffset.value.x += dx
@@ -1643,7 +1643,7 @@ const handleMouseDown = (e: MouseEvent) => {
     } else {
       // 如果没有拖拽到任何点，开始平移
       if (!draggedPoint.value) {
-        isPanning.value = true
+        isPanningScreen.value = true
         panStartScreenX = screenX
         panStartScreenY = screenY
       }
@@ -1770,9 +1770,10 @@ const handleMouseUp = () => {
     dragOffset.value = null
     drawWrapper2DAnd3D()
   }
-  if (isPanning.value) {
-    isPanning.value = false
-    drawWrapper2DAnd3D()
+  if (isPanningScreen.value) {
+    isPanningScreen.value = false
+    // 平移过程中，该渲染都渲染过了。鼠标抬起这里不用在重新渲染一下了。2026.6.6
+    // drawWrapper2DAnd3D()
   }
 }
 const handleMouseLeave = () => {
