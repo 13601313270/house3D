@@ -10,6 +10,7 @@ import outFilePlugin from './outFile'
 import outFileInWallPlugin from './outFileInWall'
 import cylinderPlugin from './cylinder'
 import planePlugin from './plane'
+import curtainPlugin from './curtain'
 import conePlugin from './cone'
 import peoplePlugin from './people'
 import importFilePlugin from './importFile'
@@ -52,6 +53,7 @@ export const fileDataKeyToClass: Record<string, EntityConstructor> = {
   cylinderPlugin,
   conePlugin,
   planePlugin,
+  curtainPlugin,
   outFilePlugin,
   outFileInWallPlugin,
   peoplePlugin,

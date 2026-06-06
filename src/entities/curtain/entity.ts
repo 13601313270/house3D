@@ -1,0 +1,330 @@
+import { HandelInfo, Point } from '@/types/map2d'
+import * as THREE from 'three'
+import { CurtainData } from './index.d'
+import { allSnapFromType, EntityClass, MatchSnapPoint } from '@/types/entity'
+import { editItem } from '..';
+import { getMaterialById } from '@/material';
+import { CurtainDataClass } from './dataClass'
+import { isPointInRotatedRect } from '@/utils/isPointInRotatedRect';
+import { MatchRectArea } from '@/utils/matchArea';
+
+export class CurtainEntity extends EntityClass<CurtainData> {
+  name: string = '幕布'
+  type: string = 'curtain'
+  isPointObj: boolean = true
+  private circleRadius = 6
+  private depth = 5
+
+  defaultValue(): CurtainData {
+    const data: CurtainData = {
+      id: Date.now().toString(),
+      x: 0,
+      y: 0,
+      z: 0,
+      width: 200,
+      height: 200,
+      color: '#a3998fff',
+      mt: null,
+      angleY: 0,
+    }
+    return new CurtainDataClass(data)
+  }
+
+  draw2DPreviewByData(ctx: CanvasRenderingContext2D, data: CurtainData, panOffset: Point, zoomLevel: number): void {
+    const screenX = data.x * zoomLevel + panOffset.x
+    const screenY = data.y * zoomLevel + panOffset.y
+    const { width } = data;
+    const angleY = data.angleY || 0;// 历史数据问题
+
+    // 绘制一个方块
+    ctx.fillStyle = '#be4141'
+    ctx.save(); // 保存当前状态
+    ctx.translate(screenX, screenY); // 移动原点到目标中心
+    ctx.rotate(angleY * -1); // 围绕新原点旋转
+    // 绘制一个方块
+    ctx.fillRect(
+      width / -2 * zoomLevel,
+      this.depth / -2 * zoomLevel,
+      width * zoomLevel,
+      this.depth * zoomLevel
+    )
+    ctx.restore(); // 恢复原始状态
+  }
+
+  draw2DByData(
+    ctx: CanvasRenderingContext2D,
+    data: CurtainData,
+    panOffset: Point,
+    zoomLevel: number,
+  ): void {
+    // 实现门的2D绘制逻辑
+    const screenX = data.x * zoomLevel + panOffset.x
+    const screenY = data.y * zoomLevel + panOffset.y
+    const angleY = data.angleY || 0;// 历史数据问题，有的数据不存在angleY，所以用了一个【|| 0】给予默认值
+
+    // 控制点
+    ctx.fillStyle = '#fff'
+    ctx.strokeStyle = '#e67e22'
+    ctx.lineWidth = 2
+    ctx.beginPath()
+    ctx.arc(screenX, screenY, this.circleRadius * zoomLevel + 3, 0, Math.PI * 2)
+    ctx.fill()
+    ctx.stroke()
+
+    const drawAngelLength = Math.max(this.getData().width / 2, this.circleRadius * 2) * 0.9;// 0.9避免超过方块范围
+    // alert(drawAngelLength)
+    console.log('drawAngelLength', angleY, drawAngelLength)
+    // 控制点向着angleY角度延伸10个单位后的坐标
+    const rotatedXAdd = data.x + Math.cos(angleY) * drawAngelLength
+    const rotatedYAdd = data.y - Math.sin(angleY) * drawAngelLength
+    const circleX = rotatedXAdd * zoomLevel + panOffset.x
+    const circleY = rotatedYAdd * zoomLevel + panOffset.y
+    const circleRadius = this.circleRadius * zoomLevel + 3
+
+    function ttt(angel: number, drawAngelLength: number) {
+      const tempX = data.x + Math.cos(angel) * drawAngelLength;
+      const tempY = data.y - Math.sin(angel) * drawAngelLength;
+      return [tempX * zoomLevel + panOffset.x, tempY * zoomLevel + panOffset.y]
+    }
+
+    // 绘制双向箭头表示旋转角度
+    ctx.fillStyle = '#fff'
+    ctx.strokeStyle = '#e67e22'
+    ctx.lineWidth = 2 * zoomLevel
+    // 绘制双向箭头的主线（圆弧）
+    ctx.beginPath();
+    ctx.arc(screenX, screenY, drawAngelLength * zoomLevel, angleY * -1 - Math.PI / 4, angleY * -1 + Math.PI / 4);
+    ctx.stroke();
+
+    // 左侧箭头
+    (() => {
+      ctx.beginPath()
+      const [p1X, p1Y] = ttt(angleY + 0.1 + Math.PI / 4, drawAngelLength)
+      const [p2X, p2Y] = ttt(angleY + Math.PI / 4, drawAngelLength + 5)
+      const [p3X, p3Y] = ttt(angleY + Math.PI / 4, drawAngelLength - 5)
+      ctx.moveTo(
+        p1X,
+        p1Y
+      )
+      ctx.lineTo(p2X, p2Y)
+      ctx.lineTo(p3X, p3Y)
+      ctx.closePath()
+      ctx.fill()
+    })();
+
+    // 右侧箭头
+    ctx.beginPath()
+    const [p1X, p1Y] = ttt(angleY - 0.1 - Math.PI / 4, drawAngelLength)
+    const [p2X, p2Y] = ttt(angleY - Math.PI / 4, drawAngelLength + 5)
+    const [p3X, p3Y] = ttt(angleY - Math.PI / 4, drawAngelLength - 5)
+    ctx.moveTo(
+      p1X,
+      p1Y
+    )
+    ctx.lineTo(p2X, p2Y)
+    ctx.lineTo(p3X, p3Y)
+    ctx.closePath()
+    ctx.fill()
+    // 绘制旋转角度线
+    ctx.beginPath()
+    ctx.arc(circleX, circleY, circleRadius, 0, Math.PI * 2)
+    ctx.fill()
+    ctx.stroke()
+  }
+
+  glbObj: THREE.Group | null = null;
+
+  create3DMesh(scene: THREE.Scene) {
+    const data = this.getData();
+    const group = new THREE.Group()
+
+    const { width, height, color, mt } = data;
+    const angleY = data.angleY || 0;// 历史数据问题，有的数据不存在angleY，所以用了一个【|| 0】给予默认值
+    // 平面
+    const material = mt ? (getMaterialById(mt)?.material(new THREE.Vector3(1, 1, 0))) : (new THREE.MeshStandardMaterial({ color: color }));
+    const plane = new THREE.PlaneGeometry(width, height)
+    const planeMesh = new THREE.Mesh(plane, material)
+    // planeMesh.rotation.x = -Math.PI / 2
+    planeMesh.position.setY(height / 2)
+    group.add(planeMesh)
+    group.rotateY(angleY);
+    return [
+      group
+    ]
+  }
+
+  createBoundingBox(): [THREE.Vector3, THREE.Vector3, THREE.Vector3] {
+    const { width, height, angleY } = this.getData();
+    return [
+      new THREE.Vector3(width, height, this.depth),
+      new THREE.Vector3(0, 0, 0),
+      new THREE.Vector3(0, angleY, 0)
+    ]
+  }
+
+  showMatchHandel(x: number, y: number) {
+    const data = this.getData();
+    // const dist = Math.hypot(x - data.x, y - data.y)
+    const angleY = data.angleY || 0;// 历史数据问题，有的数据不存在angleY，所以用了一个【|| 0】给予默认值
+    if (isPointInRotatedRect(x, y, {
+      x: data.x,
+      y: data.y,
+      width: data.width,
+      depth: this.depth + 30,
+      angleY: angleY * -1,
+    })) {
+      return new MatchRectArea({
+        x: data.x,
+        y: data.y,
+        width: data.width,
+        depth: this.depth,
+        angleY: angleY,
+      })
+    }
+    return null;
+  }
+
+  matchHandelInfo(x: number, y: number) {
+    const data = this.getData();
+    const dist = Math.hypot(x - data.x, y - data.y)
+    const angleY = data.angleY || 0;// 历史数据问题，有的数据不存在angleY，所以用了一个【|| 0】给予默认值
+    if (dist < this.circleRadius + 3) {
+      return {
+        index: 0,
+        type: this.type,
+        id: data.id,
+        dist: dist,
+      }
+    }
+    const drawAngelLength = Math.max(this.getData().width / 2, this.circleRadius * 2) * 0.9;// 0.9避免超过方块范围
+    // 控制点向着angleY角度延伸10个单位后的坐标
+    const rotatedXAdd = data.x + Math.cos(angleY) * drawAngelLength
+    const rotatedYAdd = data.y - Math.sin(angleY) * drawAngelLength
+
+    const dist2 = Math.hypot(x - rotatedXAdd, y - rotatedYAdd)
+    // console.log('dist2', dist2)
+    if (dist2 < this.circleRadius + 3) {
+      return {
+        index: 1,
+        type: this.type,
+        id: data.id,
+        dist: dist2,
+      }
+    }
+    return null;
+  }
+
+  matchHandelMoveCallback(position: {
+    x: number,
+    y: number,
+  }, matchHandelInfo: HandelInfo) {
+    const { x, y } = position
+    if (matchHandelInfo.index === 0) {
+      this.changePosition({ x, y })
+    } else if (matchHandelInfo.index === 1) {
+      const data = this.getData();
+      // 根据x,y计算angleY
+      const angleY = Math.atan2(y - data.y, x - data.x)
+      console.log(angleY)
+      this.setData({
+        ...this.getData(),
+        angleY: angleY * -1,
+      })
+    }
+  }
+
+  getMineBeSnapPoints() {
+    const key: allSnapFromType = 'point';
+    const data = this.getData();
+    return [{
+      objType: this.type,
+      objId: data.id,
+      snapFromType: key,
+      point: {
+        index: 0,
+        x: data.x,
+        y: data.y,
+      },
+    }]
+  }
+
+  getMineBeSnapLines(): [Point, Point][] {
+    return []
+  }
+
+  setData(data: CurtainData) {
+    // 双向去除原有的关联对象
+    this.associationEntity.forEach(entity => {
+      if (entity.associationEntity.includes(this)) {
+        entity.remove3DCache()
+      }
+    })
+    super.setData(data)
+  }
+
+  editPropConfig(snapPoint: HandelInfo, editShow: (editInfoList: editItem[], callback: (val: any) => void) => void): void {
+    const data = this.getData();
+    editShow([
+      {
+        id: 'width',
+        label: '宽度',
+        dataType: 'number',
+        min: 1,
+        max: Infinity,
+        step: 10,
+        value: data.width,
+      },
+      {
+        id: 'height',
+        label: '高度',
+        dataType: 'number',
+        min: 1,
+        max: Infinity,
+        step: 10,
+        value: data.height,
+      },
+      {
+        id: 'z',
+        label: '距离地面高度',
+        dataType: 'number',
+        min: -Infinity,
+        max: Infinity,
+        step: 1,
+        value: data.z,
+      },
+      {
+        id: 'mt',
+        label: '门材质',
+        dataType: 'material',
+        value: data.mt,
+      },
+      {
+        id: 'color',
+        label: '颜色',
+        dataType: 'color',
+        value: data.color,
+      },
+    ], (val) => {
+      this.setData({
+        ...data,
+        ...val,
+      })
+    })
+  }
+
+  inSceneSnapPointArea(newPosition: MatchSnapPoint) {
+    return false
+  }
+
+  inSceneSnapLineArea(obj: EntityClass<CurtainData>, line: [Point, Point]) {
+    return false
+  }
+
+  setPrepareState(x: number, y: number): void {
+    this.setData({
+      ...this.getData(),
+      x,
+      y,
+    })
+  }
+}
