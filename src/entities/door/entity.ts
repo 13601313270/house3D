@@ -19,7 +19,7 @@ export class DoorEntity extends EntityClassInWall<DoorData> {
   isPointObj: boolean = true
   private circleRadius = 6
 
-  constructor(world: World, door?: DoorData) {
+  constructor(world: World, door: DoorData) {
     super(world, door)
     if (door && door.wallId) {
       if (!this.world.allFileMapObjects.wall) {

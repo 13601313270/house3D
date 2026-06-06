@@ -17,7 +17,7 @@ export class WindowEntity extends EntityClassInWall<WindowData> {
   isPointObj: boolean = true
   private circleRadius = 6
 
-  constructor(world: World, window?: WindowData) {
+  constructor(world: World, window: WindowData) {
     super(world, window)
     if (window && window.wallId) {
       if (!this.world.allFileMapObjects.wall) {
