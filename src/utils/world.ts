@@ -311,10 +311,11 @@ export class World {
               item.boundingBox.children[0].rotation.set(rotateVector3.x, rotateVector3.y, rotateVector3.z)
               item.boundingBox.children[0].scale.set(boxVector3.x, boxVector3.y, boxVector3.z)
               item.boundingBox.children[0].position.set(offsetVector3.x, offsetVector3.y, offsetVector3.z)
-              item.boundingBox.visible = true
+              item.boundingBox.visible = false
               if (item.spriteGroup) {
                 item.spriteGroup.position.set(data.x, data.z, data.y)
-                item.spriteGroup.children[0].position.set(0, boxVector3.y + 12, 0)
+                console.log('offsetVector3', offsetVector3)
+                item.spriteGroup.children[0].position.set(0, boxVector3.y / 2 + offsetVector3.y + 12, 0)
               }
             } else {
               item.boundingBox.visible = false
