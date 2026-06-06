@@ -184,6 +184,12 @@
   <Login v-if="showLogin" @close="showLogin = false" @login="handleLogin" />
   <Help v-if="showHelpModal" @close="showHelpModal = false" />
   <div v-if="initWorldLoading" class="globalLoading">...</div>
+  <teleport to="#teleport" v-if="insertAdding">
+    <div class="loadingContent">
+      <img class="loadingIcon" src="../assets/loading_white.svg" alt="loading" />
+      <!-- <div>模型初始化中，请稍后...</div> -->
+    </div>
+  </teleport>
 </template>
 
 <script lang="ts" setup>
@@ -302,6 +308,7 @@ type ObjFileType = {
 const ObjFileTypes = ref<Array<ObjFileType>>([])
 
 let insertTempObj: EntityClass<any> | null = null
+const insertAdding = ref(false)
 
 let panStartScreenX = 0
 let panStartScreenY = 0
@@ -885,7 +892,6 @@ onMounted(async () => {
         hoverPoint.value = null
       } else {
         if (insertTempObj && currentTool.value !== 'drag') {
-          console.log('insertTempObj----1111')
           insertTempObj = null;
         }
       }
@@ -1311,15 +1317,25 @@ const handleCanvasClick = async (e: MouseEvent) => {
     lastPoint.value = clickPoint
   } else if (insertTempObj) {
     if (insertTempObj instanceof EntityClassInWall) {
-      if (hoverPoint.value) {
+      if (hoverPoint.value && insertAdding.value === false) {
+        insertAdding.value = true
         await worldApi.add(currentTool.value, [insertTempObj.getData()])
         insertTempObj = null;
+        setTimeout(() => {
+          insertAdding.value = false
+        }, 300)// 至少停留300毫秒，防止出现那种闪现的效果。
         currentTool.value = 'drag'
       }
     } else {
-      await worldApi.add(currentTool.value, [insertTempObj.getData()])
-      insertTempObj = null;
-      currentTool.value = 'drag'
+      if (insertAdding.value === false) {
+        insertAdding.value = true
+        await worldApi.add(currentTool.value, [insertTempObj.getData()])
+        insertTempObj = null;
+        setTimeout(() => {
+          insertAdding.value = false
+        }, 300)// 至少停留300毫秒，防止出现那种闪现的效果。
+        currentTool.value = 'drag'
+      }
     }
   }
 
@@ -2680,5 +2696,37 @@ button {
   color: white;
   font-size: 36px;
   cursor: default;
+}
+
+.loadingContent {
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.3);
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 16px;
+
+  .loadingIcon {
+    width: 20px;
+    height: 20px;
+    margin-right: 8px;
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin {
+    from {
+      transform: rotate(0deg);
+    }
+
+    to {
+      transform: rotate(360deg);
+    }
+  }
 }
 </style>
