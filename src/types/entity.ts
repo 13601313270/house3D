@@ -67,9 +67,9 @@ export abstract class EntityClass<T extends ObjData> {
   // 生成3D模型
   abstract create3DMesh(scene: THREE.Scene, ...args: any[]): THREE.Group[]
 
-  public boxSize: THREE.Vector3 = new THREE.Vector3()
-  public boxOffset: THREE.Vector3 = new THREE.Vector3()
-  public boxRotate: THREE.Vector3 = new THREE.Vector3()
+  // public boxSize: THREE.Vector3 = new THREE.Vector3()
+  // public boxOffset: THREE.Vector3 = new THREE.Vector3()
+  // public boxRotate: THREE.Vector3 = new THREE.Vector3()
 
   // 创建包裹立方体
   abstract createBoundingBox(): [THREE.Vector3, THREE.Vector3, THREE.Vector3] | null // 第一个是尺寸，第二个是位置偏移，第三个是旋转角度
@@ -92,10 +92,10 @@ export abstract class EntityClass<T extends ObjData> {
         if (!boundingBox) {
           return;
         }
-        const [boxVector3, offsetVector3, rotateVector3] = boundingBox;
-        this.boxSize.set(boxVector3.x, boxVector3.y, boxVector3.z)
-        this.boxOffset.set(offsetVector3.x, offsetVector3.y, offsetVector3.z)
-        this.boxRotate.set(rotateVector3.x, rotateVector3.y, rotateVector3.z);
+        // const [boxVector3, offsetVector3, rotateVector3] = boundingBox;
+        // this.boxSize.set(boxVector3.x, boxVector3.y, boxVector3.z)
+        // this.boxOffset.set(offsetVector3.x, offsetVector3.y, offsetVector3.z)
+        // this.boxRotate.set(rotateVector3.x, rotateVector3.y, rotateVector3.z);
         (() => {
           console.log('createBoundingBox-data', this.data);
           // this.data.tip = '哈哈哈'

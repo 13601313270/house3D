@@ -5,9 +5,6 @@ import { EntityClass, MatchSnapPoint, OrigionSnapPoint } from '@/types/entity'
 import { editItem } from '..'
 // @ts-ignore
 import { FBXLoader } from 'three/addons/loaders/FBXLoader.js';
-
-// @ts-ignore
-import kamera from './kamera.png'
 import { PeopleDataClass } from './dataClass'
 import { MatchCircleArea } from '@/utils/matchArea'
 
@@ -26,6 +23,8 @@ export class PeopleEntity extends EntityClass<PeopleData> {
   active: boolean = false // 这个不存在数据库里，只是在前端动态调整
   drawAngelLength: number = 40
   private circleRadius = 6
+
+  ManClean: THREE.Group | null = null
 
   defaultValue(): PeopleData {
     const people: PeopleData = {
@@ -145,6 +144,16 @@ export class PeopleEntity extends EntityClass<PeopleData> {
     ctx.stroke()
   }
 
+  init(): Promise<void> {
+    return new Promise((resolve) => {
+      const loader = new FBXLoader()
+      loader.load('./ManClean.fbx', (fbxModel: THREE.Group) => {
+        this.ManClean = fbxModel
+        resolve()
+      })
+    })
+  }
+
   create3DMesh(scene: THREE.Scene): THREE.Group[] {
     console.log('create3DMesh', 1)
 
@@ -152,7 +161,9 @@ export class PeopleEntity extends EntityClass<PeopleData> {
     const loader = new FBXLoader()
     const group = new THREE.Group()
     const { color, tip } = data
-    loader.load('./ManClean.fbx', (fbxModel: any) => {
+    if (this.ManClean) {
+      const fbxModel = this.ManClean
+
       fbxModel.rotateX(Math.PI);
       fbxModel.rotateY(Math.PI)
       fbxModel.rotateZ(Math.PI);
@@ -190,12 +201,7 @@ export class PeopleEntity extends EntityClass<PeopleData> {
       // group.add(sprite);
 
       group.add(fbxModel)
-    }, (progress: any) => {
-      // const percent = (progress.loaded / progress.total * 100).toFixed(2)
-      // console.log('加载进度:', percent + '%')
-    }, () => {
-      // console.error('FBX文件加载失败:', error)
-    })
+    }
     return [
       group
     ]
@@ -206,10 +212,11 @@ export class PeopleEntity extends EntityClass<PeopleData> {
     const data = this.getData();
     let boxHeight = 0;// = data.height;
     if (this.meshList?.[0]?.children[0] && data.bone && data.bone?.length > 0) {
-      boxHeight = this.boxSize.y;
+      const [boxSize, boxCenter] = this.getSkinnedMeshBoundingBox(this.meshList[0].children[0])
+      boxHeight = boxSize.y;
       return [
-        new THREE.Vector3(this.boxSize.x, boxHeight, this.boxSize.z),
-        new THREE.Vector3(this.boxOffset.x, this.boxOffset.y, this.boxOffset.z),//  + boxHeight / 2
+        new THREE.Vector3(boxSize.x, boxHeight, boxSize.z),
+        new THREE.Vector3(boxCenter.x - data.x, boxCenter.y - data.z, boxCenter.z - data.y),//  + boxHeight / 2
         new THREE.Vector3(0, data.angle * -1, 0)
       ]
     } else {
@@ -297,7 +304,6 @@ export class PeopleEntity extends EntityClass<PeopleData> {
     const center = new THREE.Vector3()
     box.getSize(size)
     box.getCenter(center)
-    
     return [size, center]
   }
 
@@ -481,16 +487,6 @@ export class PeopleEntity extends EntityClass<PeopleData> {
         ...data,
         ...val,
       })
-      const newData = this.getData()
-      if (this.meshList?.[0]?.children[0] && newData.bone && newData.bone?.length > 0) {
-        const [boxSize, boxCenter] = this.getSkinnedMeshBoundingBox(this.meshList[0].children[0])
-        this.boxSize.set(boxSize.x, boxSize.y, boxSize.z)
-        console.log('包围盒中心点:', boxCenter.z, newData.y)
-        this.boxOffset.set(boxCenter.x - newData.x, boxCenter.y, boxCenter.z - newData.y)
-      } else {
-        this.boxSize.set(newData.height * 2 / 5, newData.height, newData.height / 5)
-        this.boxOffset.set(0, 0, 0)
-      }
     })
   }
 }
