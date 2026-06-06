@@ -301,22 +301,25 @@ export class World {
         (this.allFileMapObjects[key] as EntityClass<any>[]).forEach((item) => {
           item.reCreate3DMeshIfNeed()
           item.change3DMeshState()
-          const boundingBox = item.createBoundingBox();
-          if (boundingBox) {
-            const data = item.getData();
-            const [boxVector3, offsetVector3, rotateVector3] = boundingBox;
-            item.boundingBox.position.set(data.x, data.z, data.y)
-            item.boundingBox.children[0].rotation.set(rotateVector3.x, rotateVector3.y, rotateVector3.z)
-            item.boundingBox.children[0].scale.set(boxVector3.x, boxVector3.y, boxVector3.z)
-            item.boundingBox.children[0].position.set(offsetVector3.x, offsetVector3.y, offsetVector3.z)
-            item.boundingBox.visible = true
-            if (item.spriteGroup) {
-              item.spriteGroup.position.set(data.x, data.z, data.y)
-              item.spriteGroup.children[0].position.set(0, boxVector3.y + 12, 0)
+          setTimeout(() => {
+            const boundingBox = item.createBoundingBox();
+            if (boundingBox) {
+              const data = item.getData();
+              // 第一个是尺寸，第二个是位置偏移，第三个是旋转角度
+              const [boxVector3, offsetVector3, rotateVector3] = boundingBox;
+              item.boundingBox.position.set(data.x, data.z, data.y)
+              item.boundingBox.children[0].rotation.set(rotateVector3.x, rotateVector3.y, rotateVector3.z)
+              item.boundingBox.children[0].scale.set(boxVector3.x, boxVector3.y, boxVector3.z)
+              item.boundingBox.children[0].position.set(offsetVector3.x, offsetVector3.y, offsetVector3.z)
+              item.boundingBox.visible = true
+              if (item.spriteGroup) {
+                item.spriteGroup.position.set(data.x, data.z, data.y)
+                item.spriteGroup.children[0].position.set(0, boxVector3.y + 12, 0)
+              }
+            } else {
+              item.boundingBox.visible = false
             }
-          } else {
-            item.boundingBox.visible = false
-          }
+          })
         });
       }
     });
@@ -359,7 +362,9 @@ export class World {
       // @ts-ignore
       this.allFileMapObjects[type].push(api)
     }
-    this.changeBindList.forEach(callback => callback())
+    if (data.length) {
+      this.changeBindList.forEach(callback => callback())
+    }
   }
 
   clearAll() {
@@ -369,7 +374,6 @@ export class World {
           item.beforeRemove()
         });
         this.allFileMapObjects[type] = []
-        this.changeBindList.forEach(callback => callback())
       }
     })
     this.changeBindList.forEach(callback => callback())

@@ -217,7 +217,8 @@ export class PeopleEntity extends EntityClass<PeopleData> {
       return [
         new THREE.Vector3(boxSize.x, boxHeight, boxSize.z),
         new THREE.Vector3(boxCenter.x - data.x, boxCenter.y - data.z, boxCenter.z - data.y),//  + boxHeight / 2
-        new THREE.Vector3(0, data.angle * -1, 0)
+        // new THREE.Vector3(0, data.angle * -1, 0),
+        new THREE.Vector3(0, 0, 0)
       ]
     } else {
       boxHeight = data.height;
