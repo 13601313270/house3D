@@ -21,6 +21,7 @@ export interface ObjData {
   y: number
   z: number
   tip?: string,// 提示信息
+  tipFontSize?: number,// 提示信息字号
 }
 
 export interface ObjInWallData extends ObjData {

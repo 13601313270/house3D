@@ -84,7 +84,6 @@ export type editItem = {
   'area' |
   'material' |
   'hidden' |
-  'title' | /* 一个标题，纯展示使用 */
   'button' | /* 按钮 */
   string[]/* 枚举 */
   value: any
@@ -97,4 +96,8 @@ export type editItem = {
   step: number,
   value: number
   unit?: string
+} | {
+  id: string,
+  label: string,
+  dataType: 'title', /* 一个标题，纯展示使用 */
 }

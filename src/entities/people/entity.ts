@@ -160,7 +160,7 @@ export class PeopleEntity extends EntityClass<PeopleData> {
     const data = this.getData();
     const loader = new FBXLoader()
     const group = new THREE.Group()
-    const { color, tip } = data
+    const { color } = data
     if (this.ManClean) {
       const fbxModel = this.ManClean
 
@@ -319,7 +319,7 @@ export class PeopleEntity extends EntityClass<PeopleData> {
   change3DMeshState(): void {
     const data = this.getData();
     const singleHeight = 0.213 * 0.0261
-    const { height, angle, tip } = data
+    const { height, angle } = data
     this.meshList.forEach(v => {
       v.position.set(data.x, data.z, data.y)
       v.scale.set(singleHeight * height, singleHeight * height, singleHeight * height)
@@ -453,6 +453,11 @@ export class PeopleEntity extends EntityClass<PeopleData> {
   editPropConfig(snapPoint: HandelInfo, editShow: (editInfoList: editItem[], callback: (val: any) => void) => void): void {
     const data = this.getData();
     editShow([
+      {
+        id: 'tipGroup',
+        label: '基本信息',
+        dataType: 'title',
+      },
       {
         id: 'height',
         label: '身高',

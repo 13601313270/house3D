@@ -104,7 +104,7 @@ export abstract class EntityClass<T extends ObjData> {
             const ctx = canvas.getContext('2d')!;
 
             // 设置canvas尺寸
-            const fontSize = 96;
+            const fontSize = this.data.tipFontSize || 96;
             ctx.font = `bold ${fontSize}px Arial`;
             const textWidth = ctx.measureText(this.data.tip).width;
             const heightPadding = 5;

@@ -6,6 +6,7 @@ class ObjDataClass<T extends ObjData> {
   y: number
   z: number
   tip?: string // 提示信息
+  tipFontSize?: number // 提示信息字号
 
   constructor(data: T) {
     this.id = data.id
@@ -13,6 +14,7 @@ class ObjDataClass<T extends ObjData> {
     this.y = data.y
     this.z = data.z
     this.tip = data.tip || ''
+    this.tipFontSize = data.tipFontSize || 96
   }
 }
 

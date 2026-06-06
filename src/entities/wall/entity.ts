@@ -642,7 +642,6 @@ export class WallEntity extends EntityClass<WallData> {
           id: 'title',
           label: '顶点属性',
           dataType: 'title',
-          value: '',
         },
         {
           id: 'delete',
@@ -665,7 +664,6 @@ export class WallEntity extends EntityClass<WallData> {
           id: 'title',
           label: '整个墙体属性',
           dataType: 'title',
-          value: '',
         },
         ...configList,
       ], (val) => {
@@ -681,7 +679,6 @@ export class WallEntity extends EntityClass<WallData> {
           id: 'title',
           label: '墙面属性',
           dataType: 'title',
-          value: '',
         },
         {
           id: 'hidden',
@@ -693,7 +690,6 @@ export class WallEntity extends EntityClass<WallData> {
           id: 'title',
           label: '整个墙体属性',
           dataType: 'title',
-          value: '',
         },
         ...wallBaseConfig
       ], (val) => {

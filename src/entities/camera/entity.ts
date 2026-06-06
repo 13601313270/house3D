@@ -364,6 +364,7 @@ export class CameraEntity extends EntityClass<CameraData> {
   meshNeedChangeKey() {
     const cacheData = {
       tip: this.getData().tip,
+      tipFontSize: this.getData().tipFontSize,
     }
     return this.type + JSON.stringify(cacheData)
   }

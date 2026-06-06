@@ -1160,19 +1160,35 @@ const handleContextMenu = (e: MouseEvent) => {
             editSnapPoint.value = snapPoint
             editPropTypeKey.value = type
             editPropTypeIndex.value = j
-            const modifyConfig = [...propConfig];
+            const modifyConfig: editItem[] = [...propConfig];
             if (type !== 'wall') {
+              modifyConfig.push({
+                id: 'tipGroup',
+                label: '提示信息',
+                dataType: 'title',
+              })
               modifyConfig.push({
                 id: 'tip',
                 label: '提示信息',
                 dataType: 'string',
                 value: api.getData().tip || '',
               })
+              modifyConfig.push({
+                id: 'tipFontSize',
+                label: '提示信息字号',
+                dataType: 'number',
+                min: 1,
+                max: 120,
+                step: 1,
+                value: api.getData().tipFontSize || 96,
+              })
             }
             editPropConfigInfo.value = modifyConfig
             const inputData: any = {}
             modifyConfig.forEach(v => {
-              inputData[v.id] = v.value
+              if (v.dataType !== 'title') {
+                inputData[v.id] = v.value
+              }
             })
             console.log('初始化数据', inputData)
             editPropInputInfo.value = inputData;
