@@ -37,8 +37,11 @@
           <div class="controlBtn" @click="save">应用本帧</div>
         </div>
       </div>
+      <div v-if="loading" class="loading">
+        <img src="../assets/loading_white.svg" alt="loading" />
+      </div>
     </div>
-    <div class="boneListPanel" style="display: none;">
+    <!-- <div class="boneListPanel" style="display: none;">
       <div class="boneItemList">
         <div v-for="item in allBones" :key="item.name" class="boneItem">
           <div class="label">
@@ -77,7 +80,7 @@
       <div class="bottomActions">
         <div class="saveBtn" @click="save">应用</div>
       </div>
-    </div>
+    </div> -->
   </div>
 
   <div v-if="showModal" class="modal-overlay" @click.self="showModal = false">
@@ -104,6 +107,8 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 // @ts-ignore
 import { FBXLoader } from 'three/addons/loaders/FBXLoader.js'
+import message from '@/utils/message'
+import { sleep } from '@/utils/sleep'
 
 const viewportRef = ref<HTMLDivElement | null>(null)
 const containerRef = ref<HTMLDivElement | null>(null)
@@ -689,7 +694,7 @@ function initThree() {
 
     scene.add(fbxModel)
 
-    runPostAnimation('/walk.fbx')
+    runPostAnimation('./pose/standing.fbx')
   })
 }
 
@@ -791,50 +796,61 @@ function save() {
   // console.log('保存数据', JSON.stringify(saveVal))
   emit('update:modelValue', saveVal)
 }
+const loading = ref(false)
 function playAnimation(file: string) {
-  runPostAnimation('./pose/' + file)
+  loading.value = true
+  Promise.all([
+    runPostAnimation('./pose/' + file),
+    sleep(300)
+  ]).then(() => {
+    loading.value = false
+  }).catch(() => {
+    message.error('播放动画失败')
+    loading.value = false
+  })
 }
 
 function handleModalItemClick(file: string) {
   playAnimation(file)
   showModal.value = false
 }
-function runPostAnimation(file: string) {
+function runPostAnimation(file: string): Promise<void> {
   console.log('runPostAnimation', file)
   if (currentAction) {
     currentAction.stop()
   }
-  fbxLoader.load(file, (fbxScene: any) => {
-    if (fbxScene.animations && fbxScene.animations.length > 0) {
-      // fbxScene.animations.forEach((anim: any, index: number) => {
-      //   console.log(`动画 ${index}: ${anim.name}, 时长: ${anim.duration.toFixed(2)}s`)
-      // })
-      mixer = new THREE.AnimationMixer(fbxModel as THREE.Group)
+  return new Promise((resolve, reject) => {
+    fbxLoader.load(file, (fbxScene: any) => {
+      if (fbxScene.animations && fbxScene.animations.length > 0) {
+        mixer = new THREE.AnimationMixer(fbxModel as THREE.Group)
 
-      const clip = fbxScene.animations[0]
-      currentAction = mixer.clipAction(clip, fbxModel as THREE.Group)
-      totalDuration.value = clip.duration
-      currentAction.play()
-      isPlaying.value = true
+        const clip = fbxScene.animations[0]
+        currentAction = mixer.clipAction(clip, fbxModel as THREE.Group)
+        totalDuration.value = clip.duration
+        currentAction.play()
+        isPlaying.value = true
 
-      if (totalDuration.value < 0.06) {
-        setTimeout(() => {
-          currentAction!.paused = true
-          isPlaying.value = false
-        }, 30)
+        if (totalDuration.value < 0.06) {
+          setTimeout(() => {
+            currentAction!.paused = true
+            isPlaying.value = false
+          }, 30)
+        }
+        resolve()
+        // console.log(`播放动画: ${clip.name}`)
+      } else {
+        reject()
+        // console.log('FBX文件没有包含动画数据')
       }
-      // console.log(`播放动画: ${clip.name}`)
-    } else {
-      // console.log('FBX文件没有包含动画数据')
-    }
 
-    animate()
-  }, (progress: any) => {
-    // const percent = (progress.loaded / progress.total * 100).toFixed(2)
-    // console.log('FBX加载进度:', percent + '%')
-  }, () => {
-    // console.error('FBX文件加载失败:', error)
-    animate()
+      animate()
+    }, (progress: any) => {
+      // const percent = (progress.loaded / progress.total * 100).toFixed(2)
+      // console.log('FBX加载进度:', percent + '%')
+    }, () => {
+      // console.error('FBX文件加载失败:', error)
+      animate()
+    })
   })
 }
 function showModelPanel() {
@@ -910,6 +926,34 @@ function showModelPanel() {
   box-sizing: border-box;
   border-radius: 8px;
   overflow: hidden;
+
+  .loading {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.4);
+
+    >img {
+      width: 32px;
+      height: 32px;
+      animation: loading 2s linear infinite;
+    }
+
+    @keyframes loading {
+      0% {
+        transform: rotate(0deg);
+      }
+
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+  }
 }
 
 .canvas-bone-3d-container {
