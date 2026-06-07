@@ -9,7 +9,7 @@
     <div class="imgEditContainer">
       <select class="typeSelect" v-model="typeSelect" @change="changeTypeSelect">
         <option :value="1">网址</option>
-        <option :value="2">上传文件</option>
+        <option :value="2">选择文件</option>
       </select>
       <input class="urlInput" v-if="typeSelect === 1" :value="modelValue" @change="updateEditPropInputInfo($event)"
         type="text" placeholder="请输入网址" />

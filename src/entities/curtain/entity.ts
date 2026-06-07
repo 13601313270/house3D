@@ -126,7 +126,7 @@ export class CurtainEntity extends EntityClass<CurtainData> {
     const { width, height, angleY } = this.getData();
     return [
       new THREE.Vector3(width, height, this.depth),
-      new THREE.Vector3(0, 0, 0),
+      new THREE.Vector3(0, height / 2, 0),
       new THREE.Vector3(0, angleY, 0)
     ]
   }
