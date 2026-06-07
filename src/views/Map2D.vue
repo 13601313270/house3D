@@ -211,7 +211,7 @@ import { DoorEntity } from '@/entities/door/entity'
 import { CameraData } from '@/entities/camera/index.d'
 import { WallDataClass } from '@/entities/wall/dataClass'
 import { defaultWallData, WallEntity } from '@/entities/wall/entity'
-import { ImportFileType, ObjOutputFileType } from '@/entities/allObjs'
+import { ImportFileType, ImportImgType, ObjOutputFileType } from '@/entities/allObjs'
 import { OutFileDataClass } from '@/entities/outFile/dataClass'
 import { OutFileEntity } from '@/entities/outFile/entity'
 import { OutFileData } from '@/entities/outFile/index.d'
@@ -741,6 +741,7 @@ function roundNumberList(point: { x: number, y: number }) {
   return { x: Math.round(point.x), y: Math.round(point.y) }
 }
 const worldApi = new World()
+window.worldApi = worldApi
 const drawWrapper2DAnd3D = () => {
   const fileData: fileData = worldApi.getAllFileObjects()
   drawWrapper2D(fileData);
@@ -938,12 +939,14 @@ const saveDrawing = async () => {
     zoomLevel: number
     cameraState: CameraState
     activeCameraIndex: number
+    allImportImgs: string[]
   } = {
     ...worldApi.getAllFileObjects() as any,
     panOffset: panOffset.value,
     zoomLevel: zoom2DLevel.value,
     cameraState: cameraStateCenter.value,
-    activeCameraIndex: activeCameraIndex.value
+    activeCameraIndex: activeCameraIndex.value,
+    allImportImgs: worldApi.allImportImgs.map(v => v.fileTypeId),
   }
 
   const zip = new JSZip();
@@ -964,6 +967,15 @@ const saveDrawing = async () => {
   if (assetsFolder) {
     for (const file of allImportFiles) {
       assetsFolder.file(file.fileTypeId, file.file);
+    }
+  }
+
+  const allImportImg = worldApi.allImportImgs
+  console.log('allImportImg', allImportImg)
+  const imgsFolder = zip.folder('imgs');
+  if (imgsFolder) {
+    for (const img of allImportImg) {
+      imgsFolder.file(img.fileTypeId, img.file);
     }
   }
 
@@ -1012,12 +1024,15 @@ const handleLoadProgramFileChange = async (e: Event) => {
   }
   // 2. 读取 scene.json
   const sceneJsonText = await t.async('string');
-  const sceneData = JSON.parse(sceneJsonText);
+  const sceneData: {
+    importFile: ImportFileType[]
+    allImportImgs: string[]
+  } = JSON.parse(sceneJsonText);
 
-  console.log(sceneData)
+  console.log('sceneData', sceneData)
   if (sceneData.importFile && sceneData.importFile.length) {
     for (const v of sceneData.importFile) {
-      const { fileTypeId, scale, color } = v
+      const { fileTypeId } = v
       const read = await zip.file(`assets/${fileTypeId}`);
       const extension = fileTypeId.split('.').pop()?.toLowerCase();
       if (!read) continue
@@ -1036,7 +1051,20 @@ const handleLoadProgramFileChange = async (e: Event) => {
         }
         // 添加到 ObjFileTypes
         worldApi.allImportFiles.push(customObjItem)
-      }, v)
+      })
+    }
+  }
+
+  if (sceneData.allImportImgs && sceneData.allImportImgs.length) {
+    for (const fileTypeId of sceneData.allImportImgs) {
+      console.log('fileTypeId', fileTypeId)
+      const read = await zip.file(`imgs/${fileTypeId}`);
+      const extension = fileTypeId.split('.').pop()?.toLowerCase();
+      if (!read) continue
+      const blob = await read.async('blob');
+      const url = URL.createObjectURL(blob);
+      const file = new File([blob], fileTypeId, { type: blob.type || 'application/octet-stream' })
+      worldApi.allImportImgs.push({ fileTypeId, file })
     }
   }
 
@@ -1055,25 +1083,20 @@ const handleLoadProgramFileChange = async (e: Event) => {
 
   //   // 7. 模型加载完成后记得 URL.revokeObjectURL(url)
   // }
-
-  const reader = new FileReader()
-  reader.onload = async (event) => {
-    try {
-      const data: fileData & {
-        panOffset: Point
-        zoomLevel: number
-        cameraState: CameraState
-        activeCameraIndex: number
-      } = JSON.parse(sceneJsonText as string)
-      initWorldLoading.value = true
-      await initWorldByData(data)
-      initWorldLoading.value = false
-    } catch (error) {
-      initWorldLoading.value = false
-      console.error(error)
-    }
+  try {
+    const data: fileData & {
+      panOffset: Point
+      zoomLevel: number
+      cameraState: CameraState
+      activeCameraIndex: number
+    } = JSON.parse(sceneJsonText as string)
+    initWorldLoading.value = true
+    await initWorldByData(data)
+    initWorldLoading.value = false
+  } catch (error) {
+    initWorldLoading.value = false
+    console.error(error)
   }
-  reader.readAsText(file)
   input.value = ''
 }
 

@@ -5,7 +5,7 @@ import { OBJLoader } from 'three/addons/loaders/OBJLoader.js'
 import { FBXLoader } from 'three/addons/loaders/FBXLoader.js'
 import { ImportFileData } from '@/entities/importFile/index.d'
 
-const processUploadedFile = async (file: File, callback: (object: THREE.Group, file: File, type: string) => void, v?: ImportFileData): Promise<void> => {
+const processUploadedFile = async (file: File, callback: (object: THREE.Group, file: File, type: string) => void): Promise<void> => {
   return new Promise((resolve, reject) => {
     const fileName = file.name.toLowerCase()
 

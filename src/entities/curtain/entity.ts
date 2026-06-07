@@ -6,6 +6,7 @@ import { editItem } from '..';
 import { CurtainDataClass } from './dataClass'
 import { isPointInRotatedRect } from '@/utils/isPointInRotatedRect';
 import { MatchRectArea } from '@/utils/matchArea';
+import { importImgFileHead } from '../allObjs';
 
 export class CurtainEntity extends EntityClass<CurtainData> {
   name: string = '幕布'
@@ -14,7 +15,7 @@ export class CurtainEntity extends EntityClass<CurtainData> {
   private circleRadius = 6
   private depth = 5
   private static textureLoader = new THREE.TextureLoader();
-  private static textureCache = new Map<string, THREE.Texture>();
+  private static textureCache = new Map<string | File, THREE.Texture>();
 
   draw2DPreviewByData(ctx: CanvasRenderingContext2D, data: CurtainData, panOffset: Point, zoomLevel: number): void {
     const screenX = data.x * zoomLevel + panOffset.x
@@ -88,15 +89,23 @@ export class CurtainEntity extends EntityClass<CurtainData> {
   create3DMesh(scene: THREE.Scene) {
     const data = this.getData();
     const group = new THREE.Group()
-
     const { width, height, img } = data;
     const angleY = data.angleY || 0;// 历史数据问题，有的数据不存在angleY，所以用了一个【|| 0】给予默认值
-    // 平面
     let material: THREE.MeshStandardMaterial | null = null;
     let texture = CurtainEntity.textureCache.get(img);
     if (!texture) {
-      texture = CurtainEntity.textureLoader.load(img);
-      CurtainEntity.textureCache.set(img, texture);
+      if (img.startsWith(importImgFileHead)) {
+        const findImportFile = this.world.allImportImgs.find(item => item.fileTypeId === img);
+        if (findImportFile) {
+          const imgFile: File = findImportFile.file as File;
+          const objectUrl = URL.createObjectURL(imgFile);
+          texture = CurtainEntity.textureLoader.load(objectUrl);
+          CurtainEntity.textureCache.set(img, texture);
+        }
+      } else {
+        texture = CurtainEntity.textureLoader.load(img);
+        CurtainEntity.textureCache.set(img, texture);
+      }
     }
     material = new THREE.MeshStandardMaterial({ map: texture, color: '#ffffff' });
     if (material) {

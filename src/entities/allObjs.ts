@@ -33,4 +33,19 @@ type ImportFileType = {
   file: File
 }
 
-export type { ObjOutputFileType, ImportFileType }
+const importImgFileHead = 'importImg_'
+
+type ImportImgType = {
+  fileTypeId: string,
+  file: File,
+}
+
+export {
+  importImgFileHead
+}
+
+export type {
+  ObjOutputFileType,
+  ImportFileType,
+  ImportImgType
+}
