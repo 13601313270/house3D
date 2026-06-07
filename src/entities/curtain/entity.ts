@@ -3,7 +3,6 @@ import * as THREE from 'three'
 import { CurtainData } from './index.d'
 import { EntityClass, MatchSnapPoint } from '@/types/entity'
 import { editItem } from '..';
-import { getMaterialById } from '@/material';
 import { CurtainDataClass } from './dataClass'
 import { isPointInRotatedRect } from '@/utils/isPointInRotatedRect';
 import { MatchRectArea } from '@/utils/matchArea';
@@ -14,21 +13,8 @@ export class CurtainEntity extends EntityClass<CurtainData> {
   isPointObj: boolean = true
   private circleRadius = 6
   private depth = 5
-
-  defaultValue(): CurtainData {
-    const data: CurtainData = {
-      id: Date.now().toString(),
-      x: 0,
-      y: 0,
-      z: 0,
-      width: 200,
-      height: 200,
-      color: '#a3998fff',
-      mt: null,
-      angleY: 0,
-    }
-    return new CurtainDataClass(data)
-  }
+  private static textureLoader = new THREE.TextureLoader();
+  private static textureCache = new Map<string, THREE.Texture>();
 
   draw2DPreviewByData(ctx: CanvasRenderingContext2D, data: CurtainData, panOffset: Point, zoomLevel: number): void {
     const screenX = data.x * zoomLevel + panOffset.x
@@ -57,23 +43,14 @@ export class CurtainEntity extends EntityClass<CurtainData> {
     panOffset: Point,
     zoomLevel: number,
   ): void {
-    // 实现门的2D绘制逻辑
-    const screenX = data.x * zoomLevel + panOffset.x
-    const screenY = data.y * zoomLevel + panOffset.y
-    const angleY = data.angleY || 0;// 历史数据问题，有的数据不存在angleY，所以用了一个【|| 0】给予默认值
+    const angleY = data.angleY || 0;
 
     // 控制点
     ctx.fillStyle = '#fff'
     ctx.strokeStyle = '#e67e22'
     ctx.lineWidth = 2
     const drawAngelLength = Math.max(this.getData().width / 2, this.circleRadius * 2);
-    // alert(drawAngelLength)
-    // console.log('drawAngelLength', angleY, drawAngelLength)
-    // 控制点向着angleY角度延伸10个单位后的坐标
-    const circleRadius = this.circleRadius * zoomLevel + 3
-    ctx.fillStyle = '#fff'
-    ctx.strokeStyle = '#e67e22'
-    ctx.lineWidth = 2 * zoomLevel
+
     const basicX = data.x * zoomLevel + panOffset.x
     const basicY = data.y * zoomLevel + panOffset.y
 
@@ -88,6 +65,11 @@ export class CurtainEntity extends EntityClass<CurtainData> {
     const rotatedXAdd = Math.cos(angleY) * drawAngelLength * zoomLevel
     const rotatedYAdd = Math.sin(angleY) * drawAngelLength * zoomLevel
 
+    // 控制点向着angleY角度延伸10个单位后的坐标
+    const circleRadius = this.circleRadius * zoomLevel + 3
+    ctx.fillStyle = '#fff'
+    ctx.strokeStyle = '#e67e22'
+    ctx.lineWidth = 2 * zoomLevel
     ctx.beginPath()
     ctx.arc(basicX + rotatedXAdd, basicY - rotatedYAdd, circleRadius, 0, Math.PI * 2)
     ctx.fill()
@@ -104,19 +86,24 @@ export class CurtainEntity extends EntityClass<CurtainData> {
   glbObj: THREE.Group | null = null;
 
   create3DMesh(scene: THREE.Scene) {
-    console.log('sss')
     const data = this.getData();
     const group = new THREE.Group()
 
-    const { width, height, color, mt } = data;
+    const { width, height, img } = data;
     const angleY = data.angleY || 0;// 历史数据问题，有的数据不存在angleY，所以用了一个【|| 0】给予默认值
     // 平面
-    const material = mt ? (getMaterialById(mt)?.material(new THREE.Vector3(Math.sin(angleY), 0, Math.cos(angleY)))) : (new THREE.MeshStandardMaterial({ color: color }));
+    let material: THREE.MeshStandardMaterial | null = null;
+    let texture = CurtainEntity.textureCache.get(img);
+    if (!texture) {
+      texture = CurtainEntity.textureLoader.load(img);
+      CurtainEntity.textureCache.set(img, texture);
+    }
+    material = new THREE.MeshStandardMaterial({ map: texture, color: '#ffffff' });
     if (material) {
       material.side = THREE.DoubleSide;
     }
     const plane = new THREE.PlaneGeometry(width, height)
-    const planeMesh = new THREE.Mesh(plane, material)
+    const planeMesh = new THREE.Mesh(plane, material!)
     // planeMesh.rotation.x = -Math.PI / 2
     planeMesh.position.setY(height / 2)
     group.add(planeMesh)
@@ -234,9 +221,9 @@ export class CurtainEntity extends EntityClass<CurtainData> {
       const angleY = Math.atan2(newDragPoint2.y - newDragPoint3.y, newDragPoint2.x - newDragPoint3.x)
       this.setData({
         ...this.getData(),
-        width: allDistance,
-        x: center.x,
-        y: center.y,
+        width: Math.round(allDistance),
+        x: Math.round(center.x),
+        y: Math.round(center.y),
         angleY: angleY * -1,
       })
     }
@@ -282,6 +269,12 @@ export class CurtainEntity extends EntityClass<CurtainData> {
         value: data.height,
       },
       {
+        id: 'img',
+        label: '图片',
+        dataType: 'img',
+        value: data.img,
+      },
+      {
         id: 'z',
         label: '距离地面高度',
         dataType: 'number',
@@ -289,18 +282,6 @@ export class CurtainEntity extends EntityClass<CurtainData> {
         max: Infinity,
         step: 1,
         value: data.z,
-      },
-      {
-        id: 'mt',
-        label: '门材质',
-        dataType: 'material',
-        value: data.mt,
-      },
-      {
-        id: 'color',
-        label: '颜色',
-        dataType: 'color',
-        value: data.color,
       },
     ], (val) => {
       this.setData({
@@ -342,5 +323,19 @@ export class CurtainEntity extends EntityClass<CurtainData> {
   inAreaHoverText() {
     const data = this.getData();
     return this.name + `(${Math.round(data.width).toString()}cm×${Math.round(data.height).toString()}cm)`
+  }
+
+  defaultValue(): CurtainData {
+    const data: CurtainData = {
+      id: Date.now().toString(),
+      x: 0,
+      y: 0,
+      z: 0,
+      width: 200,
+      height: 200,
+      angleY: 0,
+      img: '', // https://q0.itc.cn/q_70/images03/20250729/b9252b83f9a64720b2077345a655f144.jpeg
+    }
+    return new CurtainDataClass(data)
   }
 }

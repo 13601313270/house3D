@@ -86,6 +86,7 @@ export type editItem = {
   'area' |
   'material' |
   'hidden' |
+  'img' |
   'button' | /* 按钮 */
   string[]/* 枚举 */
   value: any

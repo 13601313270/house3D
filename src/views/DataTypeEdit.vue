@@ -10,12 +10,14 @@
         <div v-if="item.unit" class="unit">{{ item.unit }}</div>
       </div>
     </div>
+    <ImgEdit v-else-if="item.dataType === 'img'" :modelValue="modelValue"
+      @update:modelValue="updateEditPropInputInfoString" :item="item" />
     <input v-else-if="item.dataType === 'color'" type="color" class="colorInput" :value="modelValue"
-      @change="updateEditPropInputInfo(item.id, $event)" />
+      @change="updateEditPropInputInfo($event)" />
     <input v-else-if="item.dataType === 'boolean'" type="checkbox" class="checkBox" :checked="modelValue"
-      @change="updateEditPropInputInfoBoolean(item.id, $event)" />
+      @change="updateEditPropInputInfoBoolean($event)" />
     <input v-else-if="item.dataType === 'string'" type="text" :value="modelValue"
-      @change="updateEditPropInputInfo(item.id, $event)" />
+      @change="updateEditPropInputInfo($event)" />
     <div v-else-if="item.dataType === 'material'" class="materialList">
       <div @click="allMaterialShow = true, allMaterialShowPropId = item.id">
         <div class="materialItem" v-if="!modelValue">
@@ -58,9 +60,10 @@
   </div>
 </template>
 <script setup lang="ts">
+import { ref } from 'vue'
 import { editItem } from '@/entities';
 import { allMaterial } from '@/material';
-import { ref } from 'vue'
+import ImgEdit from './ImgEdit.vue'
 
 const props = defineProps<{
   item: editItem,
@@ -84,17 +87,21 @@ function updateEditPropInputNumberInfo(event: Event | number | null) {
     emit('update:modelValue', event)
   }
 }
-function updateEditPropInputInfo(id: string, event: Event) {
+function updateEditPropInputInfo(event: Event) {
+  console.log('event.target.value', 3, event)
   if (event.target) {
     // @ts-ignore
     emit('update:modelValue', event.target.value as string)
   }
 }
-function updateEditPropInputInfoBoolean(id: string, event: Event) {
+function updateEditPropInputInfoBoolean(event: Event) {
   if (event.target) {
     // @ts-ignore
     emit('update:modelValue', event.target.checked)
   }
+}
+function updateEditPropInputInfoString(value: string) {
+  emit('update:modelValue', value)
 }
 </script>
 <style scoped lang="less">
