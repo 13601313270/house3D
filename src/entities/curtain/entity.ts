@@ -153,6 +153,17 @@ export class CurtainEntity extends EntityClass<CurtainData> {
     return null;
   }
 
+  beforeMatchHandleSaveData: {
+    dragPoint2: {
+      x: number,
+      y: number,
+    },
+    dragPoint3: {
+      x: number,
+      y: number,
+    },
+  } | null = null
+
   matchHandelInfo(x: number, y: number) {
     const data = this.getData();
     const dist = Math.hypot(x - data.x, y - data.y)
@@ -167,13 +178,24 @@ export class CurtainEntity extends EntityClass<CurtainData> {
     }
     const drawAngelLength = Math.max(this.getData().width / 2, this.circleRadius * 2);// 0.9避免超过方块范围
     // 控制点向着angleY角度延伸10个单位后的坐标
-    const rotated1XAdd = Math.cos(angleY) * drawAngelLength
-    const rotated1YAdd = Math.sin(angleY) * drawAngelLength
+    const rotatedXAdd = Math.cos(angleY) * drawAngelLength
+    const rotatedYAdd = Math.sin(angleY) * drawAngelLength
 
-    const dist2 = Math.hypot(
-      x - data.x - rotated1XAdd,
-      y - data.y + rotated1YAdd
-    )
+    const dragPoint2 = {
+      x: (data.x + rotatedXAdd),
+      y: (data.y - rotatedYAdd),
+    }
+    const dragPoint3 = {
+      x: (data.x - rotatedXAdd),
+      y: (data.y + rotatedYAdd),
+    }
+
+    this.beforeMatchHandleSaveData = {
+      dragPoint2,
+      dragPoint3,
+    }
+
+    const dist2 = Math.hypot(x - dragPoint2.x, y - dragPoint2.y)
     // console.log('dist2', dist2)
     if (dist2 < this.circleRadius + 3) {
       return {
@@ -183,11 +205,7 @@ export class CurtainEntity extends EntityClass<CurtainData> {
         dist: dist2,
       }
     }
-    const dist3 = Math.hypot(
-      x - data.x + rotated1XAdd,
-      y - data.y - rotated1YAdd
-    )
-
+    const dist3 = Math.hypot(x - dragPoint3.x, y - dragPoint3.y)
     if (dist3 < this.circleRadius + 3) {
       return {
         index: 2,
@@ -206,17 +224,29 @@ export class CurtainEntity extends EntityClass<CurtainData> {
     const { x, y } = position
     if (matchHandelInfo.index === 0) {
       this.changePosition({ x, y })
-    } else if (matchHandelInfo.index === 1) {
+    } else if (matchHandelInfo.index === 1 || matchHandelInfo.index === 2) {
       const data = this.getData();
-      // 根据x,y计算angleY
-      const angleY = Math.atan2(y - data.y, x - data.x)
-      console.log(angleY)
+      const { dragPoint2, dragPoint3 } = this.beforeMatchHandleSaveData!
+      let newDragPoint2 = { ...dragPoint2 }
+      let newDragPoint3 = { ...dragPoint3 }
+      if (matchHandelInfo.index === 1) {
+        newDragPoint2 = { x, y }
+      } else if (matchHandelInfo.index === 2) {
+        newDragPoint3 = { x, y }
+      }
+      const center = {
+        x: (newDragPoint2.x + newDragPoint3.x) / 2,
+        y: (newDragPoint2.y + newDragPoint3.y) / 2,
+      }
+      const allDistance = Math.hypot(newDragPoint2.x - newDragPoint3.x, newDragPoint2.y - newDragPoint3.y)
+      const angleY = Math.atan2(newDragPoint2.y - newDragPoint3.y, newDragPoint2.x - newDragPoint3.x)
       this.setData({
         ...this.getData(),
+        width: allDistance,
+        x: center.x,
+        y: center.y,
         angleY: angleY * -1,
       })
-    } else if (matchHandelInfo.index === 2) {
-      // this.changePosition({ x, y })
     }
   }
 
