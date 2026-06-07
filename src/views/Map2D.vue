@@ -1404,16 +1404,16 @@ const handleMouseMove = (e: MouseEvent) => {
     // 绘制操作句柄
     const ctxAction = canvasAction.getContext('2d')!
     // 如果正在拖拽，处理拖拽逻辑（即使当前工具不是 drag）
-    if (matchHandelObj && matchHandelInfo) {
+    if (matchHandelObj && matchedHandelInfo) {
       // console.log('currentTool.value---1')
       // console.log('matchHandelObj', currentTool.value)
       function temp(api: EntityClass<ObjData>): boolean {
-        if (matchHandelObj && matchHandelInfo) {
+        if (matchHandelObj && matchedHandelInfo) {
           let beMatchPoints = api.getMineBeSnapPoints()
           // 排出掉和自己磁吸
           beMatchPoints = beMatchPoints.filter(v => {
             if (v.snapFromType === 'point') {
-              if (v.point.index === matchHandelInfo?.index) {
+              if (v.point.index === matchedHandelInfo?.index) {
                 return false;
               }
             }
@@ -1429,7 +1429,7 @@ const handleMouseMove = (e: MouseEvent) => {
                   snapFromType: 'point',
                   point: snapped.point
                 },
-                matchHandelInfo,
+                matchedHandelInfo,
               )
               if (result) {
                 drawWrapper2DAnd3D()
@@ -1483,7 +1483,7 @@ const handleMouseMove = (e: MouseEvent) => {
         y,
         startX: matchHandelStartPoint ? matchHandelStartPoint.x : undefined,
         startY: matchHandelStartPoint ? matchHandelStartPoint.y : undefined,
-      }, matchHandelInfo)
+      }, matchedHandelInfo)
       drawWrapper2D(fileData);
       // 绘制操作句柄
       ctxAction.clearRect(0, 0, canvasAction.width, canvasAction.height)
@@ -1507,18 +1507,9 @@ const handleMouseMove = (e: MouseEvent) => {
     } else {
       // 鼠标浮动而过
       ctxAction.clearRect(0, 0, canvasAction.width, canvasAction.height)
-      // let handleInfoList: Array<{
-      //   classInfo: EntityClass<any>
-      // }> = getHandleInfoByXY(x, y)
-      // if (handleInfoList.length === 0) {
-
-      // }
-      const handleInfoList = getHandleInAreaInfoByXY(x, y)
-      handleInfoList.forEach((v, index) => {
-        if (index !== 0) {
-          return
-        }
-        const { classInfo, matchArea } = v
+      const handleInfo = getHandleInAreaInfoByXY(x, y)
+      if (handleInfo) {
+        const { classInfo, matchArea } = handleInfo
         const textPositionX = x;
         const textPositionY = y - 10;
         if (matchArea instanceof MatchRectArea) {
@@ -1577,7 +1568,7 @@ const handleMouseMove = (e: MouseEvent) => {
           textPositionX * zoom2DLevel.value + panOffset.value.x,
           textPositionY * zoom2DLevel.value + panOffset.value.y
         )
-      })
+      }
     }
   } else if (currentTool.value === 'wall') {
     if (tempDrawWall.value && tempDrawWall.value?.points?.length && tempDrawWall.value.points.length > 0) {
@@ -1640,7 +1631,7 @@ const handleMouseMove = (e: MouseEvent) => {
 }
 
 let matchHandelObj: EntityClass<any> | null = null;
-let matchHandelInfo: HandelInfo | null = null;
+let matchedHandelInfo: HandelInfo | null = null;
 let matchHandelStartPoint: Point | null = null;
 const handleMouseDown = (e: MouseEvent) => {
   contextMenu.value = null;
@@ -1658,15 +1649,15 @@ const handleMouseDown = (e: MouseEvent) => {
   if (currentTool.value === 'drag') {
     if (e.button !== 0) return
     const handleInfoList = getHandleInfoByXY(x, y)
-    if (handleInfoList.length > 0) {
-      const { classInfo, handle, startPooint } = handleInfoList[0]
+    if (handleInfoList) {
+      const { classInfo, handle, startPoint } = handleInfoList
       matchHandelObj = classInfo
-      matchHandelInfo = handle
+      matchedHandelInfo = handle
       matchHandelStartPoint = { x, y }
       dragOffset.value = { x: 0, y: 0 }
       dragStartPoint.value = {
-        x: startPooint.x,
-        y: startPooint.y
+        x: startPoint.x,
+        y: startPoint.y
       }
       const canvasAction = canvas2D2Ref.value!;
       const ctxAction = canvasAction.getContext('2d')!
@@ -1683,19 +1674,19 @@ const handleMouseDown = (e: MouseEvent) => {
   }
 }
 
-function getHandleInfoByXY(x: number, y: number): Array<{
+function getHandleInfoByXY(x: number, y: number): {
   classInfo: EntityClass<any>
   handle: HandelInfo,
-  startPooint: Point,
+  startPoint: Point,
   dist: number,
-}> {
-  const matchHandelInfoList: Array<{
+} | null {
+  let minDistance = Infinity
+  let matchHandelInfoList: {
     classInfo: EntityClass<any>
     handle: HandelInfo,
-    startPooint: Point,
+    startPoint: Point,
     dist: number,
-  }> = []
-  const canvasAction = canvas2D2Ref.value!;
+  } | null = null
   // 检查已绘制的墙上的点
   if (worldApi.allFileMapObjects.wall) {
     for (let i = 0; i < worldApi.getObjects('wall').length; i++) {
@@ -1703,12 +1694,15 @@ function getHandleInfoByXY(x: number, y: number): Array<{
       const api: WallEntity = worldApi.allFileMapObjects.wall[i] as WallEntity;
       const matchInfo = api.matchHandelInfo(x, y)
       if (matchInfo) {
-        matchHandelInfoList.push({
-          classInfo: api,
-          handle: matchInfo,
-          startPooint: { x, y },
-          dist: matchInfo.dist,
-        })
+        if (matchInfo.dist < minDistance) {
+          matchHandelInfoList = {
+            classInfo: api,
+            handle: matchInfo,
+            startPoint: { x, y },
+            dist: matchInfo.dist,
+          }
+          minDistance = matchInfo.dist
+        }
       }
     }
   }
@@ -1723,32 +1717,32 @@ function getHandleInfoByXY(x: number, y: number): Array<{
       const api: DoorEntity = worldApi.allFileMapObjects[key][j] as DoorEntity;
       const matchInfo = api.matchHandelInfo(x, y)
       if (matchInfo) {
-        matchHandelInfoList.push({
-          classInfo: api,
-          handle: matchInfo,
-          startPooint: { x, y },
-          dist: matchInfo.dist,
-        })
+        if (matchInfo.dist < minDistance) {
+          matchHandelInfoList = {
+            classInfo: api,
+            handle: matchInfo,
+            startPoint: { x, y },
+            dist: matchInfo.dist,
+          }
+          minDistance = matchInfo.dist
+        }
       }
     }
   }
-
-  const sortedMatchAllObjList = matchHandelInfoList.sort((a, b) => {
-    return a.dist - b.dist
-  })
-  return sortedMatchAllObjList;
+  return matchHandelInfoList;
 }
 
-function getHandleInAreaInfoByXY(x: number, y: number): Array<{
+function getHandleInAreaInfoByXY(x: number, y: number): {
   classInfo: EntityClass<any>,
   matchArea: MatchRectArea | MatchCircleArea,
   dist: number,
-}> {
-  const matchHandelInfoList: Array<{
+} | null {
+  let minDistance = Infinity
+  let matchHandelInfoList: {
     classInfo: EntityClass<any>,
     matchArea: MatchRectArea | MatchCircleArea
     dist: number,
-  }> = []
+  } | null = null
   // 检查已绘制的墙上的点
   if (worldApi.allFileMapObjects.wall) {
     for (let i = 0; i < worldApi.getObjects('wall').length; i++) {
@@ -1758,11 +1752,14 @@ function getHandleInAreaInfoByXY(x: number, y: number): Array<{
       if (matchInfo) {
         const data = api.getData();
         const dist = Math.hypot(x - data.x, y - data.y)
-        matchHandelInfoList.push({
-          classInfo: api,
-          matchArea: matchInfo,
-          dist: dist,
-        })
+        if (dist < minDistance) {
+          matchHandelInfoList = {
+            classInfo: api,
+            matchArea: matchInfo,
+            dist: dist,
+          }
+          minDistance = dist
+        }
       }
     }
   }
@@ -1779,23 +1776,24 @@ function getHandleInAreaInfoByXY(x: number, y: number): Array<{
       if (matchInfo) {
         const data = api.getData();
         const dist = Math.hypot(x - data.x, y - data.y)
-        matchHandelInfoList.push({
-          classInfo: api,
-          matchArea: matchInfo,
-          dist: dist,
-        })
+        if (dist < minDistance) {
+          matchHandelInfoList = {
+            classInfo: api,
+            matchArea: matchInfo,
+            dist: dist,
+          }
+          minDistance = dist
+        }
       }
     }
   }
-  const sortedMatchAllObjList = matchHandelInfoList.sort((a, b) => {
-    return a.dist - b.dist
-  })
-  return sortedMatchAllObjList;
+  // console.log('minDistance', minDistance, matchHandelInfoList)
+  return matchHandelInfoList
 }
 
 const handleMouseUp = () => {
   matchHandelObj = null
-  matchHandelInfo = null
+  matchedHandelInfo = null
   if (draggedPoint.value !== null) {
     history.value.push(JSON.parse(JSON.stringify(worldApi.getObjects('wall'))))
     draggedPoint.value = null
