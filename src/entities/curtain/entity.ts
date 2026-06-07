@@ -71,65 +71,31 @@ export class CurtainEntity extends EntityClass<CurtainData> {
     ctx.fill()
     ctx.stroke()
 
-    const drawAngelLength = Math.max(this.getData().width / 2, this.circleRadius * 2) * 0.9;// 0.9避免超过方块范围
+    const drawAngelLength = Math.max(this.getData().width / 2, this.circleRadius * 2);
     // alert(drawAngelLength)
-    console.log('drawAngelLength', angleY, drawAngelLength)
+    // console.log('drawAngelLength', angleY, drawAngelLength)
     // 控制点向着angleY角度延伸10个单位后的坐标
-    const rotatedXAdd = data.x + Math.cos(angleY) * drawAngelLength
-    const rotatedYAdd = data.y - Math.sin(angleY) * drawAngelLength
-    const circleX = rotatedXAdd * zoomLevel + panOffset.x
-    const circleY = rotatedYAdd * zoomLevel + panOffset.y
     const circleRadius = this.circleRadius * zoomLevel + 3
-
-    function ttt(angel: number, drawAngelLength: number) {
-      const tempX = data.x + Math.cos(angel) * drawAngelLength;
-      const tempY = data.y - Math.sin(angel) * drawAngelLength;
-      return [tempX * zoomLevel + panOffset.x, tempY * zoomLevel + panOffset.y]
-    }
-
-    // 绘制双向箭头表示旋转角度
     ctx.fillStyle = '#fff'
     ctx.strokeStyle = '#e67e22'
     ctx.lineWidth = 2 * zoomLevel
-    // 绘制双向箭头的主线（圆弧）
-    ctx.beginPath();
-    ctx.arc(screenX, screenY, drawAngelLength * zoomLevel, angleY * -1 - Math.PI / 4, angleY * -1 + Math.PI / 4);
-    ctx.stroke();
+    const basicX = data.x * zoomLevel + panOffset.x
+    const basicY = data.y * zoomLevel + panOffset.y
+    const rotatedXAdd = Math.cos(angleY) * drawAngelLength * zoomLevel
+    const rotatedYAdd = Math.sin(angleY) * drawAngelLength * zoomLevel
 
-    // 左侧箭头
-    (() => {
-      ctx.beginPath()
-      const [p1X, p1Y] = ttt(angleY + 0.1 + Math.PI / 4, drawAngelLength)
-      const [p2X, p2Y] = ttt(angleY + Math.PI / 4, drawAngelLength + 5)
-      const [p3X, p3Y] = ttt(angleY + Math.PI / 4, drawAngelLength - 5)
-      ctx.moveTo(
-        p1X,
-        p1Y
-      )
-      ctx.lineTo(p2X, p2Y)
-      ctx.lineTo(p3X, p3Y)
-      ctx.closePath()
-      ctx.fill()
-    })();
-
-    // 右侧箭头
-    ctx.beginPath()
-    const [p1X, p1Y] = ttt(angleY - 0.1 - Math.PI / 4, drawAngelLength)
-    const [p2X, p2Y] = ttt(angleY - Math.PI / 4, drawAngelLength + 5)
-    const [p3X, p3Y] = ttt(angleY - Math.PI / 4, drawAngelLength - 5)
-    ctx.moveTo(
-      p1X,
-      p1Y
-    )
-    ctx.lineTo(p2X, p2Y)
-    ctx.lineTo(p3X, p3Y)
-    ctx.closePath()
-    ctx.fill()
     // 绘制旋转角度线
     ctx.beginPath()
-    ctx.arc(circleX, circleY, circleRadius, 0, Math.PI * 2)
+    ctx.arc(basicX + rotatedXAdd, basicY - rotatedYAdd, circleRadius, 0, Math.PI * 2)
     ctx.fill()
     ctx.stroke()
+    ctx.closePath()
+
+    ctx.beginPath()
+    ctx.arc(basicX - rotatedXAdd, basicY + rotatedYAdd, circleRadius, 0, Math.PI * 2)
+    ctx.fill()
+    ctx.stroke()
+    ctx.closePath()
   }
 
   glbObj: THREE.Group | null = null;
@@ -142,6 +108,9 @@ export class CurtainEntity extends EntityClass<CurtainData> {
     const angleY = data.angleY || 0;// 历史数据问题，有的数据不存在angleY，所以用了一个【|| 0】给予默认值
     // 平面
     const material = mt ? (getMaterialById(mt)?.material(new THREE.Vector3(1, 1, 0))) : (new THREE.MeshStandardMaterial({ color: color }));
+    if (material) {
+      material.side = THREE.DoubleSide;
+    }
     const plane = new THREE.PlaneGeometry(width, height)
     const planeMesh = new THREE.Mesh(plane, material)
     // planeMesh.rotation.x = -Math.PI / 2
@@ -169,7 +138,7 @@ export class CurtainEntity extends EntityClass<CurtainData> {
     if (isPointInRotatedRect(x, y, {
       x: data.x,
       y: data.y,
-      width: data.width,
+      width: data.width + 30,
       depth: this.depth + 30,
       angleY: angleY * -1,
     })) {
@@ -196,12 +165,15 @@ export class CurtainEntity extends EntityClass<CurtainData> {
         dist: dist,
       }
     }
-    const drawAngelLength = Math.max(this.getData().width / 2, this.circleRadius * 2) * 0.9;// 0.9避免超过方块范围
+    const drawAngelLength = Math.max(this.getData().width / 2, this.circleRadius * 2);// 0.9避免超过方块范围
     // 控制点向着angleY角度延伸10个单位后的坐标
-    const rotatedXAdd = data.x + Math.cos(angleY) * drawAngelLength
-    const rotatedYAdd = data.y - Math.sin(angleY) * drawAngelLength
+    const rotated1XAdd = Math.cos(angleY) * drawAngelLength
+    const rotated1YAdd = Math.sin(angleY) * drawAngelLength
 
-    const dist2 = Math.hypot(x - rotatedXAdd, y - rotatedYAdd)
+    const dist2 = Math.hypot(
+      x - data.x - rotated1XAdd,
+      y - data.y + rotated1YAdd
+    )
     // console.log('dist2', dist2)
     if (dist2 < this.circleRadius + 3) {
       return {
@@ -209,6 +181,19 @@ export class CurtainEntity extends EntityClass<CurtainData> {
         type: this.type,
         id: data.id,
         dist: dist2,
+      }
+    }
+    const dist3 = Math.hypot(
+      x - data.x + rotated1XAdd,
+      y - data.y - rotated1YAdd
+    )
+
+    if (dist3 < this.circleRadius + 3) {
+      return {
+        index: 2,
+        type: this.type,
+        id: data.id,
+        dist: dist3,
       }
     }
     return null;
@@ -230,6 +215,8 @@ export class CurtainEntity extends EntityClass<CurtainData> {
         ...this.getData(),
         angleY: angleY * -1,
       })
+    } else if (matchHandelInfo.index === 2) {
+      // this.changePosition({ x, y })
     }
   }
 
