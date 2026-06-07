@@ -1,7 +1,7 @@
 import { HandelInfo, Point } from '@/types/map2d'
 import * as THREE from 'three'
 import { CurtainData } from './index.d'
-import { allSnapFromType, EntityClass, MatchSnapPoint } from '@/types/entity'
+import { EntityClass, MatchSnapPoint } from '@/types/entity'
 import { editItem } from '..';
 import { getMaterialById } from '@/material';
 import { CurtainDataClass } from './dataClass'
@@ -66,11 +66,6 @@ export class CurtainEntity extends EntityClass<CurtainData> {
     ctx.fillStyle = '#fff'
     ctx.strokeStyle = '#e67e22'
     ctx.lineWidth = 2
-    ctx.beginPath()
-    ctx.arc(screenX, screenY, this.circleRadius * zoomLevel + 3, 0, Math.PI * 2)
-    ctx.fill()
-    ctx.stroke()
-
     const drawAngelLength = Math.max(this.getData().width / 2, this.circleRadius * 2);
     // alert(drawAngelLength)
     // console.log('drawAngelLength', angleY, drawAngelLength)
@@ -81,10 +76,18 @@ export class CurtainEntity extends EntityClass<CurtainData> {
     ctx.lineWidth = 2 * zoomLevel
     const basicX = data.x * zoomLevel + panOffset.x
     const basicY = data.y * zoomLevel + panOffset.y
+
+    ctx.font = `${Math.max(14 * zoomLevel, 14)}px '微软雅黑'`
+    ctx.textBaseline = 'middle'
+    ctx.strokeStyle = 'white'
+    ctx.fillStyle = 'black'
+    const text = `${Math.round(this.getData().width).toString()}×${Math.round(this.getData().height).toString()}`
+    ctx.strokeText(text, basicX, basicY)
+    ctx.fillText(text, basicX, basicY)
+
     const rotatedXAdd = Math.cos(angleY) * drawAngelLength * zoomLevel
     const rotatedYAdd = Math.sin(angleY) * drawAngelLength * zoomLevel
 
-    // 绘制旋转角度线
     ctx.beginPath()
     ctx.arc(basicX + rotatedXAdd, basicY - rotatedYAdd, circleRadius, 0, Math.PI * 2)
     ctx.fill()
@@ -101,13 +104,14 @@ export class CurtainEntity extends EntityClass<CurtainData> {
   glbObj: THREE.Group | null = null;
 
   create3DMesh(scene: THREE.Scene) {
+    console.log('sss')
     const data = this.getData();
     const group = new THREE.Group()
 
     const { width, height, color, mt } = data;
     const angleY = data.angleY || 0;// 历史数据问题，有的数据不存在angleY，所以用了一个【|| 0】给予默认值
     // 平面
-    const material = mt ? (getMaterialById(mt)?.material(new THREE.Vector3(1, 1, 0))) : (new THREE.MeshStandardMaterial({ color: color }));
+    const material = mt ? (getMaterialById(mt)?.material(new THREE.Vector3(Math.sin(angleY), 0, Math.cos(angleY)))) : (new THREE.MeshStandardMaterial({ color: color }));
     if (material) {
       material.side = THREE.DoubleSide;
     }
@@ -166,16 +170,7 @@ export class CurtainEntity extends EntityClass<CurtainData> {
 
   matchHandelInfo(x: number, y: number) {
     const data = this.getData();
-    const dist = Math.hypot(x - data.x, y - data.y)
     const angleY = data.angleY || 0;// 历史数据问题，有的数据不存在angleY，所以用了一个【|| 0】给予默认值
-    if (dist < this.circleRadius + 3) {
-      return {
-        index: 0,
-        type: this.type,
-        id: data.id,
-        dist: dist,
-      }
-    }
     const drawAngelLength = Math.max(this.getData().width / 2, this.circleRadius * 2);// 0.9避免超过方块范围
     // 控制点向着angleY角度延伸10个单位后的坐标
     const rotatedXAdd = Math.cos(angleY) * drawAngelLength
@@ -199,7 +194,7 @@ export class CurtainEntity extends EntityClass<CurtainData> {
     // console.log('dist2', dist2)
     if (dist2 < this.circleRadius + 3) {
       return {
-        index: 1,
+        index: 0,
         type: this.type,
         id: data.id,
         dist: dist2,
@@ -208,7 +203,7 @@ export class CurtainEntity extends EntityClass<CurtainData> {
     const dist3 = Math.hypot(x - dragPoint3.x, y - dragPoint3.y)
     if (dist3 < this.circleRadius + 3) {
       return {
-        index: 2,
+        index: 1,
         type: this.type,
         id: data.id,
         dist: dist3,
@@ -222,16 +217,13 @@ export class CurtainEntity extends EntityClass<CurtainData> {
     y: number,
   }, matchHandelInfo: HandelInfo) {
     const { x, y } = position
-    if (matchHandelInfo.index === 0) {
-      this.changePosition({ x, y })
-    } else if (matchHandelInfo.index === 1 || matchHandelInfo.index === 2) {
-      const data = this.getData();
+    if (matchHandelInfo.index === 0 || matchHandelInfo.index === 1) {
       const { dragPoint2, dragPoint3 } = this.beforeMatchHandleSaveData!
       let newDragPoint2 = { ...dragPoint2 }
       let newDragPoint3 = { ...dragPoint3 }
-      if (matchHandelInfo.index === 1) {
+      if (matchHandelInfo.index === 0) {
         newDragPoint2 = { x, y }
-      } else if (matchHandelInfo.index === 2) {
+      } else if (matchHandelInfo.index === 1) {
         newDragPoint3 = { x, y }
       }
       const center = {
@@ -251,18 +243,7 @@ export class CurtainEntity extends EntityClass<CurtainData> {
   }
 
   getMineBeSnapPoints() {
-    const key: allSnapFromType = 'point';
-    const data = this.getData();
-    return [{
-      objType: this.type,
-      objId: data.id,
-      snapFromType: key,
-      point: {
-        index: 0,
-        x: data.x,
-        y: data.y,
-      },
-    }]
+    return []
   }
 
   getMineBeSnapLines(): [Point, Point][] {
@@ -343,5 +324,23 @@ export class CurtainEntity extends EntityClass<CurtainData> {
       x,
       y,
     })
+  }
+
+  // 当前对象是否需要重新生成3D模型状态
+  meshNeedChangeKey(): string {
+    const cacheData = {
+      ...this.getData(),
+      x: undefined,
+      y: undefined,
+      z: undefined,
+      angleY: undefined,
+    }
+    console.log('cacheData', JSON.stringify(cacheData))
+    return this.type + JSON.stringify(cacheData)
+  }
+
+  inAreaHoverText() {
+    const data = this.getData();
+    return this.name + `(${Math.round(data.width).toString()}cm×${Math.round(data.height).toString()}cm)`
   }
 }

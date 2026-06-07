@@ -1556,15 +1556,16 @@ const handleMouseMove = (e: MouseEvent) => {
         // 设置边框样式
         ctxAction.strokeStyle = 'white'
         ctxAction.lineWidth = 2
+        const text = classInfo.inAreaHoverText()
         ctxAction.strokeText(
-          `${classInfo.name}`,
+          text,
           textPositionX * zoom2DLevel.value + panOffset.value.x,
           textPositionY * zoom2DLevel.value + panOffset.value.y
         )
         // 设置填充样式
         ctxAction.fillStyle = 'black'
         ctxAction.fillText(
-          `${classInfo.name}`,
+          `${text}`,
           textPositionX * zoom2DLevel.value + panOffset.value.x,
           textPositionY * zoom2DLevel.value + panOffset.value.y
         )

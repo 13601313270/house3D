@@ -287,4 +287,8 @@ export abstract class EntityClass<T extends ObjData> {
     editShow: (editInfoList: editItem[], callback: (val: any) => void) => void,
     close: () => void,
   ): void
+
+  inAreaHoverText() {
+    return this.name
+  }
 }
