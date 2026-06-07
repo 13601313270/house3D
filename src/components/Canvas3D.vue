@@ -514,6 +514,7 @@ watch(() => props.cameraState, (newVal) => {
   if (newVal) {
     cameraStateZ.value = { ...newVal }
     updateCameraAngel()
+    resize();
   }
 }, {
   deep: true
