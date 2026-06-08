@@ -9,7 +9,7 @@ import { MatchRectArea } from '@/utils/matchArea';
 import { importImgFileHead } from '../allObjs';
 
 export class CurtainEntity extends EntityClass<CurtainData> {
-  name: string = '幕布'
+  name: string = '幕布/图片'
   type: string = 'curtain'
   isPointObj: boolean = true
   private circleRadius = 6
@@ -154,6 +154,10 @@ export class CurtainEntity extends EntityClass<CurtainData> {
   }
 
   beforeMatchHandleSaveData: {
+    centerOffset: {
+      x: number,
+      y: number,
+    },
     dragPoint2: {
       x: number,
       y: number,
@@ -182,6 +186,10 @@ export class CurtainEntity extends EntityClass<CurtainData> {
     }
 
     this.beforeMatchHandleSaveData = {
+      centerOffset: {
+        x: x - data.x,
+        y: y - data.y,
+      },
       dragPoint2,
       dragPoint3,
     }
@@ -228,7 +236,13 @@ export class CurtainEntity extends EntityClass<CurtainData> {
     y: number,
   }, matchHandelInfo: HandelInfo) {
     const { x, y } = position
-    if (matchHandelInfo.index === 1 || matchHandelInfo.index === 2) {
+    if (matchHandelInfo.index === 0) {
+      const { centerOffset } = this.beforeMatchHandleSaveData!
+      this.changePosition({
+        x: x - centerOffset.x,
+        y: y - centerOffset.y,
+      })
+    } else if (matchHandelInfo.index === 1 || matchHandelInfo.index === 2) {
       const { dragPoint2, dragPoint3 } = this.beforeMatchHandleSaveData!
       let newDragPoint2 = { ...dragPoint2 }
       let newDragPoint3 = { ...dragPoint3 }
