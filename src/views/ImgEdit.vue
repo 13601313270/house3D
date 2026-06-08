@@ -2,9 +2,11 @@
   <div>
     <div class="preview" v-if="typeSelect === 1">
       <img v-if="modelValue" :src="modelValue" alt="img" class="img" />
+      <img v-else src="../assets/Empty.png" alt="noMaterial" class="img" />
     </div>
     <div class="preview" v-else>
       <img v-if="modelValue.startsWith(importImgFileHead)" :src="importFile || ''" alt="img" class="img" />
+      <img v-else src="../assets/Empty.png" alt="noMaterial" class="img" />
     </div>
     <div class="imgEditContainer">
       <select class="typeSelect" v-model="typeSelect" @change="changeTypeSelect">
@@ -98,10 +100,10 @@ function changeTypeSelect() {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 100%;
+  height: 100px;
 
   >img {
-    width: 100%;
+    height: 100px;
     margin-bottom: 8px;
   }
 }

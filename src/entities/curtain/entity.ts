@@ -186,11 +186,26 @@ export class CurtainEntity extends EntityClass<CurtainData> {
       dragPoint3,
     }
 
+    if (isPointInRotatedRect(x, y, {
+      x: data.x,
+      y: data.y,
+      width: data.width - this.circleRadius * 2,
+      depth: this.depth + 30,
+      angleY: angleY * -1,
+    })) {
+      return {
+        index: 0,
+        type: this.type,
+        id: data.id,
+        dist: 0,
+      }
+    }
+
     const dist2 = Math.hypot(x - dragPoint2.x, y - dragPoint2.y)
     // console.log('dist2', dist2)
     if (dist2 < this.circleRadius + 3) {
       return {
-        index: 0,
+        index: 1,
         type: this.type,
         id: data.id,
         dist: dist2,
@@ -199,7 +214,7 @@ export class CurtainEntity extends EntityClass<CurtainData> {
     const dist3 = Math.hypot(x - dragPoint3.x, y - dragPoint3.y)
     if (dist3 < this.circleRadius + 3) {
       return {
-        index: 1,
+        index: 2,
         type: this.type,
         id: data.id,
         dist: dist3,
@@ -213,13 +228,13 @@ export class CurtainEntity extends EntityClass<CurtainData> {
     y: number,
   }, matchHandelInfo: HandelInfo) {
     const { x, y } = position
-    if (matchHandelInfo.index === 0 || matchHandelInfo.index === 1) {
+    if (matchHandelInfo.index === 1 || matchHandelInfo.index === 2) {
       const { dragPoint2, dragPoint3 } = this.beforeMatchHandleSaveData!
       let newDragPoint2 = { ...dragPoint2 }
       let newDragPoint3 = { ...dragPoint3 }
-      if (matchHandelInfo.index === 0) {
+      if (matchHandelInfo.index === 1) {
         newDragPoint2 = { x, y }
-      } else if (matchHandelInfo.index === 1) {
+      } else if (matchHandelInfo.index === 2) {
         newDragPoint3 = { x, y }
       }
       const center = {
