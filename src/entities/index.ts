@@ -14,6 +14,7 @@ import curtainPlugin from './curtain'
 import conePlugin from './cone'
 import peoplePlugin from './people'
 import importFilePlugin from './importFile'
+import curtainInWallPlugin from './curtainInWall'
 
 type EntityConstructor = new (...args: any[]) => EntityClass<any>;
 
@@ -32,7 +33,7 @@ export const allFileKeysGroup: TypeGroup = [
   },
   {
     id: 'curtain',
-    name: '幕布',
+    name: '幕布/图片',
     child: [],
   },
   {
@@ -63,6 +64,7 @@ export const fileDataKeyToClass: Record<string, EntityConstructor> = {
   outFileInWallPlugin,
   peoplePlugin,
   importFilePlugin,
+  curtainInWallPlugin,
 ].forEach(v => {
   allFileKeys.push(v.key)
   if (v.type === 'base') {

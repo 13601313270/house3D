@@ -332,12 +332,12 @@ export class WallEntity extends EntityClass<WallData> {
       const p1 = this.getData().points[i]
       const p2 = this.getData().points[i + 1]
 
-      const [box] = createAllWallFromPoints([
-        {
-          points: [p1, p2],
-          thickness: this.getData().thickness,
-        }
-      ])
+      // const [box] = createAllWallFromPoints([
+      //   {
+      //     points: [p1, p2],
+      //     thickness: this.getData().thickness,
+      //   }
+      // ])
 
       const midX = (p1.x + p2.x) / 2
       const midY = (p1.y + p2.y) / 2
@@ -358,14 +358,14 @@ export class WallEntity extends EntityClass<WallData> {
           angleY: angel * -1,
         })
       }
-      const dist = Math.hypot(x - midX, y - midY)
-      if (dist < this.getData().thickness) {
-        return new MatchCircleArea({
-          x: midX,
-          y: midY,
-          r: this.getData().thickness,
-        })
-      }
+      // const dist = Math.hypot(x - midX, y - midY)
+      // if (dist < this.getData().thickness) {
+      //   return new MatchCircleArea({
+      //     x: midX,
+      //     y: midY,
+      //     r: this.getData().thickness,
+      //   })
+      // }
     }
     return null
   }
@@ -395,7 +395,7 @@ export class WallEntity extends EntityClass<WallData> {
       const midX = (p1.x + p2.x) / 2
       const midY = (p1.y + p2.y) / 2
       const dist = Math.hypot(x - midX, y - midY)
-      if (dist < this.getData().thickness) {
+      if (dist < this.getData().thickness / 2) {
         this.prePointStartPosition = p1;
         this.nextPointStartPosition = p2;
 
