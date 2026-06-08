@@ -200,7 +200,7 @@ import JSZip from 'jszip';
 import request from '@/utils/request'
 import { ObjData, Point } from '../types'
 import { snapThreshold, World } from '../utils/world'
-import Canvas3D, { CameraState, OrthographicCamera } from '../components/Canvas3D.vue'
+import Canvas3D, { CameraState } from '../components/Canvas3D.vue'
 import { WallData } from '@/entities/wall/index.d'
 import { allFileKeys, fileData, editItem, allFileKeysName, fileDataKeyToClass, allFileKeysGroup } from '@/entities'
 import { EntityClass, MatchSnapPoint } from '@/types/entity'
@@ -211,7 +211,7 @@ import { DoorEntity } from '@/entities/door/entity'
 import { CameraData } from '@/entities/camera/index.d'
 import { WallDataClass } from '@/entities/wall/dataClass'
 import { defaultWallData, WallEntity } from '@/entities/wall/entity'
-import { ImportFileType, ImportImgType, ObjOutputFileType } from '@/entities/allObjs'
+import { ImportFileType, ObjOutputFileType } from '@/entities/allObjs'
 import { OutFileDataClass } from '@/entities/outFile/dataClass'
 import { OutFileEntity } from '@/entities/outFile/entity'
 import { OutFileData } from '@/entities/outFile/index.d'
@@ -274,13 +274,13 @@ const isDragOver = ref(false)
 const isUploading = ref(false)
 
 const store = useStore<Store>()
-const cameraStateLeft = ref<OrthographicCamera>({
-  targetPositionX: 0,
-  targetPositionY: 0,
-  targetPositionZ: 0,
-  size: 300,
-  length: 300,
-})
+// const cameraStateLeft = ref<OrthographicCamera>({
+//   targetPositionX: 0,
+//   targetPositionY: 0,
+//   targetPositionZ: 0,
+//   size: 300,
+//   length: 300,
+// })
 const aspectRatio1 = ref(1)
 const aspectRatio2 = ref(1)
 
@@ -1043,7 +1043,7 @@ const handleLoadProgramFileChange = async (e: Event) => {
       // // console.log('blob', blob, url)
       // const fileExtension = v.fileName ? v.fileName.split('.').pop()?.toLowerCase() || '' : '';
       console.log('blob', blob, url, file, file.name, extension)
-      processUploadedFile(file, (object: THREE.Group, file: File, type: string) => {
+      processUploadedFile(file, (object: THREE.Group, file: File) => {
         const customObjItem: ImportFileType = {
           fileTypeId: v.fileTypeId,
           mesh: object,
@@ -1059,10 +1059,10 @@ const handleLoadProgramFileChange = async (e: Event) => {
     for (const fileTypeId of sceneData.allImportImgs) {
       console.log('fileTypeId', fileTypeId)
       const read = await zip.file(`imgs/${fileTypeId}`);
-      const extension = fileTypeId.split('.').pop()?.toLowerCase();
+      // const extension = fileTypeId.split('.').pop()?.toLowerCase();
       if (!read) continue
       const blob = await read.async('blob');
-      const url = URL.createObjectURL(blob);
+      // const url = URL.createObjectURL(blob);
       const file = new File([blob], fileTypeId, { type: blob.type || 'application/octet-stream' })
       worldApi.allImportImgs.push({ fileTypeId, file })
     }
@@ -1780,7 +1780,7 @@ function getHandleInAreaInfoByXY(x: number, y: number): {
           matchHandelInfoList = {
             classInfo: api,
             matchArea: matchInfo,
-            dist: dist,
+            dist,
           }
           minDistance = dist
         }
@@ -1804,7 +1804,7 @@ function getHandleInAreaInfoByXY(x: number, y: number): {
           matchHandelInfoList = {
             classInfo: api,
             matchArea: matchInfo,
-            dist: dist,
+            dist,
           }
           minDistance = dist
         }
@@ -2058,7 +2058,7 @@ function chooseDemo(id: number) {
 }
 
 // 拖拽上传相关方法
-const onDragOver = (e: DragEvent) => {
+const onDragOver = () => {
   isDragOver.value = true
 }
 
@@ -2143,6 +2143,7 @@ async function importOutObj(file: File) {
               centerY * zoomTemp,
               v.position.z
             )
+            console.log(centerZ)
             // v.position.copy(newPosition)
             await handleLoadedObject(v, file, type, scaleFactor * v.scale.x, newPosition)
             await sleep(100)

@@ -1,7 +1,7 @@
 import { HandelInfo, Point } from '@/types/map2d'
 import * as THREE from 'three'
 import { PlaneData } from './index.d'
-import { allSnapFromType, EntityClass, MatchSnapPoint } from '@/types/entity'
+import { allSnapFromType, EntityClass } from '@/types/entity'
 import { editItem } from '..';
 import { getMaterialById } from '@/material';
 import { PlaneDataClass } from './dataClass'
@@ -133,7 +133,7 @@ export class PlaneEntity extends EntityClass<PlaneData> {
 
   glbObj: THREE.Group | null = null;
 
-  create3DMesh(scene: THREE.Scene) {
+  create3DMesh() {
     const data = this.getData();
     const group = new THREE.Group()
 
@@ -141,7 +141,7 @@ export class PlaneEntity extends EntityClass<PlaneData> {
     const angleY = data.angleY || 0;// 历史数据问题，有的数据不存在angleY，所以用了一个【|| 0】给予默认值
 
     // 平面
-    const material = mt ? (getMaterialById(mt)?.material(new THREE.Vector3(1, 1, 0))) : (new THREE.MeshStandardMaterial({ color: color }));
+    const material = mt ? (getMaterialById(mt)?.material(new THREE.Vector3(1, 1, 0))) : (new THREE.MeshStandardMaterial({ color }));
     const plane = new THREE.PlaneGeometry(width, length)
     const planeMesh = new THREE.Mesh(plane, material)
     planeMesh.rotation.x = -Math.PI / 2
@@ -177,7 +177,7 @@ export class PlaneEntity extends EntityClass<PlaneData> {
         y: data.y,
         width: data.width,
         depth: data.length,
-        angleY: angleY,
+        angleY,
       })
     }
     return null;
@@ -192,7 +192,7 @@ export class PlaneEntity extends EntityClass<PlaneData> {
         index: 0,
         type: this.type,
         id: data.id,
-        dist: dist,
+        dist,
       }
     }
     const drawAngelLength = Math.max(this.getData().width / 2, this.circleRadius * 2) * 0.9;// 0.9避免超过方块范围
@@ -311,11 +311,11 @@ export class PlaneEntity extends EntityClass<PlaneData> {
     })
   }
 
-  inSceneSnapPointArea(newPosition: MatchSnapPoint) {
+  inSceneSnapPointArea() {
     return false
   }
 
-  inSceneSnapLineArea(obj: EntityClass<PlaneData>, line: [Point, Point]) {
+  inSceneSnapLineArea() {
     return false
   }
 

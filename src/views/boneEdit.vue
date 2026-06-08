@@ -102,8 +102,6 @@
 import { ref, onMounted, onUnmounted, nextTick } from 'vue'
 import * as THREE from 'three'
 // @ts-ignore
-import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
-// @ts-ignore
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 // @ts-ignore
 import { FBXLoader } from 'three/addons/loaders/FBXLoader.js'
@@ -354,57 +352,57 @@ function seekTo(event: MouseEvent) {
   currentAction.time = newTime
 }
 
-async function applyPreset() {
-  // if (['stand', 'sit', 'walk'].includes(preset.name)) {
-  //   // const json = await import(`./peoplePose/${preset.name}.json`)
-  //   // const jsonDefault = JSON.parse(JSON.stringify(json.default))
-  //   // if (jsonDefault) {
-  //   //   allBones.value.forEach(v => {
-  //   //     const find = jsonDefault.find((item: any) => item.name === v.name)
-  //   //     if (find) {
-  //   //       v.value = find.value
-  //   //       changeBoneValue(v, 'x', v.value.x)
-  //   //       changeBoneValue(v, 'y', v.value.y)
-  //   //       changeBoneValue(v, 'z', v.value.z)
-  //   //     }
-  //   //   })
-  //   // }
-  // } else {
-  //   allBones.value.forEach(v => {
-  //     const find = preset.bones.find((item: any) => item.name === v.name)
-  //     if (find) {
-  //       v.value = find.value
-  //       changeBoneValue(v, 'x', v.value.x)
-  //       changeBoneValue(v, 'y', v.value.y)
-  //       changeBoneValue(v, 'z', v.value.z)
-  //     }
-  //   })
-  //   // allBones.value = preset.bones.map(v => {
-  //   //   const bondMesh = scene.getObjectByName(v.name) as THREE.Mesh
-  //   //   bondMesh.rotation.x = v.value.x
-  //   //   bondMesh.rotation.y = v.value.y
-  //   //   bondMesh.rotation.z = v.value.z
+// async function applyPreset() {
+//   if (['stand', 'sit', 'walk'].includes(preset.name)) {
+//     // const json = await import(`./peoplePose/${preset.name}.json`)
+//     // const jsonDefault = JSON.parse(JSON.stringify(json.default))
+//     // if (jsonDefault) {
+//     //   allBones.value.forEach(v => {
+//     //     const find = jsonDefault.find((item: any) => item.name === v.name)
+//     //     if (find) {
+//     //       v.value = find.value
+//     //       changeBoneValue(v, 'x', v.value.x)
+//     //       changeBoneValue(v, 'y', v.value.y)
+//     //       changeBoneValue(v, 'z', v.value.z)
+//     //     }
+//     //   })
+//     // }
+//   } else {
+//     allBones.value.forEach(v => {
+//       const find = preset.bones.find((item: any) => item.name === v.name)
+//       if (find) {
+//         v.value = find.value
+//         changeBoneValue(v, 'x', v.value.x)
+//         changeBoneValue(v, 'y', v.value.y)
+//         changeBoneValue(v, 'z', v.value.z)
+//       }
+//     })
+//     // allBones.value = preset.bones.map(v => {
+//     //   const bondMesh = scene.getObjectByName(v.name) as THREE.Mesh
+//     //   bondMesh.rotation.x = v.value.x
+//     //   bondMesh.rotation.y = v.value.y
+//     //   bondMesh.rotation.z = v.value.z
 
-  //   //   return {
-  //   //     name: v.name,
-  //   //     basicValue: v.value,
-  //   //     value: v.value,
-  //   //   }
-  //   // });
-  // }
-  // const newBones = [];
-  // preset.bones.forEach(boneData => {
-  //   newBones.push({
-  //     ...allBones.value.find(b => b.name === boneData.name),
-  //     value: boneData.value,
-  //   })
-  //   // if (bone) {
-  //   //   changeBoneValue(bone, 'x', boneData.value.x)
-  //   //   changeBoneValue(bone, 'y', boneData.value.y)
-  //   //   changeBoneValue(bone, 'z', boneData.value.z)
-  //   // }
-  // })
-}
+//     //   return {
+//     //     name: v.name,
+//     //     basicValue: v.value,
+//     //     value: v.value,
+//     //   }
+//     // });
+//   }
+//   const newBones = [];
+//   preset.bones.forEach(boneData => {
+//     newBones.push({
+//       ...allBones.value.find(b => b.name === boneData.name),
+//       value: boneData.value,
+//     })
+//     // if (bone) {
+//     //   changeBoneValue(bone, 'x', boneData.value.x)
+//     //   changeBoneValue(bone, 'y', boneData.value.y)
+//     //   changeBoneValue(bone, 'z', boneData.value.z)
+//     // }
+//   })
+// }
 
 const allBones = ref<Array<{
   name: string,
@@ -435,103 +433,103 @@ const allBones = ref<Array<{
   }
 }))
 
-const nameToConfig = ref<{
-  [key: string]: {
-    title: string,
-    minX: number,
-    maxX: number,
-    minY?: number,
-    maxY?: number,
-  }
-}>({
-  'spine': {
-    title: '整个身体',
-    minX: -3.14,
-    maxX: 3.14,
-  },
-  'spine001': {
-    title: '腰',
-    minX: -3.14,
-    maxX: 3.14,
-  },
-  'spine005': {
-    title: '脖子',
-    minX: -3.14,
-    maxX: 3.14,
-  },
-  'thighR': {
-    title: '大腿(左)',
-    minX: 0,
-    maxX: 6.28,
-  },
-  'shinR': {
-    title: '小腿(左)',
-    minX: -3.14,
-    maxX: 3.14,
-  },
-  'footR': {
-    title: '脚踝(左)',
-    minX: -3.14,
-    maxX: 3.14,
-  },
-  'shoulderL': {
-    title: '肩头(右)',
-    minX: -3.14,
-    maxX: 3.14,
-    minY: -3.14,
-    maxY: 3.14,
-  },
-  'shoulderR': {
-    title: '肩头(左)',
-    minX: -3.14,
-    maxX: 3.14,
-  },
-  'upper_armL': {
-    title: '大臂(右)',
-    minX: -3.14,
-    maxX: 3.14,
-  },
-  'upper_armR': {
-    title: '大臂(左)',
-    minX: -3.14,
-    maxX: 3.14,
-  },
-  'forearmL': {
-    title: '小臂(右)',
-    minX: -3.14,
-    maxX: 3.14,
-  },
-  'forearmR': {
-    title: '小臂(左)',
-    minX: -3.14,
-    maxX: 3.14,
-  },
-  'handL': {
-    title: '手腕(右)',
-    minX: -3.14,
-    maxX: 3.14,
-  },
-  'handR': {
-    title: '手腕(左)',
-    minX: -3.14,
-    maxX: 3.14,
-  },
-  'thighL': {
-    title: '大腿(右)',
-    minX: 0,
-    maxX: 6.28,
-  },
-  'shinL': {
-    title: '小腿(右)',
-    minX: -3.14,
-    maxX: 3.14,
-  },
-  'footL': {
-    title: '脚踝(右)',
-    minX: -3.14,
-    maxX: 3.14,
-  },
-})
+// const nameToConfig = ref<{
+//   [key: string]: {
+//     title: string,
+//     minX: number,
+//     maxX: number,
+//     minY?: number,
+//     maxY?: number,
+//   }
+// }>({
+//   'spine': {
+//     title: '整个身体',
+//     minX: -3.14,
+//     maxX: 3.14,
+//   },
+//   'spine001': {
+//     title: '腰',
+//     minX: -3.14,
+//     maxX: 3.14,
+//   },
+//   'spine005': {
+//     title: '脖子',
+//     minX: -3.14,
+//     maxX: 3.14,
+//   },
+//   'thighR': {
+//     title: '大腿(左)',
+//     minX: 0,
+//     maxX: 6.28,
+//   },
+//   'shinR': {
+//     title: '小腿(左)',
+//     minX: -3.14,
+//     maxX: 3.14,
+//   },
+//   'footR': {
+//     title: '脚踝(左)',
+//     minX: -3.14,
+//     maxX: 3.14,
+//   },
+//   'shoulderL': {
+//     title: '肩头(右)',
+//     minX: -3.14,
+//     maxX: 3.14,
+//     minY: -3.14,
+//     maxY: 3.14,
+//   },
+//   'shoulderR': {
+//     title: '肩头(左)',
+//     minX: -3.14,
+//     maxX: 3.14,
+//   },
+//   'upper_armL': {
+//     title: '大臂(右)',
+//     minX: -3.14,
+//     maxX: 3.14,
+//   },
+//   'upper_armR': {
+//     title: '大臂(左)',
+//     minX: -3.14,
+//     maxX: 3.14,
+//   },
+//   'forearmL': {
+//     title: '小臂(右)',
+//     minX: -3.14,
+//     maxX: 3.14,
+//   },
+//   'forearmR': {
+//     title: '小臂(左)',
+//     minX: -3.14,
+//     maxX: 3.14,
+//   },
+//   'handL': {
+//     title: '手腕(右)',
+//     minX: -3.14,
+//     maxX: 3.14,
+//   },
+//   'handR': {
+//     title: '手腕(左)',
+//     minX: -3.14,
+//     maxX: 3.14,
+//   },
+//   'thighL': {
+//     title: '大腿(右)',
+//     minX: 0,
+//     maxX: 6.28,
+//   },
+//   'shinL': {
+//     title: '小腿(右)',
+//     minX: -3.14,
+//     maxX: 3.14,
+//   },
+//   'footL': {
+//     title: '脚踝(右)',
+//     minX: -3.14,
+//     maxX: 3.14,
+//   },
+// })
 const viewportConfigs: ViewportConfig[] = [
   {
     id: 'main',
@@ -728,7 +726,6 @@ function animate() {
 
 onMounted(() => {
   if (!viewportRef.value) return
-  const { width, height } = viewportRef.value.getBoundingClientRect()
   allPanelHeight.value = 428;
   nextTick(() => {
     initThree()
@@ -746,26 +743,26 @@ onUnmounted(() => {
     panel.renderer.dispose()
   })
 })
-function changeBoneValue(item: {
-  name: string,
-  value: {
-    x: number,
-    y: number,
-    z: number,
-  },
-}, editRotation: 'x' | 'y' | 'z', event: InputEvent | number) {
-  let newValue = 0;
-  if (typeof event === 'number') {
-    newValue = +event
-  } else {
-    if (!event.target) return
-    // @ts-ignore
-    newValue = +event.target.value;
-  }
-  item.value[editRotation] = newValue;
-  const bondMesh = scene.getObjectByName(item.name) as THREE.Mesh
-  bondMesh.rotation[editRotation] = item.value[editRotation]
-}
+// function changeBoneValue(item: {
+//   name: string,
+//   value: {
+//     x: number,
+//     y: number,
+//     z: number,
+//   },
+// }, editRotation: 'x' | 'y' | 'z', event: InputEvent | number) {
+//   let newValue = 0;
+//   if (typeof event === 'number') {
+//     newValue = +event
+//   } else {
+//     if (!event.target) return
+//     // @ts-ignore
+//     newValue = +event.target.value;
+//   }
+//   item.value[editRotation] = newValue;
+//   const bondMesh = scene.getObjectByName(item.name) as THREE.Mesh
+//   bondMesh.rotation[editRotation] = item.value[editRotation]
+// }
 function save() {
   if (currentAction && isPlaying.value) {
     currentAction.paused = true
@@ -844,7 +841,7 @@ function runPostAnimation(file: string): Promise<void> {
       }
 
       animate()
-    }, (progress: any) => {
+    }, () => {
       // const percent = (progress.loaded / progress.total * 100).toFixed(2)
       // console.log('FBX加载进度:', percent + '%')
     }, () => {

@@ -65,7 +65,7 @@ import { editItem } from '@/entities';
 import { allMaterial } from '@/material';
 import ImgEdit from './ImgEdit.vue'
 
-const props = defineProps<{
+defineProps<{
   item: editItem,
   modelValue: any
 }>()

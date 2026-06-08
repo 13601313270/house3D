@@ -1,4 +1,4 @@
-import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios'
+import axios, { AxiosInstance } from 'axios'
 // 创建一个 axios 实例
 const service: AxiosInstance = axios.create({
   baseURL: location.host === 'localhost:8080' ? ('http://' + location.host + '/api') : 'https://api.studying1v1.com', // 所有的请求地址前缀部分

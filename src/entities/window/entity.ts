@@ -149,7 +149,7 @@ export class WindowEntity extends EntityClassInWall<WindowData> {
         index: 0,
         id: data.id,
         type: this.type,
-        dist: dist,
+        dist,
       }
     }
     return null;
@@ -163,7 +163,7 @@ export class WindowEntity extends EntityClassInWall<WindowData> {
     this.changePosition({ x, y })
   }
 
-  create3DMesh(scene: THREE.Scene) {
+  create3DMesh() {
     const data = this.getData();
     const group = new THREE.Group();
     const {

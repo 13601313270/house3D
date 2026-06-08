@@ -1,7 +1,7 @@
 import { HandelInfo, ObjData, Point } from '@/types/map2d'
 import * as THREE from 'three'
 import { OutFileInWallData } from './index.d'
-import { EntityClass, MatchSnapPoint, OrigionSnapPoint } from '@/types/entity'
+import { EntityClass, OrigionSnapPoint } from '@/types/entity'
 import { editItem } from '..'
 // @ts-ignore
 import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
@@ -114,7 +114,7 @@ export class OutFileInWallEntity extends EntityClassInWall<OutFileInWallData> {
     ctx.stroke()
   }
 
-  create3DMesh(scene: THREE.Scene): THREE.Group[] {
+  create3DMesh(): THREE.Group[] {
     const data = this.getData();
     const group = new THREE.Group()
     const { fileTypeId, bm, color, wallId, isOuter } = data
@@ -149,7 +149,7 @@ export class OutFileInWallEntity extends EntityClassInWall<OutFileInWallData> {
         }
       }
       return new THREE.MeshStandardMaterial({
-        color: color,
+        color,
         roughness: 0.7,
         metalness: 0.1
       });
@@ -368,7 +368,7 @@ export class OutFileInWallEntity extends EntityClassInWall<OutFileInWallData> {
         index: 0,
         type: this.type,
         id: data.id,
-        dist: dist,
+        dist,
       }
     }
     return null;
@@ -385,7 +385,7 @@ export class OutFileInWallEntity extends EntityClassInWall<OutFileInWallData> {
   }
 
   getMineBeSnapPoints(): Array<OrigionSnapPoint> {
-    const { x, y, angle, id } = this.getData()
+    const { x, y, id } = this.getData()
     // 计算旋转后的点
     // const rotatedX = x * Math.cos(angle) - y * Math.sin(angle)
     // const rotatedY = x * Math.sin(angle) + y * Math.cos(angle)

@@ -21,8 +21,6 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { ref } from 'vue'
-
 const wechatNumber = 'w309568486'
 const emailAddress = '309568486@qq.com'
 const emits = defineEmits(['close'])

@@ -103,7 +103,7 @@ export class DoorEntity extends EntityClassInWall<DoorData> {
 
   glbObj: THREE.Group | null = null;
 
-  create3DMesh(scene: THREE.Scene) {
+  create3DMesh() {
     // 加载 https://video-obj.oss-cn-beijing.aliyuncs.com/door.glb
     const data = this.getData();
     const group = new THREE.Group()
@@ -275,7 +275,7 @@ export class DoorEntity extends EntityClassInWall<DoorData> {
         index: 0,
         type: this.type,
         id: data.id,
-        dist: dist,
+        dist,
       }
     }
     return null;

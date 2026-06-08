@@ -1,15 +1,14 @@
 import { HandelInfo, Point } from '@/types/map2d'
 import * as THREE from 'three'
 import { CameraData } from './index.d'
-import { EntityClass, MatchSnapPoint, OrigionSnapPoint } from '@/types/entity'
+import { EntityClass, OrigionSnapPoint } from '@/types/entity'
 import { editItem } from '..'
 // @ts-ignore
 import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
 // @ts-ignore
 import kamera from './kamera.png'
 import { CameraDataClass } from './dataClass'
-import { MatchCircleArea, MatchRectArea } from '@/utils/matchArea'
-import { isPointInRotatedRect } from '@/utils/isPointInRotatedRect'
+import { MatchCircleArea } from '@/utils/matchArea'
 
 const img = new Image()
 img.src = kamera || ''
@@ -169,7 +168,7 @@ export class CameraEntity extends EntityClass<CameraData> {
     ctx.stroke()
   }
 
-  create3DMesh(scene: THREE.Scene): THREE.Group[] {
+  create3DMesh(): THREE.Group[] {
     const data = this.getData();
     const dx = data.targetPositionX - data.x
     const dy = data.targetPositionY - data.y
@@ -379,7 +378,7 @@ export class CameraEntity extends EntityClass<CameraData> {
     const radius = distance
 
     // 计算FOV的半角
-    const halfFov = (data.fov * Math.PI) / 360
+    // const halfFov = (data.fov * Math.PI) / 360
 
     // 计算方向向量
     const dirX = targetX - screenX
@@ -389,11 +388,11 @@ export class CameraEntity extends EntityClass<CameraData> {
     const unitDirY = dirY / dirLength
 
     // 计算垂直方向向量
-    const perpX = -unitDirY
-    const perpY = unitDirX
+    // const perpX = -unitDirY
+    // const perpY = unitDirX
 
     // 计算三角形底边长
-    const baseHalfLength = radius * Math.tan(halfFov)
+    // const baseHalfLength = radius * Math.tan(halfFov)
 
     // 计算三角形的两个底点
     const midX = screenX + unitDirX * radius
@@ -431,7 +430,7 @@ export class CameraEntity extends EntityClass<CameraData> {
         index: 0,
         type: this.type,
         id: data.id,
-        dist: dist,
+        dist,
       }
     }
     const distToTarget = Math.hypot(x - data.targetPositionX, y - data.targetPositionY)
@@ -463,7 +462,7 @@ export class CameraEntity extends EntityClass<CameraData> {
     }
   }
 
-  inSceneSnapPointArea(newPosition: MatchSnapPoint) {
+  inSceneSnapPointArea() {
     return false
   }
 
@@ -485,7 +484,7 @@ export class CameraEntity extends EntityClass<CameraData> {
     return []
   }
 
-  inSceneSnapLineArea(obj: EntityClass<CameraData>, line: [Point, Point]) {
+  inSceneSnapLineArea() {
     return false;
   }
 

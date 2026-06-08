@@ -1,18 +1,11 @@
 import { HandelInfo, ObjData, Point } from '@/types/map2d'
 import * as THREE from 'three'
 import { CurtainInWallData } from './index.d'
-import { EntityClass, MatchSnapPoint, OrigionSnapPoint } from '@/types/entity'
+import { EntityClass, OrigionSnapPoint } from '@/types/entity'
 import { editItem } from '..'
-// @ts-ignore
-import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
-// @ts-ignore
-import { MTLLoader } from 'three/addons/loaders/MTLLoader.js';
-// @ts-ignore
-import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-import { getMaterialById } from '@/material'
 import { CurtainInWallDataClass } from './dataClass';
 import { EntityClassInWall } from '@/types/entityInWall'
-import { MatchCircleArea, MatchRectArea } from '@/utils/matchArea'
+import { MatchRectArea } from '@/utils/matchArea'
 import { isPointInRotatedRect } from '@/utils/isPointInRotatedRect'
 import { importImgFileHead } from '../allObjs'
 
@@ -87,7 +80,7 @@ export class CurtainInWallEntity extends EntityClassInWall<CurtainInWallData> {
     panOffset: Point,
     zoomLevel: number
   ): void {
-    const { width, isOuter, angle, wallId } = data;
+    const { isOuter, angle, wallId } = data;
     if (!this.world.allFileMapObjects.wall) {
       this.world.allFileMapObjects.wall = []
     }
@@ -111,7 +104,7 @@ export class CurtainInWallEntity extends EntityClassInWall<CurtainInWallData> {
     ctx.closePath()
   }
 
-  create3DMesh(scene: THREE.Scene): THREE.Group[] {
+  create3DMesh(): THREE.Group[] {
     const data = this.getData();
     const group = new THREE.Group()
     const { wallId, img, width, height, angle, isOuter } = data
@@ -241,7 +234,7 @@ export class CurtainInWallEntity extends EntityClassInWall<CurtainInWallData> {
         index: 0,
         type: this.type,
         id: data.id,
-        dist: dist,
+        dist,
       }
     }
     return null;

@@ -1,7 +1,7 @@
 import { HandelInfo, Point } from '@/types/map2d'
 import * as THREE from 'three'
 import { CubeData } from './index.d'
-import { allSnapFromType, EntityClass, MatchSnapPoint } from '@/types/entity'
+import { allSnapFromType, EntityClass } from '@/types/entity'
 import { editItem } from '..';
 import { getMaterialById } from '@/material';
 import { CubeDataClass } from './dataClass'
@@ -133,7 +133,7 @@ export class CubeEntity extends EntityClass<CubeData> {
 
   glbObj: THREE.Group | null = null;
 
-  create3DMesh(scene: THREE.Scene) {
+  create3DMesh() {
     const data = this.getData();
     const group = new THREE.Group()
 
@@ -145,7 +145,7 @@ export class CubeEntity extends EntityClass<CubeData> {
       height,
       depth
     );
-    const material = mt ? (getMaterialById(mt)?.material(new THREE.Vector3(1, 0, 1))) : (new THREE.MeshStandardMaterial({ color: color }));
+    const material = mt ? (getMaterialById(mt)?.material(new THREE.Vector3(1, 0, 1))) : (new THREE.MeshStandardMaterial({ color }));
     const mesh = new THREE.Mesh(geometry, material)
     mesh.position.setY(data.height / 2)
     group.add(mesh);
@@ -186,7 +186,7 @@ export class CubeEntity extends EntityClass<CubeData> {
         index: 0,
         type: this.type,
         id: data.id,
-        dist: dist,
+        dist,
       }
     }
     const drawAngelLength = Math.max(this.getData().width / 2, this.circleRadius * 2) * 0.9;// 0.9避免超过方块范围
@@ -313,11 +313,11 @@ export class CubeEntity extends EntityClass<CubeData> {
     })
   }
 
-  inSceneSnapPointArea(newPosition: MatchSnapPoint) {
+  inSceneSnapPointArea() {
     return false
   }
 
-  inSceneSnapLineArea(obj: EntityClass<CubeData>, line: [Point, Point]) {
+  inSceneSnapLineArea() {
     return false
   }
 

@@ -61,8 +61,8 @@ const containerRef = ref<HTMLDivElement | null>(null)
 // let scene: THREE.Scene | null = null
 let camera: THREE.PerspectiveCamera | THREE.OrthographicCamera | null = null
 let renderer: THREE.WebGLRenderer | null = null
-const raycaster: THREE.Raycaster = new THREE.Raycaster()
-const mouse: THREE.Vector2 = new THREE.Vector2()
+// const raycaster: THREE.Raycaster = new THREE.Raycaster()
+// const mouse: THREE.Vector2 = new THREE.Vector2()
 
 const cameraStateZ = ref<CameraState | OrthographicCamera>({
   targetPositionX: 0,
@@ -75,31 +75,31 @@ const cameraStateZ = ref<CameraState | OrthographicCamera>({
   aspectH: 1,
 })
 
-function raycastObjects(event: MouseEvent): THREE.Object3D | null {
-  if (!camera || !containerRef.value || !renderer) return null
+// function raycastObjects(event: MouseEvent): THREE.Object3D | null {
+//   if (!camera || !containerRef.value || !renderer) return null
   
-  const rect = containerRef.value.getBoundingClientRect()
-  const canvasRect = renderer.domElement.getBoundingClientRect()
+//   const rect = containerRef.value.getBoundingClientRect()
+//   const canvasRect = renderer.domElement.getBoundingClientRect()
   
-  const scaleX = canvasRect.width / rect.width
-  const scaleY = canvasRect.height / rect.height
+//   const scaleX = canvasRect.width / rect.width
+//   const scaleY = canvasRect.height / rect.height
   
-  const x = ((event.clientX - rect.left) * scaleX / canvasRect.width) * 2 - 1
-  const y = -((event.clientY - rect.top) * scaleY / canvasRect.height) * 2 + 1
+//   const x = ((event.clientX - rect.left) * scaleX / canvasRect.width) * 2 - 1
+//   const y = -((event.clientY - rect.top) * scaleY / canvasRect.height) * 2 + 1
   
-  mouse.set(x, y)
-  raycaster.setFromCamera(mouse, camera)
+//   mouse.set(x, y)
+//   raycaster.setFromCamera(mouse, camera)
   
-  const scene = props.world.scene
-  if (!scene) return null
+//   const scene = props.world.scene
+//   if (!scene) return null
   
-  // const intersects = raycaster.intersectObjects(props.world.boundingBoxList, true)
+//   // const intersects = raycaster.intersectObjects(props.world.boundingBoxList, true)
   
-  // if (intersects.length > 0) {
-  //   return intersects[0].object
-  // }
-  return null
-}
+//   // if (intersects.length > 0) {
+//   //   return intersects[0].object
+//   // }
+//   return null
+// }
 
 function updateCameraAngel() {
   if (props.cameraType === 'orthographic') {
@@ -161,10 +161,10 @@ const initThree = () => {
   const container = containerRef.value
   if (!container) return
 
-  const width = container.clientWidth
-  const height = container.clientHeight
+  // const width = container.clientWidth
+  // const height = container.clientHeight
 
-  const scene = props.world.scene
+  // const scene = props.world.scene
   const maxCamera1Radius = 10000;
   if (props.cameraType === 'orthographic' && ('size' in props.cameraState)) {
     camera = new THREE.OrthographicCamera(
@@ -366,7 +366,7 @@ const initThree = () => {
       e.preventDefault();
     });
 
-    container.addEventListener('click', (e) => {
+    container.addEventListener('click', () => {
       if (!canvas1IsMouseMove && !canvas1IsMouseAngel) {
         // const clickedObject = raycastObjects(e)
         // emit('objectClick', clickedObject)

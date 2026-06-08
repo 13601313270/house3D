@@ -118,7 +118,7 @@ function startDrag(e: MouseEvent) {
     const parentEl = contextMenuEl.parentElement
     if (parentEl) {
       const parentRect = parentEl.getBoundingClientRect()
-      const contextMenuRect = contextMenuEl.getBoundingClientRect()
+      // const contextMenuRect = contextMenuEl.getBoundingClientRect()
       const mouseXInParent = e.clientX - parentRect.left
       const mouseYInParent = e.clientY - parentRect.top
       offsetX = mouseXInParent - position.value.x

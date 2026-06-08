@@ -1,7 +1,7 @@
 import { HandelInfo, Point } from '@/types/map2d'
 import * as THREE from 'three'
 import { SphereData } from './index.d'
-import { allSnapFromType, EntityClass, MatchSnapPoint } from '@/types/entity'
+import { allSnapFromType, EntityClass } from '@/types/entity'
 import { editItem } from '..';
 import { getMaterialById } from '@/material';
 import { SphereDataClass } from './dataClass'
@@ -71,7 +71,7 @@ export class SphereEntity extends EntityClass<SphereData> {
 
   glbObj: THREE.Group | null = null;
 
-  create3DMesh(scene: THREE.Scene) {
+  create3DMesh() {
     const data = this.getData();
     const group = new THREE.Group()
 
@@ -82,7 +82,7 @@ export class SphereEntity extends EntityClass<SphereData> {
       32,
       32
     );
-    const material = mt ? (getMaterialById(mt)?.material(new THREE.Vector3(0, 0, 1))) : (new THREE.MeshStandardMaterial({ color: color }));
+    const material = mt ? (getMaterialById(mt)?.material(new THREE.Vector3(0, 0, 1))) : (new THREE.MeshStandardMaterial({ color }));
     const mesh = new THREE.Mesh(geometry, material)
     mesh.position.setY(data.r)
     group.add(mesh);
@@ -118,7 +118,7 @@ export class SphereEntity extends EntityClass<SphereData> {
         index: 0,
         type: this.type,
         id: data.id,
-        dist: dist,
+        dist,
       }
     }
     return null;
@@ -193,11 +193,11 @@ export class SphereEntity extends EntityClass<SphereData> {
     })
   }
 
-  inSceneSnapPointArea(newPosition: MatchSnapPoint) {
+  inSceneSnapPointArea() {
     return false
   }
 
-  inSceneSnapLineArea(obj: EntityClass<SphereData>, line: [Point, Point]) {
+  inSceneSnapLineArea() {
     return false
   }
 

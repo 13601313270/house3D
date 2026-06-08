@@ -1,7 +1,7 @@
 import { HandelInfo, Point } from '@/types/map2d'
 import * as THREE from 'three'
 import { CylinderData } from './index.d'
-import { allSnapFromType, EntityClass, MatchSnapPoint } from '@/types/entity'
+import { allSnapFromType, EntityClass } from '@/types/entity'
 import { editItem } from '..';
 import { getMaterialById } from '@/material';
 import { CylinderDataClass } from './dataClass'
@@ -72,7 +72,7 @@ export class CylinderEntity extends EntityClass<CylinderData> {
 
   glbObj: THREE.Group | null = null;
 
-  create3DMesh(scene: THREE.Scene) {
+  create3DMesh() {
     const data = this.getData();
     const group = new THREE.Group()
 
@@ -84,7 +84,7 @@ export class CylinderEntity extends EntityClass<CylinderData> {
       h,
       32
     );
-    const material = mt ? (getMaterialById(mt)?.material(new THREE.Vector3(0, 0, 1))) : (new THREE.MeshStandardMaterial({ color: color }));
+    const material = mt ? (getMaterialById(mt)?.material(new THREE.Vector3(0, 0, 1))) : (new THREE.MeshStandardMaterial({ color }));
     const doorMeshRight = new THREE.Mesh(geometryRight, material)
     doorMeshRight.position.setY(h / 2)
     group.add(doorMeshRight);
@@ -122,7 +122,7 @@ export class CylinderEntity extends EntityClass<CylinderData> {
         index: 0,
         type: this.type,
         id: data.id,
-        dist: dist,
+        dist,
       }
     }
     return null;
@@ -206,11 +206,11 @@ export class CylinderEntity extends EntityClass<CylinderData> {
     })
   }
 
-  inSceneSnapPointArea(newPosition: MatchSnapPoint) {
+  inSceneSnapPointArea() {
     return false
   }
 
-  inSceneSnapLineArea(obj: EntityClass<CylinderData>, line: [Point, Point]) {
+  inSceneSnapLineArea() {
     return false
   }
 

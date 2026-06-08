@@ -1,7 +1,7 @@
 import { HandelInfo, Point } from '@/types/map2d'
 import * as THREE from 'three'
 import { CurtainData } from './index.d'
-import { EntityClass, MatchSnapPoint } from '@/types/entity'
+import { EntityClass } from '@/types/entity'
 import { editItem } from '..';
 import { CurtainDataClass } from './dataClass'
 import { isPointInRotatedRect } from '@/utils/isPointInRotatedRect';
@@ -86,7 +86,7 @@ export class CurtainEntity extends EntityClass<CurtainData> {
 
   glbObj: THREE.Group | null = null;
 
-  create3DMesh(scene: THREE.Scene) {
+  create3DMesh() {
     const data = this.getData();
     const group = new THREE.Group()
     const { width, height, img } = data;
@@ -147,7 +147,7 @@ export class CurtainEntity extends EntityClass<CurtainData> {
         y: data.y,
         width: data.width,
         depth: this.depth,
-        angleY: angleY,
+        angleY,
       })
     }
     return null;
@@ -329,11 +329,11 @@ export class CurtainEntity extends EntityClass<CurtainData> {
     })
   }
 
-  inSceneSnapPointArea(newPosition: MatchSnapPoint) {
+  inSceneSnapPointArea() {
     return false
   }
 
-  inSceneSnapLineArea(obj: EntityClass<CurtainData>, line: [Point, Point]) {
+  inSceneSnapLineArea() {
     return false
   }
 

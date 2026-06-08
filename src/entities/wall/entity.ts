@@ -1,4 +1,4 @@
-import { Point, HandelInfo, PointWithIndex } from '@/types/map2d'
+import { Point, HandelInfo } from '@/types/map2d'
 import { allSnapFromType, EntityClass, MatchSnapPoint } from '@/types/entity'
 import { WallData } from './index.d'
 import { createAllWallFromPoints } from '@/utils/createAllWallFromPoints'
@@ -212,7 +212,7 @@ export class WallEntity extends EntityClass<WallData> {
     }
   }
 
-  create3DMesh(scene: THREE.Scene) {
+  create3DMesh() {
     const data = this.getData()
     const meshList: THREE.Group[] = []
     const wallBoxList = createAllWallFromPoints([data]);
@@ -315,8 +315,9 @@ export class WallEntity extends EntityClass<WallData> {
 
   showMatchHandel(x: number, y: number) {
     const data = this.getData();
-    for (let i = 0; i < this.getData().points.length; i++) {
-      const point = this.getData().points[i]
+    const { points } = data;
+    for (let i = 0; i < points.length; i++) {
+      const point = points[i]
       const dist = Math.hypot(x - point.x, y - point.y)
       if (dist < this.getData().thickness) {
         return new MatchCircleArea({
@@ -328,9 +329,9 @@ export class WallEntity extends EntityClass<WallData> {
     }
 
     // 每两个点之间，再绘制一个点，代表边的控制器
-    for (let i = 0; i < this.getData().points.length - 1; i++) {
-      const p1 = this.getData().points[i]
-      const p2 = this.getData().points[i + 1]
+    for (let i = 0; i < points.length - 1; i++) {
+      const p1 = points[i]
+      const p2 = points[i + 1]
 
       // const [box] = createAllWallFromPoints([
       //   {
@@ -346,14 +347,14 @@ export class WallEntity extends EntityClass<WallData> {
       if (isPointInRotatedRect(x, y, {
         x: midX,
         y: midY,
-        width: width,
+        width,
         depth: this.getData().thickness + 2,
         angleY: angel,
       })) {
         return new MatchRectArea({
           x: midX,
           y: midY,
-          width: width,
+          width,
           depth: this.getData().thickness + 2,
           angleY: angel * -1,
         })
@@ -383,7 +384,7 @@ export class WallEntity extends EntityClass<WallData> {
           id: data.id,
           type: this.type,
           index: i * 2,
-          dist: dist,
+          dist,
         }
       }
     }
@@ -403,7 +404,7 @@ export class WallEntity extends EntityClass<WallData> {
           id: data.id,
           type: this.type,
           index: i * 2 + 1,
-          dist: dist,
+          dist,
         }
       }
     }
@@ -540,11 +541,11 @@ export class WallEntity extends EntityClass<WallData> {
     return lines;
   }
 
-  inSceneSnapLineArea(obj: { type: string }, line: [Point, Point]) {
+  inSceneSnapLineArea() {
     return false;
   }
 
-  setPrepareState(x: number, y: number): void {
+  setPrepareState(): void {
   }
 
   editPropConfig(snapPoint: HandelInfo, editShow: (editInfoList: editItem[], callback: (val: any) => void) => void, close: () => void): void {

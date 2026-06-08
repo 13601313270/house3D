@@ -3,7 +3,7 @@ import * as THREE from 'three'
 import { OBJLoader } from 'three/addons/loaders/OBJLoader.js'
 // @ts-ignore
 import { FBXLoader } from 'three/addons/loaders/FBXLoader.js'
-import { ImportFileData } from '@/entities/importFile/index.d'
+// import { ImportFileData } from '@/entities/importFile/index.d'
 
 const processUploadedFile = async (file: File, callback: (object: THREE.Group, file: File, type: string) => void): Promise<void> => {
   return new Promise((resolve, reject) => {

@@ -1,14 +1,8 @@
 import { HandelInfo, Point } from '@/types/map2d'
 import * as THREE from 'three'
 import { ImportFileData } from './index.d'
-import { EntityClass, MatchSnapPoint, OrigionSnapPoint } from '@/types/entity'
+import { EntityClass, OrigionSnapPoint } from '@/types/entity'
 import { editItem } from '..'
-// @ts-ignore
-import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
-// @ts-ignore
-import { MTLLoader } from 'three/addons/loaders/MTLLoader.js';
-// @ts-ignore
-import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { getMaterialById } from '@/material'
 import { ImportFileDataClass } from './dataClass';
 import { MatchCircleArea } from '@/utils/matchArea'
@@ -158,7 +152,7 @@ export class ImportFileEntity extends EntityClass<ImportFileData> {
     ctx.stroke()
   }
 
-  create3DMesh(scene: THREE.Scene): THREE.Group[] {
+  create3DMesh(): THREE.Group[] {
     const data = this.getData();
     const group = new THREE.Group()
     const { fileTypeId, bm, color, scale } = data
@@ -188,7 +182,7 @@ export class ImportFileEntity extends EntityClass<ImportFileData> {
         }
       }
       return new THREE.MeshStandardMaterial({
-        color: color,
+        color,
         roughness: 0.7,
         metalness: 0.1
       });
@@ -351,7 +345,7 @@ export class ImportFileEntity extends EntityClass<ImportFileData> {
         index: 0,
         type: this.type,
         id: data.id,
-        dist: dist,
+        dist,
       }
     }
     const findObjInfo = this.world.ObjFileTypes.find(item => item.id === data.fileTypeId)
@@ -392,15 +386,15 @@ export class ImportFileEntity extends EntityClass<ImportFileData> {
     }
   }
 
-  inSceneSnapPointArea(newPosition: MatchSnapPoint) {
+  inSceneSnapPointArea() {
     return false
   }
 
   getMineBeSnapPoints(): Array<OrigionSnapPoint> {
-    const { x, y, angleY, id } = this.getData()
+    const { x, y, id } = this.getData()
     // 计算旋转后的点
-    const rotatedX = x * Math.cos(angleY) - y * Math.sin(angleY)
-    const rotatedY = x * Math.sin(angleY) + y * Math.cos(angleY)
+    // const rotatedX = x * Math.cos(angleY) - y * Math.sin(angleY)
+    // const rotatedY = x * Math.sin(angleY) + y * Math.cos(angleY)
 
     return [{
       objType: this.type,
@@ -418,7 +412,7 @@ export class ImportFileEntity extends EntityClass<ImportFileData> {
     return []
   }
 
-  inSceneSnapLineArea(obj: EntityClass<ImportFileData>, line: [Point, Point]) {
+  inSceneSnapLineArea() {
     return false
   }
 

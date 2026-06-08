@@ -1,7 +1,7 @@
 import { HandelInfo, Point } from '@/types/map2d'
 import * as THREE from 'three'
 import { PeopleData } from './index.d'
-import { EntityClass, MatchSnapPoint, OrigionSnapPoint } from '@/types/entity'
+import { EntityClass, OrigionSnapPoint } from '@/types/entity'
 import { editItem } from '..'
 // @ts-ignore
 import { FBXLoader } from 'three/addons/loaders/FBXLoader.js';
@@ -154,11 +154,10 @@ export class PeopleEntity extends EntityClass<PeopleData> {
     })
   }
 
-  create3DMesh(scene: THREE.Scene): THREE.Group[] {
+  create3DMesh(): THREE.Group[] {
     console.log('create3DMesh', 1)
 
     const data = this.getData();
-    const loader = new FBXLoader()
     const group = new THREE.Group()
     const { color } = data
     if (this.ManClean) {
@@ -378,7 +377,7 @@ export class PeopleEntity extends EntityClass<PeopleData> {
         index: 0,
         type: this.type,
         id: data.id,
-        dist: dist,
+        dist,
       }
     }
     // 控制点向着angle角度延伸10个单位后的坐标
@@ -416,7 +415,7 @@ export class PeopleEntity extends EntityClass<PeopleData> {
     }
   }
 
-  inSceneSnapPointArea(newPosition: MatchSnapPoint) {
+  inSceneSnapPointArea() {
     return false
   }
 
@@ -438,7 +437,7 @@ export class PeopleEntity extends EntityClass<PeopleData> {
     return []
   }
 
-  inSceneSnapLineArea(obj: EntityClass<PeopleData>, line: [Point, Point]) {
+  inSceneSnapLineArea() {
     return false;
   }
 
