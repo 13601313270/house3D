@@ -31,6 +31,11 @@ export const allFileKeysGroup: TypeGroup = [
     child: []
   },
   {
+    id: 'curtain',
+    name: '幕布',
+    child: [],
+  },
+  {
     id: 'other',
     name: '其他类型',
     child: [],
@@ -62,8 +67,10 @@ export const fileDataKeyToClass: Record<string, EntityConstructor> = {
   allFileKeys.push(v.key)
   if (v.type === 'base') {
     allFileKeysGroup[0].child.push(v.key)
-  } else {
+  } else if (v.type === 'curtain') {
     allFileKeysGroup[1].child.push(v.key)
+  } else {
+    allFileKeysGroup[2].child.push(v.key)
   }
   allFileKeysName[v.key] = v.name
   fileDataKeyToClass[v.key] = v.entity
