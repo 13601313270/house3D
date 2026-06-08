@@ -10,7 +10,7 @@ import { isPointInRotatedRect } from '@/utils/isPointInRotatedRect'
 import { importImgFileHead } from '../allObjs'
 
 export class CurtainInWallEntity extends EntityClassInWall<CurtainInWallData> {
-  name: string = '挂在墙上'
+  name: string = '方形幕布(挂在墙上)'
   type: string = 'curtainInWall'
   isPointObj: boolean = true
   color: string = '#0c7f25'
@@ -107,7 +107,7 @@ export class CurtainInWallEntity extends EntityClassInWall<CurtainInWallData> {
   create3DMesh(): THREE.Group[] {
     const data = this.getData();
     const group = new THREE.Group()
-    const { wallId, img, width, height, angle, isOuter } = data
+    const { wallId, img, width, height, isOuter } = data
     if (!this.world.allFileMapObjects.wall) {
       this.world.allFileMapObjects.wall = []
     }
@@ -115,9 +115,6 @@ export class CurtainInWallEntity extends EntityClassInWall<CurtainInWallData> {
       return entity.getData().id === wallId;
     })
     const wallThickness = wall ? wall.getData().thickness : 10;
-    // const { angleY } = findObjInfo
-    const offsetX = Math.cos(angle + (isOuter ? Math.PI / -2 : Math.PI / 2)) * wallThickness;
-    const offsetY = Math.sin(angle + (isOuter ? Math.PI / -2 : Math.PI / 2)) * wallThickness;
     // 将方向向量旋转90度
     let material: THREE.MeshStandardMaterial | null = null;
     let texture = CurtainInWallEntity.textureCache.get(img);
@@ -136,12 +133,17 @@ export class CurtainInWallEntity extends EntityClassInWall<CurtainInWallData> {
       }
     }
     material = new THREE.MeshStandardMaterial({ map: texture, color: '#ffffff' });
+    if (material) {
+      material.side = THREE.DoubleSide;
+    }
     const plane = new THREE.PlaneGeometry(width, height)
     const planeMesh = new THREE.Mesh(plane, material!)
-    // planeMesh.rotation.x = -Math.PI / 2
-    planeMesh.position.set(offsetX, height / 2, offsetY)
     if (isOuter) {
+      planeMesh.position.set(0, height / 2, (wallThickness + 3) / -2)
       planeMesh.rotation.y = Math.PI
+    } else {
+      planeMesh.position.set(0, height / 2, (wallThickness + 3) / 2)
+      planeMesh.rotation.y = 0
     }
     group.add(planeMesh)
     return [
