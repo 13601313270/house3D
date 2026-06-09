@@ -52,7 +52,6 @@
       <div class="left-panel" :style="{ width: panel1SplitWidthPer * 100 + '%' }">
         <div class="toolbar">
           <div style="flex-shrink: 0;">布局图</div>
-
           <div class="toolbar-item" @mouseleave="activeToolsIndex = -1">
             <button type="button" @mouseenter="activeToolsIndex = 1">
               添加
@@ -856,6 +855,67 @@ onMounted(async () => {
       panStartScreenX = screenX
       panStartScreenY = screenY
       drawWrapper2DAnd3D()
+    }
+    if (location.href.includes('initId=38')) {
+      // chooseDemo(1)
+
+      const initDefaultFile: any & {
+        panOffset: Point
+        zoomLevel: number
+        cameraState: CameraState
+        activeCameraIndex: number
+      } = {
+        "wall": [],
+        "door": [],
+        "window": [],
+        "camera": [],
+        "cube": [],
+        "sphere": [],
+        "cylinder": [],
+        "cone": [],
+        "plane": [],
+        "curtain": [],
+        "outFile": [
+          {
+            "id": "1780987800414",
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "tip": "",
+            "tipFontSize": 96,
+            "fileTypeId": 38,
+            "angleY": 0,
+            "bm": null,
+            "color": "",
+            "canAngelZ": 1
+          }
+        ],
+        "outFileInWall": [],
+        "people": [],
+        "importFile": [],
+        "curtainInWall": [],
+        "panOffset": {
+          "x": 127.0703125,
+          "y": 373.5
+        },
+        "zoomLevel": 1,
+        "cameraState": {
+          "targetPositionX": 0,
+          "targetPositionY": 0,
+          "targetPositionZ": 0,
+          "radius": 800,
+          "angleX": 0,
+          "angleY": 0.7853981633974483,
+          "aspectW": 1,
+          "aspectH": 1
+        },
+        "activeCameraIndex": 0,
+        "allImportImgs": []
+      }
+      initWorldByData(initDefaultFile).finally(() => {
+        showDemos.value = false
+        demoIniting.value = false
+      })
     }
   })
   drawWrapper2DAnd3D()
@@ -2048,7 +2108,7 @@ function exportImage() {
 function chooseDemo(id: number) {
   demoIniting.value = true
   axios.get('https://api.studying1v1.com/video/scene/demo/' + id).then(res => {
-    console.log('res.data', res.data.json)
+    console.log('res.data----', res.data.json)
     const initDefaultFile = res.data.json
     initWorldByData(initDefaultFile).finally(() => {
       showDemos.value = false
