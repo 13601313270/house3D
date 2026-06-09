@@ -856,7 +856,8 @@ onMounted(async () => {
       panStartScreenY = screenY
       drawWrapper2DAnd3D()
     }
-    if (location.href.includes('initId=38')) {
+    const match = location.href.match(/initId=(\d+)/);
+    if (match) {
       // chooseDemo(1)
 
       const initDefaultFile: any & {
@@ -883,7 +884,7 @@ onMounted(async () => {
             "z": 0,
             "tip": "",
             "tipFontSize": 96,
-            "fileTypeId": 38,
+            "fileTypeId": Number(match[1]),
             "angleY": 0,
             "bm": null,
             "color": "",
