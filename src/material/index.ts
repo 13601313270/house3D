@@ -16,6 +16,9 @@ import rockEmbeddedMaterial from './rockEmbedded'
 import rustyMaterial from './rusty'
 import leatherMaterial from './leather'
 import leather2Material from './leather2'
+import mossyGroundMaterial from './mossyGround'
+import barkMaterial from './bark'
+import cobblestonePavementMaterial from './cobblestonePavement'
 
 export type MaterialDate = {
   id: number
@@ -133,6 +136,24 @@ const allMaterial: MaterialDate[] = [
     material: leather2Material.material,
     img: leather2Material.img,
   },
+  {
+    id: 19,
+    name: '苔藓地',
+    material: mossyGroundMaterial.material,
+    img: mossyGroundMaterial.img,
+  },
+  {
+    id: 20,
+    name: ' bark',
+    material: barkMaterial.material,
+    img: barkMaterial.img,
+  },
+  {
+    id: 21,
+    name: ' cobblestonePavement',
+    material: cobblestonePavementMaterial.material,
+    img: cobblestonePavementMaterial.img,
+  }
 ]
 
 export { allMaterial }

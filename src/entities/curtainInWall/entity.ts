@@ -126,12 +126,12 @@ export class CurtainInWallEntity extends EntityClassInWall<CurtainInWallData> {
             const imgFile: File = findImportFile.file as File;
             const objectUrl = URL.createObjectURL(imgFile);
             texture = CurtainInWallEntity.textureLoader.load(objectUrl);
-            texture.flipY = false;
+            // texture.flipY = false;
             CurtainInWallEntity.textureCache.set(img, texture);
           }
         } else {
           texture = CurtainInWallEntity.textureLoader.load(img);
-          texture.flipY = false;
+          // texture.flipY = false;
           CurtainInWallEntity.textureCache.set(img, texture);
         }
       }

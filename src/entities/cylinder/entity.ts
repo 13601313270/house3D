@@ -188,7 +188,7 @@ export class CylinderEntity extends EntityClass<CylinderData> {
       },
       {
         id: 'mt',
-        label: '门材质',
+        label: '材质',
         dataType: 'material',
         value: data.mt,
       },

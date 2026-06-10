@@ -188,7 +188,7 @@ export class ConeEntity extends EntityClass<ConeData> {
       },
       {
         id: 'mt',
-        label: '门材质',
+        label: '材质',
         dataType: 'material',
         value: data.mt,
       },

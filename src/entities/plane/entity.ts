@@ -328,7 +328,7 @@ export class PlaneEntity extends EntityClass<PlaneData> {
       },
       {
         id: 'mt',
-        label: '门材质',
+        label: '材质',
         dataType: 'material',
         value: data.mt,
       },

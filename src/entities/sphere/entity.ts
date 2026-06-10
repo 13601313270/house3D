@@ -175,7 +175,7 @@ export class SphereEntity extends EntityClass<SphereData> {
       },
       {
         id: 'mt',
-        label: '门材质',
+        label: '材质',
         dataType: 'material',
         value: data.mt,
       },

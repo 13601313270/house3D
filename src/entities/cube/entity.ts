@@ -286,7 +286,7 @@ export class CubeEntity extends EntityClass<CubeData> {
       },
       {
         id: 'mt',
-        label: '门材质',
+        label: '材质',
         dataType: 'material',
         value: data.mt,
       },
