@@ -215,16 +215,30 @@ export class World {
         }
       }
     }
+
+    const allObj: EntityClass<any>[] = [];
     allFileKeys.forEach((key) => {
       if (fileData[key]) {
         fileData[key].forEach((item, index) => {
           // @ts-ignore
           const itemApi: DoorEntity = this.allFileMapObjects[key][index];
           if (itemApi) {
-            itemApi.draw2DPreview(ctx, panOffset, zoomLevel)
+            allObj.push(itemApi)
           }
         })
       }
+    })
+    allObj.sort((a, b) => {
+      const aData = a.getData()
+      const bData = b.getData()
+      if (!a.boundingBoxData || !b.boundingBoxData) {
+        return 0
+      }
+      console.log('a.boundingBoxData', a.boundingBoxData[0])
+      console.log('b.boundingBoxData', b.boundingBoxData[0])
+      return (aData.z + a.boundingBoxData[0].y) - (bData.z + b.boundingBoxData[0].y)
+    }).forEach((item) => {
+      item.draw2DPreview(ctx, panOffset, zoomLevel)
     })
 
     if (insertTempObj) {
@@ -309,6 +323,7 @@ export class World {
               const data = item.getData();
               // 第一个是尺寸，第二个是位置偏移，第三个是旋转角度
               const [boxVector3, offsetVector3, rotateVector3] = boundingBox;
+              item.boundingBoxData = [boxVector3, offsetVector3, rotateVector3]
               item.boundingBox.position.set(data.x, data.z, data.y)
               item.boundingBox.children[0].rotation.set(rotateVector3.x, rotateVector3.y, rotateVector3.z)
               item.boundingBox.children[0].scale.set(boxVector3.x, boxVector3.y, boxVector3.z)

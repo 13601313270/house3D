@@ -28,6 +28,7 @@ export abstract class EntityClass<T extends ObjData> {
   private data: T
   meshList: THREE.Group[] = []
   boundingBox: THREE.Group
+  boundingBoxData: [THREE.Vector3, THREE.Vector3, THREE.Vector3] | null = null // 第一个是尺寸，第二个是位置偏移，第三个是旋转角度
   spriteGroup: THREE.Group | null = null
   // eslint-disable-next-line
   associationEntity: EntityClass<any>[] = []// 关联对象，就是本对象渲染，需要联动修改的对象。（比如：墙壁上被窗户挖洞，那么墙修改，需要重新挖洞）
@@ -89,6 +90,7 @@ export abstract class EntityClass<T extends ObjData> {
       // 容器包裹立方体
       (() => {
         const boundingBox = this.createBoundingBox();
+        this.boundingBoxData = boundingBox
         if (!boundingBox) {
           return;
         }
