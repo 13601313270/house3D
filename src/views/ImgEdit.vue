@@ -7,6 +7,9 @@
     <div class="preview" v-else>
       <img v-if="modelValue.startsWith(importImgFileHead)" :src="importFile || ''" alt="img" class="img" />
       <img v-else src="../assets/Empty.png" alt="noMaterial" class="img" />
+      <div v-if="modelValue.startsWith(importImgFileHead)" @click="emits('update:modelValue', '')" class="closeButton">
+        <img src="../assets/close.svg" alt="noMaterial" class="img" />
+      </div>
     </div>
     <div class="imgEditContainer">
       <select class="typeSelect" v-model="typeSelect" @change="changeTypeSelect">
@@ -101,10 +104,22 @@ function changeTypeSelect() {
   align-items: center;
   justify-content: center;
   height: 100px;
+  position: relative;
 
   >img {
     height: 100px;
-    margin-bottom: 8px;
+  }
+
+  .closeButton {
+    position: absolute;
+    top: 0;
+    right: 0;
+    cursor: pointer;
+    padding: 8px;
+
+    >img {
+      height: 24px;
+    }
   }
 }
 

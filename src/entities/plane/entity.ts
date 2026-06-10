@@ -7,12 +7,15 @@ import { getMaterialById } from '@/material';
 import { PlaneDataClass } from './dataClass'
 import { isPointInRotatedRect } from '@/utils/isPointInRotatedRect';
 import { MatchRectArea } from '@/utils/matchArea';
+import { importImgFileHead } from '../allObjs';
 
 export class PlaneEntity extends EntityClass<PlaneData> {
   name: string = '平面'
   type: string = 'plane'
   isPointObj: boolean = true
   private circleRadius = 6
+  private static textureLoader = new THREE.TextureLoader();
+  private static textureCache = new Map<string | File, THREE.Texture>();
 
   defaultValue(): PlaneData {
     const data: PlaneData = {
@@ -137,11 +140,43 @@ export class PlaneEntity extends EntityClass<PlaneData> {
     const data = this.getData();
     const group = new THREE.Group()
 
-    const { width, length, color, mt } = data;
+    const { width, length, color, mt, img } = data;
     const angleY = data.angleY || 0;// 历史数据问题，有的数据不存在angleY，所以用了一个【|| 0】给予默认值
 
+    let material: THREE.Material | null = null;
     // 平面
-    const material = mt ? (getMaterialById(mt)?.material(new THREE.Vector3(1, 1, 0))) : (new THREE.MeshStandardMaterial({ color }));
+    if (img) {
+      let texture = PlaneEntity.textureCache.get(img);
+      if (!texture) {
+        if (img.startsWith(importImgFileHead)) {
+          const findImportFile = this.world.allImportImgs.find(item => item.fileTypeId === img);
+          if (findImportFile) {
+            const imgFile: File = findImportFile.file as File;
+            const objectUrl = URL.createObjectURL(imgFile);
+            texture = PlaneEntity.textureLoader.load(objectUrl);
+            texture.flipY = false;
+            PlaneEntity.textureCache.set(img, texture);
+          }
+        } else {
+          texture = PlaneEntity.textureLoader.load(img);
+          texture.flipY = false;
+          PlaneEntity.textureCache.set(img, texture);
+        }
+      }
+      material = new THREE.MeshStandardMaterial({
+        map: texture,
+        color: '#ffffff',
+        transparent: true,
+        alphaTest: 0.1,
+      });
+    } else {
+      const materialById = mt ? getMaterialById(mt) : null;
+      if (mt && materialById) {
+        material = materialById.material(new THREE.Vector3(1, 1, 0))
+      } else {
+        material = (new THREE.MeshStandardMaterial({ color }));
+      }
+    }
     const plane = new THREE.PlaneGeometry(width, length)
     const planeMesh = new THREE.Mesh(plane, material)
     planeMesh.rotation.x = -Math.PI / 2
@@ -296,6 +331,12 @@ export class PlaneEntity extends EntityClass<PlaneData> {
         label: '门材质',
         dataType: 'material',
         value: data.mt,
+      },
+      {
+        id: 'img',
+        label: '图片',
+        dataType: 'img',
+        value: data.img || '',
       },
       {
         id: 'color',

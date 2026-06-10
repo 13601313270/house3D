@@ -7,6 +7,7 @@ export class PlaneDataClass extends ObjDataClass<PlaneData> {
   color: string
   mt: number | null
   angleY: number // 旋转角度
+  img?: string // 图片
 
   constructor(data: PlaneData) {
     super(data)
@@ -15,5 +16,6 @@ export class PlaneDataClass extends ObjDataClass<PlaneData> {
     this.color = data.color
     this.mt = data.mt
     this.angleY = data.angleY || 0
+    this.img = data.img
   }
 }
