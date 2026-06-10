@@ -9,7 +9,7 @@ import { MatchRectArea } from '@/utils/matchArea';
 import { importImgFileHead } from '../allObjs';
 
 export class CurtainEntity extends EntityClass<CurtainData> {
-  name: string = '方形幕布'
+  name: string = '垂直方形幕布'
   type: string = 'curtain'
   isPointObj: boolean = true
   private circleRadius = 6
