@@ -175,10 +175,18 @@ const initThree = () => {
       0.1,
       1000
     )
-    camera.position.set(props.cameraState.targetPositionX, props.cameraState.targetPositionZ + props.cameraState.length, props.cameraState.targetPositionY)
-    camera.lookAt(props.cameraState.targetPositionX, props.cameraState.targetPositionZ, props.cameraState.targetPositionY)
+    camera.position.set(
+      props.cameraState.targetPositionX,
+      props.cameraState.targetPositionZ + props.cameraState.length,
+      props.cameraState.targetPositionY
+    )
+    camera.lookAt(
+      props.cameraState.targetPositionX,
+      props.cameraState.targetPositionZ,
+      props.cameraState.targetPositionY
+    )
   } else {
-    camera = new THREE.PerspectiveCamera(45, props.aspectRatio, 0.1, maxCamera1Radius)
+    camera = new THREE.PerspectiveCamera(55, props.aspectRatio, 0.1, maxCamera1Radius)
     camera.position.set(0, 800, 1200)
     camera.lookAt(0, 0, 0);
   }
