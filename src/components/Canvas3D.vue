@@ -165,7 +165,7 @@ const initThree = () => {
   // const height = container.clientHeight
 
   // const scene = props.world.scene
-  const maxCamera1Radius = 10000;
+  const maxCamera1Radius = 20000;
   if (props.cameraType === 'orthographic' && ('size' in props.cameraState)) {
     camera = new THREE.OrthographicCamera(
       -props.cameraState.size * props.aspectRatio,

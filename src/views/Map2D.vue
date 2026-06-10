@@ -1958,7 +1958,7 @@ const handleWheel = (e: WheelEvent) => {
   const mouseY = e.clientY - rect.top
 
   const zoomFactor = e.deltaY < 0 ? 1.1 : 0.9
-  const newZoomLevel = Math.max(0.1, Math.min(5, zoom2DLevel.value * zoomFactor))
+  const newZoomLevel = Math.max(0.01, Math.min(5, zoom2DLevel.value * zoomFactor))
 
   const zoomRatio = newZoomLevel / zoom2DLevel.value
   const newPanX = mouseX - (mouseX - panOffset.value.x) * zoomRatio
