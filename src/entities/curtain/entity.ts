@@ -92,22 +92,35 @@ export class CurtainEntity extends EntityClass<CurtainData> {
     const { width, height, img } = data;
     const angleY = data.angleY || 0;// 历史数据问题，有的数据不存在angleY，所以用了一个【|| 0】给予默认值
     let material: THREE.MeshStandardMaterial | null = null;
-    let texture = CurtainEntity.textureCache.get(img);
-    if (!texture) {
-      if (img.startsWith(importImgFileHead)) {
-        const findImportFile = this.world.allImportImgs.find(item => item.fileTypeId === img);
-        if (findImportFile) {
-          const imgFile: File = findImportFile.file as File;
-          const objectUrl = URL.createObjectURL(imgFile);
-          texture = CurtainEntity.textureLoader.load(objectUrl);
+    if (img) {
+      let texture = CurtainEntity.textureCache.get(img);
+      if (!texture) {
+        if (img.startsWith(importImgFileHead)) {
+          const findImportFile = this.world.allImportImgs.find(item => item.fileTypeId === img);
+          if (findImportFile) {
+            const imgFile: File = findImportFile.file as File;
+            const objectUrl = URL.createObjectURL(imgFile);
+            texture = CurtainEntity.textureLoader.load(objectUrl);
+            texture.flipY = false;
+            CurtainEntity.textureCache.set(img, texture);
+          }
+        } else {
+          texture = CurtainEntity.textureLoader.load(img);
+          texture.flipY = false;
           CurtainEntity.textureCache.set(img, texture);
         }
-      } else {
-        texture = CurtainEntity.textureLoader.load(img);
-        CurtainEntity.textureCache.set(img, texture);
       }
+      material = new THREE.MeshStandardMaterial({
+        map: texture,
+        color: '#ffffff',
+        transparent: true,
+        alphaTest: 0.1,
+      });
+    } else {
+      material = new THREE.MeshStandardMaterial({
+        color: '#ffffff',
+      });
     }
-    material = new THREE.MeshStandardMaterial({ map: texture, color: '#ffffff' });
     if (material) {
       material.side = THREE.DoubleSide;
     }

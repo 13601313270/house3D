@@ -117,22 +117,33 @@ export class CurtainInWallEntity extends EntityClassInWall<CurtainInWallData> {
     const wallThickness = wall ? wall.getData().thickness : 10;
     // 将方向向量旋转90度
     let material: THREE.MeshStandardMaterial | null = null;
-    let texture = CurtainInWallEntity.textureCache.get(img);
-    if (!texture) {
-      if (img.startsWith(importImgFileHead)) {
-        const findImportFile = this.world.allImportImgs.find(item => item.fileTypeId === img);
-        if (findImportFile) {
-          const imgFile: File = findImportFile.file as File;
-          const objectUrl = URL.createObjectURL(imgFile);
-          texture = CurtainInWallEntity.textureLoader.load(objectUrl);
+    if (img) {
+      let texture = CurtainInWallEntity.textureCache.get(img);
+      if (!texture) {
+        if (img.startsWith(importImgFileHead)) {
+          const findImportFile = this.world.allImportImgs.find(item => item.fileTypeId === img);
+          if (findImportFile) {
+            const imgFile: File = findImportFile.file as File;
+            const objectUrl = URL.createObjectURL(imgFile);
+            texture = CurtainInWallEntity.textureLoader.load(objectUrl);
+            texture.flipY = false;
+            CurtainInWallEntity.textureCache.set(img, texture);
+          }
+        } else {
+          texture = CurtainInWallEntity.textureLoader.load(img);
+          texture.flipY = false;
           CurtainInWallEntity.textureCache.set(img, texture);
         }
-      } else {
-        texture = CurtainInWallEntity.textureLoader.load(img);
-        CurtainInWallEntity.textureCache.set(img, texture);
       }
+      material = new THREE.MeshStandardMaterial({
+        map: texture,
+        color: '#ffffff',
+        transparent: true,
+        alphaTest: 0.1,
+      });
+    } else {
+      material = new THREE.MeshStandardMaterial({ color: '#8b8b8b' });
     }
-    material = new THREE.MeshStandardMaterial({ map: texture, color: '#ffffff' });
     if (material) {
       material.side = THREE.DoubleSide;
     }
