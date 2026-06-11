@@ -19,6 +19,8 @@ import leather2Material from './leather2'
 import mossyGroundMaterial from './mossyGround'
 import barkMaterial from './bark'
 import cobblestonePavementMaterial from './cobblestonePavement'
+import linenMaterial from './linen'
+import oldStyleTilesMaterial from './oldStyleTiles'
 
 export type MaterialDate = {
   id: number
@@ -144,15 +146,27 @@ const allMaterial: MaterialDate[] = [
   },
   {
     id: 20,
-    name: ' bark',
+    name: '树皮',
     material: barkMaterial.material,
     img: barkMaterial.img,
   },
   {
     id: 21,
-    name: ' cobblestonePavement',
+    name: '鹅卵石地面',
     material: cobblestonePavementMaterial.material,
     img: cobblestonePavementMaterial.img,
+  },
+  {
+    id: 22,
+    name: '麻布',
+    material: linenMaterial.material,
+    img: linenMaterial.img,
+  },
+  {
+    id: 23,
+    name: '复古瓷砖',
+    material: oldStyleTilesMaterial.material,
+    img: oldStyleTilesMaterial.img,
   }
 ]
 

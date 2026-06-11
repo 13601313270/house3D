@@ -52,47 +52,39 @@
       <div class="left-panel" :style="{ width: panel1SplitWidthPer * 100 + '%' }">
         <div class="toolbar">
           <div style="flex-shrink: 0;">布局图</div>
-          <div class="toolbar-item" @mouseleave="activeToolsIndex = -1">
-            <button type="button" @mouseenter="activeToolsIndex = 1">
+          <div class="toolbar-item" @mouseleave="leaveObjTypeCate1">
+            <button type="button" @mouseenter="isMouseInCate1 = true">
               添加
             </button>
-            <div class="list" v-show="activeToolsIndex === 1">
+            <div class="list insertObjTypeSelect" @mouseenter="isMouseInCate1 = true"
+              v-show="isMouseInCate1 || isMouseInCate2">
               <template v-if="lastChooseOutFile">
-                <div class="childItem" @click="changeCurrentToolToOutFile(lastChooseOutFile.id)">
+                <div class="childItem" @click="changeCurrentToolToOutFile(lastChooseOutFile.id), isMouseInCate1 = false">
                   最近使用：{{ lastChooseOutFile.name }}
                 </div>
                 <div class="splitLine"></div>
               </template>
               <div>
                 <div v-for="item in allFileKeysGroup.filter(item => item.id !== 'other')" :key="item.id"
-                  class="typeItemContent">
+                  class="typeItemContent" @mouseenter="clearCate1List">
                   <div class="typeName">{{ item.name }}</div>
                   <div class="childItemList" v-if="item.child && item.child.length > 0">
-                    <div v-for="item2 in item.child" class="childItem" :key="item2" @click="changeCurrentTool(item2)">
+                    <div v-for="item2 in item.child" class="childItem" :key="item2" @click="changeCurrentTool(item2), isMouseInCate1 = false">
                       {{ allFileKeysName[item2] }}
                     </div>
                   </div>
                 </div>
                 <div class="childItem"
                   v-for="value in (allFileKeysGroup.find(item => item.id === 'other') || { child: [] }).child.filter(item => item !== 'outFile' && item !== 'outFileInWall' && item !== 'importFile')"
-                  :key="value" :class="{ active: currentTool === value }" @click="changeCurrentTool(value)">
+                  :key="value" :class="{ active: currentTool === value }"
+                  @click="changeCurrentTool(value), isMouseInCate1 = false" @mouseenter="clearCate1List">
                   {{ allFileKeysName[value] }}
                 </div>
               </div>
               <div class="splitLine"></div>
               <div>
                 <div v-for="item in ObjFileTypes" :key="item.id" class="typeItemContent">
-                  <div class="typeName" @mouseenter="mouseEnterType(item)">{{ item.name }}</div>
-                  <div class="childItemList" v-if="item.child && item.child.length > 0">
-                    <div v-for="item2 in item.child" class="childItem" :key="item2.id"
-                      @click="changeCurrentToolToOutFile(item2.id)">
-                      {{ item2.name }}
-                    </div>
-                    <div class="childItem" @click="showHelpModal = true">
-                      <div>联系售后添加</div>
-                      <div class="desc">（24小时内添加）</div>
-                    </div>
-                  </div>
+                  <div class="typeName" @mouseenter="mouseEnterType($event, item)">{{ item.name }}</div>
                 </div>
               </div>
             </div>
@@ -187,6 +179,21 @@
     <div class="loadingContent">
       <img class="loadingIcon" src="../assets/loading_white.svg" alt="loading" />
       <!-- <div>模型初始化中，请稍后...</div> -->
+    </div>
+  </teleport>
+  <teleport to="#teleport">
+    <div class="addOutFileChildList" ref="addOutFileChildListRef" @mouseenter="isMouseInCate2 = true"
+      @mouseleave="leaveObjTypeCate2"
+      :style="{ top: enterEventDomPosition?.y + 'px', left: enterEventDomPosition?.x + 'px' }"
+      v-if="activeObjChildList.length > 0">
+      <div v-for="item2 in activeObjChildList" class="childItem" :key="item2.id"
+        @click="changeCurrentToolToOutFile(item2.id), isMouseInCate2 = false">
+        {{ item2.name }}
+      </div>
+      <div class="childItem" @click="showHelpModal = true, isMouseInCate2 = false">
+        <div>联系售后添加</div>
+        <div class="desc">（24小时内添加）</div>
+      </div>
     </div>
   </teleport>
 </template>
@@ -305,6 +312,7 @@ type ObjFileType = {
   }[]
 }
 const ObjFileTypes = ref<Array<ObjFileType>>([])
+const activeObjChildList = ref<Array<{ id: string, name: string, type: number }>>([])
 
 let insertTempObj: EntityClass<any> | null = null
 const insertAdding = ref(false)
@@ -2027,6 +2035,7 @@ const lastChooseOutFile = ref<ObjOutputFileType>()
 
 async function changeCurrentToolToOutFile(id: string) {
   activeToolsIndex.value = -1
+  activeObjChildList.value = []
   const index = worldApi.ObjFileTypes.findIndex(item => item.id === id);
   if (index === -1) {
     const { data } = await axios.get('https://api.studying1v1.com/video/objectFileById/' + id)
@@ -2077,7 +2086,11 @@ async function changeCurrentToolToOutFile(id: string) {
   }
 }
 
-async function mouseEnterType(type: ObjFileType) {
+const isMouseInCate1 = ref(false)
+const isMouseInCate2 = ref(false)
+const addOutFileChildListRef = ref<HTMLDivElement>()
+const enterEventDomPosition = ref<{ x: number, y: number }>()
+async function mouseEnterType(event: MouseEvent, type: ObjFileType) {
   if (!type.child || type.child.length === 0) {
     type.child = [];
     const { data: res } = await axios.get('https://api.studying1v1.com/video/objectFileListByType/' + type.id)
@@ -2089,6 +2102,26 @@ async function mouseEnterType(type: ObjFileType) {
       type.child.push(v)
     })
   }
+  activeObjChildList.value = type.child
+  const dom = event.target as HTMLElement;
+  const { right, top } = dom.getBoundingClientRect()
+  enterEventDomPosition.value = { x: right, y: top }
+  nextTick(() => {
+    if (addOutFileChildListRef.value) {
+      const { bottom } = addOutFileChildListRef.value!.getBoundingClientRect()
+      console.log('addOutFileChildListRef', bottom, window.innerHeight)
+      if (bottom > window.innerHeight) {
+        enterEventDomPosition.value = {
+          x: right,
+          y: top - (bottom - window.innerHeight)
+        }
+      }
+    }
+  })
+}
+
+function clearCate1List() {
+  activeObjChildList.value = []
 }
 
 watch(() => editPropInputInfo.value, () => {
@@ -2270,6 +2303,23 @@ function handleObjectHover(object: THREE.Object3D | null) {
     // console.log('object', object.entity)
   }
 }
+function leaveObjTypeCate1() {
+  isMouseInCate1.value = false
+  setTimeout(() => {
+    if (isMouseInCate2.value) {
+      console.log('111111')
+      return
+    } else {
+      console.log('111111---2')
+      activeToolsIndex.value = -1
+      activeObjChildList.value = []
+    }
+  }, 10)
+}
+function leaveObjTypeCate2() {
+  isMouseInCate2.value = false
+  activeObjChildList.value = []
+}
 function handleObjectClick(object: THREE.Object3D | null) {
   console.log('object', object)
 }
@@ -2395,6 +2445,8 @@ function handleObjectClick(object: THREE.Object3D | null) {
         .typeName {
           padding: 4px 0;
           cursor: default;
+          text-align: center;
+          color: #2c3e50;
 
           &::after {
             content: '';
@@ -2457,6 +2509,8 @@ function handleObjectClick(object: THREE.Object3D | null) {
       .childItem {
         padding: 4px 0;
         cursor: default;
+        text-align: center;
+        color: #2c3e50;
 
         &:hover,
         &.active {
@@ -2725,6 +2779,7 @@ button {
       justify-content: center;
       overflow: hidden;
       box-sizing: border-box;
+      text-align: center;
 
       >img {
         width: 100%;
@@ -2827,6 +2882,53 @@ button {
 
     to {
       transform: rotate(360deg);
+    }
+  }
+}
+
+.insertObjTypeSelect {
+  position: fixed;
+  background-color: red;
+}
+
+.addOutFileChildList {
+  position: fixed;
+  top: -8px;
+  left: 100%;
+  width: 140px;
+  background: white;
+  border: 1px solid #d9d9d9;
+  box-sizing: border-box;
+  border-radius: 8px;
+  padding: 7px 0;
+  z-index: 1001;
+
+  .childItem {
+    border-bottom: 1px solid #f1f1f1;
+    margin: 0 8px;
+    padding: 4px 0;
+    cursor: default;
+    color: #2c3e50;
+    padding: 4px 0;
+    text-align: center;
+
+    &:last-child {
+      border-bottom: none;
+    }
+
+    &:hover {
+      background-color: #1890ff;
+      color: white;
+      font-weight: bold;
+
+      .desc {
+        color: white;
+      }
+    }
+
+    .desc {
+      font-size: 14px;
+      color: #666;
     }
   }
 }
