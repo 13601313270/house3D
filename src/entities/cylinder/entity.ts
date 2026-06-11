@@ -198,6 +198,15 @@ export class CylinderEntity extends EntityClass<CylinderData> {
         dataType: 'color',
         value: data.color,
       },
+      {
+        id: 'z',
+        label: '距离地面',
+        dataType: 'number',
+        min: -100,
+        max: 100,
+        step: 1,
+        value: data.z,
+      }
     ], (val) => {
       this.setData({
         ...data,

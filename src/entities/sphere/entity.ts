@@ -185,6 +185,15 @@ export class SphereEntity extends EntityClass<SphereData> {
         dataType: 'color',
         value: data.color,
       },
+      {
+        id: 'z',
+        label: '距离地面',
+        dataType: 'number',
+        min: -100,
+        max: 100,
+        step: 1,
+        value: data.z,
+      }
     ], (val) => {
       this.setData({
         ...data,

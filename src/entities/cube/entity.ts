@@ -305,6 +305,15 @@ export class CubeEntity extends EntityClass<CubeData> {
         step: 1,
         value: data.angleY,
       },
+      {
+        id: 'z',
+        label: '距离地面',
+        dataType: 'number',
+        min: -100,
+        max: 100,
+        step: 1,
+        value: data.z,
+      }
     ], (val) => {
       this.setData({
         ...data,
