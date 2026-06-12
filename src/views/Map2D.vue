@@ -246,7 +246,8 @@ const canvas3DRef = ref<typeof Canvas3D | null>(null)
 const canvas3DRef2 = ref<typeof Canvas3D | null>(null)
 const activeToolsIndex = ref(-1)
 const currentTool = ref<string | 'drag'>('drag')
-const tempDrawWall = ref<{
+// 所有用连续点作为创建的元素的那个点阵
+const tempPointInsertData = ref<{
   x: number
   y: number
 }[]>([])
@@ -528,9 +529,9 @@ const getSnapPoint = (
 
   const snapAngles = [0, 45, 90, 135, 180, -135, -90, -45]
 
-  if (tempDrawWall.value.length && tempDrawWall.value.length > 1) {
-    const prev = tempDrawWall.value[tempDrawWall.value.length - 2]
-    const last = tempDrawWall.value[tempDrawWall.value.length - 1]
+  if (tempPointInsertData.value.length && tempPointInsertData.value.length > 1) {
+    const prev = tempPointInsertData.value[tempPointInsertData.value.length - 2]
+    const last = tempPointInsertData.value[tempPointInsertData.value.length - 1]
     const prevDx = last.x - prev.x
     const prevDy = last.y - prev.y
     const prevAngle = Math.atan2(prevDy, prevDx)
@@ -766,7 +767,7 @@ const drawWrapper2D = (fileData: fileData) => {
     worldApi.draw2DWorld(
       canvas,
       fileData,
-      tempDrawWall.value || [],
+      tempPointInsertData.value || [],
       hoverPoint.value,
       currentTool.value,
       xAxisSnappedY.value === null ? null : xAxisSnappedY.value?.number,
@@ -948,15 +949,15 @@ onMounted(async () => {
 
   const handleKeyDown = async (e: KeyboardEvent) => {
     if (e.key === 'Escape') {
-      if (tempDrawWall.value.length > 0) {
-        if (tempDrawWall.value.length > 1) {
+      if (tempPointInsertData.value.length > 0) {
+        if (tempPointInsertData.value.length > 1) {
           const newWall: WallData = {
             ...defaultWallData,
             id: Date.now().toString(),
             x: 0,
             y: 0,
             z: 0,
-            points: tempDrawWall.value.map(v => {
+            points: tempPointInsertData.value.map(v => {
               return {
                 ...v,
                 snw: false,
@@ -967,7 +968,7 @@ onMounted(async () => {
           await worldApi.add('wall', [newWall])
           history.value.push(JSON.parse(JSON.stringify(worldApi.getObjects('wall'))))
         }
-        tempDrawWall.value = []
+        tempPointInsertData.value = []
         lastPoint.value = null
         hoverPoint.value = null
       } else {
@@ -1365,14 +1366,14 @@ const handleCanvasClick = async (e: MouseEvent) => {
   if (currentTool.value === 'wall') {
     let clickPoint: Point = { x, y }
 
-    if (tempDrawWall.value) {
-      if (tempDrawWall.value.length > 0) {
+    if (tempPointInsertData.value) {
+      if (tempPointInsertData.value.length > 0) {
         const last = {
-          ...tempDrawWall.value[tempDrawWall.value.length - 1],
-          index: tempDrawWall.value.length - 1,
+          ...tempPointInsertData.value[tempPointInsertData.value.length - 1],
+          index: tempPointInsertData.value.length - 1,
         }
         // 收集所有点（包括临时折线和已绘制的墙上的点）
-        const allPoints: Point[] = [...tempDrawWall.value];
+        const allPoints: Point[] = [...tempPointInsertData.value];
         (worldApi.getObjects('wall') as WallData[]).forEach((wall: WallData) => {
           wall.points.forEach(point => {
             allPoints.push(point)
@@ -1403,10 +1404,10 @@ const handleCanvasClick = async (e: MouseEvent) => {
         const dist = Math.hypot(snapped22.point.x - last.x, snapped22.point.y - last.y)
 
         if (dist < 10 * zoom2DLevel.value) {
-          if (tempDrawWall.value.length > 1) {
+          if (tempPointInsertData.value.length > 1) {
             const newWall: WallData = {
               ...defaultWallData,
-              points: tempDrawWall.value.map(v => {
+              points: tempPointInsertData.value.map(v => {
                 return {
                   ...v,
                   snw: false,
@@ -1416,18 +1417,18 @@ const handleCanvasClick = async (e: MouseEvent) => {
             }
             await worldApi.add('wall', [newWall])
             history.value.push(JSON.parse(JSON.stringify(worldApi.getObjects('wall'))))
-            tempDrawWall.value = []
+            tempPointInsertData.value = []
             lastPoint.value = null
           }
           return
         }
         clickPoint = snapped22.point
       }
-      tempDrawWall.value.push({
+      tempPointInsertData.value.push({
         ...clickPoint,
       })
     } else {
-      tempDrawWall.value = [{
+      tempPointInsertData.value = [{
         ...clickPoint,
       }]
     }
@@ -1673,15 +1674,15 @@ const handleMouseMove = (e: MouseEvent) => {
       }
     }
   } else if (currentTool.value === 'wall') {
-    if (tempDrawWall.value && tempDrawWall.value.length > 0) {
-      const last = tempDrawWall.value[tempDrawWall.value.length - 1]
+    if (tempPointInsertData.value && tempPointInsertData.value.length > 0) {
+      const last = tempPointInsertData.value[tempPointInsertData.value.length - 1]
       const dist = Math.hypot(x - last.x, y - last.y)
 
       if (dist < snapThreshold) {
         hoverPoint.value = { ...last }
       } else {
         // 收集所有点（包括临时折线和已绘制的墙上的点）
-        const allPoints = [...tempDrawWall.value];
+        const allPoints = [...tempPointInsertData.value];
         (worldApi.getObjects('wall') as WallData[]).forEach((wall: WallData) => {
           wall.points.forEach((point) => {
             allPoints.push(point)
