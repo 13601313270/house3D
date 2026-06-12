@@ -6,5 +6,6 @@ const spherePlugin: PluginType = {
   key: 'sphere',
   type: 'base',
   entity: SphereEntity,
+  objType: 'point',
 }
 export default spherePlugin

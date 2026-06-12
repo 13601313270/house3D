@@ -6,5 +6,6 @@ const cameraPlugin: PluginType = {
   key: 'people',
   type: 'other',
   entity: PeopleEntity,
+  objType: 'point',
 }
 export default cameraPlugin

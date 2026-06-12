@@ -6,5 +6,6 @@ const staircasePlugin: PluginType = {
   key: 'staircase',
   type: 'house',
   entity: StaircaseEntity,
+  objType: 'polyline',
 }
 export default staircasePlugin

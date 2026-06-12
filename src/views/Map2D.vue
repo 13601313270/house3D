@@ -1251,10 +1251,7 @@ const handleContextMenu = (e: MouseEvent) => {
             editPropTypeKey.value = type
             editPropTypeIndex.value = j
             const modifyConfig: editItem[] = [...propConfig];
-            // if (api instanceof PointEntityClass) {
-
-            // }
-            if (type !== 'wall') {
+            if (api instanceof PointEntityClass) {
               modifyConfig.push({
                 id: 'tipGroup',
                 label: '提示信息',

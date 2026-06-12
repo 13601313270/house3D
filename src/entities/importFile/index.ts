@@ -6,5 +6,6 @@ const importFilePlugin: PluginType = {
   key: 'importFile',
   type: 'other',
   entity: ImportFileEntity,
+  objType: 'point',
 }
 export default importFilePlugin

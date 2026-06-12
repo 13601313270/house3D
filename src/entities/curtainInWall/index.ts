@@ -6,5 +6,6 @@ const curtainInWallPlugin: PluginType = {
   key: 'curtainInWall',
   type: 'curtain',
   entity: CurtainInWallEntity,
+  objType: 'point',
 }
 export default curtainInWallPlugin

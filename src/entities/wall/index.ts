@@ -6,5 +6,6 @@ const wallPlugin: PluginType = {
   key: 'wall',
   type: 'house',
   entity: WallEntity,
+  objType: 'polyline',
 }
 export default wallPlugin

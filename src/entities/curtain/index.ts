@@ -6,5 +6,6 @@ const CurtainPlugin: PluginType = {
   key: 'curtain',
   type: 'curtain',
   entity: CurtainEntity,
+  objType: 'point',
 }
 export default CurtainPlugin

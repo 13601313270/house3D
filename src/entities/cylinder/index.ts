@@ -6,5 +6,6 @@ const cylinderPlugin: PluginType = {
   key: 'cylinder',
   type: 'base',
   entity: CylinderEntity,
+  objType: 'point',
 }
 export default cylinderPlugin

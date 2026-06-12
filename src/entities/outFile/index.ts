@@ -6,5 +6,6 @@ const outFilePlugin: PluginType = {
   key: 'outFile',
   type: 'other',
   entity: OutFileEntity,
+  objType: 'point',
 }
 export default outFilePlugin

@@ -6,5 +6,6 @@ const cubePlugin: PluginType = {
   key: 'cube',
   type: 'base',
   entity: CubeEntity,
+  objType: 'point',
 }
 export default cubePlugin

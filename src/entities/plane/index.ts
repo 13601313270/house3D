@@ -6,5 +6,6 @@ const PlanePlugin: PluginType = {
   key: 'plane',
   type: 'base',
   entity: PlaneEntity,
+  objType: 'point',
 }
 export default PlanePlugin

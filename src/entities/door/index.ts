@@ -6,5 +6,6 @@ const doorPlugin: PluginType = {
   key: 'door',
   type: 'house',
   entity: DoorEntity,
+  objType: 'point',
 }
 export default doorPlugin

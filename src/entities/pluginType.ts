@@ -8,6 +8,7 @@ type PluginType = {
   key: string,
   type: 'base' | 'house' | 'curtain' | 'other',
   entity: EntityConstructor,
+  objType: 'point' | 'polyline'
 }
 
 export default PluginType

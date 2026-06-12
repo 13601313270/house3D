@@ -6,5 +6,6 @@ const ConePlugin: PluginType = {
   key: 'cone',
   type: 'base',
   entity: ConeEntity,
+  objType: 'point',
 }
 export default ConePlugin

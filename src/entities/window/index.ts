@@ -6,5 +6,6 @@ const windowPlugin: PluginType = {
   key: 'window',
   type: 'house',
   entity: WindowEntity,
+  objType: 'point',
 }
 export default windowPlugin
