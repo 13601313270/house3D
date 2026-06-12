@@ -2,6 +2,8 @@ import * as THREE from 'three'
 import { HandelInfo, Point, BaseObj } from './map2d'
 import { World } from '@/utils/world'
 import { editItem } from '@/entities'
+import { MatchCircleArea, MatchRectArea } from '@/utils/matchArea'
+import { OrigionSnapPoint } from './pointEntity'
 
 export abstract class BaseEntityClass<T extends BaseObj> {
   abstract name: string
@@ -98,5 +100,43 @@ export abstract class BaseEntityClass<T extends BaseObj> {
       })
     }
     this.associationEntity = []
+  }
+
+  reCreate3DMeshIfNeed(): void {
+    const newKeyByData = this.meshNeedChangeKey();
+    if (this.cacheKeyStr === newKeyByData) {
+      return;
+    }
+    console.log('reCreate3DMeshIfNeed', this.cacheKeyStr, newKeyByData)
+    const scene: THREE.Scene = this.world.scene
+    this.meshList.forEach(mesh => scene.remove(mesh))
+    this.meshList = this.create3DMesh(scene);
+    this.meshList.forEach(mesh => scene.add(mesh))
+    this.cacheKeyStr = newKeyByData;
+  }
+
+  // 显示可拖拽具柄
+  abstract showMatchHandel(x: number, y: number): MatchRectArea | MatchCircleArea | null;
+
+  // 命中可拖拽具柄
+  abstract matchHandelInfo(x: number, y: number): HandelInfo | null;
+
+  // 命中可拖拽具柄被移动
+  abstract matchHandelMoveCallback(position: {
+    x: number,
+    y: number,
+    startX?: number,
+    startY?: number,
+  }, matchHandelInfo: HandelInfo): void;
+
+  // 本对象可以被其他对象对齐参考点（注意是被对齐，提供给其他拖动磁吸的参考点）
+  abstract getMineBeSnapPoints(): Array<OrigionSnapPoint>;
+
+  // 本对象可以被其他对象对齐的参考线（注意是被对齐，提供个其他拖动磁吸的参考线）
+  abstract getMineBeSnapLines(): Array<[Point, Point]>;
+
+  draw2DPreview(ctx: CanvasRenderingContext2D, panOffset: Point, zoomLevel: number) {
+    const data = this.getData();
+    this.draw2DPreviewByData(ctx, data, panOffset, zoomLevel)
   }
 }
