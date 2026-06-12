@@ -767,9 +767,7 @@ const drawWrapper2D = (fileData: fileData) => {
     worldApi.draw2DWorld(
       canvas,
       fileData,
-      tempPointInsertData.value || [],
       hoverPoint.value,
-      currentTool.value,
       xAxisSnappedY.value === null ? null : xAxisSnappedY.value?.number,
       yAxisSnappedX.value === null ? null : yAxisSnappedX.value?.number,
       panOffset.value,
@@ -777,6 +775,15 @@ const drawWrapper2D = (fileData: fileData) => {
       canvasSize.value.height,
       zoom2DLevel.value,
       insertTempObj,
+    )
+
+    // 绘制临时点阵
+    worldApi.drawTempPointInsertData(
+      canvas,
+      tempPointInsertData.value || [],
+      hoverPoint.value,
+      panOffset.value,
+      zoom2DLevel.value,
     )
   }
 }

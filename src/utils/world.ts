@@ -83,34 +83,17 @@ export class World {
     });
   }
 
-  draw2DWorld(
+  drawTempPointInsertData(
     canvasBgRef: HTMLCanvasElement | null,
-    fileData: fileData,
     tempWallPoints: Point[],
     hoverPoint: Point | null,
-    currentTool: string,
-    xAxisSnappedY: number | null,
-    yAxisSnappedX: number | null,
     panOffset: Point = { x: 0, y: 0 },
-    canvasWidth: number = 800,
-    canvasHeight: number = 600,
     zoomLevel: number = 1,
-    insertTempObj: EntityClass<any> | null = null,
   ) {
     if (!canvasBgRef) return
     const ctx = canvasBgRef.getContext('2d')
     if (!ctx) return
-
-    ctx.clearRect(0, 0, canvasWidth, canvasHeight)
-
-    ctx.fillStyle = '#f5f5f5'
-    ctx.fillRect(0, 0, canvasWidth, canvasHeight)
-    // 绘制墙体
-    if (!this.allFileMapObjects.wall) {
-      this.allFileMapObjects.wall = []
-    }
-
-    if (currentTool === 'wall' && tempWallPoints.length > 0) {
+    if (tempWallPoints.length > 0) {
       ctx.strokeStyle = '#42b983'
       ctx.setLineDash([5, 5])
       ctx.beginPath()
@@ -214,6 +197,32 @@ export class World {
           }
         }
       }
+    }
+  }
+
+  draw2DWorld(
+    canvasBgRef: HTMLCanvasElement | null,
+    fileData: fileData,
+    hoverPoint: Point | null,
+    xAxisSnappedY: number | null,
+    yAxisSnappedX: number | null,
+    panOffset: Point = { x: 0, y: 0 },
+    canvasWidth: number = 800,
+    canvasHeight: number = 600,
+    zoomLevel: number = 1,
+    insertTempObj: EntityClass<any> | null = null,
+  ) {
+    if (!canvasBgRef) return
+    const ctx = canvasBgRef.getContext('2d')
+    if (!ctx) return
+
+    ctx.clearRect(0, 0, canvasWidth, canvasHeight)
+
+    ctx.fillStyle = '#f5f5f5'
+    ctx.fillRect(0, 0, canvasWidth, canvasHeight)
+    // 绘制墙体
+    if (!this.allFileMapObjects.wall) {
+      this.allFileMapObjects.wall = []
     }
 
     const allObj: EntityClass<any>[] = [];
