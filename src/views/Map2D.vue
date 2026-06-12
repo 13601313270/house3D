@@ -478,8 +478,8 @@ const getClosestPointOnLine = (p: Point, a: Point, b: Point) => {
 }
 
 const getSnapPoint = (
-  startPoints: Array<MatchSnapPoint>, // 这里的点会计算角度磁吸
   current: Point,
+  startPoints: Array<MatchSnapPoint>, // 这里的点会计算角度磁吸
   allPoints: Array<MatchSnapPoint> = [], // 点磁吸和轴磁吸
 ): MatchSnapPoint | null => {
   // 找到距离 current 最近的 start 点
@@ -1382,20 +1382,23 @@ const handleCanvasClick = async (e: MouseEvent) => {
             allPoints.push(point)
           })
         })
-        let snapped = getSnapPoint([{
-          objType: 'wall',
-          objId: tempDrawWall.value.id,
-          snapFromType: 'point',
-          point: last
-        }], clickPoint, allPoints.map((v, index) => ({
-          objType: 'wall',
-          objId: (tempDrawWall.value as WallData).id,
-          snapFromType: 'point',
-          point: {
-            ...v,
-            index,
-          }
-        })))
+        let snapped = getSnapPoint(clickPoint,
+          [{
+            objType: 'wall',
+            objId: tempDrawWall.value.id,
+            snapFromType: 'point',
+            point: last
+          }],
+          allPoints.map((v, index) => ({
+            objType: 'wall',
+            objId: (tempDrawWall.value as WallData).id,
+            snapFromType: 'point',
+            point: {
+              ...v,
+              index,
+            }
+          }))
+        )
         if (snapped === null) {
           snapped = {
             objType: 'wall',
@@ -1528,7 +1531,7 @@ const handleMouseMove = (e: MouseEvent) => {
             return true;
           })
           if (beMatchPoints.length > 0) {
-            const snapped = getSnapPoint([], { x, y }, beMatchPoints)
+            const snapped = getSnapPoint({ x, y }, [], beMatchPoints)
             if (snapped !== null) {
               const result = matchHandelObj.inSceneSnapPointArea(
                 {
@@ -1694,17 +1697,21 @@ const handleMouseMove = (e: MouseEvent) => {
             allPoints.push(point)
           })
         })
-        let snappedPoint = getSnapPoint([{
-          objType: 'wall',
-          objId: tempDrawWall.value.id,
-          snapFromType: 'point',
-          point: last
-        }], { x, y }, allPoints.map(v => ({
-          objType: 'wall',
-          objId: (tempDrawWall.value as WallData).id,
-          snapFromType: 'point',
-          point: v
-        })))
+        let snappedPoint = getSnapPoint(
+          { x, y },
+          [{
+            objType: 'wall',
+            objId: tempDrawWall.value.id,
+            snapFromType: 'point',
+            point: last
+          }],
+          allPoints.map(v => ({
+            objType: 'wall',
+            objId: (tempDrawWall.value as WallData).id,
+            snapFromType: 'point',
+            point: v
+          }))
+        )
         if (snappedPoint === null) {
           snappedPoint = {
             objType: 'wall',
