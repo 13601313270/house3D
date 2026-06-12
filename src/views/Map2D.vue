@@ -59,7 +59,8 @@
             <div class="list insertObjTypeSelect" @mouseenter="isMouseInCate1 = true"
               v-show="isMouseInCate1 || isMouseInCate2">
               <template v-if="lastChooseOutFile">
-                <div class="childItem" @click="changeCurrentToolToOutFile(lastChooseOutFile.id), isMouseInCate1 = false">
+                <div class="childItem"
+                  @click="changeCurrentToolToOutFile(lastChooseOutFile.id), isMouseInCate1 = false">
                   最近使用：{{ lastChooseOutFile.name }}
                 </div>
                 <div class="splitLine"></div>
@@ -69,7 +70,8 @@
                   class="typeItemContent" @mouseenter="clearCate1List">
                   <div class="typeName">{{ item.name }}</div>
                   <div class="childItemList" v-if="item.child && item.child.length > 0">
-                    <div v-for="item2 in item.child" class="childItem" :key="item2" @click="changeCurrentTool(item2), isMouseInCate1 = false">
+                    <div v-for="item2 in item.child" class="childItem" :key="item2"
+                      @click="changeCurrentTool(item2), isMouseInCate1 = false">
                       {{ allFileKeysName[item2] }}
                     </div>
                   </div>
@@ -244,7 +246,14 @@ const canvas3DRef = ref<typeof Canvas3D | null>(null)
 const canvas3DRef2 = ref<typeof Canvas3D | null>(null)
 const activeToolsIndex = ref(-1)
 const currentTool = ref<string | 'drag'>('drag')
-const tempDrawWall = ref<WallDataClass | null>(null)
+const tempDrawWall = ref<{
+  id: string,
+  points: {
+    x: number
+    y: number
+  }[],
+  // thickness: number,
+} | null>(null)
 const hoverPoint = ref<Point | null>(null)
 const lastPoint = ref<Point | null>(null)
 const history = ref<WallDataClass[][]>([])
@@ -947,11 +956,16 @@ onMounted(async () => {
         if (tempDrawWall.value?.points.length > 1) {
           const newWall: WallData = {
             ...defaultWallData,
-            id: tempDrawWall.value.id,
-            x: tempDrawWall.value.x,
-            y: tempDrawWall.value.y,
-            z: tempDrawWall.value.z,
-            points: [...tempDrawWall.value.points],
+            id: Date.now().toString(),
+            x: 0,
+            y: 0,
+            z: 0,
+            points: tempDrawWall.value.points.map(v => {
+              return {
+                ...v,
+                snw: false,
+              }
+            }),
             thickness: wallThickness.value,
           }
           await worldApi.add('wall', [newWall])
@@ -1396,7 +1410,12 @@ const handleCanvasClick = async (e: MouseEvent) => {
           if (tempDrawWall.value?.points?.length && tempDrawWall.value.points.length > 1) {
             const newWall: WallData = {
               ...defaultWallData,
-              points: [...tempDrawWall.value.points],
+              points: tempDrawWall.value.points.map(v => {
+                return {
+                  ...v,
+                  snw: false,
+                }
+              }),
               thickness: wallThickness.value,
             }
             await worldApi.add('wall', [newWall])
@@ -1410,16 +1429,13 @@ const handleCanvasClick = async (e: MouseEvent) => {
       }
       tempDrawWall.value?.points?.push({
         ...clickPoint,
-        snw: false,
       })
     } else {
       tempDrawWall.value = {
-        ...defaultWallData,
+        id: Date.now().toString(),
         points: [{
           ...clickPoint,
-          snw: false,
         }],
-        thickness: wallThickness.value,
       }
     }
     lastPoint.value = clickPoint
