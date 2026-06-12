@@ -1,6 +1,7 @@
 import { WallData } from "@/entities/wall/index.d";
-import { PointEntityClass, MatchSnapPoint } from "./pointEntity";
+import { PointEntityClass } from "./pointEntity";
 import { PointObjData, ObjInWallData, Point } from "./map2d";
+import { MatchSnapPoint } from "./baseEntity";
 
 interface NearestWallResult {
   wall: WallData

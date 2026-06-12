@@ -1,7 +1,7 @@
 import { HandelInfo, Point } from '@/types/map2d'
 import * as THREE from 'three'
 import { CameraData } from './index.d'
-import { PointEntityClass, OrigionSnapPoint } from '@/types/pointEntity'
+import { PointEntityClass } from '@/types/pointEntity'
 import { editItem } from '..'
 // @ts-ignore
 import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
@@ -9,6 +9,7 @@ import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
 import kamera from './kamera.png'
 import { CameraDataClass } from './dataClass'
 import { MatchCircleArea } from '@/utils/matchArea'
+import { OrigionSnapPoint } from '@/types/baseEntity'
 
 const img = new Image()
 img.src = kamera || ''

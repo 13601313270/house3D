@@ -1,11 +1,12 @@
 import { HandelInfo, Point } from '@/types/map2d'
 import * as THREE from 'three'
 import { ConeData } from './index.d'
-import { allSnapFromType, PointEntityClass } from '@/types/pointEntity'
+import { PointEntityClass } from '@/types/pointEntity'
 import { editItem } from '..';
 import { getMaterialById } from '@/material';
 import { ConeDataClass } from './dataClass'
 import { MatchCircleArea } from '@/utils/matchArea';
+import { allSnapFromType } from '@/types/baseEntity';
 
 export class ConeEntity extends PointEntityClass<ConeData> {
   name: string = '圆锥体'

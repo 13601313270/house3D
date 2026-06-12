@@ -1,7 +1,7 @@
 import { HandelInfo, PointObjData, Point } from '@/types/map2d'
 import * as THREE from 'three'
 import { OutFileInWallData } from './index.d'
-import { PointEntityClass, OrigionSnapPoint } from '@/types/pointEntity'
+import { PointEntityClass } from '@/types/pointEntity'
 import { editItem } from '..'
 // @ts-ignore
 import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
@@ -14,6 +14,7 @@ import { OutFileInWallDataClass } from './dataClass';
 import { EntityClassInWall } from '@/types/entityInWall'
 import { MatchCircleArea, MatchRectArea } from '@/utils/matchArea'
 import { isPointInRotatedRect } from '@/utils/isPointInRotatedRect'
+import { OrigionSnapPoint } from '@/types/baseEntity'
 
 export class OutFileInWallEntity extends EntityClassInWall<OutFileInWallData> {
   name: string = '外部文件'

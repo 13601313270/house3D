@@ -1,5 +1,4 @@
 import { Point, HandelInfo } from '@/types/map2d'
-import { allSnapFromType } from '@/types/pointEntity'
 import { EntityClassInWall } from '@/types/entityInWall'
 import { WindowData } from './index.d'
 import * as THREE from 'three'
@@ -10,6 +9,7 @@ import { getMaterialById } from '@/material';
 import { WindowDataClass } from './dataClass';
 import { MatchRectArea } from '@/utils/matchArea'
 import { isPointInRotatedRect } from '@/utils/isPointInRotatedRect'
+import { allSnapFromType } from '@/types/baseEntity';
 
 export class WindowEntity extends EntityClassInWall<WindowData> {
   name: string = '窗户'

@@ -1,23 +1,7 @@
 import * as THREE from 'three'
-import { PointObjData, HandelInfo, Point, PointWithIndex } from './map2d'
+import { PointObjData, HandelInfo, Point } from './map2d'
 import { World } from '@/utils/world'
-import { BaseEntityClass } from './baseEntity'
-
-export type allSnapFromType = 'point' | 'line' | 'axis'
-// 磁吸点
-export type OrigionSnapPoint = {
-  objType: string, // 磁吸点对象类型
-  snapFromType: 'point', // 磁吸点来源类型
-  // objId: string, // 磁吸点对象ID
-  point: PointWithIndex,
-}
-// 磁吸点(扩展)，通过其他计算延伸出来的磁吸，比如贴边，贴发现
-export type MatchSnapPoint = OrigionSnapPoint | {
-  objType: string, // 磁吸点对象类型
-  // objId: string, // 磁吸点对象ID
-  snapFromType: 'line' | 'axis' | string, // 磁吸点来源类型
-  point: Point,
-}
+import { BaseEntityClass, MatchSnapPoint } from './baseEntity'
 
 export abstract class PointEntityClass<T extends PointObjData> extends BaseEntityClass<T> {
   abstract isPointObj: boolean // 点状对象，如窗户/门。非点状的如墙

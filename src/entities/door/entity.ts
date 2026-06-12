@@ -4,7 +4,6 @@ import * as THREE from 'three'
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { DoorData } from './index.d'
 import { Brush, Evaluator, SUBTRACTION } from 'three-bvh-csg';
-import { allSnapFromType } from '@/types/pointEntity'
 import { EntityClassInWall } from '@/types/entityInWall'
 import { editItem } from '..';
 import { World } from '@/utils/world';
@@ -12,6 +11,7 @@ import { getMaterialById } from '@/material';
 import { DoorDataClass } from './dataClass';
 import { MatchRectArea } from '@/utils/matchArea';
 import { isPointInRotatedRect } from '@/utils/isPointInRotatedRect';
+import { allSnapFromType } from '@/types/baseEntity';
 
 export class DoorEntity extends EntityClassInWall<DoorData> {
   name: string = '门'

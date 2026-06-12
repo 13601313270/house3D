@@ -1,11 +1,12 @@
 import { HandelInfo, Point } from '@/types/map2d'
 import * as THREE from 'three'
 import { CylinderData } from './index.d'
-import { allSnapFromType, PointEntityClass } from '@/types/pointEntity'
+import { PointEntityClass } from '@/types/pointEntity'
 import { editItem } from '..';
 import { getMaterialById } from '@/material';
 import { CylinderDataClass } from './dataClass'
 import { MatchCircleArea } from '@/utils/matchArea';
+import { allSnapFromType } from '@/types/baseEntity';
 
 export class CylinderEntity extends PointEntityClass<CylinderData> {
   name: string = '圆柱体'

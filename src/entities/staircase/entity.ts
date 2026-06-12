@@ -1,5 +1,5 @@
 import { Point, HandelInfo } from '@/types/map2d'
-import { allSnapFromType, PointEntityClass, MatchSnapPoint } from '@/types/pointEntity'
+import { PointEntityClass } from '@/types/pointEntity'
 import { StaircaseData } from './index.d'
 import { createAllWallFromPoints } from '@/utils/createAllWallFromPoints'
 import * as THREE from 'three'
@@ -10,6 +10,7 @@ import { MatchCircleArea, MatchRectArea } from '@/utils/matchArea'
 import { calculateAngle } from '@/utils/calculateAngle'
 import message from '@/utils/message'
 import { isPointInRotatedRect } from '@/utils/isPointInRotatedRect'
+import { allSnapFromType, MatchSnapPoint } from '@/types/baseEntity'
 
 export class StaircaseEntity extends PointEntityClass<StaircaseData> {
   name: string = '楼梯'

@@ -1,13 +1,14 @@
 import { HandelInfo, Point } from '@/types/map2d'
 import * as THREE from 'three'
 import { PlaneData } from './index.d'
-import { allSnapFromType, PointEntityClass } from '@/types/pointEntity'
+import { PointEntityClass } from '@/types/pointEntity'
 import { editItem } from '..';
 import { getMaterialById } from '@/material';
 import { PlaneDataClass } from './dataClass'
 import { isPointInRotatedRect } from '@/utils/isPointInRotatedRect';
 import { MatchRectArea } from '@/utils/matchArea';
 import { importImgFileHead } from '../allObjs';
+import { allSnapFromType } from '@/types/baseEntity';
 
 export class PlaneEntity extends PointEntityClass<PlaneData> {
   name: string = '平面'
