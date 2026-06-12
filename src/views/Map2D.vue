@@ -210,7 +210,7 @@ import { ObjData, Point } from '../types'
 import { snapThreshold, World } from '../utils/world'
 import Canvas3D, { CameraState } from '../components/Canvas3D.vue'
 import { WallData } from '@/entities/wall/index.d'
-import { allFileKeys, fileData, editItem, allFileKeysName, fileDataKeyToClass, allFileKeysGroup } from '@/entities'
+import { allFileKeys, fileData, editItem, allFileKeysName, fileDataKeyToClass, allFileKeysGroup, allFileKeysObjType } from '@/entities'
 import { PointEntityClass } from '@/types/pointEntity'
 import { EntityClassInWall, NearestWallResult } from '@/types/entityInWall'
 import { HandelInfo, PointWithIndex } from '@/types/map2d'
@@ -1350,7 +1350,7 @@ const handleCanvasClick = async (e: MouseEvent) => {
     return
   }
 
-  if (currentTool.value === 'wall') {
+  if (allFileKeysObjType[currentTool.value] === 'polyline') {
     let clickPoint: Point = { x, y }
 
     if (tempPointInsertData.value) {
@@ -1361,19 +1361,19 @@ const handleCanvasClick = async (e: MouseEvent) => {
         }
         // 收集所有点（包括临时折线和已绘制的墙上的点）
         const allPoints: Point[] = [...tempPointInsertData.value];
-        (worldApi.getObjects('wall') as WallData[]).forEach((wall: WallData) => {
-          wall.points.forEach((point: any) => {
+        (worldApi.getObjects(currentTool.value) as WallData[]).forEach((item: WallData) => {
+          item.points.forEach((point: any) => {
             allPoints.push(point)
           })
         })
         let snapped22 = getSnapPoint(clickPoint,
           [{
-            objType: 'wall',
+            objType: currentTool.value,
             snapFromType: 'point',
             point: last
           }],
           allPoints.map((v, index) => ({
-            objType: 'wall',
+            objType: currentTool.value,
             snapFromType: 'point',
             point: {
               ...v,
@@ -1383,7 +1383,7 @@ const handleCanvasClick = async (e: MouseEvent) => {
         )
         if (snapped22 === null) {
           snapped22 = {
-            objType: 'wall',
+            objType: currentTool.value,
             snapFromType: 'point',
             point: clickPoint
           }
@@ -1657,7 +1657,8 @@ const handleMouseMove = (e: MouseEvent) => {
         }
       }
     }
-  } else if (currentTool.value === 'wall') {
+  } else if (allFileKeysObjType[currentTool.value] === 'polyline') {
+    // alert(allFileKeysObjType[currentTool.value]);
     if (tempPointInsertData.value && tempPointInsertData.value.length > 0) {
       const last = tempPointInsertData.value[tempPointInsertData.value.length - 1]
       const dist = Math.hypot(x - last.x, y - last.y)
@@ -1774,34 +1775,13 @@ function getHandleInfoByXY(x: number, y: number): {
     startPoint: Point,
     dist: number,
   } | null = null
-  // 检查已绘制的墙上的点
-  if (worldApi.allFileMapObjects.wall) {
-    for (let i = 0; i < worldApi.getObjects('wall').length; i++) {
-      // const wall = worldApi.getObjects('wall')[i]
-      const api: WallEntity = worldApi.allFileMapObjects.wall[i] as WallEntity;
-      const matchInfo = api.matchHandelInfo(x, y)
-      if (matchInfo) {
-        if (matchInfo.dist < minDistance) {
-          matchHandelInfoList = {
-            classInfo: api,
-            handle: matchInfo,
-            startPoint: { x, y },
-            dist: matchInfo.dist,
-          }
-          minDistance = matchInfo.dist
-        }
-      }
-    }
-  }
-
   for (let i = 0; i < allFileKeys.length; i++) {
     const key = allFileKeys[i];
-    if (key === 'wall') continue;
     if (!worldApi.allFileMapObjects[key]) {
       continue
     }
     for (let j = 0; j < worldApi.getObjects(key).length; j++) {
-      const api: DoorEntity = worldApi.allFileMapObjects[key][j] as DoorEntity;
+      const api: BaseEntityClass<any> = worldApi.allFileMapObjects[key][j] as BaseEntityClass<any>;
       const matchInfo = api.matchHandelInfo(x, y)
       if (matchInfo) {
         if (matchInfo.dist < minDistance) {

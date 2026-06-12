@@ -55,6 +55,9 @@ export const allFileKeysName: Record<string, string> = {
 export const fileDataKeyToClass: Record<string, EntityConstructor> = {
 };
 
+export const allFileKeysObjType: Record<string, 'point' | 'polyline'> = {
+};
+
 ([
   wallPlugin,
   doorPlugin,
@@ -85,6 +88,7 @@ export const fileDataKeyToClass: Record<string, EntityConstructor> = {
   }
   allFileKeysName[v.key] = v.name
   fileDataKeyToClass[v.key] = v.entity
+  allFileKeysObjType[v.key] = v.objType
 }))
 
 export type fileData = {
