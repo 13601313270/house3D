@@ -4,7 +4,7 @@ import { DoorEntity } from '@/entities/door/entity'
 import { drawPoint } from './drawPoint'
 import { calculateAngle } from './calculateAngle'
 import { allFileKeys, fileData, fileDataKeyToClass } from '@/entities/index'
-import { EntityClass } from '@/types/entity'
+import { PointEntityClass } from '@/types/entity'
 import { EntityClassInWall } from '@/types/entityInWall'
 import { ObjDataClass } from '@/entities/objData'
 import { ImportFileType, ImportImgType, ObjOutputFileType } from '@/entities/allObjs';
@@ -14,7 +14,7 @@ export const snapThreshold = 20
 
 export class World {
   allFileMapObjects: {
-    [key in string]?: EntityClass<any>[]
+    [key in string]?: PointEntityClass<any>[]
   } = {}
 
   // private allObjFiles: {
@@ -210,7 +210,7 @@ export class World {
     canvasWidth: number = 800,
     canvasHeight: number = 600,
     zoomLevel: number = 1,
-    insertTempObj: EntityClass<any> | null = null,
+    insertTempObj: PointEntityClass<any> | null = null,
   ) {
     if (!canvasBgRef) return
     const ctx = canvasBgRef.getContext('2d')
@@ -225,7 +225,7 @@ export class World {
       this.allFileMapObjects.wall = []
     }
 
-    const allObj: EntityClass<any>[] = [];
+    const allObj: PointEntityClass<any>[] = [];
     allFileKeys.forEach((key) => {
       if (fileData[key]) {
         fileData[key].forEach((item, index) => {
@@ -323,7 +323,7 @@ export class World {
   draw3D() {
     allFileKeys.forEach((key) => {
       if (this.allFileMapObjects[key]) {
-        (this.allFileMapObjects[key] as EntityClass<any>[]).forEach((item) => {
+        (this.allFileMapObjects[key] as PointEntityClass<any>[]).forEach((item) => {
           item.reCreate3DMeshIfNeed()
           item.change3DMeshState()
           setTimeout(() => {
@@ -357,7 +357,7 @@ export class World {
     allFileKeys.forEach((key) => {
       returnData[key] = []
       if (this.allFileMapObjects[key]) {
-        (this.allFileMapObjects[key] as EntityClass<any>[]).forEach((item) => {
+        (this.allFileMapObjects[key] as PointEntityClass<any>[]).forEach((item) => {
           // @ts-ignore
           returnData[key].push(item.getData())
         })
@@ -378,13 +378,13 @@ export class World {
   }
 
   async add(type: string, data: ObjDataClass<any>[]) {
-    const EntityClassItem: EntityClass<any> = fileDataKeyToClass[type] as any;
+    const EntityClassItem: PointEntityClass<any> = fileDataKeyToClass[type] as any;
     if (!this.allFileMapObjects[type]) {
       this.allFileMapObjects[type] = []
     }
     for (let i = 0; i < data.length; i++) {
       // @ts-ignore
-      const api: EntityClass<any> = new EntityClassItem(this, data[i]);
+      const api: PointEntityClass<any> = new EntityClassItem(this, data[i]);
       await api.init()
       // @ts-ignore
       this.allFileMapObjects[type].push(api)
@@ -397,7 +397,7 @@ export class World {
   clearAll() {
     allFileKeys.forEach((type) => {
       if (this.allFileMapObjects[type]) {
-        (this.allFileMapObjects[type] as EntityClass<any>[]).forEach((item) => {
+        (this.allFileMapObjects[type] as PointEntityClass<any>[]).forEach((item) => {
           item.beforeRemove()
         });
         this.allFileMapObjects[type] = []

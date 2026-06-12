@@ -1,14 +1,14 @@
 import { HandelInfo, Point } from '@/types/map2d'
 import * as THREE from 'three'
 import { CubeData } from './index.d'
-import { allSnapFromType, EntityClass } from '@/types/entity'
+import { allSnapFromType, PointEntityClass } from '@/types/entity'
 import { editItem } from '..';
 import { getMaterialById } from '@/material';
 import { CubeDataClass } from './dataClass'
 import { isPointInRotatedRect } from '@/utils/isPointInRotatedRect'
 import { MatchRectArea } from '@/utils/matchArea';
 
-export class CubeEntity extends EntityClass<CubeData> {
+export class CubeEntity extends PointEntityClass<CubeData> {
   name: string = '方块'
   type: string = 'cube'
   isPointObj: boolean = true

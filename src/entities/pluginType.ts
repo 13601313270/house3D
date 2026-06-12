@@ -1,6 +1,6 @@
-import { EntityClass } from "@/types/entity";
+import { PointEntityClass } from "@/types/entity";
 
-type EntityConstructor = new (...args: any[]) => EntityClass<any>;
+type EntityConstructor = new (...args: any[]) => PointEntityClass<any>;
 
 type PluginType = {
   name: string,

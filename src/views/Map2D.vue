@@ -211,7 +211,7 @@ import { snapThreshold, World } from '../utils/world'
 import Canvas3D, { CameraState } from '../components/Canvas3D.vue'
 import { WallData } from '@/entities/wall/index.d'
 import { allFileKeys, fileData, editItem, allFileKeysName, fileDataKeyToClass, allFileKeysGroup } from '@/entities'
-import { EntityClass, MatchSnapPoint } from '@/types/entity'
+import { PointEntityClass, MatchSnapPoint } from '@/types/entity'
 import { EntityClassInWall } from '@/types/entityInWall'
 import { HandelInfo, PointWithIndex } from '@/types/map2d'
 import pointToLineDistance from '@/utils/pointToLineDistance'
@@ -312,7 +312,7 @@ type ObjFileType = {
 const ObjFileTypes = ref<Array<ObjFileType>>([])
 const activeObjChildList = ref<Array<{ id: string, name: string, type: number }>>([])
 
-let insertTempObj: EntityClass<any> | null = null
+let insertTempObj: PointEntityClass<any> | null = null
 const insertAdding = ref(false)
 
 let panStartScreenX = 0
@@ -1249,7 +1249,7 @@ const handleContextMenu = (e: MouseEvent) => {
         continue
       }
       for (let j = 0; j < worldApi.getObjects(type).length; j++) {
-        const api: EntityClass<any> = worldApi.allFileMapObjects[type][j]
+        const api: PointEntityClass<any> = worldApi.allFileMapObjects[type][j]
         const snapPoint = api.matchHandelInfo(x, y)
         if (snapPoint) {
           api.editPropConfig(snapPoint, (propConfig, callback) => {
@@ -1496,7 +1496,7 @@ const handleMouseMove = (e: MouseEvent) => {
     if (matchHandelObj && matchedHandelInfo) {
       // console.log('currentTool.value---1')
       // console.log('matchHandelObj', currentTool.value)
-      function temp(api: EntityClass<ObjData>): boolean {
+      function temp(api: PointEntityClass<ObjData>): boolean {
         if (matchHandelObj && matchedHandelInfo) {
           let beMatchPoints = api.getMineBeSnapPoints()
           // 排出掉和自己磁吸
@@ -1714,7 +1714,7 @@ const handleMouseMove = (e: MouseEvent) => {
         insertTempObj.setPrepareState(x, y, nearest)
         drawWrapper2DAnd3D()
       }
-    } else if (insertTempObj instanceof EntityClass) {
+    } else if (insertTempObj instanceof PointEntityClass) {
       // console.log('nearest---1', nearest)
       insertTempObj.setPrepareState(x, y)
       drawWrapper2DAnd3D()
@@ -1722,7 +1722,7 @@ const handleMouseMove = (e: MouseEvent) => {
   }
 }
 
-let matchHandelObj: EntityClass<any> | null = null;
+let matchHandelObj: PointEntityClass<any> | null = null;
 let matchedHandelInfo: HandelInfo | null = null;
 let matchHandelStartPoint: Point | null = null;
 const handleMouseDown = (e: MouseEvent) => {
@@ -1765,14 +1765,14 @@ const handleMouseDown = (e: MouseEvent) => {
 }
 
 function getHandleInfoByXY(x: number, y: number): {
-  classInfo: EntityClass<any>
+  classInfo: PointEntityClass<any>
   handle: HandelInfo,
   startPoint: Point,
   dist: number,
 } | null {
   let minDistance = Infinity
   let matchHandelInfoList: {
-    classInfo: EntityClass<any>
+    classInfo: PointEntityClass<any>
     handle: HandelInfo,
     startPoint: Point,
     dist: number,
@@ -1823,13 +1823,13 @@ function getHandleInfoByXY(x: number, y: number): {
 }
 
 function getHandleInAreaInfoByXY(x: number, y: number): {
-  classInfo: EntityClass<any>,
+  classInfo: PointEntityClass<any>,
   matchArea: MatchRectArea | MatchCircleArea,
   dist: number,
 } | null {
   let minDistance = Infinity
   let matchHandelInfoList: {
-    classInfo: EntityClass<any>,
+    classInfo: PointEntityClass<any>,
     matchArea: MatchRectArea | MatchCircleArea
     dist: number,
   } | null = null
@@ -1861,7 +1861,7 @@ function getHandleInAreaInfoByXY(x: number, y: number): {
       continue
     }
     for (let j = 0; j < worldApi.getObjects(key).length; j++) {
-      const api: EntityClass<any> = worldApi.allFileMapObjects[key][j] as EntityClass<any>;
+      const api: PointEntityClass<any> = worldApi.allFileMapObjects[key][j] as PointEntityClass<any>;
       const matchInfo = api.showMatchHandel(x, y)
       if (matchInfo) {
         const data = api.getData();

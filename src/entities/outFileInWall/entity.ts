@@ -1,7 +1,7 @@
 import { HandelInfo, PointObjData, Point } from '@/types/map2d'
 import * as THREE from 'three'
 import { OutFileInWallData } from './index.d'
-import { EntityClass, OrigionSnapPoint } from '@/types/entity'
+import { PointEntityClass, OrigionSnapPoint } from '@/types/entity'
 import { editItem } from '..'
 // @ts-ignore
 import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
@@ -445,7 +445,7 @@ export class OutFileInWallEntity extends EntityClassInWall<OutFileInWallData> {
     })
   }
 
-  inSceneSnapLineArea(obj: EntityClass<PointObjData>, line: [Point, Point], point: Point) {
+  inSceneSnapLineArea(obj: PointEntityClass<PointObjData>, line: [Point, Point], point: Point) {
     if (obj.type === 'wall') {
       const p1 = line[0]
       const p2 = line[1]

@@ -20,7 +20,7 @@ export type MatchSnapPoint = OrigionSnapPoint | {
   point: Point,
 }
 
-export abstract class EntityClass<T extends PointObjData> {
+export abstract class PointEntityClass<T extends PointObjData> {
   abstract name: string
   abstract type: string
   abstract isPointObj: boolean // 点状对象，如窗户/门。非点状的如墙
@@ -31,7 +31,7 @@ export abstract class EntityClass<T extends PointObjData> {
   boundingBoxData: [THREE.Vector3, THREE.Vector3, THREE.Vector3] | null = null // 第一个是尺寸，第二个是位置偏移，第三个是旋转角度
   spriteGroup: THREE.Group | null = null
   // eslint-disable-next-line
-  associationEntity: EntityClass<any>[] = []// 关联对象，就是本对象渲染，需要联动修改的对象。（比如：墙壁上被窗户挖洞，那么墙修改，需要重新挖洞）
+  associationEntity: PointEntityClass<any>[] = []// 关联对象，就是本对象渲染，需要联动修改的对象。（比如：墙壁上被窗户挖洞，那么墙修改，需要重新挖洞）
 
   constructor(world: World, data: T) {
     this.world = world
@@ -208,7 +208,7 @@ export abstract class EntityClass<T extends PointObjData> {
 
   // 当前对象进入到一根吸附线的区域
   abstract inSceneSnapLineArea(
-    obj: EntityClass<PointObjData>,
+    obj: PointEntityClass<PointObjData>,
     line: [Point, Point],
     point: Point,
   ): boolean;

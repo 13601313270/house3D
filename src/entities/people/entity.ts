@@ -1,7 +1,7 @@
 import { HandelInfo, Point } from '@/types/map2d'
 import * as THREE from 'three'
 import { PeopleData } from './index.d'
-import { EntityClass, OrigionSnapPoint } from '@/types/entity'
+import { PointEntityClass, OrigionSnapPoint } from '@/types/entity'
 import { editItem } from '..'
 // @ts-ignore
 import { FBXLoader } from 'three/addons/loaders/FBXLoader.js';
@@ -11,7 +11,7 @@ import { MatchCircleArea } from '@/utils/matchArea'
 const img = new Image()
 img.src = 'people.png'
 
-export class PeopleEntity extends EntityClass<PeopleData> {
+export class PeopleEntity extends PointEntityClass<PeopleData> {
   name: string = '人物'
   type: string = 'people'
   isPointObj: boolean = true

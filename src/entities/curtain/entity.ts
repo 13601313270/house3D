@@ -1,14 +1,14 @@
 import { HandelInfo, Point } from '@/types/map2d'
 import * as THREE from 'three'
 import { CurtainData } from './index.d'
-import { EntityClass } from '@/types/entity'
+import { PointEntityClass } from '@/types/entity'
 import { editItem } from '..';
 import { CurtainDataClass } from './dataClass'
 import { isPointInRotatedRect } from '@/utils/isPointInRotatedRect';
 import { MatchRectArea } from '@/utils/matchArea';
 import { importImgFileHead } from '../allObjs';
 
-export class CurtainEntity extends EntityClass<CurtainData> {
+export class CurtainEntity extends PointEntityClass<CurtainData> {
   name: string = '垂直方形幕布'
   type: string = 'curtain'
   isPointObj: boolean = true

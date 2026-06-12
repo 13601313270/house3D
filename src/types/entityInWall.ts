@@ -1,5 +1,5 @@
 import { WallData } from "@/entities/wall/index.d";
-import { EntityClass, MatchSnapPoint } from "./entity";
+import { PointEntityClass, MatchSnapPoint } from "./entity";
 import { PointObjData, ObjInWallData, Point } from "./map2d";
 
 interface NearestWallResult {
@@ -9,7 +9,7 @@ interface NearestWallResult {
   angle: number
 }
 
-export abstract class EntityClassInWall<T extends ObjInWallData> extends EntityClass<T> {
+export abstract class EntityClassInWall<T extends ObjInWallData> extends PointEntityClass<T> {
   // 待添加状态（鼠标新增悬浮的时候）
   setPrepareState(x: number, y: number, nearest: NearestWallResult) {
     const { pointOnWall, angle } = nearest
@@ -35,7 +35,7 @@ export abstract class EntityClassInWall<T extends ObjInWallData> extends EntityC
     return false
   }
 
-  inSceneSnapLineArea(obj: EntityClass<PointObjData>, line: [Point, Point], point: Point) {
+  inSceneSnapLineArea(obj: PointEntityClass<PointObjData>, line: [Point, Point], point: Point) {
     if (obj.type === 'wall') {
       const p1 = line[0]
       const p2 = line[1]

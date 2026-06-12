@@ -1,7 +1,7 @@
 import { HandelInfo, Point } from '@/types/map2d'
 import * as THREE from 'three'
 import { CameraData } from './index.d'
-import { EntityClass, OrigionSnapPoint } from '@/types/entity'
+import { PointEntityClass, OrigionSnapPoint } from '@/types/entity'
 import { editItem } from '..'
 // @ts-ignore
 import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
@@ -13,7 +13,7 @@ import { MatchCircleArea } from '@/utils/matchArea'
 const img = new Image()
 img.src = kamera || ''
 
-export class CameraEntity extends EntityClass<CameraData> {
+export class CameraEntity extends PointEntityClass<CameraData> {
   name: string = '相机'
   type: string = 'camera'
   isPointObj: boolean = true

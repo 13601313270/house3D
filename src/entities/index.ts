@@ -1,4 +1,4 @@
-import { EntityClass } from '@/types/entity'
+import { PointEntityClass } from '@/types/entity'
 import { PointObjData } from '@/types/map2d'
 import wallPlugin from './wall'
 import windowPlugin from './window'
@@ -17,7 +17,7 @@ import peoplePlugin from './people'
 import importFilePlugin from './importFile'
 import curtainInWallPlugin from './curtainInWall'
 
-type EntityConstructor = new (...args: any[]) => EntityClass<any>;
+type EntityConstructor = new (...args: any[]) => PointEntityClass<any>;
 
 export const allFileKeys: string[] = [
 ]

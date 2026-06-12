@@ -1,5 +1,5 @@
 import { Point, HandelInfo } from '@/types/map2d'
-import { allSnapFromType, EntityClass, MatchSnapPoint } from '@/types/entity'
+import { allSnapFromType, PointEntityClass, MatchSnapPoint } from '@/types/entity'
 import { WallData } from './index.d'
 import { createAllWallFromPoints } from '@/utils/createAllWallFromPoints'
 import * as THREE from 'three'
@@ -11,7 +11,7 @@ import { calculateAngle } from '@/utils/calculateAngle'
 import message from '@/utils/message'
 import { isPointInRotatedRect } from '@/utils/isPointInRotatedRect'
 
-export class WallEntity extends EntityClass<WallData> {
+export class WallEntity extends PointEntityClass<WallData> {
   name: string = '墙'
   type: string = 'wall'
   isPointObj: boolean = false

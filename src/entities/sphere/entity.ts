@@ -1,13 +1,13 @@
 import { HandelInfo, Point } from '@/types/map2d'
 import * as THREE from 'three'
 import { SphereData } from './index.d'
-import { allSnapFromType, EntityClass } from '@/types/entity'
+import { allSnapFromType, PointEntityClass } from '@/types/entity'
 import { editItem } from '..';
 import { getMaterialById } from '@/material';
 import { SphereDataClass } from './dataClass'
 import { MatchCircleArea } from '@/utils/matchArea';
 
-export class SphereEntity extends EntityClass<SphereData> {
+export class SphereEntity extends PointEntityClass<SphereData> {
   name: string = '球体'
   type: string = 'sphere'
   isPointObj: boolean = true

@@ -1,13 +1,13 @@
 import { HandelInfo, Point } from '@/types/map2d'
 import * as THREE from 'three'
 import { ImportFileData } from './index.d'
-import { EntityClass, OrigionSnapPoint } from '@/types/entity'
+import { PointEntityClass, OrigionSnapPoint } from '@/types/entity'
 import { editItem } from '..'
 import { getMaterialById } from '@/material'
 import { ImportFileDataClass } from './dataClass';
 import { MatchCircleArea } from '@/utils/matchArea'
 
-export class ImportFileEntity extends EntityClass<ImportFileData> {
+export class ImportFileEntity extends PointEntityClass<ImportFileData> {
   name: string = '导入文件'
   type: string = 'importFile'
   isPointObj: boolean = true
