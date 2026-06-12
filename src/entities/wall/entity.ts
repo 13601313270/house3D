@@ -713,9 +713,9 @@ export class WallEntity extends LineEntityClass<WallData> {
 
 const defaultWallData: WallData = {
   id: Date.now().toString(),
-  x: 0,
-  y: 0,
-  z: 0,
+  // x: 0,
+  // y: 0,
+  // z: 0,
   height: 280,
   color: '#fff',
   wmt: 0,

@@ -1835,7 +1835,7 @@ function getHandleInAreaInfoByXY(x: number, y: number): {
       const matchInfo = api.showMatchHandel(x, y)
       if (matchInfo) {
         const data = api.getData();
-        const dist = Math.hypot(x - data.x, y - data.y)
+        const dist = Math.hypot(x - data.x || 0, y - data.y || 0)
         if (dist < minDistance) {
           matchHandelInfoList = {
             classInfo: api,
@@ -1855,11 +1855,12 @@ function getHandleInAreaInfoByXY(x: number, y: number): {
       continue
     }
     for (let j = 0; j < worldApi.getObjects(key).length; j++) {
-      const api: PointEntityClass<any> = worldApi.allFileMapObjects[key][j] as PointEntityClass<any>;
+      const api: BaseEntityClass<any> = worldApi.allFileMapObjects[key][j] as BaseEntityClass<any>;
       const matchInfo = api.showMatchHandel(x, y)
       if (matchInfo) {
         const data = api.getData();
-        const dist = Math.hypot(x - data.x, y - data.y)
+        const dist = Math.hypot(x - data.x || 0, y - data.y || 0);
+        console.log(dist)
         if (dist < minDistance) {
           matchHandelInfoList = {
             classInfo: api,
@@ -1871,7 +1872,6 @@ function getHandleInAreaInfoByXY(x: number, y: number): {
       }
     }
   }
-  // console.log('minDistance', minDistance, matchHandelInfoList)
   return matchHandelInfoList
 }
 

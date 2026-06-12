@@ -35,19 +35,10 @@ export abstract class LineEntityClass<T extends PointObjData> extends BaseEntity
   // 改变3D模型的状态
   // 例如：改变位置，旋转角度等
   change3DMeshState(): void {
-    this.meshList.forEach(v => {
-      v.position.set(this.data.x, this.data.z, this.data.y)
-    })
   }
 
   // 当前对象不在任何一根吸附线的区域
   notInSceneSnapLineArea(): void { }
-
-  changePosition(newPosition: { x: number, y: number }) {
-    this.data.x = newPosition.x
-    this.data.y = newPosition.y
-    this.world._callAllOnChangeCallback()
-  }
 
   // 待添加状态（鼠标新增悬浮的时候）
   abstract setPrepareState(x: number, y: number, ...args: any[]): void
