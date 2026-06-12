@@ -1542,7 +1542,7 @@ const handleMouseMove = (e: MouseEvent) => {
               }
             }
             if (nearestPoint && minDistance < snapThreshold) {
-              if (matchLine && api instanceof PointEntityClass) {
+              if (matchLine) {
                 const result2 = matchHandelObj.inSceneSnapLineArea(api, matchLine, nearestPoint)
                 if (result2) {
                   drawWrapper2DAnd3D()

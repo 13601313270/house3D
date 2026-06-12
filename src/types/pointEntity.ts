@@ -125,7 +125,7 @@ export abstract class PointEntityClass<T extends PointObjData> extends BaseEntit
 
   // 当前对象进入到一根吸附线的区域
   abstract inSceneSnapLineArea(
-    obj: PointEntityClass<PointObjData>,
+    obj: BaseEntityClass<PointObjData>,
     line: [Point, Point],
     point: Point,
   ): boolean;
