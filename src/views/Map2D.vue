@@ -1810,30 +1810,8 @@ function getHandleInAreaInfoByXY(x: number, y: number): {
     matchArea: MatchRectArea | MatchCircleArea
     dist: number,
   } | null = null
-  // 检查已绘制的墙上的点
-  if (worldApi.allFileMapObjects.wall) {
-    for (let i = 0; i < worldApi.getObjects('wall').length; i++) {
-      // const wall = worldApi.getObjects('wall')[i]
-      const api: WallEntity = worldApi.allFileMapObjects.wall[i] as WallEntity;
-      const matchInfo = api.showMatchHandel(x, y)
-      if (matchInfo) {
-        const data = api.getData();
-        const dist = Math.hypot(x - data.x || 0, y - data.y || 0)
-        if (dist < minDistance) {
-          matchHandelInfoList = {
-            classInfo: api,
-            matchArea: matchInfo,
-            dist,
-          }
-          minDistance = dist
-        }
-      }
-    }
-  }
-
   for (let i = 0; i < allFileKeys.length; i++) {
     const key = allFileKeys[i];
-    if (key === 'wall') continue;
     if (!worldApi.allFileMapObjects[key]) {
       continue
     }
@@ -1842,8 +1820,7 @@ function getHandleInAreaInfoByXY(x: number, y: number): {
       const matchInfo = api.showMatchHandel(x, y)
       if (matchInfo) {
         const data = api.getData();
-        const dist = Math.hypot(x - data.x || 0, y - data.y || 0);
-        console.log(dist)
+        const dist = Math.hypot(x - data.x || 0, y - data.y || 0)
         if (dist < minDistance) {
           matchHandelInfoList = {
             classInfo: api,
