@@ -2,8 +2,8 @@ import { DoorEntity } from "./entity"
 import PluginType from "../pluginType"
 
 const doorPlugin: PluginType = {
-  name: '门',
-  key: 'door',
+  name: '门洞',
+  key: 'doorway',
   type: 'house',
   entity: DoorEntity,
 }

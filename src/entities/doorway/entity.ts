@@ -1,7 +1,5 @@
 import { HandelInfo, Point } from '@/types/map2d'
 import * as THREE from 'three'
-// @ts-ignore
-import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { DoorData } from './index.d'
 import { Brush, Evaluator, SUBTRACTION } from 'three-bvh-csg';
 import { allSnapFromType } from '@/types/entity'
@@ -14,7 +12,7 @@ import { MatchRectArea } from '@/utils/matchArea';
 import { isPointInRotatedRect } from '@/utils/isPointInRotatedRect';
 
 export class DoorEntity extends EntityClassInWall<DoorData> {
-  name: string = '门'
+  name: string = '门洞'
   type: string = 'door'
   isPointObj: boolean = true
   private circleRadius = 6
@@ -43,12 +41,10 @@ export class DoorEntity extends EntityClassInWall<DoorData> {
       width: 110,
       height: 180,
       bottom: 0,
-      openAngle: 0,
       angle: 0,
-      hasBorder: true,
+      hasBorder: false,
       color: '#e67e22',
       mt: 3,
-      openType: 1,
     }
     return new DoorDataClass(door)
   }
@@ -76,8 +72,6 @@ export class DoorEntity extends EntityClassInWall<DoorData> {
     ctx.strokeStyle = color
     ctx.lineWidth = 3
     ctx.fillRect(-width / 2, -thickness / 2, width, thickness)
-    ctx.beginPath()
-    ctx.arc(0, 0, width / 2, -Math.PI / 4, Math.PI / 4)
     ctx.stroke()
     ctx.restore()
   }
@@ -101,8 +95,6 @@ export class DoorEntity extends EntityClassInWall<DoorData> {
     ctx.stroke()
   }
 
-  glbObj: THREE.Group | null = null;
-
   create3DMesh() {
     // 加载 https://video-obj.oss-cn-beijing.aliyuncs.com/door.glb
     const data = this.getData();
@@ -114,46 +106,6 @@ export class DoorEntity extends EntityClassInWall<DoorData> {
       return entity.getData().id === data.wallId
     })
     const wallThickness = wall ? wall.getData().thickness : 10;
-    const changeBLBState = () => {
-      if (this.glbObj) {
-        this.glbObj.traverse((child: any) => {
-          if (child instanceof THREE.Mesh) {
-            child.material = material
-          }
-        })
-        if (data.openType === 1) {
-          this.glbObj.position.set(data.width / -2.1, data.height / -2, wallThickness / 2);
-          this.glbObj.scale.set(data.width * 0.23, data.height * 0.11, wallThickness * 2);
-          this.glbObj.rotation.y = THREE.MathUtils.degToRad(data.openAngle * -1 || 0);
-        }
-        else if (data.openType === 2) {
-          this.glbObj.position.set(data.width / 2.1, data.height / -2, wallThickness / 2);
-          this.glbObj.scale.set(data.width * -0.23, data.height * 0.11, wallThickness * 2);
-          this.glbObj.rotation.y = THREE.MathUtils.degToRad(data.openAngle || 0);
-        }
-        else if (data.openType === 3) {
-          this.glbObj.position.set(data.width / -2.1, data.height / -2, wallThickness / -2);
-          this.glbObj.scale.set(data.width * 0.23, data.height * 0.11, wallThickness * -2);
-          this.glbObj.rotation.y = THREE.MathUtils.degToRad(data.openAngle || 0);
-        }
-        else if (data.openType === 4) {
-          this.glbObj.position.set(data.width / 2.1, data.height / -2, wallThickness / -2);
-          this.glbObj.scale.set(data.width * -0.23, data.height * 0.11, wallThickness * -2);
-          this.glbObj.rotation.y = THREE.MathUtils.degToRad(data.openAngle * -1 || 0);
-        }
-      }
-    }
-    if (this.glbObj === null) {
-      const loader = new GLTFLoader();
-      loader.load('https://video-obj.oss-cn-beijing.aliyuncs.com/door.glb', (gltf: any) => {
-        this.glbObj = gltf.scene;
-        // 旋转45度
-        changeBLBState()
-        gltf.scene.position.setY(0)
-        group.add(gltf.scene)
-      });
-    }
-    const material = data.mt ? (getMaterialById(data.mt)?.material(new THREE.Vector3(0, 0, 1))) : (new THREE.MeshStandardMaterial({ color: data.color }));
 
     // group添加门框
     (() => {
@@ -189,11 +141,6 @@ export class DoorEntity extends EntityClassInWall<DoorData> {
       doorMeshTop.position.setY(data.height)
       group.add(doorMeshTop);
     })();
-    if (this.glbObj) {
-      changeBLBState()
-      this.glbObj.position.setY(0)
-      group.add(this.glbObj)
-    }
 
     // group.position.set(data.x, data.height / 2, data.y)
     group.rotateY(data.angle * -1);
@@ -356,24 +303,6 @@ export class DoorEntity extends EntityClassInWall<DoorData> {
         label: '是否有门框',
         dataType: 'boolean',
         value: data.hasBorder,
-      },
-      {
-        id: 'openAngle',
-        label: '门打开的角度',
-        dataType: 'number',
-        min: 0,
-        max: 180,
-        step: 15,
-        value: data.openAngle,
-      },
-      {
-        id: 'openType',
-        label: '开门方式(1内左开 2内右开 3外左开 4外右开)',
-        dataType: 'number',
-        min: 1,
-        max: 4,
-        step: 1,
-        value: data.openType,
       },
       {
         id: 'z',

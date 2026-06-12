@@ -5,7 +5,7 @@ type EntityConstructor = new (...args: any[]) => EntityClass<any>;
 type PluginType = {
   name: string,
   key: string,
-  type: 'base' | 'curtain' | 'other',
+  type: 'base' | 'house' | 'curtain' | 'other',
   entity: EntityConstructor,
 }
 

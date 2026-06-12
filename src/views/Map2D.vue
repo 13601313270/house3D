@@ -2472,7 +2472,7 @@ function handleObjectClick(object: THREE.Object3D | null) {
           display: none;
           top: -8px;
           left: 100%;
-          width: 140px;
+          width: 180px;
           background: white;
           border: 1px solid #d9d9d9;
           box-sizing: border-box;
@@ -2895,7 +2895,7 @@ button {
   position: fixed;
   top: -8px;
   left: 100%;
-  width: 140px;
+  width: 180px;
   background: white;
   border: 1px solid #d9d9d9;
   box-sizing: border-box;

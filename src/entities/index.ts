@@ -3,6 +3,7 @@ import { ObjData } from '@/types/map2d'
 import wallPlugin from './wall'
 import windowPlugin from './window'
 import doorPlugin from './door'
+import doorwayPlugin from './doorway'
 import cameraPlugin from './camera'
 import cubePlugin from './cube'
 import spherePlugin from './sphere'
@@ -37,6 +38,11 @@ export const allFileKeysGroup: TypeGroup = [
     child: [],
   },
   {
+    id: 'house',
+    name: '户型/墙体',
+    child: []
+  },
+  {
     id: 'other',
     name: '其他类型',
     child: [],
@@ -52,6 +58,7 @@ export const fileDataKeyToClass: Record<string, EntityConstructor> = {
 ([
   wallPlugin,
   doorPlugin,
+  doorwayPlugin,
   windowPlugin,
   cameraPlugin,
   cubePlugin,
@@ -71,8 +78,10 @@ export const fileDataKeyToClass: Record<string, EntityConstructor> = {
     allFileKeysGroup[0].child.push(v.key)
   } else if (v.type === 'curtain') {
     allFileKeysGroup[1].child.push(v.key)
-  } else {
+  } else if (v.type === 'house') {
     allFileKeysGroup[2].child.push(v.key)
+  } else if (v.type === 'other') {
+    allFileKeysGroup[3].child.push(v.key)
   }
   allFileKeysName[v.key] = v.name
   fileDataKeyToClass[v.key] = v.entity

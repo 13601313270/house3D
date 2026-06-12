@@ -289,6 +289,7 @@ function removeIfOutside() {
         margin-bottom: 6px;
         padding-bottom: 6px;
         border-bottom: solid 1px #f3f3f3;
+        flex-wrap: wrap;
 
         &.title {
           margin-bottom: 0;
