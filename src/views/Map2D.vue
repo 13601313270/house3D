@@ -943,17 +943,18 @@ onMounted(async () => {
     if (e.key === 'Escape') {
       if (tempPointInsertData.value.length > 0) {
         if (tempPointInsertData.value.length > 1) {
-          const newWall: WallData = {
-            ...defaultWallData,
-            id: Date.now().toString(),
-            points: tempPointInsertData.value.map(v => {
+          const ClassName = fileDataKeyToClass[currentTool.value];
+          if (ClassName) {
+            const insertTempObj = new ClassName(worldApi)
+            const value = insertTempObj.defaultValue()
+            value.points = tempPointInsertData.value.map(v => {
               return {
                 ...v,
                 snw: false,
               }
-            }),
+            })
+            await worldApi.add(currentTool.value, [value])
           }
-          await worldApi.add('wall', [newWall])
         }
         tempPointInsertData.value = []
         lastPoint.value = null
@@ -1391,19 +1392,21 @@ const handleCanvasClick = async (e: MouseEvent) => {
 
         if (dist < 10 * zoom2DLevel.value) {
           if (tempPointInsertData.value.length > 1) {
-            const newWall: WallData = {
-              ...defaultWallData,
-              id: Date.now().toString(),
-              points: tempPointInsertData.value.map(v => {
+            const ClassName = fileDataKeyToClass[currentTool.value];
+            if (ClassName) {
+              const insertTempObj = new ClassName(worldApi)
+              const value = insertTempObj.defaultValue()
+              value.points = tempPointInsertData.value.map(v => {
                 return {
                   ...v,
                   snw: false,
                 }
-              }),
+              })
+              await worldApi.add(currentTool.value, [value])
+              tempPointInsertData.value = []
+              lastPoint.value = null
+              currentTool.value = 'drag'
             }
-            await worldApi.add('wall', [newWall])
-            tempPointInsertData.value = []
-            lastPoint.value = null
           }
           return
         }
