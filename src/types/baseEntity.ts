@@ -154,4 +154,12 @@ export abstract class BaseEntityClass<T extends BaseObj> {
     const data = this.getData();
     this.draw2DPreviewByData(ctx, data, panOffset, zoomLevel)
   }
+
+  abstract change3DMeshState(): void
+
+  // 本对象进入一个吸附对象的区域
+  abstract inSceneSnapPointArea(
+    newPosition: MatchSnapPoint,
+    dragHandelInfo: HandelInfo,
+  ): boolean;
 }

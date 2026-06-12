@@ -211,7 +211,7 @@ import { snapThreshold, World } from '../utils/world'
 import Canvas3D, { CameraState } from '../components/Canvas3D.vue'
 import { WallData } from '@/entities/wall/index.d'
 import { allFileKeys, fileData, editItem, allFileKeysName, fileDataKeyToClass, allFileKeysGroup } from '@/entities'
-import { PointEntityClass, MatchSnapPoint } from '@/types/pointEntity'
+import { PointEntityClass } from '@/types/pointEntity'
 import { EntityClassInWall } from '@/types/entityInWall'
 import { HandelInfo, PointWithIndex } from '@/types/map2d'
 import pointToLineDistance from '@/utils/pointToLineDistance'
@@ -237,6 +237,7 @@ import { sleep } from '@/utils/sleep';
 import { MatchCircleArea, MatchRectArea } from '@/utils/matchArea';
 import processUploadedFile from '@/utils/processUploadedFile';
 import DataTypeEditPanel from './DataTypeEditPanel.vue'
+import { BaseEntityClass, MatchSnapPoint } from '@/types/baseEntity';
 
 const canvas2DRef = ref<HTMLCanvasElement | null>(null)
 const canvas2D2Ref = ref<HTMLCanvasElement | null>(null)
@@ -312,7 +313,7 @@ type ObjFileType = {
 const ObjFileTypes = ref<Array<ObjFileType>>([])
 const activeObjChildList = ref<Array<{ id: string, name: string, type: number }>>([])
 
-let insertTempObj: PointEntityClass<any> | null = null
+let insertTempObj: BaseEntityClass<any> | null = null
 const insertAdding = ref(false)
 
 let panStartScreenX = 0
@@ -1249,7 +1250,7 @@ const handleContextMenu = (e: MouseEvent) => {
         continue
       }
       for (let j = 0; j < worldApi.getObjects(type).length; j++) {
-        const api: PointEntityClass<any> = worldApi.allFileMapObjects[type][j]
+        const api: BaseEntityClass<any> = worldApi.allFileMapObjects[type][j]
         const snapPoint = api.matchHandelInfo(x, y)
         if (snapPoint) {
           api.editPropConfig(snapPoint, (propConfig, callback) => {
@@ -1371,7 +1372,7 @@ const handleCanvasClick = async (e: MouseEvent) => {
         // 收集所有点（包括临时折线和已绘制的墙上的点）
         const allPoints: Point[] = [...tempPointInsertData.value];
         (worldApi.getObjects('wall') as WallData[]).forEach((wall: WallData) => {
-          wall.points.forEach(point => {
+          wall.points.forEach((point: any) => {
             allPoints.push(point)
           })
         })
@@ -1496,7 +1497,7 @@ const handleMouseMove = (e: MouseEvent) => {
     if (matchHandelObj && matchedHandelInfo) {
       // console.log('currentTool.value---1')
       // console.log('matchHandelObj', currentTool.value)
-      function temp(api: PointEntityClass<ObjData>): boolean {
+      function temp(api: BaseEntityClass<ObjData>): boolean {
         if (matchHandelObj && matchedHandelInfo) {
           let beMatchPoints = api.getMineBeSnapPoints()
           // 排出掉和自己磁吸
@@ -1527,7 +1528,7 @@ const handleMouseMove = (e: MouseEvent) => {
             }
           }
           const beMatchLines = api.getMineBeSnapLines()
-          if (beMatchLines.length > 0) {
+          if (beMatchLines.length > 0 && matchHandelObj instanceof PointEntityClass) {
             let nearestPoint: Point | null = null
             let minDistance = Infinity
             let matchLine = null;
@@ -1541,7 +1542,7 @@ const handleMouseMove = (e: MouseEvent) => {
               }
             }
             if (nearestPoint && minDistance < snapThreshold) {
-              if (matchLine) {
+              if (matchLine && api instanceof PointEntityClass) {
                 const result2 = matchHandelObj.inSceneSnapLineArea(api, matchLine, nearestPoint)
                 if (result2) {
                   drawWrapper2DAnd3D()
@@ -1565,8 +1566,9 @@ const handleMouseMove = (e: MouseEvent) => {
           }
         }
       }
-
-      matchHandelObj.notInSceneSnapLineArea()
+      if (matchHandelObj instanceof PointEntityClass) {
+        matchHandelObj.notInSceneSnapLineArea()
+      }
       matchHandelObj.matchHandelMoveCallback({
         x,
         y,
@@ -1639,25 +1641,28 @@ const handleMouseMove = (e: MouseEvent) => {
           ctxAction.restore(); // 恢复原始状态
         }
         classInfo.draw2D(ctxAction, panOffset.value, zoom2DLevel.value)
-        // 绘制文字（带边框）
-        ctxAction.font = `${Math.max(14 * zoom2DLevel.value, 14)}px '微软雅黑'`
-        ctxAction.textAlign = 'center'
-        // 设置边框样式
-        ctxAction.strokeStyle = 'white'
-        ctxAction.lineWidth = 2
-        const text = classInfo.inAreaHoverText()
-        ctxAction.strokeText(
-          text,
-          textPositionX * zoom2DLevel.value + panOffset.value.x,
-          textPositionY * zoom2DLevel.value + panOffset.value.y
-        )
-        // 设置填充样式
-        ctxAction.fillStyle = 'black'
-        ctxAction.fillText(
-          `${text}`,
-          textPositionX * zoom2DLevel.value + panOffset.value.x,
-          textPositionY * zoom2DLevel.value + panOffset.value.y
-        )
+
+        if (classInfo instanceof PointEntityClass) {
+          // 绘制文字（带边框）
+          ctxAction.font = `${Math.max(14 * zoom2DLevel.value, 14)}px '微软雅黑'`
+          ctxAction.textAlign = 'center'
+          // 设置边框样式
+          ctxAction.strokeStyle = 'white'
+          ctxAction.lineWidth = 2
+          const text = classInfo.inAreaHoverText()
+          ctxAction.strokeText(
+            text,
+            textPositionX * zoom2DLevel.value + panOffset.value.x,
+            textPositionY * zoom2DLevel.value + panOffset.value.y
+          )
+          // 设置填充样式
+          ctxAction.fillStyle = 'black'
+          ctxAction.fillText(
+            `${text}`,
+            textPositionX * zoom2DLevel.value + panOffset.value.x,
+            textPositionY * zoom2DLevel.value + panOffset.value.y
+          )
+        }
       }
     }
   } else if (currentTool.value === 'wall') {
@@ -1671,7 +1676,7 @@ const handleMouseMove = (e: MouseEvent) => {
         // 收集所有点（包括临时折线和已绘制的墙上的点）
         const allPoints = [...tempPointInsertData.value];
         (worldApi.getObjects('wall') as WallData[]).forEach((wall: WallData) => {
-          wall.points.forEach((point) => {
+          wall.points.forEach((point: any) => {
             allPoints.push(point)
           })
         })
@@ -1722,7 +1727,7 @@ const handleMouseMove = (e: MouseEvent) => {
   }
 }
 
-let matchHandelObj: PointEntityClass<any> | null = null;
+let matchHandelObj: BaseEntityClass<any> | null = null;
 let matchedHandelInfo: HandelInfo | null = null;
 let matchHandelStartPoint: Point | null = null;
 const handleMouseDown = (e: MouseEvent) => {
@@ -1765,14 +1770,14 @@ const handleMouseDown = (e: MouseEvent) => {
 }
 
 function getHandleInfoByXY(x: number, y: number): {
-  classInfo: PointEntityClass<any>
+  classInfo: BaseEntityClass<any>
   handle: HandelInfo,
   startPoint: Point,
   dist: number,
 } | null {
   let minDistance = Infinity
   let matchHandelInfoList: {
-    classInfo: PointEntityClass<any>
+    classInfo: BaseEntityClass<any>
     handle: HandelInfo,
     startPoint: Point,
     dist: number,
@@ -1823,13 +1828,13 @@ function getHandleInfoByXY(x: number, y: number): {
 }
 
 function getHandleInAreaInfoByXY(x: number, y: number): {
-  classInfo: PointEntityClass<any>,
+  classInfo: BaseEntityClass<any>,
   matchArea: MatchRectArea | MatchCircleArea,
   dist: number,
 } | null {
   let minDistance = Infinity
   let matchHandelInfoList: {
-    classInfo: PointEntityClass<any>,
+    classInfo: BaseEntityClass<any>,
     matchArea: MatchRectArea | MatchCircleArea
     dist: number,
   } | null = null

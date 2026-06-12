@@ -1,5 +1,4 @@
 import { Point, HandelInfo } from '@/types/map2d'
-import { PointEntityClass } from '@/types/pointEntity'
 import { WallData } from './index.d'
 import { createAllWallFromPoints } from '@/utils/createAllWallFromPoints'
 import * as THREE from 'three'
@@ -11,8 +10,9 @@ import { calculateAngle } from '@/utils/calculateAngle'
 import message from '@/utils/message'
 import { isPointInRotatedRect } from '@/utils/isPointInRotatedRect'
 import { allSnapFromType, MatchSnapPoint } from '@/types/baseEntity'
+import { LineEntityClass } from '@/types/lineEntity'
 
-export class WallEntity extends PointEntityClass<WallData> {
+export class WallEntity extends LineEntityClass<WallData> {
   name: string = '墙'
   type: string = 'wall'
   isPointObj: boolean = false
@@ -543,10 +543,6 @@ export class WallEntity extends PointEntityClass<WallData> {
       lines.push([p1, p2])
     }
     return lines;
-  }
-
-  inSceneSnapLineArea() {
-    return false;
   }
 
   setPrepareState(): void {

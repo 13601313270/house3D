@@ -1,7 +1,7 @@
 import * as THREE from 'three'
-import { PointObjData, HandelInfo, Point } from './map2d'
+import { PointObjData, Point } from './map2d'
 import { World } from '@/utils/world'
-import { BaseEntityClass, MatchSnapPoint } from './baseEntity'
+import { BaseEntityClass } from './baseEntity'
 
 export abstract class PointEntityClass<T extends PointObjData> extends BaseEntityClass<T> {
   abstract isPointObj: boolean // 点状对象，如窗户/门。非点状的如墙
@@ -122,12 +122,6 @@ export abstract class PointEntityClass<T extends PointObjData> extends BaseEntit
       v.position.set(this.data.x, this.data.z, this.data.y)
     })
   }
-
-  // 本对象进入一个吸附对象的区域
-  abstract inSceneSnapPointArea(
-    newPosition: MatchSnapPoint,
-    dragHandelInfo: HandelInfo,
-  ): boolean;
 
   // 当前对象进入到一根吸附线的区域
   abstract inSceneSnapLineArea(

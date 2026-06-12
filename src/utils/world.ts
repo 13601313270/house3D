@@ -8,13 +8,14 @@ import { PointEntityClass } from '@/types/pointEntity'
 import { EntityClassInWall } from '@/types/entityInWall'
 import { ObjDataClass } from '@/entities/objData'
 import { ImportFileType, ImportImgType, ObjOutputFileType } from '@/entities/allObjs';
+import { BaseEntityClass } from '@/types/baseEntity'
 
 export const canvasHeight = 600
 export const snapThreshold = 20
 
 export class World {
   allFileMapObjects: {
-    [key in string]?: PointEntityClass<any>[]
+    [key in string]?: BaseEntityClass<any>[]
   } = {}
 
   // private allObjFiles: {
@@ -210,7 +211,7 @@ export class World {
     canvasWidth: number = 800,
     canvasHeight: number = 600,
     zoomLevel: number = 1,
-    insertTempObj: PointEntityClass<any> | null = null,
+    insertTempObj: BaseEntityClass<any> | null = null,
   ) {
     if (!canvasBgRef) return
     const ctx = canvasBgRef.getContext('2d')
@@ -323,30 +324,32 @@ export class World {
   draw3D() {
     allFileKeys.forEach((key) => {
       if (this.allFileMapObjects[key]) {
-        (this.allFileMapObjects[key] as PointEntityClass<any>[]).forEach((item) => {
+        (this.allFileMapObjects[key] as BaseEntityClass<any>[]).forEach((item) => {
           item.reCreate3DMeshIfNeed()
           item.change3DMeshState()
-          setTimeout(() => {
-            const boundingBox = item.createBoundingBox();
-            if (boundingBox) {
-              const data = item.getData();
-              // 第一个是尺寸，第二个是位置偏移，第三个是旋转角度
-              const [boxVector3, offsetVector3, rotateVector3] = boundingBox;
-              item.boundingBoxData = [boxVector3, offsetVector3, rotateVector3]
-              item.boundingBox.position.set(data.x, data.z, data.y)
-              item.boundingBox.children[0].rotation.set(rotateVector3.x, rotateVector3.y, rotateVector3.z)
-              item.boundingBox.children[0].scale.set(boxVector3.x, boxVector3.y, boxVector3.z)
-              item.boundingBox.children[0].position.set(offsetVector3.x, offsetVector3.y, offsetVector3.z)
-              item.boundingBox.visible = false
-              if (item.spriteGroup) {
-                item.spriteGroup.position.set(data.x, data.z, data.y)
-                console.log('offsetVector3', offsetVector3)
-                item.spriteGroup.children[0].position.set(0, boxVector3.y / 2 + offsetVector3.y + 12, 0)
+          if (item instanceof PointEntityClass) {
+            setTimeout(() => {
+              const boundingBox = item.createBoundingBox();
+              if (boundingBox) {
+                const data = item.getData();
+                // 第一个是尺寸，第二个是位置偏移，第三个是旋转角度
+                const [boxVector3, offsetVector3, rotateVector3] = boundingBox;
+                item.boundingBoxData = [boxVector3, offsetVector3, rotateVector3]
+                item.boundingBox.position.set(data.x, data.z, data.y)
+                item.boundingBox.children[0].rotation.set(rotateVector3.x, rotateVector3.y, rotateVector3.z)
+                item.boundingBox.children[0].scale.set(boxVector3.x, boxVector3.y, boxVector3.z)
+                item.boundingBox.children[0].position.set(offsetVector3.x, offsetVector3.y, offsetVector3.z)
+                item.boundingBox.visible = false
+                if (item.spriteGroup) {
+                  item.spriteGroup.position.set(data.x, data.z, data.y)
+                  console.log('offsetVector3', offsetVector3)
+                  item.spriteGroup.children[0].position.set(0, boxVector3.y / 2 + offsetVector3.y + 12, 0)
+                }
+              } else {
+                item.boundingBox.visible = false
               }
-            } else {
-              item.boundingBox.visible = false
-            }
-          })
+            })
+          }
         });
       }
     });
