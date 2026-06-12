@@ -1,5 +1,5 @@
 import { Point, HandelInfo } from '@/types/map2d'
-import { allSnapFromType, PointEntityClass, MatchSnapPoint } from '@/types/entity'
+import { allSnapFromType, PointEntityClass, MatchSnapPoint } from '@/types/pointEntity'
 import { StaircaseData } from './index.d'
 import { createAllWallFromPoints } from '@/utils/createAllWallFromPoints'
 import * as THREE from 'three'

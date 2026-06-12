@@ -1,8 +1,8 @@
 import * as THREE from 'three'
 import { PointObjData, HandelInfo, Point, PointWithIndex } from './map2d'
 import { World } from '@/utils/world'
-import { editItem } from '@/entities'
 import { MatchRectArea, MatchCircleArea } from '@/utils/matchArea'
+import { BaseEntityClass } from './baseEntity'
 
 export type allSnapFromType = 'point' | 'line' | 'axis'
 // 磁吸点
@@ -20,22 +20,14 @@ export type MatchSnapPoint = OrigionSnapPoint | {
   point: Point,
 }
 
-export abstract class PointEntityClass<T extends PointObjData> {
-  abstract name: string
-  abstract type: string
+export abstract class PointEntityClass<T extends PointObjData> extends BaseEntityClass<T> {
   abstract isPointObj: boolean // 点状对象，如窗户/门。非点状的如墙
-  world: World;
-  private data: T
-  meshList: THREE.Group[] = []
   boundingBox: THREE.Group
   boundingBoxData: [THREE.Vector3, THREE.Vector3, THREE.Vector3] | null = null // 第一个是尺寸，第二个是位置偏移，第三个是旋转角度
   spriteGroup: THREE.Group | null = null
-  // eslint-disable-next-line
-  associationEntity: PointEntityClass<any>[] = []// 关联对象，就是本对象渲染，需要联动修改的对象。（比如：墙壁上被窗户挖洞，那么墙修改，需要重新挖洞）
 
   constructor(world: World, data: T) {
-    this.world = world
-    this.data = data || this.defaultValue();
+    super(world, data);
     (() => {
       const geometry = new THREE.BoxGeometry(1, 1, 1);
       const edges = new THREE.EdgesGeometry(geometry);
@@ -50,24 +42,6 @@ export abstract class PointEntityClass<T extends PointObjData> {
     })();
   }
 
-  init(): Promise<void> {
-    return Promise.resolve()
-  }
-
-  abstract defaultValue(): T
-
-  setData(data: T) {
-    this.data = data
-    this.world._callAllOnChangeCallback()
-  }
-
-  getData(): T {
-    return this.data
-  }
-
-  // 生成3D模型
-  abstract create3DMesh(scene: THREE.Scene, ...args: any[]): THREE.Group[]
-
   // public boxSize: THREE.Vector3 = new THREE.Vector3()
   // public boxOffset: THREE.Vector3 = new THREE.Vector3()
   // public boxRotate: THREE.Vector3 = new THREE.Vector3()
@@ -75,7 +49,6 @@ export abstract class PointEntityClass<T extends PointObjData> {
   // 创建包裹立方体
   abstract createBoundingBox(): [THREE.Vector3, THREE.Vector3, THREE.Vector3] | null // 第一个是尺寸，第二个是位置偏移，第三个是旋转角度
 
-  private cacheKeyStr = '';
   reCreate3DMeshIfNeed(): void {
     const newKeyByData = this.meshNeedChangeKey();
     if (this.cacheKeyStr !== newKeyByData) {
@@ -148,22 +121,10 @@ export abstract class PointEntityClass<T extends PointObjData> {
 
   public remove3DCache() {
     // 这里注意防止死循环
-    // console.log('remove3DCache')
-    if (this.meshList.length) {
-      this.meshList.forEach(mesh => this.world.scene.remove(mesh))
-      this.meshList = []
-    }
+    super.remove3DCache()
     if (this.spriteGroup) {
       this.world.scene.remove(this.spriteGroup)
       this.spriteGroup = null
-    }
-    if (this.cacheKeyStr) {
-      this.cacheKeyStr = ''
-      if (this.associationEntity.length > 0) {
-        this.associationEntity.forEach(entity => {
-          entity.remove3DCache()
-        })
-      }
     }
   }
 
@@ -222,36 +183,6 @@ export abstract class PointEntityClass<T extends PointObjData> {
   // 本对象可以被其他对象对齐的参考线（注意是被对齐，提供个其他拖动磁吸的参考线）
   abstract getMineBeSnapLines(): Array<[Point, Point]>;
 
-  draw2DPreview(ctx: CanvasRenderingContext2D, panOffset: Point, zoomLevel: number) {
-    const data = this.getData();
-    this.draw2DPreviewByData(ctx, data, panOffset, zoomLevel)
-  }
-
-  // 本对象的2D预览绘制，（时间早于draw2DByData）
-  abstract draw2DPreviewByData(
-    ctx: CanvasRenderingContext2D,
-    data: T,
-    panOffset: Point,
-    zoomLevel: number,
-  ): void;
-
-  // 本对象的2D具柄绘制逻辑（时间晚于draw2DPreview）
-  abstract draw2DByData(
-    ctx: CanvasRenderingContext2D,
-    data: T,
-    panOffset: Point,
-    zoomLevel: number,
-  ): void;
-
-  draw2D(
-    ctx: CanvasRenderingContext2D,
-    panOffset: Point,
-    zoomLevel: number,
-  ) {
-    const data = this.getData();
-    this.draw2DByData(ctx, data, panOffset, zoomLevel)
-  }
-
   changePosition(newPosition: { x: number, y: number }) {
     this.data.x = newPosition.x
     this.data.y = newPosition.y
@@ -262,9 +193,8 @@ export abstract class PointEntityClass<T extends PointObjData> {
   abstract setPrepareState(x: number, y: number, ...args: any[]): void
 
   beforeRemove() {
+    super.beforeRemove()
     const scene: THREE.Scene = this.world.scene
-    this.remove3DCache()
-    this.meshList.forEach(mesh => scene.remove(mesh))
     if (this.boundingBox) {
       scene.remove(this.boundingBox)
     }
@@ -272,23 +202,12 @@ export abstract class PointEntityClass<T extends PointObjData> {
       scene.remove(this.spriteGroup)
       this.spriteGroup = null
     }
-
-    if (this.associationEntity.length > 0) {
-      this.associationEntity.forEach(entity => {
-        const index = entity.associationEntity.indexOf(this)
-        if (index !== -1) {
-          entity.associationEntity.splice(index, 1)
-        }
-      })
-    }
-    this.associationEntity = []
   }
 
-  abstract editPropConfig(
-    snapPoint: HandelInfo,
-    editShow: (editInfoList: editItem[], callback: (val: any) => void) => void,
-    close: () => void,
-  ): void
+  draw2DPreview(ctx: CanvasRenderingContext2D, panOffset: Point, zoomLevel: number) {
+    const data = this.getData();
+    this.draw2DPreviewByData(ctx, data, panOffset, zoomLevel)
+  }
 
   inAreaHoverText() {
     return this.name

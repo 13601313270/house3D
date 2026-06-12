@@ -1,4 +1,4 @@
-import { PointEntityClass } from "@/types/entity";
+import { PointEntityClass } from "@/types/pointEntity";
 
 type EntityConstructor = new (...args: any[]) => PointEntityClass<any>;
 

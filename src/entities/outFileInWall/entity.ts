@@ -1,7 +1,7 @@
 import { HandelInfo, PointObjData, Point } from '@/types/map2d'
 import * as THREE from 'three'
 import { OutFileInWallData } from './index.d'
-import { PointEntityClass, OrigionSnapPoint } from '@/types/entity'
+import { PointEntityClass, OrigionSnapPoint } from '@/types/pointEntity'
 import { editItem } from '..'
 // @ts-ignore
 import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';

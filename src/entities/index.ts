@@ -1,4 +1,4 @@
-import { PointEntityClass } from '@/types/entity'
+import { PointEntityClass } from '@/types/pointEntity'
 import { PointObjData } from '@/types/map2d'
 import wallPlugin from './wall'
 import windowPlugin from './window'

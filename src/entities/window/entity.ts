@@ -1,5 +1,5 @@
 import { Point, HandelInfo } from '@/types/map2d'
-import { allSnapFromType } from '@/types/entity'
+import { allSnapFromType } from '@/types/pointEntity'
 import { EntityClassInWall } from '@/types/entityInWall'
 import { WindowData } from './index.d'
 import * as THREE from 'three'

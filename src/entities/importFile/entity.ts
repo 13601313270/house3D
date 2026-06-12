@@ -1,7 +1,7 @@
 import { HandelInfo, Point } from '@/types/map2d'
 import * as THREE from 'three'
 import { ImportFileData } from './index.d'
-import { PointEntityClass, OrigionSnapPoint } from '@/types/entity'
+import { PointEntityClass, OrigionSnapPoint } from '@/types/pointEntity'
 import { editItem } from '..'
 import { getMaterialById } from '@/material'
 import { ImportFileDataClass } from './dataClass';

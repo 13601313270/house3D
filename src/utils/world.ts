@@ -4,7 +4,7 @@ import { DoorEntity } from '@/entities/door/entity'
 import { drawPoint } from './drawPoint'
 import { calculateAngle } from './calculateAngle'
 import { allFileKeys, fileData, fileDataKeyToClass } from '@/entities/index'
-import { PointEntityClass } from '@/types/entity'
+import { PointEntityClass } from '@/types/pointEntity'
 import { EntityClassInWall } from '@/types/entityInWall'
 import { ObjDataClass } from '@/entities/objData'
 import { ImportFileType, ImportImgType, ObjOutputFileType } from '@/entities/allObjs';

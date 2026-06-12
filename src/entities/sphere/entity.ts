@@ -1,7 +1,7 @@
 import { HandelInfo, Point } from '@/types/map2d'
 import * as THREE from 'three'
 import { SphereData } from './index.d'
-import { allSnapFromType, PointEntityClass } from '@/types/entity'
+import { allSnapFromType, PointEntityClass } from '@/types/pointEntity'
 import { editItem } from '..';
 import { getMaterialById } from '@/material';
 import { SphereDataClass } from './dataClass'
