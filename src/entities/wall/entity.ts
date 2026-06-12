@@ -235,76 +235,79 @@ export class WallEntity extends EntityClass<WallData> {
       for (let j = 0; j < box.length; j++) {
         points.push(new THREE.Vector2(box[j].x, box[j].y * -1))
       }
-      const shape = new THREE.Shape(points)
-      const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings)
-      geometry.rotateX(-Math.PI / 2);   // 将 XY 平面旋转成 XZ 平面
-      // 计算点points[0]到points[1]的方向向量
-      const direction = new THREE.Vector3(box[1].x - box[0].x, 0, box[1].y - box[0].y).normalize()
-      // 将方向向量旋转90度
-      const rotatedDirection = new THREE.Vector3(-direction.z, direction.y, direction.x)
+      if (points.length) {
+        const shape = new THREE.Shape(points)
+        const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings)
+        geometry.rotateX(-Math.PI / 2);   // 将 XY 平面旋转成 XZ 平面
+        // 计算点points[0]到points[1]的方向向量
+        const direction = new THREE.Vector3(box[1].x - box[0].x, 0, box[1].y - box[0].y).normalize()
+        // 将方向向量旋转90度
+        const rotatedDirection = new THREE.Vector3(-direction.z, direction.y, direction.x)
 
-      const material = getMaterialById(this.getData().wmt)?.material(rotatedDirection) || new THREE.MeshStandardMaterial({
-        color: this.getData().color,
-        side: THREE.DoubleSide
-      })
-
-      const wallMesh = new THREE.Mesh(geometry, material)
-      if (data.points[i].snw) {
-        wallMesh.visible = false
+        const material = getMaterialById(this.getData().wmt)?.material(rotatedDirection) || new THREE.MeshStandardMaterial({
+          color: this.getData().color,
+          side: THREE.DoubleSide
+        })
+        const wallMesh = new THREE.Mesh(geometry, material)
+        if (data.points[i].snw) {
+          wallMesh.visible = false
+        }
+        // wallMesh.position.set(0, 0, 0)
+        // console.log('this.getData() ', this.getData())
+        wallMesh.castShadow = true
+        wallMesh.receiveShadow = true
+        wallMesh.position.setY(bottom)
+        const group = new THREE.Group()
+        group.add(wallMesh)
+        meshList.push(group)
       }
-      // wallMesh.position.set(0, 0, 0)
-      // console.log('this.getData() ', this.getData())
-      wallMesh.castShadow = true
-      wallMesh.receiveShadow = true
-      wallMesh.position.setY(bottom)
-      const group = new THREE.Group()
-      group.add(wallMesh)
-      meshList.push(group)
     }
 
     const points: THREE.Vector2[] = []; // wall.points.map((p) => new THREE.Vector2(p.x, p.y))
     data.points.forEach((mesh: Point) => {
       points.push(new THREE.Vector2(mesh.x, mesh.y * -1))
     })
-    const shape = new THREE.Shape(points)
-    // 盖一个地板
-    if (data.hb) {
-      const floorDepth = 1
-      const extrudeSettingsBottom = {
-        steps: 1,
-        depth: floorDepth,
-        bevelEnabled: true,
+    if (points.length) {
+      const shape = new THREE.Shape(points)
+      // 盖一个地板
+      if (data.hb) {
+        const floorDepth = 1
+        const extrudeSettingsBottom = {
+          steps: 1,
+          depth: floorDepth,
+          bevelEnabled: true,
+        }
+        const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettingsBottom)
+        geometry.rotateX(-Math.PI / 2);   // 将 XY 平面旋转成 XZ 平面
+        const materialBottom = data.bmt ? (getMaterialById(data.bmt)?.material(new THREE.Vector3(0, 1, 0))) : (new THREE.MeshStandardMaterial({
+          color: data.bc,
+          side: THREE.DoubleSide
+        }));
+        const floorMesh = new THREE.Mesh(geometry, materialBottom)
+        floorMesh.position.set(0, floorDepth * -1 + 1 + bottom, 0)
+        const group = new THREE.Group()
+        group.add(floorMesh)
+        meshList.push(group)
       }
-      const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettingsBottom)
-      geometry.rotateX(-Math.PI / 2);   // 将 XY 平面旋转成 XZ 平面
-      const materialBottom = data.bmt ? (getMaterialById(data.bmt)?.material(new THREE.Vector3(0, 1, 0))) : (new THREE.MeshStandardMaterial({
-        color: data.bc,
-        side: THREE.DoubleSide
-      }));
-      const floorMesh = new THREE.Mesh(geometry, materialBottom)
-      floorMesh.position.set(0, floorDepth * -1 + 1 + bottom, 0)
-      const group = new THREE.Group()
-      group.add(floorMesh)
-      meshList.push(group)
-    }
 
-    // 盖一个盖子
-    if (this.getData().ht) {
-      const geometryTop = new THREE.ShapeGeometry(shape)
-      geometryTop.rotateX(-Math.PI / 2);   // 将 XY 平面旋转成 XZ 平面
-      const mater = getMaterialById(this.getData().tmt)?.material(new THREE.Vector3(0, 1, 0));
-      if (mater) {
-        mater.side = data.td ? THREE.DoubleSide : THREE.BackSide;
+      // 盖一个盖子
+      if (this.getData().ht) {
+        const geometryTop = new THREE.ShapeGeometry(shape)
+        geometryTop.rotateX(-Math.PI / 2);   // 将 XY 平面旋转成 XZ 平面
+        const mater = getMaterialById(this.getData().tmt)?.material(new THREE.Vector3(0, 1, 0));
+        if (mater) {
+          mater.side = data.td ? THREE.DoubleSide : THREE.BackSide;
+        }
+        const materialTop = mater || (new THREE.MeshStandardMaterial({
+          color: data.tc,
+          side: data.td ? THREE.DoubleSide : THREE.BackSide
+        }));
+        const topMesh = new THREE.Mesh(geometryTop, materialTop)
+        topMesh.position.set(0, wallHeight + 1 + bottom, 0)
+        const group2 = new THREE.Group()
+        group2.add(topMesh)
+        meshList.push(group2)
       }
-      const materialTop = mater || (new THREE.MeshStandardMaterial({
-        color: data.tc,
-        side: data.td ? THREE.DoubleSide : THREE.BackSide
-      }));
-      const topMesh = new THREE.Mesh(geometryTop, materialTop)
-      topMesh.position.set(0, wallHeight + 1 + bottom, 0)
-      const group2 = new THREE.Group()
-      group2.add(topMesh)
-      meshList.push(group2)
     }
     return meshList
   }
