@@ -1,5 +1,5 @@
 import * as THREE from 'three'
-import { ObjData, HandelInfo, Point, PointWithIndex } from './map2d'
+import { PointObjData, HandelInfo, Point, PointWithIndex } from './map2d'
 import { World } from '@/utils/world'
 import { editItem } from '@/entities'
 import { MatchRectArea, MatchCircleArea } from '@/utils/matchArea'
@@ -20,7 +20,7 @@ export type MatchSnapPoint = OrigionSnapPoint | {
   point: Point,
 }
 
-export abstract class EntityClass<T extends ObjData> {
+export abstract class EntityClass<T extends PointObjData> {
   abstract name: string
   abstract type: string
   abstract isPointObj: boolean // 点状对象，如窗户/门。非点状的如墙
@@ -208,7 +208,7 @@ export abstract class EntityClass<T extends ObjData> {
 
   // 当前对象进入到一根吸附线的区域
   abstract inSceneSnapLineArea(
-    obj: EntityClass<ObjData>,
+    obj: EntityClass<PointObjData>,
     line: [Point, Point],
     point: Point,
   ): boolean;

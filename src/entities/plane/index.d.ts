@@ -1,6 +1,6 @@
-import { ObjData } from '@/types/map2d'
+import { PointObjData } from '@/types/map2d'
 
-export type PlaneData = ObjData & {
+export type PlaneData = PointObjData & {
   width: number
   length: number
   color: string

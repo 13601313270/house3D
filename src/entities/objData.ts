@@ -1,6 +1,6 @@
-import { ObjData, ObjInWallData } from "@/types/map2d"
+import { PointObjData, ObjInWallData } from "@/types/map2d"
 
-class ObjDataClass<T extends ObjData> {
+class ObjDataClass<T extends PointObjData> {
   id: string
   x: number
   y: number

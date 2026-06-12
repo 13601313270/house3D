@@ -1,1 +1,1 @@
-export { Point, ObjData } from './map2d'
+export { Point, PointObjData as ObjData } from './map2d'

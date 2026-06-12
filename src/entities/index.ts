@@ -1,5 +1,5 @@
 import { EntityClass } from '@/types/entity'
-import { ObjData } from '@/types/map2d'
+import { PointObjData } from '@/types/map2d'
 import wallPlugin from './wall'
 import windowPlugin from './window'
 import doorPlugin from './door'
@@ -88,7 +88,7 @@ export const fileDataKeyToClass: Record<string, EntityConstructor> = {
 }))
 
 export type fileData = {
-  [key in string]?: ObjData[]
+  [key in string]?: PointObjData[]
 }
 
 export type editItem = {

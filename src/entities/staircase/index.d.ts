@@ -1,4 +1,4 @@
-import { Point, ObjData } from '@/types/map2d'
+import { Point, PointObjData } from '@/types/map2d'
 
 
 export interface StaircasePoint extends Point {
@@ -9,7 +9,7 @@ export interface StaircasePoint extends Point {
 type wallInfo = {
   hidden: boolean
 }
-export type StaircaseData = ObjData & {
+export type StaircaseData = PointObjData & {
   points: StaircasePoint[]
   thickness: number
   color: string

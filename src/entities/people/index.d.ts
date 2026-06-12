@@ -1,6 +1,6 @@
-import { ObjData } from '@/types/map2d'
+import { PointObjData } from '@/types/map2d'
 
-export type PeopleData = ObjData & {
+export type PeopleData = PointObjData & {
   angle: number
   height: number,// 身高
   color?: string,// 人物颜色

@@ -1,6 +1,6 @@
-import { ObjData } from '@/types/map2d'
+import { PointObjData } from '@/types/map2d'
 
-export type CameraData = ObjData & {
+export type CameraData = PointObjData & {
   targetPositionX: number
   targetPositionY: number
   targetPositionZ: number

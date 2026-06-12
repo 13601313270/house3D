@@ -1,6 +1,6 @@
-import { ObjData } from '@/types/map2d'
+import { PointObjData } from '@/types/map2d'
 
-export type CubeData = ObjData & {
+export type CubeData = PointObjData & {
   width: number
   height: number
   depth: number

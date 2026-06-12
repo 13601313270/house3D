@@ -1,6 +1,6 @@
-import { ObjData } from '@/types/map2d'
+import { PointObjData } from '@/types/map2d'
 
-export type CylinderData = ObjData & {
+export type CylinderData = PointObjData & {
   r: number
   h: number
   color: string

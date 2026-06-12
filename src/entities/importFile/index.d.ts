@@ -1,6 +1,6 @@
-import { ObjData } from '@/types/map2d'
+import { PointObjData } from '@/types/map2d'
 
-export type ImportFileData = ObjData & {
+export type ImportFileData = PointObjData & {
   fileTypeId: string
   angleY: number
   bm: number | null // 材质
