@@ -122,7 +122,7 @@ export abstract class BaseEntityClass<T extends BaseObj> {
     if (this.cacheKeyStr === newKeyByData) {
       return;
     }
-    console.log('reCreate3DMeshIfNeed', this.cacheKeyStr, newKeyByData)
+    // console.log('reCreate3DMeshIfNeed', this.cacheKeyStr, newKeyByData)
     const scene: THREE.Scene = this.world.scene
     this.meshList.forEach(mesh => scene.remove(mesh))
     this.meshList = this.create3DMesh(scene);

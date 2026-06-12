@@ -347,7 +347,6 @@ export class World {
                 item.boundingBox.visible = false
                 if (item.spriteGroup) {
                   item.spriteGroup.position.set(data.x, data.z, data.y)
-                  console.log('offsetVector3', offsetVector3)
                   item.spriteGroup.children[0].position.set(0, boxVector3.y / 2 + offsetVector3.y + 12, 0)
                 }
               } else {

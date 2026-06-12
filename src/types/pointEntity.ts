@@ -29,9 +29,10 @@ export abstract class PointEntityClass<T extends PointObjData> extends BaseEntit
   abstract createBoundingBox(): [THREE.Vector3, THREE.Vector3, THREE.Vector3] | null // 第一个是尺寸，第二个是位置偏移，第三个是旋转角度
 
   reCreate3DMeshIfNeed(): void {
+    const oldCacheKey = this.cacheKeyStr;
     super.reCreate3DMeshIfNeed();
     const newKeyByData = this.meshNeedChangeKey();
-    if (this.cacheKeyStr === newKeyByData) {
+    if (oldCacheKey === newKeyByData) {
       return;
     }
     const scene: THREE.Scene = this.world.scene
@@ -51,7 +52,6 @@ export abstract class PointEntityClass<T extends PointObjData> extends BaseEntit
       // this.boxOffset.set(offsetVector3.x, offsetVector3.y, offsetVector3.z)
       // this.boxRotate.set(rotateVector3.x, rotateVector3.y, rotateVector3.z);
       (() => {
-        console.log('createBoundingBox-data', this.data);
         // this.data.tip = '哈哈哈'
         if (this.data.tip) { // data.tip
           const canvas = document.createElement('canvas');

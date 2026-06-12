@@ -217,7 +217,7 @@ import { HandelInfo, PointWithIndex } from '@/types/map2d'
 import pointToLineDistance from '@/utils/pointToLineDistance'
 import { DoorEntity } from '@/entities/door/entity'
 import { CameraData } from '@/entities/camera/index.d'
-import { defaultWallData, WallEntity } from '@/entities/wall/entity'
+import { WallEntity } from '@/entities/wall/entity'
 import { ImportFileType, ObjOutputFileType } from '@/entities/allObjs'
 import { OutFileDataClass } from '@/entities/outFile/dataClass'
 import { OutFileEntity } from '@/entities/outFile/entity'
@@ -1251,6 +1251,9 @@ const handleContextMenu = (e: MouseEvent) => {
             editPropTypeKey.value = type
             editPropTypeIndex.value = j
             const modifyConfig: editItem[] = [...propConfig];
+            // if (api instanceof PointEntityClass) {
+
+            // }
             if (type !== 'wall') {
               modifyConfig.push({
                 id: 'tipGroup',
