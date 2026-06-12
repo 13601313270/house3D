@@ -946,9 +946,6 @@ onMounted(async () => {
           const newWall: WallData = {
             ...defaultWallData,
             id: Date.now().toString(),
-            x: 0,
-            y: 0,
-            z: 0,
             points: tempPointInsertData.value.map(v => {
               return {
                 ...v,
@@ -1396,6 +1393,7 @@ const handleCanvasClick = async (e: MouseEvent) => {
           if (tempPointInsertData.value.length > 1) {
             const newWall: WallData = {
               ...defaultWallData,
+              id: Date.now().toString(),
               points: tempPointInsertData.value.map(v => {
                 return {
                   ...v,
