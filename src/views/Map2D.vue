@@ -212,7 +212,7 @@ import Canvas3D, { CameraState } from '../components/Canvas3D.vue'
 import { WallData } from '@/entities/wall/index.d'
 import { allFileKeys, fileData, editItem, allFileKeysName, fileDataKeyToClass, allFileKeysGroup } from '@/entities'
 import { PointEntityClass } from '@/types/pointEntity'
-import { EntityClassInWall } from '@/types/entityInWall'
+import { EntityClassInWall, NearestWallResult } from '@/types/entityInWall'
 import { HandelInfo, PointWithIndex } from '@/types/map2d'
 import pointToLineDistance from '@/utils/pointToLineDistance'
 import { DoorEntity } from '@/entities/door/entity'
@@ -397,13 +397,6 @@ const editPropInputInfo = ref<any>({})
 const editPropTypeKey = ref<string>()
 const editSnapPoint = ref<HandelInfo>()
 const editPropTypeIndex = ref<number>(-1)
-
-export interface NearestWallResult {
-  wall: WallData
-  lineIndex: number,
-  pointOnWall: Point
-  angle: number
-}
 
 const getNearestWall = (point: Point): NearestWallResult | null => {
   let nearestWall: WallData | null = null
@@ -873,7 +866,6 @@ onMounted(async () => {
     const match = location.href.match(/initId=(\d+)/);
     if (match) {
       // chooseDemo(1)
-
       const initDefaultFile: any & {
         panOffset: Point
         zoomLevel: number
@@ -1411,7 +1403,6 @@ const handleCanvasClick = async (e: MouseEvent) => {
                 }
               }),
             }
-            console.log('ddddddsssss---111')
             await worldApi.add('wall', [newWall])
             tempPointInsertData.value = []
             lastPoint.value = null

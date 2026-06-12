@@ -96,7 +96,7 @@ export class World {
     if (!ctx) return
     if (tempWallPoints.length > 0) {
       ctx.strokeStyle = '#42b983'
-      ctx.setLineDash([5, 5])
+      ctx.lineWidth = 10
       ctx.beginPath()
       ctx.moveTo(tempWallPoints[0].x * zoomLevel + panOffset.x, tempWallPoints[0].y * zoomLevel + panOffset.y)
       for (let i = 1; i < tempWallPoints.length; i++) {
@@ -106,29 +106,25 @@ export class World {
         ctx.lineTo(hoverPoint.x * zoomLevel + panOffset.x, hoverPoint.y * zoomLevel + panOffset.y)
       }
       ctx.stroke()
-
+      ctx.fillStyle = '#b94242'
+      ctx.font = '20px Arial'
+      ctx.textAlign = 'center'
+      ctx.strokeStyle = 'white'
+      ctx.lineWidth = 3
+      ctx.lineJoin = 'round'
       tempWallPoints.forEach((point, index) => {
         const screenX = point.x * zoomLevel + panOffset.x
         const screenY = point.y * zoomLevel + panOffset.y
-        const isDragged = false;// index === draggedPointIndex
-        drawPoint(ctx, screenX, screenY, isDragged ? '#1890ff' : '#42b983')
-        if (isDragged) {
-          ctx.strokeStyle = '#1890ff'
-          ctx.lineWidth = 2
-          ctx.beginPath()
-          ctx.arc(screenX, screenY, 12 * zoomLevel, 0, Math.PI * 2)
-          ctx.stroke()
-        }
+        drawPoint(ctx, screenX, screenY, '#b94242')
         if (index > 0) {
           const prev = tempWallPoints[index - 1]
           const prevScreenX = prev.x * zoomLevel + panOffset.x
           const prevScreenY = prev.y * zoomLevel + panOffset.y
-          ctx.fillStyle = isDragged ? '#1890ff' : '#42b983'
-          ctx.font = '20px Arial'
           const dist = Math.round(Math.hypot(point.x - prev.x, point.y - prev.y))
           const midX = (screenX + prevScreenX) / 2
           const midY = (screenY + prevScreenY) / 2
-          ctx.fillText(`${dist}cm`, midX, midY - 5)
+          ctx.strokeText(`${dist}cm`, midX, midY)
+          ctx.fillText(`${dist}cm`, midX, midY)
 
           // 绘制角度标记
           if (index > 1) {
@@ -148,7 +144,7 @@ export class World {
               const offset = angle < 30 ? 15 : -15
               const angleX = prevScreenX - 10
               const angleY = prevScreenY + offset
-              ctx.fillStyle = '#42b983'
+              ctx.strokeText(angleText, angleX, angleY)
               ctx.fillText(angleText, angleX, angleY)
             }
           }
@@ -160,7 +156,17 @@ export class World {
       if (hoverPoint) {
         const hoverScreenX = hoverPoint.x * zoomLevel + panOffset.x
         const hoverScreenY = hoverPoint.y * zoomLevel + panOffset.y
-        drawPoint(ctx, hoverScreenX, hoverScreenY, '#42b983')
+        drawPoint(ctx, hoverScreenX, hoverScreenY, '#b94242')
+        ctx.setLineDash([])
+        ctx.font = '24px Arial'
+        ctx.textBaseline = 'middle'
+        ctx.strokeStyle = 'white'
+        ctx.lineWidth = 3
+        ctx.lineJoin = 'round'
+        ctx.fillStyle = '#b94242ff'
+        ctx.strokeText('ESC 结束', hoverScreenX, hoverScreenY + 20)
+        ctx.fillText('ESC 结束', hoverScreenX, hoverScreenY + 20)
+
         // 绘制最后一个转角的角度标记
         if (tempWallPoints.length > 0) {
           const prev = tempWallPoints[tempWallPoints.length - 1]
@@ -170,12 +176,11 @@ export class World {
           const screenX = hoverPoint.x * zoomLevel + panOffset.x
           const screenY = hoverPoint.y * zoomLevel + panOffset.y
 
-          ctx.fillStyle = '#42b983'
-          ctx.font = '20px Arial'
           const dist = Math.round(Math.hypot(hoverPoint.x - prev.x, hoverPoint.y - prev.y))
           const midX = (screenX + prevScreenX) / 2
           const midY = (screenY + prevScreenY) / 2
-          ctx.fillText(`${dist}cm`, midX, midY - 5)
+          ctx.strokeText(`${dist}cm`, midX, midY)
+          ctx.fillText(`${dist}cm`, midX, midY)
           if (tempWallPoints.length > 1) {
             const prev2 = tempWallPoints[tempWallPoints.length - 2]
             const prev2ScreenX = prev2.x * zoomLevel + panOffset.x
@@ -193,6 +198,7 @@ export class World {
               const offset = angle < 30 ? 15 : -15
               const angleX = prevScreenX - 10
               const angleY = prevScreenY + offset
+              ctx.strokeText(angleText, angleX, angleY)
               ctx.fillText(angleText, angleX, angleY)
             }
           }
@@ -277,7 +283,6 @@ export class World {
       // const hoverScreenY = hoverPoint.y * zoomLevel + panOffset.y
       ctx.strokeStyle = '#999'
       ctx.lineWidth = 1
-      ctx.setLineDash([5, 5])
 
       // 垂直线（y轴对齐）
       if (yAxisSnappedX !== null) {

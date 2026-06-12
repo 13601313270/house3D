@@ -3,7 +3,7 @@ import { PointEntityClass } from "./pointEntity";
 import { PointObjData, ObjInWallData, Point } from "./map2d";
 import { MatchSnapPoint } from "./baseEntity";
 
-interface NearestWallResult {
+export interface NearestWallResult {
   wall: WallData
   lineIndex: number,
   pointOnWall: Point
