@@ -247,13 +247,9 @@ const canvas3DRef2 = ref<typeof Canvas3D | null>(null)
 const activeToolsIndex = ref(-1)
 const currentTool = ref<string | 'drag'>('drag')
 const tempDrawWall = ref<{
-  id: string,
-  points: {
-    x: number
-    y: number
-  }[],
-  // thickness: number,
-} | null>(null)
+  x: number
+  y: number
+}[]>([])
 const hoverPoint = ref<Point | null>(null)
 const lastPoint = ref<Point | null>(null)
 const history = ref<WallDataClass[][]>([])
@@ -506,7 +502,7 @@ const getSnapPoint = (
         pointDistance = dist
         pointSnapped = {
           objType: point.objType,
-          objId: point.objId,
+          // objId: point.objId,
           snapFromType: point.snapFromType,
           point: point.point
         }
@@ -519,7 +515,7 @@ const getSnapPoint = (
     return {
       objType: pointSnapped.objType,
       snapFromType: pointSnapped.snapFromType,
-      objId: pointSnapped.objId,
+      // objId: pointSnapped.objId,
       point: {
         ...roundNumberList(pointSnapped.point),
         index: (pointSnapped.point as PointWithIndex).index,
@@ -532,9 +528,9 @@ const getSnapPoint = (
 
   const snapAngles = [0, 45, 90, 135, 180, -135, -90, -45]
 
-  if (tempDrawWall.value?.points?.length && tempDrawWall.value.points.length > 1) {
-    const prev = tempDrawWall.value.points[tempDrawWall.value.points.length - 2]
-    const last = tempDrawWall.value.points[tempDrawWall.value.points.length - 1]
+  if (tempDrawWall.value.length && tempDrawWall.value.length > 1) {
+    const prev = tempDrawWall.value[tempDrawWall.value.length - 2]
+    const last = tempDrawWall.value[tempDrawWall.value.length - 1]
     const prevDx = last.x - prev.x
     const prevDy = last.y - prev.y
     const prevAngle = Math.atan2(prevDy, prevDx)
@@ -555,12 +551,12 @@ const getSnapPoint = (
   // 3. 计算轴对齐磁吸数据
   let xAxisSnappedYVal: {
     objType: string,
-    objId: string,
+    // objId: string,
     number: number
   } | null = null // 命中的y坐标值（水平对齐，即y值与某个点一致）
   let yAxisSnappedXVal: {
     objType: string,
-    objId: string,
+    // objId: string,
     number: number
   } | null = null // 命中的x坐标值（垂直对齐，即x值与某个点一致）
   let xAxisDistance = Infinity // 命中x轴对齐的最小距离
@@ -571,7 +567,7 @@ const getSnapPoint = (
       xAxisDistance = distToXAxis
       xAxisSnappedYVal = {
         objType: point.objType,
-        objId: point.objId,
+        // objId: point.objId,
         number: point.point.y
       }
     }
@@ -581,7 +577,7 @@ const getSnapPoint = (
       yAxisDistance = distToYAxis
       yAxisSnappedXVal = {
         objType: point.objType,
-        objId: point.objId,
+        // objId: point.objId,
         number: point.point.x
       }
     }
@@ -612,7 +608,7 @@ const getSnapPoint = (
     // 1. 计算角度磁吸数据
     let angleSnapped: {
       objType: string,
-      objId: string,
+      // objId: string,
       point: Point
     } | null = null
     if (minAngleDiff < 10) {
@@ -624,7 +620,7 @@ const getSnapPoint = (
       if (distToMouse < 10) {
         angleSnapped = {
           objType: nearestStart.objType,
-          objId: nearestStart.objId,
+          // objId: nearestStart.objId,
           point: {
             x: snappedXTemp,
             y: snappedYTemp
@@ -687,7 +683,7 @@ const getSnapPoint = (
       }
       return {
         objType: nearestStart.objType,
-        objId: nearestStart.objId,
+        // objId: nearestStart.objId,
         snapFromType: 'line',
         point: roundNumberList({
           x: snappedX,
@@ -701,7 +697,7 @@ const getSnapPoint = (
       snappedY = angleSnapped.point.y
       return {
         objType: angleSnapped.objType,
-        objId: angleSnapped.objId,
+        // objId: angleSnapped.objId,
         snapFromType: 'line',
         point: roundNumberList({
           x: snappedX,
@@ -716,7 +712,7 @@ const getSnapPoint = (
     snappedY = xAxisSnappedYVal.number
     return {
       objType: yAxisSnappedXVal.objType,
-      objId: yAxisSnappedXVal.objId,
+      // objId: yAxisSnappedXVal.objId,
       snapFromType: 'axis',
       point: roundNumberList({
         x: snappedX,
@@ -729,7 +725,7 @@ const getSnapPoint = (
     snappedY = current.y
     return {
       objType: yAxisSnappedXVal.objType,
-      objId: yAxisSnappedXVal.objId,
+      // objId: yAxisSnappedXVal.objId,
       snapFromType: 'axis',
       point: roundNumberList({
         x: snappedX,
@@ -742,7 +738,7 @@ const getSnapPoint = (
     snappedY = xAxisSnappedYVal.number
     return {
       objType: xAxisSnappedYVal.objType,
-      objId: xAxisSnappedYVal.objId,
+      // objId: xAxisSnappedYVal.objId,
       snapFromType: 'axis',
       point: roundNumberList({
         x: snappedX,
@@ -770,7 +766,7 @@ const drawWrapper2D = (fileData: fileData) => {
     worldApi.draw2DWorld(
       canvas,
       fileData,
-      tempDrawWall.value?.points || [],
+      tempDrawWall.value || [],
       hoverPoint.value,
       currentTool.value,
       xAxisSnappedY.value === null ? null : xAxisSnappedY.value?.number,
@@ -952,15 +948,15 @@ onMounted(async () => {
 
   const handleKeyDown = async (e: KeyboardEvent) => {
     if (e.key === 'Escape') {
-      if (tempDrawWall.value?.points?.length && tempDrawWall.value.points.length > 0) {
-        if (tempDrawWall.value?.points.length > 1) {
+      if (tempDrawWall.value.length > 0) {
+        if (tempDrawWall.value.length > 1) {
           const newWall: WallData = {
             ...defaultWallData,
             id: Date.now().toString(),
             x: 0,
             y: 0,
             z: 0,
-            points: tempDrawWall.value.points.map(v => {
+            points: tempDrawWall.value.map(v => {
               return {
                 ...v,
                 snw: false,
@@ -971,7 +967,7 @@ onMounted(async () => {
           await worldApi.add('wall', [newWall])
           history.value.push(JSON.parse(JSON.stringify(worldApi.getObjects('wall'))))
         }
-        tempDrawWall.value = null
+        tempDrawWall.value = []
         lastPoint.value = null
         hoverPoint.value = null
       } else {
@@ -1370,28 +1366,26 @@ const handleCanvasClick = async (e: MouseEvent) => {
     let clickPoint: Point = { x, y }
 
     if (tempDrawWall.value) {
-      if (tempDrawWall.value.points.length > 0) {
+      if (tempDrawWall.value.length > 0) {
         const last = {
-          ...tempDrawWall.value.points[tempDrawWall.value.points.length - 1],
-          index: tempDrawWall.value.points.length - 1,
+          ...tempDrawWall.value[tempDrawWall.value.length - 1],
+          index: tempDrawWall.value.length - 1,
         }
         // 收集所有点（包括临时折线和已绘制的墙上的点）
-        const allPoints: Point[] = [...tempDrawWall.value.points];
+        const allPoints: Point[] = [...tempDrawWall.value];
         (worldApi.getObjects('wall') as WallData[]).forEach((wall: WallData) => {
           wall.points.forEach(point => {
             allPoints.push(point)
           })
         })
-        let snapped = getSnapPoint(clickPoint,
+        let snapped22 = getSnapPoint(clickPoint,
           [{
             objType: 'wall',
-            objId: tempDrawWall.value.id,
             snapFromType: 'point',
             point: last
           }],
           allPoints.map((v, index) => ({
             objType: 'wall',
-            objId: (tempDrawWall.value as WallData).id,
             snapFromType: 'point',
             point: {
               ...v,
@@ -1399,21 +1393,20 @@ const handleCanvasClick = async (e: MouseEvent) => {
             }
           }))
         )
-        if (snapped === null) {
-          snapped = {
+        if (snapped22 === null) {
+          snapped22 = {
             objType: 'wall',
-            objId: tempDrawWall.value.id,
             snapFromType: 'point',
             point: clickPoint
           }
         }
-        const dist = Math.hypot(snapped.point.x - last.x, snapped.point.y - last.y)
+        const dist = Math.hypot(snapped22.point.x - last.x, snapped22.point.y - last.y)
 
         if (dist < 10 * zoom2DLevel.value) {
-          if (tempDrawWall.value?.points?.length && tempDrawWall.value.points.length > 1) {
+          if (tempDrawWall.value.length > 1) {
             const newWall: WallData = {
               ...defaultWallData,
-              points: tempDrawWall.value.points.map(v => {
+              points: tempDrawWall.value.map(v => {
                 return {
                   ...v,
                   snw: false,
@@ -1423,23 +1416,20 @@ const handleCanvasClick = async (e: MouseEvent) => {
             }
             await worldApi.add('wall', [newWall])
             history.value.push(JSON.parse(JSON.stringify(worldApi.getObjects('wall'))))
-            tempDrawWall.value.points = []
+            tempDrawWall.value = []
             lastPoint.value = null
           }
           return
         }
-        clickPoint = snapped.point
+        clickPoint = snapped22.point
       }
-      tempDrawWall.value?.points?.push({
+      tempDrawWall.value.push({
         ...clickPoint,
       })
     } else {
-      tempDrawWall.value = {
-        id: Date.now().toString(),
-        points: [{
-          ...clickPoint,
-        }],
-      }
+      tempDrawWall.value = [{
+        ...clickPoint,
+      }]
     }
     lastPoint.value = clickPoint
   } else if (insertTempObj) {
@@ -1531,14 +1521,14 @@ const handleMouseMove = (e: MouseEvent) => {
             return true;
           })
           if (beMatchPoints.length > 0) {
-            const snapped = getSnapPoint({ x, y }, [], beMatchPoints)
-            if (snapped !== null) {
+            const snapped33 = getSnapPoint({ x, y }, [], beMatchPoints)
+            if (snapped33 !== null) {
               const result = matchHandelObj.inSceneSnapPointArea(
                 {
                   objType: api.type,
-                  objId: snapped.objId,
+                  // objId: snapped33.objId,
                   snapFromType: 'point',
-                  point: snapped.point
+                  point: snapped33.point
                 },
                 matchedHandelInfo,
               )
@@ -1683,45 +1673,43 @@ const handleMouseMove = (e: MouseEvent) => {
       }
     }
   } else if (currentTool.value === 'wall') {
-    if (tempDrawWall.value && tempDrawWall.value?.points?.length && tempDrawWall.value.points.length > 0) {
-      const last = tempDrawWall.value.points[tempDrawWall.value.points.length - 1]
+    if (tempDrawWall.value && tempDrawWall.value.length > 0) {
+      const last = tempDrawWall.value[tempDrawWall.value.length - 1]
       const dist = Math.hypot(x - last.x, y - last.y)
 
       if (dist < snapThreshold) {
         hoverPoint.value = { ...last }
       } else {
         // 收集所有点（包括临时折线和已绘制的墙上的点）
-        const allPoints = [...tempDrawWall.value.points];
+        const allPoints = [...tempDrawWall.value];
         (worldApi.getObjects('wall') as WallData[]).forEach((wall: WallData) => {
           wall.points.forEach((point) => {
             allPoints.push(point)
           })
         })
-        let snappedPoint = getSnapPoint(
+        let snappedPoint44 = getSnapPoint(
           { x, y },
           [{
             objType: 'wall',
-            objId: tempDrawWall.value.id,
             snapFromType: 'point',
             point: last
           }],
           allPoints.map(v => ({
             objType: 'wall',
-            objId: (tempDrawWall.value as WallData).id,
+            // objId: (tempDrawWall.value as WallData).id,
             snapFromType: 'point',
             point: v
           }))
         )
-        if (snappedPoint === null) {
-          snappedPoint = {
+        if (snappedPoint44 === null) {
+          snappedPoint44 = {
             objType: 'wall',
-            objId: tempDrawWall.value.id,
             snapFromType: 'point',
             point: { x, y }
           }
         }
-        if (snappedPoint) {
-          hoverPoint.value = snappedPoint.point
+        if (snappedPoint44) {
+          hoverPoint.value = snappedPoint44.point
         }
       }
     }

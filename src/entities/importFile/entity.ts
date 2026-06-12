@@ -391,14 +391,14 @@ export class ImportFileEntity extends EntityClass<ImportFileData> {
   }
 
   getMineBeSnapPoints(): Array<OrigionSnapPoint> {
-    const { x, y, id } = this.getData()
+    const { x, y } = this.getData()
     // 计算旋转后的点
     // const rotatedX = x * Math.cos(angleY) - y * Math.sin(angleY)
     // const rotatedY = x * Math.sin(angleY) + y * Math.cos(angleY)
 
     return [{
       objType: this.type,
-      objId: id,
+      // objId: id,
       snapFromType: 'point',
       point: {
         index: 0,

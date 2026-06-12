@@ -489,10 +489,10 @@ export class OutFileEntity extends EntityClass<OutFileData> {
   }
 
   getMineBeSnapPoints(): Array<OrigionSnapPoint> {
-    const { x, y, id } = this.getData()
+    const { x, y } = this.getData()
     return [{
       objType: this.type,
-      objId: id,
+      // objId: id,
       snapFromType: 'point',
       point: {
         index: 0,

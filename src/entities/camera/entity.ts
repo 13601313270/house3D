@@ -470,7 +470,7 @@ export class CameraEntity extends EntityClass<CameraData> {
     const data = this.getData();
     return [{
       objType: this.type,
-      objId: data.id,
+      // objId: data.id,
       snapFromType: 'point',
       point: {
         index: 0,
