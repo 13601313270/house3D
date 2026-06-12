@@ -1,8 +1,9 @@
 import { WallData, WallPoint } from "./index.d"
-import { ObjDataClass } from "../objData"
+import { LineObjDataClass } from "../objData"
+import { Point } from "@/types";
 
-export class WallDataClass extends ObjDataClass<WallData> {
-  points: WallPoint[]
+export class WallDataClass extends LineObjDataClass<WallPoint, WallData> {
+  points: (Point & WallPoint)[]
   thickness: number
   color: string
   height: number
