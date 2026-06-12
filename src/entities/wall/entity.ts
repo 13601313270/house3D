@@ -723,7 +723,7 @@ const defaultWallData: WallData = {
   color: '#fff',
   wmt: 0,
   points: [],
-  thickness: 10,
+  thickness: 20,
   hb: true,
   bc: '#aaa',
   bmt: 2,

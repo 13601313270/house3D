@@ -217,7 +217,6 @@ import { HandelInfo, PointWithIndex } from '@/types/map2d'
 import pointToLineDistance from '@/utils/pointToLineDistance'
 import { DoorEntity } from '@/entities/door/entity'
 import { CameraData } from '@/entities/camera/index.d'
-import { WallDataClass } from '@/entities/wall/dataClass'
 import { defaultWallData, WallEntity } from '@/entities/wall/entity'
 import { ImportFileType, ObjOutputFileType } from '@/entities/allObjs'
 import { OutFileDataClass } from '@/entities/outFile/dataClass'
@@ -253,14 +252,8 @@ const tempPointInsertData = ref<{
 }[]>([])
 const hoverPoint = ref<Point | null>(null)
 const lastPoint = ref<Point | null>(null)
-const history = ref<WallDataClass[][]>([])
 const xAxisSnappedY = ref<{ objType: string; number: number } | null>(null)
 const yAxisSnappedX = ref<{ objType: string; number: number } | null>(null)
-const draggedPoint = ref<
-  { objType: 'wall'; wallIndex: number; pointIndex: number } |
-  { type: 'door'; doorIndex: number } |
-  { type: 'window'; windowIndex: number } |
-  null>(null)
 const dragOffset = ref<Point | null>(null)
 const dragStartPoint = ref<Point | null>(null)
 const panOffset = ref<Point>({ x: 0, y: 0 })
@@ -270,7 +263,6 @@ const panel2SplitWidthPer = ref(0.35)
 const isSplitting = ref(false)
 const canvasSize = ref({ width: 0, height: 0 })
 const zoom2DLevel = ref(1)
-const wallThickness = ref<number>(20)
 
 const showLogin = ref(false)
 const showDemos = ref(false)
@@ -392,7 +384,7 @@ const contextMenu = ref<{
   visible: boolean;
   x: number;
   y: number;
-  type: 'door' | 'window' | 'wall' | 'camera';
+  type: string;
   index?: number;
   wallIndex?: number;
   pointIndex?: number;
@@ -970,10 +962,8 @@ onMounted(async () => {
                 snw: false,
               }
             }),
-            thickness: wallThickness.value,
           }
           await worldApi.add('wall', [newWall])
-          history.value.push(JSON.parse(JSON.stringify(worldApi.getObjects('wall'))))
         }
         tempPointInsertData.value = []
         lastPoint.value = null
@@ -1232,7 +1222,6 @@ async function initWorldByData(data: fileData & {
   if (data.activeCameraIndex !== undefined) {
     changeCamera2State(data.activeCameraIndex)
   }
-  history.value = []
   drawWrapper2DAnd3D()
 }
 
@@ -1420,10 +1409,9 @@ const handleCanvasClick = async (e: MouseEvent) => {
                   snw: false,
                 }
               }),
-              thickness: wallThickness.value,
             }
+            console.log('ddddddsssss---111')
             await worldApi.add('wall', [newWall])
-            history.value.push(JSON.parse(JSON.stringify(worldApi.getObjects('wall'))))
             tempPointInsertData.value = []
             lastPoint.value = null
           }
@@ -1470,7 +1458,6 @@ const handleCanvasClick = async (e: MouseEvent) => {
 const clearDrawing = () => {
   if (confirm('确定要清空所有绘制内容吗？')) {
     worldApi.clearAll();
-    history.value = []
     drawWrapper2DAnd3D()
   }
 }
@@ -1489,13 +1476,6 @@ const loginByToken = () => {
     }
   })
 }
-
-// const undo = () => {
-//   if (history.value.length > 0) {
-//     worldApi.allFileObjects.wall = history.value.pop() || []
-//     drawWrapper()
-//   }
-// }
 
 const handleMouseMove = (e: MouseEvent) => {
   const canvas = canvas2DRef.value
@@ -1777,11 +1757,9 @@ const handleMouseDown = (e: MouseEvent) => {
       matchHandelObj.draw2D(ctxAction, panOffset.value, zoom2DLevel.value)
     } else {
       // 如果没有拖拽到任何点，开始平移
-      if (!draggedPoint.value) {
-        isPanningScreen.value = true
-        panStartScreenX = screenX
-        panStartScreenY = screenY
-      }
+      isPanningScreen.value = true
+      panStartScreenX = screenX
+      panStartScreenY = screenY
     }
   }
 }
@@ -1906,12 +1884,6 @@ function getHandleInAreaInfoByXY(x: number, y: number): {
 const handleMouseUp = () => {
   matchHandelObj = null
   matchedHandelInfo = null
-  if (draggedPoint.value !== null) {
-    history.value.push(JSON.parse(JSON.stringify(worldApi.getObjects('wall'))))
-    draggedPoint.value = null
-    dragOffset.value = null
-    drawWrapper2DAnd3D()
-  }
   if (isPanningScreen.value) {
     isPanningScreen.value = false
     // 平移过程中，该渲染都渲染过了。鼠标抬起这里不用在重新渲染一下了。2026.6.6
