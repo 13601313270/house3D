@@ -20,13 +20,6 @@ export type MatchSnapPoint = OrigionSnapPoint | {
   point: Point,
 }
 
-export type MatchSnapPointNew = OrigionSnapPoint | {
-  objType: string, // 磁吸点对象类型
-  objId: string, // 磁吸点对象ID
-  snapFromType: 'line' | 'axis' | string, // 磁吸点来源类型
-  point: Point,
-}
-
 export abstract class EntityClass<T extends ObjData> {
   abstract name: string
   abstract type: string
