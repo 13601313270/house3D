@@ -28,7 +28,7 @@ export function createAllWallFromPoints(wallitem: {
   if (!wallitem.points || wallitem.points.length < 2) return []
   // console.log('========点========')
   for (let j = 0, len = wallitem.points.length; j < len; j++) {
-    let prev = wallitem.points[j - 1] || {} as Point;
+    const prev = wallitem.points[j - 1] || {} as Point;
     const curr = wallitem.points[j];
     const next = wallitem.points[j + 1] || {} as Point;
 
@@ -58,12 +58,12 @@ export function createAllWallFromPoints(wallitem: {
     // console.log('left点', (+(curr.x + Lvector[0] * (radius / deflection)).toFixed(2)), (+(curr.y + Lvector[1] * (radius / deflection)).toFixed(2)))
     // console.log('right点', (+(curr.x + Rvector[0] * (radius / deflection)).toFixed(2)), (+(curr.y + Rvector[1] * (radius / deflection)).toFixed(2)))
     left.push({
-      x: (+(curr.x + Lvector[0] * (radius / deflection)).toFixed(2)),
-      y: (+(curr.y + Lvector[1] * (radius / deflection)).toFixed(2)),
+      x: +(curr.x + Lvector[0] * (radius / deflection)).toFixed(2),
+      y: +(curr.y + Lvector[1] * (radius / deflection)).toFixed(2),
     });
     right.unshift({
-      x: (+(curr.x + Rvector[0] * (radius / deflection)).toFixed(2)),
-      y: (+(curr.y + Rvector[1] * (radius / deflection)).toFixed(2)),
+      x: +(curr.x + Rvector[0] * (radius / deflection)).toFixed(2),
+      y: +(curr.y + Rvector[1] * (radius / deflection)).toFixed(2),
     });
     if (j !== 0) {
       const point1: [number, number] = [
@@ -89,18 +89,7 @@ export function createAllWallFromPoints(wallitem: {
         { x: point3[0], y: point3[1] },
         { x: point4[0], y: point4[1] },
       ])
-      // try {
-      //   // if (margineds) {
-      //   //   margineds = union(margineds, [[point1, point2, point3, point4, point1]])
-      //   // } else {
-      //   //   margineds = [[point1, point2, point3, point4, point1]];
-      //   // }
-      // } catch (error) {
-      //   console.log('error', error)
-      //   continue;
-      // }
     }
-    prev = curr;
   }
   return allWallBox;
   // cache.set(key, margineds)
