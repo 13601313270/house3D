@@ -215,7 +215,6 @@ import { PointEntityClass } from '@/types/pointEntity'
 import { EntityClassInWall, NearestWallResult } from '@/types/entityInWall'
 import { HandelInfo, PointWithIndex } from '@/types/map2d'
 import pointToLineDistance from '@/utils/pointToLineDistance'
-import { DoorEntity } from '@/entities/door/entity'
 import { CameraData } from '@/entities/camera/index.d'
 import { WallEntity } from '@/entities/wall/entity'
 import { ImportFileType, ObjOutputFileType } from '@/entities/allObjs'
@@ -238,6 +237,7 @@ import { MatchCircleArea, MatchRectArea } from '@/utils/matchArea';
 import processUploadedFile from '@/utils/processUploadedFile';
 import DataTypeEditPanel from './DataTypeEditPanel.vue'
 import { BaseEntityClass, MatchSnapPoint } from '@/types/baseEntity';
+import { LineEntityClass } from '@/types/lineEntity';
 
 const canvas2DRef = ref<HTMLCanvasElement | null>(null)
 const canvas2D2Ref = ref<HTMLCanvasElement | null>(null)
@@ -1507,7 +1507,6 @@ const handleMouseMove = (e: MouseEvent) => {
               const result = matchHandelObj.inSceneSnapPointArea(
                 {
                   objType: api.type,
-                  // objId: snapped33.objId,
                   snapFromType: 'point',
                   point: snapped33.point
                 },
@@ -1548,7 +1547,6 @@ const handleMouseMove = (e: MouseEvent) => {
       }
       if (worldApi.allFileMapObjects.wall) {
         for (let i = 0; i < worldApi.getObjects('wall').length; i++) {
-          // const wall = worldApi.getObjects('wall')[i] as Wall
           const api: WallEntity = worldApi.allFileMapObjects.wall[i] as WallEntity;
           if (temp(api)) {
             // 绘制操作句柄
@@ -1668,20 +1666,20 @@ const handleMouseMove = (e: MouseEvent) => {
       } else {
         // 收集所有点（包括临时折线和已绘制的墙上的点）
         const allPoints = [...tempPointInsertData.value];
-        (worldApi.getObjects('wall') as WallData[]).forEach((wall: WallData) => {
-          wall.points.forEach((point: any) => {
+        (worldApi.getObjects(currentTool.value) as WallData[]).forEach((item: WallData) => {
+          item.points.forEach((point: any) => {
             allPoints.push(point)
           })
         })
         let snappedPoint44 = getSnapPoint(
           { x, y },
           [{
-            objType: 'wall',
+            objType: currentTool.value,
             snapFromType: 'point',
             point: last
           }],
           allPoints.map(v => ({
-            objType: 'wall',
+            objType: currentTool.value,
             // objId: (tempDrawWall.value as WallData).id,
             snapFromType: 'point',
             point: v
@@ -1689,7 +1687,7 @@ const handleMouseMove = (e: MouseEvent) => {
         )
         if (snappedPoint44 === null) {
           snappedPoint44 = {
-            objType: 'wall',
+            objType: currentTool.value,
             snapFromType: 'point',
             point: { x, y }
           }
@@ -1820,8 +1818,13 @@ function getHandleInAreaInfoByXY(x: number, y: number): {
       const matchInfo = api.showMatchHandel(x, y)
       if (matchInfo) {
         const data = api.getData();
-        const dist = Math.hypot(x - data.x || 0, y - data.y || 0)
-        if (dist < minDistance) {
+        let dist: number;
+        if (api instanceof LineEntityClass) {
+          dist = Infinity;// 线段没有距离概念，命中点对象优先级更高。
+        } else {
+          dist = Math.hypot(x - data.x || 0, y - data.y || 0)
+        }
+        if (dist < minDistance || minDistance === Infinity) {
           matchHandelInfoList = {
             classInfo: api,
             matchArea: matchInfo,

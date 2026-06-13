@@ -1,7 +1,7 @@
 import { CameraData } from "./index.d"
-import { ObjDataClass } from "../objData"
+import { PointObjDataClass } from "../objData"
 
-export class CameraDataClass extends ObjDataClass<CameraData> {
+export class CameraDataClass extends PointObjDataClass<CameraData> {
   targetPositionX: number
   targetPositionY: number
   targetPositionZ: number

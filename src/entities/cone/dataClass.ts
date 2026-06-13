@@ -1,7 +1,7 @@
 import { ConeData } from "./index.d"
-import { ObjDataClass } from "../objData"
+import { PointObjDataClass } from "../objData"
 
-export class ConeDataClass extends ObjDataClass<ConeData> {
+export class ConeDataClass extends PointObjDataClass<ConeData> {
   r: number
   h: number
   color: string

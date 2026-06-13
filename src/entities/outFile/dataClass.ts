@@ -1,7 +1,7 @@
 import { OutFileData } from "./index.d"
-import { ObjDataClass } from "../objData"
+import { PointObjDataClass } from "../objData"
 
-export class OutFileDataClass extends ObjDataClass<OutFileData> {
+export class OutFileDataClass extends PointObjDataClass<OutFileData> {
   fileTypeId: string
   angleY: number
   bm: number | null // 材质

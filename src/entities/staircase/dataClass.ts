@@ -1,7 +1,7 @@
 import { StaircaseData, StaircasePoint } from "./index.d"
-import { ObjDataClass } from "../objData"
+import { PointObjDataClass } from "../objData"
 
-export class StaircaseDataClass extends ObjDataClass<StaircaseData> {
+export class StaircaseDataClass extends PointObjDataClass<StaircaseData> {
   points: StaircasePoint[]
   thickness: number
   color: string

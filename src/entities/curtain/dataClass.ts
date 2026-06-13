@@ -1,7 +1,7 @@
 import { CurtainData } from "./index.d"
-import { ObjDataClass } from "../objData"
+import { PointObjDataClass } from "../objData"
 
-export class CurtainDataClass extends ObjDataClass<CurtainData> {
+export class CurtainDataClass extends PointObjDataClass<CurtainData> {
   width: number
   height: number
   angleY: number // 旋转角度

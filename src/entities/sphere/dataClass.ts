@@ -1,7 +1,7 @@
 import { SphereData } from "./index.d"
-import { ObjDataClass } from "../objData"
+import { PointObjDataClass } from "../objData"
 
-export class SphereDataClass extends ObjDataClass<SphereData> {
+export class SphereDataClass extends PointObjDataClass<SphereData> {
   r: number
   color: string
   mt: number | null

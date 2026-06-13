@@ -1,7 +1,7 @@
 import { CylinderData } from "./index.d"
-import { ObjDataClass } from "../objData"
+import { PointObjDataClass } from "../objData"
 
-export class CylinderDataClass extends ObjDataClass<CylinderData> {
+export class CylinderDataClass extends PointObjDataClass<CylinderData> {
   r: number
   h: number
   color: string

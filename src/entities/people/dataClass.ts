@@ -1,7 +1,7 @@
 import { PeopleData } from "./index.d"
-import { ObjDataClass } from "../objData"
+import { PointObjDataClass } from "../objData"
 
-export class PeopleDataClass extends ObjDataClass<PeopleData> {
+export class PeopleDataClass extends PointObjDataClass<PeopleData> {
   angle: number
   height: number
   color: string

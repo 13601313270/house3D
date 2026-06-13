@@ -8,7 +8,7 @@ type wallInfo = {
   hidden: boolean
 }
 export type WallData = LineObjData & {
-  points: (Point & WallPoint)[]
+  // points: (Point & WallPoint)[]
   thickness: number
   color: string
   height: number

@@ -1,7 +1,7 @@
 import { PlaneData } from "./index.d"
-import { ObjDataClass } from "../objData"
+import { PointObjDataClass } from "../objData"
 
-export class PlaneDataClass extends ObjDataClass<PlaneData> {
+export class PlaneDataClass extends PointObjDataClass<PlaneData> {
   width: number
   length: number
   color: string
