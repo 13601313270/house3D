@@ -6,7 +6,7 @@ import { calculateAngle } from './calculateAngle'
 import { allFileKeys, fileData, fileDataKeyToClass } from '@/entities/index'
 import { PointEntityClass } from '@/types/pointEntity'
 import { EntityClassInWall } from '@/types/entityInWall'
-import { PointObjDataClass } from '@/entities/objData'
+import { BaseObjDataClass, PointObjDataClass } from '@/entities/objData'
 import { ImportFileType, ImportImgType, ObjOutputFileType } from '@/entities/allObjs';
 import { BaseEntityClass } from '@/types/baseEntity'
 
@@ -374,7 +374,7 @@ export class World {
   }
 
   getObjects(type: string) {
-    const returnData: PointObjDataClass<any>[] = [];
+    const returnData: BaseObjDataClass<any>[] = [];
     if (!this.allFileMapObjects[type]) {
       this.allFileMapObjects[type] = []
     }

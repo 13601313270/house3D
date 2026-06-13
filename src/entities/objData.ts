@@ -53,6 +53,7 @@ class ObjInWallDataClass<T extends ObjInWallData> extends PointObjDataClass<T> {
 }
 
 export {
+  BaseObjDataClass,
   PointObjDataClass,
   LineObjDataClass,
   ObjInWallDataClass

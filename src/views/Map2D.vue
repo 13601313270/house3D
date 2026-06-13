@@ -213,7 +213,7 @@ import { WallData } from '@/entities/wall/index.d'
 import { allFileKeys, fileData, editItem, allFileKeysName, fileDataKeyToClass, allFileKeysGroup, allFileKeysObjType } from '@/entities'
 import { PointEntityClass } from '@/types/pointEntity'
 import { EntityClassInWall, NearestWallResult } from '@/types/entityInWall'
-import { HandelInfo, PointWithIndex } from '@/types/map2d'
+import { HandelInfo, LineObjData, PointWithIndex } from '@/types/map2d'
 import pointToLineDistance from '@/utils/pointToLineDistance'
 import { CameraData } from '@/entities/camera/index.d'
 import { WallEntity } from '@/entities/wall/entity'
@@ -238,6 +238,7 @@ import processUploadedFile from '@/utils/processUploadedFile';
 import DataTypeEditPanel from './DataTypeEditPanel.vue'
 import { BaseEntityClass, MatchSnapPoint } from '@/types/baseEntity';
 import { LineEntityClass } from '@/types/lineEntity';
+import { LineObjDataClass } from '@/entities/objData';
 
 const canvas2DRef = ref<HTMLCanvasElement | null>(null)
 const canvas2D2Ref = ref<HTMLCanvasElement | null>(null)
@@ -1666,7 +1667,7 @@ const handleMouseMove = (e: MouseEvent) => {
       } else {
         // 收集所有点（包括临时折线和已绘制的墙上的点）
         const allPoints = [...tempPointInsertData.value];
-        (worldApi.getObjects(currentTool.value) as WallData[]).forEach((item: WallData) => {
+        (worldApi.getObjects(currentTool.value) as LineObjDataClass<any, LineObjData<any>>[]).forEach((item: LineObjDataClass<any, LineObjData<any>>) => {
           item.points.forEach((point: any) => {
             allPoints.push(point)
           })
