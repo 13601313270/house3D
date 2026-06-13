@@ -224,12 +224,13 @@ export class StaircaseEntity extends LineEntityClass<StaircasePoint, StaircaseDa
       const wallMesh = new THREE.Mesh(geometry, material)
       // wallMesh.position.set(0, 0, 0)
       const pointData = data.points[i];
+      console.log('data[i]---1', JSON.parse(JSON.stringify(data.points)))
       // wallMesh.position.setZ(pointData.z || 100)
       // console.log('this.getData() ', this.getData())
-      console.log('pointData', pointData)
+      console.log('data[i]---pointData', i, pointData, JSON.parse(JSON.stringify(pointData)))
       wallMesh.castShadow = true
       wallMesh.receiveShadow = true
-      wallMesh.position.setY(bottom + pointData.z || 100)
+      wallMesh.position.setY(bottom + (pointData.z || 0))
       const group = new THREE.Group()
       group.add(wallMesh)
       meshList.push(group)
@@ -329,7 +330,7 @@ export class StaircaseEntity extends LineEntityClass<StaircasePoint, StaircaseDa
       const midX = (p1.x + p2.x) / 2
       const midY = (p1.y + p2.y) / 2
       const dist = Math.hypot(x - midX, y - midY)
-      if (dist < this.getData().thickness / 2) {
+      if (dist < this.getData().thickness / 4) {
         this.prePointStartPosition = p1;
         this.nextPointStartPosition = p2;
 
@@ -555,7 +556,6 @@ export class StaircaseEntity extends LineEntityClass<StaircasePoint, StaircaseDa
         ...configList,
       ], (val) => {
         const points = [...data.points]
-        console.log('ssss', val.z)
         points[pointIndex] = {
           ...points[pointIndex],
           z: val.z,

@@ -18,7 +18,7 @@ import curtainInWallPlugin from './curtainInWall'
 import staircasePlugin from './staircase'
 import { BaseEntityClass } from '@/types/baseEntity'
 
-type EntityConstructor = new (...args: any[]) => BaseEntityClass<any>;
+export type EntityConstructor = new (...args: any[]) => BaseEntityClass<any>;
 
 export const allFileKeys: string[] = [
 ]

@@ -25,9 +25,6 @@ export abstract class LineEntityClass<V, T extends LineObjData<V>> extends BaseE
   meshNeedChangeKey(): string {
     const cacheData = {
       ...this.data,
-      x: undefined,
-      y: undefined,
-      z: undefined,
     }
     return this.type + JSON.stringify(cacheData)
   }

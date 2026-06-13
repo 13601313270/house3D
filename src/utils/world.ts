@@ -3,10 +3,10 @@ import { Point } from '../types'
 import { DoorEntity } from '@/entities/door/entity'
 import { drawPoint } from './drawPoint'
 import { calculateAngle } from './calculateAngle'
-import { allFileKeys, fileData, fileDataKeyToClass } from '@/entities/index'
+import { allFileKeys, EntityConstructor, fileData, fileDataKeyToClass } from '@/entities/index'
 import { PointEntityClass } from '@/types/pointEntity'
 import { EntityClassInWall } from '@/types/entityInWall'
-import { BaseObjDataClass, PointObjDataClass } from '@/entities/objData'
+import { BaseObjDataClass } from '@/entities/objData'
 import { ImportFileType, ImportImgType, ObjOutputFileType } from '@/entities/allObjs';
 import { BaseEntityClass } from '@/types/baseEntity'
 
@@ -384,16 +384,14 @@ export class World {
     return returnData
   }
 
-  async add(type: string, data: PointObjDataClass<any>[]) {
-    const EntityClassItem: PointEntityClass<any> = fileDataKeyToClass[type] as any;
+  async add(type: string, data: BaseObjDataClass<any>[]) {
+    const EntityClassItem: EntityConstructor = fileDataKeyToClass[type] as any;
     if (!this.allFileMapObjects[type]) {
       this.allFileMapObjects[type] = []
     }
     for (let i = 0; i < data.length; i++) {
-      // @ts-ignore
-      const api: PointEntityClass<any> = new EntityClassItem(this, data[i]);
+      const api: BaseEntityClass<any> = new EntityClassItem(this, data[i]);
       await api.init()
-      // @ts-ignore
       this.allFileMapObjects[type].push(api)
     }
     if (data.length) {
