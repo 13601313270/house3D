@@ -1,19 +1,17 @@
-import { Point, PointObjData } from '@/types/map2d'
+import { Point, LineObjData } from '@/types/map2d'
 
 
 export interface StaircasePoint extends Point {
-  snw: boolean,// show next wall，是否这个点对应的下面的线的信息（是否显示下一个墙）
+  z: number,// 高度
 }
-
 
 type wallInfo = {
   hidden: boolean
 }
-export type StaircaseData = PointObjData & {
-  points: StaircasePoint[]
+export type StaircaseData = LineObjData<StaircasePoint> & {
+  // points: StaircasePoint[]
   thickness: number
   color: string
-  height: number
   wmt: number // 墙材质
   // hb: boolean // 是否有地板
   // bc: string // 地板颜色

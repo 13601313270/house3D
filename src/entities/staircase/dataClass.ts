@@ -1,11 +1,10 @@
 import { StaircaseData, StaircasePoint } from "./index.d"
-import { PointObjDataClass } from "../objData"
+import { LineObjDataClass } from "../objData"
 
-export class StaircaseDataClass extends PointObjDataClass<StaircaseData> {
+export class StaircaseDataClass extends LineObjDataClass<StaircasePoint, StaircaseData> {
   points: StaircasePoint[]
   thickness: number
   color: string
-  height: number
   wmt: number // 墙材质
   // hb: boolean // 是否有地板
   // bc: string // 地板颜色
@@ -20,7 +19,6 @@ export class StaircaseDataClass extends PointObjDataClass<StaircaseData> {
     super(data)
     this.points = data.points
     this.thickness = data.thickness
-    this.height = data.height
     this.color = data.color
     this.wmt = data.wmt
     // this.hb = data.hb

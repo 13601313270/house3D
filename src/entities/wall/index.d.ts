@@ -7,7 +7,7 @@ export interface WallPoint {
 type wallInfo = {
   hidden: boolean
 }
-export type WallData = LineObjData & {
+export type WallData = LineObjData<WallPoint> & {
   // points: (Point & WallPoint)[]
   thickness: number
   color: string

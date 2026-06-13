@@ -1,6 +1,5 @@
 import { Point, HandelInfo } from '@/types/map2d'
-import { PointEntityClass } from '@/types/pointEntity'
-import { StaircaseData } from './index.d'
+import { StaircaseData, StaircasePoint } from './index.d'
 import { createAllWallFromPoints } from '@/utils/createAllWallFromPoints'
 import * as THREE from 'three'
 import { editItem } from '..'
@@ -11,8 +10,9 @@ import { calculateAngle } from '@/utils/calculateAngle'
 import message from '@/utils/message'
 import { isPointInRotatedRect } from '@/utils/isPointInRotatedRect'
 import { allSnapFromType, MatchSnapPoint } from '@/types/baseEntity'
+import { LineEntityClass } from '@/types/lineEntity'
 
-export class StaircaseEntity extends PointEntityClass<StaircaseData> {
+export class StaircaseEntity extends LineEntityClass<StaircasePoint, StaircaseData> {
   name: string = '楼梯'
   type: string = 'staircase'
   isPointObj: boolean = false
@@ -33,11 +33,7 @@ export class StaircaseEntity extends PointEntityClass<StaircaseData> {
     for (let i = 0; i < wallBoxList.length; i++) {
       const box = wallBoxList[i]
 
-      if (data.points[i].snw) {
-        ctx.setLineDash([10 * zoomLevel, 10 * zoomLevel])
-      } else {
-        ctx.setLineDash([])
-      }
+      ctx.setLineDash([])
 
       ctx.beginPath()
       for (let j = 0; j < box.length; j++) {
@@ -75,13 +71,7 @@ export class StaircaseEntity extends PointEntityClass<StaircaseData> {
 
     for (let i = 0; i < wallBoxList.length; i++) {
       const box = wallBoxList[i]
-
-      if (data.points[i].snw) {
-        ctx.setLineDash([10 * zoomLevel, 10 * zoomLevel])
-      } else {
-        ctx.setLineDash([])
-      }
-
+      ctx.setLineDash([])
       ctx.beginPath()
       for (let j = 0; j < box.length; j++) {
         const screenX = box[j].x * zoomLevel + panOffset.x
@@ -199,7 +189,7 @@ export class StaircaseEntity extends PointEntityClass<StaircaseData> {
     const data = this.getData()
     const meshList: THREE.Group[] = []
     const wallBoxList = createAllWallFromPoints([data]);
-    const wallHeight = data.height
+    const wallHeight = 100;
     const bottom = 0;
     // console.log(1)
     const extrudeSettings = {
@@ -232,14 +222,14 @@ export class StaircaseEntity extends PointEntityClass<StaircaseData> {
       })
 
       const wallMesh = new THREE.Mesh(geometry, material)
-      if (data.points[i].snw) {
-        wallMesh.visible = false
-      }
       // wallMesh.position.set(0, 0, 0)
+      const pointData = data.points[i];
+      // wallMesh.position.setZ(pointData.z || 100)
       // console.log('this.getData() ', this.getData())
+      console.log('pointData', pointData)
       wallMesh.castShadow = true
       wallMesh.receiveShadow = true
-      wallMesh.position.setY(bottom)
+      wallMesh.position.setY(bottom + pointData.z || 100)
       const group = new THREE.Group()
       group.add(wallMesh)
       meshList.push(group)
@@ -266,7 +256,7 @@ export class StaircaseEntity extends PointEntityClass<StaircaseData> {
         return new MatchCircleArea({
           x: point.x,
           y: point.y,
-          r: this.getData().thickness,
+          r: this.getData().thickness / 4,
         })
       }
     }
@@ -406,7 +396,11 @@ export class StaircaseEntity extends PointEntityClass<StaircaseData> {
             }
           }
         }
-        this.getData().points[index] = { x, y, snw: this.getData().points[index].snw, }
+        this.getData().points[index] = {
+          x,
+          y,
+          z: this.getData().points[index].z,
+        }
       } else {
         // 拖拽线
         if (startX !== undefined && startY !== undefined) {
@@ -418,12 +412,12 @@ export class StaircaseEntity extends PointEntityClass<StaircaseData> {
             this.getData().points[preIndex] = {
               x: this.prePointStartPosition.x + diffMouseX,
               y: this.prePointStartPosition.y + diffMouseY,
-              snw: this.getData().points[preIndex].snw,
+              z: this.getData().points[preIndex].z,
             }
             this.getData().points[nextIndex] = {
               x: this.nextPointStartPosition.x + diffMouseX,
               y: this.nextPointStartPosition.y + diffMouseY,
-              snw: this.getData().points[nextIndex].snw,
+              z: this.getData().points[nextIndex].z,
             }
             console.log('移动边', startX, startY)
           }
@@ -505,16 +499,6 @@ export class StaircaseEntity extends PointEntityClass<StaircaseData> {
         unit: 'cm',
       },
       {
-        id: 'height',
-        label: '墙体高度',
-        dataType: 'number',
-        min: 1,
-        max: Infinity,
-        step: 1,
-        value: data.height,
-        unit: 'cm',
-      },
-      {
         id: 'color',
         label: '墙体颜色',
         dataType: 'color',
@@ -529,11 +513,22 @@ export class StaircaseEntity extends PointEntityClass<StaircaseData> {
     ];
     if (snapPoint.index % 2 === 0) {
       const configList: editItem[] = [...wallBaseConfig]
+      const pointIndex = snapPoint.index / 2;
       editShow([
         {
           id: 'title',
           label: '顶点属性',
           dataType: 'title',
+        },
+        {
+          id: 'z',
+          label: '顶点高度',
+          dataType: 'number',
+          min: 0,
+          max: 300,
+          step: 1,
+          value: data.points[snapPoint.index / 2].z,
+          unit: 'cm',
         },
         {
           id: 'delete',
@@ -559,9 +554,18 @@ export class StaircaseEntity extends PointEntityClass<StaircaseData> {
         },
         ...configList,
       ], (val) => {
+        const points = [...data.points]
+        console.log('ssss', val.z)
+        points[pointIndex] = {
+          ...points[pointIndex],
+          z: val.z,
+        };
+        const saveVal = { ...val }
+        delete saveVal.z;
         this.setData({
           ...data,
-          ...val,
+          ...saveVal,
+          points,
         })
       })
     } else {
@@ -573,12 +577,6 @@ export class StaircaseEntity extends PointEntityClass<StaircaseData> {
           dataType: 'title',
         },
         {
-          id: 'hidden',
-          label: '隐藏墙',
-          dataType: 'boolean',
-          value: data.points[pointIndex].snw,
-        },
-        {
           id: 'title',
           label: '整个墙体属性',
           dataType: 'title',
@@ -588,7 +586,6 @@ export class StaircaseEntity extends PointEntityClass<StaircaseData> {
         const points = [...data.points]
         points[pointIndex] = {
           ...points[pointIndex],
-          snw: val.hidden,
         };
         const saveVal = { ...val }
         delete saveVal.hidden
@@ -604,10 +601,6 @@ export class StaircaseEntity extends PointEntityClass<StaircaseData> {
 
 const defaultStaircaseData: StaircaseData = {
   id: Date.now().toString(),
-  x: 0,
-  y: 0,
-  z: 0,
-  height: 280,
   color: '#fff',
   wmt: 0,
   points: [],

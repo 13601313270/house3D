@@ -1,8 +1,8 @@
-import { PointObjData } from './map2d'
+import { LineObjData } from './map2d'
 import { World } from '@/utils/world'
 import { BaseEntityClass } from './baseEntity'
 
-export abstract class LineEntityClass<T extends PointObjData> extends BaseEntityClass<T> {
+export abstract class LineEntityClass<V, T extends LineObjData<V>> extends BaseEntityClass<T> {
   constructor(world: World, data: T) {
     console.log(1)
     super(world, data);

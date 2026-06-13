@@ -951,7 +951,6 @@ onMounted(async () => {
             value.points = tempPointInsertData.value.map(v => {
               return {
                 ...v,
-                snw: false,
               }
             })
             await worldApi.add(currentTool.value, [value])
@@ -1400,7 +1399,6 @@ const handleCanvasClick = async (e: MouseEvent) => {
               value.points = tempPointInsertData.value.map(v => {
                 return {
                   ...v,
-                  snw: false,
                 }
               })
               await worldApi.add(currentTool.value, [value])
@@ -1481,7 +1479,7 @@ const handleMouseMove = (e: MouseEvent) => {
   const x = (screenX - panOffset.value.x) / zoom2DLevel.value
   const y = (screenY - panOffset.value.y) / zoom2DLevel.value
 
-  if (currentTool.value === 'drag') {
+  if (currentTool.value === 'drag') { // drag代表拖拽和鼠标移动
     const fileData: fileData = worldApi.getAllFileObjects()
     const canvasAction = canvas2D2Ref.value!;
     // 绘制操作句柄
