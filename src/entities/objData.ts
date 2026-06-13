@@ -1,7 +1,13 @@
-import { PointObjData, LineObjData, ObjInWallData, Point } from "@/types/map2d"
+import { PointObjData, LineObjData, ObjInWallData, Point, BaseObjData } from "@/types/map2d"
 
-class PointObjDataClass<T extends PointObjData> {
+class BaseObjDataClass<T extends BaseObjData> {
   id: string
+  constructor(data: T) {
+    this.id = data.id
+  }
+}
+
+class PointObjDataClass<T extends PointObjData> extends BaseObjDataClass<T> {
   x: number
   y: number
   z: number
@@ -9,7 +15,7 @@ class PointObjDataClass<T extends PointObjData> {
   tipFontSize?: number // 提示信息字号
 
   constructor(data: T) {
-    this.id = data.id
+    super(data)
     this.x = data.x
     this.y = data.y
     this.z = data.z
@@ -18,14 +24,13 @@ class PointObjDataClass<T extends PointObjData> {
   }
 }
 
-class LineObjDataClass<V, T extends LineObjData<V>> {
-  id: string
+class LineObjDataClass<V, T extends LineObjData<V>> extends BaseObjDataClass<T> {
   points: (Point & V)[]
   tip?: string // 提示信息
   tipFontSize?: number // 提示信息字号
 
   constructor(data: T) {
-    this.id = data.id
+    super(data)
     this.points = data.points || []
     this.tip = data.tip || ''
     this.tipFontSize = data.tipFontSize || 96

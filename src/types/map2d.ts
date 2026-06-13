@@ -15,20 +15,20 @@ export interface HandelInfo {
   dist: number,
 }
 
-export interface BaseObj {
+export interface BaseObjData {
   id: string
   tip?: string,// 提示信息
   tipFontSize?: number,// 提示信息字号
 }
 // 点状对象数据基类
-export interface PointObjData extends BaseObj {
+export interface PointObjData extends BaseObjData {
   x: number
   y: number
   z: number
 }
 
 // 链状对象数据基类
-export interface LineObjData<T> extends BaseObj {
+export interface LineObjData<T> extends BaseObjData {
   points: (Point & T)[]
 }
 

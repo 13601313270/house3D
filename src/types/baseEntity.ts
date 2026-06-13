@@ -1,5 +1,5 @@
 import * as THREE from 'three'
-import { HandelInfo, Point, BaseObj, PointWithIndex } from './map2d'
+import { HandelInfo, Point, BaseObjData, PointWithIndex } from './map2d'
 import { World } from '@/utils/world'
 import { editItem } from '@/entities'
 import { MatchCircleArea, MatchRectArea } from '@/utils/matchArea'
@@ -20,7 +20,7 @@ export type MatchSnapPoint = OrigionSnapPoint | {
   point: Point,
 }
 
-export abstract class BaseEntityClass<T extends BaseObj> {
+export abstract class BaseEntityClass<T extends BaseObjData> {
   abstract name: string
   abstract type: string
   world: World;
