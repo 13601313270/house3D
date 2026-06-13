@@ -206,14 +206,14 @@ import axios from 'axios'
 import * as THREE from 'three'
 import JSZip from 'jszip';
 import request from '@/utils/request'
-import { ObjData, Point } from '../types'
+import { Point } from '../types'
 import { snapThreshold, World } from '../utils/world'
 import Canvas3D, { CameraState } from '../components/Canvas3D.vue'
 import { WallData } from '@/entities/wall/index.d'
 import { allFileKeys, fileData, editItem, allFileKeysName, fileDataKeyToClass, allFileKeysGroup, allFileKeysObjType } from '@/entities'
 import { PointEntityClass } from '@/types/pointEntity'
 import { EntityClassInWall, NearestWallResult } from '@/types/entityInWall'
-import { HandelInfo, LineObjData, PointWithIndex } from '@/types/map2d'
+import { BaseObjData, HandelInfo, LineObjData, PointWithIndex } from '@/types/map2d'
 import pointToLineDistance from '@/utils/pointToLineDistance'
 import { CameraData } from '@/entities/camera/index.d'
 import { WallEntity } from '@/entities/wall/entity'
@@ -1488,7 +1488,7 @@ const handleMouseMove = (e: MouseEvent) => {
     if (matchHandelObj && matchedHandelInfo) {
       // console.log('currentTool.value---1')
       // console.log('matchHandelObj', currentTool.value)
-      function temp(api: BaseEntityClass<ObjData>): boolean {
+      function temp(api: BaseEntityClass<BaseObjData>): boolean {
         if (matchHandelObj && matchedHandelInfo) {
           let beMatchPoints = api.getMineBeSnapPoints()
           // 排出掉和自己磁吸
@@ -1547,6 +1547,7 @@ const handleMouseMove = (e: MouseEvent) => {
       if (worldApi.allFileMapObjects.wall) {
         for (let i = 0; i < worldApi.getObjects('wall').length; i++) {
           const api: WallEntity = worldApi.allFileMapObjects.wall[i] as WallEntity;
+          // 类型“WallEntity”的参数不能赋给类型“BaseEntityClass<PointObjData>”的参数。
           if (temp(api)) {
             // 绘制操作句柄
             ctxAction.clearRect(0, 0, canvasAction.width, canvasAction.height)

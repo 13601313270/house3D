@@ -1,5 +1,5 @@
 import * as THREE from 'three'
-import { PointObjData, Point } from './map2d'
+import { PointObjData, Point, BaseObjData } from './map2d'
 import { World } from '@/utils/world'
 import { BaseEntityClass } from './baseEntity'
 
@@ -125,7 +125,7 @@ export abstract class PointEntityClass<T extends PointObjData> extends BaseEntit
 
   // 当前对象进入到一根吸附线的区域
   abstract inSceneSnapLineArea(
-    obj: BaseEntityClass<PointObjData>,
+    obj: BaseEntityClass<BaseObjData>,
     line: [Point, Point],
     point: Point,
   ): boolean;
