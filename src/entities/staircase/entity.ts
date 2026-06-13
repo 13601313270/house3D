@@ -24,24 +24,6 @@ export class StaircaseEntity extends PointEntityClass<StaircaseData> {
   }
 
   draw2DPreviewByData(ctx: CanvasRenderingContext2D, data: StaircaseData, panOffset: Point, zoomLevel: number): void {
-    if (data.hb) {
-      ctx.strokeStyle = 'black'
-      ctx.fillStyle = data.bc
-      ctx.lineWidth = 2
-      ctx.setLineDash([5, 5])
-      ctx.beginPath()
-      for (let i = 0; i < data.points.length; i++) {
-        const point = data.points[i]
-        if (i === 0) {
-          ctx.moveTo(point.x * zoomLevel + panOffset.x, point.y * zoomLevel + panOffset.y)
-        } else {
-          ctx.lineTo(point.x * zoomLevel + panOffset.x, point.y * zoomLevel + panOffset.y)
-        }
-      }
-      ctx.stroke()
-      ctx.fill()
-      ctx.setLineDash([])
-    }
     const wallBoxList = createAllWallFromPoints([data])
     ctx.strokeStyle = 'black'
     ctx.fillStyle = data.color
@@ -218,7 +200,7 @@ export class StaircaseEntity extends PointEntityClass<StaircaseData> {
     const meshList: THREE.Group[] = []
     const wallBoxList = createAllWallFromPoints([data]);
     const wallHeight = data.height
-    const bottom = data.bottom || 0
+    const bottom = 0;
     // console.log(1)
     const extrudeSettings = {
       steps: 1,
@@ -544,58 +526,6 @@ export class StaircaseEntity extends PointEntityClass<StaircaseData> {
         dataType: 'material',
         value: data.wmt,
       },
-      {
-        id: 'hb',
-        label: '是否有地板',
-        dataType: 'boolean',
-        value: data.hb,
-      },
-      {
-        id: 'bc',
-        label: '地板颜色',
-        dataType: 'color',
-        value: data.bc,
-      },
-      {
-        id: 'bmt',
-        label: '地板材质',
-        dataType: 'material',
-        value: data.bmt,
-      },
-      {
-        id: 'ht',
-        label: '是否有天花板',
-        dataType: 'boolean',
-        value: data.ht,
-      },
-      {
-        id: 'tc',
-        label: '天花板颜色',
-        dataType: 'color',
-        value: data.tc,
-      },
-      {
-        id: 'tmt',
-        label: '天花板材质',
-        dataType: 'material',
-        value: data.tmt,
-      },
-      {
-        id: 'td',
-        label: '天花板是否是双面',
-        dataType: 'boolean',
-        value: data.td,
-      },
-      {
-        id: 'bottom',
-        label: '距离地面距离',
-        dataType: 'number',
-        min: 0,
-        max: Infinity,
-        step: 1,
-        value: data.bottom,
-        unit: 'cm',
-      },
     ];
     if (snapPoint.index % 2 === 0) {
       const configList: editItem[] = [...wallBaseConfig]
@@ -681,15 +611,7 @@ const defaultStaircaseData: StaircaseData = {
   color: '#fff',
   wmt: 0,
   points: [],
-  thickness: 10,
-  hb: true,
-  bc: '#aaa',
-  bmt: 2,
-  ht: true,
-  tc: '#fff',
-  tmt: 2,
-  td: false,
-  bottom: 0,
+  thickness: 100,
 }
 
 export {
