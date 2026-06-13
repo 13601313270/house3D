@@ -42,7 +42,7 @@ export class WallEntity extends LineEntityClass<WallPoint, WallData> {
       ctx.fill()
       ctx.setLineDash([])
     }
-    const wallBoxList = createAllWallFromPoints([data])
+    const wallBoxList = createAllWallFromPoints(data)
     ctx.strokeStyle = 'black'
     ctx.fillStyle = data.color
     ctx.lineWidth = 2
@@ -82,10 +82,10 @@ export class WallEntity extends LineEntityClass<WallPoint, WallData> {
   ): void {
     const wall = data;
     // 用红色绘制墙
-    const wallBoxList = createAllWallFromPoints([{
+    const wallBoxList = createAllWallFromPoints({
       points: data.points,
       thickness: data.thickness + 1,
-    }])
+    })
     ctx.strokeStyle = 'red'
     ctx.fillStyle = data.color
     ctx.lineWidth = 1
@@ -216,7 +216,7 @@ export class WallEntity extends LineEntityClass<WallPoint, WallData> {
   create3DMesh() {
     const data = this.getData()
     const meshList: THREE.Group[] = []
-    const wallBoxList = createAllWallFromPoints([data]);
+    const wallBoxList = createAllWallFromPoints(data);
     const wallHeight = data.height
     const bottom = data.bottom || 0
     // console.log(1)
@@ -336,14 +336,6 @@ export class WallEntity extends LineEntityClass<WallPoint, WallData> {
     for (let i = 0; i < points.length - 1; i++) {
       const p1 = points[i]
       const p2 = points[i + 1]
-
-      // const [box] = createAllWallFromPoints([
-      //   {
-      //     points: [p1, p2],
-      //     thickness: this.getData().thickness,
-      //   }
-      // ])
-
       const midX = (p1.x + p2.x) / 2
       const midY = (p1.y + p2.y) / 2
       const width = Math.hypot(p2.x - p1.x, p2.y - p1.y)
