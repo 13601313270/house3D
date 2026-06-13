@@ -1,6 +1,6 @@
 import { Point, HandelInfo } from '@/types/map2d'
 import { StaircaseData, StaircasePoint } from './index.d'
-import { createAllWallFromPoints } from '@/utils/createAllWallFromPoints'
+import { createAllWallFromPoints } from '@/utils/createAllWallFromPoints/angleType1'
 import * as THREE from 'three'
 import { editItem } from '..'
 import { getMaterialById } from '@/material'
@@ -253,7 +253,7 @@ export class StaircaseEntity extends LineEntityClass<StaircasePoint, StaircaseDa
     for (let i = 0; i < points.length; i++) {
       const point = points[i]
       const dist = Math.hypot(x - point.x, y - point.y)
-      if (dist < this.getData().thickness) {
+      if (dist < this.getData().thickness / 4) {
         return new MatchCircleArea({
           x: point.x,
           y: point.y,
@@ -313,7 +313,7 @@ export class StaircaseEntity extends LineEntityClass<StaircasePoint, StaircaseDa
     for (let i = 0; i < this.getData().points.length; i++) {
       const point = this.getData().points[i]
       const dist = Math.hypot(x - point.x, y - point.y)
-      if (dist < this.getData().thickness) {
+      if (dist < this.getData().thickness / 4) {
         return {
           id: data.id,
           type: this.type,
@@ -525,7 +525,7 @@ export class StaircaseEntity extends LineEntityClass<StaircasePoint, StaircaseDa
           id: 'z',
           label: '顶点高度',
           dataType: 'number',
-          min: 0,
+          min: -300,
           max: 300,
           step: 1,
           value: data.points[snapPoint.index / 2].z,

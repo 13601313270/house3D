@@ -1,6 +1,6 @@
 import { Point, HandelInfo } from '@/types/map2d'
 import { WallData, WallPoint } from './index.d'
-import { createAllWallFromPoints } from '@/utils/createAllWallFromPoints'
+import { createAllWallFromPoints } from '@/utils/createAllWallFromPoints/angleType1'
 import * as THREE from 'three'
 import { editItem } from '..'
 import { getMaterialById } from '@/material'
