@@ -16,6 +16,7 @@ export class WallDataClass extends LineObjDataClass<WallPoint, WallData> {
   tmt: number // 天花板材质
   td: boolean // 天花板是否是双面
   bottom: number // 距离地面距离
+  cornerType: 0 | 1 | 2 | 3 | 4 | 5 // 角点类型
 
   constructor(data: WallData) {
     super(data)
@@ -32,5 +33,6 @@ export class WallDataClass extends LineObjDataClass<WallPoint, WallData> {
     this.tmt = data.tmt
     this.td = data.td
     this.bottom = data.bottom
+    this.cornerType = data.cornerType !== undefined ? data.cornerType : 1
   }
 }

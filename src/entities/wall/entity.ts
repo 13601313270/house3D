@@ -11,13 +11,20 @@ import message from '@/utils/message'
 import { isPointInRotatedRect } from '@/utils/isPointInRotatedRect'
 import { allSnapFromType, MatchSnapPoint } from '@/types/baseEntity'
 import { LineEntityClass } from '@/types/lineEntity'
+import { World } from '@/utils/world'
 
 export class WallEntity extends LineEntityClass<WallPoint, WallData> {
   name: string = '墙'
   type: string = 'wall'
   isPointObj: boolean = false
   private circleRadius = 6
-  private cornerType: 0 | 1 | 2 | 3 | 4 | 5 = 5;
+
+  constructor(world: World, data: WallData) {
+    super(world, data);
+    if (this.data.cornerType === undefined) {
+      this.data.cornerType = 1
+    }
+  }
 
   defaultValue(): WallData {
     const wall: WallData = defaultWallData
@@ -43,7 +50,7 @@ export class WallEntity extends LineEntityClass<WallPoint, WallData> {
       ctx.fill()
       ctx.setLineDash([])
     }
-    const { data: wallBoxList, countPerPoint: countPerPointPerPoint } = createAllWallFromPoints(data, this.cornerType)
+    const { data: wallBoxList, countPerPoint: countPerPointPerPoint } = createAllWallFromPoints(data, data.cornerType)
     ctx.strokeStyle = 'black'
     ctx.fillStyle = data.color
     ctx.lineWidth = 2
@@ -86,7 +93,7 @@ export class WallEntity extends LineEntityClass<WallPoint, WallData> {
     const { data: wallBoxList, countPerPoint: countPerPointPerPoint } = createAllWallFromPoints({
       points: data.points,
       thickness: data.thickness + 1,
-    }, this.cornerType)
+    }, data.cornerType)
     ctx.strokeStyle = 'red'
     ctx.fillStyle = data.color
     ctx.lineWidth = 1
@@ -217,7 +224,7 @@ export class WallEntity extends LineEntityClass<WallPoint, WallData> {
   create3DMesh() {
     const data = this.getData()
     const meshList: THREE.Group[] = []
-    const { data: wallBoxList, countPerPoint: countPerPointPerPoint } = createAllWallFromPoints(data, this.cornerType);
+    const { data: wallBoxList, countPerPoint: countPerPointPerPoint } = createAllWallFromPoints(data, data.cornerType);
     const wallHeight = data.height
     const bottom = data.bottom || 0
     // console.log(1)
@@ -628,6 +635,15 @@ export class WallEntity extends LineEntityClass<WallPoint, WallData> {
         value: data.bottom,
         unit: 'cm',
       },
+      {
+        id: 'cornerType',
+        label: '墙体角类型',
+        dataType: 'number',
+        value: data.cornerType,
+        min: 0,
+        max: 5,
+        step: 1,
+      }
     ];
     if (snapPoint.index % 2 === 0) {
       const configList: editItem[] = [...wallBaseConfig]
@@ -722,6 +738,7 @@ const defaultWallData: WallData = {
   tmt: 2,
   td: false,
   bottom: 0,
+  cornerType: 1,
 }
 
 export {

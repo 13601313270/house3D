@@ -4,9 +4,6 @@ export interface WallPoint {
   snw: boolean,// show next wall，是否这个点对应的下面的线的信息（是否显示下一个墙）
 }
 
-type wallInfo = {
-  hidden: boolean
-}
 export type WallData = LineObjData<WallPoint> & {
   // points: (Point & WallPoint)[]
   thickness: number
@@ -21,4 +18,5 @@ export type WallData = LineObjData<WallPoint> & {
   tmt: number // 天花板材质
   td: boolean // 天花板是否是双面
   bottom: number // 距离地面距离
+  cornerType: 0 | 1 | 2 | 3 | 4 | 5 // 角点类型
 }

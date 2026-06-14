@@ -5,9 +5,6 @@ export interface StaircasePoint extends Point {
   z: number,// 高度
 }
 
-type wallInfo = {
-  hidden: boolean
-}
 export type StaircaseData = LineObjData<StaircasePoint> & {
   // points: StaircasePoint[]
   thickness: number
