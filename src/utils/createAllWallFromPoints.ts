@@ -14,13 +14,29 @@ export function createAllWallFromPoints(wallitem: {
     y: number
   }[]
   thickness: number
-}): wallBox[] {
+}, type: 0 | 1 | 2 | 3 | 4 | 5): {
+  data: wallBox[],
+  countPerPoint: number
+} {
   const left: Point[] = [];
   const right: Point[] = [];
   const allWallBox: wallBox[] = []
   // console.log('========线========')
   const radius = wallitem.thickness / 2;
-  if (!wallitem.points || wallitem.points.length < 2) return []
+  const countPerPoint = {
+    0: 1,
+    1: 1,
+    2: 2,
+    3: 3,
+    4: 2,
+    5: 2,
+  }[type];
+  if (!wallitem.points || wallitem.points.length < 2) {
+    return {
+      data: [],
+      countPerPoint: 0
+    }
+  }
   // console.log('========点========')
   console.log('===============pppLeftX-set===============')
   for (let i = 0, len = wallitem.points.length; i < len; i++) {
@@ -129,29 +145,132 @@ export function createAllWallFromPoints(wallitem: {
   }
   const allWallBoxMerge: wallBox[] = []
   for (let i = 0; i < wallitem.points.length - 1; i++) {
-    allWallBoxMerge.push(allWallBox[i * 3])
+    if (type === 1) {
+      const cirPre1 = allWallBox[i * 3 - 1]
+      const cir1 = allWallBox[i * 3 + 1]
+      let point1 = allWallBox[i * 3][0];
+      let point2 = allWallBox[i * 3][1];
+      let point3 = allWallBox[i * 3][2];
+      let point4 = allWallBox[i * 3][3];
+      if (cirPre1) {
+        if (JSON.stringify(cirPre1[2]) === JSON.stringify(cirPre1[3])) {
+          point1 = cirPre1[0];
+        } else {
+          point4 = cirPre1[3];
+        }
+      }
+      if (cir1) {
+        if (JSON.stringify(cir1[2]) === JSON.stringify(cir1[3])) {
+          point2 = cir1[1];
+        } else {
+          point3 = cir1[2];
+        }
+      }
+      allWallBoxMerge.push([
+        point1,
+        point2,
+        point3,
+        point4,
+      ])
+    } else {
+      allWallBoxMerge.push(allWallBox[i * 3])
+    }
     if (i === wallitem.points.length - 2) {
       break;
     }
     const cir1 = allWallBox[i * 3 + 1]
     const cir2 = allWallBox[i * 3 + 2]
-    if (JSON.stringify(cir1[2]) === JSON.stringify(cir1[3])) {
-      allWallBoxMerge.push([
-        cir1[0],
-        cir1[1],
-        cir2[1],
-        cir2[2],
-      ])
-    } else {
-      allWallBoxMerge.push([
-        cir1[0],
-        cir2[2],
-        cir2[3],
-        cir1[3],
-      ])
+    if (type === 2) {
+      if (JSON.stringify(cir1[2]) === JSON.stringify(cir1[3])) {
+        allWallBoxMerge.push([
+          cir1[0],
+          cir2[1],
+          cir2[2],
+        ])
+      } else {
+        allWallBoxMerge.push([
+          cir1[0],
+          cir2[2],
+          cir1[3],
+        ])
+      }
+    } else if (type === 3) {
+      allWallBoxMerge.push(cir1)
+      allWallBoxMerge.push(cir2)
+    } else if (type === 4) {
+      if (JSON.stringify(cir1[2]) === JSON.stringify(cir1[3])) {
+        allWallBoxMerge.push([
+          cir1[0],
+          cir1[1],
+          cir2[1],
+          cir2[2],
+        ])
+      } else {
+        allWallBoxMerge.push([
+          cir1[0],
+          cir2[2],
+          cir2[3],
+          cir1[3],
+        ])
+      }
+    } else if (type === 5) {
+      const ddCount = 3;
+      const cornerPoints = [];
+      const {
+        yuandian,
+        leftPoint,
+        rightPoint
+      } = (function () {
+        if (JSON.stringify(cir1[2]) === JSON.stringify(cir1[3])) {
+          const yuandian = cir2[2];
+          const leftPoint = cir1[0];
+          const rightPoint = cir2[1];
+          return {
+            yuandian,
+            leftPoint,
+            rightPoint
+          }
+        } else {
+          const yuandian = cir1[0];
+          const leftPoint = cir2[2];
+          const rightPoint = cir1[3];
+          return {
+            yuandian,
+            leftPoint,
+            rightPoint
+          }
+        }
+      })()
+      cornerPoints.push(yuandian, leftPoint)
+      // 计算yuandian到leftPoint的角度
+      const angle = Math.atan2(leftPoint.y - yuandian.y, leftPoint.x - yuandian.x)
+      // 计算yuandian到rightPoint的角度
+      const angle2 = Math.atan2(rightPoint.y - yuandian.y, rightPoint.x - yuandian.x)
+      // 计算angle和angle2之间的夹角角度
+      let diff = Math.abs(angle2 - angle);
+
+      // 处理角度周期性（取最小夹角，范围 [0, π]）
+      if (diff > Math.PI) {
+        diff = 2 * Math.PI - diff;
+      }
+      for (let i = 0; i < ddCount; i++) {
+        const fff = rotateVector([
+          leftPoint.x - yuandian.x,
+          leftPoint.y - yuandian.y
+        ], diff / (ddCount + 1) * (i + 1));
+        cornerPoints.push({
+          x: yuandian.x + fff[0],
+          y: yuandian.y + fff[1],
+        })
+      }
+      cornerPoints.push(rightPoint)
+      allWallBoxMerge.push(cornerPoints)
     }
   }
-  return allWallBoxMerge;
+  return {
+    data: allWallBoxMerge,
+    countPerPoint,
+  }
 }
 
 /**

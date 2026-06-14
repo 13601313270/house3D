@@ -1,6 +1,6 @@
 import { Point, HandelInfo } from '@/types/map2d'
 import { WallData, WallPoint } from './index.d'
-import { createAllWallFromPoints } from '@/utils/createAllWallFromPoints/angleType1'
+import { createAllWallFromPoints } from '@/utils/createAllWallFromPoints'
 import * as THREE from 'three'
 import { editItem } from '..'
 import { getMaterialById } from '@/material'
@@ -17,6 +17,7 @@ export class WallEntity extends LineEntityClass<WallPoint, WallData> {
   type: string = 'wall'
   isPointObj: boolean = false
   private circleRadius = 6
+  private cornerType: 0 | 1 | 2 | 3 | 4 | 5 = 5;
 
   defaultValue(): WallData {
     const wall: WallData = defaultWallData
@@ -42,7 +43,7 @@ export class WallEntity extends LineEntityClass<WallPoint, WallData> {
       ctx.fill()
       ctx.setLineDash([])
     }
-    const wallBoxList = createAllWallFromPoints(data)
+    const { data: wallBoxList, countPerPoint: countPerPointPerPoint } = createAllWallFromPoints(data, this.cornerType)
     ctx.strokeStyle = 'black'
     ctx.fillStyle = data.color
     ctx.lineWidth = 2
@@ -51,7 +52,7 @@ export class WallEntity extends LineEntityClass<WallPoint, WallData> {
     for (let i = 0; i < wallBoxList.length; i++) {
       const box = wallBoxList[i]
 
-      if (data.points[i].snw) {
+      if (i % countPerPointPerPoint === 0 && data.points[i / countPerPointPerPoint].snw) {
         ctx.setLineDash([10 * zoomLevel, 10 * zoomLevel])
       } else {
         ctx.setLineDash([])
@@ -82,10 +83,10 @@ export class WallEntity extends LineEntityClass<WallPoint, WallData> {
   ): void {
     const wall = data;
     // 用红色绘制墙
-    const wallBoxList = createAllWallFromPoints({
+    const { data: wallBoxList, countPerPoint: countPerPointPerPoint } = createAllWallFromPoints({
       points: data.points,
       thickness: data.thickness + 1,
-    })
+    }, this.cornerType)
     ctx.strokeStyle = 'red'
     ctx.fillStyle = data.color
     ctx.lineWidth = 1
@@ -94,7 +95,7 @@ export class WallEntity extends LineEntityClass<WallPoint, WallData> {
     for (let i = 0; i < wallBoxList.length; i++) {
       const box = wallBoxList[i]
 
-      if (data.points[i].snw) {
+      if (i % countPerPointPerPoint === 0 && data.points[i / countPerPointPerPoint].snw) {
         ctx.setLineDash([10 * zoomLevel, 10 * zoomLevel])
       } else {
         ctx.setLineDash([])
@@ -216,7 +217,7 @@ export class WallEntity extends LineEntityClass<WallPoint, WallData> {
   create3DMesh() {
     const data = this.getData()
     const meshList: THREE.Group[] = []
-    const wallBoxList = createAllWallFromPoints(data);
+    const { data: wallBoxList, countPerPoint: countPerPointPerPoint } = createAllWallFromPoints(data, this.cornerType);
     const wallHeight = data.height
     const bottom = data.bottom || 0
     // console.log(1)
@@ -250,7 +251,7 @@ export class WallEntity extends LineEntityClass<WallPoint, WallData> {
           side: THREE.DoubleSide
         })
         const wallMesh = new THREE.Mesh(geometry, material)
-        if (data.points[i].snw) {
+        if (i % countPerPointPerPoint === 0 && data.points[i / countPerPointPerPoint].snw) {
           wallMesh.visible = false
         }
         // wallMesh.position.set(0, 0, 0)

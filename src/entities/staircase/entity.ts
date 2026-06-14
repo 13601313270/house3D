@@ -1,6 +1,6 @@
 import { Point, HandelInfo } from '@/types/map2d'
 import { StaircaseData, StaircasePoint } from './index.d'
-import { createAllWallFromPoints } from '@/utils/createAllWallFromPoints/angleType1'
+import { createAllWallFromPoints } from '@/utils/createAllWallFromPoints'
 import * as THREE from 'three'
 import { editItem } from '..'
 import { getMaterialById } from '@/material'
@@ -17,6 +17,7 @@ export class StaircaseEntity extends LineEntityClass<StaircasePoint, StaircaseDa
   type: string = 'staircase'
   isPointObj: boolean = false
   private circleRadius = 6
+  private cornerType: 0 | 1 | 2 | 3 | 4 | 5 = 5;
 
   defaultValue(): StaircaseData {
     const staircase: StaircaseData = defaultStaircaseData
@@ -24,7 +25,7 @@ export class StaircaseEntity extends LineEntityClass<StaircasePoint, StaircaseDa
   }
 
   draw2DPreviewByData(ctx: CanvasRenderingContext2D, data: StaircaseData, panOffset: Point, zoomLevel: number): void {
-    const wallBoxList = createAllWallFromPoints(data)
+    const { data: wallBoxList } = createAllWallFromPoints(data, this.cornerType)
     ctx.strokeStyle = 'black'
     ctx.fillStyle = data.color
     ctx.lineWidth = 2
@@ -60,10 +61,10 @@ export class StaircaseEntity extends LineEntityClass<StaircasePoint, StaircaseDa
   ): void {
     const staircase = data;
     // 用红色绘制墙
-    const wallBoxList = createAllWallFromPoints({
+    const { data: wallBoxList } = createAllWallFromPoints({
       points: data.points,
       thickness: data.thickness + 1,
-    })
+    }, this.cornerType)
     ctx.strokeStyle = 'red'
     ctx.fillStyle = data.color
     ctx.lineWidth = 1
@@ -188,7 +189,9 @@ export class StaircaseEntity extends LineEntityClass<StaircasePoint, StaircaseDa
   create3DMesh() {
     const data = this.getData()
     const meshList: THREE.Group[] = []
-    const wallBoxList = createAllWallFromPoints(data);
+    return meshList
+    const { data: wallBoxList, countPerPoint: countPerPointPerPoint } = createAllWallFromPoints(data, this.cornerType);
+    console.log('countPerPointPerPoint', countPerPointPerPoint)
     const wallHeight = 100;
     const bottom = 0;
     // console.log(1)
