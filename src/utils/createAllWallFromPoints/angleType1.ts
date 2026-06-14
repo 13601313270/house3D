@@ -34,9 +34,9 @@ export function createAllWallFromPoints(wallitem: {
 
     let v1 = [curr.x - prev.x, curr.y - prev.y];
     let v2 = [next.x - curr.x, next.y - curr.y];
-    if (!prev.x && prev.x !== 0) {
+    if (j === 0) {
       v1 = [...v2];
-    } else if (!next.x && next.x !== 0) {
+    } else if (j === len - 1) {
       v2 = [...v1];
     }
 
