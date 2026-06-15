@@ -258,9 +258,9 @@ export class CameraEntity extends PointEntityClass<CameraData> {
       object.isCameraObj = true;
       group.add(object)
       // console.log('OBJ文件加载成功:', url)
-    }, (progress: any) => {
+    }, () => {
       // 加载进度
-      const percent = (progress.loaded / progress.total * 100).toFixed(2)
+      // const percent = (progress.loaded / progress.total * 100).toFixed(2)
       // console.log('加载进度:', percent + '%')
     }, (error: any) => {
       console.error('OBJ文件加载失败:', error)
