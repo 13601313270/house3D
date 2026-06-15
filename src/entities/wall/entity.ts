@@ -225,6 +225,7 @@ export class WallEntity extends LineEntityClass<WallPoint, WallData> {
     const data = this.getData()
     const meshList: THREE.Group[] = []
     const { data: wallBoxList, countPerPoint: countPerPointPerPoint } = createAllWallFromPoints(data, data.cornerType);
+    console.log('dddddddd---1', wallBoxList.length, countPerPointPerPoint, data.points.length)
     const wallHeight = data.height
     const bottom = data.bottom || 0
     // console.log(1)
@@ -232,11 +233,7 @@ export class WallEntity extends LineEntityClass<WallPoint, WallData> {
       steps: 1,
       depth: wallHeight,
       bevelEnabled: true,
-      // bevelThickness: 2,
-      // bevelSize: 2,
-      // bevelSegments: 1
     }
-    // console.log('wallBoxList', wallBoxList)
     for (let i = 0; i < wallBoxList.length; i++) {
       const box = wallBoxList[i]
 
@@ -268,6 +265,8 @@ export class WallEntity extends LineEntityClass<WallPoint, WallData> {
         wallMesh.position.setY(bottom)
         const group = new THREE.Group()
         group.add(wallMesh)
+        // @ts-ignore
+        group.isWall = true
         meshList.push(group)
       }
     }

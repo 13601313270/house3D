@@ -169,9 +169,9 @@ export class ImportFileEntity extends PointEntityClass<ImportFileData> {
     const threeObject = findObjInfo.mesh as THREE.Group | undefined;
 
     // console.log('materialVec', materialVec)
-    console.log('materialId', bm);
+    // console.log('materialId', bm);
     const materialUseId = bm || -1
-    console.log('materialId', color);
+    // console.log('materialId', color);
     // console.log('scaleX', scaleX, 'scaleY', scaleY, 'scaleZ', scaleZ)
     // 将方向向量旋转90度
     const rotatedDirection = new THREE.Vector3(-1, 1, 1);// materialVec ? new THREE.Vector3(...materialVec) : new THREE.Vector3(-1, 1, 1)

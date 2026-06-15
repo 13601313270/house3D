@@ -133,11 +133,11 @@ export class OutFileInWallEntity extends EntityClassInWall<OutFileInWallData> {
     })
     const wallThickness = wall ? wall.getData().thickness : 10;
     const { scaleX, scaleY, scaleZ, url, materialUrl, angleY, materialVec, defaultColor, materialId } = findObjInfo
-    console.log('materialVec', materialVec)
-    console.log('materialId', bm);
+    // console.log('materialVec', materialVec)
+    // console.log('materialId', bm);
     const materialUseId = (bm === null) ? (materialId || -1) : bm
-    console.log('materialId', color);
-    console.log('scaleX', scaleX, 'scaleY', scaleY, 'scaleZ', scaleZ)
+    // console.log('materialId', color);
+    // console.log('scaleX', scaleX, 'scaleY', scaleY, 'scaleZ', scaleZ)
     const offsetX = Math.cos(angleY + (isOuter ? Math.PI / -2 : Math.PI / 2)) * wallThickness;
     const offsetY = Math.sin(angleY + (isOuter ? Math.PI / -2 : Math.PI / 2)) * wallThickness;
     // 将方向向量旋转90度
@@ -182,7 +182,7 @@ export class OutFileInWallEntity extends EntityClassInWall<OutFileInWallData> {
           }
         })
         group.add(object)
-        console.log('OBJ文件加载成功:', url)
+        // console.log('OBJ文件加载成功:', url)
       }
       // console.log('material-material', getMaterialById(materialId))
       if (materialUrl) {
@@ -194,7 +194,7 @@ export class OutFileInWallEntity extends EntityClassInWall<OutFileInWallData> {
           }, (progress: any) => {
             // 加载进度
             const percent = (progress.loaded / progress.total * 100).toFixed(2)
-            console.log('加载进度:', percent + '%')
+            // console.log('加载进度:', percent + '%')
           }, (error: any) => {
             console.error('OBJ文件加载失败:', error)
           })
@@ -205,7 +205,7 @@ export class OutFileInWallEntity extends EntityClassInWall<OutFileInWallData> {
         }, (progress: any) => {
           // 加载进度
           const percent = (progress.loaded / progress.total * 100).toFixed(2)
-          console.log('加载进度:', percent + '%')
+          // console.log('加载进度:', percent + '%')
         }, (error: any) => {
           console.error('OBJ文件加载失败:', error)
         })
@@ -235,7 +235,7 @@ export class OutFileInWallEntity extends EntityClassInWall<OutFileInWallData> {
       }, (progress: any) => {
         // 加载进度
         const percent = (progress.loaded / progress.total * 100).toFixed(2)
-        console.log('加载进度:', percent + '%')
+        // console.log('加载进度:', percent + '%')
       }, (error: any) => {
         console.error('OBJ文件加载失败:', error)
       })

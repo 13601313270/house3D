@@ -200,11 +200,11 @@ export class OutFileEntity extends PointEntityClass<OutFileData> {
       defaultColor,
       materialId,
     } = findObjInfo
-    console.log('materialVec', materialVec)
-    console.log('materialId', bm);
+    // console.log('materialVec', materialVec)
+    // console.log('materialId', bm);
     const materialUseId = (bm === null) ? (materialId || -1) : bm
-    console.log('materialId', color);
-    console.log('scaleX', scaleX, 'scaleY', scaleY, 'scaleZ', scaleZ)
+    // console.log('materialId', color);
+    // console.log('scaleX', scaleX, 'scaleY', scaleY, 'scaleZ', scaleZ)
     // 将方向向量旋转90度
     const rotatedDirection = materialVec ? new THREE.Vector3(...materialVec) : new THREE.Vector3(-1, 1, 1)
     const material: THREE.Material | undefined = (() => {
@@ -245,7 +245,7 @@ export class OutFileEntity extends PointEntityClass<OutFileData> {
           }
         })
         group.add(object)
-        console.log('OBJ文件加载成功:', url)
+        // console.log('OBJ文件加载成功:', url)
       }
       // console.log('material-material', getMaterialById(materialId))
       if (materialUrl) {
@@ -257,7 +257,7 @@ export class OutFileEntity extends PointEntityClass<OutFileData> {
           }, (progress: any) => {
             // 加载进度
             const percent = (progress.loaded / progress.total * 100).toFixed(2)
-            console.log('加载进度:', percent + '%')
+            // console.log('加载进度:', percent + '%')
           }, (error: any) => {
             console.error('OBJ文件加载失败:', error)
           })
@@ -268,7 +268,7 @@ export class OutFileEntity extends PointEntityClass<OutFileData> {
         }, (progress: any) => {
           // 加载进度
           const percent = (progress.loaded / progress.total * 100).toFixed(2)
-          console.log('加载进度:', percent + '%')
+          // console.log('加载进度:', percent + '%')
         }, (error: any) => {
           console.error('OBJ文件加载失败:', error)
         })
@@ -296,7 +296,7 @@ export class OutFileEntity extends PointEntityClass<OutFileData> {
       }, (progress: any) => {
         // 加载进度
         const percent = (progress.loaded / progress.total * 100).toFixed(2)
-        console.log('加载进度:', percent + '%')
+        // console.log('加载进度:', percent + '%')
       }, (error: any) => {
         console.error('OBJ文件加载失败:', error)
       })

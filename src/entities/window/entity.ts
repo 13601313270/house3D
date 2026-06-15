@@ -391,7 +391,8 @@ export class WindowEntity extends EntityClassInWall<WindowData> {
     // group.position.set(data.x, data.height / 2 + (data.bottom || 0), data.y)
     group.rotateY(data.angle * -1);
     if (wall && data.wallPointId > -1 && wall.meshList[data.wallPointId]) {
-      const countPerPoint = (wall.meshList.length - 1) / (wall.getData().points.length - 2)
+      const boxLength = wall.meshList.filter(v => 'isWall' in v).length;
+      const countPerPoint = (boxLength - 1) / (wall.getData().points.length - 2)
       const wallGroup = wall.meshList[data.wallPointId * countPerPoint];
       const subtractGeometry = new THREE.BoxGeometry(
         data.width,
@@ -402,6 +403,7 @@ export class WindowEntity extends EntityClassInWall<WindowData> {
       const cylinderBrush = new Brush(subtractGeometry);
       cylinderBrush.position.set(data.x, data.height / 2 - 1 + (data.bottom || 0), data.y)
       cylinderBrush.updateMatrixWorld()
+      // console.log('dddddddd', countPerPoint, wallGroup)
       const firstMesh = wallGroup.children.find(child => child instanceof THREE.Mesh) as THREE.Mesh;
       const boxBrush = new Brush(firstMesh.geometry.clone());// 主体
       boxBrush.position.set(

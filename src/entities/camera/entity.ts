@@ -261,7 +261,7 @@ export class CameraEntity extends PointEntityClass<CameraData> {
     }, (progress: any) => {
       // 加载进度
       const percent = (progress.loaded / progress.total * 100).toFixed(2)
-      console.log('加载进度:', percent + '%')
+      // console.log('加载进度:', percent + '%')
     }, (error: any) => {
       console.error('OBJ文件加载失败:', error)
     })

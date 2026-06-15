@@ -250,8 +250,8 @@ export class World {
       if (!a.boundingBoxData || !b.boundingBoxData) {
         return 0
       }
-      console.log('a.boundingBoxData', a.boundingBoxData[0])
-      console.log('b.boundingBoxData', b.boundingBoxData[0])
+      // console.log('a.boundingBoxData', a.boundingBoxData[0])
+      // console.log('b.boundingBoxData', b.boundingBoxData[0])
       return (aData.z + a.boundingBoxData[0].y) - (bData.z + b.boundingBoxData[0].y)
     }).forEach((item) => {
       item.draw2DPreview(ctx, panOffset, zoomLevel)
