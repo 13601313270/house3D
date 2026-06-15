@@ -38,7 +38,7 @@ export function createAllWallFromPoints(wallitem: {
     }
   }
   // console.log('========点========')
-  console.log('===============pppLeftX-set===============')
+  // console.log('===============pppLeftX-set===============')
   for (let i = 0, len = wallitem.points.length; i < len; i++) {
     const prev = wallitem.points[i - 1] || {} as Point;
     const curr = wallitem.points[i];
