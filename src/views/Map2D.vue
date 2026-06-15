@@ -52,45 +52,8 @@
       <div class="left-panel" :style="{ width: panel1SplitWidthPer * 100 + '%' }">
         <div class="toolbar">
           <div style="flex-shrink: 0;">布局图</div>
-          <div class="toolbar-item" @mouseleave="leaveObjTypeCate1">
-            <button type="button" @mouseenter="isMouseInCate1 = true">
-              添加
-            </button>
-            <div class="list insertObjTypeSelect" @mouseenter="isMouseInCate1 = true"
-              v-show="isMouseInCate1 || isMouseInCate2">
-              <template v-if="lastChooseOutFile">
-                <div class="childItem"
-                  @click="changeCurrentToolToOutFile(lastChooseOutFile.id), isMouseInCate1 = false">
-                  最近使用：{{ lastChooseOutFile.name }}
-                </div>
-                <div class="splitLine"></div>
-              </template>
-              <div>
-                <div v-for="item in allFileKeysGroup.filter(item => item.id !== 'other')" :key="item.id"
-                  class="typeItemContent" @mouseenter="clearCate1List">
-                  <div class="typeName">{{ item.name }}</div>
-                  <div class="childItemList" v-if="item.child && item.child.length > 0">
-                    <div v-for="item2 in item.child" class="childItem" :key="item2"
-                      @click="changeCurrentTool(item2), isMouseInCate1 = false">
-                      {{ allFileKeysName[item2] }}
-                    </div>
-                  </div>
-                </div>
-                <div class="childItem"
-                  v-for="value in (allFileKeysGroup.find(item => item.id === 'other') || { child: [] }).child.filter(item => item !== 'outFile' && item !== 'outFileInWall' && item !== 'importFile')"
-                  :key="value" :class="{ active: currentTool === value }"
-                  @click="changeCurrentTool(value), isMouseInCate1 = false" @mouseenter="clearCate1List">
-                  {{ allFileKeysName[value] }}
-                </div>
-              </div>
-              <div class="splitLine"></div>
-              <div>
-                <div v-for="item in ObjFileTypes" :key="item.id" class="typeItemContent">
-                  <div class="typeName" @mouseenter="mouseEnterType($event, item)">{{ item.name }}</div>
-                </div>
-              </div>
-            </div>
-          </div>
+          <ObjTypeSelect :currentTool="currentTool" @select="changeObjTypeSelect"
+            @onShowHelpModal="showHelpModal = true" />
           <button @click="triggerImportFile" type="button">
             导入模型
           </button>
@@ -183,21 +146,6 @@
       <!-- <div>模型初始化中，请稍后...</div> -->
     </div>
   </teleport>
-  <teleport to="#teleport">
-    <div class="addOutFileChildList" ref="addOutFileChildListRef" @mouseenter="isMouseInCate2 = true"
-      @mouseleave="leaveObjTypeCate2"
-      :style="{ top: enterEventDomPosition?.y + 'px', left: enterEventDomPosition?.x + 'px' }"
-      v-if="activeObjChildList.length > 0">
-      <div v-for="item2 in activeObjChildList" class="childItem" :key="item2.id"
-        @click="changeCurrentToolToOutFile(item2.id), isMouseInCate2 = false">
-        {{ item2.name }}
-      </div>
-      <div class="childItem" @click="showHelpModal = true, isMouseInCate2 = false">
-        <div>联系售后添加</div>
-        <div class="desc">（24小时内添加）</div>
-      </div>
-    </div>
-  </teleport>
 </template>
 
 <script lang="ts" setup>
@@ -210,7 +158,7 @@ import { Point } from '../types'
 import { snapThreshold, World } from '../utils/world'
 import Canvas3D, { CameraState } from '../components/Canvas3D.vue'
 import { WallData } from '@/entities/wall/index.d'
-import { allFileKeys, fileData, editItem, allFileKeysName, fileDataKeyToClass, allFileKeysGroup, allFileKeysObjType } from '@/entities'
+import { allFileKeys, fileData, editItem, fileDataKeyToClass, allFileKeysObjType } from '@/entities'
 import { PointEntityClass } from '@/types/pointEntity'
 import { EntityClassInWall, NearestWallResult } from '@/types/entityInWall'
 import { BaseObjData, HandelInfo, LineObjData, PointWithIndex } from '@/types/map2d'
@@ -218,13 +166,7 @@ import pointToLineDistance from '@/utils/pointToLineDistance'
 import { CameraData } from '@/entities/camera/index.d'
 import { WallEntity } from '@/entities/wall/entity'
 import { ImportFileType, ObjOutputFileType } from '@/entities/allObjs'
-import { OutFileDataClass } from '@/entities/outFile/dataClass'
-import { OutFileEntity } from '@/entities/outFile/entity'
-import { OutFileData } from '@/entities/outFile/index.d'
-
-import { OutFileInWallDataClass } from '@/entities/outFileInWall/dataClass'
-import { OutFileInWallEntity } from '@/entities/outFileInWall/entity'
-import { OutFileInWallData } from '@/entities/outFileInWall/index.d'
+import ObjTypeSelect from '@/components/ObjTypeSelect.vue'
 
 import { ImportFileDataClass } from '@/entities/importFile/dataClass';
 import { ImportFileData } from '@/entities/importFile/index.d';
@@ -312,7 +254,6 @@ type ObjFileType = {
   }[]
 }
 const ObjFileTypes = ref<Array<ObjFileType>>([])
-const activeObjChildList = ref<Array<{ id: string, name: string, type: number }>>([])
 
 let insertTempObj: BaseEntityClass<any> | null = null
 const insertAdding = ref(false)
@@ -1925,152 +1866,6 @@ const handleWheel = (e: WheelEvent) => {
 
   drawWrapper2DAnd3D()
 }
-function changeCurrentTool(type: string | 'drag') {
-  activeToolsIndex.value = -1
-  insertTempObj = null
-
-  if (allFileKeys.includes(type as any)) {
-    if (type === 'outFile' || type === 'outFileInWall') {
-      // 不该进入这里
-      // const findObjInfo = worldApi.ObjFileTypes[1];
-      // if (type === 'outFileInWall') {
-      //   const data: OutFileInWallData = {
-      //     fileTypeId: findObjInfo.id,
-      //     id: Date.now().toString(),
-      //     bm: findObjInfo.materialId,
-      //     x: 0,
-      //     y: 0,
-      //     z: findObjInfo.defaultZ || 0,
-      //     angle: 0,
-      //     wallPointId: -1,
-      //     bottom: 40,
-      //     isOuter: false,
-      //     color: findObjInfo.defaultColor,
-      //   }
-      //   const insertTempObjData = new OutFileInWallDataClass(data)
-      //   insertTempObj = new OutFileInWallEntity(worldApi, insertTempObjData)
-      //   insertTempObj.init()
-      // } else {
-      //   const data: OutFileData = {
-      //     fileTypeId: findObjInfo.id,
-      //     id: Date.now().toString(),
-      //     bm: findObjInfo.materialId,
-      //     angleY: 0,
-      //     x: 0,
-      //     y: 0,
-      //     z: 0,
-      //     color: findObjInfo.defaultColor,
-      //   }
-      //   const insertTempObjData = new OutFileDataClass(data)
-      //   insertTempObj = new OutFileEntity(worldApi, insertTempObjData)
-      //   insertTempObj.init()
-      // }
-    } else {
-      // @ts-ignore
-      const ClassName = fileDataKeyToClass[type];
-      if (ClassName) {
-        insertTempObj = new ClassName(worldApi)
-        if (insertTempObj) {
-          insertTempObj.init()
-        }
-      }
-    }
-  }
-  currentTool.value = type
-}
-
-const lastChooseOutFile = ref<ObjOutputFileType>()
-
-async function changeCurrentToolToOutFile(id: string) {
-  activeToolsIndex.value = -1
-  activeObjChildList.value = []
-  const index = worldApi.ObjFileTypes.findIndex(item => item.id === id);
-  if (index === -1) {
-    const { data } = await axios.get('https://api.studying1v1.com/video/objectFileById/' + id)
-    const res: ObjOutputFileType = data;
-    lastChooseOutFile.value = res;
-    worldApi.ObjFileTypes.push(res)
-  } else {
-    lastChooseOutFile.value = worldApi.ObjFileTypes[index];
-  }
-  const findObjInfo = worldApi.ObjFileTypes.find(item => item.id === id);
-  if (!findObjInfo) return
-
-  if (findObjInfo.inWall) {
-    const data: OutFileInWallData = {
-      id: Date.now().toString(),
-      fileTypeId: findObjInfo.id,
-      bm: findObjInfo.materialId,
-      x: 0,
-      y: 0,
-      z: findObjInfo.defaultZ || 0,
-      angle: 0,
-      wallPointId: -1,
-      bottom: 40,
-      color: findObjInfo.defaultColor,
-      isOuter: false,
-      canAngelZ: findObjInfo.canAngelZ,
-    }
-    const insertTempObjData = new OutFileInWallDataClass(data)
-    insertTempObj = new OutFileInWallEntity(worldApi, insertTempObjData)
-    insertTempObj.init()
-    currentTool.value = 'outFileInWall'
-  } else {
-    const data: OutFileData = {
-      fileTypeId: findObjInfo.id,
-      id: Date.now().toString(),
-      x: 0,
-      y: 0,
-      z: 0,
-      bm: findObjInfo.materialId,
-      angleY: 0,
-      color: findObjInfo.defaultColor,
-      canAngelZ: findObjInfo.canAngelZ,
-    }
-    const insertTempObjData = new OutFileDataClass(data)
-    insertTempObj = new OutFileEntity(worldApi, insertTempObjData)
-    insertTempObj.init()
-    currentTool.value = 'outFile'
-  }
-}
-
-const isMouseInCate1 = ref(false)
-const isMouseInCate2 = ref(false)
-const addOutFileChildListRef = ref<HTMLDivElement>()
-const enterEventDomPosition = ref<{ x: number, y: number }>()
-async function mouseEnterType(event: MouseEvent, type: ObjFileType) {
-  if (!type.child || type.child.length === 0) {
-    type.child = [];
-    const { data: res } = await axios.get('https://api.studying1v1.com/video/objectFileListByType/' + type.id)
-    res.forEach((v: {
-      id: string,
-      name: string,
-      type: number,
-    }) => {
-      type.child.push(v)
-    })
-  }
-  activeObjChildList.value = type.child
-  const dom = event.target as HTMLElement;
-  const { right, top } = dom.getBoundingClientRect()
-  enterEventDomPosition.value = { x: right, y: top }
-  nextTick(() => {
-    if (addOutFileChildListRef.value) {
-      const { bottom } = addOutFileChildListRef.value!.getBoundingClientRect()
-      console.log('addOutFileChildListRef', bottom, window.innerHeight)
-      if (bottom > window.innerHeight) {
-        enterEventDomPosition.value = {
-          x: right,
-          y: top - (bottom - window.innerHeight)
-        }
-      }
-    }
-  })
-}
-
-function clearCate1List() {
-  activeObjChildList.value = []
-}
 
 watch(() => editPropInputInfo.value, () => {
   if (contextMenu.value?.visible) {
@@ -2251,25 +2046,22 @@ function handleObjectHover(object: THREE.Object3D | null) {
     // console.log('object', object.entity)
   }
 }
-function leaveObjTypeCate1() {
-  isMouseInCate1.value = false
-  setTimeout(() => {
-    if (isMouseInCate2.value) {
-      console.log('111111')
-      return
-    } else {
-      console.log('111111---2')
-      activeToolsIndex.value = -1
-      activeObjChildList.value = []
-    }
-  }, 10)
-}
-function leaveObjTypeCate2() {
-  isMouseInCate2.value = false
-  activeObjChildList.value = []
-}
+
 function handleObjectClick(object: THREE.Object3D | null) {
   console.log('object', object)
+}
+function changeObjTypeSelect(type: string, baseObj: BaseEntityClass<any>) {
+  activeToolsIndex.value = -1
+  insertTempObj = null
+
+  if (allFileKeys.includes(type as any)) {
+    // @ts-ignore
+    const ClassName = fileDataKeyToClass[type];
+    if (ClassName) {
+      insertTempObj = baseObj
+      currentTool.value = type
+    }
+  }
 }
 </script>
 

@@ -15,7 +15,7 @@ import conePlugin from './cone'
 import peoplePlugin from './people'
 import importFilePlugin from './importFile'
 import curtainInWallPlugin from './curtainInWall'
-import staircasePlugin from './staircase'
+// import staircasePlugin from './staircase'
 import { BaseEntityClass } from '@/types/baseEntity'
 
 export type EntityConstructor = new (...args: any[]) => BaseEntityClass<any>;
@@ -76,7 +76,7 @@ export const allFileKeysObjType: Record<string, 'point' | 'polyline'> = {
   peoplePlugin,
   importFilePlugin,
   curtainInWallPlugin,
-  staircasePlugin,
+  // staircasePlugin,
 ].forEach(v => {
   allFileKeys.push(v.key)
   if (v.type === 'base') {
