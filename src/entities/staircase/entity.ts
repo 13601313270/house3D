@@ -189,7 +189,6 @@ export class StaircaseEntity extends LineEntityClass<StaircasePoint, StaircaseDa
   create3DMesh() {
     const data = this.getData()
     const meshList: THREE.Group[] = []
-    return meshList
     const { data: wallBoxList, countPerPoint: countPerPointPerPoint } = createAllWallFromPoints(data, this.cornerType);
     console.log('countPerPointPerPoint', countPerPointPerPoint)
     const wallHeight = 100;
@@ -225,15 +224,17 @@ export class StaircaseEntity extends LineEntityClass<StaircasePoint, StaircaseDa
       })
 
       const wallMesh = new THREE.Mesh(geometry, material)
-      // wallMesh.position.set(0, 0, 0)
-      const pointData = data.points[i];
-      console.log('data[i]---1', JSON.parse(JSON.stringify(data.points)))
-      // wallMesh.position.setZ(pointData.z || 100)
-      // console.log('this.getData() ', this.getData())
-      console.log('data[i]---pointData', i, pointData, JSON.parse(JSON.stringify(pointData)))
       wallMesh.castShadow = true
       wallMesh.receiveShadow = true
-      wallMesh.position.setY(bottom + (pointData.z || 0))
+      if (i % countPerPointPerPoint === 0) {
+        // wallMesh.position.set(0, 0, 0)
+        const pointData = data.points[i / countPerPointPerPoint];
+        wallMesh.position.setY(bottom + (pointData.z || 0))
+        // console.log('data[i]---1', JSON.parse(JSON.stringify(data.points)))
+        // wallMesh.position.setZ(pointData.z || 100)
+        // console.log('this.getData() ', this.getData())
+        // console.log('data[i]---pointData', i, pointData, JSON.parse(JSON.stringify(pointData)))
+      }
       const group = new THREE.Group()
       group.add(wallMesh)
       meshList.push(group)

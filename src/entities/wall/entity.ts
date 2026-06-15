@@ -53,7 +53,7 @@ export class WallEntity extends LineEntityClass<WallPoint, WallData> {
     const { data: wallBoxList, countPerPoint: countPerPointPerPoint } = createAllWallFromPoints(data, data.cornerType)
     ctx.strokeStyle = 'black'
     ctx.fillStyle = data.color
-    ctx.lineWidth = 2
+    ctx.lineWidth = 3
     ctx.setLineDash([])
 
     for (let i = 0; i < wallBoxList.length; i++) {
@@ -629,8 +629,8 @@ export class WallEntity extends LineEntityClass<WallPoint, WallData> {
         id: 'bottom',
         label: '距离地面距离',
         dataType: 'number',
-        min: 0,
-        max: Infinity,
+        min: -500,
+        max: 500,
         step: 1,
         value: data.bottom,
         unit: 'cm',
@@ -638,11 +638,9 @@ export class WallEntity extends LineEntityClass<WallPoint, WallData> {
       {
         id: 'cornerType',
         label: '墙体角类型',
-        dataType: 'number',
+        dataType: 'cornerType',
         value: data.cornerType,
-        min: 0,
-        max: 5,
-        step: 1,
+        panelDesc: '某些角类型3D渲染是一致的，但是区分“独立墙蹲”，区别在于隐藏墙的时候，独立墙蹲不会隐藏。',
       }
     ];
     if (snapPoint.index % 2 === 0) {

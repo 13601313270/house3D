@@ -34,6 +34,13 @@
         </div>
       </div>
     </div>
+    <div v-else-if="item.dataType === 'cornerType'">
+      <CornerTypeEdit :modelValue="modelValue" @update:modelValue="updateEditPropInputInfoNumber" :item="item">
+        <slot>
+          <div class="cornerTypeDesc">{{ item.panelDesc }}</div>
+        </slot>
+      </CornerTypeEdit>
+    </div>
     <div class="allMaterialPanel" v-if="allMaterialShow && allMaterialShowPropId"
       @click.self="allMaterialShow = false, allMaterialShowPropId = undefined">
       <div class="allMaterialPanelInner">
@@ -64,6 +71,7 @@ import { ref } from 'vue'
 import { editItem } from '@/entities';
 import { allMaterial } from '@/material';
 import ImgEdit from './ImgEdit.vue'
+import CornerTypeEdit from './cornerTypeEdit.vue'
 
 defineProps<{
   item: editItem,
@@ -101,6 +109,9 @@ function updateEditPropInputInfoBoolean(event: Event) {
   }
 }
 function updateEditPropInputInfoString(value: string) {
+  emit('update:modelValue', value)
+}
+function updateEditPropInputInfoNumber(value: number) {
   emit('update:modelValue', value)
 }
 </script>
@@ -274,5 +285,10 @@ function updateEditPropInputInfoString(value: string) {
       }
     }
   }
+}
+
+.cornerTypeDesc {
+  font-size: 14px;
+  color: #b2b2b2;
 }
 </style>

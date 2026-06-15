@@ -127,4 +127,10 @@ export type editItem = {
   id: string,
   label: string,
   dataType: 'title', /* 一个标题，纯展示使用 */
+} | {
+  id: string,
+  label: string,
+  dataType: 'cornerType',
+  value: number,
+  panelDesc: string,
 }
