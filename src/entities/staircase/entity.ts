@@ -17,7 +17,6 @@ export class StaircaseEntity extends LineEntityClass<StaircasePoint, StaircaseDa
   type: string = 'staircase'
   isPointObj: boolean = false
   private circleRadius = 6
-  private cornerType: 0 | 1 | 2 | 3 | 4 | 5 = 5;
 
   defaultValue(): StaircaseData {
     const staircase: StaircaseData = defaultStaircaseData
@@ -25,7 +24,8 @@ export class StaircaseEntity extends LineEntityClass<StaircasePoint, StaircaseDa
   }
 
   draw2DPreviewByData(ctx: CanvasRenderingContext2D, data: StaircaseData, panOffset: Point, zoomLevel: number): void {
-    const { data: wallBoxList } = createAllWallFromPoints(data, this.cornerType)
+    const { cornerType } = data;
+    const { data: wallBoxList } = createAllWallFromPoints(data, cornerType)
     ctx.strokeStyle = 'black'
     ctx.fillStyle = data.color
     ctx.lineWidth = 2
@@ -59,12 +59,12 @@ export class StaircaseEntity extends LineEntityClass<StaircasePoint, StaircaseDa
     panOffset: Point,
     zoomLevel: number,
   ): void {
-    const staircase = data;
+    const { cornerType, points, thickness } = data;
     // 用红色绘制墙
     const { data: wallBoxList } = createAllWallFromPoints({
-      points: data.points,
-      thickness: data.thickness + 1,
-    }, this.cornerType)
+      points,
+      thickness: thickness + 1,
+    }, cornerType)
     ctx.strokeStyle = 'red'
     ctx.fillStyle = data.color
     ctx.lineWidth = 1
@@ -89,10 +89,10 @@ export class StaircaseEntity extends LineEntityClass<StaircasePoint, StaircaseDa
     }
     ctx.setLineDash([])
 
-    if (staircase.points && staircase.points.length >= 2) {
+    if (points && points.length >= 2) {
       // 绘制墙上的点
       ctx.lineWidth = 3
-      staircase.points.forEach((point: Point, index: number) => {
+      points.forEach((point: Point, index: number) => {
         ctx.strokeStyle = 'red'
         ctx.fillStyle = 'white'
         const screenX = point.x * zoomLevel + panOffset.x
@@ -102,9 +102,9 @@ export class StaircaseEntity extends LineEntityClass<StaircasePoint, StaircaseDa
         ctx.stroke()
         ctx.fill()
         ctx.closePath()
-        if (index > 0 && index < staircase.points.length - 1) {
-          const prev = staircase.points[index - 1]
-          const next = staircase.points[index + 1]
+        if (index > 0 && index < points.length - 1) {
+          const prev = points[index - 1]
+          const next = points[index + 1]
           const angleResult = calculateAngle(prev, point, next)
           if (angleResult) {
             const { angle } = angleResult
@@ -152,9 +152,9 @@ export class StaircaseEntity extends LineEntityClass<StaircasePoint, StaircaseDa
       });
       ctx.fillStyle = 'white'
       // 每两个点之间，再绘制一个点，代表边的控制器
-      for (let i = 0; i < staircase.points.length - 1; i++) {
-        const p1 = staircase.points[i]
-        const p2 = staircase.points[i + 1]
+      for (let i = 0; i < points.length - 1; i++) {
+        const p1 = points[i]
+        const p2 = points[i + 1]
         const midX = (p1.x + p2.x) / 2
         const midY = (p1.y + p2.y) / 2
         const screenX = midX * zoomLevel + panOffset.x
@@ -189,11 +189,12 @@ export class StaircaseEntity extends LineEntityClass<StaircasePoint, StaircaseDa
   create3DMesh() {
     const data = this.getData()
     const meshList: THREE.Group[] = []
-    const { data: wallBoxList, countPerPoint: countPerPointPerPoint } = createAllWallFromPoints(data, this.cornerType);
-    console.log('countPerPointPerPoint', countPerPointPerPoint)
-    const wallHeight = 100;
+    const { cornerType } = data
+    const { data: wallBoxList, countPerPoint: countPerPointPerPoint } = createAllWallFromPoints(data, cornerType);
+    // console.log('countPerPointPerPoint', countPerPointPerPoint)
+    const wallHeight = 10;
     const bottom = 0;
-    // console.log(1)
+    const group = new THREE.Group()
     const extrudeSettings = {
       steps: 1,
       depth: wallHeight,
@@ -204,39 +205,87 @@ export class StaircaseEntity extends LineEntityClass<StaircasePoint, StaircaseDa
     }
     // console.log('wallBoxList', wallBoxList)
     for (let i = 0; i < wallBoxList.length; i++) {
-      const box = wallBoxList[i]
-
-      const points = [];
-      for (let j = 0; j < box.length; j++) {
-        points.push(new THREE.Vector2(box[j].x, box[j].y * -1))
-      }
-      const shape = new THREE.Shape(points)
-      const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings)
-      geometry.rotateX(-Math.PI / 2);   // 将 XY 平面旋转成 XZ 平面
-      // 计算点points[0]到points[1]的方向向量
-      const direction = new THREE.Vector3(box[1].x - box[0].x, 0, box[1].y - box[0].y).normalize()
-      // 将方向向量旋转90度
-      const rotatedDirection = new THREE.Vector3(-direction.z, direction.y, direction.x)
-
-      const material = getMaterialById(this.getData().wmt)?.material(rotatedDirection) || new THREE.MeshStandardMaterial({
-        color: this.getData().color,
-        side: THREE.DoubleSide
-      })
-
-      const wallMesh = new THREE.Mesh(geometry, material)
-      wallMesh.castShadow = true
-      wallMesh.receiveShadow = true
+      const pointIndex = Math.ceil(i / countPerPointPerPoint)
+      const boxItem = wallBoxList[i]
+      const pointData = data.points[pointIndex];
+      const splitBoxs: Array<{
+        point: { x: number, y: number }[],
+        z: number,
+      }> = [];
       if (i % countPerPointPerPoint === 0) {
-        // wallMesh.position.set(0, 0, 0)
-        const pointData = data.points[i / countPerPointPerPoint];
-        wallMesh.position.setY(bottom + (pointData.z || 0))
-        // console.log('data[i]---1', JSON.parse(JSON.stringify(data.points)))
-        // wallMesh.position.setZ(pointData.z || 100)
-        // console.log('this.getData() ', this.getData())
-        // console.log('data[i]---pointData', i, pointData, JSON.parse(JSON.stringify(pointData)))
+        (() => {
+          const splitPointCount = 5;
+          const pointStart: { x: number, y: number, z: number } = {
+            x: (boxItem[0].x + boxItem[3].x) / 2,
+            y: (boxItem[0].y + boxItem[3].y) / 2,
+            z: pointData.z || 0,
+          };
+          const pointEnd: { x: number, y: number, z: number } = {
+            x: (boxItem[1].x + boxItem[2].x) / 2,
+            y: (boxItem[1].y + boxItem[2].y) / 2,
+            z: data.points[pointIndex + 1].z || 0,
+          };
+          const stepX = (pointEnd.x - pointStart.x) / (splitPointCount)
+          const stepY = (pointEnd.y - pointStart.y) / (splitPointCount)
+          const stepZ = (pointEnd.z - pointStart.z) / (splitPointCount + 1)
+          // 生成 point1到 point2 中间的 splitPointCount 个点
+          for (let j = 0; j < splitPointCount; j++) {
+            splitBoxs.push({
+              point: [
+                {
+                  x: boxItem[0].x + stepX * (j),
+                  y: boxItem[0].y + stepY * (j),
+                },
+                {
+                  x: boxItem[0].x + stepX * (j + 1),
+                  y: boxItem[0].y + stepY * (j + 1),
+                },
+                {
+                  x: boxItem[3].x + stepX * (j + 1),
+                  y: boxItem[3].y + stepY * (j + 1),
+                },
+                {
+                  x: boxItem[3].x + stepX * (j),
+                  y: boxItem[3].y + stepY * (j),
+                }
+              ],
+              z: (pointData.z || 0) + stepZ * (j + 1),
+            })
+          }
+          // console.log('=====box=====', pointStart, pointEnd)
+        })();
+      } else {
+        splitBoxs.push({
+          point: boxItem,
+          z: pointData.z || 0,
+        })
       }
-      const group = new THREE.Group()
-      group.add(wallMesh)
+
+      splitBoxs.forEach(({ point: box, z }) => {
+        const points = [];
+        for (let j = 0; j < box.length; j++) {
+          points.push(new THREE.Vector2(box[j].x, box[j].y * -1))
+        }
+        const shape = new THREE.Shape(points)
+        const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings)
+        geometry.rotateX(-Math.PI / 2);   // 将 XY 平面旋转成 XZ 平面
+        // 计算点points[0]到points[1]的方向向量
+        const direction = new THREE.Vector3(box[1].x - box[0].x, 0, box[1].y - box[0].y).normalize()
+        // 将方向向量旋转90度
+        const rotatedDirection = new THREE.Vector3(-direction.z, direction.y, direction.x)
+
+        const material = getMaterialById(this.getData().wmt)?.material(rotatedDirection) || new THREE.MeshStandardMaterial({
+          color: this.getData().color,
+          side: THREE.DoubleSide
+        })
+
+        const wallMesh = new THREE.Mesh(geometry, material)
+        wallMesh.castShadow = true
+        wallMesh.receiveShadow = true
+        console.log('pointIndex', pointIndex)
+        wallMesh.position.setY(bottom + z)
+        group.add(wallMesh)
+      })
       meshList.push(group)
     }
 
@@ -252,16 +301,15 @@ export class StaircaseEntity extends LineEntityClass<StaircasePoint, StaircaseDa
   }
 
   showMatchHandel(x: number, y: number) {
-    const data = this.getData();
-    const { points } = data;
+    const { points, thickness } = this.getData();
     for (let i = 0; i < points.length; i++) {
       const point = points[i]
       const dist = Math.hypot(x - point.x, y - point.y)
-      if (dist < this.getData().thickness / 4) {
+      if (dist < thickness / 4) {
         return new MatchCircleArea({
           x: point.x,
           y: point.y,
-          r: this.getData().thickness / 4,
+          r: thickness / 4,
         })
       }
     }
@@ -278,23 +326,23 @@ export class StaircaseEntity extends LineEntityClass<StaircasePoint, StaircaseDa
         x: midX,
         y: midY,
         width,
-        depth: this.getData().thickness + 2,
+        depth: thickness + 2,
         angleY: angel,
       })) {
         return new MatchRectArea({
           x: midX,
           y: midY,
           width,
-          depth: this.getData().thickness + 2,
+          depth: thickness + 2,
           angleY: angel * -1,
         })
       }
       // const dist = Math.hypot(x - midX, y - midY)
-      // if (dist < this.getData().thickness) {
+      // if (dist < thickness) {
       //   return new MatchCircleArea({
       //     x: midX,
       //     y: midY,
-      //     r: this.getData().thickness,
+      //     r: thickness,
       //   })
       // }
     }
@@ -507,6 +555,13 @@ export class StaircaseEntity extends LineEntityClass<StaircasePoint, StaircaseDa
         dataType: 'material',
         value: data.wmt,
       },
+      {
+        id: 'cornerType',
+        label: '墙体角类型',
+        dataType: 'cornerType',
+        value: data.cornerType,
+        panelDesc: '某些角类型3D渲染是一致的，但是区分“独立墙蹲”，区别在于隐藏墙的时候，独立墙蹲不会隐藏。',
+      }
     ];
     if (snapPoint.index % 2 === 0) {
       const configList: editItem[] = [...wallBaseConfig]
@@ -601,6 +656,7 @@ const defaultStaircaseData: StaircaseData = {
   wmt: 0,
   points: [],
   thickness: 100,
+  cornerType: 1,
 }
 
 export {

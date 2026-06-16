@@ -10,6 +10,7 @@ export type StaircaseData = LineObjData<StaircasePoint> & {
   thickness: number
   color: string
   wmt: number // 墙材质
+  cornerType: 0 | 1 | 2 | 3 | 4 | 5 // 墙角类型
   // hb: boolean // 是否有地板
   // bc: string // 地板颜色
   // bmt: number // 地板材质
