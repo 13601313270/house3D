@@ -1,36 +1,24 @@
 <template>
-  <img class="img" v-if="modelValue === 1" src="cornerTypeImgs/1.png" alt="" @click="showAllCornerTypePanel = true">
-  <img class="img" v-if="modelValue === 2" src="cornerTypeImgs/2.png" alt="" @click="showAllCornerTypePanel = true">
-  <img class="img" v-if="modelValue === 3" src="cornerTypeImgs/3.png" alt="" @click="showAllCornerTypePanel = true">
-  <img class="img" v-if="modelValue === 4" src="cornerTypeImgs/4.png" alt="" @click="showAllCornerTypePanel = true">
-  <img class="img" v-if="modelValue === 5" src="cornerTypeImgs/5.png" alt="" @click="showAllCornerTypePanel = true">
+  <div class="selectInfo" v-if="enums.find(v => v.id === modelValue)">
+    <img class="img" :src="enums.find(v => v.id === modelValue)!.img" alt="" @click="showAllCornerTypePanel = true">
+    <div class="desc">{{enums.find(v => v.id === modelValue)!.name}}</div>
+  </div>
+  <div class="selectInfo" v-else>
+    <img class="img" src="../assets/Empty.png" alt="" @click="showAllCornerTypePanel = true">
+    <div class="desc">请选择类型</div>
+  </div>
   <teleport to="#teleport" v-if="showAllCornerTypePanel">
     <div class="cornerTypePanel" @click.self="showAllCornerTypePanel = false">
       <div class="cornerTypePanelInner">
         <div class="title">
-          所有角点类型
+          所有类型
         </div>
         <slot></slot>
         <div class="list">
-          <div class="item" :class="{ active: modelValue === 1 }" @click="change(1)">
-            <img class="img" src="cornerTypeImgs/1.png" alt="">
-            <div class="desc">对角，无独立墙蹲</div>
-          </div>
-          <div class="item" :class="{ active: modelValue === 2 }" @click="change(2)">
-            <img class="img" src="cornerTypeImgs/2.png" alt="">
-            <div class="desc">切脚，独立墙蹲</div>
-          </div>
-          <div class="item" :class="{ active: modelValue === 3 }" @click="change(3)">
-            <img class="img" src="cornerTypeImgs/3.png" alt="">
-            <div class="desc">对角，独立墙蹲</div>
-          </div>
-          <div class="item" :class="{ active: modelValue === 4 }" @click="change(4)">
-            <img class="img" src="cornerTypeImgs/4.png" alt="">
-            <div class="desc">对角，独立墙蹲</div>
-          </div>
-          <div class="item" :class="{ active: modelValue === 5 }" @click="change(5)">
-            <img class="img" src="cornerTypeImgs/5.png" alt="">
-            <div class="desc">圆角，独立墙蹲</div>
+          <div v-for="item in enums" :key="item.id" class="item" :class="{ active: modelValue === item.id }"
+            @click="change(item.id)">
+            <img class="img" :src="item.img" alt="">
+            <div class="desc">{{ item.name }}</div>
           </div>
         </div>
       </div>
@@ -39,13 +27,14 @@
 </template>
 <script setup lang="ts">
 import { ref } from 'vue';
-import { editItem } from '@/entities';
+import { editItem, enumItem } from '@/entities';
 
 const showAllCornerTypePanel = ref(false)
 
 defineProps<{
   item: editItem,
-  modelValue: any
+  modelValue: any,
+  enums: enumItem[]
 }>()
 const emit = defineEmits(['update:modelValue'])
 
@@ -55,10 +44,22 @@ function change(val: number) {
 }
 </script>
 <style scoped lang="less">
-.img {
-  height: 88px;
-  border-radius: 4px;
-  border: solid 1px #d9d9d9;
+.selectInfo {
+  display: flex;
+  flex-direction: column;
+  align-items: end;
+
+  .img {
+    height: 88px;
+    border-radius: 4px;
+    border: solid 1px #d9d9d9;
+  }
+
+  .desc {
+    font-size: 14px;
+    color: #666;
+    text-align: center;
+  }
 }
 
 .cornerTypePanel {

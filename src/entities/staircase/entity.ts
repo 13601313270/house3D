@@ -189,7 +189,8 @@ export class StaircaseEntity extends LineEntityClass<StaircasePoint, StaircaseDa
   create3DMesh() {
     const data = this.getData()
     const meshList: THREE.Group[] = []
-    const { cornerType } = data
+    const { cornerType, stepType } = data
+    console.log('stepType', stepType)
     const { data: wallBoxList, countPerPoint: countPerPointPerPoint } = createAllWallFromPoints(data, cornerType);
     // console.log('countPerPointPerPoint', countPerPointPerPoint)
     const wallHeight = 10;
@@ -199,11 +200,7 @@ export class StaircaseEntity extends LineEntityClass<StaircasePoint, StaircaseDa
       steps: 1,
       depth: wallHeight,
       bevelEnabled: true,
-      // bevelThickness: 2,
-      // bevelSize: 2,
-      // bevelSegments: 1
     }
-    // console.log('wallBoxList', wallBoxList)
     for (let i = 0; i < wallBoxList.length; i++) {
       const pointIndex = Math.ceil(i / countPerPointPerPoint)
       const boxItem = wallBoxList[i]
@@ -214,7 +211,6 @@ export class StaircaseEntity extends LineEntityClass<StaircasePoint, StaircaseDa
       }> = [];
       if (i % countPerPointPerPoint === 0) {
         (() => {
-          const splitPointCount = 5;
           const pointStart: { x: number, y: number, z: number } = {
             x: (boxItem[0].x + boxItem[3].x) / 2,
             y: (boxItem[0].y + boxItem[3].y) / 2,
@@ -225,6 +221,17 @@ export class StaircaseEntity extends LineEntityClass<StaircasePoint, StaircaseDa
             y: (boxItem[1].y + boxItem[2].y) / 2,
             z: data.points[pointIndex + 1].z || 0,
           };
+          // 计算pointEnd到pointStart的距离
+          const dist = Math.hypot(pointEnd.x - pointStart.x, pointEnd.y - pointStart.y)
+          const splitPointCount = Math.max(
+            Math.min(
+              Math.round(Math.abs(dist) / 30),
+              Math.round(Math.abs(pointEnd.z - pointStart.z) / 10)
+            ),
+            1
+          );
+          console.log('splitPointCount', splitPointCount)
+
           const stepX = (pointEnd.x - pointStart.x) / (splitPointCount)
           const stepY = (pointEnd.y - pointStart.y) / (splitPointCount)
           const stepZ = (pointEnd.z - pointStart.z) / (splitPointCount + 1)
@@ -557,10 +564,28 @@ export class StaircaseEntity extends LineEntityClass<StaircasePoint, StaircaseDa
       },
       {
         id: 'cornerType',
-        label: '墙体角类型',
+        label: '转角类型',
         dataType: 'cornerType',
         value: data.cornerType,
         panelDesc: '某些角类型3D渲染是一致的，但是区分“独立墙蹲”，区别在于隐藏墙的时候，独立墙蹲不会隐藏。',
+      },
+      {
+        id: 'stepType',
+        label: '台阶类型',
+        dataType: 'enum',
+        value: data.stepType,
+        enumList: [
+          {
+            id: 1,
+            name: '普通台阶',
+            img: 'step.png',
+          },
+          {
+            id: 2,
+            name: '双面台阶',
+            img: 'step.png',
+          },
+        ],
       }
     ];
     if (snapPoint.index % 2 === 0) {
@@ -656,7 +681,8 @@ const defaultStaircaseData: StaircaseData = {
   wmt: 0,
   points: [],
   thickness: 100,
-  cornerType: 1,
+  cornerType: 4,
+  stepType: 1,
 }
 
 export {

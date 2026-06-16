@@ -35,7 +35,16 @@
       </div>
     </div>
     <div v-else-if="item.dataType === 'cornerType'">
-      <CornerTypeEdit :modelValue="modelValue" @update:modelValue="updateEditPropInputInfoNumber" :item="item">
+      <CornerTypeEdit :modelValue="modelValue" @update:modelValue="updateEditPropInputInfoNumber" :item="item"
+        :enums="cornerTypeEdit">
+        <slot>
+          <div class="cornerTypeDesc">{{ item.panelDesc }}</div>
+        </slot>
+      </CornerTypeEdit>
+    </div>
+    <div v-else-if="item.dataType === 'enum'">
+      <CornerTypeEdit :modelValue="modelValue" @update:modelValue="updateEditPropInputInfoNumber" :item="item"
+        :enums="item.enumList">
         <slot>
           <div class="cornerTypeDesc">{{ item.panelDesc }}</div>
         </slot>
@@ -68,7 +77,7 @@
 </template>
 <script setup lang="ts">
 import { ref } from 'vue'
-import { editItem } from '@/entities';
+import { editItem, enumItem } from '@/entities';
 import { allMaterial } from '@/material';
 import ImgEdit from './ImgEdit.vue'
 import CornerTypeEdit from './cornerTypeEdit.vue'
@@ -77,6 +86,34 @@ defineProps<{
   item: editItem,
   modelValue: any
 }>()
+
+const cornerTypeEdit = ref<enumItem[]>([
+  {
+    id: 1,
+    name: '对角，无独立墙蹲',
+    img: 'cornerTypeImgs/1.png',
+  },
+  {
+    id: 2,
+    name: '切脚，独立墙蹲',
+    img: 'cornerTypeImgs/2.png',
+  },
+  {
+    id: 3,
+    name: '对角，独立墙蹲',
+    img: 'cornerTypeImgs/3.png',
+  },
+  {
+    id: 4,
+    name: '对角，独立墙蹲',
+    img: 'cornerTypeImgs/4.png',
+  },
+  {
+    id: 5,
+    name: '圆角，独立墙蹲',
+    img: 'cornerTypeImgs/5.png',
+  },
+])
 
 const allMaterialShow = ref(false)
 const allMaterialShowPropId = ref<string>()

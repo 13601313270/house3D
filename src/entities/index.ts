@@ -15,10 +15,15 @@ import conePlugin from './cone'
 import peoplePlugin from './people'
 import importFilePlugin from './importFile'
 import curtainInWallPlugin from './curtainInWall'
-// import staircasePlugin from './staircase'
+import staircasePlugin from './staircase'
 import { BaseEntityClass } from '@/types/baseEntity'
 
 export type EntityConstructor = new (...args: any[]) => BaseEntityClass<any>;
+export type enumItem = {
+  id: number,
+  name: string,
+  img: string,
+}
 
 export const allFileKeys: string[] = [
 ]
@@ -76,7 +81,7 @@ export const allFileKeysObjType: Record<string, 'point' | 'polyline'> = {
   peoplePlugin,
   importFilePlugin,
   curtainInWallPlugin,
-  // staircasePlugin,
+  staircasePlugin,
 ].forEach(v => {
   allFileKeys.push(v.key)
   if (v.type === 'base') {
@@ -132,5 +137,12 @@ export type editItem = {
   label: string,
   dataType: 'cornerType',
   value: number,
-  panelDesc: string,
+  panelDesc?: string,
+} | {
+  id: string,
+  label: string,
+  dataType: 'enum',
+  value: number,
+  panelDesc?: string,
+  enumList: Array<enumItem>,
 }

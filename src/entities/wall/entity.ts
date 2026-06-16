@@ -636,7 +636,7 @@ export class WallEntity extends LineEntityClass<WallPoint, WallData> {
       },
       {
         id: 'cornerType',
-        label: '墙体角类型',
+        label: '转角类型',
         dataType: 'cornerType',
         value: data.cornerType,
         panelDesc: '某些角类型3D渲染是一致的，但是区分“独立墙蹲”，区别在于隐藏墙的时候，独立墙蹲不会隐藏。',
