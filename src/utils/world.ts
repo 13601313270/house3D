@@ -5,7 +5,6 @@ import { drawPoint } from './drawPoint'
 import { calculateAngle } from './calculateAngle'
 import { allFileKeys, EntityConstructor, fileData, fileDataKeyToClass } from '@/entities/index'
 import { PointEntityClass } from '@/types/pointEntity'
-import { EntityClassInWall } from '@/types/entityInWall'
 import { BaseObjDataClass } from '@/entities/objData'
 import { ImportFileType, ImportImgType, ObjOutputFileType } from '@/entities/allObjs';
 import { BaseEntityClass } from '@/types/baseEntity'
@@ -217,7 +216,6 @@ export class World {
     canvasWidth: number = 800,
     canvasHeight: number = 600,
     zoomLevel: number = 1,
-    insertTempObj: BaseEntityClass<any> | null = null,
   ) {
     if (!canvasBgRef) return
     const ctx = canvasBgRef.getContext('2d')
@@ -256,18 +254,6 @@ export class World {
     }).forEach((item) => {
       item.draw2DPreview(ctx, panOffset, zoomLevel)
     })
-
-    if (insertTempObj) {
-      if (insertTempObj instanceof EntityClassInWall) {
-        if (hoverPoint) {
-          insertTempObj.draw2DPreview(ctx, panOffset, zoomLevel)
-          insertTempObj.draw2D(ctx, panOffset, zoomLevel)
-        }
-      } else {
-        insertTempObj.draw2DPreview(ctx, panOffset, zoomLevel)
-        insertTempObj.draw2D(ctx, panOffset, zoomLevel)
-      }
-    }
 
     // 绘制所有ObjFile的中心点
     // this.allObjFiles.forEach((item) => {

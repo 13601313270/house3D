@@ -9,8 +9,9 @@ import { MatchCircleArea, MatchRectArea } from '@/utils/matchArea'
 import { calculateAngle } from '@/utils/calculateAngle'
 import message from '@/utils/message'
 import { isPointInRotatedRect } from '@/utils/isPointInRotatedRect'
-import { allSnapFromType, MatchSnapPoint } from '@/types/baseEntity'
+import { allSnapFromType } from '@/types/baseEntity'
 import { LineEntityClass } from '@/types/lineEntity'
+import { World } from '@/utils/world'
 
 export class StaircaseEntity extends LineEntityClass<StaircasePoint, StaircaseData> {
   name: string = '楼梯'
@@ -18,9 +19,27 @@ export class StaircaseEntity extends LineEntityClass<StaircasePoint, StaircaseDa
   isPointObj: boolean = false
   private circleRadius = 6
 
+  constructor(world: World, data: StaircaseData) {
+    super(world, data)
+    if (this.data) {
+      if (this.data.stepType === undefined) {
+        this.data.stepType = 1
+      }
+    }
+  }
+
   defaultValue(): StaircaseData {
     const staircase: StaircaseData = defaultStaircaseData
     return new StaircaseDataClass(staircase)
+  }
+
+  setPreparePoint(point: (Point & StaircasePoint)[]): void {
+    this.getData().points = point
+    this.data.points.forEach((v, i) => {
+      if (v.z === undefined) {
+        v.z = i * 30
+      }
+    })
   }
 
   draw2DPreviewByData(ctx: CanvasRenderingContext2D, data: StaircaseData, panOffset: Point, zoomLevel: number): void {
@@ -151,45 +170,13 @@ export class StaircaseEntity extends LineEntityClass<StaircasePoint, StaircaseDa
         }
       });
       ctx.fillStyle = 'white'
-      // 每两个点之间，再绘制一个点，代表边的控制器
-      for (let i = 0; i < points.length - 1; i++) {
-        const p1 = points[i]
-        const p2 = points[i + 1]
-        const midX = (p1.x + p2.x) / 2
-        const midY = (p1.y + p2.y) / 2
-        const screenX = midX * zoomLevel + panOffset.x
-        const screenY = midY * zoomLevel + panOffset.y
-        ctx.strokeStyle = 'red'
-        ctx.fillStyle = 'white'
-        ctx.lineWidth = 2
-        ctx.beginPath()
-        ctx.arc(screenX, screenY, this.circleRadius * zoomLevel + 3, 0, Math.PI * 2)
-        ctx.stroke()
-        ctx.fill()
-        ctx.closePath()
-        // 绘制p1到p2长度
-        const len = Math.sqrt((p2.x - p1.x) * (p2.x - p1.x) + (p2.y - p1.y) * (p2.y - p1.y))
-        const lenText = `${Math.round(len)}cm`
-        ctx.font = `${Math.max(20 * zoomLevel, 20)}px Arial`
-        ctx.textBaseline = 'middle'
-        ctx.strokeStyle = 'white'
-        ctx.lineWidth = Math.max(3 * zoomLevel, 2)
-        ctx.lineJoin = 'round'
-        ctx.fillStyle = 'red'
-        // p1到p2的角度
-        const angle = Math.atan2(p2.y - p1.y, p2.x - p1.x)
-        const textX = Math.abs(Math.tan(angle)) > 1 ? screenX + 30 * zoomLevel : screenX
-        const textY = Math.abs(Math.tan(angle)) > 1 ? screenY : screenY + 20 * zoomLevel
-        ctx.strokeText(lenText, textX, textY)
-        ctx.fillText(lenText, textX, textY)
-      }
     }
   }
 
   create3DMesh() {
     const data = this.getData()
     const meshList: THREE.Group[] = []
-    const { cornerType, stepType } = data
+    const { cornerType, stepType, color } = data
     console.log('stepType', stepType)
     const { data: wallBoxList, countPerPoint: countPerPointPerPoint } = createAllWallFromPoints(data, cornerType);
     // console.log('countPerPointPerPoint', countPerPointPerPoint)
@@ -230,11 +217,9 @@ export class StaircaseEntity extends LineEntityClass<StaircasePoint, StaircaseDa
             ),
             1
           );
-          console.log('splitPointCount', splitPointCount)
-
           const stepX = (pointEnd.x - pointStart.x) / (splitPointCount)
           const stepY = (pointEnd.y - pointStart.y) / (splitPointCount)
-          const stepZ = (pointEnd.z - pointStart.z) / (splitPointCount + 1)
+          const stepZ = (pointEnd.z - pointStart.z) / (splitPointCount)
           // 生成 point1到 point2 中间的 splitPointCount 个点
           for (let j = 0; j < splitPointCount; j++) {
             splitBoxs.push({
@@ -256,7 +241,7 @@ export class StaircaseEntity extends LineEntityClass<StaircasePoint, StaircaseDa
                   y: boxItem[3].y + stepY * (j),
                 }
               ],
-              z: (pointData.z || 0) + stepZ * (j + 1),
+              z: (pointData.z || 0) + stepZ * j,
             })
           }
           // console.log('=====box=====', pointStart, pointEnd)
@@ -264,7 +249,7 @@ export class StaircaseEntity extends LineEntityClass<StaircasePoint, StaircaseDa
       } else {
         splitBoxs.push({
           point: boxItem,
-          z: pointData.z || 0,
+          z: (pointData.z - wallHeight) || 0,
         })
       }
 
@@ -274,15 +259,17 @@ export class StaircaseEntity extends LineEntityClass<StaircasePoint, StaircaseDa
           points.push(new THREE.Vector2(box[j].x, box[j].y * -1))
         }
         const shape = new THREE.Shape(points)
-        const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings)
+        const geometry = new THREE.ExtrudeGeometry(shape, {
+          ...extrudeSettings,
+          depth: stepType === 1 ? wallHeight : (z + wallHeight),
+        })
         geometry.rotateX(-Math.PI / 2);   // 将 XY 平面旋转成 XZ 平面
         // 计算点points[0]到points[1]的方向向量
-        const direction = new THREE.Vector3(box[1].x - box[0].x, 0, box[1].y - box[0].y).normalize()
+        // const direction = new THREE.Vector3(box[1].x - box[0].x, 0, box[1].y - box[0].y).normalize()
         // 将方向向量旋转90度
-        const rotatedDirection = new THREE.Vector3(-direction.z, direction.y, direction.x)
-
+        const rotatedDirection = new THREE.Vector3(0, 1, 0)
         const material = getMaterialById(this.getData().wmt)?.material(rotatedDirection) || new THREE.MeshStandardMaterial({
-          color: this.getData().color,
+          color,
           side: THREE.DoubleSide
         })
 
@@ -290,7 +277,12 @@ export class StaircaseEntity extends LineEntityClass<StaircasePoint, StaircaseDa
         wallMesh.castShadow = true
         wallMesh.receiveShadow = true
         console.log('pointIndex', pointIndex)
-        wallMesh.position.setY(bottom + z)
+        if (stepType === 1) {
+          wallMesh.position.setY(bottom + z)
+        } else if (stepType === 2) {
+          wallMesh.position.setY(bottom)
+        }
+
         group.add(wallMesh)
       })
       meshList.push(group)
@@ -373,26 +365,6 @@ export class StaircaseEntity extends LineEntityClass<StaircasePoint, StaircaseDa
         }
       }
     }
-
-    // 每两个点之间，再绘制一个点，代表边的控制器
-    for (let i = 0; i < this.getData().points.length - 1; i++) {
-      const p1 = this.getData().points[i]
-      const p2 = this.getData().points[i + 1]
-      const midX = (p1.x + p2.x) / 2
-      const midY = (p1.y + p2.y) / 2
-      const dist = Math.hypot(x - midX, y - midY)
-      if (dist < this.getData().thickness / 4) {
-        this.prePointStartPosition = p1;
-        this.nextPointStartPosition = p2;
-
-        return {
-          id: data.id,
-          type: this.type,
-          index: i * 2 + 1,
-          dist,
-        }
-      }
-    }
     return null
   }
 
@@ -402,7 +374,7 @@ export class StaircaseEntity extends LineEntityClass<StaircasePoint, StaircaseDa
     startX?: number,
     startY?: number,
   }, matchHandelInfo: HandelInfo) {
-    const { x, y, startX, startY } = position
+    const { x, y } = position
     if (matchHandelInfo.index !== undefined) {
       this.remove3DCache()
       if (matchHandelInfo.index % 2 === 0) {
@@ -411,7 +383,7 @@ export class StaircaseEntity extends LineEntityClass<StaircasePoint, StaircaseDa
         // 判断有没有非法角度
         const wall = this.getData();
         if (wall.points && wall.points.length >= 2) {
-          // 绘制墙上的点
+          // 绘制楼梯上的点
           const pointsBack: { x: number, y: number }[] = [...wall.points]
           pointsBack[index] = { x, y }
 
@@ -453,27 +425,6 @@ export class StaircaseEntity extends LineEntityClass<StaircasePoint, StaircaseDa
           y,
           z: this.getData().points[index].z,
         }
-      } else {
-        // 拖拽线
-        if (startX !== undefined && startY !== undefined) {
-          const diffMouseX = x - startX
-          const diffMouseY = y - startY
-          const preIndex = (matchHandelInfo.index - 1) / 2;
-          const nextIndex = (matchHandelInfo.index + 1) / 2;
-          if (this.prePointStartPosition && this.nextPointStartPosition) {
-            this.getData().points[preIndex] = {
-              x: this.prePointStartPosition.x + diffMouseX,
-              y: this.prePointStartPosition.y + diffMouseY,
-              z: this.getData().points[preIndex].z,
-            }
-            this.getData().points[nextIndex] = {
-              x: this.nextPointStartPosition.x + diffMouseX,
-              y: this.nextPointStartPosition.y + diffMouseY,
-              z: this.getData().points[nextIndex].z,
-            }
-            console.log('移动边', startX, startY)
-          }
-        }
       }
     }
   }
@@ -483,27 +434,7 @@ export class StaircaseEntity extends LineEntityClass<StaircasePoint, StaircaseDa
   //   super.remove3DCache()
   // }
 
-  inSceneSnapPointArea(
-    newPosition: MatchSnapPoint,
-    dragHandelInfo: HandelInfo
-  ) {
-    if (newPosition.snapFromType === 'point') {
-      // 暂时没有考虑好怎么写磁吸到边的情况，因为暂时无法排除自己，所以只命中point磁吸
-      // console.log('MatchSnapPoint-3', newPosition.point, dragHandelInfo.index)
-      if (dragHandelInfo.index % 2 === 0) {
-        // 和自己排除的逻辑，总是写不好，所以暂时注销掉。
-        // const index = dragHandelInfo.index / 2;
-        // console.log('newPosition', index, (newPosition.point as PointWithIndex))
-        // if ((newPosition.point as PointWithIndex).index && index !== (newPosition.point as PointWithIndex).index) {
-        //   this.getData().points[index] = {
-        //     x: newPosition.point.x,
-        //     y: newPosition.point.y,
-        //     snw: this.getData().points[index].snw,
-        //   }
-        //   return true
-        // }
-      }
-    }
+  inSceneSnapPointArea() {
     return false;
   }
 
@@ -542,7 +473,7 @@ export class StaircaseEntity extends LineEntityClass<StaircasePoint, StaircaseDa
     const wallBaseConfig: editItem[] = [
       {
         id: 'thickness',
-        label: '墙体厚度',
+        label: '楼梯宽度',
         dataType: 'number',
         min: 0,
         max: Infinity,
@@ -552,13 +483,13 @@ export class StaircaseEntity extends LineEntityClass<StaircasePoint, StaircaseDa
       },
       {
         id: 'color',
-        label: '墙体颜色',
+        label: '楼梯颜色',
         dataType: 'color',
         value: data.color,
       },
       {
         id: 'wmt',
-        label: '墙体材质',
+        label: '楼梯材质',
         dataType: 'material',
         value: data.wmt,
       },
@@ -577,14 +508,24 @@ export class StaircaseEntity extends LineEntityClass<StaircasePoint, StaircaseDa
         enumList: [
           {
             id: 1,
-            name: '普通台阶',
-            img: 'step.png',
+            name: '独立台阶',
+            img: 'staircaseImgs/1.jpg',
           },
           {
             id: 2,
-            name: '双面台阶',
-            img: 'step.png',
+            name: '落地台阶',
+            img: 'staircaseImgs/2.jpg',
           },
+          // {
+          //   id: 3,
+          //   name: '直角连接台阶',
+          //   img: 'staircaseImgs/3.jpg',
+          // },
+          // {
+          //   id: 4,
+          //   name: '斜边连接台阶',
+          //   img: 'staircaseImgs/4.jpg',
+          // },
         ],
       }
     ];
@@ -626,7 +567,7 @@ export class StaircaseEntity extends LineEntityClass<StaircasePoint, StaircaseDa
         },
         {
           id: 'title',
-          label: '整个墙体属性',
+          label: '整个楼梯属性',
           dataType: 'title',
         },
         ...configList,
@@ -677,7 +618,7 @@ export class StaircaseEntity extends LineEntityClass<StaircasePoint, StaircaseDa
 
 const defaultStaircaseData: StaircaseData = {
   id: Date.now().toString(),
-  color: '#fff',
+  color: '#646591',
   wmt: 0,
   points: [],
   thickness: 100,

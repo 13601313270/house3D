@@ -60,8 +60,8 @@ import { OutFileInWallDataClass } from '@/entities/outFileInWall/dataClass';
 import { OutFileInWallEntity } from '@/entities/outFileInWall/entity';
 import { OutFileDataClass } from '@/entities/outFile/dataClass';
 import { OutFileEntity } from '@/entities/outFile/entity';
-import { BaseEntityClass } from '@/types/baseEntity';
 import { OutFileData } from '@/entities/outFile/index.d'
+import { BaseEntityClass } from '@/types/baseEntity';
 
 defineProps<{
   currentTool: string | 'drag'
@@ -154,7 +154,6 @@ async function changeCurrentToolToOutFile(id: string) {
 }
 
 function changeCurrentTool(type: string) {
-  // @ts-ignore
   const ClassName = fileDataKeyToClass[type];
   if (ClassName) {
     const insertTempObj = new ClassName(worldApi)

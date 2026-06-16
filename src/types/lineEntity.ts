@@ -1,4 +1,4 @@
-import { LineObjData } from './map2d'
+import { LineObjData, Point } from './map2d'
 import { BaseEntityClass } from './baseEntity'
 
 export abstract class LineEntityClass<V, T extends LineObjData<V>> extends BaseEntityClass<T> {
@@ -31,9 +31,6 @@ export abstract class LineEntityClass<V, T extends LineObjData<V>> extends BaseE
   // 当前对象不在任何一根吸附线的区域
   notInSceneSnapLineArea(): void { }
 
-  // 待添加状态（鼠标新增悬浮的时候）
-  abstract setPrepareState(x: number, y: number, ...args: any[]): void
-
   beforeRemove() {
     super.beforeRemove()
   }
@@ -41,4 +38,7 @@ export abstract class LineEntityClass<V, T extends LineObjData<V>> extends BaseE
   inAreaHoverText() {
     return this.name
   }
+
+  // 待添加状态（鼠标新增悬浮的时候的点）
+  abstract setPreparePoint(points: (V & Point)[]): void
 }

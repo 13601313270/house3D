@@ -1,4 +1,4 @@
-import { PointObjData } from '@/types/map2d'
+import { BaseObjData, PointObjData } from '@/types/map2d'
 import wallPlugin from './wall'
 import windowPlugin from './window'
 import doorPlugin from './door'
@@ -17,8 +17,9 @@ import importFilePlugin from './importFile'
 import curtainInWallPlugin from './curtainInWall'
 import staircasePlugin from './staircase'
 import { BaseEntityClass } from '@/types/baseEntity'
+import { World } from '@/utils/world'
 
-export type EntityConstructor = new (...args: any[]) => BaseEntityClass<any>;
+export type EntityConstructor = new (world: World, data?: BaseObjData) => BaseEntityClass<any>;
 export type enumItem = {
   id: number,
   name: string,

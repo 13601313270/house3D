@@ -2,7 +2,7 @@ import { StaircaseEntity } from "./entity"
 import PluginType from "../pluginType"
 
 const staircasePlugin: PluginType = {
-  name: '楼梯',
+  name: '楼梯/台阶',
   key: 'staircase',
   type: 'house',
   entity: StaircaseEntity,

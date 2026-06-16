@@ -29,7 +29,7 @@ export abstract class BaseEntityClass<T extends BaseObjData> {
   // eslint-disable-next-line
   associationEntity: BaseEntityClass<any>[] = []// 关联对象，就是本对象渲染，需要联动修改的对象。（比如：墙壁上被窗户挖洞，那么墙修改，需要重新挖洞）
 
-  constructor(world: World, data: T) {
+  constructor(world: World, data?: T) {
     this.world = world
     this.data = data || this.defaultValue();
     // console.log(world, data)

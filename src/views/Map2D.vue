@@ -702,8 +702,21 @@ const drawWrapper2D = (fileData: fileData) => {
       canvasSize.value.width,
       canvasSize.value.height,
       zoom2DLevel.value,
-      insertTempObj,
     )
+    const ctx = canvas.getContext('2d')
+    if (ctx) {
+      if (insertTempObj && insertTempObj instanceof PointEntityClass) {
+        if (insertTempObj instanceof EntityClassInWall) {
+          if (hoverPoint.value) {
+            insertTempObj.draw2DPreview(ctx, panOffset.value, zoom2DLevel.value)
+            insertTempObj.draw2D(ctx, panOffset.value, zoom2DLevel.value)
+          }
+        } else {
+          insertTempObj.draw2DPreview(ctx, panOffset.value, zoom2DLevel.value)
+          insertTempObj.draw2D(ctx, panOffset.value, zoom2DLevel.value)
+        }
+      }
+    }
 
     // 绘制临时点阵
     worldApi.drawTempPointInsertData(
@@ -888,13 +901,17 @@ onMounted(async () => {
           const ClassName = fileDataKeyToClass[currentTool.value];
           if (ClassName) {
             const insertTempObj = new ClassName(worldApi)
-            const value = insertTempObj.defaultValue()
-            value.points = tempPointInsertData.value.map(v => {
-              return {
-                ...v,
-              }
-            })
-            await worldApi.add(currentTool.value, [value])
+            if (insertTempObj instanceof LineEntityClass) {
+              insertTempObj.setPreparePoint(tempPointInsertData.value.map(v => {
+                return {
+                  ...v,
+                }
+              }))
+            }
+            const value = insertTempObj.getData()
+            if (value !== undefined) {
+              await worldApi.add(currentTool.value, [value])
+            }
           }
         }
         tempPointInsertData.value = []
@@ -1332,22 +1349,6 @@ const handleCanvasClick = async (e: MouseEvent) => {
         const dist = Math.hypot(snapped22.point.x - last.x, snapped22.point.y - last.y)
 
         if (dist < 10 * zoom2DLevel.value) {
-          if (tempPointInsertData.value.length > 1) {
-            const ClassName = fileDataKeyToClass[currentTool.value];
-            if (ClassName) {
-              const insertTempObj = new ClassName(worldApi)
-              const value = insertTempObj.defaultValue()
-              value.points = tempPointInsertData.value.map(v => {
-                return {
-                  ...v,
-                }
-              })
-              await worldApi.add(currentTool.value, [value])
-              tempPointInsertData.value = []
-              lastPoint.value = null
-              currentTool.value = 'drag'
-            }
-          }
           return
         }
         clickPoint = snapped22.point
@@ -1361,7 +1362,7 @@ const handleCanvasClick = async (e: MouseEvent) => {
       }]
     }
     lastPoint.value = clickPoint
-  } else if (insertTempObj) {
+  } else if (insertTempObj && insertTempObj instanceof PointEntityClass) {
     if (insertTempObj instanceof EntityClassInWall) {
       if (hoverPoint.value && insertAdding.value === false) {
         insertAdding.value = true
@@ -2055,12 +2056,10 @@ function changeObjTypeSelect(type: string, baseObj: BaseEntityClass<any>) {
   insertTempObj = null
 
   if (allFileKeys.includes(type as any)) {
-    // @ts-ignore
-    const ClassName = fileDataKeyToClass[type];
-    if (ClassName) {
+    if (baseObj instanceof PointEntityClass) {
       insertTempObj = baseObj
-      currentTool.value = type
     }
+    currentTool.value = type
   }
 }
 </script>

@@ -443,23 +443,6 @@ export class WallEntity extends LineEntityClass<WallPoint, WallData> {
               if (angleResult) {
                 const { angle } = angleResult
                 if (angle < 5) {
-                  // 计算prev到current的角度
-                  // const anglePrevToCurrent = Math.atan2(current.y - prev.y, current.x - prev.x);
-                  // console.log('角度角度', anglePrevToCurrent)
-                  // const limitAngel = anglePrevToCurrent - 30 * Math.PI / 180;
-
-                  // // 从next点做一条角度为limitAngel的直线
-                  // // 计算点{x, y}到这条直线的投影点
-                  // const cos = Math.cos(limitAngel);
-                  // const sin = Math.sin(limitAngel);
-                  // const dx = x - next.x;
-                  // const dy = y - next.y;
-                  // const t = dx * cos + dy * sin;
-                  // const projectionX = next.x + t * cos;
-                  // const projectionY = next.y + t * sin;
-                  // // const newPoint = { x: projectionX, y: projectionY };
-                  // this.getData().points[index] = { x: projectionX, y: projectionY, snw: this.getData().points[index].snw, }
-
                   return;
                 }
               }
@@ -544,7 +527,8 @@ export class WallEntity extends LineEntityClass<WallPoint, WallData> {
     return lines;
   }
 
-  setPrepareState(): void {
+  setPreparePoint(point: (Point & WallPoint)[]): void {
+    this.getData().points = point
   }
 
   editPropConfig(snapPoint: HandelInfo, editShow: (editInfoList: editItem[], callback: (val: any) => void) => void, close: () => void): void {
