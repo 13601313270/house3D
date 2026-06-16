@@ -245,12 +245,9 @@ export class World {
     allObj.sort((a, b) => {
       const aData = a.getData()
       const bData = b.getData()
-      if (!a.boundingBoxData || !b.boundingBoxData) {
-        return 0
-      }
-      // console.log('a.boundingBoxData', a.boundingBoxData[0])
-      // console.log('b.boundingBoxData', b.boundingBoxData[0])
-      return (aData.z + a.boundingBoxData[0].y) - (bData.z + b.boundingBoxData[0].y)
+      const aZ = ((aData.z || 0) + (a.boundingBoxData ? a.boundingBoxData[0].y : 0))
+      const bZ = ((bData.z || 0) + (b.boundingBoxData ? b.boundingBoxData[0].y : 0))
+      return aZ - bZ
     }).forEach((item) => {
       item.draw2DPreview(ctx, panOffset, zoomLevel)
     })
