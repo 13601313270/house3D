@@ -41,6 +41,7 @@
       </div>
       <div class="buttonGroup">
         <button v-if="typeKey === 'people'" @click="showBoneEdit">姿态编辑</button>
+        <button @click="LockObj">锁定</button>
         <div style="flex-grow: 1;"></div>
         <button class="deleteButton" @click="deleteContextMenuEntity">删除</button>
       </div>
@@ -201,6 +202,15 @@ function removeIfOutside() {
   const clampedLeft = Math.max(EDGE_PADDING, Math.min(position.value.x, maxLeft))
   const clampedTop = Math.max(EDGE_PADDING, Math.min(position.value.y, maxTop))
   position.value = { x: clampedLeft, y: clampedTop }
+}
+
+// 锁定后，无法被移动
+function LockObj() {
+  console.log('锁定')
+  emit('update:modelValue', {
+    ...props.modelValue,
+    isLocked: true,
+  })
 }
 </script>
 <style scoped lang="less">

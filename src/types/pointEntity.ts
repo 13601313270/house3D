@@ -136,7 +136,7 @@ export abstract class PointEntityClass<T extends PointObjData> extends BaseEntit
   changePosition(newPosition: { x: number, y: number }) {
     this.data.x = newPosition.x
     this.data.y = newPosition.y
-    this.world._callAllOnChangeCallback()
+    this.world._callObjDataChange(this)
   }
 
   // 待添加状态（鼠标新增悬浮的时候）

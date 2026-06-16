@@ -225,7 +225,6 @@ export class WallEntity extends LineEntityClass<WallPoint, WallData> {
     const data = this.getData()
     const meshList: THREE.Group[] = []
     const { data: wallBoxList, countPerPoint: countPerPointPerPoint } = createAllWallFromPoints(data, data.cornerType);
-    console.log('dddddddd---1', wallBoxList.length, countPerPointPerPoint, data.points.length)
     const wallHeight = data.height
     const bottom = data.bottom || 0
     // console.log(1)
@@ -420,7 +419,12 @@ export class WallEntity extends LineEntityClass<WallPoint, WallData> {
     startX?: number,
     startY?: number,
   }, matchHandelInfo: HandelInfo) {
-    const { x, y, startX, startY } = position
+    const {
+      x,
+      y,
+      // startX,
+      // startY
+    } = position
     if (matchHandelInfo.index !== undefined) {
       this.remove3DCache()
       if (matchHandelInfo.index % 2 === 0) {
@@ -451,26 +455,26 @@ export class WallEntity extends LineEntityClass<WallPoint, WallData> {
         }
         this.getData().points[index] = { x, y, snw: this.getData().points[index].snw, }
       } else {
-        // 拖拽线
-        if (startX !== undefined && startY !== undefined) {
-          const diffMouseX = x - startX
-          const diffMouseY = y - startY
-          const preIndex = (matchHandelInfo.index - 1) / 2;
-          const nextIndex = (matchHandelInfo.index + 1) / 2;
-          if (this.prePointStartPosition && this.nextPointStartPosition) {
-            this.getData().points[preIndex] = {
-              x: this.prePointStartPosition.x + diffMouseX,
-              y: this.prePointStartPosition.y + diffMouseY,
-              snw: this.getData().points[preIndex].snw,
-            }
-            this.getData().points[nextIndex] = {
-              x: this.nextPointStartPosition.x + diffMouseX,
-              y: this.nextPointStartPosition.y + diffMouseY,
-              snw: this.getData().points[nextIndex].snw,
-            }
-            console.log('移动边', startX, startY)
-          }
-        }
+        // 拖拽线开启后，墙上的窗户移动的时候，无法被触发，所以关闭掉。
+        // if (startX !== undefined && startY !== undefined) {
+        //   const diffMouseX = x - startX
+        //   const diffMouseY = y - startY
+        //   const preIndex = (matchHandelInfo.index - 1) / 2;
+        //   const nextIndex = (matchHandelInfo.index + 1) / 2;
+        //   if (this.prePointStartPosition && this.nextPointStartPosition) {
+        //     this.getData().points[preIndex] = {
+        //       x: this.prePointStartPosition.x + diffMouseX,
+        //       y: this.prePointStartPosition.y + diffMouseY,
+        //       snw: this.getData().points[preIndex].snw,
+        //     }
+        //     this.getData().points[nextIndex] = {
+        //       x: this.nextPointStartPosition.x + diffMouseX,
+        //       y: this.nextPointStartPosition.y + diffMouseY,
+        //       snw: this.getData().points[nextIndex].snw,
+        //     }
+        //     console.log('移动边', startX, startY)
+        //   }
+        // }
       }
     }
   }
@@ -658,6 +662,7 @@ export class WallEntity extends LineEntityClass<WallPoint, WallData> {
         },
         ...configList,
       ], (val) => {
+        this.remove3DCache()
         this.setData({
           ...data,
           ...val,
@@ -684,6 +689,7 @@ export class WallEntity extends LineEntityClass<WallPoint, WallData> {
         },
         ...wallBaseConfig
       ], (val) => {
+        this.remove3DCache()
         const points = [...data.points]
         points[pointIndex] = {
           ...points[pointIndex],

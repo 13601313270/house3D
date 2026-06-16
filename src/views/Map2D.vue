@@ -181,6 +181,7 @@ import DataTypeEditPanel from './DataTypeEditPanel.vue'
 import { BaseEntityClass, MatchSnapPoint } from '@/types/baseEntity';
 import { LineEntityClass } from '@/types/lineEntity';
 import { LineObjDataClass } from '@/entities/objData';
+import { CameraEntity } from '@/entities/camera/entity';
 
 const canvas2DRef = ref<HTMLCanvasElement | null>(null)
 const canvas2D2Ref = ref<HTMLCanvasElement | null>(null)
@@ -797,8 +798,11 @@ onMounted(async () => {
   })
   ObjFileTypes.value = data;
 
-  worldApi.onChange(() => {
-    changeCamera2State(activeCameraIndex.value)
+  worldApi.onWorldChange((type, objList) => {
+    const find = objList.find((item) => item instanceof CameraEntity)
+    if (find) {
+      changeCamera2State(activeCameraIndex.value)
+    }
   })
   // const canvas2 = canvas2D2Ref.value
   // ctxList.forEach(ctx => {
@@ -1157,10 +1161,11 @@ async function initWorldByData(data: fileData & {
   })
 
   console.log('data------', res)
-
   for (let i = 0; i < allFileKeys.length; i++) {
     const key = allFileKeys[i]
-    await worldApi.add(key, data[key] || [])
+    if (data[key] && data[key].length > 0) {
+      await worldApi.add(key, data[key])
+    }
   }
 
   panOffset.value = data.panOffset || { x: 0, y: 0 }
@@ -1757,6 +1762,7 @@ function getHandleInAreaInfoByXY(x: number, y: number): {
     }
     for (let j = 0; j < worldApi.getObjects(key).length; j++) {
       const api: BaseEntityClass<any> = worldApi.allFileMapObjects[key][j] as BaseEntityClass<any>;
+      if (api.getData().isLocked) continue
       const matchInfo = api.showMatchHandel(x, y)
       if (matchInfo) {
         const data = api.getData();

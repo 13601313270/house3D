@@ -43,7 +43,7 @@ export abstract class BaseEntityClass<T extends BaseObjData> {
 
   setData(data: T) {
     this.data = data
-    this.world._callAllOnChangeCallback()
+    this.world._callObjDataChange(this)
   }
 
   getData(): T {

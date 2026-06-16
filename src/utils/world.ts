@@ -11,6 +11,7 @@ import { BaseEntityClass } from '@/types/baseEntity'
 
 export const canvasHeight = 600
 export const snapThreshold = 20
+type WorldChangeType = 'add' | 'remove' | 'change'
 
 export class World {
   allFileMapObjects: {
@@ -372,44 +373,77 @@ export class World {
     if (!this.allFileMapObjects[type]) {
       this.allFileMapObjects[type] = []
     }
+    const apiList = [];
     for (let i = 0; i < data.length; i++) {
       const api: BaseEntityClass<any> = new EntityClassItem(this, data[i]);
       await api.init()
+      apiList.push(api);
       this.allFileMapObjects[type].push(api)
+      this.worldAddBindList.forEach(callback => callback(api))
     }
-    if (data.length) {
-      this.changeBindList.forEach(callback => callback())
-    }
+    this._callAllOnChangeCallback('add', apiList)
   }
 
   clearAll() {
+    const willRemoveList: BaseEntityClass<any>[] = [];
     allFileKeys.forEach((type) => {
       if (this.allFileMapObjects[type]) {
-        (this.allFileMapObjects[type] as PointEntityClass<any>[]).forEach((item) => {
+        (this.allFileMapObjects[type] as BaseEntityClass<any>[]).forEach((item) => {
+          willRemoveList.push(item);
+        });
+      }
+    })
+    allFileKeys.forEach((type) => {
+      if (this.allFileMapObjects[type]) {
+        (this.allFileMapObjects[type] as BaseEntityClass<any>[]).forEach((item) => {
           item.beforeRemove()
         });
         this.allFileMapObjects[type] = []
       }
     })
-    this.changeBindList.forEach(callback => callback())
+    this._callAllOnChangeCallback('remove', willRemoveList);
   }
 
   splice(type: string, index: number, count: number = 1) {
     if (this.allFileMapObjects[type]) {
+      const back = this.allFileMapObjects[type][index];
       this.allFileMapObjects[type][index].beforeRemove()
       this.allFileMapObjects[type].splice(index, count)
-      this.changeBindList.forEach(callback => callback())
+      this._callAllOnChangeCallback('remove', [back])
     }
   }
 
-  changeBindList: (() => void)[] = [];
-
-  onChange(callback: () => void) {
-    this.changeBindList.push(callback)
+  // 世界变化
+  worldChangeBindList: ((type: WorldChangeType, obj: BaseEntityClass<any>[]) => void)[] = [];
+  onWorldChange(callback: (type: WorldChangeType, obj: BaseEntityClass<any>[]) => void) {
+    this.worldChangeBindList.push(callback)
   }
 
-  _callAllOnChangeCallback() {
-    this.changeBindList.forEach(callback => callback())
+  private _callAllOnChangeCallback(type: WorldChangeType, obj: BaseEntityClass<any>[]) {
+    this.worldChangeBindList.forEach(callback => callback(type, obj))
+  }
+
+  // 世界添加对象
+  worldAddBindList: ((obj: BaseEntityClass<any>) => void)[] = [];
+  onWorldAddObj(callback: (obj: BaseEntityClass<any>) => void) {
+    this.worldAddBindList.push(callback)
+  }
+
+  // 世界对象修改
+  worldObjChangeDataBindList: ((obj: BaseEntityClass<any>) => void)[] = [];
+  onWorldObjChangeData(callback: (obj: BaseEntityClass<any>) => void) {
+    this.worldObjChangeDataBindList.push(callback)
+  }
+
+  public _callObjDataChange(obj: BaseEntityClass<any>) {
+    this.worldObjChangeDataBindList.forEach(callback => callback(obj))
+    this._callAllOnChangeCallback('change', [obj])
+  }
+
+  // 世界对象删除
+  worldObjRemoveBindList: ((obj: BaseEntityClass<any>) => void)[] = [];
+  onWorldObjRemove(callback: (obj: BaseEntityClass<any>) => void) {
+    this.worldObjRemoveBindList.push(callback)
   }
 }
 
