@@ -392,7 +392,7 @@ export class WindowEntity extends EntityClassInWall<WindowData> {
     group.rotateY(data.angle * -1);
     if (wall && data.wallPointId > -1 && wall.meshList[data.wallPointId]) {
       const boxLength = wall.meshList.filter(v => 'isWall' in v).length;
-      const countPerPoint = (boxLength - 1) / (wall.getData().points.length - 2)
+      const countPerPoint = wall.getData().points.length === 2 ? 1 : ((boxLength - 1) / (wall.getData().points.length - 2))
       const wallGroup = wall.meshList[data.wallPointId * countPerPoint];
       const subtractGeometry = new THREE.BoxGeometry(
         data.width,
