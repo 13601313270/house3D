@@ -69,6 +69,26 @@ export class CylinderEntity extends PointEntityClass<CylinderData> {
     ctx.arc(screenX, screenY, this.circleRadius * zoomLevel + 3, 0, Math.PI * 2)
     ctx.fill()
     ctx.stroke()
+
+    // 绘制轮廓
+    const circleArea = new MatchCircleArea({ x: data.x, y: data.y, r: data.r })
+    ctx.lineWidth = 2
+    ctx.strokeStyle = 'red'
+    ctx.save(); // 保存当前状态
+    ctx.translate(
+      circleArea.data.x * zoomLevel + panOffset.x,
+      circleArea.data.y * zoomLevel + panOffset.y
+    );
+    ctx.beginPath()
+    ctx.arc(
+      0,
+      0,
+      circleArea.data.r * zoomLevel,
+      0,
+      Math.PI * 2,
+    )
+    ctx.stroke()
+    ctx.restore(); // 恢复原始状态
   }
 
   glbObj: THREE.Group | null = null;

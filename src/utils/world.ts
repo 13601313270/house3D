@@ -8,6 +8,7 @@ import { PointEntityClass } from '@/types/pointEntity'
 import { BaseObjDataClass } from '@/entities/objData'
 import { ImportFileType, ImportImgType, ObjOutputFileType } from '@/entities/allObjs';
 import { BaseEntityClass } from '@/types/baseEntity'
+import { BaseObjData } from '@/types/map2d'
 
 export const canvasHeight = 600
 export const snapThreshold = 20
@@ -15,8 +16,11 @@ type WorldChangeType = 'add' | 'remove' | 'change'
 
 export class World {
   allFileMapObjects: {
-    [key in string]?: BaseEntityClass<any>[]
+    [key in string]?: BaseEntityClass<BaseObjData>[]
   } = {}
+
+  // 锁定状态的对象列表
+  lockedObjList: BaseEntityClass<BaseObjData>[] = []
 
   // private allObjFiles: {
   //   id: string
@@ -380,8 +384,26 @@ export class World {
       apiList.push(api);
       this.allFileMapObjects[type].push(api)
       this.worldAddBindList.forEach(callback => callback(api))
+      if (api.getData().isLocked) {
+        this.lockedObjList.push(api)
+      }
     }
     this._callAllOnChangeCallback('add', apiList)
+  }
+
+  splice(type: string, index: number, count: number = 1) {
+    if (this.allFileMapObjects[type]) {
+      const backup = this.allFileMapObjects[type][index];
+      this.allFileMapObjects[type][index].beforeRemove()
+      this.allFileMapObjects[type].splice(index, count)
+      if (backup.getData().isLocked) {
+        const index = this.lockedObjList.indexOf(backup)
+        if (index !== -1) {
+          this.lockedObjList.splice(index, 1)
+        }
+      }
+      this._callAllOnChangeCallback('remove', [backup])
+    }
   }
 
   clearAll() {
@@ -396,6 +418,12 @@ export class World {
     allFileKeys.forEach((type) => {
       if (this.allFileMapObjects[type]) {
         (this.allFileMapObjects[type] as BaseEntityClass<any>[]).forEach((item) => {
+          if (item.getData().isLocked) {
+            const index = this.lockedObjList.indexOf(item)
+            if (index !== -1) {
+              this.lockedObjList.splice(index, 1)
+            }
+          }
           item.beforeRemove()
         });
         this.allFileMapObjects[type] = []
@@ -404,45 +432,46 @@ export class World {
     this._callAllOnChangeCallback('remove', willRemoveList);
   }
 
-  splice(type: string, index: number, count: number = 1) {
-    if (this.allFileMapObjects[type]) {
-      const back = this.allFileMapObjects[type][index];
-      this.allFileMapObjects[type][index].beforeRemove()
-      this.allFileMapObjects[type].splice(index, count)
-      this._callAllOnChangeCallback('remove', [back])
-    }
-  }
-
   // 世界变化
-  worldChangeBindList: ((type: WorldChangeType, obj: BaseEntityClass<any>[]) => void)[] = [];
-  onWorldChange(callback: (type: WorldChangeType, obj: BaseEntityClass<any>[]) => void) {
+  worldChangeBindList: ((type: WorldChangeType, obj: BaseEntityClass<BaseObjData>[]) => void)[] = [];
+  onWorldChange(callback: (type: WorldChangeType, obj: BaseEntityClass<BaseObjData>[]) => void) {
     this.worldChangeBindList.push(callback)
   }
 
-  private _callAllOnChangeCallback(type: WorldChangeType, obj: BaseEntityClass<any>[]) {
+  private _callAllOnChangeCallback(type: WorldChangeType, obj: BaseEntityClass<BaseObjData>[]) {
     this.worldChangeBindList.forEach(callback => callback(type, obj))
   }
 
   // 世界添加对象
-  worldAddBindList: ((obj: BaseEntityClass<any>) => void)[] = [];
-  onWorldAddObj(callback: (obj: BaseEntityClass<any>) => void) {
+  worldAddBindList: ((obj: BaseEntityClass<BaseObjData>) => void)[] = [];
+  onWorldAddObj(callback: (obj: BaseEntityClass<BaseObjData>) => void) {
     this.worldAddBindList.push(callback)
   }
 
   // 世界对象修改
-  worldObjChangeDataBindList: ((obj: BaseEntityClass<any>) => void)[] = [];
-  onWorldObjChangeData(callback: (obj: BaseEntityClass<any>) => void) {
+  worldObjChangeDataBindList: ((obj: BaseEntityClass<BaseObjData>) => void)[] = [];
+  onWorldObjChangeData(callback: (obj: BaseEntityClass<BaseObjData>) => void) {
     this.worldObjChangeDataBindList.push(callback)
   }
 
-  public _callObjDataChange(obj: BaseEntityClass<any>) {
+  public _callObjDataChange(obj: BaseEntityClass<BaseObjData>) {
     this.worldObjChangeDataBindList.forEach(callback => callback(obj))
+    if (obj.getData().isLocked) {
+      if (!this.lockedObjList.includes(obj)) {
+        this.lockedObjList.push(obj)
+      }
+    } else {
+      const index = this.lockedObjList.indexOf(obj)
+      if (index !== -1) {
+        this.lockedObjList.splice(index, 1)
+      }
+    }
     this._callAllOnChangeCallback('change', [obj])
   }
 
   // 世界对象删除
-  worldObjRemoveBindList: ((obj: BaseEntityClass<any>) => void)[] = [];
-  onWorldObjRemove(callback: (obj: BaseEntityClass<any>) => void) {
+  worldObjRemoveBindList: ((obj: BaseEntityClass<BaseObjData>) => void)[] = [];
+  onWorldObjRemove(callback: (obj: BaseEntityClass<BaseObjData>) => void) {
     this.worldObjRemoveBindList.push(callback)
   }
 }

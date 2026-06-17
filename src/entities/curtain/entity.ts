@@ -45,6 +45,30 @@ export class CurtainEntity extends PointEntityClass<CurtainData> {
     zoomLevel: number,
   ): void {
     const angleY = data.angleY || 0;
+    // 绘制轮廓
+    const matchArea = new MatchRectArea({
+      x: data.x,
+      y: data.y,
+      width: data.width,
+      depth: this.depth,
+      angleY,
+    })
+    ctx.lineWidth = 2
+    ctx.strokeStyle = 'red'
+    ctx.save(); // 保存当前状态
+    ctx.translate(
+      matchArea.data.x * zoomLevel + panOffset.x,
+      matchArea.data.y * zoomLevel + panOffset.y
+    ); // 移动原点到目标中心
+    ctx.rotate(matchArea.data.angleY * -1); // 围绕新原点旋转
+    // 绘制一个方块
+    ctx.strokeRect(
+      matchArea.data.width / -2 * zoomLevel,
+      matchArea.data.depth / -2 * zoomLevel,
+      matchArea.data.width * zoomLevel,
+      matchArea.data.depth * zoomLevel,
+    )
+    ctx.restore(); // 恢复原始状态
 
     // 控制点
     ctx.fillStyle = '#fff'

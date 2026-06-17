@@ -130,6 +130,31 @@ export class CubeEntity extends PointEntityClass<CubeData> {
     ctx.arc(circleX, circleY, circleRadius, 0, Math.PI * 2)
     ctx.fill()
     ctx.stroke()
+
+    // 绘制 轮廓
+    const matchArea = new MatchRectArea({
+      x: data.x,
+      y: data.y,
+      width: data.width,
+      depth: data.depth,
+      angleY: data.angleY,
+    })
+    ctx.lineWidth = 2
+    ctx.strokeStyle = 'red'
+    ctx.save(); // 保存当前状态
+    ctx.translate(
+      matchArea.data.x * zoomLevel + panOffset.x,
+      matchArea.data.y * zoomLevel + panOffset.y
+    ); // 移动原点到目标中心
+    ctx.rotate(matchArea.data.angleY * -1); // 围绕新原点旋转
+    // 绘制一个方块
+    ctx.strokeRect(
+      matchArea.data.width / -2 * zoomLevel,
+      matchArea.data.depth / -2 * zoomLevel,
+      matchArea.data.width * zoomLevel,
+      matchArea.data.depth * zoomLevel,
+    )
+    ctx.restore(); // 恢复原始状态
   }
 
   glbObj: THREE.Group | null = null;

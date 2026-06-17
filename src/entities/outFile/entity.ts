@@ -177,6 +177,59 @@ export class OutFileEntity extends PointEntityClass<OutFileData> {
     ctx.arc(circleX, circleY, circleRadius, 0, Math.PI * 2)
     ctx.fill()
     ctx.stroke()
+
+    if (findObjInfo) {
+      const { matchAreaType, matchAreaNumber1, matchAreaNumber2, matchAreaOffsetX, matchAreaOffsetY } = findObjInfo
+      if (matchAreaType === 1) {
+        const matchArea = new MatchRectArea({
+          x: data.x + matchAreaOffsetX * Math.cos(data.angleY) + matchAreaOffsetY * Math.sin(data.angleY),
+          y: data.y - matchAreaOffsetX * Math.sin(data.angleY) + matchAreaOffsetY * Math.cos(data.angleY),
+          width: Math.max(matchAreaNumber1, 30),
+          depth: Math.max(matchAreaNumber2, 30),
+          angleY: data.angleY,
+        })
+
+        ctx.lineWidth = 2
+        ctx.strokeStyle = 'red'
+        ctx.save(); // 保存当前状态
+        ctx.translate(
+          matchArea.data.x * zoomLevel + panOffset.x,
+          matchArea.data.y * zoomLevel + panOffset.y
+        ); // 移动原点到目标中心
+        ctx.rotate(matchArea.data.angleY * -1); // 围绕新原点旋转
+        // 绘制一个方块
+        ctx.strokeRect(
+          matchArea.data.width / -2 * zoomLevel,
+          matchArea.data.depth / -2 * zoomLevel,
+          matchArea.data.width * zoomLevel,
+          matchArea.data.depth * zoomLevel,
+        )
+        ctx.restore(); // 恢复原始状态
+      } else if (matchAreaType === 2) {
+        const circleArea = new MatchCircleArea({
+          x: data.x + matchAreaOffsetX * Math.cos(data.angleY) + matchAreaOffsetY * Math.sin(data.angleY),
+          y: data.y - matchAreaOffsetX * Math.sin(data.angleY) + matchAreaOffsetY * Math.cos(data.angleY),
+          r: matchAreaNumber1,
+        })
+        ctx.lineWidth = 2
+        ctx.strokeStyle = 'red'
+        ctx.save(); // 保存当前状态
+        ctx.translate(
+          circleArea.data.x * zoomLevel + panOffset.x,
+          circleArea.data.y * zoomLevel + panOffset.y
+        );
+        ctx.beginPath()
+        ctx.arc(
+          0,
+          0,
+          circleArea.data.r * zoomLevel,
+          0,
+          Math.PI * 2,
+        )
+        ctx.stroke()
+        ctx.restore(); // 恢复原始状态
+      }
+    }
   }
 
   create3DMesh(): THREE.Group[] {

@@ -60,6 +60,9 @@
           <button @click="clearDrawing" type="button">
             清空
           </button>
+          <button @click="showAllObjSelect = true" type="button">
+            对象列表({{ allObjCount }})
+          </button>
           <input type="file" id="fileInput" ref="loadProgramFileInputRef" accept=".devt" style="display: none"
             @change="handleLoadProgramFileChange" />
           <input type="file" id="importFileInput" ref="importFileInputRef" accept=".fbx,.obj" style="display: none"
@@ -69,7 +72,7 @@
           <!-- <Canvas3D ref="canvas3DRef1" :world="worldApi" v-model:cameraState="cameraStateLeft"
             :aspectRatio="aspectRatio1" :showCamera="true" cameraType="orthographic" /> -->
           <canvas ref="canvas2DRef" class="drawing-canvas" :style="{ display: isSplitting ? 'none' : 'block' }" />
-          <canvas ref="canvas2D2Ref" @click="handleCanvasClick" @mousedown="handleMouseDown"
+          <canvas id="canvas2D2" ref="canvas2D2Ref" @click="handleCanvasClick" @mousedown="handleMouseDown"
             @mousemove="handleMouseMove" @mouseleave="handleMouseLeave" @mouseup="handleMouseUp"
             @contextmenu="handleContextMenu" @wheel="handleWheel" class="drawing-canvas"
             :style="{ display: isSplitting ? 'none' : 'block' }" />
@@ -114,6 +117,7 @@
         :editPropConfigInfo="editPropConfigInfo" v-model="editPropInputInfo"
         :initPosition="{ x: contextMenu.x, y: contextMenu.y }" @deleteContextMenuEntity="deleteContextMenuEntity"
         @close="contextMenu = null" />
+      <AllWorldObjSelect v-if="showAllObjSelect" :zoom2DLevel="zoom2DLevel" :panOffset="panOffset" @close="showAllObjSelect = false" />
     </div>
   </div>
   <div v-if="showDemos" class="allDemosContent">
@@ -182,6 +186,7 @@ import { BaseEntityClass, MatchSnapPoint } from '@/types/baseEntity';
 import { LineEntityClass } from '@/types/lineEntity';
 import { LineObjDataClass } from '@/entities/objData';
 import { CameraEntity } from '@/entities/camera/entity';
+import AllWorldObjSelect from '@/components/AllWorldObjSelect.vue'
 
 const canvas2DRef = ref<HTMLCanvasElement | null>(null)
 const canvas2D2Ref = ref<HTMLCanvasElement | null>(null)
@@ -245,6 +250,8 @@ const cameraStateCenter = ref<CameraState>({
 })
 const allCamera = ref<CameraState[]>([])
 const cameraState2 = ref<CameraState | null>(null)
+const lockObjCount = ref(0)
+const allObjCount = ref(0)
 type ObjFileType = {
   id: number,
   name: string,
@@ -340,6 +347,7 @@ const editPropInputInfo = ref<any>({})
 const editPropTypeKey = ref<string>()
 const editSnapPoint = ref<HandelInfo>()
 const editPropTypeIndex = ref<number>(-1)
+const showAllObjSelect = ref(false)
 
 const getNearestWall = (point: Point): NearestWallResult | null => {
   let nearestWall: WallData | null = null
@@ -799,6 +807,17 @@ onMounted(async () => {
   ObjFileTypes.value = data;
 
   worldApi.onWorldChange((type, objList) => {
+    if (['add', 'remove'].includes(type)) {
+      let newCount = 0;
+      for (const key in worldApi.allFileMapObjects) {
+        if (worldApi.allFileMapObjects[key]) {
+          newCount += worldApi.allFileMapObjects[key].length
+        }
+      }
+      allObjCount.value = newCount
+    }
+    console.log('lllll', type)
+    lockObjCount.value = worldApi.lockedObjList.length
     const find = objList.find((item) => item instanceof CameraEntity)
     if (find) {
       changeCamera2State(activeCameraIndex.value)

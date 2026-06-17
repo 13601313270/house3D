@@ -10,6 +10,7 @@ import { DoorDataClass } from './dataClass';
 import { MatchRectArea } from '@/utils/matchArea';
 import { isPointInRotatedRect } from '@/utils/isPointInRotatedRect';
 import { allSnapFromType } from '@/types/baseEntity';
+import { WallEntity } from '../wall/entity';
 
 export class DoorEntity extends EntityClassInWall<DoorData> {
   name: string = '门洞'
@@ -53,7 +54,7 @@ export class DoorEntity extends EntityClassInWall<DoorData> {
     if (!this.world.allFileMapObjects.wall) {
       this.world.allFileMapObjects.wall = []
     }
-    const findWall = this.world.allFileMapObjects.wall.find((entity) => entity.getData().id === data.wallId);
+    const findWall: WallEntity = this.world.allFileMapObjects.wall.find((entity) => entity.getData().id === data.wallId) as WallEntity
     let wallThickness = 10;
     if (findWall) {
       wallThickness = findWall.getData().thickness;
@@ -102,9 +103,9 @@ export class DoorEntity extends EntityClassInWall<DoorData> {
     if (!this.world.allFileMapObjects.wall) {
       this.world.allFileMapObjects.wall = []
     }
-    const wall = this.world.allFileMapObjects.wall.find((entity) => {
+    const wall: WallEntity = this.world.allFileMapObjects.wall.find((entity) => {
       return entity.getData().id === data.wallId
-    })
+    }) as WallEntity
     const wallThickness = wall ? wall.getData().thickness : 10;
 
     // group添加门框
@@ -198,9 +199,9 @@ export class DoorEntity extends EntityClassInWall<DoorData> {
     if (!this.world.allFileMapObjects.wall) {
       this.world.allFileMapObjects.wall = []
     }
-    const wall = this.world.allFileMapObjects.wall.find((entity) => {
+    const wall: WallEntity = this.world.allFileMapObjects.wall.find((entity) => {
       return entity.getData().id === data.wallId;
-    })
+    }) as WallEntity
     const wallThickness = wall ? wall.getData().thickness : 10;
     // const dist = Math.hypot(x - data.x, y - data.y)
     // console.log('zoomLevel---2', zoomLevel)

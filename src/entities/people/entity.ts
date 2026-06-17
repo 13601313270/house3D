@@ -143,6 +143,30 @@ export class PeopleEntity extends PointEntityClass<PeopleData> {
     ctx.arc(circleX, circleY, circleRadius, 0, Math.PI * 2)
     ctx.fill()
     ctx.stroke()
+
+    // 绘制轮廓
+    const circleArea = new MatchCircleArea({
+      x: data.x,
+      y: data.y,
+      r: data.height * 0.3 + 10
+    })
+    ctx.lineWidth = 2
+    ctx.strokeStyle = 'red'
+    ctx.save(); // 保存当前状态
+    ctx.translate(
+      circleArea.data.x * zoomLevel + panOffset.x,
+      circleArea.data.y * zoomLevel + panOffset.y
+    );
+    ctx.beginPath()
+    ctx.arc(
+      0,
+      0,
+      circleArea.data.r * zoomLevel,
+      0,
+      Math.PI * 2,
+    )
+    ctx.stroke()
+    ctx.restore(); // 恢复原始状态
   }
 
   init(): Promise<void> {

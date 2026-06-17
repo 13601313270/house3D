@@ -10,6 +10,7 @@ import { WindowDataClass } from './dataClass';
 import { MatchRectArea } from '@/utils/matchArea'
 import { isPointInRotatedRect } from '@/utils/isPointInRotatedRect'
 import { allSnapFromType } from '@/types/baseEntity';
+import { WallEntity } from '../wall/entity';
 
 export class WindowEntity extends EntityClassInWall<WindowData> {
   name: string = '窗户'
@@ -62,7 +63,7 @@ export class WindowEntity extends EntityClassInWall<WindowData> {
     if (!this.world.allFileMapObjects.wall) {
       this.world.allFileMapObjects.wall = []
     }
-    const findWall = this.world.allFileMapObjects.wall.find((entity) => entity.getData().id === data.wallId);
+    const findWall: WallEntity = this.world.allFileMapObjects.wall.find((entity) => entity.getData().id === data.wallId) as WallEntity
     let wallThickness = 10;
     if (findWall) {
       wallThickness = findWall.getData().thickness;
@@ -98,6 +99,14 @@ export class WindowEntity extends EntityClassInWall<WindowData> {
     panOffset: Point,
     zoomLevel: number,
   ): void {
+    if (!this.world.allFileMapObjects.wall) {
+      this.world.allFileMapObjects.wall = []
+    }
+    const findWall: WallEntity = this.world.allFileMapObjects.wall.find((entity) => entity.getData().id === data.wallId) as WallEntity
+    let wallThickness = 10;
+    if (findWall) {
+      wallThickness = findWall.getData().thickness;
+    }
     // 实现门的2D绘制逻辑
     const screenX = data.x * zoomLevel + panOffset.x
     const screenY = data.y * zoomLevel + panOffset.y
@@ -110,6 +119,31 @@ export class WindowEntity extends EntityClassInWall<WindowData> {
     ctx.fill()
     ctx.stroke()
     ctx.closePath()
+
+    // 绘制 轮廓
+    const matchArea = new MatchRectArea({
+      x: data.x,
+      y: data.y,
+      width: data.width,
+      depth: Math.max(wallThickness + 20, 20),
+      angleY: data.angle,
+    })
+    ctx.lineWidth = 2
+    ctx.strokeStyle = 'red'
+    ctx.save(); // 保存当前状态
+    ctx.translate(
+      matchArea.data.x * zoomLevel + panOffset.x,
+      matchArea.data.y * zoomLevel + panOffset.y
+    ); // 移动原点到目标中心
+    ctx.rotate(matchArea.data.angleY * -1); // 围绕新原点旋转
+    // 绘制一个方块
+    ctx.strokeRect(
+      matchArea.data.width / -2 * zoomLevel,
+      matchArea.data.depth / -2 * zoomLevel,
+      matchArea.data.width * zoomLevel,
+      matchArea.data.depth * zoomLevel,
+    )
+    ctx.restore(); // 恢复原始状态
   }
 
   showMatchHandel(x: number, y: number) {
@@ -117,9 +151,9 @@ export class WindowEntity extends EntityClassInWall<WindowData> {
     if (!this.world.allFileMapObjects.wall) {
       this.world.allFileMapObjects.wall = []
     }
-    const wall = this.world.allFileMapObjects.wall.find((entity) => {
+    const wall: WallEntity = this.world.allFileMapObjects.wall.find((entity) => {
       return entity.getData().id === data.wallId;
-    })
+    }) as WallEntity
     const wallThickness = wall ? wall.getData().thickness : 10;
     // const dist = Math.hypot(x - data.x, y - data.y)
     if (isPointInRotatedRect(x, y, {
@@ -175,9 +209,9 @@ export class WindowEntity extends EntityClassInWall<WindowData> {
     if (!this.world.allFileMapObjects.wall) {
       this.world.allFileMapObjects.wall = []
     }
-    const wall = this.world.allFileMapObjects.wall.find((entity) => {
+    const wall: WallEntity = this.world.allFileMapObjects.wall.find((entity) => {
       return entity.getData().id === data.wallId;
-    })
+    }) as WallEntity
     const wallThickness = wall ? wall.getData().thickness : 10;
     const geometry = new THREE.BoxGeometry(
       data.width * 1,
