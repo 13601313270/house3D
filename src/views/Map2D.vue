@@ -768,14 +768,14 @@ function changeCamera2State(activeIndex: number = 0) {
           if (camera.active === false) {
             // @ts-ignore
             camera.active = true
-            camera.remove3DCache()
+            camera.markObjectIsDirty()
           }
         } else {
           // @ts-ignore
           if (camera.active === true) {
             // @ts-ignore
             camera.active = false
-            camera.remove3DCache()
+            camera.markObjectIsDirty()
           }
         }
       })

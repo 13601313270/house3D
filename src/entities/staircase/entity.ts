@@ -376,7 +376,7 @@ export class StaircaseEntity extends LineEntityClass<StaircasePoint, StaircaseDa
   }, matchHandelInfo: HandelInfo) {
     const { x, y } = position
     if (matchHandelInfo.index !== undefined) {
-      this.remove3DCache()
+      this.markObjectIsDirty()
       if (matchHandelInfo.index % 2 === 0) {
         // 拖拽点
         const index = matchHandelInfo.index / 2;
@@ -429,9 +429,9 @@ export class StaircaseEntity extends LineEntityClass<StaircasePoint, StaircaseDa
     }
   }
 
-  // remove3DCache() {
-  //   console.log('remove3DCache---wall')
-  //   super.remove3DCache()
+  // markObjectIsDirty() {
+  //   console.log('markObjectIsDirty---wall')
+  //   super.markObjectIsDirty()
   // }
 
   inSceneSnapPointArea() {

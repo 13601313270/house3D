@@ -427,7 +427,7 @@ export class WallEntity extends LineEntityClass<WallPoint, WallData> {
       // startY
     } = position
     if (matchHandelInfo.index !== undefined) {
-      this.remove3DCache()
+      this.markObjectIsDirty()
       if (matchHandelInfo.index % 2 === 0) {
         // 拖拽点
         const index = matchHandelInfo.index / 2;
@@ -480,9 +480,9 @@ export class WallEntity extends LineEntityClass<WallPoint, WallData> {
     }
   }
 
-  // remove3DCache() {
-  //   console.log('remove3DCache---wall')
-  //   super.remove3DCache()
+  // markObjectIsDirty() {
+  //   console.log('markObjectIsDirty---wall')
+  //   super.markObjectIsDirty()
   // }
 
   inSceneSnapPointArea(
@@ -663,7 +663,7 @@ export class WallEntity extends LineEntityClass<WallPoint, WallData> {
         },
         ...configList,
       ], (val) => {
-        this.remove3DCache()
+        this.markObjectIsDirty()
         this.setData({
           ...data,
           ...val,
@@ -690,7 +690,7 @@ export class WallEntity extends LineEntityClass<WallPoint, WallData> {
         },
         ...wallBaseConfig
       ], (val) => {
-        this.remove3DCache()
+        this.markObjectIsDirty()
         const points = [...data.points]
         points[pointIndex] = {
           ...points[pointIndex],

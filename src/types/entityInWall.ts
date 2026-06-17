@@ -60,7 +60,7 @@ export abstract class EntityClassInWall<T extends ObjInWallData> extends PointEn
       this.associationEntity.forEach(entity => {
         if (entity.associationEntity.includes(this)) {
           entity.associationEntity.splice(entity.associationEntity.indexOf(this), 1)
-          entity.remove3DCache()
+          entity.markObjectIsDirty()
         }
       })
       this.associationEntity = []
@@ -71,7 +71,7 @@ export abstract class EntityClassInWall<T extends ObjInWallData> extends PointEn
       if (!obj.associationEntity.includes(this)) {
         obj.associationEntity.push(this)
       }
-      this.remove3DCache()
+      this.markObjectIsDirty()
       return true;
     }
     return false;
@@ -91,12 +91,12 @@ export abstract class EntityClassInWall<T extends ObjInWallData> extends PointEn
       this.associationEntity.forEach(entity => {
         if (entity.associationEntity.includes(this)) {
           entity.associationEntity.splice(entity.associationEntity.indexOf(this), 1)
-          entity.remove3DCache()
+          entity.markObjectIsDirty()
         }
       })
       this.associationEntity = []
       // 双向添加新的关联对象
-      this.remove3DCache()
+      this.markObjectIsDirty()
       return true;
     }
   }

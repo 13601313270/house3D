@@ -95,9 +95,9 @@ export abstract class PointEntityClass<T extends PointObjData> extends BaseEntit
     })();
   }
 
-  public remove3DCache() {
+  public markObjectIsDirty() {
     // 这里注意防止死循环
-    super.remove3DCache()
+    super.markObjectIsDirty()
     if (this.spriteGroup) {
       this.world.scene.remove(this.spriteGroup)
       this.spriteGroup = null

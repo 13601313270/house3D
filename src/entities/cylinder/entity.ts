@@ -180,7 +180,7 @@ export class CylinderEntity extends PointEntityClass<CylinderData> {
     // 双向去除原有的关联对象
     this.associationEntity.forEach(entity => {
       if (entity.associationEntity.includes(this)) {
-        entity.remove3DCache()
+        entity.markObjectIsDirty()
       }
     })
     super.setData(data)

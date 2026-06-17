@@ -54,7 +54,7 @@ export abstract class BaseEntityClass<T extends BaseObjData> {
   abstract create3DMesh(scene: THREE.Scene, ...args: any[]): THREE.Group[]
 
   protected cacheKeyStr = '';
-  public remove3DCache() {
+  public markObjectIsDirty() {
     if (this.meshList.length) {
       console.trace('创建测试----删除-----2', this.type)
       this.meshList.forEach(mesh => this.world.scene.remove(mesh))
@@ -64,7 +64,7 @@ export abstract class BaseEntityClass<T extends BaseObjData> {
       this.cacheKeyStr = ''
       if (this.associationEntity.length > 0) {
         this.associationEntity.forEach(entity => {
-          entity.remove3DCache()
+          entity.markObjectIsDirty()
         })
       }
     }
@@ -106,7 +106,7 @@ export abstract class BaseEntityClass<T extends BaseObjData> {
   beforeRemove() {
     console.log('创建测试----删除-----', this.type)
     const scene: THREE.Scene = this.world.scene
-    this.remove3DCache()
+    this.markObjectIsDirty()
     this.meshList.forEach(mesh => scene.remove(mesh))
     if (this.associationEntity.length > 0) {
       this.associationEntity.forEach(entity => {

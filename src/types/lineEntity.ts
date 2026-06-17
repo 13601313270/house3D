@@ -2,9 +2,9 @@ import { LineObjData, Point } from './map2d'
 import { BaseEntityClass } from './baseEntity'
 
 export abstract class LineEntityClass<V, T extends LineObjData<V>> extends BaseEntityClass<T> {
-  public remove3DCache() {
+  public markObjectIsDirty() {
     // 这里注意防止死循环
-    super.remove3DCache()
+    super.markObjectIsDirty()
   }
 
   // 当前对象是否需要重新生成3D模型状态
