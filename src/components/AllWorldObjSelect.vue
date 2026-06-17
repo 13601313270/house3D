@@ -197,9 +197,13 @@ function handleLocation(item: Item) {
       handleEnter(item)
     })
   } else if (api instanceof LineEntityClass) {
-    console.log('api', api)
-    const points = api.getData().points
-    console.log('pointspoints', points)
+    const points: Array<{ x: number, y: number }> = api.getData().points
+    const centerX = points.reduce((acc, cur) => acc + cur.x, 0) / points.length
+    const centerY = points.reduce((acc, cur) => acc + cur.y, 0) / points.length
+    emit('locationPosition', { x: centerX, y: centerY })
+    nextTick(() => {
+      handleEnter(item)
+    })
   }
 }
 

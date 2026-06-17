@@ -61,10 +61,6 @@ export abstract class BaseEntityClass<T extends BaseObjData> {
 
   protected cacheKeyStr = '';
   public markObjectIsDirty() {
-    if (this.meshList.length) {
-      this.meshList.forEach(mesh => this.world.scene.remove(mesh))
-      this.meshList = []
-    }
     if (this.cacheKeyStr) {
       this.cacheKeyStr = ''
       if (this.associationEntity.length > 0) {

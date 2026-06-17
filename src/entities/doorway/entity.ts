@@ -14,7 +14,7 @@ import { WallEntity } from '../wall/entity';
 
 export class DoorEntity extends EntityClassInWall<DoorData> {
   name: string = '门洞'
-  type: string = 'door'
+  type: string = 'doorway'
   isPointObj: boolean = true
   private circleRadius = 6
 
@@ -94,6 +94,32 @@ export class DoorEntity extends EntityClassInWall<DoorData> {
     ctx.arc(screenX, screenY, this.circleRadius * zoomLevel + 3, 0, Math.PI * 2)
     ctx.fill()
     ctx.stroke()
+
+    // 绘制轮廓
+    if (!this.world.allFileMapObjects.wall) {
+      this.world.allFileMapObjects.wall = []
+    }
+    const wall: WallEntity = this.world.allFileMapObjects.wall.find((entity) => {
+      return entity.getData().id === data.wallId;
+    }) as WallEntity
+    const wallThickness = wall ? wall.getData().thickness : 10;
+    const matchArea = new MatchRectArea({ x: data.x, y: data.y, width: data.width, depth: Math.max(wallThickness + 20, 20), angleY: data.angle * -1 })
+    ctx.lineWidth = 2
+    ctx.strokeStyle = 'red'
+    ctx.save(); // 保存当前状态
+    ctx.translate(
+      matchArea.data.x * zoomLevel + panOffset.x,
+      matchArea.data.y * zoomLevel + panOffset.y
+    ); // 移动原点到目标中心
+    ctx.rotate(matchArea.data.angleY * -1); // 围绕新原点旋转
+    // 绘制一个方块
+    ctx.strokeRect(
+      matchArea.data.width / -2 * zoomLevel,
+      matchArea.data.depth / -2 * zoomLevel,
+      matchArea.data.width * zoomLevel,
+      matchArea.data.depth * zoomLevel,
+    )
+    ctx.restore(); // 恢复原始状态
   }
 
   create3DMesh() {
