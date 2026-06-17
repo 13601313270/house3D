@@ -468,7 +468,7 @@ const updateContainerHeight = (renderer: THREE.WebGLRenderer) => {
     // }
   }
   if (hasChangeCamera) {
-    console.log('renderWidth', renderWidth, 'renderHeight', renderHeight)
+    // console.log('renderWidth', renderWidth, 'renderHeight', renderHeight)
     camera.updateProjectionMatrix()
     renderer.setSize(renderWidth, renderHeight)
   }

@@ -41,7 +41,7 @@
       </div>
       <div class="buttonGroup">
         <button v-if="typeKey === 'people'" @click="showBoneEdit">姿态编辑</button>
-        <button @click="LockObj">{{ modelValue.isLocked ? '解锁' : '锁定' }}</button>
+        <button @click="LockObj(!modelValue.isLocked)">{{ modelValue.isLocked ? '解锁' : '锁定' }}</button>
         <div style="flex-grow: 1;"></div>
         <button class="deleteButton" @click="deleteContextMenuEntity">删除</button>
       </div>
@@ -206,13 +206,20 @@ function removeIfOutside() {
 }
 
 // 锁定后，无法被移动
-function LockObj() {
+function LockObj(value: boolean) {
   console.log('锁定')
   emit('update:modelValue', {
     ...props.modelValue,
-    isLocked: true,
+    isLocked: value,
   })
-  message.success('锁定成功。如想重新编辑，请去[对象列表]解锁。', {
+  const messageText = (() => {
+    if (value) {
+      return '锁定成功。如想重新编辑，请去[对象列表]解锁。'
+    } else {
+      return '解锁成功。'
+    }
+  })();
+  message.success(messageText, {
     duration: 5000,
     position: 'top-center',
   })

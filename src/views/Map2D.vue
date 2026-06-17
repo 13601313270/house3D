@@ -817,9 +817,9 @@ onMounted(async () => {
       }
       allObjCount.value = newCount
     } else if (type === 'change') {
-      console.log('contextMenu', objList)
+      // console.log('contextMenu', objList)
       if (contextMenu.value && contextMenu.value.visible) {
-        console.log('contextMenu', objList)
+        // console.log('contextMenu', objList)
         const type = contextMenu.value.type
         const index: number = contextMenu.value.index
         const find = objList.find((v) => {
@@ -848,7 +848,6 @@ onMounted(async () => {
         }
       }
     }
-    console.log('lllll', type)
     lockObjCount.value = worldApi.lockedObjList.length
     const find = objList.find((item) => item instanceof CameraEntity)
     if (find) {
@@ -1255,7 +1254,7 @@ const handleContextMenu = (e: MouseEvent) => {
       }
       for (let j = 0; j < worldApi.getObjects(type).length; j++) {
         const api: BaseEntityClass<any> = worldApi.allFileMapObjects[type][j]
-        // if (api.getData().isLocked) continue
+        if (api.getData().isLocked) continue
         const snapPoint = api.matchHandelInfo(x, y)
         if (snapPoint) {
           api.editPropConfig(snapPoint, (propConfig, callback) => {

@@ -11,13 +11,16 @@
         </div>
       </div>
       <div class="configItemList">
-        <div class="configItem" v-for="item in allObjList" :key="item.id">
-          <div class="nameInfo" @mouseenter="handleEnter(item)">
+        <div class="configItem" v-for="item in allObjList" :key="item.id" @mouseenter="handleEnter(item)">
+          <div class="nameInfo">
             <span>{{ item.name }}</span><span class="tip" v-if="item.tip">({{ item.tip }})</span>
           </div>
           <div class="tools">
-            <div v-if="item.isLocked" class="toolItem" @click="handleUnLock(item)">
+            <div v-if="item.isLocked" class="toolItem" @click="handleUnLock(item, false)">
               <img class="img lock" src="@/assets/lock.svg" alt="lock" />
+            </div>
+            <div v-else class="toolItem" @click="handleUnLock(item, true)">
+              <img class="img" src="@/assets/unLock.svg" alt="unLock" />
             </div>
             <div class="toolItem" @click="handleLocation(item)">
               <img class="img" src="@/assets/location.svg" alt="location" />
@@ -39,6 +42,7 @@
 import { nextTick, onMounted, ref } from 'vue'
 import message from '@/utils/message'
 import { PointEntityClass } from '@/types/pointEntity'
+import { LineEntityClass } from '@/types/lineEntity'
 const allObjCount = ref(0)
 type Item = {
   id: string,
@@ -162,7 +166,7 @@ function handleEnter(item: {
 // function openEditPanel(id: string) {
 //   alert(id)
 // }
-function handleUnLock(item: Item) {
+function handleUnLock(item: Item, isLocked: boolean) {
   const { id, type } = item
   const group = window.worldApi.allFileMapObjects[type]
   if (!group) return
@@ -171,9 +175,9 @@ function handleUnLock(item: Item) {
   console.log(api)
   api.setData({
     ...api.getData(),
-    isLocked: false,
+    isLocked,
   })
-  item.isLocked = false
+  item.isLocked = isLocked
   message.success('解锁成功', { position: 'top-center' })
 }
 function handleLocation(item: Item) {
@@ -183,16 +187,15 @@ function handleLocation(item: Item) {
   const api = group.find(v => v.getData().id === id)
   if (!api) return
   if (api instanceof PointEntityClass) {
-    console.log('api', api)
     const { x, y } = api.getData()
-    console.log('api---x', x, y, props.panOffset)
-    // const canvasAction = document.getElementById('canvas2D2') as HTMLCanvasElement;
-    // const ctxAction = canvasAction.getContext('2d')!
-    // ctxAction.clearRect(0, 0, canvasAction.width, canvasAction.height)
     emit('locationPosition', { x, y })
     nextTick(() => {
       handleEnter(item)
     })
+  } else if (api instanceof LineEntityClass) {
+    console.log('api', api)
+    const points = api.getData().points
+    console.log('pointspoints', points)
   }
 }
 
@@ -263,13 +266,19 @@ window.worldApi.onWorldChange(() => {
     }
 
     .configItemList {
-      padding: 12px;
+      padding: 0 12px;
       overflow-y: auto;
       flex-grow: 1;
 
       .configItem {
         display: flex;
-        margin-bottom: 2px;
+        align-items: center;
+        border-bottom: solid 1px #e9e9e9;
+        padding: 4px 0;
+
+        &:last-child {
+          border-bottom: none;
+        }
 
         .nameInfo {
           flex-grow: 1;
