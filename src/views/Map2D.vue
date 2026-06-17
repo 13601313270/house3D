@@ -117,7 +117,8 @@
         :editPropConfigInfo="editPropConfigInfo" v-model="editPropInputInfo"
         :initPosition="{ x: contextMenu.x, y: contextMenu.y }" @deleteContextMenuEntity="deleteContextMenuEntity"
         @close="contextMenu = null" />
-      <AllWorldObjSelect v-if="showAllObjSelect" :zoom2DLevel="zoom2DLevel" :panOffset="panOffset" @close="showAllObjSelect = false" />
+      <AllWorldObjSelect v-if="showAllObjSelect" :zoom2DLevel="zoom2DLevel" :panOffset="panOffset"
+        @close="showAllObjSelect = false" @locationPosition="handleLocationPosition" />
     </div>
   </div>
   <div v-if="showDemos" class="allDemosContent">
@@ -336,7 +337,7 @@ const contextMenu = ref<{
   x: number;
   y: number;
   type: string;
-  index?: number;
+  index: number;
   wallIndex?: number;
   pointIndex?: number;
   thickness?: number
@@ -815,6 +816,37 @@ onMounted(async () => {
         }
       }
       allObjCount.value = newCount
+    } else if (type === 'change') {
+      console.log('contextMenu', objList)
+      if (contextMenu.value && contextMenu.value.visible) {
+        console.log('contextMenu', objList)
+        const type = contextMenu.value.type
+        const index: number = contextMenu.value.index
+        const find = objList.find((v) => {
+          if (v.type === type) {
+            const typeList = window.worldApi.allFileMapObjects[type]
+            if (typeList) {
+              const obj = typeList[index]
+              if (obj === v) {
+                return true;
+              }
+            }
+          }
+          return false
+        })
+        if (find) {
+          const allKey = Object.keys(editPropInputInfo.value)
+          const getData: Record<string, any> = find.getData()
+          allKey.forEach((key: string) => {
+            if (key in getData && key in editPropInputInfo.value) {
+              if (editPropInputInfo.value[key] !== getData[key]) {
+                console.log('dddddd------1111111', editPropInputInfo.value, getData, key)
+                editPropInputInfo.value[key] = getData[key]
+              }
+            }
+          })
+        }
+      }
     }
     console.log('lllll', type)
     lockObjCount.value = worldApi.lockedObjList.length
@@ -1223,6 +1255,7 @@ const handleContextMenu = (e: MouseEvent) => {
       }
       for (let j = 0; j < worldApi.getObjects(type).length; j++) {
         const api: BaseEntityClass<any> = worldApi.allFileMapObjects[type][j]
+        // if (api.getData().isLocked) continue
         const snapPoint = api.matchHandelInfo(x, y)
         if (snapPoint) {
           api.editPropConfig(snapPoint, (propConfig, callback) => {
@@ -1262,6 +1295,7 @@ const handleContextMenu = (e: MouseEvent) => {
                 inputData[v.id] = v.value
               }
             })
+            inputData.isLocked = api.getData().isLocked || false
             console.log('初始化数据', inputData)
             editPropInputInfo.value = inputData;
             nextTick(() => {
@@ -1705,29 +1739,32 @@ const handleMouseDown = (e: MouseEvent) => {
     const handleInfoList = getHandleInfoByXY(x, y)
     if (handleInfoList) {
       const { classInfo, handle, startPoint } = handleInfoList
-      matchHandelObj = classInfo
-      matchedHandelInfo = handle
-      matchHandelStartPoint = { x, y }
-      dragOffset.value = { x: 0, y: 0 }
-      dragStartPoint.value = {
-        x: startPoint.x,
-        y: startPoint.y
+      if (!classInfo.getData().isLocked) {
+        matchHandelObj = classInfo
+        matchedHandelInfo = handle
+        matchHandelStartPoint = { x, y }
+        dragOffset.value = { x: 0, y: 0 }
+        dragStartPoint.value = {
+          x: startPoint.x,
+          y: startPoint.y
+        }
+        const canvasAction = canvas2D2Ref.value!;
+        const ctxAction = canvasAction.getContext('2d')!
+        ctxAction.clearRect(0, 0, canvasAction.width, canvasAction.height)
+        matchHandelObj.draw2D(ctxAction, panOffset.value, zoom2DLevel.value)
+        return
       }
-      const canvasAction = canvas2D2Ref.value!;
-      const ctxAction = canvasAction.getContext('2d')!
-      ctxAction.clearRect(0, 0, canvasAction.width, canvasAction.height)
-      matchHandelObj.draw2D(ctxAction, panOffset.value, zoom2DLevel.value)
-    } else {
-      // 如果没有拖拽到任何点，开始平移
-      isPanningScreen.value = true
-      panStartScreenX = screenX
-      panStartScreenY = screenY
     }
+    // 如果没有拖拽到任何点，开始平移
+    isPanningScreen.value = true
+    panStartScreenX = screenX
+    panStartScreenY = screenY
+    return;
   }
 }
 
 function getHandleInfoByXY(x: number, y: number): {
-  classInfo: BaseEntityClass<any>
+  classInfo: BaseEntityClass<BaseObjData>
   handle: HandelInfo,
   startPoint: Point,
   dist: number,
@@ -2086,6 +2123,22 @@ function changeObjTypeSelect(type: string, baseObj: BaseEntityClass<any>) {
     }
     currentTool.value = type
   }
+}
+function handleLocationPosition(position: { x: number, y: number }) {
+  console.log('position', position)
+  const canvas = canvas2DRef.value
+  if (!canvas) return
+  const canvasRect = canvas.getBoundingClientRect()
+  const dx = canvasRect.width / 2
+  const dy = canvasRect.height / 2
+  panOffset.value = {
+    // x: position.x - dx,
+    x: dx - (position.x * zoom2DLevel.value),
+    // y: position.y - dy
+    y: dy - (position.y * zoom2DLevel.value),
+  }
+  const fileData: fileData = worldApi.getAllFileObjects()
+  drawWrapper2D(fileData)
 }
 </script>
 

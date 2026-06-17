@@ -1,23 +1,46 @@
 interface MessageOptions {
   duration?: number
+  position?: 'top-left' | 'top-center' | 'top-right'
 }
 
 const containerId = 'message-container'
 const styleId = 'message-keyframes'
 
-function getContainer (): HTMLElement {
-  let container = document.getElementById(containerId)
+function getContainer (position: 'top-left' | 'top-center' | 'top-right'): HTMLElement {
+  const id = `${containerId}-${position}`
+  let container = document.getElementById(id)
   if (!container) {
     container = document.createElement('div')
-    container.id = containerId
+    container.id = id
+
+    let left: string
+    let right: string
+
+    switch (position) {
+      case 'top-left':
+        left = '20px'
+        right = 'auto'
+        break
+      case 'top-center':
+        left = '50%'
+        right = 'auto'
+        break
+      case 'top-right':
+      default:
+        left = 'auto'
+        right = '20px'
+    }
+
     container.style.cssText = `
       position: fixed;
       top: 20px;
-      right: 20px;
+      left: ${left};
+      right: ${right};
       z-index: 9999;
       display: flex;
       flex-direction: column;
       gap: 10px;
+      ${position === 'top-center' ? 'transform: translateX(-50%);' : ''}
     `
     document.body.appendChild(container)
   }
@@ -41,6 +64,28 @@ function injectStyles (): void {
       }
     }
 
+    @keyframes slideInFromTop {
+      from {
+        opacity: 0;
+        transform: translateY(-100%);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes slideInFromLeft {
+      from {
+        opacity: 0;
+        transform: translateX(-100%);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
     @keyframes slideOut {
       from {
         opacity: 1;
@@ -56,8 +101,48 @@ function injectStyles (): void {
       }
     }
 
-    .message-slide-out {
+    @keyframes slideOutToTop {
+      from {
+        opacity: 1;
+        transform: translateY(0);
+        max-height: 60px;
+        margin-bottom: 10px;
+      }
+      to {
+        opacity: 0;
+        transform: translateY(-100%);
+        max-height: 0;
+        margin-bottom: 0;
+      }
+    }
+
+    @keyframes slideOutToLeft {
+      from {
+        opacity: 1;
+        transform: translateX(0);
+        max-height: 60px;
+        margin-bottom: 10px;
+      }
+      to {
+        opacity: 0;
+        transform: translateX(-100%);
+        max-height: 0;
+        margin-bottom: 0;
+      }
+    }
+
+    .message-slide-out-right {
       animation: slideOut 0.3s ease-out forwards;
+      overflow: hidden;
+    }
+
+    .message-slide-out-top {
+      animation: slideOutToTop 0.3s ease-out forwards;
+      overflow: hidden;
+    }
+
+    .message-slide-out-left {
+      animation: slideOutToLeft 0.3s ease-out forwards;
       overflow: hidden;
     }
   `
@@ -67,7 +152,20 @@ function injectStyles (): void {
 function createMessage (type: 'info' | 'success' | 'warning' | 'error', text: string, options: MessageOptions = {}): void {
   injectStyles()
 
-  const { duration = 3000 } = options
+  const { duration = 3000, position = 'top-right' } = options
+
+  let animationName: string
+  switch (position) {
+    case 'top-center':
+      animationName = 'slideInFromTop'
+      break
+    case 'top-left':
+      animationName = 'slideInFromLeft'
+      break
+    case 'top-right':
+    default:
+      animationName = 'slideIn'
+  }
 
   const messageEl = document.createElement('div')
   messageEl.style.cssText = `
@@ -78,7 +176,7 @@ function createMessage (type: 'info' | 'success' | 'warning' | 'error', text: st
     min-width: 280px;
     max-width: 400px;
     box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
-    animation: slideIn 0.3s ease-out;
+    animation: ${animationName} 0.3s ease-out;
     max-height: 60px;
   `
 
@@ -143,7 +241,7 @@ function createMessage (type: 'info' | 'success' | 'warning' | 'error', text: st
   messageEl.appendChild(textEl)
   messageEl.appendChild(closeBtn)
 
-  const container = getContainer()
+  const container = getContainer(position)
   container.appendChild(messageEl)
 
   let removed = false
@@ -152,7 +250,20 @@ function createMessage (type: 'info' | 'success' | 'warning' | 'error', text: st
     if (removed) return
     removed = true
 
-    messageEl.classList.add('message-slide-out')
+    let slideOutClass: string
+    switch (position) {
+      case 'top-center':
+        slideOutClass = 'message-slide-out-top'
+        break
+      case 'top-left':
+        slideOutClass = 'message-slide-out-left'
+        break
+      case 'top-right':
+      default:
+        slideOutClass = 'message-slide-out-right'
+    }
+
+    messageEl.classList.add(slideOutClass)
     setTimeout(() => {
       messageEl.remove()
     }, 300)

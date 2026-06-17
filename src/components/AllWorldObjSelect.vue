@@ -1,5 +1,5 @@
 <template>
-  <div class="context-menu" :style="{ top: position.y + 'px', left: position.x + 'px' }">
+  <div class="allWOrldObjSelect" :style="{ top: position.y + 'px', left: position.x + 'px' }">
     <div class="configContainer">
       <div class="head">
         <div class="moveIcon" @mousedown="startDrag">
@@ -11,48 +11,77 @@
         </div>
       </div>
       <div class="configItemList">
-        <div v-for="item in allObjList" :key="item.id" @mouseenter="handleEnter(item)">
-          {{ item.name }} {{ item.type }} {{ item.id }} {{ item.isLocked }}
+        <div class="configItem" v-for="item in allObjList" :key="item.id">
+          <div class="nameInfo" @mouseenter="handleEnter(item)">
+            <span>{{ item.name }}</span><span class="tip" v-if="item.tip">({{ item.tip }})</span>
+          </div>
+          <div class="tools">
+            <div v-if="item.isLocked" class="toolItem" @click="handleUnLock(item)">
+              <img class="img lock" src="@/assets/lock.svg" alt="lock" />
+            </div>
+            <div class="toolItem" @click="handleLocation(item)">
+              <img class="img" src="@/assets/location.svg" alt="location" />
+            </div>
+            <!-- <div class="toolItem" @click="openEditPanel(item.id)">
+              <img class="img" src="@/assets/edit.svg" alt="edit" />
+            </div> -->
+            <!-- <div class="toolItem">
+              <img v-if="item.isHidden" class="img" src="@/assets/notVisible.svg" alt="notVisible" />
+              <img v-else class="img" src="@/assets/visible.svg" alt="visible" />
+            </div> -->
+          </div>
         </div>
       </div>
     </div>
   </div>
 </template>
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { nextTick, onMounted, ref } from 'vue'
+import message from '@/utils/message'
+import { PointEntityClass } from '@/types/pointEntity'
 const allObjCount = ref(0)
-const allObjList = ref<Array<{
+type Item = {
   id: string,
   name: string,
   type: string,
+  isHidden: boolean,
   isLocked: boolean,
-}>>([])
+  tip?: string,
+}
+const allObjList = ref<Array<Item>>([])
 const props = defineProps<{
   zoom2DLevel: number,
   panOffset: { x: number, y: number },
 }>()
 onMounted(() => {
+  reloadObjList();
+})
+function reloadObjList() {
   let newCount = 0;
+  allObjList.value = []
   for (const key in window.worldApi.allFileMapObjects) {
     if (window.worldApi.allFileMapObjects[key]) {
       newCount += window.worldApi.allFileMapObjects[key].length
       allObjList.value.push(...window.worldApi.allFileMapObjects[key].map((item) => {
-        const { id, isLocked } = item.getData()
+        const { id, isLocked, isHidden, tip } = item.getData()
         return {
           id,
           name: item.name,
           type: item.type,
+          isHidden: isHidden || false,
           isLocked: isLocked || false,
+          tip,
         }
       }))
     }
   }
   allObjCount.value = newCount
-})
-const position = ref<{ x: number, y: number }>({ x: 100, y: 100 })
+}
+const position = ref<{ x: number, y: number }>({ x: window.innerWidth / 3, y: 100 })
 
 const emit = defineEmits<{
-  (e: 'close'): void
+  (e: 'close'): void,
+  (e: 'locationPosition', value: { x: number, y: number }): void,
 }>()
 
 let isDragging = false
@@ -61,7 +90,7 @@ let offsetY = 0
 const EDGE_PADDING = 6
 function startDrag(e: MouseEvent) {
   isDragging = true
-  const contextMenuEl = document.querySelector('.context-menu') as HTMLElement
+  const contextMenuEl = document.querySelector('.allWOrldObjSelect') as HTMLElement
   if (contextMenuEl) {
     const parentEl = contextMenuEl.parentElement
     if (parentEl) {
@@ -79,7 +108,7 @@ function startDrag(e: MouseEvent) {
 function onMouseMove(e: MouseEvent) {
   if (!isDragging) return
 
-  const contextMenuEl = document.querySelector('.context-menu') as HTMLElement
+  const contextMenuEl = document.querySelector('.allWOrldObjSelect') as HTMLElement
   if (!contextMenuEl) return
 
   const parentEl = contextMenuEl.parentElement
@@ -130,9 +159,49 @@ function handleEnter(item: {
     thisObj.draw2D(ctxAction, props.panOffset, props.zoom2DLevel)
   }
 }
+// function openEditPanel(id: string) {
+//   alert(id)
+// }
+function handleUnLock(item: Item) {
+  const { id, type } = item
+  const group = window.worldApi.allFileMapObjects[type]
+  if (!group) return
+  const api = group.find(v => v.getData().id === id)
+  if (!api) return
+  console.log(api)
+  api.setData({
+    ...api.getData(),
+    isLocked: false,
+  })
+  item.isLocked = false
+  message.success('解锁成功', { position: 'top-center' })
+}
+function handleLocation(item: Item) {
+  const { id, type } = item
+  const group = window.worldApi.allFileMapObjects[type]
+  if (!group) return
+  const api = group.find(v => v.getData().id === id)
+  if (!api) return
+  if (api instanceof PointEntityClass) {
+    console.log('api', api)
+    const { x, y } = api.getData()
+    console.log('api---x', x, y, props.panOffset)
+    // const canvasAction = document.getElementById('canvas2D2') as HTMLCanvasElement;
+    // const ctxAction = canvasAction.getContext('2d')!
+    // ctxAction.clearRect(0, 0, canvasAction.width, canvasAction.height)
+    emit('locationPosition', { x, y })
+    nextTick(() => {
+      handleEnter(item)
+    })
+  }
+}
+
+window.worldApi.onWorldChange(() => {
+  reloadObjList()
+})
 </script>
 <style scoped lang="less">
-.context-menu {
+.allWOrldObjSelect {
   position: absolute;
   background: white;
   box-sizing: border-box;
@@ -197,6 +266,48 @@ function handleEnter(item: {
       padding: 12px;
       overflow-y: auto;
       flex-grow: 1;
+
+      .configItem {
+        display: flex;
+        margin-bottom: 2px;
+
+        .nameInfo {
+          flex-grow: 1;
+
+          .tip {
+            color: #8a8a8a;
+          }
+        }
+
+        .tools {
+          display: flex;
+          align-items: center;
+
+          .toolItem {
+            // border: 1px solid #8a8a8a;
+            // border-radius: 4px;
+            padding: 1px;
+            // margin-left: 2px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 30px;
+            height: 30px;
+            box-sizing: border-box;
+
+            .img {
+              width: 24px;
+              height: 24px;
+
+              &.lock {
+                width: 20px;
+                height: 20px;
+                margin-top: -2px;
+              }
+            }
+          }
+        }
+      }
     }
   }
 }

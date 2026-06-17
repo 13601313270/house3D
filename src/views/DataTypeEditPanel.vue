@@ -41,7 +41,7 @@
       </div>
       <div class="buttonGroup">
         <button v-if="typeKey === 'people'" @click="showBoneEdit">姿态编辑</button>
-        <button @click="LockObj">锁定</button>
+        <button @click="LockObj">{{ modelValue.isLocked ? '解锁' : '锁定' }}</button>
         <div style="flex-grow: 1;"></div>
         <button class="deleteButton" @click="deleteContextMenuEntity">删除</button>
       </div>
@@ -54,6 +54,7 @@ import { nextTick, onMounted, ref } from 'vue';
 import { editItem, allFileKeysName } from '@/entities/index';
 import DataTypeEdit from './DataTypeEdit.vue'
 import BoneEdit from './boneEdit.vue'
+import message from '@/utils/message';
 
 const props = defineProps<{
   typeKey: string
@@ -210,6 +211,10 @@ function LockObj() {
   emit('update:modelValue', {
     ...props.modelValue,
     isLocked: true,
+  })
+  message.success('锁定成功。如想重新编辑，请去[对象列表]解锁。', {
+    duration: 5000,
+    position: 'top-center',
   })
 }
 </script>

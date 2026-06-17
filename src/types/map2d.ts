@@ -20,6 +20,7 @@ export interface BaseObjData {
   tip?: string,// 提示信息
   tipFontSize?: number,// 提示信息字号
   isLocked?: boolean,// 是否锁定，无法被移动
+  isHidden?: boolean,// 是否隐藏
 }
 // 点状对象数据基类
 export interface PointObjData extends BaseObjData {
