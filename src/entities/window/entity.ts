@@ -205,7 +205,6 @@ export class WindowEntity extends EntityClassInWall<WindowData> {
       tc,
       ic,
     } = data
-    console.log('创建测试-----window-1')
     const baseZ = data.height / 2 + (data.bottom || 0);
     if (!this.world.allFileMapObjects.wall) {
       this.world.allFileMapObjects.wall = []
@@ -497,18 +496,6 @@ export class WindowEntity extends EntityClassInWall<WindowData> {
 
   getMineBeSnapLines(): [Point, Point][] {
     return []
-  }
-
-  setData(data: WindowData) {
-    const oldData = this.getData()
-    console.log('oldData-wallId', oldData.wallId)
-    // 双向去除原有的关联对象的缓存，也需要重新渲染
-    this.associationEntity.forEach(entity => {
-      if (entity.associationEntity.includes(this)) {
-        entity.markObjectIsDirty()
-      }
-    })
-    super.setData(data)
   }
 
   editPropConfig(snapPoint: HandelInfo, editShow: (editInfoList: editItem[], callback: (val: any) => void) => void): void {

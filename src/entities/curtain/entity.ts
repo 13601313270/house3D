@@ -312,16 +312,6 @@ export class CurtainEntity extends PointEntityClass<CurtainData> {
     return []
   }
 
-  setData(data: CurtainData) {
-    // 双向去除原有的关联对象
-    this.associationEntity.forEach(entity => {
-      if (entity.associationEntity.includes(this)) {
-        entity.markObjectIsDirty()
-      }
-    })
-    super.setData(data)
-  }
-
   editPropConfig(snapPoint: HandelInfo, editShow: (editInfoList: editItem[], callback: (val: any) => void) => void): void {
     const data = this.getData();
     editShow([
