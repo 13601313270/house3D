@@ -233,6 +233,7 @@ export class WallEntity extends LineEntityClass<WallPoint, WallData> {
       depth: wallHeight,
       bevelEnabled: true,
     }
+    console.log('创建测试-----wall')
     for (let i = 0; i < wallBoxList.length; i++) {
       const box = wallBoxList[i]
 

@@ -43,6 +43,8 @@ import { nextTick, onMounted, ref } from 'vue'
 import message from '@/utils/message'
 import { PointEntityClass } from '@/types/pointEntity'
 import { LineEntityClass } from '@/types/lineEntity'
+import { BaseEntityClass } from '@/types/baseEntity'
+import { BaseObjData } from '@/types/map2d'
 const allObjCount = ref(0)
 type Item = {
   id: string,
@@ -86,6 +88,7 @@ const position = ref<{ x: number, y: number }>({ x: window.innerWidth / 3, y: 10
 const emit = defineEmits<{
   (e: 'close'): void,
   (e: 'locationPosition', value: { x: number, y: number }): void,
+  (e: 'onChange', value: BaseEntityClass<BaseObjData>): void,
 }>()
 
 let isDragging = false
@@ -179,6 +182,7 @@ function handleUnLock(item: Item, isLocked: boolean) {
   })
   item.isLocked = isLocked
   message.success('解锁成功', { position: 'top-center' })
+  emit('onChange', api)
 }
 function handleLocation(item: Item) {
   const { id, type } = item

@@ -56,6 +56,7 @@ export abstract class BaseEntityClass<T extends BaseObjData> {
   protected cacheKeyStr = '';
   public remove3DCache() {
     if (this.meshList.length) {
+      console.trace('创建测试----删除-----2', this.type)
       this.meshList.forEach(mesh => this.world.scene.remove(mesh))
       this.meshList = []
     }
@@ -103,6 +104,7 @@ export abstract class BaseEntityClass<T extends BaseObjData> {
   ): void
 
   beforeRemove() {
+    console.log('创建测试----删除-----', this.type)
     const scene: THREE.Scene = this.world.scene
     this.remove3DCache()
     this.meshList.forEach(mesh => scene.remove(mesh))
@@ -124,6 +126,7 @@ export abstract class BaseEntityClass<T extends BaseObjData> {
     }
     // console.log('reCreate3DMeshIfNeed', this.cacheKeyStr, newKeyByData)
     const scene: THREE.Scene = this.world.scene
+    console.trace('创建测试----删除-----3', this.type)
     this.meshList.forEach(mesh => scene.remove(mesh))
     this.meshList = this.create3DMesh(scene);
     this.meshList.forEach(mesh => scene.add(mesh))

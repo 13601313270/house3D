@@ -118,7 +118,7 @@
         :initPosition="{ x: contextMenu.x, y: contextMenu.y }" @deleteContextMenuEntity="deleteContextMenuEntity"
         @close="contextMenu = null" />
       <AllWorldObjSelect v-if="showAllObjSelect" :zoom2DLevel="zoom2DLevel" :panOffset="panOffset"
-        @close="showAllObjSelect = false" @locationPosition="handleLocationPosition" />
+        @close="showAllObjSelect = false" @locationPosition="handleLocationPosition" @onChange="handleObjChange" />
     </div>
   </div>
   <div v-if="showDemos" class="allDemosContent">
@@ -2138,6 +2138,11 @@ function handleLocationPosition(position: { x: number, y: number }) {
   }
   const fileData: fileData = worldApi.getAllFileObjects()
   drawWrapper2D(fileData)
+}
+function handleObjChange(baseObj: BaseEntityClass<BaseObjData>) {
+  console.log('baseObj', baseObj)
+  // 刷新2D和3D场景
+  drawWrapper2DAnd3D()
 }
 </script>
 

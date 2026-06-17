@@ -2,14 +2,6 @@ import { LineObjData, Point } from './map2d'
 import { BaseEntityClass } from './baseEntity'
 
 export abstract class LineEntityClass<V, T extends LineObjData<V>> extends BaseEntityClass<T> {
-  reCreate3DMeshIfNeed(): void {
-    super.reCreate3DMeshIfNeed();
-    const newKeyByData = this.meshNeedChangeKey();
-    if (this.cacheKeyStr === newKeyByData) {
-      return;
-    }
-  }
-
   public remove3DCache() {
     // 这里注意防止死循环
     super.remove3DCache()

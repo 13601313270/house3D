@@ -205,6 +205,7 @@ export class WindowEntity extends EntityClassInWall<WindowData> {
       tc,
       ic,
     } = data
+    console.log('创建测试-----window-1')
     const baseZ = data.height / 2 + (data.bottom || 0);
     if (!this.world.allFileMapObjects.wall) {
       this.world.allFileMapObjects.wall = []
