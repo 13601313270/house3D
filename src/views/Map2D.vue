@@ -188,6 +188,7 @@ import { LineEntityClass } from '@/types/lineEntity';
 import { LineObjDataClass } from '@/entities/objData';
 import { CameraEntity } from '@/entities/camera/entity';
 import AllWorldObjSelect from '@/components/AllWorldObjSelect.vue'
+import message from '@/utils/message';
 
 const canvas2DRef = ref<HTMLCanvasElement | null>(null)
 const canvas2D2Ref = ref<HTMLCanvasElement | null>(null)
@@ -1254,9 +1255,12 @@ const handleContextMenu = (e: MouseEvent) => {
       }
       for (let j = 0; j < worldApi.getObjects(type).length; j++) {
         const api: BaseEntityClass<any> = worldApi.allFileMapObjects[type][j]
-        if (api.getData().isLocked) continue
         const snapPoint = api.matchHandelInfo(x, y)
         if (snapPoint) {
+          if (api.getData().isLocked) {
+            message.warning('锁定对象不能编辑，请去[对象列表]解锁', { position: 'top-center' })
+            continue
+          }
           api.editPropConfig(snapPoint, (propConfig, callback) => {
             console.log('dist', propConfig)
             const contextMenuX = e.clientX
