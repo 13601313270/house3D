@@ -40,8 +40,10 @@
         </div>
       </div>
       <div class="buttonGroup">
-        <button v-if="typeKey === 'people'" @click="showBoneEdit">姿态编辑</button>
-        <button @click="LockObj(!modelValue.isLocked)">{{ modelValue.isLocked ? '解锁' : '锁定' }}</button>
+        <div class="leftGroup">
+          <button v-if="typeKey === 'people'" @click="showBoneEdit">姿态编辑</button>
+          <button @click="LockObj(!modelValue.isLocked)">{{ modelValue.isLocked ? '解锁' : '锁定' }}</button>
+        </div>
         <div style="flex-grow: 1;"></div>
         <button class="deleteButton" @click="deleteContextMenuEntity">删除</button>
       </div>
@@ -369,6 +371,14 @@ function LockObj(value: boolean) {
       align-items: center;
       justify-content: space-between;
       padding: 12px;
+
+      .leftGroup {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+      }
 
       button {
         padding: 4px 8px;
