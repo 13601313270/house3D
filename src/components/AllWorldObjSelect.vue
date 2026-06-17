@@ -181,7 +181,7 @@ function handleUnLock(item: Item, isLocked: boolean) {
     isLocked,
   })
   item.isLocked = isLocked
-  message.success('解锁成功', { position: 'top-center' })
+  message.success(isLocked ? '锁定成功' : '解锁成功', { position: 'top-center' })
   emit('onChange', api)
 }
 function handleLocation(item: Item) {
