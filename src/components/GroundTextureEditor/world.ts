@@ -1,5 +1,6 @@
-import type { Point, ElementType, SpriteLibraryItem } from './types'
+import type { Point, ElementType } from './types'
 import { BaseElement, SpriteElement, PolylineElement, PolygonElement } from './types'
+import { ElementRegistry } from './elements/registry'
 
 export class TextureWorld {
   elements: BaseElement[] = []
@@ -17,16 +18,9 @@ export class TextureWorld {
   drawingElement: BaseElement | null = null
   lastClickTime: number = 0
 
-  spriteLibrary: SpriteLibraryItem[] = [
-    { id: 'manhole', name: '井盖', icon: '🗑️', color: '#4a4a4a', drawType: 'sprite', defaultWidth: 60, defaultHeight: 60 },
-    { id: 'grass', name: '草坪', icon: '🌿', color: '#228B22', drawType: 'polygon' },
-    { id: 'tile', name: '地砖', icon: '🧱', color: '#CD853F', drawType: 'polygon' },
-    { id: 'sign', name: '警示牌', icon: '⚠️', color: '#FFD700', drawType: 'sprite', defaultWidth: 40, defaultHeight: 50 },
-    { id: 'lamp', name: '路灯', icon: '💡', color: '#8B4513', drawType: 'sprite', defaultWidth: 30, defaultHeight: 70 },
-    { id: 'road', name: '道路', icon: '🛣️', color: '#444444', drawType: 'polyline', defaultWidth: 40 },
-    { id: 'crosswalk', name: '斑马线', icon: '🦓', color: '#FFFFFF', drawType: 'polyline', defaultWidth: 30 },
-    { id: 'flower', name: '花坛', icon: '🌸', color: '#FF69B4', drawType: 'polygon' },
-  ]
+  get spriteLibrary() {
+    return ElementRegistry.getAll()
+  }
 
   private eventListeners: Record<string, Set<(data: any) => void>> = {}
 
@@ -83,10 +77,10 @@ export class TextureWorld {
   startDrawing(type: ElementType, spriteId?: string): void {
     this.isDrawing = true
     const id = Date.now().toString()
-    
-    const sprite = spriteId ? this.spriteLibrary.find(s => s.id === spriteId) : null
-    const color = sprite?.color || '#333333'
-    const width = sprite?.defaultWidth || 20
+
+    const definition = spriteId ? ElementRegistry.getById(spriteId) : null
+    const color = definition?.color || '#333333'
+    const width = definition?.defaultWidth || 20
 
     switch (type) {
       case 'sprite':
@@ -94,11 +88,11 @@ export class TextureWorld {
           id,
           x: 0,
           y: 0,
-          width: sprite?.defaultWidth || 50,
-          height: sprite?.defaultHeight || 50,
+          width: definition?.defaultWidth || 50,
+          height: definition?.defaultHeight || 50,
           rotation: 0,
-          texture: sprite?.id || 'manhole',
-          name: sprite?.name || 'Sprite',
+          texture: definition?.id || 'manhole',
+          name: definition?.name || 'Sprite',
           opacity: 1,
           zIndex: this.elements.length,
         })
@@ -108,7 +102,7 @@ export class TextureWorld {
           id,
           points: [],
           width,
-          texture: sprite?.id || 'road',
+          texture: definition?.id || 'road',
           color,
           opacity: 1,
           zIndex: this.elements.length,
@@ -118,7 +112,7 @@ export class TextureWorld {
         this.drawingElement = new PolygonElement(this, {
           id,
           points: [],
-          texture: sprite?.id || 'grass',
+          texture: definition?.id || 'grass',
           color,
           textureScale: 1,
           opacity: 1,
@@ -184,20 +178,20 @@ export class TextureWorld {
   }
 
   createSprite(pos: Point, spriteId: string): SpriteElement | null {
-    const sprite = this.spriteLibrary.find((s) => s.id === spriteId)
-    if (!sprite) return null
+    const definition = ElementRegistry.getById(spriteId)
+    if (!definition) return null
 
     const element = new SpriteElement(this, {
       id: Date.now().toString(),
       x: pos.x,
       y: pos.y,
-      width: 60,
-      height: 60,
+      width: definition.defaultWidth || 60,
+      height: definition.defaultHeight || 60,
       rotation: 0,
-      texture: sprite.id,
+      texture: definition.id,
       opacity: 1,
       zIndex: this.elements.length,
-      name: sprite.name,
+      name: definition.name,
     })
 
     this.addElement(element)
