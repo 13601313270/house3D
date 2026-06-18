@@ -141,6 +141,8 @@ const selectedElementId = ref<string | null>(null)
 const panelPosition = ref({ x: 20, y: 20 })
 const isDraggingPanel = ref(false)
 const panelDragOffset = ref({ x: 0, y: 0 })
+const isResizing = ref(false)
+const resizeCorner = ref<'tl' | 'br' | null>(null)
 
 const selectedElement = computed<BaseElement | null>(() => {
   if (!selectedElementId.value) return null
@@ -222,6 +224,21 @@ function handleMouseDown(e: MouseEvent) {
     case 'select':
     case 'move': {
       const element = world.findElementAt(worldPos)
+      if (element && element.type === 'sprite') {
+        const sprite = element as any
+        const hitCorner = sprite.hitTestResizeHandle(worldPos)
+        if (hitCorner) {
+          world.selectElement(element.data.id)
+          selectedElementId.value = element.data.id
+          isResizing.value = true
+          resizeCorner.value = hitCorner
+          world.isDragging = false
+          world.isPanning = false
+          render()
+          return
+        }
+      }
+      
       if (element) {
         world.selectElement(element.data.id)
         selectedElementId.value = element.data.id
@@ -269,6 +286,34 @@ function handleMouseMove(e: MouseEvent) {
     return
   }
 
+  if (isResizing.value) {
+    const worldPos = {
+      x: (pos.x - world.canvasOffset.x) / world.scale,
+      y: (pos.y - world.canvasOffset.y) / world.scale,
+    }
+    const element = world.getSelectedElement()
+    if (element && element.type === 'sprite') {
+      const sprite = element as any
+      const { x, y, width, height } = sprite.data
+      
+      if (resizeCorner.value === 'br') {
+        const newWidth = Math.max(20, worldPos.x - (x - width / 2))
+        const newHeight = Math.max(20, worldPos.y - (y - height / 2))
+        sprite.data.width = newWidth
+        sprite.data.height = newHeight
+      } else if (resizeCorner.value === 'tl') {
+        const newWidth = Math.max(20, (x + width / 2) - worldPos.x)
+        const newHeight = Math.max(20, (y + height / 2) - worldPos.y)
+        sprite.data.x = x + (width - newWidth) / 2
+        sprite.data.y = y + (height - newHeight) / 2
+        sprite.data.width = newWidth
+        sprite.data.height = newHeight
+      }
+    }
+    render()
+    return
+  }
+
   if (world.isDragging) {
     const worldPos = {
       x: (pos.x - world.canvasOffset.x) / world.scale,
@@ -297,6 +342,8 @@ function handleMouseMove(e: MouseEvent) {
 function handleMouseUp(_e: MouseEvent) {
   world.isDragging = false
   world.isPanning = false
+  isResizing.value = false
+  resizeCorner.value = null
   render()
 }
 

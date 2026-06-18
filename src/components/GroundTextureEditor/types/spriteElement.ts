@@ -81,6 +81,49 @@ export class SpriteElement extends BaseElement {
     )
   }
 
+  hitTestResizeHandle(pos: Point): 'tl' | 'br' | null {
+    const { x, y, width, height, rotation } = this.data
+    const handleRadius = 12
+    
+    let tlX = x - width / 2
+    let tlY = y - height / 2
+    let brX = x + width / 2
+    let brY = y + height / 2
+    
+    if (rotation !== 0) {
+      const cos = Math.cos(rotation)
+      const sin = Math.sin(rotation)
+      
+      const tlRelX = -width / 2
+      const tlRelY = -height / 2
+      tlX = x + tlRelX * cos - tlRelY * sin
+      tlY = y + tlRelX * sin + tlRelY * cos
+      
+      const brRelX = width / 2
+      const brRelY = height / 2
+      brX = x + brRelX * cos - brRelY * sin
+      brY = y + brRelX * sin + brRelY * cos
+    }
+    
+    const tlDistance = Math.sqrt(
+      Math.pow(pos.x - tlX, 2) + 
+      Math.pow(pos.y - tlY, 2)
+    )
+    if (tlDistance <= handleRadius) {
+      return 'tl'
+    }
+    
+    const brDistance = Math.sqrt(
+      Math.pow(pos.x - brX, 2) + 
+      Math.pow(pos.y - brY, 2)
+    )
+    if (brDistance <= handleRadius) {
+      return 'br'
+    }
+    
+    return null
+  }
+
   translate(dx: number, dy: number): void {
     this.data.x += dx
     this.data.y += dy

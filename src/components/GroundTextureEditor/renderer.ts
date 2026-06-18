@@ -29,26 +29,23 @@ export class CanvasRenderer {
     this.height = height
   }
 
-  private drawGrid(ctx: CanvasRenderingContext2D, offsetX: number, offsetY: number, scaledWidth: number, scaledHeight: number): void {
+  private drawGrid(ctx: CanvasRenderingContext2D, scaledWidth: number, scaledHeight: number): void {
     ctx.strokeStyle = '#e0e0e0'
     ctx.lineWidth = 1
 
-    const gridOffsetX = offsetX % this.gridSize
-    const gridOffsetY = offsetY % this.gridSize
+    const visibleWidth = scaledWidth * 2
+    const visibleHeight = scaledHeight * 2
 
-    const visibleWidth = scaledWidth + offsetX * 2
-    const visibleHeight = scaledHeight + offsetY * 2
-
-    const startX = gridOffsetX - Math.ceil(offsetX / this.gridSize) * this.gridSize
-    for (let x = startX; x <= scaledWidth; x += this.gridSize) {
+    const startX = -visibleWidth
+    for (let x = startX; x <= visibleWidth; x += this.gridSize) {
       ctx.beginPath()
       ctx.moveTo(x, -visibleHeight)
       ctx.lineTo(x, visibleHeight)
       ctx.stroke()
     }
 
-    const startY = gridOffsetY - Math.ceil(offsetY / this.gridSize) * this.gridSize
-    for (let y = startY; y <= scaledHeight; y += this.gridSize) {
+    const startY = -visibleHeight
+    for (let y = startY; y <= visibleHeight; y += this.gridSize) {
       ctx.beginPath()
       ctx.moveTo(-visibleWidth, y)
       ctx.lineTo(visibleWidth, y)
@@ -116,7 +113,7 @@ export class CanvasRenderer {
     const scaledWidth = this.width / world.scale
     const scaledHeight = this.height / world.scale
 
-    this.drawGrid(this.ctx, world.canvasOffset.x / world.scale, world.canvasOffset.y / world.scale, scaledWidth, scaledHeight)
+    this.drawGrid(this.ctx, scaledWidth, scaledHeight)
     this.drawAxes(this.ctx, world.canvasOffset.x / world.scale, world.canvasOffset.y / world.scale, scaledWidth, scaledHeight)
 
     const sortedElements = [...world.elements].sort(
