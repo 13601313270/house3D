@@ -143,4 +143,11 @@ export class PolygonElement extends BaseElement {
       this.data.textureScale = props.textureScale
     }
   }
+
+  canFinishDrawing(): boolean {
+    return this.data.points.length >= 3
+  }
 }
+
+import { ElementFactory } from './elementFactory'
+ElementFactory.register('polygon', (world, data) => new PolygonElement(world, data))

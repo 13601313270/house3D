@@ -1,6 +1,12 @@
 import type { Point, ElementType } from './types'
-import { BaseElement, SpriteElement, PolylineElement, PolygonElement } from './types'
+import { BaseElement } from './types'
 import { ElementRegistry } from './elements/registry'
+import { ElementFactory } from './types/elementFactory'
+
+// 导入元素类以触发注册
+import './types/spriteElement'
+import './types/polylineElement'
+import './types/polygonElement'
 
 export class TextureWorld {
   elements: BaseElement[] = []
@@ -82,9 +88,10 @@ export class TextureWorld {
     const color = definition?.color || '#333333'
     const width = definition?.defaultWidth || 20
 
+    let config: any
     switch (type) {
       case 'sprite':
-        this.drawingElement = new SpriteElement(this, {
+        config = {
           id,
           x: 0,
           y: 0,
@@ -95,10 +102,10 @@ export class TextureWorld {
           name: definition?.name || 'Sprite',
           opacity: 1,
           zIndex: this.elements.length,
-        })
+        }
         break
       case 'polyline':
-        this.drawingElement = new PolylineElement(this, {
+        config = {
           id,
           points: [],
           width,
@@ -106,10 +113,10 @@ export class TextureWorld {
           color,
           opacity: 1,
           zIndex: this.elements.length,
-        })
+        }
         break
       case 'polygon':
-        this.drawingElement = new PolygonElement(this, {
+        config = {
           id,
           points: [],
           texture: definition?.id || 'grass',
@@ -117,8 +124,14 @@ export class TextureWorld {
           textureScale: 1,
           opacity: 1,
           zIndex: this.elements.length,
-        })
+        }
         break
+      default:
+        config = null
+    }
+
+    if (config) {
+      this.drawingElement = ElementFactory.create(type, this, config)
     }
   }
 
@@ -135,34 +148,13 @@ export class TextureWorld {
       return false
     }
 
-    if (this.drawingElement.type === 'sprite') {
-      const sprite = this.drawingElement as SpriteElement
-      this.addElement(sprite)
-      this.selectElement(sprite.data.id)
+    if (this.drawingElement.canFinishDrawing()) {
+      this.addElement(this.drawingElement)
+      this.selectElement(this.drawingElement.data.id)
       this.drawingElement = null
       this.isDrawing = false
       this.selectedSprite = null
       return true
-    } else if (this.drawingElement.type === 'polyline') {
-      const polyline = this.drawingElement as PolylineElement
-      if (polyline.data.points.length >= 2) {
-        this.addElement(polyline)
-        this.selectElement(polyline.data.id)
-        this.drawingElement = null
-        this.isDrawing = false
-        this.selectedSprite = null
-        return true
-      }
-    } else if (this.drawingElement.type === 'polygon') {
-      const polygon = this.drawingElement as PolygonElement
-      if (polygon.data.points.length >= 3) {
-        this.addElement(polygon)
-        this.selectElement(polygon.data.id)
-        this.drawingElement = null
-        this.isDrawing = false
-        this.selectedSprite = null
-        return true
-      }
     }
 
     this.drawingElement = null
@@ -249,20 +241,8 @@ export class TextureWorld {
     this.selectedElementId = null
 
     data.forEach((item) => {
-      let element: BaseElement | null = null
-
-      switch (item.type) {
-        case 'sprite':
-          element = new SpriteElement(this, item.data)
-          break
-        case 'polyline':
-          element = new PolylineElement(this, item.data)
-          break
-        case 'polygon':
-          element = new PolygonElement(this, item.data)
-          break
-      }
-
+      const type = item.type as ElementType
+      const element = ElementFactory.create(type, this, item.data)
       if (element) {
         this.elements.push(element)
       }

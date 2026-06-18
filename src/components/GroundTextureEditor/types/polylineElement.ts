@@ -203,4 +203,11 @@ export class PolylineElement extends BaseElement {
     if (props.opacity !== undefined) this.data.opacity = props.opacity
     if (props.width !== undefined) this.data.width = props.width
   }
+
+  canFinishDrawing(): boolean {
+    return this.data.points.length >= 2
+  }
 }
+
+import { ElementFactory } from './elementFactory'
+ElementFactory.register('polyline', (world, data) => new PolylineElement(world, data))

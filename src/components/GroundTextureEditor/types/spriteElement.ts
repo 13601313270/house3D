@@ -166,3 +166,6 @@ export class SpriteElement extends BaseElement {
     if (props.rotation !== undefined) this.data.rotation = props.rotation
   }
 }
+
+import { ElementFactory } from './elementFactory'
+ElementFactory.register('sprite', (world, data) => new SpriteElement(world, data))

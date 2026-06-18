@@ -32,4 +32,8 @@ export abstract class BaseElement {
   abstract getProperties(): Record<string, any>
 
   abstract setProperties(props: Record<string, any>): void
+
+  canFinishDrawing(): boolean {
+    return true
+  }
 }
