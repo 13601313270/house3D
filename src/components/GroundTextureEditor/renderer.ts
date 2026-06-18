@@ -3,14 +3,19 @@ import { TextureWorld } from './world'
 
 export class CanvasRenderer {
   private mainCanvas: HTMLCanvasElement
-  private ctx: CanvasRenderingContext2D
+  private mainCtx: CanvasRenderingContext2D
+  private gridCanvas: HTMLCanvasElement
+  private gridCtx: CanvasRenderingContext2D
+  private previewCanvas: HTMLCanvasElement
+  private previewCtx: CanvasRenderingContext2D
   private width: number
   private height: number
   private gridSize: number = 50
 
   constructor(
     mainCanvas: HTMLCanvasElement,
-    _gridCanvas: HTMLCanvasElement,
+    gridCanvas: HTMLCanvasElement,
+    previewCanvas: HTMLCanvasElement,
     width: number,
     height: number
   ) {
@@ -18,13 +23,25 @@ export class CanvasRenderer {
     this.mainCanvas.width = width
     this.mainCanvas.height = height
 
-    const ctx = mainCanvas.getContext('2d')
+    this.gridCanvas = gridCanvas
+    this.gridCanvas.width = width
+    this.gridCanvas.height = height
 
-    if (!ctx) {
+    this.previewCanvas = previewCanvas
+    this.previewCanvas.width = width
+    this.previewCanvas.height = height
+
+    const mainCtx = mainCanvas.getContext('2d')
+    const gridCtx = gridCanvas.getContext('2d')
+    const previewCtx = previewCanvas.getContext('2d')
+
+    if (!mainCtx || !gridCtx || !previewCtx) {
       throw new Error('无法获取Canvas上下文')
     }
 
-    this.ctx = ctx
+    this.mainCtx = mainCtx
+    this.gridCtx = gridCtx
+    this.previewCtx = previewCtx
     this.width = width
     this.height = height
   }
@@ -100,39 +117,65 @@ export class CanvasRenderer {
     ctx.restore()
   }
 
-  render(world: TextureWorld, mousePos: Point): void {
-    this.ctx.clearRect(0, 0, this.width, this.height)
+  renderGrid(world: TextureWorld): void {
+    this.gridCtx.clearRect(0, 0, this.width, this.height)
 
-    this.ctx.fillStyle = '#ffffff'
-    this.ctx.fillRect(0, 0, this.width, this.height)
-
-    this.ctx.save()
-    this.ctx.translate(world.canvasOffset.x, world.canvasOffset.y)
-    this.ctx.scale(world.scale, world.scale)
+    this.gridCtx.save()
+    this.gridCtx.translate(world.canvasOffset.x, world.canvasOffset.y)
+    this.gridCtx.scale(world.scale, world.scale)
 
     const scaledWidth = this.width / world.scale
     const scaledHeight = this.height / world.scale
 
-    this.drawGrid(this.ctx, scaledWidth, scaledHeight)
-    this.drawAxes(this.ctx, world.canvasOffset.x / world.scale, world.canvasOffset.y / world.scale, scaledWidth, scaledHeight)
+    this.drawGrid(this.gridCtx, scaledWidth, scaledHeight)
+    this.drawAxes(this.gridCtx, world.canvasOffset.x / world.scale, world.canvasOffset.y / world.scale, scaledWidth, scaledHeight)
+
+    this.gridCtx.restore()
+  }
+
+  renderMain(world: TextureWorld): void {
+    this.mainCtx.clearRect(0, 0, this.width, this.height)
+
+    this.mainCtx.fillStyle = '#ffffff'
+    this.mainCtx.fillRect(0, 0, this.width, this.height)
+
+    this.mainCtx.save()
+    this.mainCtx.translate(world.canvasOffset.x, world.canvasOffset.y)
+    this.mainCtx.scale(world.scale, world.scale)
 
     const sortedElements = [...world.elements].sort(
       (a, b) => a.data.zIndex - b.data.zIndex
     )
 
     sortedElements.forEach((element) => {
-      element.draw(this.ctx)
+      element.draw(this.mainCtx)
     })
 
+    this.mainCtx.restore()
+  }
+
+  renderPreview(world: TextureWorld, mousePos: Point): void {
+    this.previewCtx.clearRect(0, 0, this.width, this.height)
+
     if (world.isDrawing && world.drawingElement) {
+      this.previewCtx.save()
+      this.previewCtx.translate(world.canvasOffset.x, world.canvasOffset.y)
+      this.previewCtx.scale(world.scale, world.scale)
+
       const worldMousePos = {
         x: (mousePos.x - world.canvasOffset.x) / world.scale,
         y: (mousePos.y - world.canvasOffset.y) / world.scale,
       }
-      world.drawingElement.drawPreview(this.ctx, worldMousePos)
-    }
+      world.drawingElement.drawPreview(this.previewCtx, worldMousePos)
 
-    this.ctx.restore()
+      this.previewCtx.restore()
+    }
+  }
+
+  render(world: TextureWorld, mousePos: Point): void {
+    this.renderGrid(world)
+    this.renderMain(world)
+    this.renderPreview(world, mousePos)
   }
 
   resize(width: number, height: number): void {
@@ -140,5 +183,9 @@ export class CanvasRenderer {
     this.height = height
     this.mainCanvas.width = width
     this.mainCanvas.height = height
+    this.gridCanvas.width = width
+    this.gridCanvas.height = height
+    this.previewCanvas.width = width
+    this.previewCanvas.height = height
   }
 }

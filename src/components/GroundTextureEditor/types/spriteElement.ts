@@ -59,8 +59,29 @@ export class SpriteElement extends BaseElement {
     ctx.restore()
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  drawPreview(_ctx: CanvasRenderingContext2D, _mousePos: Point): void {}
+  drawPreview(ctx: CanvasRenderingContext2D, mousePos: Point): void {
+    const { width, height, opacity, texture } = this.data
+    
+    ctx.save()
+    ctx.globalAlpha = opacity * 0.7
+    ctx.translate(mousePos.x, mousePos.y)
+    
+    const sprite = this.world.spriteLibrary.find((s: any) => s.id === texture)
+    if (sprite) {
+      ctx.fillStyle = sprite.color
+      ctx.beginPath()
+      ctx.roundRect(-width / 2, -height / 2, width, height, 4)
+      ctx.fill()
+      
+      ctx.fillStyle = '#fff'
+      ctx.font = `${Math.min(width, height) * 0.5}px Arial`
+      ctx.textAlign = 'center'
+      ctx.textBaseline = 'middle'
+      ctx.fillText(sprite.icon, 0, 0)
+    }
+    
+    ctx.restore()
+  }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   handleMouseDown(_pos: Point): void {}

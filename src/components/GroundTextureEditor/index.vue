@@ -1,18 +1,6 @@
 <template>
   <div class="ground-texture-editor">
     <div class="toolbar">
-      <div class="tool-group">
-        <button
-          v-for="tool in world.tools"
-          :key="tool.id"
-          :class="['tool-btn', { active: world.currentTool === tool.id }]"
-          @click="selectTool(tool.id)"
-          :title="tool.name"
-        >
-          {{ tool.icon }}
-        </button>
-      </div>
-
       <div class="element-library">
         <span class="label">元素库</span>
         <div class="element-items">
@@ -51,6 +39,7 @@
     </div>
 
     <div class="canvas-container">
+      <canvas ref="gridCanvasRef" class="grid-canvas"></canvas>
       <canvas
         ref="canvasRef"
         class="main-canvas"
@@ -60,8 +49,7 @@
         @mouseleave="handleMouseUp"
         @wheel="handleWheel"
       ></canvas>
-
-      <canvas ref="gridCanvasRef" class="grid-canvas"></canvas>
+      <canvas ref="previewCanvasRef" class="preview-canvas"></canvas>
 
       <div
         v-if="world.isDrawing && (world.currentTool === 'polyline' || world.currentTool === 'polygon')"
@@ -92,6 +80,7 @@
             min="0"
             max="1"
             step="0.1"
+            @input="render"
           />
           <span>{{ selectedElement.data.opacity }}</span>
         </div>
@@ -102,6 +91,7 @@
             v-model.number="selectedElement.data.width"
             min="10"
             max="200"
+            @input="render"
           />
         </div>
         <div v-if="selectedElement.type === 'sprite'" class="property-item">
@@ -111,6 +101,7 @@
             v-model.number="selectedElement.data.height"
             min="10"
             max="200"
+            @input="render"
           />
         </div>
         <div v-if="selectedElement.type === 'polyline'" class="property-item">
@@ -120,6 +111,7 @@
             v-model.number="selectedElement.data.width"
             min="5"
             max="100"
+            @input="render"
           />
         </div>
         <div class="property-item">
@@ -138,6 +130,7 @@ import type { BaseElement } from './types'
 
 const canvasRef = ref<HTMLCanvasElement | null>(null)
 const gridCanvasRef = ref<HTMLCanvasElement | null>(null)
+const previewCanvasRef = ref<HTMLCanvasElement | null>(null)
 const fileInputRef = ref<HTMLInputElement | null>(null)
 
 const CANVAS_WIDTH = 1200
@@ -161,16 +154,14 @@ const selectedElement = computed<BaseElement | null>(() => {
   return world.getElementById(selectedElementId.value) || null
 })
 
-function selectTool(toolId: string) {
-  world.setTool(toolId)
-  if (toolId === 'sprite' && !world.selectedSprite && world.spriteLibrary.length > 0) {
-    world.setSelectedSprite(world.spriteLibrary[0].id)
-  }
-}
-
 function selectSprite(item: typeof world.spriteLibrary[0]) {
+  // 如果正在绘制，先取消（无论 drawingElement 是否存在）
+  if (world.isDrawing) {
+    world.cancelDrawing()
+  }
   world.setSelectedSprite(item.id)
   world.setTool(item.drawType)
+  world.startDrawing(item.drawType, item.id)
 }
 
 function getCanvasPos(e: MouseEvent) {
@@ -202,12 +193,23 @@ function handleMouseDown(e: MouseEvent) {
 
   switch (world.currentTool) {
     case 'sprite':
-      if (world.selectedSprite) {
-        const sprite = world.createSprite(worldPos, world.selectedSprite)
-        if (sprite) {
-          selectedElementId.value = sprite.data.id
+      if (world.isDrawing) {
+        if (world.drawingElement) {
+          const sprite = world.drawingElement as any
+          sprite.data.x = worldPos.x
+          sprite.data.y = worldPos.y
+          const elementId = sprite.data.id
+          world.finishDrawing()
+          selectedElementId.value = elementId
+        } else {
+          world.cancelDrawing()
         }
         world.setTool('select')
+        if (renderer) {
+          renderer.renderPreview(world, pos)
+        }
+        render()
+        return
       }
       break
 
@@ -311,6 +313,10 @@ function handleMouseMove(e: MouseEvent) {
     })
     render()
     return
+  }
+
+  if (renderer) {
+    renderer.renderPreview(world, pos)
   }
 
   if (isResizing.value) {
@@ -538,10 +544,11 @@ onMounted(() => {
     y: CANVAS_HEIGHT / 2,
   }
 
-  if (canvasRef.value && gridCanvasRef.value) {
+  if (canvasRef.value && gridCanvasRef.value && previewCanvasRef.value) {
     renderer = new CanvasRenderer(
       canvasRef.value,
       gridCanvasRef.value,
+      previewCanvasRef.value,
       CANVAS_WIDTH,
       CANVAS_HEIGHT
     )
@@ -571,34 +578,6 @@ onUnmounted(() => {
   background: #f0f2f5;
   border-bottom: 1px solid #e8e8e8;
   gap: 24px;
-}
-
-.tool-group {
-  display: flex;
-  gap: 4px;
-}
-
-.tool-btn {
-  width: 36px;
-  height: 36px;
-  border: none;
-  border-radius: 4px;
-  background: #fff;
-  cursor: pointer;
-  font-size: 18px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s;
-}
-
-.tool-btn:hover {
-  background: #e6f7ff;
-}
-
-.tool-btn.active {
-  background: #1890ff;
-  color: #fff;
 }
 
 .element-library {
@@ -697,6 +676,14 @@ onUnmounted(() => {
 }
 
 .grid-canvas {
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.preview-canvas {
   position: absolute;
   top: 20px;
   left: 50%;

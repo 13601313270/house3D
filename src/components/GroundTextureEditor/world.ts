@@ -1,4 +1,4 @@
-import type { Point, ElementType, SpriteLibraryItem, ToolInfo } from './types'
+import type { Point, ElementType, SpriteLibraryItem } from './types'
 import { BaseElement, SpriteElement, PolylineElement, PolygonElement } from './types'
 
 export class TextureWorld {
@@ -17,18 +17,12 @@ export class TextureWorld {
   drawingElement: BaseElement | null = null
   lastClickTime: number = 0
 
-  tools: ToolInfo[] = [
-    { id: 'select', name: '选择', icon: '👆' },
-    { id: 'move', name: '移动', icon: '✋' },
-    { id: 'pan', name: '平移画布', icon: '🖐️' },
-  ]
-
   spriteLibrary: SpriteLibraryItem[] = [
-    { id: 'manhole', name: '井盖', icon: '🗑️', color: '#4a4a4a', drawType: 'sprite' },
+    { id: 'manhole', name: '井盖', icon: '🗑️', color: '#4a4a4a', drawType: 'sprite', defaultWidth: 60, defaultHeight: 60 },
     { id: 'grass', name: '草坪', icon: '🌿', color: '#228B22', drawType: 'polygon' },
     { id: 'tile', name: '地砖', icon: '🧱', color: '#CD853F', drawType: 'polygon' },
-    { id: 'sign', name: '警示牌', icon: '⚠️', color: '#FFD700', drawType: 'sprite' },
-    { id: 'lamp', name: '路灯', icon: '💡', color: '#8B4513', drawType: 'sprite' },
+    { id: 'sign', name: '警示牌', icon: '⚠️', color: '#FFD700', drawType: 'sprite', defaultWidth: 40, defaultHeight: 50 },
+    { id: 'lamp', name: '路灯', icon: '💡', color: '#8B4513', drawType: 'sprite', defaultWidth: 30, defaultHeight: 70 },
     { id: 'road', name: '道路', icon: '🛣️', color: '#444444', drawType: 'polyline', defaultWidth: 40 },
     { id: 'crosswalk', name: '斑马线', icon: '🦓', color: '#FFFFFF', drawType: 'polyline', defaultWidth: 30 },
     { id: 'flower', name: '花坛', icon: '🌸', color: '#FF69B4', drawType: 'polygon' },
@@ -96,6 +90,18 @@ export class TextureWorld {
 
     switch (type) {
       case 'sprite':
+        this.drawingElement = new SpriteElement(this, {
+          id,
+          x: 0,
+          y: 0,
+          width: sprite?.defaultWidth || 50,
+          height: sprite?.defaultHeight || 50,
+          rotation: 0,
+          texture: sprite?.id || 'manhole',
+          name: sprite?.name || 'Sprite',
+          opacity: 1,
+          zIndex: this.elements.length,
+        })
         break
       case 'polyline':
         this.drawingElement = new PolylineElement(this, {
@@ -129,15 +135,28 @@ export class TextureWorld {
   }
 
   finishDrawing(): boolean {
-    if (!this.drawingElement) return false
+    if (!this.drawingElement) {
+      this.isDrawing = false
+      this.selectedSprite = null
+      return false
+    }
 
-    if (this.drawingElement.type === 'polyline') {
+    if (this.drawingElement.type === 'sprite') {
+      const sprite = this.drawingElement as SpriteElement
+      this.addElement(sprite)
+      this.selectElement(sprite.data.id)
+      this.drawingElement = null
+      this.isDrawing = false
+      this.selectedSprite = null
+      return true
+    } else if (this.drawingElement.type === 'polyline') {
       const polyline = this.drawingElement as PolylineElement
       if (polyline.data.points.length >= 2) {
         this.addElement(polyline)
         this.selectElement(polyline.data.id)
         this.drawingElement = null
         this.isDrawing = false
+        this.selectedSprite = null
         return true
       }
     } else if (this.drawingElement.type === 'polygon') {
@@ -147,18 +166,21 @@ export class TextureWorld {
         this.selectElement(polygon.data.id)
         this.drawingElement = null
         this.isDrawing = false
+        this.selectedSprite = null
         return true
       }
     }
 
     this.drawingElement = null
     this.isDrawing = false
+    this.selectedSprite = null
     return false
   }
 
   cancelDrawing(): void {
     this.drawingElement = null
     this.isDrawing = false
+    this.selectedSprite = null
   }
 
   createSprite(pos: Point, spriteId: string): SpriteElement | null {

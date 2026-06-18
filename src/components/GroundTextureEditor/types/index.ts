@@ -3,12 +3,6 @@ export interface Point {
   y: number
 }
 
-export interface ToolInfo {
-  id: string
-  name: string
-  icon: string
-}
-
 export interface SpriteLibraryItem {
   id: string
   name: string
