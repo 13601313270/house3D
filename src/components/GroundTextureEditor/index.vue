@@ -2,26 +2,23 @@
   <div class="ground-texture-editor">
     <div class="toolbar">
       <div class="element-library">
-        <span class="label">元素库</span>
-        <div class="element-items">
-          <button v-for="item in world.spriteLibrary" :key="item.id" class="element-btn" :class="{
-            active: world.selectedSprite?.id === item.id,
-            'sprite-type': item.type === 'sprite',
-            'line-type': item.type === 'polyline',
-            'polygon-type': item.type === 'polygon'
-          }" @click="selectSprite(item)" :title="item.name">
-            <span>{{ item.icon }}</span>
-            <span class="element-name">{{ item.name }}</span>
-          </button>
-        </div>
+        <button v-for="item in world.spriteLibrary" :key="item.id" class="element-btn" :class="{
+          active: world.selectedSprite?.id === item.id,
+          'sprite-type': item.type === 'sprite',
+          'line-type': item.type === 'polyline',
+          'polygon-type': item.type === 'polygon'
+        }" @click="selectSprite(item)" :title="item.name">
+          <span>{{ item.icon }}</span>
+          <span class="element-name">{{ item.name }}</span>
+        </button>
       </div>
 
-      <div class="actions">
+      <!-- <div class="actions">
         <button class="action-btn" @click="clearCanvas">清空</button>
         <button class="action-btn" @click="exportJSON">导出JSON</button>
         <button class="action-btn" @click="importJSON">导入JSON</button>
         <button class="action-btn primary" @click="exportImage">导出PNG</button>
-      </div>
+      </div> -->
       <input ref="fileInputRef" type="file" accept=".json" class="file-input" @change="handleFileSelect" />
     </div>
 
@@ -46,6 +43,18 @@
         <h3>属性</h3>
       </div>
       <div class="panel-content">
+        <!-- {{ editParams }} -->
+        <div class="property-item" v-for="item in editParams" :key="item.id">
+          <label>{{ item.label }}</label>
+          <span v-if="item.dataType === 'string'">{{ item.value }}</span>
+          <div v-else-if="item.dataType === 'number'">
+            <span>{{ item.value }}</span>
+            <input type="range" v-model.number="item.value" :min="item.min" :max="item.max" :step="item.step"
+              @input="render" />
+          </div>
+          <span v-else-if="item.dataType === 'boolean'">{{ item.value ? '是' : '否' }}</span>
+          <!-- <span v-else>{{ item.value }}</span> -->
+        </div>
         <div class="property-item">
           <label>透明度</label>
           <input type="range" v-model.number="selectedElement.data.opacity" min="0" max="1" step="0.1"
@@ -80,7 +89,9 @@
 import { ref, onMounted, onUnmounted, watch, computed } from 'vue'
 import { TextureWorld } from './world'
 import { CanvasRenderer } from './renderer'
-import type { BaseElement, BaseElementDefinition } from './types'
+import type { BaseElement, BaseElementData, BaseElementDefinition } from './types'
+import { SpriteElement, SpriteElementData } from './types/spriteElement'
+import { editItem } from '@/entities'
 
 const canvasRef = ref<HTMLCanvasElement | null>(null)
 const gridCanvasRef = ref<HTMLCanvasElement | null>(null)
@@ -94,6 +105,7 @@ let resizeObserver: ResizeObserver | null = null
 
 const mousePos = ref({ x: 0, y: 0 })
 const selectedElementId = ref<string | null>(null)
+const editParams = ref<editItem[]>([])
 const panelPosition = ref({ x: 20, y: 20 })
 const isDraggingPanel = ref(false)
 const panelDragOffset = ref({ x: 0, y: 0 })
@@ -149,12 +161,13 @@ function handleMouseDown(e: MouseEvent) {
     case 'sprite':
       if (world.isDrawing) {
         if (world.drawingElement) {
-          const sprite = world.drawingElement as any
+          const sprite = world.drawingElement as SpriteElement<SpriteElementData>;
           sprite.data.x = worldPos.x
           sprite.data.y = worldPos.y
           const elementId = sprite.data.id
           world.finishDrawing()
           selectedElementId.value = elementId
+          editParams.value = JSON.parse(JSON.stringify(sprite.setEditParams()))
         } else {
           world.cancelDrawing()
         }
@@ -550,6 +563,21 @@ onMounted(() => {
   window.addEventListener('keydown', handleKeyDown)
 })
 
+watch(() => editParams.value, (newVal) => {
+  const element = world.getSelectedElement()
+  if (element) {
+    newVal.forEach((item) => {
+      if (item.dataType === 'title') return
+      // console.log('111', element.data, item.id, item.value)
+      // @ts-ignore
+      element.data[item.id] = item.value
+    })
+    render()
+  }
+}, {
+  deep: true
+})
+
 onUnmounted(() => {
   renderer = null
   if (resizeObserver) {
@@ -559,71 +587,63 @@ onUnmounted(() => {
 })
 </script>
 
-<style scoped>
+<style scoped lang="less">
 .ground-texture-editor {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   height: 100vh;
   background: #fff;
 }
 
 .toolbar {
   display: flex;
-  align-items: center;
-  padding: 12px 16px;
-  background: #f0f2f5;
-  border-bottom: 1px solid #e8e8e8;
-  gap: 24px;
-}
-
-.element-library {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding-left: 24px;
-  border-left: 1px solid #e8e8e8;
-}
-
-.element-library .label {
-  font-size: 14px;
-  color: #666;
-}
-
-.element-items {
-  display: flex;
-  gap: 8px;
-}
-
-.element-btn {
-  display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 6px 12px;
-  border: 1px solid #d9d9d9;
-  border-radius: 4px;
-  background: #fff;
-  cursor: pointer;
-  font-size: 16px;
-  transition: all 0.2s;
-}
+  padding: 4px;
+  background: #f0f2f5;
+  gap: 24px;
 
-.element-btn:hover {
-  border-color: #1890ff;
-}
+  .element-library {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    gap: 4px;
 
-.element-btn.active {
-  background: #e6f7ff;
-  border-color: #1890ff;
-}
+    .element-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 62px;
+      height: 62px;
+      border: 1px solid #d9d9d9;
+      border-radius: 4px;
+      background: #fff;
+      cursor: pointer;
+      font-size: 16px;
+      transition: all 0.2s;
 
-.element-name {
-  font-size: 12px;
-  color: #666;
-  margin-top: 2px;
+      .element-name {
+        font-size: 12px;
+        color: #666;
+        margin-top: 2px;
+      }
+    }
+
+    .element-btn:hover {
+      border-color: #1890ff;
+    }
+
+    .element-btn.active {
+      background: #e6f7ff;
+      border-color: #1890ff;
+    }
+  }
 }
 
 .actions {
   display: flex;
+  flex-direction: column;
   gap: 8px;
   margin-left: auto;
 }

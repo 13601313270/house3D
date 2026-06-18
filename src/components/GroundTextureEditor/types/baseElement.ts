@@ -2,7 +2,7 @@ import { editItem } from '@/entities'
 import { TextureWorld } from '../world'
 import type { Point } from './index'
 
-export interface BaseElementData {
+export type BaseElementData = {
   id: string
   opacity: number
   zIndex: number
@@ -56,7 +56,7 @@ export abstract class BaseElement<T extends BaseElementData> {
         label: '图层顺序',
         dataType: 'number',
         min: 0,
-        max: 9999,
+        max: 99,
         step: 1,
         value: this.data.zIndex,
       },
