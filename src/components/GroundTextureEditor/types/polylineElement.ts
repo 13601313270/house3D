@@ -1,6 +1,7 @@
 import type { BaseElementData, Point } from './index'
 import { BaseElement } from './baseElement'
 import { ElementFactory } from './elementFactory'
+import { editItem } from '@/entities'
 
 export interface PolylineElementData extends BaseElementData {
   points: Point[]
@@ -187,20 +188,35 @@ export class PolylineElement extends BaseElement<PolylineElementData> {
     })
   }
 
-  getProperties(): Record<string, any> {
-    return {
-      opacity: this.data.opacity,
-      width: this.data.width,
-    }
-  }
-
-  setProperties(props: Record<string, any>): void {
-    if (props.opacity !== undefined) this.data.opacity = props.opacity
-    if (props.width !== undefined) this.data.width = props.width
-  }
-
   canFinishDrawing(): boolean {
     return this.data.points.length >= 2
+  }
+
+  setEditParams(): Array<editItem> {
+    return [
+      ...super.setEditParams(),
+      {
+        id: 'width',
+        label: '宽度',
+        dataType: 'number',
+        min: 1,
+        max: 100,
+        step: 1,
+        value: this.data.width,
+      },
+      {
+        id: 'color',
+        label: '颜色',
+        dataType: 'color',
+        value: this.data.color,
+      },
+      {
+        id: 'texture',
+        label: '纹理',
+        dataType: 'img',
+        value: this.data.texture,
+      }
+    ]
   }
 }
 

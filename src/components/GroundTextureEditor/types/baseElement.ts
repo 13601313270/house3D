@@ -1,3 +1,5 @@
+import { editItem } from '@/entities'
+import { TextureWorld } from '../world'
 import type { Point } from './index'
 
 export interface BaseElementData {
@@ -8,9 +10,11 @@ export interface BaseElementData {
 
 export abstract class BaseElement<T extends BaseElementData> {
   abstract type: string
+  world: TextureWorld
   data: T
   // eslint-disable-next-line no-useless-constructor
-  constructor(protected world: any, data: T) {
+  constructor(world: TextureWorld, data: T) {
+    this.world = world
     this.data = data
   }
 
@@ -31,17 +35,31 @@ export abstract class BaseElement<T extends BaseElementData> {
 
   abstract translate(dx: number, dy: number): void
 
-  getProperties(): Record<string, any> {
-    return {
-      id: this.data.id,
-      opacity: this.data.opacity,
-      zIndex: this.data.zIndex,
-    }
-  }
-
-  abstract setProperties(props: Record<string, any>): void
-
   canFinishDrawing(): boolean {
     return true
+  }
+
+  // 设置配置属性
+  setEditParams(): Array<editItem> {
+    return [
+      {
+        id: 'opacity',
+        label: '透明度',
+        dataType: 'number',
+        min: 0,
+        max: 1,
+        step: 0.1,
+        value: this.data.opacity,
+      },
+      {
+        id: 'zIndex',
+        label: '图层顺序',
+        dataType: 'number',
+        min: 0,
+        max: 9999,
+        step: 1,
+        value: this.data.zIndex,
+      },
+    ]
   }
 }

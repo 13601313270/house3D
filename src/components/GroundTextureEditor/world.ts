@@ -173,32 +173,6 @@ export class TextureWorld {
     this.selectedSprite = null
   }
 
-  createSprite(pos: Point, spriteId: string): BaseElement<BaseElementData> | null {
-    const definition = ElementRegistry.getById(spriteId)
-    if (!definition) return null
-
-    const element = ElementFactory.create('sprite', this, {
-      id: Date.now().toString(),
-      x: pos.x,
-      y: pos.y,
-      width: definition.getDefaultWidth(),
-      height: definition.getDefaultHeight(),
-      rotation: 0,
-      texture: definition.id,
-      opacity: 1,
-      zIndex: this.elements.length,
-      name: definition.name,
-    })
-
-    if (element) {
-      this.addElement(element)
-      this.selectElement(element.data.id)
-      return element
-    } else {
-      return null
-    }
-  }
-
   translateSelectedElement(dx: number, dy: number): void {
     if (!this.selectedElementId) return
     const element = this.getElementById(this.selectedElementId)

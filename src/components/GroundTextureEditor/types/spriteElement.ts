@@ -1,6 +1,7 @@
 import type { BaseElementData, Point } from './index'
 import { BaseElement } from './baseElement'
 import { ElementFactory } from './elementFactory'
+import { editItem } from '@/entities'
 
 export interface SpriteElementData extends BaseElementData {
   x: number
@@ -9,7 +10,6 @@ export interface SpriteElementData extends BaseElementData {
   height: number
   rotation: number
   texture: string
-  name: string
 }
 
 export class SpriteElement extends BaseElement<SpriteElementData> {
@@ -142,22 +142,43 @@ export class SpriteElement extends BaseElement<SpriteElementData> {
     this.data.height = Math.max(20, this.data.height)
   }
 
-  getProperties(): Record<string, any> {
-    return {
-      name: this.data.name,
-      opacity: this.data.opacity,
-      width: this.data.width,
-      height: this.data.height,
-      rotation: this.data.rotation,
-    }
-  }
-
-  setProperties(props: Record<string, any>): void {
-    if (props.name !== undefined) this.data.name = props.name
-    if (props.opacity !== undefined) this.data.opacity = props.opacity
-    if (props.width !== undefined) this.data.width = props.width
-    if (props.height !== undefined) this.data.height = props.height
-    if (props.rotation !== undefined) this.data.rotation = props.rotation
+  setEditParams(): Array<editItem> {
+    return [
+      ...super.setEditParams(),
+      {
+        id: 'width',
+        label: '宽度',
+        dataType: 'number',
+        min: 1,
+        max: 100,
+        step: 1,
+        value: this.data.width,
+      },
+      {
+        id: 'height',
+        label: '高度',
+        dataType: 'number',
+        min: 1,
+        max: 100,
+        step: 1,
+        value: this.data.height,
+      },
+      {
+        id: 'rotation',
+        label: '旋转角度',
+        dataType: 'number',
+        min: 0,
+        max: 360,
+        step: 1,
+        value: this.data.rotation,
+      },
+      {
+        id: 'texture',
+        label: '纹理',
+        dataType: 'img',
+        value: this.data.texture,
+      }
+    ]
   }
 }
 

@@ -1,6 +1,7 @@
 import type { BaseElementData, Point } from './index'
 import { BaseElement } from './baseElement'
 import { ElementFactory } from './elementFactory'
+import { editItem } from '@/entities'
 
 export interface PolygonElementData extends BaseElementData {
   points: Point[]
@@ -73,7 +74,7 @@ export class PolygonElement extends BaseElement<PolygonElementData> {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  handleMouseMove(_pos: Point): void {}
+  handleMouseMove(_pos: Point): void { }
 
   handleMouseUp(pos: Point): boolean {
     if (this.data.points.length < 3) {
@@ -123,25 +124,35 @@ export class PolygonElement extends BaseElement<PolygonElementData> {
     return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`
   }
 
-  getProperties(): Record<string, any> {
-    const parentProps = super.getProperties()
-    return {
-      ...parentProps,
-      textureScale: this.data.textureScale,
-    }
-  }
-
-  setProperties(props: Record<string, any>): void {
-    if (props.opacity !== undefined) {
-      this.data.opacity = props.opacity
-    }
-    if (props.textureScale !== undefined) {
-      this.data.textureScale = props.textureScale
-    }
-  }
-
   canFinishDrawing(): boolean {
     return this.data.points.length >= 3
+  }
+
+  setEditParams(): Array<editItem> {
+    return [
+      ...super.setEditParams(),
+      {
+        id: 'texture',
+        label: '纹理',
+        dataType: 'img',
+        value: this.data.texture,
+      },
+      {
+        id: 'color',
+        label: '颜色',
+        dataType: 'color',
+        value: this.data.color,
+      },
+      {
+        id: 'textureScale',
+        label: '纹理缩放',
+        dataType: 'number',
+        min: 0.1,
+        max: 10,
+        step: 0.1,
+        value: this.data.textureScale,
+      }
+    ]
   }
 }
 
