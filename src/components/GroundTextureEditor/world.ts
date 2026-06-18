@@ -81,12 +81,16 @@ export class TextureWorld {
   }
 
   startDrawing(type: ElementType, spriteId?: string): void {
+    const definition = spriteId ? ElementRegistry.getById(spriteId) : null
+    if (!definition) {
+      console.warn('请先从元素库中选择一个元素')
+      return
+    }
+
     this.isDrawing = true
     const id = Date.now().toString()
-
-    const definition = spriteId ? ElementRegistry.getById(spriteId) : null
-    const color = definition?.color || '#333333'
-    const width = definition?.defaultWidth || 20
+    const color = definition.color || '#333333'
+    const width = definition.defaultWidth || 20
 
     let config: any
     switch (type) {
@@ -95,11 +99,11 @@ export class TextureWorld {
           id,
           x: 0,
           y: 0,
-          width: definition?.defaultWidth || 50,
-          height: definition?.defaultHeight || 50,
+          width: definition.defaultWidth || 50,
+          height: definition.defaultHeight || 50,
           rotation: 0,
-          texture: definition?.id || 'manhole',
-          name: definition?.name || 'Sprite',
+          texture: definition.id,
+          name: definition.name,
           opacity: 1,
           zIndex: this.elements.length,
         }
@@ -109,7 +113,7 @@ export class TextureWorld {
           id,
           points: [],
           width,
-          texture: definition?.id || 'road',
+          texture: definition.id,
           color,
           opacity: 1,
           zIndex: this.elements.length,
@@ -119,7 +123,7 @@ export class TextureWorld {
         config = {
           id,
           points: [],
-          texture: definition?.id || 'grass',
+          texture: definition.id,
           color,
           textureScale: 1,
           opacity: 1,
