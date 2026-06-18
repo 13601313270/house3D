@@ -62,48 +62,60 @@
       </div>
     </div>
 
-    <div v-if="selectedElement" class="properties-panel">
-      <h3>属性</h3>
-      <div class="property-item">
-        <label>透明度</label>
-        <input
-          type="range"
-          v-model.number="selectedElement.data.opacity"
-          min="0"
-          max="1"
-          step="0.1"
-        />
-        <span>{{ selectedElement.data.opacity }}</span>
+    <div 
+      v-if="selectedElement" 
+      class="properties-panel"
+      :style="{ left: panelPosition.x + 'px', top: panelPosition.y + 'px' }"
+    >
+      <div 
+        class="panel-header"
+        @mousedown="startPanelDrag"
+      >
+        <span class="drag-handle">☰</span>
+        <h3>属性</h3>
       </div>
-      <div v-if="selectedElement.type === 'sprite'" class="property-item">
-        <label>宽度</label>
-        <input
-          type="range"
-          v-model.number="selectedElement.data.width"
-          min="10"
-          max="200"
-        />
-      </div>
-      <div v-if="selectedElement.type === 'sprite'" class="property-item">
-        <label>高度</label>
-        <input
-          type="range"
-          v-model.number="selectedElement.data.height"
-          min="10"
-          max="200"
-        />
-      </div>
-      <div v-if="selectedElement.type === 'polyline'" class="property-item">
-        <label>线宽</label>
-        <input
-          type="range"
-          v-model.number="selectedElement.data.width"
-          min="5"
-          max="100"
-        />
-      </div>
-      <div class="property-item">
-        <button class="delete-btn" @click="deleteElement">删除元素</button>
+      <div class="panel-content">
+        <div class="property-item">
+          <label>透明度</label>
+          <input
+            type="range"
+            v-model.number="selectedElement.data.opacity"
+            min="0"
+            max="1"
+            step="0.1"
+          />
+          <span>{{ selectedElement.data.opacity }}</span>
+        </div>
+        <div v-if="selectedElement.type === 'sprite'" class="property-item">
+          <label>宽度</label>
+          <input
+            type="range"
+            v-model.number="selectedElement.data.width"
+            min="10"
+            max="200"
+          />
+        </div>
+        <div v-if="selectedElement.type === 'sprite'" class="property-item">
+          <label>高度</label>
+          <input
+            type="range"
+            v-model.number="selectedElement.data.height"
+            min="10"
+            max="200"
+          />
+        </div>
+        <div v-if="selectedElement.type === 'polyline'" class="property-item">
+          <label>线宽</label>
+          <input
+            type="range"
+            v-model.number="selectedElement.data.width"
+            min="5"
+            max="100"
+          />
+        </div>
+        <div class="property-item">
+          <button class="delete-btn" @click="deleteElement">删除元素</button>
+        </div>
       </div>
     </div>
   </div>
@@ -125,9 +137,14 @@ const world = new TextureWorld()
 let renderer: CanvasRenderer | null = null
 
 const mousePos = ref({ x: 0, y: 0 })
+const selectedElementId = ref<string | null>(null)
+const panelPosition = ref({ x: 20, y: 20 })
+const isDraggingPanel = ref(false)
+const panelDragOffset = ref({ x: 0, y: 0 })
 
 const selectedElement = computed<BaseElement | null>(() => {
-  return world.getSelectedElement()
+  if (!selectedElementId.value) return null
+  return world.getElementById(selectedElementId.value) || null
 })
 
 function selectTool(toolId: string) {
@@ -172,7 +189,10 @@ function handleMouseDown(e: MouseEvent) {
   switch (world.currentTool) {
     case 'sprite':
       if (world.selectedSprite) {
-        world.createSprite(worldPos, world.selectedSprite)
+        const sprite = world.createSprite(worldPos, world.selectedSprite)
+        if (sprite) {
+          selectedElementId.value = sprite.data.id
+        }
         world.setTool('select')
       }
       break
@@ -187,7 +207,9 @@ function handleMouseDown(e: MouseEvent) {
         const minPoints = world.currentTool === 'polygon' ? 3 : 2
         if (world.drawingElement &&
           (world.drawingElement as any).data.points.length >= minPoints) {
+          const elementId = (world.drawingElement as any).data.id
           world.finishDrawing()
+          selectedElementId.value = elementId
           world.setTool('select')
           render()
           return
@@ -202,6 +224,7 @@ function handleMouseDown(e: MouseEvent) {
       const element = world.findElementAt(worldPos)
       if (element) {
         world.selectElement(element.data.id)
+        selectedElementId.value = element.data.id
         world.isDragging = true
         world.isPanning = false
         const elementPos = element.type === 'sprite'
@@ -213,6 +236,7 @@ function handleMouseDown(e: MouseEvent) {
         }
       } else {
         world.selectElement(null)
+        selectedElementId.value = null
         world.isDragging = false
         world.isPanning = true
         world.panStartPos = pos
@@ -316,6 +340,7 @@ function render() {
 
 function clearCanvas() {
   world.clear()
+  selectedElementId.value = null
   render()
 }
 
@@ -323,8 +348,37 @@ function deleteElement() {
   const element = world.getSelectedElement()
   if (element) {
     world.removeElement(element)
+    selectedElementId.value = null
     render()
   }
+}
+
+function startPanelDrag(e: MouseEvent) {
+  isDraggingPanel.value = true
+  panelDragOffset.value = {
+    x: e.clientX - panelPosition.value.x,
+    y: e.clientY - panelPosition.value.y,
+  }
+  document.addEventListener('mousemove', handlePanelDrag)
+  document.addEventListener('mouseup', stopPanelDrag)
+}
+
+function handlePanelDrag(e: MouseEvent) {
+  if (!isDraggingPanel.value) return
+  
+  const newX = e.clientX - panelDragOffset.value.x
+  const newY = e.clientY - panelDragOffset.value.y
+  
+  panelPosition.value = {
+    x: Math.max(0, Math.min(window.innerWidth - 200, newX)),
+    y: Math.max(0, Math.min(window.innerHeight - 400, newY)),
+  }
+}
+
+function stopPanelDrag() {
+  isDraggingPanel.value = false
+  document.removeEventListener('mousemove', handlePanelDrag)
+  document.removeEventListener('mouseup', stopPanelDrag)
 }
 
 function exportImage() {
@@ -533,20 +587,37 @@ onUnmounted(() => {
 
 .properties-panel {
   position: fixed;
-  right: 20px;
-  top: 80px;
   width: 200px;
-  padding: 16px;
+  padding: 0;
   background: #fff;
   border-radius: 8px;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
 }
 
-.properties-panel h3 {
-  margin: 0 0 16px 0;
+.properties-panel .panel-header {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  background: #000000;
+  border-bottom: 1px solid #333333;
+  cursor: move;
+}
+
+.properties-panel .panel-header .drag-handle {
+  margin-right: 8px;
+  color: #ffffff;
+  font-size: 12px;
+}
+
+.properties-panel .panel-header h3 {
+  margin: 0;
   font-size: 16px;
-  border-bottom: 1px solid #e8e8e8;
-  padding-bottom: 8px;
+  color: #ffffff;
+}
+
+.properties-panel .panel-content {
+  padding: 16px;
 }
 
 .property-item {
