@@ -1,11 +1,13 @@
-import type { ElementDefinition } from '../types'
+import { BaseElementDefinition } from '../types'
 
-export const roadDefinition: ElementDefinition = {
-  id: 'road',
-  name: '道路',
-  icon: '🛣️',
-  type: 'polyline',
-  drawType: 'polyline',
-  color: '#444444',
-  defaultWidth: 40,
+export class RoadDefinition extends BaseElementDefinition {
+  id = 'road'
+  name = '道路'
+  icon = '🛣️'
+  type = 'polyline' as const
+  drawType = 'polyline' as const
+  color = '#8B4513'
+  defaultWidth = 40
 }
+
+export const roadDefinition = new RoadDefinition()

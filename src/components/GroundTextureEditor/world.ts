@@ -90,7 +90,7 @@ export class TextureWorld {
     this.isDrawing = true
     const id = Date.now().toString()
     const color = definition.color || '#333333'
-    const width = definition.defaultWidth || 20
+    const width = definition.getDefaultWidth()
 
     let config: any
     switch (type) {
@@ -99,8 +99,8 @@ export class TextureWorld {
           id,
           x: 0,
           y: 0,
-          width: definition.defaultWidth || 50,
-          height: definition.defaultHeight || 50,
+          width: definition.getDefaultWidth(),
+          height: definition.getDefaultHeight(),
           rotation: 0,
           texture: definition.id,
           name: definition.name,
@@ -173,22 +173,24 @@ export class TextureWorld {
     this.selectedSprite = null
   }
 
-  createSprite(pos: Point, spriteId: string): SpriteElement | null {
+  createSprite(pos: Point, spriteId: string): BaseElement | null {
     const definition = ElementRegistry.getById(spriteId)
     if (!definition) return null
 
-    const element = new SpriteElement(this, {
+    const element = ElementFactory.create('sprite', this, {
       id: Date.now().toString(),
       x: pos.x,
       y: pos.y,
-      width: definition.defaultWidth || 60,
-      height: definition.defaultHeight || 60,
+      width: definition.getDefaultWidth(),
+      height: definition.getDefaultHeight(),
       rotation: 0,
       texture: definition.id,
       opacity: 1,
       zIndex: this.elements.length,
       name: definition.name,
     })
+
+    if (!element) return null
 
     this.addElement(element)
     this.selectElement(element.data.id)

@@ -1,12 +1,14 @@
-import type { ElementDefinition } from '../types'
+import { BaseElementDefinition } from '../types'
 
-export const lampDefinition: ElementDefinition = {
-  id: 'lamp',
-  name: '路灯',
-  icon: '💡',
-  type: 'sprite',
-  drawType: 'sprite',
-  color: '#8B4513',
-  defaultWidth: 30,
-  defaultHeight: 70,
+export class LampDefinition extends BaseElementDefinition {
+  id = 'lamp'
+  name = '路灯'
+  icon = '💡'
+  type = 'sprite' as const
+  drawType = 'sprite' as const
+  color = '#FFD700'
+  defaultWidth = 30
+  defaultHeight = 80
 }
+
+export const lampDefinition = new LampDefinition()

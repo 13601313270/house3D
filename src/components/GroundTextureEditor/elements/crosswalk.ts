@@ -1,11 +1,13 @@
-import type { ElementDefinition } from '../types'
+import { BaseElementDefinition } from '../types'
 
-export const crosswalkDefinition: ElementDefinition = {
-  id: 'crosswalk',
-  name: '斑马线',
-  icon: '🦓',
-  type: 'polyline',
-  drawType: 'polyline',
-  color: '#FFFFFF',
-  defaultWidth: 30,
+export class CrosswalkDefinition extends BaseElementDefinition {
+  id = 'crosswalk'
+  name = '斑马线'
+  icon = '🚦'
+  type = 'polyline' as const
+  drawType = 'polyline' as const
+  color = '#FFFFFF'
+  defaultWidth = 60
 }
+
+export const crosswalkDefinition = new CrosswalkDefinition()

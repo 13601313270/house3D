@@ -1,5 +1,6 @@
 import type { BaseElementData, Point } from './index'
 import { BaseElement } from './baseElement'
+import { ElementFactory } from './elementFactory'
 
 export interface PolygonElementData extends BaseElementData {
   points: Point[]
@@ -149,5 +150,4 @@ export class PolygonElement extends BaseElement {
   }
 }
 
-import { ElementFactory } from './elementFactory'
 ElementFactory.register('polygon', (world, data) => new PolygonElement(world, data))

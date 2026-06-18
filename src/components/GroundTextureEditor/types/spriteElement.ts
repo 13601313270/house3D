@@ -1,5 +1,6 @@
 import type { BaseElementData, Point } from './index'
 import { BaseElement } from './baseElement'
+import { ElementFactory } from './elementFactory'
 
 export interface SpriteElementData extends BaseElementData {
   x: number
@@ -21,127 +22,107 @@ export class SpriteElement extends BaseElement {
   }
 
   draw(ctx: CanvasRenderingContext2D): void {
-    const { x, y, width, height, rotation, opacity, texture } = this.data
-    
+    const { x, y, width, height, rotation, texture, opacity } = this.data
+
     ctx.save()
     ctx.globalAlpha = opacity
     ctx.translate(x, y)
-    ctx.rotate(rotation)
-    
-    const sprite = this.world.spriteLibrary.find((s: any) => s.id === texture)
-    if (sprite) {
-      ctx.fillStyle = sprite.color
-      ctx.beginPath()
-      ctx.roundRect(-width / 2, -height / 2, width, height, 4)
-      ctx.fill()
-      
-      ctx.fillStyle = '#fff'
-      ctx.font = `${Math.min(width, height) * 0.5}px Arial`
-      ctx.textAlign = 'center'
-      ctx.textBaseline = 'middle'
-      ctx.fillText(sprite.icon, 0, 0)
+    ctx.rotate((rotation * Math.PI) / 180)
+
+    const iconMap: Record<string, string> = {
+      manhole: '🗑️',
+      sign: '⚠️',
+      lamp: '💡',
+      flower: '🌸',
+      basketball: '🏀',
     }
-    
+
+    const icon = iconMap[texture] || '📦'
+
+    ctx.font = `${Math.min(width, height) * 0.8}px Arial`
+    ctx.textAlign = 'center'
+    ctx.textBaseline = 'middle'
+    ctx.fillText(icon, 0, 0)
+
     if (this.world.selectedElementId === this.data.id) {
       ctx.strokeStyle = '#1890ff'
       ctx.lineWidth = 2
-      ctx.stroke()
-      
+      ctx.strokeRect(-width / 2, -height / 2, width, height)
+
       ctx.fillStyle = '#1890ff'
-      ctx.beginPath()
-      ctx.arc(-width / 2, -height / 2, 6, 0, Math.PI * 2)
-      ctx.fill()
-      ctx.beginPath()
-      ctx.arc(width / 2, height / 2, 6, 0, Math.PI * 2)
-      ctx.fill()
+      const handleSize = 8
+      ctx.fillRect(-width / 2 - handleSize / 2, -height / 2 - handleSize / 2, handleSize, handleSize)
+      ctx.fillRect(width / 2 - handleSize / 2, height / 2 - handleSize / 2, handleSize, handleSize)
     }
-    
+
     ctx.restore()
   }
 
   drawPreview(ctx: CanvasRenderingContext2D, mousePos: Point): void {
-    const { width, height, opacity, texture } = this.data
-    
+    const { width, height, texture, rotation } = this.data
+
     ctx.save()
-    ctx.globalAlpha = opacity * 0.7
+    ctx.globalAlpha = 0.6
     ctx.translate(mousePos.x, mousePos.y)
-    
-    const sprite = this.world.spriteLibrary.find((s: any) => s.id === texture)
-    if (sprite) {
-      ctx.fillStyle = sprite.color
-      ctx.beginPath()
-      ctx.roundRect(-width / 2, -height / 2, width, height, 4)
-      ctx.fill()
-      
-      ctx.fillStyle = '#fff'
-      ctx.font = `${Math.min(width, height) * 0.5}px Arial`
-      ctx.textAlign = 'center'
-      ctx.textBaseline = 'middle'
-      ctx.fillText(sprite.icon, 0, 0)
+    ctx.rotate((rotation * Math.PI) / 180)
+
+    const iconMap: Record<string, string> = {
+      manhole: '🗑️',
+      sign: '⚠️',
+      lamp: '💡',
+      flower: '🌸',
+      basketball: '🏀',
     }
-    
+
+    const icon = iconMap[texture] || '📦'
+
+    ctx.font = `${Math.min(width, height) * 0.8}px Arial`
+    ctx.textAlign = 'center'
+    ctx.textBaseline = 'middle'
+    ctx.fillText(icon, 0, 0)
+
+    ctx.strokeStyle = '#1890ff'
+    ctx.lineWidth = 2
+    ctx.setLineDash([5, 5])
+    ctx.strokeRect(-width / 2, -height / 2, width, height)
+    ctx.setLineDash([])
+
     ctx.restore()
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  handleMouseDown(_pos: Point): void {}
+  handleMouseDown(pos: Point): void {
+    this.data.x = pos.x
+    this.data.y = pos.y
+  }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  handleMouseMove(_pos: Point): void {}
+  handleMouseMove(pos: Point): void {
+    this.data.x = pos.x
+    this.data.y = pos.y
+  }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   handleMouseUp(_pos: Point): boolean {
-    return false
+    return true
   }
 
   containsPoint(pos: Point): boolean {
     const { x, y, width, height } = this.data
     return (
-      Math.abs(pos.x - x) < width / 2 &&
-      Math.abs(pos.y - y) < height / 2
+      pos.x >= x - width / 2 &&
+      pos.x <= x + width / 2 &&
+      pos.y >= y - height / 2 &&
+      pos.y <= y + height / 2
     )
   }
 
   hitTestResizeHandle(pos: Point): 'tl' | 'br' | null {
-    const { x, y, width, height, rotation } = this.data
+    const { x, y, width, height } = this.data
     const handleRadius = 12
-    
-    let tlX = x - width / 2
-    let tlY = y - height / 2
-    let brX = x + width / 2
-    let brY = y + height / 2
-    
-    if (rotation !== 0) {
-      const cos = Math.cos(rotation)
-      const sin = Math.sin(rotation)
-      
-      const tlRelX = -width / 2
-      const tlRelY = -height / 2
-      tlX = x + tlRelX * cos - tlRelY * sin
-      tlY = y + tlRelX * sin + tlRelY * cos
-      
-      const brRelX = width / 2
-      const brRelY = height / 2
-      brX = x + brRelX * cos - brRelY * sin
-      brY = y + brRelX * sin + brRelY * cos
-    }
-    
-    const tlDistance = Math.sqrt(
-      Math.pow(pos.x - tlX, 2) + 
-      Math.pow(pos.y - tlY, 2)
-    )
-    if (tlDistance <= handleRadius) {
-      return 'tl'
-    }
-    
-    const brDistance = Math.sqrt(
-      Math.pow(pos.x - brX, 2) + 
-      Math.pow(pos.y - brY, 2)
-    )
-    if (brDistance <= handleRadius) {
-      return 'br'
-    }
-    
+
+    const tlDist = Math.sqrt(Math.pow(pos.x - (x - width / 2), 2) + Math.pow(pos.y - (y - height / 2), 2))
+    const brDist = Math.sqrt(Math.pow(pos.x - (x + width / 2), 2) + Math.pow(pos.y - (y + height / 2), 2))
+
+    if (tlDist <= handleRadius) return 'tl'
+    if (brDist <= handleRadius) return 'br'
     return null
   }
 
@@ -150,8 +131,26 @@ export class SpriteElement extends BaseElement {
     this.data.y += dy
   }
 
+  resize(dx: number, dy: number, corner: 'tl' | 'br'): void {
+    if (corner === 'tl') {
+      this.data.width -= dx
+      this.data.height -= dy
+      this.data.x += dx / 2
+      this.data.y += dy / 2
+    } else {
+      this.data.width += dx
+      this.data.height += dy
+      this.data.x += dx / 2
+      this.data.y += dy / 2
+    }
+
+    this.data.width = Math.max(20, this.data.width)
+    this.data.height = Math.max(20, this.data.height)
+  }
+
   getProperties(): Record<string, any> {
     return {
+      name: this.data.name,
       opacity: this.data.opacity,
       width: this.data.width,
       height: this.data.height,
@@ -160,6 +159,7 @@ export class SpriteElement extends BaseElement {
   }
 
   setProperties(props: Record<string, any>): void {
+    if (props.name !== undefined) this.data.name = props.name
     if (props.opacity !== undefined) this.data.opacity = props.opacity
     if (props.width !== undefined) this.data.width = props.width
     if (props.height !== undefined) this.data.height = props.height
@@ -167,5 +167,4 @@ export class SpriteElement extends BaseElement {
   }
 }
 
-import { ElementFactory } from './elementFactory'
 ElementFactory.register('sprite', (world, data) => new SpriteElement(world, data))

@@ -1,4 +1,12 @@
 import type { ElementDefinition } from '../types'
+import { manholeDefinition } from './manhole'
+import { grassDefinition } from './grass'
+import { tileDefinition } from './tile'
+import { signDefinition } from './sign'
+import { lampDefinition } from './lamp'
+import { roadDefinition } from './road'
+import { crosswalkDefinition } from './crosswalk'
+import { flowerDefinition } from './flower'
 
 export class ElementRegistry {
   private static definitions: ElementDefinition[] = []
@@ -19,15 +27,6 @@ export class ElementRegistry {
     return ElementRegistry.definitions.filter((d) => d.type === type)
   }
 }
-
-import { manholeDefinition } from './manhole'
-import { grassDefinition } from './grass'
-import { tileDefinition } from './tile'
-import { signDefinition } from './sign'
-import { lampDefinition } from './lamp'
-import { roadDefinition } from './road'
-import { crosswalkDefinition } from './crosswalk'
-import { flowerDefinition } from './flower'
 
 ElementRegistry.register(manholeDefinition)
 ElementRegistry.register(grassDefinition)

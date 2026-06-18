@@ -5,7 +5,7 @@ import type { ElementType } from './index'
 export type ElementCreator = (world: TextureWorld, data: any) => BaseElement
 
 export class ElementFactory {
-  private static creators: Record<ElementType, ElementCreator> = {}
+  private static creators: Partial<Record<ElementType, ElementCreator>> = {}
 
   static register(type: ElementType, creator: ElementCreator): void {
     ElementFactory.creators[type] = creator

@@ -1,5 +1,6 @@
 import type { BaseElementData, Point } from './index'
 import { BaseElement } from './baseElement'
+import { ElementFactory } from './elementFactory'
 
 export interface PolylineElementData extends BaseElementData {
   points: Point[]
@@ -31,7 +32,7 @@ export class PolylineElement extends BaseElement {
     }
 
     const lineColor = color || '#8B4513'
-    
+
     ctx.strokeStyle = '#333333'
     ctx.lineWidth = width + 4
     ctx.lineCap = 'round'
@@ -135,7 +136,7 @@ export class PolylineElement extends BaseElement {
     const handleRadius = 12
     for (let i = 0; i < points.length; i++) {
       const dist = Math.sqrt(
-        Math.pow(pos.x - points[i].x, 2) + 
+        Math.pow(pos.x - points[i].x, 2) +
         Math.pow(pos.y - points[i].y, 2)
       )
       if (dist <= handleRadius) {
@@ -209,5 +210,4 @@ export class PolylineElement extends BaseElement {
   }
 }
 
-import { ElementFactory } from './elementFactory'
 ElementFactory.register('polyline', (world, data) => new PolylineElement(world, data))

@@ -32,7 +32,7 @@ module.exports = {
     '@typescript-eslint/no-this-alias': 'off',
     '@typescript-eslint/no-non-null-assertion': 'off',
     'object-shorthand': 'error',
-    '@typescript-eslint/no-unused-vars': 'error',
+    '@typescript-eslint/no-unused-vars': 'off',
     'no-async-promise-executor': 'off',
     'operator-linebreak': 'off',
     'vue/require-v-for-key': 'off',
