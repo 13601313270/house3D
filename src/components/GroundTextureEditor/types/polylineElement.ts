@@ -130,6 +130,27 @@ export class PolylineElement extends BaseElement {
     return false
   }
 
+  hitTestPoint(pos: Point): number {
+    const { points } = this.data
+    const handleRadius = 12
+    for (let i = 0; i < points.length; i++) {
+      const dist = Math.sqrt(
+        Math.pow(pos.x - points[i].x, 2) + 
+        Math.pow(pos.y - points[i].y, 2)
+      )
+      if (dist <= handleRadius) {
+        return i
+      }
+    }
+    return -1
+  }
+
+  movePoint(index: number, newPos: Point): void {
+    if (index >= 0 && index < this.data.points.length) {
+      this.data.points[index] = { ...newPos }
+    }
+  }
+
   private pointToLineDistance(
     point: Point,
     lineStart: Point,

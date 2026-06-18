@@ -37,8 +37,17 @@
 
       <div class="actions">
         <button class="action-btn" @click="clearCanvas">清空</button>
+        <button class="action-btn" @click="exportJSON">导出JSON</button>
+        <button class="action-btn" @click="importJSON">导入JSON</button>
         <button class="action-btn primary" @click="exportImage">导出PNG</button>
       </div>
+      <input 
+        ref="fileInputRef"
+        type="file" 
+        accept=".json" 
+        class="file-input"
+        @change="handleFileSelect"
+      />
     </div>
 
     <div class="canvas-container">
@@ -129,6 +138,7 @@ import type { BaseElement } from './types'
 
 const canvasRef = ref<HTMLCanvasElement | null>(null)
 const gridCanvasRef = ref<HTMLCanvasElement | null>(null)
+const fileInputRef = ref<HTMLInputElement | null>(null)
 
 const CANVAS_WIDTH = 1200
 const CANVAS_HEIGHT = 800
@@ -143,6 +153,8 @@ const isDraggingPanel = ref(false)
 const panelDragOffset = ref({ x: 0, y: 0 })
 const isResizing = ref(false)
 const resizeCorner = ref<'tl' | 'br' | null>(null)
+const isDraggingPoint = ref(false)
+const draggingPointIndex = ref(-1)
 
 const selectedElement = computed<BaseElement | null>(() => {
   if (!selectedElementId.value) return null
@@ -239,6 +251,21 @@ function handleMouseDown(e: MouseEvent) {
         }
       }
       
+      if (element && element.type === 'polyline') {
+        const polyline = element as any
+        const pointIndex = polyline.hitTestPoint(worldPos)
+        if (pointIndex !== -1) {
+          world.selectElement(element.data.id)
+          selectedElementId.value = element.data.id
+          isDraggingPoint.value = true
+          draggingPointIndex.value = pointIndex
+          world.isDragging = false
+          world.isPanning = false
+          render()
+          return
+        }
+      }
+      
       if (element) {
         world.selectElement(element.data.id)
         selectedElementId.value = element.data.id
@@ -314,6 +341,20 @@ function handleMouseMove(e: MouseEvent) {
     return
   }
 
+  if (isDraggingPoint.value) {
+    const worldPos = {
+      x: (pos.x - world.canvasOffset.x) / world.scale,
+      y: (pos.y - world.canvasOffset.y) / world.scale,
+    }
+    const element = world.getSelectedElement()
+    if (element && element.type === 'polyline') {
+      const polyline = element as any
+      polyline.movePoint(draggingPointIndex.value, worldPos)
+    }
+    render()
+    return
+  }
+
   if (world.isDragging) {
     const worldPos = {
       x: (pos.x - world.canvasOffset.x) / world.scale,
@@ -344,6 +385,8 @@ function handleMouseUp(_e: MouseEvent) {
   world.isPanning = false
   isResizing.value = false
   resizeCorner.value = null
+  isDraggingPoint.value = false
+  draggingPointIndex.value = -1
   render()
 }
 
@@ -398,6 +441,43 @@ function deleteElement() {
     selectedElementId.value = null
     render()
   }
+}
+
+function exportJSON() {
+  const data = world.exportElements()
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = `ground-texture-${Date.now()}.json`
+  document.body.appendChild(a)
+  a.click()
+  document.body.removeChild(a)
+  URL.revokeObjectURL(url)
+}
+
+function importJSON() {
+  fileInputRef.value?.click()
+}
+
+function handleFileSelect(event: Event) {
+  const input = event.target as HTMLInputElement
+  const file = input.files?.[0]
+  if (!file) return
+  
+  const reader = new FileReader()
+  reader.onload = (e) => {
+    try {
+      const data = JSON.parse(e.target?.result as string)
+      world.importElements(data)
+      selectedElementId.value = null
+      render()
+    } catch (error) {
+      alert('导入失败，请确保文件是有效的JSON格式')
+    }
+  }
+  reader.readAsText(file)
+  input.value = ''
 }
 
 function startPanelDrag(e: MouseEvent) {
@@ -571,6 +651,10 @@ onUnmounted(() => {
   display: flex;
   gap: 8px;
   margin-left: auto;
+}
+
+.file-input {
+  display: none;
 }
 
 .action-btn {

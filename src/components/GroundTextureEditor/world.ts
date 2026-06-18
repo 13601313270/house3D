@@ -220,4 +220,36 @@ export class TextureWorld {
   sortElementsByZIndex(): void {
     this.elements.sort((a, b) => a.data.zIndex - b.data.zIndex)
   }
+
+  exportElements(): any[] {
+    return this.elements.map((element) => ({
+      type: element.type,
+      data: { ...element.data },
+    }))
+  }
+
+  importElements(data: any[]): void {
+    this.elements = []
+    this.selectedElementId = null
+
+    data.forEach((item) => {
+      let element: BaseElement | null = null
+
+      switch (item.type) {
+        case 'sprite':
+          element = new SpriteElement(this, item.data)
+          break
+        case 'polyline':
+          element = new PolylineElement(this, item.data)
+          break
+        case 'polygon':
+          element = new PolygonElement(this, item.data)
+          break
+      }
+
+      if (element) {
+        this.elements.push(element)
+      }
+    })
+  }
 }
