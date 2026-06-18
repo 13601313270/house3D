@@ -1,4 +1,4 @@
-import type { ElementDefinition } from '../types'
+import type { BaseElementDefinition } from '../types'
 // import { manholeDefinition } from './manhole'
 import { grassDefinition } from './grass'
 // import { tileDefinition } from './tile.ts.bac'
@@ -9,21 +9,21 @@ import { roadDefinition } from './road'
 import { flowerDefinition } from './flower'
 
 export class ElementRegistry {
-  private static definitions: ElementDefinition[] = []
+  private static definitions: BaseElementDefinition[] = []
 
-  static register(definition: ElementDefinition): void {
+  static register(definition: BaseElementDefinition): void {
     ElementRegistry.definitions.push(definition)
   }
 
-  static getAll(): ElementDefinition[] {
+  static getAll(): BaseElementDefinition[] {
     return [...ElementRegistry.definitions]
   }
 
-  static getById(id: string): ElementDefinition | undefined {
+  static getById(id: string): BaseElementDefinition | undefined {
     return ElementRegistry.definitions.find((d) => d.id === id)
   }
 
-  static getByType(type: string): ElementDefinition[] {
+  static getByType(type: string): BaseElementDefinition[] {
     return ElementRegistry.definitions.filter((d) => d.type === type)
   }
 }

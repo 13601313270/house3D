@@ -80,63 +80,9 @@ export class TextureWorld {
     return null
   }
 
-  startDrawing(type: ElementType): void {
+  startDrawing(): void {
     if (this.selectedSprite) {
-      const spriteId = this.selectedSprite?.id
-      const definition = spriteId ? ElementRegistry.getById(spriteId) : null
-      console.log('definition', definition)
-      if (!definition) {
-        console.warn('请先从元素库中选择一个元素')
-        return
-      }
-
       this.isDrawing = true
-      // const id = Date.now().toString()
-      // const color = definition.color || '#333333'
-      // const width = definition.getDefaultWidth()
-
-      // let config: any
-      // switch (type) {
-      //   case 'sprite':
-      //     config = {
-      //       id,
-      //       x: 0,
-      //       y: 0,
-      //       width: definition.getDefaultWidth(),
-      //       height: definition.getDefaultHeight(),
-      //       rotation: 0,
-      //       texture: definition.id,
-      //       name: definition.name,
-      //       opacity: 1,
-      //       zIndex: this.elements.length,
-      //     }
-      //     break
-      //   case 'polyline':
-      //     config = {
-      //       id,
-      //       points: [],
-      //       width,
-      //       texture: definition.id,
-      //       color,
-      //       opacity: 1,
-      //       zIndex: this.elements.length,
-      //     }
-      //     break
-      //   case 'polygon':
-      //     config = {
-      //       id,
-      //       points: [],
-      //       texture: definition.id,
-      //       color,
-      //       textureScale: 1,
-      //       opacity: 1,
-      //       zIndex: this.elements.length,
-      //     }
-      //     break
-      //   default:
-      //     config = null
-      // }
-
       const CreateClass = this.selectedSprite.createClass
       const defaultData = CreateClass.defaultData()
       this.drawingElement = new CreateClass(this, defaultData);

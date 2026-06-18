@@ -10,12 +10,6 @@ export abstract class BaseElementDefinition {
   abstract icon: string
   abstract type: ElementType
   abstract createClass: BaseElementCtor
-
-  defaultZIndex?: number
-
-  getDefaultZIndex(): number {
-    return this.defaultZIndex || 0
-  }
 }
 
 export type ElementDefinition = BaseElementDefinition

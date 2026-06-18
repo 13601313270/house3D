@@ -16,4 +16,4 @@ export interface SpriteLibraryItem {
 export type ElementType = 'sprite' | 'polyline' | 'polygon'
 
 export { BaseElement, type BaseElementData } from './baseElement'
-export { type ElementDefinition, BaseElementDefinition } from './elementDefinition'
+export { BaseElementDefinition } from './elementDefinition'

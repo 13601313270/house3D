@@ -5,7 +5,7 @@
         <span class="label">元素库</span>
         <div class="element-items">
           <button v-for="item in world.spriteLibrary" :key="item.id" class="element-btn" :class="{
-            active: world.selectedSprite === item.id,
+            active: world.selectedSprite?.id === item.id,
             'sprite-type': item.type === 'sprite',
             'line-type': item.type === 'polyline',
             'polygon-type': item.type === 'polygon'
@@ -115,7 +115,7 @@ function selectSprite(item: BaseElementDefinition) {
   }
   world.setSelectedSprite(item)
   world.setTool(item.type)
-  world.startDrawing(item.type)
+  world.startDrawing()
 }
 
 function getCanvasPos(e: MouseEvent) {
@@ -171,7 +171,7 @@ function handleMouseDown(e: MouseEvent) {
     case 'polygon':
       if (!world.isDrawing) {
         if (world.selectedSprite !== null) {
-          world.startDrawing(world.currentTool)
+          world.startDrawing()
         }
       }
 
