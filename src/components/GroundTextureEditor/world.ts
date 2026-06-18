@@ -1,6 +1,6 @@
 import type { Point, ElementType, BaseElementData, BaseElementDefinition } from './types'
 import { BaseElement } from './types'
-import { ElementRegistry } from './elements/registry'
+import { ElementRegistry } from './registry'
 import { ElementFactory } from './types/elementFactory'
 
 // 导入元素类以触发注册

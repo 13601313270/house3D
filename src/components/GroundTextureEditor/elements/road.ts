@@ -1,12 +1,16 @@
 import { BaseElementDefinition } from '../types'
-import { RoadClass } from './roadClass'
 
-export class RoadDefinition extends BaseElementDefinition {
-  id = 'road'
-  name = '道路'
-  icon = '🛣️'
-  type = 'polyline' as const
-  createClass = RoadClass
+import { PolylineElement, PolylineElementData } from '../types/polylineElement'
+
+class RoadClass extends PolylineElement<PolylineElementData> {
+  texture = '路'
+  color = '#228B22'
 }
 
-export const roadDefinition = new RoadDefinition()
+export const roadDefinition: BaseElementDefinition = {
+  id: 'road',
+  name: '道路',
+  icon: '🚗️',
+  type: 'polyline',
+  createClass: RoadClass
+}

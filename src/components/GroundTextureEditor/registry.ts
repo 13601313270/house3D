@@ -1,12 +1,12 @@
-import type { BaseElementDefinition } from '../types'
-// import { manholeDefinition } from './manhole'
-import { grassDefinition } from './grass'
-// import { tileDefinition } from './tile.ts.bac'
-// import { signDefinition } from './sign.ts.bac'
-// import { lampDefinition } from './lamp.ts.bac'
-import { roadDefinition } from './road'
-// import { crosswalkDefinition } from './crosswalk.ts.bac'
-import { flowerDefinition } from './flower'
+import type { BaseElementDefinition } from './types'
+import { manholeDefinition } from './elements/manhole'
+import { grassDefinition } from './elements/grass'
+import { tileDefinition } from './elements/tile'
+import { signDefinition } from './elements/sign'
+import { lampDefinition } from './elements/lamp'
+import { roadDefinition } from './elements/road'
+import { crosswalkDefinition } from './elements/crosswalk'
+import { flowerDefinition } from './elements/flower'
 
 export class ElementRegistry {
   private static definitions: BaseElementDefinition[] = []
@@ -28,11 +28,11 @@ export class ElementRegistry {
   }
 }
 
-// ElementRegistry.register(manholeDefinition)
+ElementRegistry.register(manholeDefinition)
 ElementRegistry.register(grassDefinition)
-// ElementRegistry.register(tileDefinition)
-// ElementRegistry.register(signDefinition)
-// ElementRegistry.register(lampDefinition)
+ElementRegistry.register(tileDefinition)
+ElementRegistry.register(signDefinition)
+ElementRegistry.register(lampDefinition)
 ElementRegistry.register(roadDefinition)
-// ElementRegistry.register(crosswalkDefinition)
+ElementRegistry.register(crosswalkDefinition)
 ElementRegistry.register(flowerDefinition)

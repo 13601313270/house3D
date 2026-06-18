@@ -1,12 +1,14 @@
 import { BaseElementDefinition } from '../types'
-import { FlowerClass } from './flowerClass'
+import { SpriteElement, SpriteElementData } from '../types/spriteElement'
 
-export class FlowerDefinition extends BaseElementDefinition {
-  id = 'flower'
-  name = '花坛'
-  icon = '🌸'
-  type = 'sprite' as const
-  createClass = FlowerClass
+class FlowerClass extends SpriteElement<SpriteElementData> {
+  texture = '🌹'
 }
 
-export const flowerDefinition = new FlowerDefinition()
+export const flowerDefinition: BaseElementDefinition = {
+  id: 'flower',
+  name: '花坛',
+  icon: '🌸',
+  type: 'sprite',
+  createClass: FlowerClass,
+}
