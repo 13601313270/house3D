@@ -5,16 +5,17 @@ import { editItem } from '@/entities'
 
 export interface PolygonElementData extends BaseElementData {
   points: Point[]
-  texture: string
-  color: string
   textureScale: number
 }
 
-export abstract class PolygonElement extends BaseElement<PolygonElementData> {
+export abstract class PolygonElement<T extends PolygonElementData> extends BaseElement<T> {
+  abstract texture: string
+  abstract color: string
   type = 'polygon' as const
 
   draw(ctx: CanvasRenderingContext2D): void {
-    const { points, color, opacity } = this.data
+    const { color } = this;
+    const { points, opacity } = this.data
     if (points.length < 3) return
 
     ctx.save()
@@ -46,7 +47,8 @@ export abstract class PolygonElement extends BaseElement<PolygonElementData> {
   }
 
   drawPreview(ctx: CanvasRenderingContext2D, mousePos: Point): void {
-    const { points, color } = this.data
+    const { color } = this;
+    const { points } = this.data
     if (points.length === 0) return
 
     ctx.save()
@@ -132,18 +134,6 @@ export abstract class PolygonElement extends BaseElement<PolygonElementData> {
     return [
       ...super.setEditParams(),
       {
-        id: 'texture',
-        label: '纹理',
-        dataType: 'img',
-        value: this.data.texture,
-      },
-      {
-        id: 'color',
-        label: '颜色',
-        dataType: 'color',
-        value: this.data.color,
-      },
-      {
         id: 'textureScale',
         label: '纹理缩放',
         dataType: 'number',
@@ -153,6 +143,14 @@ export abstract class PolygonElement extends BaseElement<PolygonElementData> {
         value: this.data.textureScale,
       }
     ]
+  }
+
+  static defaultData(): PolygonElementData {
+    return {
+      ...super.defaultData(),
+      points: [],
+      textureScale: 1,
+    }
   }
 }
 

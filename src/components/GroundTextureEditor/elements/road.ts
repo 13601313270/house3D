@@ -7,7 +7,6 @@ export class RoadDefinition extends BaseElementDefinition {
   icon = '🛣️'
   type = 'polyline' as const
   createClass = RoadClass
-  defaultWidth = 40
 }
 
 export const roadDefinition = new RoadDefinition()

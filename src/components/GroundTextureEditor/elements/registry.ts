@@ -1,6 +1,6 @@
 import type { ElementDefinition } from '../types'
 // import { manholeDefinition } from './manhole'
-// import { grassDefinition } from './grass'
+import { grassDefinition } from './grass'
 // import { tileDefinition } from './tile.ts.bac'
 // import { signDefinition } from './sign.ts.bac'
 // import { lampDefinition } from './lamp.ts.bac'
@@ -29,7 +29,7 @@ export class ElementRegistry {
 }
 
 // ElementRegistry.register(manholeDefinition)
-// ElementRegistry.register(grassDefinition)
+ElementRegistry.register(grassDefinition)
 // ElementRegistry.register(tileDefinition)
 // ElementRegistry.register(signDefinition)
 // ElementRegistry.register(lampDefinition)

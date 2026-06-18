@@ -6,15 +6,16 @@ import { editItem } from '@/entities'
 export interface PolylineElementData extends BaseElementData {
   points: Point[]
   width: number
-  color: string
 }
 
 export abstract class PolylineElement<T extends PolylineElementData> extends BaseElement<T> {
   abstract texture: string
+  abstract color: string
   type = 'polyline' as const
 
   draw(ctx: CanvasRenderingContext2D): void {
-    const { points, width, color, opacity } = this.data
+    const { color } = this;
+    const { points, width, opacity } = this.data
     if (points.length < 2) return
 
     ctx.save()
@@ -59,7 +60,8 @@ export abstract class PolylineElement<T extends PolylineElementData> extends Bas
   }
 
   drawPreview(ctx: CanvasRenderingContext2D, mousePos: Point): void {
-    const { points, width, color } = this.data
+    const { color } = this;
+    const { points, width } = this.data
     if (points.length === 0) return
 
     ctx.save()
@@ -203,12 +205,6 @@ export abstract class PolylineElement<T extends PolylineElementData> extends Bas
         max: 100,
         step: 1,
         value: this.data.width,
-      },
-      {
-        id: 'color',
-        label: '颜色',
-        dataType: 'color',
-        value: this.data.color,
       }
     ]
   }
@@ -218,7 +214,6 @@ export abstract class PolylineElement<T extends PolylineElementData> extends Bas
       ...BaseElement.defaultData(),
       points: [],
       width: 20,
-      color: '#8B4513',
     }
   }
 }
