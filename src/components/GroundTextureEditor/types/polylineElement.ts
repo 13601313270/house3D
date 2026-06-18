@@ -1,6 +1,6 @@
 import type { BaseElementData, Point } from './index'
 import { BaseElement } from './baseElement'
-import { ElementFactory } from './elementFactory'
+// import { ElementFactory } from './elementFactory'
 import { editItem } from '@/entities'
 
 export interface PolylineElementData extends BaseElementData {
@@ -10,7 +10,7 @@ export interface PolylineElementData extends BaseElementData {
   color: string
 }
 
-export class PolylineElement extends BaseElement<PolylineElementData> {
+export abstract class PolylineElement extends BaseElement<PolylineElementData> {
   type = 'polyline' as const
 
   draw(ctx: CanvasRenderingContext2D): void {
@@ -220,4 +220,4 @@ export class PolylineElement extends BaseElement<PolylineElementData> {
   }
 }
 
-ElementFactory.register('polyline', (world, data) => new PolylineElement(world, data))
+// ElementFactory.register('polyline', (world, data) => new PolylineElement(world, data))

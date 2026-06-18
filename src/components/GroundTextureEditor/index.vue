@@ -6,9 +6,9 @@
         <div class="element-items">
           <button v-for="item in world.spriteLibrary" :key="item.id" class="element-btn" :class="{
             active: world.selectedSprite === item.id,
-            'sprite-type': item.drawType === 'sprite',
-            'line-type': item.drawType === 'polyline',
-            'polygon-type': item.drawType === 'polygon'
+            'sprite-type': item.type === 'sprite',
+            'line-type': item.type === 'polyline',
+            'polygon-type': item.type === 'polygon'
           }" @click="selectSprite(item)" :title="item.name">
             <span>{{ item.icon }}</span>
             <span class="element-name">{{ item.name }}</span>
@@ -80,7 +80,7 @@
 import { ref, onMounted, onUnmounted, watch, computed } from 'vue'
 import { TextureWorld } from './world'
 import { CanvasRenderer } from './renderer'
-import type { BaseElement } from './types'
+import type { BaseElement, BaseElementDefinition } from './types'
 
 const canvasRef = ref<HTMLCanvasElement | null>(null)
 const gridCanvasRef = ref<HTMLCanvasElement | null>(null)
@@ -102,19 +102,20 @@ const resizeCorner = ref<'tl' | 'br' | null>(null)
 const isDraggingPoint = ref(false)
 const draggingPointIndex = ref(-1)
 
-const selectedElement = computed<BaseElement | null>(() => {
+const selectedElement = computed<BaseElement<any> | null>(() => {
   if (!selectedElementId.value) return null
   return world.getElementById(selectedElementId.value) || null
 })
 
-function selectSprite(item: typeof world.spriteLibrary[0]) {
+function selectSprite(item: BaseElementDefinition) {
+  console.log('selectSprite', item)
   // 如果正在绘制，先取消（无论 drawingElement 是否存在）
   if (world.isDrawing) {
     world.cancelDrawing()
   }
-  world.setSelectedSprite(item.id)
-  world.setTool(item.drawType)
-  world.startDrawing(item.drawType, item.id)
+  world.setSelectedSprite(item)
+  world.setTool(item.type)
+  world.startDrawing(item.type)
 }
 
 function getCanvasPos(e: MouseEvent) {
@@ -170,7 +171,7 @@ function handleMouseDown(e: MouseEvent) {
     case 'polygon':
       if (!world.isDrawing) {
         if (world.selectedSprite !== null) {
-          world.startDrawing(world.currentTool, world.selectedSprite)
+          world.startDrawing(world.currentTool)
         }
       }
 

@@ -1,6 +1,6 @@
 import type { BaseElementData, Point } from './index'
 import { BaseElement } from './baseElement'
-import { ElementFactory } from './elementFactory'
+// import { ElementFactory } from './elementFactory'
 import { editItem } from '@/entities'
 
 export interface PolygonElementData extends BaseElementData {
@@ -10,7 +10,7 @@ export interface PolygonElementData extends BaseElementData {
   textureScale: number
 }
 
-export class PolygonElement extends BaseElement<PolygonElementData> {
+export abstract class PolygonElement extends BaseElement<PolygonElementData> {
   type = 'polygon' as const
 
   draw(ctx: CanvasRenderingContext2D): void {
@@ -156,4 +156,4 @@ export class PolygonElement extends BaseElement<PolygonElementData> {
   }
 }
 
-ElementFactory.register('polygon', (world, data) => new PolygonElement(world, data))
+// ElementFactory.register('polygon', (world, data) => new PolygonElement(world, data))

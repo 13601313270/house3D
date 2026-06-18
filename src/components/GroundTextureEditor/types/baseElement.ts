@@ -62,4 +62,12 @@ export abstract class BaseElement<T extends BaseElementData> {
       },
     ]
   }
+
+  static defaultData(): BaseElementData {
+    return {
+      id: Date.now().toString(),
+      opacity: 1,
+      zIndex: 0,
+    }
+  }
 }

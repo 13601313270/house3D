@@ -1,11 +1,11 @@
 import type { ElementDefinition } from '../types'
-import { manholeDefinition } from './manhole'
-import { grassDefinition } from './grass'
-import { tileDefinition } from './tile'
-import { signDefinition } from './sign'
-import { lampDefinition } from './lamp'
-import { roadDefinition } from './road'
-import { crosswalkDefinition } from './crosswalk'
+// import { manholeDefinition } from './manhole'
+// import { grassDefinition } from './grass'
+// import { tileDefinition } from './tile.ts.bac'
+// import { signDefinition } from './sign.ts.bac'
+// import { lampDefinition } from './lamp.ts.bac'
+// import { roadDefinition } from './road.ts.bac'
+// import { crosswalkDefinition } from './crosswalk.ts.bac'
 import { flowerDefinition } from './flower'
 
 export class ElementRegistry {
@@ -28,11 +28,11 @@ export class ElementRegistry {
   }
 }
 
-ElementRegistry.register(manholeDefinition)
-ElementRegistry.register(grassDefinition)
-ElementRegistry.register(tileDefinition)
-ElementRegistry.register(signDefinition)
-ElementRegistry.register(lampDefinition)
-ElementRegistry.register(roadDefinition)
-ElementRegistry.register(crosswalkDefinition)
+// ElementRegistry.register(manholeDefinition)
+// ElementRegistry.register(grassDefinition)
+// ElementRegistry.register(tileDefinition)
+// ElementRegistry.register(signDefinition)
+// ElementRegistry.register(lampDefinition)
+// ElementRegistry.register(roadDefinition)
+// ElementRegistry.register(crosswalkDefinition)
 ElementRegistry.register(flowerDefinition)

@@ -33,7 +33,7 @@
     "src/**/*.vue",
     "tests/**/*.ts",
     "tests/**/*.tsx"
-  ],
+, "src/components/GroundTextureEditor/elements/tile.ts.bac", "src/components/GroundTextureEditor/elements/sign.ts.bac", "src/components/GroundTextureEditor/elements/road.ts.bac"  ],
   "exclude": [
     "node_modules"
   ]

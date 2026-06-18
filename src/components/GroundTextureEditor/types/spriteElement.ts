@@ -1,6 +1,6 @@
 import type { BaseElementData, Point } from './index'
 import { BaseElement } from './baseElement'
-import { ElementFactory } from './elementFactory'
+// import { ElementFactory } from './elementFactory'
 import { editItem } from '@/entities'
 
 export interface SpriteElementData extends BaseElementData {
@@ -9,29 +9,22 @@ export interface SpriteElementData extends BaseElementData {
   width: number
   height: number
   rotation: number
-  texture: string
 }
 
-export class SpriteElement extends BaseElement<SpriteElementData> {
+export abstract class SpriteElement<T extends SpriteElementData> extends BaseElement<T> {
+  abstract texture: string
   type = 'sprite' as const
 
   draw(ctx: CanvasRenderingContext2D): void {
-    const { x, y, width, height, rotation, texture, opacity } = this.data
+    const { texture } = this
+    const { x, y, width, height, rotation, opacity } = this.data
 
     ctx.save()
     ctx.globalAlpha = opacity
     ctx.translate(x, y)
     ctx.rotate((rotation * Math.PI) / 180)
 
-    const iconMap: Record<string, string> = {
-      manhole: '🗑️',
-      sign: '⚠️',
-      lamp: '💡',
-      flower: '🌸',
-      basketball: '🏀',
-    }
-
-    const icon = iconMap[texture] || '📦'
+    const icon = texture
 
     ctx.font = `${Math.min(width, height) * 0.8}px Arial`
     ctx.textAlign = 'center'
@@ -53,22 +46,15 @@ export class SpriteElement extends BaseElement<SpriteElementData> {
   }
 
   drawPreview(ctx: CanvasRenderingContext2D, mousePos: Point): void {
-    const { width, height, texture, rotation } = this.data
+    const { texture } = this
+    const { width, height, rotation } = this.data
 
     ctx.save()
     ctx.globalAlpha = 0.6
     ctx.translate(mousePos.x, mousePos.y)
     ctx.rotate((rotation * Math.PI) / 180)
 
-    const iconMap: Record<string, string> = {
-      manhole: '🗑️',
-      sign: '⚠️',
-      lamp: '💡',
-      flower: '🌸',
-      basketball: '🏀',
-    }
-
-    const icon = iconMap[texture] || '📦'
+    const icon = texture
 
     ctx.font = `${Math.min(width, height) * 0.8}px Arial`
     ctx.textAlign = 'center'
@@ -176,10 +162,21 @@ export class SpriteElement extends BaseElement<SpriteElementData> {
         id: 'texture',
         label: '纹理',
         dataType: 'img',
-        value: this.data.texture,
+        value: this.texture,
       }
     ]
   }
+
+  static defaultData(): SpriteElementData {
+    return {
+      ...BaseElement.defaultData(),
+      x: 0,
+      y: 0,
+      width: 20,
+      height: 20,
+      rotation: 0,
+    }
+  }
 }
 
-ElementFactory.register('sprite', (world, data) => new SpriteElement(world, data))
+// ElementFactory.register('sprite', (world, data) => new SpriteElement(world, data))
