@@ -6,11 +6,11 @@ import { editItem } from '@/entities'
 export interface PolylineElementData extends BaseElementData {
   points: Point[]
   width: number
-  texture: string
   color: string
 }
 
-export abstract class PolylineElement extends BaseElement<PolylineElementData> {
+export abstract class PolylineElement<T extends PolylineElementData> extends BaseElement<T> {
+  abstract texture: string
   type = 'polyline' as const
 
   draw(ctx: CanvasRenderingContext2D): void {
@@ -102,7 +102,7 @@ export abstract class PolylineElement extends BaseElement<PolylineElementData> {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  handleMouseMove(_pos: Point): void {}
+  handleMouseMove(_pos: Point): void { }
 
   handleMouseUp(pos: Point): boolean {
     if (this.data.points.length < 2) {
@@ -209,14 +209,17 @@ export abstract class PolylineElement extends BaseElement<PolylineElementData> {
         label: '颜色',
         dataType: 'color',
         value: this.data.color,
-      },
-      {
-        id: 'texture',
-        label: '纹理',
-        dataType: 'img',
-        value: this.data.texture,
       }
     ]
+  }
+
+  static defaultData(): PolylineElementData {
+    return {
+      ...BaseElement.defaultData(),
+      points: [],
+      width: 20,
+      color: '#8B4513',
+    }
   }
 }
 

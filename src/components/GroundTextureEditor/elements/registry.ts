@@ -4,7 +4,7 @@ import type { ElementDefinition } from '../types'
 // import { tileDefinition } from './tile.ts.bac'
 // import { signDefinition } from './sign.ts.bac'
 // import { lampDefinition } from './lamp.ts.bac'
-// import { roadDefinition } from './road.ts.bac'
+import { roadDefinition } from './road'
 // import { crosswalkDefinition } from './crosswalk.ts.bac'
 import { flowerDefinition } from './flower'
 
@@ -33,6 +33,6 @@ export class ElementRegistry {
 // ElementRegistry.register(tileDefinition)
 // ElementRegistry.register(signDefinition)
 // ElementRegistry.register(lampDefinition)
-// ElementRegistry.register(roadDefinition)
+ElementRegistry.register(roadDefinition)
 // ElementRegistry.register(crosswalkDefinition)
 ElementRegistry.register(flowerDefinition)

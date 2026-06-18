@@ -1,12 +1,12 @@
 import { BaseElementDefinition } from '../types'
+import { RoadClass } from './roadClass'
 
 export class RoadDefinition extends BaseElementDefinition {
   id = 'road'
   name = '道路'
   icon = '🛣️'
   type = 'polyline' as const
-  drawType = 'polyline' as const
-  color = '#8B4513'
+  createClass = RoadClass
   defaultWidth = 40
 }
 

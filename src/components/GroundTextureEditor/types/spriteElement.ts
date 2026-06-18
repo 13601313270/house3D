@@ -158,12 +158,6 @@ export abstract class SpriteElement<T extends SpriteElementData> extends BaseEle
         step: 1,
         value: this.data.rotation,
       },
-      {
-        id: 'texture',
-        label: '纹理',
-        dataType: 'img',
-        value: this.texture,
-      }
     ]
   }
 
