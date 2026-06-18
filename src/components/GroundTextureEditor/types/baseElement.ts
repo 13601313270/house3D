@@ -6,11 +6,13 @@ export interface BaseElementData {
   zIndex: number
 }
 
-export abstract class BaseElement {
-  abstract type: 'sprite' | 'polyline' | 'polygon'
-  abstract data: BaseElementData
+export abstract class BaseElement<T extends BaseElementData> {
+  abstract type: string
+  data: T
   // eslint-disable-next-line no-useless-constructor
-  protected constructor(protected world: any) {}
+  constructor(protected world: any, data: T) {
+    this.data = data
+  }
 
   abstract draw(ctx: CanvasRenderingContext2D): void
 
@@ -29,7 +31,13 @@ export abstract class BaseElement {
 
   abstract translate(dx: number, dy: number): void
 
-  abstract getProperties(): Record<string, any>
+  getProperties(): Record<string, any> {
+    return {
+      id: this.data.id,
+      opacity: this.data.opacity,
+      zIndex: this.data.zIndex,
+    }
+  }
 
   abstract setProperties(props: Record<string, any>): void
 

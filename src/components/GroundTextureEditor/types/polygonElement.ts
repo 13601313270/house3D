@@ -9,14 +9,8 @@ export interface PolygonElementData extends BaseElementData {
   textureScale: number
 }
 
-export class PolygonElement extends BaseElement {
+export class PolygonElement extends BaseElement<PolygonElementData> {
   type = 'polygon' as const
-  data: PolygonElementData
-
-  constructor(world: any, data: PolygonElementData) {
-    super(world)
-    this.data = data
-  }
 
   draw(ctx: CanvasRenderingContext2D): void {
     const { points, color, opacity } = this.data
@@ -130,8 +124,9 @@ export class PolygonElement extends BaseElement {
   }
 
   getProperties(): Record<string, any> {
+    const parentProps = super.getProperties()
     return {
-      opacity: this.data.opacity,
+      ...parentProps,
       textureScale: this.data.textureScale,
     }
   }

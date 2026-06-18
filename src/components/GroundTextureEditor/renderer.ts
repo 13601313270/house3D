@@ -8,8 +8,8 @@ export class CanvasRenderer {
   private gridCtx: CanvasRenderingContext2D
   private previewCanvas: HTMLCanvasElement
   private previewCtx: CanvasRenderingContext2D
-  private width: number
-  private height: number
+  public width: number
+  public height: number
   private gridSize: number = 50
 
   constructor(
@@ -105,16 +105,6 @@ export class CanvasRenderer {
         ctx.fillText((-y).toString(), -5, y)
       }
     }
-
-    ctx.fillStyle = '#666666'
-    ctx.font = 'bold 14px Arial'
-    ctx.textAlign = 'left'
-    ctx.fillText('X', scaledWidth - offsetX - 20, 20)
-    ctx.save()
-    ctx.translate(-offsetX + 20, scaledHeight - offsetY - 20)
-    ctx.rotate(-Math.PI / 2)
-    ctx.fillText('Y', 0, 0)
-    ctx.restore()
   }
 
   renderGrid(world: TextureWorld): void {

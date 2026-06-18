@@ -1,4 +1,4 @@
-import type { Point, ElementType } from './types'
+import type { Point, ElementType, BaseElementData } from './types'
 import { BaseElement } from './types'
 import { ElementRegistry } from './elements/registry'
 import { ElementFactory } from './types/elementFactory'
@@ -9,7 +9,7 @@ import './types/polylineElement'
 import './types/polygonElement'
 
 export class TextureWorld {
-  elements: BaseElement[] = []
+  elements: BaseElement<BaseElementData>[] = []
   selectedElementId: string | null = null
   currentTool: string = 'select'
   selectedSprite: string | null = null
@@ -21,7 +21,7 @@ export class TextureWorld {
   dragOffset: Point = { x: 0, y: 0 }
   panStartPos: Point = { x: 0, y: 0 }
   panStartOffset: Point = { x: 0, y: 0 }
-  drawingElement: BaseElement | null = null
+  drawingElement: BaseElement<BaseElementData> | null = null
   lastClickTime: number = 0
 
   get spriteLibrary() {
@@ -45,12 +45,12 @@ export class TextureWorld {
     this.eventListeners[event]?.forEach((callback) => callback(data))
   }
 
-  addElement(element: BaseElement): void {
+  addElement(element: BaseElement<BaseElementData>): void {
     this.elements.push(element)
     this.emit('elementAdded', element)
   }
 
-  removeElement(element: BaseElement): void {
+  removeElement(element: BaseElement<BaseElementData>): void {
     const index = this.elements.findIndex((e) => e.data.id === element.data.id)
     if (index !== -1) {
       this.elements.splice(index, 1)
@@ -61,7 +61,7 @@ export class TextureWorld {
     }
   }
 
-  getElementById(id: string): BaseElement | undefined {
+  getElementById(id: string): BaseElement<BaseElementData> | undefined {
     return this.elements.find((e) => e.data.id === id)
   }
 
@@ -70,7 +70,7 @@ export class TextureWorld {
     this.emit('selectionChanged', id)
   }
 
-  findElementAt(pos: Point): BaseElement | null {
+  findElementAt(pos: Point): BaseElement<BaseElementData> | null {
     for (let i = this.elements.length - 1; i >= 0; i--) {
       const element = this.elements[i]
       if (element.containsPoint(pos)) {
@@ -173,7 +173,7 @@ export class TextureWorld {
     this.selectedSprite = null
   }
 
-  createSprite(pos: Point, spriteId: string): BaseElement | null {
+  createSprite(pos: Point, spriteId: string): BaseElement<BaseElementData> | null {
     const definition = ElementRegistry.getById(spriteId)
     if (!definition) return null
 
@@ -190,11 +190,13 @@ export class TextureWorld {
       name: definition.name,
     })
 
-    if (!element) return null
-
-    this.addElement(element)
-    this.selectElement(element.data.id)
-    return element
+    if (element) {
+      this.addElement(element)
+      this.selectElement(element.data.id)
+      return element
+    } else {
+      return null
+    }
   }
 
   translateSelectedElement(dx: number, dy: number): void {
@@ -217,7 +219,7 @@ export class TextureWorld {
     this.emit('cleared', null)
   }
 
-  getSelectedElement(): BaseElement | null {
+  getSelectedElement(): BaseElement<BaseElementData> | null {
     if (!this.selectedElementId) return null
     return this.getElementById(this.selectedElementId) || null
   }

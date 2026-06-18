@@ -4,19 +4,12 @@
       <div class="element-library">
         <span class="label">元素库</span>
         <div class="element-items">
-          <button
-            v-for="item in world.spriteLibrary"
-            :key="item.id"
-            class="element-btn"
-            :class="{ 
-              active: world.selectedSprite === item.id,
-              'sprite-type': item.drawType === 'sprite',
-              'line-type': item.drawType === 'polyline',
-              'polygon-type': item.drawType === 'polygon'
-            }"
-            @click="selectSprite(item)"
-            :title="item.name"
-          >
+          <button v-for="item in world.spriteLibrary" :key="item.id" class="element-btn" :class="{
+            active: world.selectedSprite === item.id,
+            'sprite-type': item.drawType === 'sprite',
+            'line-type': item.drawType === 'polyline',
+            'polygon-type': item.drawType === 'polygon'
+          }" @click="selectSprite(item)" :title="item.name">
             <span>{{ item.icon }}</span>
             <span class="element-name">{{ item.name }}</span>
           </button>
@@ -29,91 +22,52 @@
         <button class="action-btn" @click="importJSON">导入JSON</button>
         <button class="action-btn primary" @click="exportImage">导出PNG</button>
       </div>
-      <input 
-        ref="fileInputRef"
-        type="file" 
-        accept=".json" 
-        class="file-input"
-        @change="handleFileSelect"
-      />
+      <input ref="fileInputRef" type="file" accept=".json" class="file-input" @change="handleFileSelect" />
     </div>
 
-    <div class="canvas-container">
-      <canvas ref="gridCanvasRef" class="grid-canvas"></canvas>
-      <canvas
-        ref="canvasRef"
-        class="main-canvas"
-        @mousedown="handleMouseDown"
-        @mousemove="handleMouseMove"
-        @mouseup="handleMouseUp"
-        @mouseleave="handleMouseUp"
-        @wheel="handleWheel"
-      ></canvas>
-      <canvas ref="previewCanvasRef" class="preview-canvas"></canvas>
+    <div class="canvas-container" ref="canvasWrapperRef">
+      <div class="canvas-wrapper">
+        <canvas ref="gridCanvasRef" class="grid-canvas"></canvas>
+        <canvas ref="canvasRef" class="main-canvas" @mousedown="handleMouseDown" @mousemove="handleMouseMove"
+          @mouseup="handleMouseUp" @mouseleave="handleMouseUp" @wheel="handleWheel"></canvas>
+        <canvas ref="previewCanvasRef" class="preview-canvas"></canvas>
 
-      <div
-        v-if="world.isDrawing && (world.currentTool === 'polyline' || world.currentTool === 'polygon')"
-        class="hint"
-      >
-        {{ world.currentTool === 'polygon' ? '点击画布添加顶点，双击完成绘制（至少3点），按Esc取消' : '点击画布添加点，双击完成绘制（至少2点），按Esc取消' }}
+        <div v-if="world.isDrawing && (world.currentTool === 'polyline' || world.currentTool === 'polygon')"
+          class="hint">
+          {{ world.currentTool === 'polygon' ? '点击画布添加顶点，双击完成绘制（至少3点），按Esc取消' : '点击画布添加点，双击完成绘制（至少2点），按Esc取消' }}
+        </div>
       </div>
     </div>
 
-    <div 
-      v-if="selectedElement" 
-      class="properties-panel"
-      :style="{ left: panelPosition.x + 'px', top: panelPosition.y + 'px' }"
-    >
-      <div 
-        class="panel-header"
-        @mousedown="startPanelDrag"
-      >
+    <div v-if="selectedElement" class="properties-panel"
+      :style="{ left: panelPosition.x + 'px', top: panelPosition.y + 'px' }">
+      <div class="panel-header" @mousedown="startPanelDrag">
         <span class="drag-handle">☰</span>
         <h3>属性</h3>
       </div>
       <div class="panel-content">
         <div class="property-item">
           <label>透明度</label>
-          <input
-            type="range"
-            v-model.number="selectedElement.data.opacity"
-            min="0"
-            max="1"
-            step="0.1"
-            @input="render"
-          />
+          <input type="range" v-model.number="selectedElement.data.opacity" min="0" max="1" step="0.1"
+            @input="render" />
           <span>{{ selectedElement.data.opacity }}</span>
         </div>
-        <div v-if="selectedElement.type === 'sprite'" class="property-item">
-          <label>宽度</label>
-          <input
-            type="range"
-            v-model.number="selectedElement.data.width"
-            min="10"
-            max="200"
-            @input="render"
-          />
-        </div>
-        <div v-if="selectedElement.type === 'sprite'" class="property-item">
-          <label>高度</label>
-          <input
-            type="range"
-            v-model.number="selectedElement.data.height"
-            min="10"
-            max="200"
-            @input="render"
-          />
-        </div>
-        <div v-if="selectedElement.type === 'polyline'" class="property-item">
-          <label>线宽</label>
-          <input
-            type="range"
-            v-model.number="selectedElement.data.width"
-            min="5"
-            max="100"
-            @input="render"
-          />
-        </div>
+        <template v-if="selectedElement.type === 'sprite'">
+          <div class="property-item">
+            <label>宽度</label>
+            <input type="range" v-model.number="selectedElement.data.width" min="10" max="200" @input="render" />
+          </div>
+          <div class="property-item">
+            <label>高度</label>
+            <input type="range" v-model.number="selectedElement.data.height" min="10" max="200" @input="render" />
+          </div>
+        </template>
+        <template v-if="selectedElement.type === 'polyline'">
+          <div class="property-item">
+            <label>线宽</label>
+            <input type="range" v-model.number="selectedElement.data.width" min="5" max="100" @input="render" />
+          </div>
+        </template>
         <div class="property-item">
           <button class="delete-btn" @click="deleteElement">删除元素</button>
         </div>
@@ -131,13 +85,12 @@ import type { BaseElement } from './types'
 const canvasRef = ref<HTMLCanvasElement | null>(null)
 const gridCanvasRef = ref<HTMLCanvasElement | null>(null)
 const previewCanvasRef = ref<HTMLCanvasElement | null>(null)
+const canvasWrapperRef = ref<HTMLDivElement | null>(null)
 const fileInputRef = ref<HTMLInputElement | null>(null)
-
-const CANVAS_WIDTH = 1200
-const CANVAS_HEIGHT = 800
 
 const world = new TextureWorld()
 let renderer: CanvasRenderer | null = null
+let resizeObserver: ResizeObserver | null = null
 
 const mousePos = ref({ x: 0, y: 0 })
 const selectedElementId = ref<string | null>(null)
@@ -216,7 +169,9 @@ function handleMouseDown(e: MouseEvent) {
     case 'polyline':
     case 'polygon':
       if (!world.isDrawing) {
-        world.startDrawing(world.currentTool, world.selectedSprite)
+        if (world.selectedSprite !== null) {
+          world.startDrawing(world.currentTool, world.selectedSprite)
+        }
       }
 
       if (isDoubleClick) {
@@ -252,7 +207,7 @@ function handleMouseDown(e: MouseEvent) {
           return
         }
       }
-      
+
       if (element && element.type === 'polyline') {
         const polyline = element as any
         const pointIndex = polyline.hitTestPoint(worldPos)
@@ -267,7 +222,7 @@ function handleMouseDown(e: MouseEvent) {
           return
         }
       }
-      
+
       if (element) {
         world.selectElement(element.data.id)
         selectedElementId.value = element.data.id
@@ -328,7 +283,7 @@ function handleMouseMove(e: MouseEvent) {
     if (element && element.type === 'sprite') {
       const sprite = element as any
       const { x, y, width, height } = sprite.data
-      
+
       if (resizeCorner.value === 'br') {
         const newWidth = Math.max(20, worldPos.x - (x - width / 2))
         const newHeight = Math.max(20, worldPos.y - (y - height / 2))
@@ -400,17 +355,17 @@ function handleWheel(e: WheelEvent) {
   e.preventDefault()
 
   const pos = getCanvasPos(e as unknown as MouseEvent)
-  
+
   const zoomFactor = e.deltaY > 0 ? 0.9 : 1.1
   const newScale = Math.max(0.1, Math.min(5, world.scale * zoomFactor))
-  
+
   const worldX = (pos.x - world.canvasOffset.x) / world.scale
   const worldY = (pos.y - world.canvasOffset.y) / world.scale
-  
+
   world.canvasOffset.x = pos.x - worldX * newScale
   world.canvasOffset.y = pos.y - worldY * newScale
   world.scale = newScale
-  
+
   render()
 }
 
@@ -418,8 +373,8 @@ function handleKeyDown(e: KeyboardEvent) {
   if (e.key === 'Escape') {
     if (world.isDrawing) {
       const minPoints = world.currentTool === 'polygon' ? 3 : 2
-      if (world.drawingElement && 
-          (world.drawingElement as any).data.points.length >= minPoints) {
+      if (world.drawingElement &&
+        (world.drawingElement as any).data.points.length >= minPoints) {
         world.finishDrawing()
         world.setTool('select')
       } else {
@@ -432,6 +387,32 @@ function handleKeyDown(e: KeyboardEvent) {
 
 function render() {
   renderer?.render(world, mousePos.value)
+}
+
+function resizeCanvas() {
+  if (!canvasWrapperRef.value || !renderer) return
+
+  console.log('resize')
+  const wrapperWidth = canvasWrapperRef.value.clientWidth
+  const wrapperHeight = canvasWrapperRef.value.clientHeight
+
+  const newWidth = wrapperWidth;
+  const newHeight = wrapperHeight;
+
+  const oldWidth = renderer.width
+  const oldHeight = renderer.height
+
+  renderer.resize(newWidth - 1, newHeight - 1)
+
+  const offsetRatioX = newWidth / oldWidth
+  const offsetRatioY = newHeight / oldHeight
+
+  world.canvasOffset = {
+    x: world.canvasOffset.x * offsetRatioX,
+    y: world.canvasOffset.y * offsetRatioY,
+  }
+
+  render()
 }
 
 function clearCanvas() {
@@ -470,7 +451,7 @@ function handleFileSelect(event: Event) {
   const input = event.target as HTMLInputElement
   const file = input.files?.[0]
   if (!file) return
-  
+
   const reader = new FileReader()
   reader.onload = (e) => {
     try {
@@ -498,10 +479,10 @@ function startPanelDrag(e: MouseEvent) {
 
 function handlePanelDrag(e: MouseEvent) {
   if (!isDraggingPanel.value) return
-  
+
   const newX = e.clientX - panelDragOffset.value.x
   const newY = e.clientY - panelDragOffset.value.y
-  
+
   panelPosition.value = {
     x: Math.max(0, Math.min(window.innerWidth - 200, newX)),
     y: Math.max(0, Math.min(window.innerHeight - 400, newY)),
@@ -539,9 +520,12 @@ watch(
 )
 
 onMounted(() => {
+  if (!canvasWrapperRef.value) return
+  const initialWidth = canvasWrapperRef.value.clientWidth
+  const initialHeight = canvasWrapperRef.value.clientHeight
   world.canvasOffset = {
-    x: CANVAS_WIDTH / 2,
-    y: CANVAS_HEIGHT / 2,
+    x: initialWidth / 2,
+    y: initialHeight / 2,
   }
 
   if (canvasRef.value && gridCanvasRef.value && previewCanvasRef.value) {
@@ -549,16 +533,27 @@ onMounted(() => {
       canvasRef.value,
       gridCanvasRef.value,
       previewCanvasRef.value,
-      CANVAS_WIDTH,
-      CANVAS_HEIGHT
+      initialWidth,
+      initialHeight
     )
     render()
   }
+
+  if (canvasWrapperRef.value) {
+    resizeObserver = new ResizeObserver(() => {
+      resizeCanvas()
+    })
+    resizeObserver.observe(canvasWrapperRef.value)
+  }
+
   window.addEventListener('keydown', handleKeyDown)
 })
 
 onUnmounted(() => {
   renderer = null
+  if (resizeObserver) {
+    resizeObserver.disconnect()
+  }
   window.removeEventListener('keydown', handleKeyDown)
 })
 </script>
@@ -668,26 +663,32 @@ onUnmounted(() => {
   background: #e8e8e8;
 }
 
+.canvas-wrapper {
+  position: relative;
+  width: 100%;
+}
+
 .main-canvas {
   display: block;
-  margin: 20px auto;
-  border-radius: 4px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  height: auto;
 }
 
 .grid-canvas {
   position: absolute;
-  top: 20px;
-  left: 50%;
-  transform: translateX(-50%);
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   pointer-events: none;
 }
 
 .preview-canvas {
   position: absolute;
-  top: 20px;
-  left: 50%;
-  transform: translateX(-50%);
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   pointer-events: none;
 }
 

@@ -9,14 +9,8 @@ export interface PolylineElementData extends BaseElementData {
   color: string
 }
 
-export class PolylineElement extends BaseElement {
+export class PolylineElement extends BaseElement<PolylineElementData> {
   type = 'polyline' as const
-  data: PolylineElementData
-
-  constructor(world: any, data: PolylineElementData) {
-    super(world)
-    this.data = data
-  }
 
   draw(ctx: CanvasRenderingContext2D): void {
     const { points, width, color, opacity } = this.data

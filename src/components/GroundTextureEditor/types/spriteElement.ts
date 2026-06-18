@@ -12,14 +12,8 @@ export interface SpriteElementData extends BaseElementData {
   name: string
 }
 
-export class SpriteElement extends BaseElement {
+export class SpriteElement extends BaseElement<SpriteElementData> {
   type = 'sprite' as const
-  data: SpriteElementData
-
-  constructor(world: any, data: SpriteElementData) {
-    super(world)
-    this.data = data
-  }
 
   draw(ctx: CanvasRenderingContext2D): void {
     const { x, y, width, height, rotation, texture, opacity } = this.data
