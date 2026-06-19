@@ -636,7 +636,7 @@ function initThree() {
     }> = [];
     fbxModel.traverse((child: any) => {
       if (child.isMesh) {
-        console.log('网格对象:', child.name, '材质:', child.material)
+        console.log('对象:', child.name, '材质:', child.material)
         if (!child.material || child.material.type === 'MeshBasicMaterial') {
           child.material = new THREE.MeshNormalMaterial()
         }

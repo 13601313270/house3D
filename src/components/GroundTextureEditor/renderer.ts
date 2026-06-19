@@ -149,6 +149,8 @@ export class CanvasRenderer {
 
   renderGrid(world: TextureWorld): void {
     this.gridCtx.clearRect(0, 0, this.width, this.height)
+    this.gridCtx.fillStyle = '#ffffff'
+    this.gridCtx.fillRect(0, 0, this.width, this.height)
 
     this.gridCtx.save()
     this.gridCtx.translate(world.canvasOffset.x, world.canvasOffset.y)
@@ -166,8 +168,8 @@ export class CanvasRenderer {
   renderMain(world: TextureWorld): void {
     this.mainCtx.clearRect(0, 0, this.width, this.height)
 
-    this.mainCtx.fillStyle = '#ffffff'
-    this.mainCtx.fillRect(0, 0, this.width, this.height)
+    // this.mainCtx.fillStyle = '#ffffff'
+    // this.mainCtx.fillRect(0, 0, this.width, this.height)
 
     this.mainCtx.save()
     this.mainCtx.translate(world.canvasOffset.x, world.canvasOffset.y)

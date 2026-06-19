@@ -105,6 +105,7 @@ const resizeCorner = ref<'tl' | 'br' | null>(null)
 const isDraggingPoint = ref(false)
 const draggingPointIndex = ref(-1)
 const dragPointOffset = ref({ x: 0, y: 0 })
+const resizeOffset = ref({ x: 0, y: 0 })
 
 const selectedElement = computed<BaseElement<any> | null>(() => {
   if (!selectedElementId.value) return null
@@ -186,6 +187,29 @@ async function handleMouseDown(e: MouseEvent) {
 
 // 统一的元素选择逻辑
 function selectElementAt(worldPos: { x: number; y: number }, screenPos: { x: number; y: number }) {
+  // 0. 检测当前选中 Sprite 的缩放控制点（控制点可能超出元素边界）
+  const selectedEl = world.getSelectedElement()
+  if (selectedEl && selectedEl instanceof SpriteElement && selectedEl.data.id === selectedElementId.value) {
+    const hitCorner = selectedEl.hitTestResizeHandle(worldPos)
+    if (hitCorner) {
+      isResizing.value = true
+      resizeCorner.value = hitCorner
+      world.isDragging = false
+      world.isPanning = false
+
+      const sprite = selectedEl as SpriteElement<SpriteElementData>
+      const { x, y, width, height } = sprite.data
+      const cornerPos = hitCorner === 'tl'
+        ? { x: x - width / 2, y: y - height / 2 }
+        : { x: x + width / 2, y: y + height / 2 }
+      resizeOffset.value = {
+        x: worldPos.x - cornerPos.x,
+        y: worldPos.y - cornerPos.y,
+      }
+      return
+    }
+  }
+
   // 1. 检测 Polyline/Polygon 的顶点
   for (const el of world.elements) {
     if (el instanceof PolylineElement || el instanceof PolygonElement) {
@@ -201,7 +225,7 @@ function selectElementAt(worldPos: { x: number; y: number }, screenPos: { x: num
     }
   }
 
-  // 2. 检测 Sprite 缩放控制点
+  // 2. 检测其他元素
   const element = world.findElementAt(worldPos)
   if (!element) {
     // 空白区域：取消选择，开始平移
@@ -213,17 +237,6 @@ function selectElementAt(worldPos: { x: number; y: number }, screenPos: { x: num
     world.panStartPos = screenPos
     world.panStartOffset = { ...world.canvasOffset }
     return
-  }
-
-  if (element instanceof SpriteElement) {
-    const hitCorner = element.hitTestResizeHandle(worldPos)
-    if (hitCorner && element.data.id === selectedElementId.value) {
-      isResizing.value = true
-      resizeCorner.value = hitCorner
-      world.isDragging = false
-      world.isPanning = false
-      return
-    }
   }
 
   // 3. 检测元素
@@ -310,14 +323,17 @@ function handleMouseMove(e: MouseEvent) {
       const sprite = element as SpriteElement<SpriteElementData>
       const { x, y, width, height } = sprite.data
 
+      const cornerX = worldPos.x - resizeOffset.value.x
+      const cornerY = worldPos.y - resizeOffset.value.y
+
       if (resizeCorner.value === 'br') {
-        const newWidth = Math.round(Math.max(20, worldPos.x - (x - width / 2)))
-        const newHeight = Math.round(Math.max(20, worldPos.y - (y - height / 2)))
+        const newWidth = Math.round(Math.max(20, cornerX - (x - width / 2)))
+        const newHeight = Math.round(Math.max(20, cornerY - (y - height / 2)))
         sprite.data.width = newWidth
         sprite.data.height = newHeight
       } else if (resizeCorner.value === 'tl') {
-        const newWidth = Math.round(Math.max(20, (x + width / 2) - worldPos.x))
-        const newHeight = Math.round(Math.max(20, (y + height / 2) - worldPos.y))
+        const newWidth = Math.round(Math.max(20, (x + width / 2) - cornerX))
+        const newHeight = Math.round(Math.max(20, (y + height / 2) - cornerY))
         sprite.data.x = Math.round(x + (width - newWidth) / 2)
         sprite.data.y = Math.round(y + (height - newHeight) / 2)
         sprite.data.width = newWidth
@@ -733,6 +749,8 @@ onUnmounted(() => {
   display: block;
   width: 100%;
   height: auto;
+  position: relative;
+  z-index: 101;
 }
 
 .grid-canvas {
@@ -742,6 +760,7 @@ onUnmounted(() => {
   width: 100%;
   height: 100%;
   pointer-events: none;
+  z-index: 100;
 }
 
 .preview-canvas {
@@ -751,6 +770,7 @@ onUnmounted(() => {
   width: 100%;
   height: 100%;
   pointer-events: none;
+  z-index: 102;
 }
 
 .hint {
