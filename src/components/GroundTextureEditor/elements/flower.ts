@@ -2,6 +2,7 @@ import { BaseElementDefinition } from '../types'
 import { SpriteElement, SpriteElementData } from '../types/spriteElement'
 
 class FlowerClass extends SpriteElement<SpriteElementData> {
+  type = 'flower'
   texture = '🌹'
 }
 

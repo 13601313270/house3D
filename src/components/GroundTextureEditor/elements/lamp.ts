@@ -2,6 +2,7 @@ import { BaseElementDefinition } from '../types'
 import { SpriteElement, SpriteElementData } from '../types/spriteElement'
 
 class LampClass extends SpriteElement<SpriteElementData> {
+  type = 'lamp'
   texture = '💡'
   color = '#FFD700'
 }

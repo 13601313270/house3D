@@ -2,6 +2,7 @@ import { BaseElementDefinition } from '../types'
 import { PolylineElement, PolylineElementData } from '../types/polylineElement'
 
 class CrosswalkClass extends PolylineElement<PolylineElementData> {
+  type = 'crosswalk'
   texture = '🦓'
   color = '#228B22'
 }

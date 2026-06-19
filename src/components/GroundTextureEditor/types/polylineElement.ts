@@ -11,7 +11,6 @@ export interface PolylineElementData extends BaseElementData {
 export abstract class PolylineElement<T extends PolylineElementData> extends BaseElement<T> {
   abstract texture: string
   abstract color: string
-  type = 'polyline' as const
 
   draw(ctx: CanvasRenderingContext2D): void {
     const { color } = this;

@@ -2,6 +2,7 @@ import { BaseElementDefinition } from '../types'
 import { SpriteElement, SpriteElementData } from '../types/spriteElement'
 
 class ManholeClass extends SpriteElement<SpriteElementData> {
+  type = 'manhole'
   texture = '⭕️'
   color = '#4a4a4a'
 }

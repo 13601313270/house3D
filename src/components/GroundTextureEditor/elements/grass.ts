@@ -3,6 +3,7 @@ import { BaseElementDefinition } from '../types'
 import { PolygonElement, PolygonElementData } from '../types/polygonElement'
 
 class GrassClass extends PolygonElement<PolygonElementData> {
+  type = 'grass'
   texture = '草坪'
   color = '#228B22'
 }

@@ -174,9 +174,14 @@ export class TextureWorld {
 
     data.forEach((item) => {
       const type = item.type as ElementType
-      const element = ElementFactory.create(type, this, item.data)
-      if (element) {
-        this.elements.push(element)
+      const option = ElementRegistry.mapIdToDefinition.get(type)
+      console.log('option', option, item.data)
+      if (option) {
+        const ClassName = option.createClass;
+        const element = new ClassName(this, item.data);
+        if (element) {
+          this.elements.push(element)
+        }
       }
     })
   }

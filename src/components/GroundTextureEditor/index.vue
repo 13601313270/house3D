@@ -13,12 +13,12 @@
         </button>
       </div>
 
-      <!-- <div class="actions">
+      <div class="actions">
         <button class="action-btn" @click="clearCanvas">清空</button>
         <button class="action-btn" @click="exportJSON">导出JSON</button>
         <button class="action-btn" @click="importJSON">导入JSON</button>
         <button class="action-btn primary" @click="exportImage">导出PNG</button>
-      </div> -->
+      </div>
       <input ref="fileInputRef" type="file" accept=".json" class="file-input" @change="handleFileSelect" />
     </div>
 
@@ -48,14 +48,13 @@
           <label>{{ item.label }}</label>
           <span v-if="item.dataType === 'string'">{{ item.value }}</span>
           <div v-else-if="item.dataType === 'number'">
-            <span>{{ item.value }}</span>
             <input type="range" v-model.number="item.value" :min="item.min" :max="item.max" :step="item.step"
               @input="render" />
           </div>
           <span v-else-if="item.dataType === 'boolean'">{{ item.value ? '是' : '否' }}</span>
           <!-- <span v-else>{{ item.value }}</span> -->
         </div>
-        <div class="property-item">
+        <!-- <div class="property-item">
           <label>透明度</label>
           <input type="range" v-model.number="selectedElement.data.opacity" min="0" max="1" step="0.1"
             @input="render" />
@@ -71,12 +70,12 @@
             <input type="range" v-model.number="selectedElement.data.height" min="10" max="200" @input="render" />
           </div>
         </template>
-        <template v-if="selectedElement.type === 'polyline'">
+<template v-if="selectedElement.type === 'polyline'">
           <div class="property-item">
             <label>线宽</label>
             <input type="range" v-model.number="selectedElement.data.width" min="5" max="100" @input="render" />
           </div>
-        </template>
+        </template> -->
         <div class="property-item">
           <button class="delete-btn" @click="deleteElement">删除元素</button>
         </div>
@@ -92,6 +91,7 @@ import { CanvasRenderer } from './renderer'
 import type { BaseElement, BaseElementData, BaseElementDefinition } from './types'
 import { SpriteElement, SpriteElementData } from './types/spriteElement'
 import { editItem } from '@/entities'
+import { PolylineElement, PolylineElementData } from './types/polylineElement'
 
 const canvasRef = ref<HTMLCanvasElement | null>(null)
 const gridCanvasRef = ref<HTMLCanvasElement | null>(null)
@@ -207,8 +207,8 @@ function handleMouseDown(e: MouseEvent) {
     case 'select':
     case 'move': {
       const element = world.findElementAt(worldPos)
-      if (element && element.type === 'sprite') {
-        const sprite = element as any
+      if (element && element instanceof SpriteElement) {
+        const sprite = element as SpriteElement<SpriteElementData>
         const hitCorner = sprite.hitTestResizeHandle(worldPos)
         if (hitCorner) {
           world.selectElement(element.data.id)
@@ -222,8 +222,8 @@ function handleMouseDown(e: MouseEvent) {
         }
       }
 
-      if (element && element.type === 'polyline') {
-        const polyline = element as any
+      if (element && element instanceof PolylineElement) {
+        const polyline = element as PolylineElement<PolylineElementData>
         const pointIndex = polyline.hitTestPoint(worldPos)
         if (pointIndex !== -1) {
           world.selectElement(element.data.id)
@@ -242,8 +242,8 @@ function handleMouseDown(e: MouseEvent) {
         selectedElementId.value = element.data.id
         world.isDragging = true
         world.isPanning = false
-        const elementPos = element.type === 'sprite'
-          ? { x: (element as any).data.x, y: (element as any).data.y }
+        const elementPos = element instanceof SpriteElement
+          ? { x: (element as SpriteElement<SpriteElementData>).data.x, y: (element as SpriteElement<SpriteElementData>).data.y }
           : (element as any).data.points[0]
         world.dragOffset = {
           x: worldPos.x - elementPos.x,
@@ -294,8 +294,8 @@ function handleMouseMove(e: MouseEvent) {
       y: (pos.y - world.canvasOffset.y) / world.scale,
     }
     const element = world.getSelectedElement()
-    if (element && element.type === 'sprite') {
-      const sprite = element as any
+    if (element && element instanceof SpriteElement) {
+      const sprite = element as SpriteElement<SpriteElementData>
       const { x, y, width, height } = sprite.data
 
       if (resizeCorner.value === 'br') {
@@ -322,8 +322,8 @@ function handleMouseMove(e: MouseEvent) {
       y: (pos.y - world.canvasOffset.y) / world.scale,
     }
     const element = world.getSelectedElement()
-    if (element && element.type === 'polyline') {
-      const polyline = element as any
+    if (element && element instanceof PolylineElement) {
+      const polyline = element as PolylineElement<PolylineElementData>
       polyline.movePoint(draggingPointIndex.value, worldPos)
     }
     render()
@@ -338,8 +338,8 @@ function handleMouseMove(e: MouseEvent) {
     const newX = worldPos.x - world.dragOffset.x
     const element = world.getSelectedElement()
     if (element) {
-      const oldPos = element.type === 'sprite'
-        ? { x: (element as any).data.x, y: (element as any).data.y }
+      const oldPos = element instanceof SpriteElement
+        ? { x: (element as SpriteElement<SpriteElementData>).data.x, y: (element as SpriteElement<SpriteElementData>).data.y }
         : (element as any).data.points[0]
       const dx = newX - oldPos.x
       const dy = (worldPos.y - world.dragOffset.y) - oldPos.y
@@ -468,8 +468,11 @@ function handleFileSelect(event: Event) {
 
   const reader = new FileReader()
   reader.onload = (e) => {
+    console.log(1)
     try {
+      console.log(2)
       const data = JSON.parse(e.target?.result as string)
+      console.log(3, data)
       world.importElements(data)
       selectedElementId.value = null
       render()

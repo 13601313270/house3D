@@ -13,7 +13,6 @@ export interface SpriteElementData extends BaseElementData {
 
 export abstract class SpriteElement<T extends SpriteElementData> extends BaseElement<T> {
   abstract texture: string
-  type = 'sprite' as const
 
   draw(ctx: CanvasRenderingContext2D): void {
     const { texture } = this

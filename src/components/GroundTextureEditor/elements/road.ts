@@ -3,6 +3,7 @@ import { BaseElementDefinition } from '../types'
 import { PolylineElement, PolylineElementData } from '../types/polylineElement'
 
 class RoadClass extends PolylineElement<PolylineElementData> {
+  type = 'road'
   texture = '路'
   color = '#228B22'
 }

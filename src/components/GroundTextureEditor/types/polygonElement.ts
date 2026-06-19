@@ -11,7 +11,6 @@ export interface PolygonElementData extends BaseElementData {
 export abstract class PolygonElement<T extends PolygonElementData> extends BaseElement<T> {
   abstract texture: string
   abstract color: string
-  type = 'polygon' as const
 
   draw(ctx: CanvasRenderingContext2D): void {
     const { color } = this;

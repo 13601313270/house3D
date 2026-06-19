@@ -9,9 +9,11 @@ import { crosswalkDefinition } from './elements/crosswalk'
 import { flowerDefinition } from './elements/flower'
 
 export class ElementRegistry {
+  static mapIdToDefinition: Map<string, BaseElementDefinition> = new Map()
   private static definitions: BaseElementDefinition[] = []
 
   static register(definition: BaseElementDefinition): void {
+    this.mapIdToDefinition.set(definition.id, definition)
     ElementRegistry.definitions.push(definition)
   }
 
