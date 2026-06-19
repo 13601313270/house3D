@@ -21,6 +21,7 @@ import barkMaterial from './bark'
 import cobblestonePavementMaterial from './cobblestonePavement'
 import linenMaterial from './linen'
 import oldStyleTilesMaterial from './oldStyleTiles'
+import asphaltMaterial from './asphalt'
 
 export type MaterialDate = {
   id: number
@@ -167,6 +168,12 @@ const allMaterial: MaterialDate[] = [
     name: '复古瓷砖',
     material: oldStyleTilesMaterial.material,
     img: oldStyleTilesMaterial.img,
+  },
+  {
+    id: 24,
+    name: '沥青路',
+    material: asphaltMaterial.material,
+    img: asphaltMaterial.img,
   }
 ]
 
