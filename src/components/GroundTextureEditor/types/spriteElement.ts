@@ -11,24 +11,69 @@ export interface SpriteElementData extends BaseElementData {
   rotation: number
 }
 
+// 图片缓存，避免重复加载
+const imageCache: Map<string, HTMLImageElement> = new Map()
+
 export abstract class SpriteElement<T extends SpriteElementData> extends BaseElement<T> {
   abstract texture: string
+  abstract ratioLocked: boolean
+  abstract defaultWidth: number
+  abstract defaultHeight: number
+
+  private static loadImage(url: string): Promise<HTMLImageElement> {
+    return new Promise((resolve, reject) => {
+      if (imageCache.has(url)) {
+        resolve(imageCache.get(url)!)
+        return
+      }
+
+      const img = new Image()
+      img.crossOrigin = 'anonymous'
+      img.onload = () => {
+        imageCache.set(url, img)
+        resolve(img)
+      }
+      img.onerror = () => {
+        reject(new Error(`Failed to load image: ${url}`))
+      }
+      img.src = url
+    })
+  }
+
+  async init(): Promise<void> {
+    await SpriteElement.loadImage(this.texture)
+    this.isInitialized = true
+  }
 
   draw(ctx: CanvasRenderingContext2D): void {
-    const { texture } = this
-    const { x, y, width, height, rotation, opacity } = this.data
+    const { texture, ratioLocked, defaultWidth, defaultHeight } = this
+    const { x, y, rotation, opacity } = this.data
+
+    // 如果比例锁定，按照 defaultWidth/defaultHeight 的比例计算实际高度
+    let width = this.data.width
+    let height = this.data.height
+    if (ratioLocked) {
+      const ratio = defaultWidth / defaultHeight
+      height = width / ratio
+    }
 
     ctx.save()
     ctx.globalAlpha = opacity
     ctx.translate(x, y)
     ctx.rotate((rotation * Math.PI) / 180)
 
-    const icon = texture
-
-    ctx.font = `${Math.min(width, height) * 0.8}px Arial`
-    ctx.textAlign = 'center'
-    ctx.textBaseline = 'middle'
-    ctx.fillText(icon, 0, 0)
+    const cachedImg = imageCache.get(texture)
+    if (cachedImg && cachedImg.complete) {
+      ctx.drawImage(cachedImg, -width / 2, -height / 2, width, height)
+    } else {
+      ctx.fillStyle = '#cccccc'
+      ctx.fillRect(-width / 2, -height / 2, width, height)
+      ctx.fillStyle = '#666666'
+      ctx.font = '12px Arial'
+      ctx.textAlign = 'center'
+      ctx.textBaseline = 'middle'
+      ctx.fillText('图', 0, 0)
+    }
 
     if (this.world.selectedElementId === this.data.id) {
       ctx.strokeStyle = '#1890ff'
@@ -45,20 +90,34 @@ export abstract class SpriteElement<T extends SpriteElementData> extends BaseEle
   }
 
   drawPreview(ctx: CanvasRenderingContext2D, mousePos: Point): void {
-    const { texture } = this
-    const { width, height, rotation } = this.data
+    const { texture, ratioLocked, defaultWidth, defaultHeight } = this
+    const { rotation } = this.data
+
+    // 如果比例锁定，按照 defaultWidth/defaultHeight 的比例计算实际高度
+    let width = this.data.width
+    let height = this.data.height
+    if (ratioLocked) {
+      const ratio = defaultWidth / defaultHeight
+      height = width / ratio
+    }
 
     ctx.save()
     ctx.globalAlpha = 0.6
     ctx.translate(mousePos.x, mousePos.y)
     ctx.rotate((rotation * Math.PI) / 180)
 
-    const icon = texture
-
-    ctx.font = `${Math.min(width, height) * 0.8}px Arial`
-    ctx.textAlign = 'center'
-    ctx.textBaseline = 'middle'
-    ctx.fillText(icon, 0, 0)
+    const cachedImg = imageCache.get(texture)
+    if (cachedImg && cachedImg.complete) {
+      ctx.drawImage(cachedImg, -width / 2, -height / 2, width, height)
+    } else {
+      ctx.fillStyle = '#cccccc'
+      ctx.fillRect(-width / 2, -height / 2, width, height)
+      ctx.fillStyle = '#666666'
+      ctx.font = '12px Arial'
+      ctx.textAlign = 'center'
+      ctx.textBaseline = 'middle'
+      ctx.fillText('图', 0, 0)
+    }
 
     ctx.strokeStyle = '#1890ff'
     ctx.lineWidth = 2
@@ -111,20 +170,37 @@ export abstract class SpriteElement<T extends SpriteElementData> extends BaseEle
   }
 
   resize(dx: number, dy: number, corner: 'tl' | 'br'): void {
-    if (corner === 'tl') {
-      this.data.width -= dx
-      this.data.height -= dy
-      this.data.x += dx / 2
-      this.data.y += dy / 2
-    } else {
-      this.data.width += dx
-      this.data.height += dy
-      this.data.x += dx / 2
-      this.data.y += dy / 2
-    }
+    if (this.ratioLocked) {
+      // 比例锁定模式：按照 defaultWidth/defaultHeight 的比例缩放
+      const ratio = this.defaultWidth / this.defaultHeight
+      const delta = corner === 'tl' ? -dx : dx
+      const newWidth = Math.max(20, this.data.width + delta)
+      const newHeight = newWidth / ratio
 
-    this.data.width = Math.max(20, this.data.width)
-    this.data.height = Math.max(20, this.data.height)
+      const dw = newWidth - this.data.width
+      const dh = newHeight - this.data.height
+
+      this.data.width = newWidth
+      this.data.height = newHeight
+      this.data.x += dw / 2
+      this.data.y += dh / 2
+    } else {
+      // 自由缩放模式
+      if (corner === 'tl') {
+        this.data.width -= dx
+        this.data.height -= dy
+        this.data.x += dx / 2
+        this.data.y += dy / 2
+      } else {
+        this.data.width += dx
+        this.data.height += dy
+        this.data.x += dx / 2
+        this.data.y += dy / 2
+      }
+
+      this.data.width = Math.max(20, this.data.width)
+      this.data.height = Math.max(20, this.data.height)
+    }
   }
 
   setEditParams(): Array<editItem> {

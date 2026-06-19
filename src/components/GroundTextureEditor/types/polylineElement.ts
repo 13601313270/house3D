@@ -12,6 +12,10 @@ export abstract class PolylineElement<T extends PolylineElementData> extends Bas
   abstract texture: string
   abstract color: string
 
+  async init(): Promise<void> {
+    this.isInitialized = true
+  }
+
   draw(ctx: CanvasRenderingContext2D): void {
     const { color } = this;
     const { points, width, opacity } = this.data

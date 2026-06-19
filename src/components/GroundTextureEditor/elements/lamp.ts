@@ -5,6 +5,9 @@ class LampClass extends SpriteElement<SpriteElementData> {
   type = 'lamp'
   texture = '💡'
   color = '#FFD700'
+  ratioLocked = false
+  defaultWidth = 30
+  defaultHeight = 40
 }
 
 export const lampDefinition: BaseElementDefinition = {

@@ -129,14 +129,13 @@ const selectedElement = computed<BaseElement<any> | null>(() => {
   return world.getElementById(selectedElementId.value) || null
 })
 
-function selectSprite(item: BaseElementDefinition) {
+async function selectSprite(item: BaseElementDefinition) {
   // 如果正在绘制，先取消（无论 drawingElement 是否存在）
   if (world.isDrawing) {
     world.cancelDrawing()
   }
-  world.setSelectedSprite(item)
   world.setTool(item.type)
-  world.startDrawing()
+  await world.setSelectedSprite(item)
 }
 
 function getCanvasPos(e: MouseEvent) {
@@ -153,7 +152,7 @@ function getCanvasPos(e: MouseEvent) {
   }
 }
 
-function handleMouseDown(e: MouseEvent) {
+async function handleMouseDown(e: MouseEvent) {
   const pos = getCanvasPos(e)
   mousePos.value = pos
 
@@ -191,12 +190,6 @@ function handleMouseDown(e: MouseEvent) {
 
     case 'polyline':
     case 'polygon':
-      if (!world.isDrawing) {
-        if (world.selectedSprite !== null) {
-          world.startDrawing()
-        }
-      }
-
       if (isDoubleClick) {
         const minPoints = world.currentTool === 'polygon' ? 3 : 2
         if (world.drawingElement &&

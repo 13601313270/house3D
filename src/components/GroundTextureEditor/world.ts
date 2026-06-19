@@ -1,12 +1,7 @@
 import type { Point, ElementType, BaseElementData, BaseElementDefinition } from './types'
 import { BaseElement } from './types'
 import { ElementRegistry } from './registry'
-import { ElementFactory } from './types/elementFactory'
-
-// 导入元素类以触发注册
-import './types/spriteElement'
-import './types/polylineElement'
-import './types/polygonElement'
+import { SpriteElement } from './types/spriteElement'
 
 export class TextureWorld {
   elements: BaseElement<BaseElementData>[] = []
@@ -80,15 +75,6 @@ export class TextureWorld {
     return null
   }
 
-  startDrawing(): void {
-    if (this.selectedSprite) {
-      this.isDrawing = true
-      const CreateClass = this.selectedSprite.createClass
-      const defaultData = CreateClass.defaultData()
-      this.drawingElement = new CreateClass(this, defaultData);
-    }
-  }
-
   addDrawingPoint(pos: Point): void {
     if (this.drawingElement) {
       this.drawingElement.handleMouseDown(pos)
@@ -153,8 +139,22 @@ export class TextureWorld {
     this.emit('toolChanged', tool)
   }
 
-  setSelectedSprite(spriteId: BaseElementDefinition): void {
+  async setSelectedSprite(spriteId: BaseElementDefinition): Promise<void> {
     this.selectedSprite = spriteId
+    const CreateClass = this.selectedSprite.createClass
+    const defaultData = CreateClass.defaultData()
+    this.drawingElement = new CreateClass(this, defaultData);
+
+    // 如果是 SpriteElement，使用子类定义的默认宽高
+    if (this.drawingElement instanceof SpriteElement) {
+      const sprite = this.drawingElement as SpriteElement<any>
+      sprite.data.width = sprite.defaultWidth
+      sprite.data.height = sprite.defaultHeight
+    }
+
+    // 调用异步初始化方法
+    await this.drawingElement.init()
+    this.isDrawing = true
   }
 
   sortElementsByZIndex(): void {

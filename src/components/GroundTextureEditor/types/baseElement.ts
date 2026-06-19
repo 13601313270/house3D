@@ -12,11 +12,14 @@ export abstract class BaseElement<T extends BaseElementData> {
   abstract type: string
   world: TextureWorld
   data: T
+  isInitialized: boolean = false
   // eslint-disable-next-line no-useless-constructor
   constructor(world: TextureWorld, data: T) {
     this.world = world
     this.data = data
   }
+
+  abstract init(): Promise<void>
 
   abstract draw(ctx: CanvasRenderingContext2D): void
 

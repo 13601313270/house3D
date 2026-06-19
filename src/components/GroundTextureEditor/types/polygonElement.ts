@@ -13,6 +13,10 @@ export abstract class PolygonElement<T extends PolygonElementData> extends BaseE
   abstract color: string
   private dragHandleRadius: number = 12
 
+  async init(): Promise<void> {
+    this.isInitialized = true
+  }
+
   draw(ctx: CanvasRenderingContext2D): void {
     const { color } = this;
     const { points, opacity } = this.data

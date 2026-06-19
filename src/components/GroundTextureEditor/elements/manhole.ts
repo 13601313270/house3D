@@ -3,8 +3,11 @@ import { SpriteElement, SpriteElementData } from '../types/spriteElement'
 
 class ManholeClass extends SpriteElement<SpriteElementData> {
   type = 'manhole'
-  texture = '⭕️'
+  texture = '/sticker/manhole.png'
   color = '#4a4a4a'
+  ratioLocked = true
+  defaultWidth = 70
+  defaultHeight = 70
 }
 
 export const manholeDefinition: BaseElementDefinition = {

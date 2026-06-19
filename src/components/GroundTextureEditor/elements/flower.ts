@@ -4,6 +4,9 @@ import { SpriteElement, SpriteElementData } from '../types/spriteElement'
 class FlowerClass extends SpriteElement<SpriteElementData> {
   type = 'flower'
   texture = '🌹'
+  ratioLocked = true
+  defaultWidth = 50
+  defaultHeight = 50
 }
 
 export const flowerDefinition: BaseElementDefinition = {

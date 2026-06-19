@@ -5,6 +5,9 @@ class SignClass extends SpriteElement<SpriteElementData> {
   type = 'sign'
   texture = '⚠️'
   color = '#FFFF00'
+  ratioLocked = false
+  defaultWidth = 30
+  defaultHeight = 40
 }
 export const signDefinition: BaseElementDefinition = {
   id: 'sign',
