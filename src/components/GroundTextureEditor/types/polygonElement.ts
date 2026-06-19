@@ -4,21 +4,72 @@ import { BaseElement } from './baseElement'
 import { editItem } from '@/entities'
 
 export interface PolygonElementData extends BaseElementData {
-  points: Point[]
-  textureScale: number
+  points: Point[],
+  textureScale: number,
 }
 
 export abstract class PolygonElement<T extends PolygonElementData> extends BaseElement<T> {
   abstract texture: string
   abstract color: string
+  abstract defaultTextureScale: number
   private dragHandleRadius: number = 12
 
+  private texturePattern: CanvasPattern | null = null
+  private textureImage: HTMLImageElement | null = null
+  private textureLoaded = false
+
   async init(): Promise<void> {
+    await this.loadTexture()
     this.isInitialized = true
   }
 
+  private async loadTexture(): Promise<void> {
+    if (!this.texture) return
+
+    return new Promise((resolve) => {
+      const img = new Image()
+      img.crossOrigin = 'anonymous'
+      img.onload = () => {
+        this.textureImage = img
+        this.textureLoaded = true
+        resolve()
+      }
+      img.onerror = () => {
+        this.textureLoaded = false
+        resolve()
+      }
+      img.src = this.texture
+    })
+  }
+
+  private lastRunScale: number | null = null;
+  private getTexturePattern(ctx: CanvasRenderingContext2D): CanvasPattern | null {
+    if (!this.textureLoaded || !this.textureImage) return null
+
+    if (!this.texturePattern || this.lastRunScale !== this.data.textureScale) {
+      const scale = this.defaultTextureScale * this.data.textureScale
+      console.log('scale', scale)
+      const scaledWidth = this.textureImage.width * scale
+      const scaledHeight = this.textureImage.height * scale
+
+      const tempCanvas = document.createElement('canvas')
+      tempCanvas.width = scaledWidth
+      tempCanvas.height = scaledHeight
+      const tempCtx = tempCanvas.getContext('2d')!
+
+      tempCtx.drawImage(
+        this.textureImage,
+        0, 0,
+        scaledWidth,
+        scaledHeight
+      )
+      this.lastRunScale = this.data.textureScale
+      this.texturePattern = ctx.createPattern(tempCanvas, 'repeat')
+    }
+    return this.texturePattern
+  }
+
   draw(ctx: CanvasRenderingContext2D): void {
-    const { color } = this;
     const { points, opacity } = this.data
     if (points.length < 3) return
 
@@ -32,11 +83,13 @@ export abstract class PolygonElement<T extends PolygonElementData> extends BaseE
     }
     ctx.closePath()
 
-    ctx.fillStyle = color || '#228B22'
+    const texturePattern = this.getTexturePattern(ctx)
+    if (texturePattern) {
+      ctx.fillStyle = texturePattern
+    } else {
+      ctx.fillStyle = this.color || '#228B22'
+    }
     ctx.fill()
-    ctx.strokeStyle = this.darkenColor(color || '#228B22')
-    ctx.lineWidth = 2
-    ctx.stroke()
 
     if (this.world.selectedElementId === this.data.id) {
       ctx.fillStyle = '#1890ff'
@@ -122,7 +175,6 @@ export abstract class PolygonElement<T extends PolygonElementData> extends BaseE
   }
 
   drawPreview(ctx: CanvasRenderingContext2D, mousePos: Point): void {
-    const { color } = this;
     const { points } = this.data
     if (points.length === 0) return
 
@@ -137,9 +189,15 @@ export abstract class PolygonElement<T extends PolygonElementData> extends BaseE
     ctx.lineTo(mousePos.x, mousePos.y)
     ctx.closePath()
 
-    ctx.fillStyle = color || '#228B22'
+    const texturePattern = this.getTexturePattern(ctx)
+    if (texturePattern) {
+      ctx.fillStyle = texturePattern
+    } else {
+      ctx.fillStyle = this.color || '#228B22'
+    }
     ctx.fill()
-    ctx.strokeStyle = this.darkenColor(color || '#228B22')
+
+    ctx.strokeStyle = this.color;
     ctx.lineWidth = 2
     ctx.stroke()
 
@@ -193,14 +251,6 @@ export abstract class PolygonElement<T extends PolygonElementData> extends BaseE
     })
   }
 
-  private darkenColor(color: string): string {
-    const hex = color.replace('#', '')
-    const r = Math.max(0, parseInt(hex.substring(0, 2), 16) - 40)
-    const g = Math.max(0, parseInt(hex.substring(2, 4), 16) - 40)
-    const b = Math.max(0, parseInt(hex.substring(4, 6), 16) - 40)
-    return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`
-  }
-
   canFinishDrawing(): boolean {
     return this.data.points.length >= 3
   }
@@ -223,8 +273,8 @@ export abstract class PolygonElement<T extends PolygonElementData> extends BaseE
   static defaultData(): PolygonElementData {
     return {
       ...super.defaultData(),
-      points: [],
       textureScale: 1,
+      points: [],
     }
   }
 }

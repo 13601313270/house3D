@@ -50,7 +50,7 @@ export abstract class SpriteElement<T extends SpriteElementData> extends BaseEle
     const { x, y, rotation, opacity } = this.data
 
     // 如果比例锁定，按照 defaultWidth/defaultHeight 的比例计算实际高度
-    let width = this.data.width
+    const width = this.data.width
     let height = this.data.height
     if (ratioLocked) {
       const ratio = defaultWidth / defaultHeight
@@ -94,7 +94,7 @@ export abstract class SpriteElement<T extends SpriteElementData> extends BaseEle
     const { rotation } = this.data
 
     // 如果比例锁定，按照 defaultWidth/defaultHeight 的比例计算实际高度
-    let width = this.data.width
+    const width = this.data.width
     let height = this.data.height
     if (ratioLocked) {
       const ratio = defaultWidth / defaultHeight

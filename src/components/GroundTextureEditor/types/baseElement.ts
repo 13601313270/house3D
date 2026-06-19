@@ -54,15 +54,6 @@ export abstract class BaseElement<T extends BaseElementData> {
         step: 0.1,
         value: this.data.opacity,
       },
-      {
-        id: 'zIndex',
-        label: '图层顺序',
-        dataType: 'number',
-        min: 0,
-        max: 99,
-        step: 1,
-        value: this.data.zIndex,
-      },
     ]
   }
 

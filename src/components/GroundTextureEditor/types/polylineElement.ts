@@ -12,12 +12,44 @@ export abstract class PolylineElement<T extends PolylineElementData> extends Bas
   abstract texture: string
   abstract color: string
 
+  private texturePattern: CanvasPattern | null = null
+  private textureImage: HTMLImageElement | null = null
+  private textureLoaded = false
+
   async init(): Promise<void> {
+    await this.loadTexture()
     this.isInitialized = true
   }
 
+  private async loadTexture(): Promise<void> {
+    if (!this.texture) return
+
+    return new Promise((resolve) => {
+      const img = new Image()
+      img.crossOrigin = 'anonymous'
+      img.onload = () => {
+        this.textureImage = img
+        this.textureLoaded = true
+        resolve()
+      }
+      img.onerror = () => {
+        this.textureLoaded = false
+        resolve()
+      }
+      img.src = this.texture
+    })
+  }
+
+  private getTexturePattern(ctx: CanvasRenderingContext2D): CanvasPattern | null {
+    if (!this.textureLoaded || !this.textureImage) return null
+
+    if (!this.texturePattern) {
+      this.texturePattern = ctx.createPattern(this.textureImage, 'repeat')
+    }
+    return this.texturePattern
+  }
+
   draw(ctx: CanvasRenderingContext2D): void {
-    const { color } = this;
     const { points, width, opacity } = this.data
     if (points.length < 2) return
 
@@ -29,8 +61,6 @@ export abstract class PolylineElement<T extends PolylineElementData> extends Bas
     for (let i = 1; i < points.length; i++) {
       ctx.lineTo(points[i].x, points[i].y)
     }
-
-    const lineColor = color || '#8B4513'
 
     ctx.strokeStyle = '#333333'
     ctx.lineWidth = width + 4
@@ -44,7 +74,12 @@ export abstract class PolylineElement<T extends PolylineElementData> extends Bas
       ctx.lineTo(points[i].x, points[i].y)
     }
 
-    ctx.strokeStyle = lineColor
+    const texturePattern = this.getTexturePattern(ctx)
+    if (texturePattern) {
+      ctx.strokeStyle = texturePattern
+    } else {
+      ctx.strokeStyle = this.color || '#8B4513'
+    }
     ctx.lineWidth = width
     ctx.lineCap = 'round'
     ctx.lineJoin = 'round'
@@ -63,7 +98,6 @@ export abstract class PolylineElement<T extends PolylineElementData> extends Bas
   }
 
   drawPreview(ctx: CanvasRenderingContext2D, mousePos: Point): void {
-    const { color } = this;
     const { points, width } = this.data
     if (points.length === 0) return
 
@@ -77,7 +111,6 @@ export abstract class PolylineElement<T extends PolylineElementData> extends Bas
     }
     ctx.lineTo(mousePos.x, mousePos.y)
 
-    const lineColor = color || '#8B4513'
     const lineWidth = width || 20
 
     ctx.strokeStyle = '#333333'
@@ -93,7 +126,12 @@ export abstract class PolylineElement<T extends PolylineElementData> extends Bas
     }
     ctx.lineTo(mousePos.x, mousePos.y)
 
-    ctx.strokeStyle = lineColor
+    const texturePattern = this.getTexturePattern(ctx)
+    if (texturePattern) {
+      ctx.strokeStyle = texturePattern
+    } else {
+      ctx.strokeStyle = this.color || '#8B4513'
+    }
     ctx.lineWidth = lineWidth
     ctx.lineCap = 'round'
     ctx.lineJoin = 'round'
