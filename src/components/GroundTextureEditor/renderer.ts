@@ -10,7 +10,18 @@ export class CanvasRenderer {
   private previewCtx: CanvasRenderingContext2D
   public width: number
   public height: number
-  private gridSize: number = 50
+  private readonly gridIntervals: number[] = [10, 20, 25, 50, 100, 200, 500, 1000, 2000]
+  private readonly baseGridSize: number = 50
+
+  private getGridSize(scale: number): number {
+    const targetInterval = this.baseGridSize / scale
+    for (const interval of this.gridIntervals) {
+      if (interval >= targetInterval) {
+        return interval
+      }
+    }
+    return this.gridIntervals[this.gridIntervals.length - 1]
+  }
 
   constructor(
     mainCanvas: HTMLCanvasElement,
@@ -46,52 +57,55 @@ export class CanvasRenderer {
     this.height = height
   }
 
-  private drawGrid(ctx: CanvasRenderingContext2D, scaledWidth: number, scaledHeight: number): void {
+  private drawGrid(ctx: CanvasRenderingContext2D, scaledWidth: number, scaledHeight: number, scale: number): void {
     ctx.strokeStyle = '#e0e0e0'
     ctx.lineWidth = 1
 
-    const visibleWidth = scaledWidth * 2
-    const visibleHeight = scaledHeight * 2
+    const gridSize = this.getGridSize(scale)
+    const extendedRange = Math.max(scaledWidth, scaledHeight) * 2
 
-    const startX = -visibleWidth
-    for (let x = startX; x <= visibleWidth; x += this.gridSize) {
+    const startX = Math.floor(-extendedRange / gridSize) * gridSize
+    for (let x = startX; x <= extendedRange; x += gridSize) {
       ctx.beginPath()
-      ctx.moveTo(x, -visibleHeight)
-      ctx.lineTo(x, visibleHeight)
+      ctx.moveTo(x, -extendedRange)
+      ctx.lineTo(x, extendedRange)
       ctx.stroke()
     }
 
-    const startY = -visibleHeight
-    for (let y = startY; y <= visibleHeight; y += this.gridSize) {
+    const startY = Math.floor(-extendedRange / gridSize) * gridSize
+    for (let y = startY; y <= extendedRange; y += gridSize) {
       ctx.beginPath()
-      ctx.moveTo(-visibleWidth, y)
-      ctx.lineTo(visibleWidth, y)
+      ctx.moveTo(-extendedRange, y)
+      ctx.lineTo(extendedRange, y)
       ctx.stroke()
     }
   }
 
-  private drawAxes(ctx: CanvasRenderingContext2D, offsetX: number, offsetY: number, scaledWidth: number, scaledHeight: number): void {
+  private drawAxes(ctx: CanvasRenderingContext2D, scaledWidth: number, scaledHeight: number, scale: number): void {
     ctx.strokeStyle = '#333333'
     ctx.lineWidth = 2
 
+    const axisLength = Math.max(scaledWidth, scaledHeight) * 2
+    const gridSize = this.getGridSize(scale)
+
     ctx.beginPath()
-    ctx.moveTo(0, -offsetY)
-    ctx.lineTo(0, scaledHeight - offsetY)
+    ctx.moveTo(0, -axisLength)
+    ctx.lineTo(0, axisLength)
     ctx.stroke()
 
     ctx.beginPath()
-    ctx.moveTo(-offsetX, 0)
-    ctx.lineTo(scaledWidth - offsetX, 0)
+    ctx.moveTo(-axisLength, 0)
+    ctx.lineTo(axisLength, 0)
     ctx.stroke()
 
     ctx.fillStyle = '#333333'
-    ctx.font = '12px Arial'
     ctx.textAlign = 'center'
     ctx.textBaseline = 'top'
 
-    const startX = Math.floor(-offsetX / this.gridSize) * this.gridSize
-    for (let x = startX; x <= scaledWidth - offsetX; x += this.gridSize) {
+    const startX = Math.floor(-axisLength / gridSize) * gridSize
+    for (let x = startX; x <= axisLength; x += gridSize) {
       if (x !== 0) {
+        ctx.font = `${12 / scale}px Arial`
         ctx.fillText(x.toString(), x, 5)
       }
     }
@@ -99,12 +113,23 @@ export class CanvasRenderer {
     ctx.textAlign = 'right'
     ctx.textBaseline = 'middle'
 
-    const startY = Math.floor(-offsetY / this.gridSize) * this.gridSize
-    for (let y = startY; y <= scaledHeight - offsetY; y += this.gridSize) {
+    const startY = Math.floor(-axisLength / gridSize) * gridSize
+    for (let y = startY; y <= axisLength; y += gridSize) {
       if (y !== 0) {
+        ctx.font = `${12 / scale}px Arial`
         ctx.fillText((-y).toString(), -5, y)
       }
     }
+
+    ctx.fillStyle = '#666666'
+    ctx.font = `bold ${14 / scale}px Arial`
+    ctx.textAlign = 'left'
+    ctx.fillText('X', axisLength - 20, 20)
+    ctx.save()
+    ctx.translate(20, -axisLength + 20)
+    ctx.rotate(-Math.PI / 2)
+    ctx.fillText('Y', 0, 0)
+    ctx.restore()
   }
 
   renderGrid(world: TextureWorld): void {
@@ -117,8 +142,8 @@ export class CanvasRenderer {
     const scaledWidth = this.width / world.scale
     const scaledHeight = this.height / world.scale
 
-    this.drawGrid(this.gridCtx, scaledWidth, scaledHeight)
-    this.drawAxes(this.gridCtx, world.canvasOffset.x / world.scale, world.canvasOffset.y / world.scale, scaledWidth, scaledHeight)
+    this.drawGrid(this.gridCtx, scaledWidth, scaledHeight, world.scale)
+    this.drawAxes(this.gridCtx, scaledWidth, scaledHeight, world.scale)
 
     this.gridCtx.restore()
   }
