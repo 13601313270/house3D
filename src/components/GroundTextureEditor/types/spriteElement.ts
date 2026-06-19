@@ -131,24 +131,6 @@ export abstract class SpriteElement<T extends SpriteElementData> extends BaseEle
     return [
       ...super.setEditParams(),
       {
-        id: 'width',
-        label: '宽度',
-        dataType: 'number',
-        min: 1,
-        max: 100,
-        step: 1,
-        value: this.data.width,
-      },
-      {
-        id: 'height',
-        label: '高度',
-        dataType: 'number',
-        min: 1,
-        max: 100,
-        step: 1,
-        value: this.data.height,
-      },
-      {
         id: 'rotation',
         label: '旋转角度',
         dataType: 'number',

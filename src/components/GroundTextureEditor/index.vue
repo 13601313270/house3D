@@ -50,9 +50,14 @@
         <div class="property-item" v-for="item in editParams" :key="item.id">
           <label>{{ item.label }}</label>
           <span v-if="item.dataType === 'string'">{{ item.value }}</span>
-          <div v-else-if="item.dataType === 'number'">
+          <div v-else-if="item.dataType === 'number'" class="numberEdit">
             <input type="range" v-model.number="item.value" :min="item.min" :max="item.max" :step="item.step"
               @input="render" />
+            <div class="numberInputContainer">
+              <input type="number" class="numberInput" v-model.number="item.value" :min="item.min" :max="item.max"
+                :step="item.step" @input="render" />
+              <div v-if="item.unit" class="unit">{{ item.unit }}</div>
+            </div>
           </div>
           <span v-else-if="item.dataType === 'boolean'">{{ item.value ? '是' : '否' }}</span>
           <!-- <span v-else>{{ item.value }}</span> -->
@@ -863,15 +868,19 @@ onUnmounted(() => {
   }
 
   .panel-content {
-    padding: 16px;
-    overflow: auto;
+    padding: 12px;
+    overflow-y: auto;
     flex-grow: 1;
 
     .property-item {
       display: flex;
-      flex-direction: column;
-      gap: 8px;
-      margin-bottom: 16px;
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 6px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid #f3f3f3;
+      flex-wrap: wrap;
 
       label {
         font-size: 14px;
@@ -886,6 +895,31 @@ onUnmounted(() => {
         font-size: 12px;
         color: #999;
         text-align: right;
+      }
+
+      .numberEdit {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        .numberInputContainer {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border: 1px solid #b2b2b2;
+          border-radius: 4px;
+          overflow: hidden;
+          flex-shrink: 0;
+
+          .numberInput {
+            margin-left: 2px;
+            width: 40px;
+            height: 28px;
+            border: none;
+            outline: none;
+            width: 44px;
+          }
+        }
       }
     }
   }

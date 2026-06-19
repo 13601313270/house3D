@@ -309,7 +309,6 @@ function LockObj(value: boolean) {
         flex-direction: row;
         align-items: center;
         justify-content: space-between;
-        margin-bottom: 12px;
         margin-bottom: 6px;
         padding-bottom: 6px;
         border-bottom: solid 1px #f3f3f3;
