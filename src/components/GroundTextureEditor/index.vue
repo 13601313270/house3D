@@ -39,8 +39,11 @@
     <div v-if="selectedElement" class="properties-panel"
       :style="{ left: panelPosition.x + 'px', top: panelPosition.y + 'px' }">
       <div class="panel-header" @mousedown="startPanelDrag">
-        <span class="drag-handle">☰</span>
-        <h3>属性</h3>
+        <span class="drag-handle">
+          <img src="@/assets/move2.svg" alt="move" @mousedown.prevent />
+        </span>
+        <div class="title">属性</div>
+        <div class="close-btn"></div>
       </div>
       <div class="panel-content">
         <!-- {{ editParams }} -->
@@ -92,6 +95,7 @@ import type { BaseElement, BaseElementData, BaseElementDefinition } from './type
 import { SpriteElement, SpriteElementData } from './types/spriteElement'
 import { editItem } from '@/entities'
 import { PolylineElement, PolylineElementData } from './types/polylineElement'
+import { PolygonElement } from './types/polygonElement'
 
 const canvasRef = ref<HTMLCanvasElement | null>(null)
 const gridCanvasRef = ref<HTMLCanvasElement | null>(null)
@@ -106,13 +110,14 @@ let resizeObserver: ResizeObserver | null = null
 const mousePos = ref({ x: 0, y: 0 })
 const selectedElementId = ref<string | null>(null)
 const editParams = ref<editItem[]>([])
-const panelPosition = ref({ x: 20, y: 20 })
+const panelPosition = ref({ x: window.innerWidth - 360, y: 20 })
 const isDraggingPanel = ref(false)
 const panelDragOffset = ref({ x: 0, y: 0 })
 const isResizing = ref(false)
 const resizeCorner = ref<'tl' | 'br' | null>(null)
 const isDraggingPoint = ref(false)
 const draggingPointIndex = ref(-1)
+const dragPointOffset = ref({ x: 0, y: 0 })
 
 const selectedElement = computed<BaseElement<any> | null>(() => {
   if (!selectedElementId.value) return null
@@ -205,7 +210,49 @@ function handleMouseDown(e: MouseEvent) {
 
     case 'select':
     case 'move': {
+      // 先检测所有元素的顶点
+      for (const el of world.elements) {
+        if (el instanceof PolylineElement) {
+          const polyline = el as PolylineElement<PolylineElementData>
+          const pointIndex = polyline.hitTestPoint(worldPos)
+          if (pointIndex !== -1) {
+            world.selectElement(el.data.id)
+            selectedElementId.value = el.data.id
+            isDraggingPoint.value = true
+            draggingPointIndex.value = pointIndex
+            const pointPos = polyline.data.points[pointIndex]
+            dragPointOffset.value = {
+              x: worldPos.x - pointPos.x,
+              y: worldPos.y - pointPos.y,
+            }
+            world.isDragging = false
+            world.isPanning = false
+            render()
+            return
+          }
+        } else if (el instanceof PolygonElement) {
+          const polygon = el as PolygonElement<any>
+          const pointIndex = polygon.hitTestPoint(worldPos)
+          if (pointIndex !== -1) {
+            world.selectElement(el.data.id)
+            selectedElementId.value = el.data.id
+            isDraggingPoint.value = true
+            draggingPointIndex.value = pointIndex
+            const pointPos = polygon.data.points[pointIndex]
+            dragPointOffset.value = {
+              x: worldPos.x - pointPos.x,
+              y: worldPos.y - pointPos.y,
+            }
+            world.isDragging = false
+            world.isPanning = false
+            render()
+            return
+          }
+        }
+      }
+
       const element = world.findElementAt(worldPos)
+
       if (element && element instanceof SpriteElement) {
         const sprite = element as SpriteElement<SpriteElementData>
         const hitCorner = sprite.hitTestResizeHandle(worldPos)
@@ -222,15 +269,37 @@ function handleMouseDown(e: MouseEvent) {
       }
 
       if (element && element instanceof PolylineElement) {
-        const polyline = element as PolylineElement<PolylineElementData>
-        const pointIndex = polyline.hitTestPoint(worldPos)
-        if (pointIndex !== -1) {
+        world.selectElement(element.data.id)
+        selectedElementId.value = element.data.id
+        world.isDragging = false
+        world.isPanning = true
+        world.panStartPos = pos
+        world.panStartOffset = { ...world.canvasOffset }
+        render()
+        return
+      }
+
+      if (element && element instanceof PolygonElement) {
+        const polygon = element as PolygonElement<any>
+        if (polygon.hitTestDragHandle(worldPos)) {
           world.selectElement(element.data.id)
           selectedElementId.value = element.data.id
-          isDraggingPoint.value = true
-          draggingPointIndex.value = pointIndex
-          world.isDragging = false
+          world.isDragging = true
           world.isPanning = false
+          const center = polygon.getCenter()
+          world.dragOffset = {
+            x: worldPos.x - center.x,
+            y: worldPos.y - center.y,
+          }
+          render()
+          return
+        } else {
+          world.selectElement(element.data.id)
+          selectedElementId.value = element.data.id
+          world.isDragging = false
+          world.isPanning = true
+          world.panStartPos = pos
+          world.panStartOffset = { ...world.canvasOffset }
           render()
           return
         }
@@ -323,26 +392,45 @@ function handleMouseMove(e: MouseEvent) {
     const element = world.getSelectedElement()
     if (element && element instanceof PolylineElement) {
       const polyline = element as PolylineElement<PolylineElementData>
-      polyline.movePoint(draggingPointIndex.value, worldPos)
+      const newPos = {
+        x: worldPos.x - dragPointOffset.value.x,
+        y: worldPos.y - dragPointOffset.value.y,
+      }
+      polyline.movePoint(draggingPointIndex.value, newPos)
+    } else if (element && element instanceof PolygonElement) {
+      const polygon = element as PolygonElement<any>
+      const newPos = {
+        x: worldPos.x - dragPointOffset.value.x,
+        y: worldPos.y - dragPointOffset.value.y,
+      }
+      polygon.movePoint(draggingPointIndex.value, newPos)
     }
     render()
     return
   }
-  
+
   if (world.isDragging) {
     const worldPos = {
       x: Math.round((pos.x - world.canvasOffset.x) / world.scale),
       y: Math.round((pos.y - world.canvasOffset.y) / world.scale),
     }
-    const newX = worldPos.x - world.dragOffset.x
     const element = world.getSelectedElement()
     if (element) {
-      const oldPos = element instanceof SpriteElement
-        ? { x: (element as SpriteElement<SpriteElementData>).data.x, y: (element as SpriteElement<SpriteElementData>).data.y }
-        : (element as any).data.points[0]
-      const dx = newX - oldPos.x
-      const dy = (worldPos.y - world.dragOffset.y) - oldPos.y
-      world.translateSelectedElement(dx, dy)
+      if (element instanceof PolygonElement) {
+        const polygon = element as PolygonElement<any>
+        const center = polygon.getCenter()
+        const dx = worldPos.x - world.dragOffset.x - center.x
+        const dy = worldPos.y - world.dragOffset.y - center.y
+        world.translateSelectedElement(dx, dy)
+      } else {
+        const oldPos = element instanceof SpriteElement
+          ? { x: (element as SpriteElement<SpriteElementData>).data.x, y: (element as SpriteElement<SpriteElementData>).data.y }
+          : (element as any).data.points[0]
+        const newX = worldPos.x - world.dragOffset.x
+        const dx = newX - oldPos.x
+        const dy = (worldPos.y - world.dragOffset.y) - oldPos.y
+        world.translateSelectedElement(dx, dy)
+      }
     }
     render()
     return
@@ -361,6 +449,7 @@ function handleMouseUp(_e: MouseEvent) {
   resizeCorner.value = null
   isDraggingPoint.value = false
   draggingPointIndex.value = -1
+  dragPointOffset.value = { x: 0, y: 0 }
   render()
 }
 
@@ -724,59 +813,82 @@ onUnmounted(() => {
 
 .properties-panel {
   position: fixed;
-  width: 200px;
+  width: 340px;
   padding: 0;
-  background: #fff;
+  background: white;
   border-radius: 8px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 0 14px 3px rgba(0, 0, 0, 0.65);
   overflow: hidden;
-}
-
-.properties-panel .panel-header {
-  display: flex;
-  align-items: center;
-  padding: 12px 16px;
-  background: #000000;
-  border-bottom: 1px solid #333333;
-  cursor: move;
-}
-
-.properties-panel .panel-header .drag-handle {
-  margin-right: 8px;
-  color: #ffffff;
-  font-size: 12px;
-}
-
-.properties-panel .panel-header h3 {
-  margin: 0;
-  font-size: 16px;
-  color: #ffffff;
-}
-
-.properties-panel .panel-content {
-  padding: 16px;
-}
-
-.property-item {
+  z-index: 1000;
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  margin-bottom: 16px;
-}
 
-.property-item label {
-  font-size: 14px;
-  color: #666;
-}
+  .panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #000000;
+    color: #ffffff;
+    cursor: move;
 
-.property-item input[type='range'] {
-  width: 100%;
-}
+    .drag-handle {
+      width: 32px;
+      height: 32px;
+      cursor: move;
+      display: flex;
+      align-items: center;
+      justify-content: center;
 
-.property-item span {
-  font-size: 12px;
-  color: #999;
-  text-align: right;
+      >img {
+        width: 24px;
+        height: 24px;
+      }
+    }
+
+    .title {
+      font-size: 16px;
+      line-height: 32px;
+      height: 32px;
+      text-align: center;
+      flex-grow: 1;
+    }
+
+    .close-btn {
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+  }
+
+  .panel-content {
+    padding: 16px;
+    overflow: auto;
+    flex-grow: 1;
+
+    .property-item {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 16px;
+
+      label {
+        font-size: 14px;
+        color: #666;
+      }
+
+      input[type='range'] {
+        width: 100%;
+      }
+
+      span {
+        font-size: 12px;
+        color: #999;
+        text-align: right;
+      }
+    }
+  }
 }
 
 .delete-btn {

@@ -50,7 +50,7 @@ export abstract class PolylineElement<T extends PolylineElementData> extends Bas
       ctx.fillStyle = '#1890ff'
       points.forEach((point) => {
         ctx.beginPath()
-        ctx.arc(point.x, point.y, 6, 0, Math.PI * 2)
+        ctx.arc(point.x, point.y, 10, 0, Math.PI * 2)
         ctx.fill()
       })
     }
@@ -129,7 +129,7 @@ export abstract class PolylineElement<T extends PolylineElementData> extends Bas
 
   hitTestPoint(pos: Point): number {
     const { points } = this.data
-    const handleRadius = 12
+    const handleRadius = 20
     for (let i = 0; i < points.length; i++) {
       const dist = Math.sqrt(
         Math.pow(pos.x - points[i].x, 2) +

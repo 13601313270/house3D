@@ -1,25 +1,25 @@
 <template>
   <div class="context-menu" :style="{ top: position.y + 'px', left: position.x + 'px' }">
     <div class="configContainer" v-if="boneEditIsShow" style="width: auto;height: auto;">
-      <div class="head">
-        <div class="moveIcon" @mousedown="startDrag">
+      <div class="head" @mousedown="startDrag">
+        <div class="moveIcon">
           <img src="../assets/move2.svg" alt="move" @mousedown.prevent />
         </div>
         <div class="title">骨骼姿势编辑</div>
-        <div class="closeIcon" @click="boneEditIsShow = false, emit('close')">
-          <img src="../assets/closeWhite.svg" alt="close" />
+        <div class="closeIcon" @mousedown.stop @click="boneEditIsShow = false, emit('close')">
+          <img @mousedown.prevent.stop src="../assets/closeWhite.svg" alt="close" />
         </div>
       </div>
       <BoneEdit v-if="boneEditIsShow" :modelValue="modelValue.bone" @update:modelValue="handleUpdateBone" />
     </div>
     <div class="configContainer" v-else>
-      <div class="head">
-        <div class="moveIcon" @mousedown="startDrag">
+      <div class="head" @mousedown="startDrag">
+        <div class="moveIcon">
           <img src="../assets/move2.svg" alt="move" @mousedown.prevent />
         </div>
         <div class="title">{{ allFileKeysName[typeKey] }}</div>
-        <div class="closeIcon" @click="emit('close')">
-          <img src="../assets/closeWhite.svg" alt="close" />
+        <div class="closeIcon" @mousedown.stop @click="emit('close')">
+          <img @mousedown.stop.prevent src="../assets/closeWhite.svg" alt="close" />
         </div>
       </div>
       <!-- {{ modelValue }} -->

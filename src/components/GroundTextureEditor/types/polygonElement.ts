@@ -11,6 +11,7 @@ export interface PolygonElementData extends BaseElementData {
 export abstract class PolygonElement<T extends PolygonElementData> extends BaseElement<T> {
   abstract texture: string
   abstract color: string
+  private dragHandleRadius: number = 12
 
   draw(ctx: CanvasRenderingContext2D): void {
     const { color } = this;
@@ -37,12 +38,83 @@ export abstract class PolygonElement<T extends PolygonElementData> extends BaseE
       ctx.fillStyle = '#1890ff'
       points.forEach((point) => {
         ctx.beginPath()
-        ctx.arc(point.x, point.y, 6, 0, Math.PI * 2)
+        ctx.arc(point.x, point.y, 10, 0, Math.PI * 2)
         ctx.fill()
       })
+
+      this.drawDragHandle(ctx)
     }
 
     ctx.restore()
+  }
+
+  public getCenter(): Point {
+    const { points } = this.data
+    if (points.length === 0) return { x: 0, y: 0 }
+
+    let centerX = 0
+    let centerY = 0
+    points.forEach(point => {
+      centerX += point.x
+      centerY += point.y
+    })
+    return {
+      x: centerX / points.length,
+      y: centerY / points.length
+    }
+  }
+
+  private drawDragHandle(ctx: CanvasRenderingContext2D): void {
+    const center = this.getCenter()
+
+    ctx.save()
+
+    ctx.beginPath()
+    ctx.arc(center.x, center.y, this.dragHandleRadius, 0, Math.PI * 2)
+    ctx.fillStyle = '#1890ff'
+    ctx.fill()
+    ctx.strokeStyle = '#ffffff'
+    ctx.lineWidth = 2
+    ctx.stroke()
+
+    ctx.fillStyle = '#ffffff'
+    ctx.font = 'bold 16px Arial'
+    ctx.textAlign = 'center'
+    ctx.textBaseline = 'middle'
+    ctx.fillText('⇄', center.x, center.y)
+
+    ctx.restore()
+  }
+
+  hitTestDragHandle(pos: Point): boolean {
+    if (this.world.selectedElementId !== this.data.id) return false
+
+    const center = this.getCenter()
+    const dist = Math.sqrt(
+      Math.pow(pos.x - center.x, 2) + Math.pow(pos.y - center.y, 2)
+    )
+    return dist <= this.dragHandleRadius
+  }
+
+  hitTestPoint(pos: Point): number {
+    const { points } = this.data
+    const handleRadius = 20
+    for (let i = 0; i < points.length; i++) {
+      const dist = Math.sqrt(
+        Math.pow(pos.x - points[i].x, 2) +
+        Math.pow(pos.y - points[i].y, 2)
+      )
+      if (dist <= handleRadius) {
+        return i
+      }
+    }
+    return -1
+  }
+
+  movePoint(index: number, newPos: Point): void {
+    if (index >= 0 && index < this.data.points.length) {
+      this.data.points[index] = { ...newPos }
+    }
   }
 
   drawPreview(ctx: CanvasRenderingContext2D, mousePos: Point): void {

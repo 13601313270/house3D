@@ -1,13 +1,13 @@
 <template>
   <div class="allWOrldObjSelect" :style="{ top: position.y + 'px', left: position.x + 'px' }">
     <div class="configContainer">
-      <div class="head">
-        <div class="moveIcon" @mousedown="startDrag">
+      <div class="head" @mousedown="startDrag">
+        <div class="moveIcon">
           <img src="../assets/move2.svg" alt="move" @mousedown.prevent />
         </div>
         <div class="title">对象列表({{ allObjCount }})</div>
-        <div class="closeIcon" @click="emit('close')">
-          <img src="../assets/closeWhite.svg" alt="close" />
+        <div class="closeIcon" @mousedown.stop @click="emit('close')">
+          <img @mousedown.prevent.stop src="../assets/closeWhite.svg" alt="close" />
         </div>
       </div>
       <div class="configItemList">
