@@ -191,8 +191,11 @@ function selectElementAt(worldPos: { x: number; y: number }, screenPos: { x: num
     if (el instanceof PolylineElement || el instanceof PolygonElement) {
       const pointIndex = (el as PolylineElement<PolylineElementData>).hitTestPoint(worldPos)
       if (pointIndex !== -1) {
+        const isAlreadySelected = el.data.id === selectedElementId.value
         selectAndEdit(el)
-        startDragPoint(el as PolylineElement<PolylineElementData>, pointIndex, worldPos)
+        if (isAlreadySelected) {
+          startDragPoint(el as PolylineElement<PolylineElementData>, pointIndex, worldPos)
+        }
         return
       }
     }
@@ -214,8 +217,7 @@ function selectElementAt(worldPos: { x: number; y: number }, screenPos: { x: num
 
   if (element instanceof SpriteElement) {
     const hitCorner = element.hitTestResizeHandle(worldPos)
-    if (hitCorner) {
-      selectAndEdit(element)
+    if (hitCorner && element.data.id === selectedElementId.value) {
       isResizing.value = true
       resizeCorner.value = hitCorner
       world.isDragging = false
