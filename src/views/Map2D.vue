@@ -151,6 +151,9 @@
       <!-- <div>模型初始化中，请稍后...</div> -->
     </div>
   </teleport>
+  <!-- <teleport to="#teleport">
+    <GroundTextureEditor class="dd" ref="groundTextureEditorRef" />
+  </teleport> -->
 </template>
 
 <script lang="ts" setup>
@@ -189,6 +192,7 @@ import { LineObjDataClass } from '@/entities/objData';
 import { CameraEntity } from '@/entities/camera/entity';
 import AllWorldObjSelect from '@/components/AllWorldObjSelect.vue'
 import message from '@/utils/message';
+import GroundTextureEditor from '@/components/GroundTextureEditor/index.vue'
 
 const canvas2DRef = ref<HTMLCanvasElement | null>(null)
 const canvas2D2Ref = ref<HTMLCanvasElement | null>(null)
@@ -2756,5 +2760,14 @@ button {
       color: #666;
     }
   }
+}
+
+.dd {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1000;
 }
 </style>

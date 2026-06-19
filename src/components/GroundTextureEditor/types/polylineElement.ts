@@ -246,6 +246,7 @@ export abstract class PolylineElement<T extends PolylineElementData> extends Bas
         max: 100,
         step: 1,
         value: this.data.width,
+        unit: 'cm'
       }
     ]
   }
