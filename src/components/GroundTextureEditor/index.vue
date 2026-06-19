@@ -46,45 +46,23 @@
         <div class="close-btn"></div>
       </div>
       <div class="panel-content">
-        <!-- {{ editParams }} -->
-        <div class="property-item" v-for="item in editParams" :key="item.id">
-          <label>{{ item.label }}</label>
-          <span v-if="item.dataType === 'string'">{{ item.value }}</span>
-          <div v-else-if="item.dataType === 'number'" class="numberEdit">
-            <input type="range" v-model.number="item.value" :min="item.min" :max="item.max" :step="item.step"
-              @input="render" />
-            <div class="numberInputContainer">
-              <input type="number" class="numberInput" v-model.number="item.value" :min="item.min" :max="item.max"
-                :step="item.step" @input="render" />
-              <div v-if="item.unit" class="unit">{{ item.unit }}</div>
+        <div class="property-list">
+          <div class="property-item" v-for="item in editParams" :key="item.id">
+            <label>{{ item.label }}</label>
+            <span v-if="item.dataType === 'string'">{{ item.value }}</span>
+            <div v-else-if="item.dataType === 'number'" class="numberEdit">
+              <input type="range" v-model.number="item.value" :min="item.min" :max="item.max" :step="item.step"
+                @input="render" />
+              <div class="numberInputContainer">
+                <input type="number" class="numberInput" v-model.number="item.value" :min="item.min" :max="item.max"
+                  :step="item.step" @input="render" />
+                <div v-if="item.unit" class="unit">{{ item.unit }}</div>
+              </div>
             </div>
+            <span v-else-if="item.dataType === 'boolean'">{{ item.value ? '是' : '否' }}</span>
           </div>
-          <span v-else-if="item.dataType === 'boolean'">{{ item.value ? '是' : '否' }}</span>
-          <!-- <span v-else>{{ item.value }}</span> -->
         </div>
-        <!-- <div class="property-item">
-          <label>透明度</label>
-          <input type="range" v-model.number="selectedElement.data.opacity" min="0" max="1" step="0.1"
-            @input="render" />
-          <span>{{ selectedElement.data.opacity }}</span>
-        </div>
-        <template v-if="selectedElement.type === 'sprite'">
-          <div class="property-item">
-            <label>宽度</label>
-            <input type="range" v-model.number="selectedElement.data.width" min="10" max="200" @input="render" />
-          </div>
-          <div class="property-item">
-            <label>高度</label>
-            <input type="range" v-model.number="selectedElement.data.height" min="10" max="200" @input="render" />
-          </div>
-        </template>
-<template v-if="selectedElement.type === 'polyline'">
-          <div class="property-item">
-            <label>线宽</label>
-            <input type="range" v-model.number="selectedElement.data.width" min="5" max="100" @input="render" />
-          </div>
-        </template> -->
-        <div class="property-item">
+        <div class="bottomTools">
           <button class="delete-btn" @click="deleteElement">删除元素</button>
         </div>
       </div>
@@ -865,71 +843,87 @@ onUnmounted(() => {
     overflow-y: auto;
     flex-grow: 1;
 
-    .property-item {
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 6px;
-      padding-bottom: 6px;
-      border-bottom: 1px solid #f3f3f3;
-      flex-wrap: wrap;
-
-      label {
-        font-size: 14px;
-        color: #666;
-      }
-
-      input[type='range'] {
-        width: 100%;
-      }
-
-      span {
-        font-size: 12px;
-        color: #999;
-        text-align: right;
-      }
-
-      .numberEdit {
+    .property-list {
+      .property-item {
         display: flex;
+        flex-direction: row;
         align-items: center;
-        justify-content: center;
+        justify-content: space-between;
+        margin-bottom: 6px;
+        padding-bottom: 6px;
+        border-bottom: 1px solid #f3f3f3;
+        flex-wrap: wrap;
 
-        .numberInputContainer {
+        &:last-child {
+          margin-bottom: 0;
+          border-bottom: none;
+        }
+
+        label {
+          font-size: 14px;
+          color: #666;
+        }
+
+        input[type='range'] {
+          width: 100%;
+        }
+
+        span {
+          font-size: 12px;
+          color: #999;
+          text-align: right;
+        }
+
+        .numberEdit {
           display: flex;
           align-items: center;
           justify-content: center;
-          border: 1px solid #b2b2b2;
-          border-radius: 4px;
-          overflow: hidden;
-          flex-shrink: 0;
 
-          .numberInput {
-            margin-left: 2px;
-            width: 40px;
-            height: 28px;
-            border: none;
-            outline: none;
-            width: 44px;
+          .numberInputContainer {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #b2b2b2;
+            border-radius: 4px;
+            overflow: hidden;
+            flex-shrink: 0;
+
+            .numberInput {
+              margin-left: 2px;
+              width: 40px;
+              height: 28px;
+              border: none;
+              outline: none;
+              width: 44px;
+            }
           }
         }
       }
     }
+
+    .bottomTools {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      border-top: 1px solid #f3f3f3;
+      padding-top: 12px;
+      margin-top: 12px;
+
+      .delete-btn {
+        width: 100%;
+        padding: 8px;
+        border: none;
+        border-radius: 4px;
+        background: #ff4d4f;
+        color: #fff;
+        cursor: pointer;
+        font-size: 14px;
+      }
+
+      .delete-btn:hover {
+        background: #ff7875;
+      }
+    }
   }
-}
-
-.delete-btn {
-  width: 100%;
-  padding: 8px;
-  border: none;
-  border-radius: 4px;
-  background: #ff4d4f;
-  color: #fff;
-  cursor: pointer;
-  font-size: 14px;
-}
-
-.delete-btn:hover {
-  background: #ff7875;
 }
 </style>
