@@ -179,9 +179,7 @@ export class TextureWorld {
       if (option) {
         const ClassName = option.createClass;
         const element = new ClassName(this, item.data);
-        if (element) {
-          this.elements.push(element)
-        }
+        this.elements.push(element)
       }
     })
   }

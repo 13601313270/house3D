@@ -120,7 +120,6 @@ const selectedElement = computed<BaseElement<any> | null>(() => {
 })
 
 function selectSprite(item: BaseElementDefinition) {
-  console.log('selectSprite', item)
   // 如果正在绘制，先取消（无论 drawingElement 是否存在）
   if (world.isDrawing) {
     world.cancelDrawing()
@@ -153,8 +152,8 @@ function handleMouseDown(e: MouseEvent) {
   world.lastClickTime = now
 
   const worldPos = {
-    x: (pos.x - world.canvasOffset.x) / world.scale,
-    y: (pos.y - world.canvasOffset.y) / world.scale,
+    x: Math.round((pos.x - world.canvasOffset.x) / world.scale),
+    y: Math.round((pos.y - world.canvasOffset.y) / world.scale),
   }
 
   switch (world.currentTool) {
@@ -290,8 +289,8 @@ function handleMouseMove(e: MouseEvent) {
 
   if (isResizing.value) {
     const worldPos = {
-      x: (pos.x - world.canvasOffset.x) / world.scale,
-      y: (pos.y - world.canvasOffset.y) / world.scale,
+      x: Math.round((pos.x - world.canvasOffset.x) / world.scale),
+      y: Math.round((pos.y - world.canvasOffset.y) / world.scale),
     }
     const element = world.getSelectedElement()
     if (element && element instanceof SpriteElement) {
@@ -299,15 +298,15 @@ function handleMouseMove(e: MouseEvent) {
       const { x, y, width, height } = sprite.data
 
       if (resizeCorner.value === 'br') {
-        const newWidth = Math.max(20, worldPos.x - (x - width / 2))
-        const newHeight = Math.max(20, worldPos.y - (y - height / 2))
+        const newWidth = Math.round(Math.max(20, worldPos.x - (x - width / 2)))
+        const newHeight = Math.round(Math.max(20, worldPos.y - (y - height / 2)))
         sprite.data.width = newWidth
         sprite.data.height = newHeight
       } else if (resizeCorner.value === 'tl') {
-        const newWidth = Math.max(20, (x + width / 2) - worldPos.x)
-        const newHeight = Math.max(20, (y + height / 2) - worldPos.y)
-        sprite.data.x = x + (width - newWidth) / 2
-        sprite.data.y = y + (height - newHeight) / 2
+        const newWidth = Math.round(Math.max(20, (x + width / 2) - worldPos.x))
+        const newHeight = Math.round(Math.max(20, (y + height / 2) - worldPos.y))
+        sprite.data.x = Math.round(x + (width - newWidth) / 2)
+        sprite.data.y = Math.round(y + (height - newHeight) / 2)
         sprite.data.width = newWidth
         sprite.data.height = newHeight
       }
@@ -318,8 +317,8 @@ function handleMouseMove(e: MouseEvent) {
 
   if (isDraggingPoint.value) {
     const worldPos = {
-      x: (pos.x - world.canvasOffset.x) / world.scale,
-      y: (pos.y - world.canvasOffset.y) / world.scale,
+      x: Math.round((pos.x - world.canvasOffset.x) / world.scale),
+      y: Math.round((pos.y - world.canvasOffset.y) / world.scale),
     }
     const element = world.getSelectedElement()
     if (element && element instanceof PolylineElement) {
@@ -329,11 +328,11 @@ function handleMouseMove(e: MouseEvent) {
     render()
     return
   }
-
+  
   if (world.isDragging) {
     const worldPos = {
-      x: (pos.x - world.canvasOffset.x) / world.scale,
-      y: (pos.y - world.canvasOffset.y) / world.scale,
+      x: Math.round((pos.x - world.canvasOffset.x) / world.scale),
+      y: Math.round((pos.y - world.canvasOffset.y) / world.scale),
     }
     const newX = worldPos.x - world.dragOffset.x
     const element = world.getSelectedElement()
@@ -406,7 +405,6 @@ function render() {
 function resizeCanvas() {
   if (!canvasWrapperRef.value || !renderer) return
 
-  console.log('resize')
   const wrapperWidth = canvasWrapperRef.value.clientWidth
   const wrapperHeight = canvasWrapperRef.value.clientHeight
 
@@ -468,11 +466,8 @@ function handleFileSelect(event: Event) {
 
   const reader = new FileReader()
   reader.onload = (e) => {
-    console.log(1)
     try {
-      console.log(2)
       const data = JSON.parse(e.target?.result as string)
-      console.log(3, data)
       world.importElements(data)
       selectedElementId.value = null
       render()
@@ -571,7 +566,6 @@ watch(() => editParams.value, (newVal) => {
   if (element) {
     newVal.forEach((item) => {
       if (item.dataType === 'title') return
-      // console.log('111', element.data, item.id, item.value)
       // @ts-ignore
       element.data[item.id] = item.value
     })
