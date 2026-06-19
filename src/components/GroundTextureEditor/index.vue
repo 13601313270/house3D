@@ -63,6 +63,10 @@
           </div>
         </div>
         <div class="bottomTools">
+          <div class="layer-controls">
+            <button class="layer-btn" @click="bringForward" title="上移一层">⬆️ 上移</button>
+            <button class="layer-btn" @click="sendBackward" title="下移一层">⬇️ 下移</button>
+          </div>
           <button class="delete-btn" @click="deleteElement">删除元素</button>
         </div>
       </div>
@@ -498,6 +502,16 @@ function clearCanvas() {
   render()
 }
 
+function bringForward() {
+  world.bringForward()
+  render()
+}
+
+function sendBackward() {
+  world.sendBackward()
+  render()
+}
+
 function deleteElement() {
   const element = world.getSelectedElement()
   if (element) {
@@ -524,16 +538,16 @@ function importJSON() {
   fileInputRef.value?.click()
 }
 
-function handleFileSelect(event: Event) {
+async function handleFileSelect(event: Event) {
   const input = event.target as HTMLInputElement
   const file = input.files?.[0]
   if (!file) return
 
   const reader = new FileReader()
-  reader.onload = (e) => {
+  reader.onload = async (e) => {
     try {
       const data = JSON.parse(e.target?.result as string)
-      world.importElements(data)
+      await world.importElements(data)
       selectedElementId.value = null
       render()
     } catch (error) {
@@ -908,6 +922,26 @@ onUnmounted(() => {
       border-top: 1px solid #f3f3f3;
       padding-top: 12px;
       margin-top: 12px;
+
+      .layer-controls {
+        display: flex;
+        gap: 8px;
+
+        .layer-btn {
+          flex: 1;
+          padding: 8px;
+          border: none;
+          border-radius: 4px;
+          background: #1890ff;
+          color: #fff;
+          cursor: pointer;
+          font-size: 14px;
+        }
+
+        .layer-btn:hover {
+          background: #40a9ff;
+        }
+      }
 
       .delete-btn {
         width: 100%;

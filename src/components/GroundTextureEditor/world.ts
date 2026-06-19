@@ -41,6 +41,11 @@ export class TextureWorld {
   }
 
   addElement(element: BaseElement<BaseElementData>): void {
+    // 自动分配 zIndex，确保新元素在最上层
+    const maxZIndex = this.elements.length > 0
+      ? Math.max(...this.elements.map(e => e.data.zIndex))
+      : -1
+    element.data.zIndex = maxZIndex + 1
     this.elements.push(element)
     this.emit('elementAdded', element)
   }
@@ -161,6 +166,88 @@ export class TextureWorld {
     this.elements.sort((a, b) => a.data.zIndex - b.data.zIndex)
   }
 
+  // 向上移动一层（与最近的上一层元素交换 zIndex）
+  bringForward(): void {
+    if (!this.selectedElementId) return
+    const element = this.getElementById(this.selectedElementId)
+    if (!element) return
+
+    const currentZIndex = element.data.zIndex
+
+    // 找出 zIndex 大于当前元素且最接近的元素
+    const aboveElements = this.elements
+      .filter(e => e.data.zIndex > currentZIndex)
+      .sort((a, b) => a.data.zIndex - b.data.zIndex)
+
+    if (aboveElements.length > 0) {
+      const swapTarget = aboveElements[0]
+      const targetZIndex = swapTarget.data.zIndex
+      swapTarget.data.zIndex = currentZIndex
+      element.data.zIndex = targetZIndex
+      this.sortElementsByZIndex()
+      this.emit('elementUpdated', element.data.id)
+    }
+  }
+
+  // 向下移动一层（与最近的下一层元素交换 zIndex）
+  sendBackward(): void {
+    if (!this.selectedElementId) return
+    const element = this.getElementById(this.selectedElementId)
+    if (!element) return
+
+    const currentZIndex = element.data.zIndex
+
+    // 找出 zIndex 小于当前元素且最接近的元素
+    const belowElements = this.elements
+      .filter(e => e.data.zIndex < currentZIndex)
+      .sort((a, b) => b.data.zIndex - a.data.zIndex)
+
+    if (belowElements.length > 0) {
+      const swapTarget = belowElements[0]
+      const targetZIndex = swapTarget.data.zIndex
+      swapTarget.data.zIndex = currentZIndex
+      element.data.zIndex = targetZIndex
+      this.sortElementsByZIndex()
+      this.emit('elementUpdated', element.data.id)
+    }
+  }
+
+  // 移动到最顶层
+  bringToFront(): void {
+    if (!this.selectedElementId) return
+    const element = this.getElementById(this.selectedElementId)
+    if (!element) return
+
+    const maxZIndex = Math.max(...this.elements.map(e => e.data.zIndex))
+    if (element.data.zIndex < maxZIndex) {
+      element.data.zIndex = maxZIndex + 1
+      this.sortElementsByZIndex()
+      this.emit('elementUpdated', element.data.id)
+    }
+  }
+
+  // 移动到最底层
+  sendToBack(): void {
+    if (!this.selectedElementId) return
+    const element = this.getElementById(this.selectedElementId)
+    if (!element) return
+
+    const minZIndex = Math.min(...this.elements.map(e => e.data.zIndex))
+    if (element.data.zIndex > minZIndex) {
+      element.data.zIndex = minZIndex - 1
+      this.sortElementsByZIndex()
+      this.emit('elementUpdated', element.data.id)
+    }
+  }
+
+  // 重新分配所有元素的 zIndex（按当前顺序从 0 开始编号）
+  reindexZIndex(): void {
+    this.elements.forEach((element, index) => {
+      element.data.zIndex = index
+    })
+    this.emit('elementsReindexed', null)
+  }
+
   exportElements(): any[] {
     return this.elements.map((element) => ({
       type: element.type,
@@ -168,19 +255,24 @@ export class TextureWorld {
     }))
   }
 
-  importElements(data: any[]): void {
+  async importElements(data: any[]): Promise<void> {
     this.elements = []
     this.selectedElementId = null
 
-    data.forEach((item) => {
+    for (let i = 0; i < data.length; i++) {
+      const item = data[i]
       const type = item.type as ElementType
       const option = ElementRegistry.mapIdToDefinition.get(type)
-      console.log('option', option, item.data)
       if (option) {
-        const ClassName = option.createClass;
-        const element = new ClassName(this, item.data);
+        const ClassName = option.createClass
+        const element = new ClassName(this, item.data)
+        await element.init()
+        // 导入时按顺序分配 zIndex
+        element.data.zIndex = i
         this.elements.push(element)
       }
-    })
+    }
+    // 重新分配 zIndex 确保连续
+    this.reindexZIndex()
   }
 }
