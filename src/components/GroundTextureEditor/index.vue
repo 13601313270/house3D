@@ -147,176 +147,138 @@ async function handleMouseDown(e: MouseEvent) {
     y: Math.round((pos.y - world.canvasOffset.y) / world.scale),
   }
 
-  switch (world.currentTool) {
-    case 'sprite':
-      if (world.isDrawing) {
-        if (world.drawingElement) {
-          const sprite = world.drawingElement as SpriteElement<SpriteElementData>;
-          sprite.data.x = worldPos.x
-          sprite.data.y = worldPos.y
-          const elementId = sprite.data.id
-          world.finishDrawing()
-          selectedElementId.value = elementId
-          editParams.value = JSON.parse(JSON.stringify(sprite.setEditParams()))
-        } else {
-          world.cancelDrawing()
-        }
-        world.setTool('select')
-        if (renderer) {
-          renderer.renderPreview(world, pos)
-        }
-        render()
-        return
-      }
-      break
-
-    case 'polyline':
-    case 'polygon':
-      if (isDoubleClick) {
-        const minPoints = world.currentTool === 'polygon' ? 3 : 2
-        if (world.drawingElement &&
-          (world.drawingElement as any).data.points.length >= minPoints) {
-          const elementId = (world.drawingElement as any).data.id
-          world.finishDrawing()
-          selectedElementId.value = elementId
-          world.setTool('select')
-          render()
-          return
-        }
-      }
-
-      world.addDrawingPoint(worldPos)
-      break
-
-    case 'select':
-    case 'move': {
-      // 先检测所有元素的顶点
-      for (const el of world.elements) {
-        if (el instanceof PolylineElement) {
-          const polyline = el as PolylineElement<PolylineElementData>
-          const pointIndex = polyline.hitTestPoint(worldPos)
-          if (pointIndex !== -1) {
-            world.selectElement(el.data.id)
-            selectedElementId.value = el.data.id
-            isDraggingPoint.value = true
-            draggingPointIndex.value = pointIndex
-            const pointPos = polyline.data.points[pointIndex]
-            dragPointOffset.value = {
-              x: worldPos.x - pointPos.x,
-              y: worldPos.y - pointPos.y,
-            }
-            world.isDragging = false
-            world.isPanning = false
-            render()
-            return
-          }
-        } else if (el instanceof PolygonElement) {
-          const polygon = el as PolygonElement<any>
-          const pointIndex = polygon.hitTestPoint(worldPos)
-          if (pointIndex !== -1) {
-            world.selectElement(el.data.id)
-            selectedElementId.value = el.data.id
-            isDraggingPoint.value = true
-            draggingPointIndex.value = pointIndex
-            const pointPos = polygon.data.points[pointIndex]
-            dragPointOffset.value = {
-              x: worldPos.x - pointPos.x,
-              y: worldPos.y - pointPos.y,
-            }
-            world.isDragging = false
-            world.isPanning = false
-            render()
-            return
-          }
-        }
-      }
-
-      const element = world.findElementAt(worldPos)
-
-      if (element && element instanceof SpriteElement) {
-        const sprite = element as SpriteElement<SpriteElementData>
-        const hitCorner = sprite.hitTestResizeHandle(worldPos)
-        if (hitCorner) {
-          world.selectElement(element.data.id)
-          selectedElementId.value = element.data.id
-          isResizing.value = true
-          resizeCorner.value = hitCorner
-          world.isDragging = false
-          world.isPanning = false
-          render()
-          return
-        }
-      }
-
-      if (element && element instanceof PolylineElement) {
-        world.selectElement(element.data.id)
-        selectedElementId.value = element.data.id
-        world.isDragging = false
-        world.isPanning = true
-        world.panStartPos = pos
-        world.panStartOffset = { ...world.canvasOffset }
-        render()
-        return
-      }
-
-      if (element && element instanceof PolygonElement) {
-        const polygon = element as PolygonElement<any>
-        if (polygon.hitTestDragHandle(worldPos)) {
-          world.selectElement(element.data.id)
-          selectedElementId.value = element.data.id
-          world.isDragging = true
-          world.isPanning = false
-          const center = polygon.getCenter()
-          world.dragOffset = {
-            x: worldPos.x - center.x,
-            y: worldPos.y - center.y,
-          }
-          render()
-          return
-        } else {
-          world.selectElement(element.data.id)
-          selectedElementId.value = element.data.id
-          world.isDragging = false
-          world.isPanning = true
-          world.panStartPos = pos
-          world.panStartOffset = { ...world.canvasOffset }
-          render()
-          return
-        }
-      }
-
-      if (element) {
-        world.selectElement(element.data.id)
-        selectedElementId.value = element.data.id
-        world.isDragging = true
-        world.isPanning = false
-        const elementPos = element instanceof SpriteElement
-          ? { x: (element as SpriteElement<SpriteElementData>).data.x, y: (element as SpriteElement<SpriteElementData>).data.y }
-          : (element as any).data.points[0]
-        world.dragOffset = {
-          x: worldPos.x - elementPos.x,
-          y: worldPos.y - elementPos.y,
-        }
-      } else {
-        world.selectElement(null)
-        selectedElementId.value = null
-        world.isDragging = false
-        world.isPanning = true
-        world.panStartPos = pos
-        world.panStartOffset = { ...world.canvasOffset }
-      }
-      break
+  // 正在绘制：处理绘制逻辑
+  if (world.isDrawing) {
+    if (world.currentTool === 'sprite' && world.drawingElement) {
+      const sprite = world.drawingElement as SpriteElement<SpriteElementData>
+      sprite.data.x = worldPos.x
+      sprite.data.y = worldPos.y
+      const elementId = sprite.data.id
+      world.finishDrawing()
+      selectedElementId.value = elementId
+      editParams.value = JSON.parse(JSON.stringify(sprite.setEditParams()))
+      renderer?.renderPreview(world, pos)
+      render()
+      return
     }
 
-    case 'pan':
-      world.isPanning = true
-      world.panStartPos = pos
-      world.panStartOffset = { ...world.canvasOffset }
-      world.selectElement(null)
-      break
+    if (world.currentTool === 'polyline' || world.currentTool === 'polygon') {
+      if (isDoubleClick) {
+        const minPoints = world.currentTool === 'polygon' ? 3 : 2
+        const drawing = world.drawingElement as PolylineElement<PolylineElementData>
+        if (drawing && drawing.data.points.length >= minPoints) {
+          const elementId = drawing.data.id
+          world.finishDrawing()
+          selectedElementId.value = elementId
+          render()
+          return
+        }
+      }
+      world.addDrawingPoint(worldPos)
+      return
+    }
   }
 
+  // 未在绘制：处理选择/拖拽/平移逻辑
+  selectElementAt(worldPos, pos)
   render()
+}
+
+// 统一的元素选择逻辑
+function selectElementAt(worldPos: { x: number; y: number }, screenPos: { x: number; y: number }) {
+  // 1. 检测 Polyline/Polygon 的顶点
+  for (const el of world.elements) {
+    if (el instanceof PolylineElement || el instanceof PolygonElement) {
+      const pointIndex = (el as PolylineElement<PolylineElementData>).hitTestPoint(worldPos)
+      if (pointIndex !== -1) {
+        selectAndEdit(el)
+        startDragPoint(el as PolylineElement<PolylineElementData>, pointIndex, worldPos)
+        return
+      }
+    }
+  }
+
+  // 2. 检测 Sprite 缩放控制点
+  const element = world.findElementAt(worldPos)
+  if (!element) {
+    // 空白区域：取消选择，开始平移
+    world.selectElement(null)
+    selectedElementId.value = null
+    editParams.value = []
+    world.isDragging = false
+    world.isPanning = true
+    world.panStartPos = screenPos
+    world.panStartOffset = { ...world.canvasOffset }
+    return
+  }
+
+  if (element instanceof SpriteElement) {
+    const hitCorner = element.hitTestResizeHandle(worldPos)
+    if (hitCorner) {
+      selectAndEdit(element)
+      isResizing.value = true
+      resizeCorner.value = hitCorner
+      world.isDragging = false
+      world.isPanning = false
+      return
+    }
+  }
+
+  // 3. 检测元素
+  selectAndEdit(element)
+
+  // 4. 根据元素类型设置拖拽模式
+  if (element instanceof PolylineElement) {
+    world.isDragging = false
+    world.isPanning = true
+    world.panStartPos = screenPos
+    world.panStartOffset = { ...world.canvasOffset }
+  } else if (element instanceof PolygonElement) {
+    const polygon = element
+    if (polygon.hitTestDragHandle(worldPos)) {
+      world.isDragging = true
+      world.isPanning = false
+      const center = polygon.getCenter()
+      world.dragOffset = {
+        x: worldPos.x - center.x,
+        y: worldPos.y - center.y,
+      }
+    } else {
+      world.isDragging = false
+      world.isPanning = true
+      world.panStartPos = screenPos
+      world.panStartOffset = { ...world.canvasOffset }
+    }
+  } else {
+    // Sprite 或其他元素
+    world.isDragging = true
+    world.isPanning = false
+    const elementPos = 'x' in element.data
+      ? { x: (element as SpriteElement<SpriteElementData>).data.x, y: (element as SpriteElement<SpriteElementData>).data.y }
+      : (element as PolylineElement<PolylineElementData>).data.points[0]
+    world.dragOffset = {
+      x: worldPos.x - elementPos.x,
+      y: worldPos.y - elementPos.y,
+    }
+  }
+}
+
+function selectAndEdit(element: BaseElement<BaseElementData>) {
+  world.selectElement(element.data.id)
+  selectedElementId.value = element.data.id
+  editParams.value = JSON.parse(JSON.stringify(element.setEditParams()))
+}
+
+function startDragPoint(element: PolylineElement<PolylineElementData>, pointIndex: number, worldPos: { x: number; y: number }) {
+  isDraggingPoint.value = true
+  draggingPointIndex.value = pointIndex
+  const pointPos = element.data.points[pointIndex]
+  dragPointOffset.value = {
+    x: worldPos.x - pointPos.x,
+    y: worldPos.y - pointPos.y,
+  }
+  world.isDragging = false
+  world.isPanning = false
 }
 
 function handleMouseMove(e: MouseEvent) {
