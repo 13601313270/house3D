@@ -41,11 +41,16 @@
       v-if="activeObjChildList.length > 0">
       <div v-for="item2 in activeObjChildList" class="childItem" :key="item2.id"
         @click="changeCurrentToolToOutFile(item2.id), isMouseInCate2 = false">
-        {{ item2.name }}
+        <div class="previewImg">
+          <img v-if="item2.previewImg" :src="item2.previewImg" alt="" />
+        </div>
+        <div class="name">{{ item2.name }}</div>
       </div>
       <div class="childItem" @click="showHelpModal, isMouseInCate2 = false">
-        <div>联系售后添加</div>
-        <div class="desc">（24小时内添加）</div>
+        <div>
+          <div>联系售后添加</div>
+          <div class="desc">（24小时内添加）</div>
+        </div>
       </div>
     </div>
   </teleport>
@@ -82,10 +87,11 @@ type ObjFileType = {
     id: string,
     name: string,
     type: number,
+    previewImg?: string,
   }[]
 }
 const ObjFileTypes = ref<Array<ObjFileType>>([])
-const activeObjChildList = ref<Array<{ id: string, name: string, type: number }>>([])
+const activeObjChildList = ref<Array<{ id: string, name: string, type: number, previewImg?: string }>>([])
 
 const worldApi = window.worldApi
 onMounted(async () => {
@@ -232,6 +238,7 @@ function showHelpModal() {
   background: #e4e6eb;
   cursor: pointer;
   font-size: 16px;
+  width: 50px;
   transition: all 0.3s;
 }
 
@@ -359,6 +366,8 @@ function showHelpModal() {
   position: fixed;
   top: -8px;
   left: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
   width: 180px;
   background: white;
   border: 1px solid #d9d9d9;
@@ -376,6 +385,9 @@ function showHelpModal() {
     color: #2c3e50;
     padding: 4px 0;
     text-align: center;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
 
     &:last-child {
       border-bottom: none;
@@ -388,6 +400,21 @@ function showHelpModal() {
 
       .desc {
         color: white;
+      }
+    }
+
+    .previewImg {
+      width: 40px;
+      height: 40px;
+      border: solid 1px #eaeaea;
+      border-radius: 4px;
+      margin-left: 4px;
+      margin-right: 8px;
+      background-color: white;
+
+      >img {
+        width: 100%;
+        height: 100%;
       }
     }
 

@@ -2365,6 +2365,7 @@ button {
   cursor: pointer;
   font-size: 16px;
   transition: all 0.3s;
+  flex-shrink: 0;
 }
 
 .toolbar button:hover {
