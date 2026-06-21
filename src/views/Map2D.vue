@@ -63,6 +63,9 @@
           <button @click="showAllObjSelect = true" type="button">
             对象列表({{ allObjCount }})
           </button>
+          <button @click="showEnvironmentEditor = true" type="button">
+            环境
+          </button>
           <input type="file" id="fileInput" ref="loadProgramFileInputRef" accept=".devt" style="display: none"
             @change="handleLoadProgramFileChange" />
           <input type="file" id="importFileInput" ref="importFileInputRef" accept=".fbx,.obj" style="display: none"
@@ -119,6 +122,7 @@
         @close="contextMenu = null" />
       <AllWorldObjSelect v-if="showAllObjSelect" :zoom2DLevel="zoom2DLevel" :panOffset="panOffset"
         @close="showAllObjSelect = false" @locationPosition="handleLocationPosition" @onChange="handleObjChange" />
+      <EnvironmentEditor v-if="showEnvironmentEditor" @close="showEnvironmentEditor = false" />
     </div>
   </div>
   <div v-if="showDemos" class="allDemosContent">
@@ -175,6 +179,7 @@ import { CameraData } from '@/entities/camera/index.d'
 import { WallEntity } from '@/entities/wall/entity'
 import { ImportFileType, ObjOutputFileType } from '@/entities/allObjs'
 import ObjTypeSelect from '@/components/ObjTypeSelect.vue'
+import EnvironmentEditor from '@/components/EnvironmentEditor.vue'
 
 import { ImportFileDataClass } from '@/entities/importFile/dataClass';
 import { ImportFileData } from '@/entities/importFile/index.d';
@@ -354,6 +359,7 @@ const editPropTypeKey = ref<string>()
 const editSnapPoint = ref<HandelInfo>()
 const editPropTypeIndex = ref<number>(-1)
 const showAllObjSelect = ref(false)
+const showEnvironmentEditor = ref(false)
 
 const getNearestWall = (point: Point): NearestWallResult | null => {
   let nearestWall: WallData | null = null

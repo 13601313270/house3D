@@ -60,14 +60,7 @@ export class World {
     axesHelper.layers.set(2)
     this.scene.add(axesHelper)
 
-    // === 加载 JPG 全景 ===
-    const loader = new THREE.TextureLoader();
-    loader.load('sky.jpg', (texture) => {
-      texture.mapping = THREE.EquirectangularReflectionMapping;
-
-      this.scene.background = texture;
-      this.scene.environment = texture; // 可选：简单环境光
-    });
+    this.setEnvironMent()
 
     const loader2 = new THREE.TextureLoader();
     loader2.load('grand.jpg', (texture) => {
@@ -85,6 +78,17 @@ export class World {
       ground.rotation.x = -Math.PI / 2
       ground.position.y = -10
       this.scene.add(ground)
+    });
+  }
+
+  setEnvironMent() {
+    // === 加载 JPG 全景 ===
+    const loader = new THREE.TextureLoader();
+    loader.load('/skyImg/sky.jpg', (texture) => {
+      texture.mapping = THREE.EquirectangularReflectionMapping;
+
+      this.scene.background = texture;
+      this.scene.environment = texture; // 可选：简单环境光
     });
   }
 

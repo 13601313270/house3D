@@ -48,9 +48,10 @@ function change(val: number) {
   display: flex;
   flex-direction: column;
   align-items: end;
+  width: 88px;
 
   .img {
-    height: 88px;
+    width: 88px;
     border-radius: 4px;
     border: solid 1px #d9d9d9;
   }
