@@ -25,37 +25,52 @@ import EditPanel from './editPanel.vue'
 import DataTypeEdit from '@/views/DataTypeEdit.vue'
 
 import { editItem } from '@/entities/index.js';
+import { EnvironmentConfig } from '../utils/world'
 const environmentValue = ref<{
   [key in string]: number | string | boolean
 }>()
 
 onMounted(() => {
+  const worldApi = (window as any).worldApi
+  const savedSkyType = worldApi?.environmentConfig?.skyType || 1
+  
   environmentValue.value = {
+    skyType: savedSkyType,
     ambientLight: 0,
   }
 })
 const editPropConfigInfo = ref<editItem[]>([
   {
-    id: 'ambientLight',
-    label: '天光',
+    id: 'skyType',
+    label: '天空种类',
     dataType: 'enum',
-    value: 0,
-    panelDesc: '天光强度',
+    value: 1,
+    panelDesc: '天空种类',
     enumList: [
       {
-        id: 0,
-        name: '低',
-        img: '',
-      },
-      {
         id: 1,
-        name: '中',
-        img: '',
+        name: '白天',
+        img: '/skyImg/sky.jpg',
       },
       {
         id: 2,
-        name: '高',
-        img: '',
+        name: '清晨',
+        img: '/skyImg/sky2.jpg',
+      },
+      {
+        id: 3,
+        name: '傍晚',
+        img: '/skyImg/sky3.jpg',
+      },
+      {
+        id: 4,
+        name: '黄昏',
+        img: '/skyImg/sky4.jpg',
+      },
+      {
+        id: 5,
+        name: '夜晚（满月）',
+        img: '/skyImg/sky5.jpg',
       },
     ],
   }
@@ -63,13 +78,20 @@ const editPropConfigInfo = ref<editItem[]>([
 function handleUpdate(key: string, value: number | string | boolean) {
   if (environmentValue.value) {
     environmentValue.value[key] = value
+    
+    const worldApi = (window as any).worldApi
+    if (worldApi && worldApi.setEnvironMent) {
+      const config: EnvironmentConfig = {
+        skyType: environmentValue.value.skyType as number || 1,
+      }
+      worldApi.setEnvironMent(config)
+    }
   }
 }
 </script>
 <style scoped lang="less">
 .content {
   padding: 8px;
-  height: 200px;
 }
 
 .configItemList {

@@ -14,6 +14,10 @@ export const canvasHeight = 600
 export const snapThreshold = 20
 type WorldChangeType = 'add' | 'remove' | 'change'
 
+export interface EnvironmentConfig {
+  skyType: number
+}
+
 export class World {
   allFileMapObjects: {
     [key in string]?: BaseEntityClass<BaseObjData>[]
@@ -38,6 +42,8 @@ export class World {
   allImportImgs: ImportImgType[] = []
 
   activeCameraIndex: number = -1
+
+  environmentConfig: EnvironmentConfig = { skyType: 1 }
 
   scene: THREE.Scene
 
@@ -81,10 +87,22 @@ export class World {
     });
   }
 
-  setEnvironMent() {
+  setEnvironMent(config?: EnvironmentConfig) {
+    if (config) {
+      this.environmentConfig = config
+    }
+    const skyType = this.environmentConfig.skyType || 1;
+    const skyImgMap: Record<number, string> = {
+      1: '/skyImg/sky.jpg',
+      2: '/skyImg/sky2.jpg',
+      3: '/skyImg/sky3.jpg',
+      4: '/skyImg/sky4.jpg',
+      5: '/skyImg/sky5.jpg',
+    };
+    const path = skyImgMap[skyType] || '/skyImg/sky.jpg';
     // === 加载 JPG 全景 ===
     const loader = new THREE.TextureLoader();
-    loader.load('/skyImg/sky.jpg', (texture) => {
+    loader.load(path, (texture) => {
       texture.mapping = THREE.EquirectangularReflectionMapping;
 
       this.scene.background = texture;

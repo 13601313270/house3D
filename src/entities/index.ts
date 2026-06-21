@@ -100,7 +100,7 @@ export const allFileKeysObjType: Record<string, 'point' | 'polyline'> = {
 }))
 
 export type fileData = {
-  [key in string]?: PointObjData[]
+  [key in string]?: BaseObjData[]
 }
 
 export type editItem = {

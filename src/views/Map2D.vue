@@ -167,7 +167,7 @@ import * as THREE from 'three'
 import JSZip from 'jszip';
 import request from '@/utils/request'
 import { Point } from '../types'
-import { snapThreshold, World } from '../utils/world'
+import { snapThreshold, World, EnvironmentConfig } from '../utils/world'
 import Canvas3D, { CameraState } from '../components/Canvas3D.vue'
 import { WallData } from '@/entities/wall/index.d'
 import { allFileKeys, fileData, editItem, fileDataKeyToClass, allFileKeysObjType } from '@/entities'
@@ -1031,6 +1031,7 @@ const saveDrawing = async () => {
     cameraState: CameraState
     activeCameraIndex: number
     allImportImgs: string[]
+    environmentConfig: EnvironmentConfig
   } = {
     ...worldApi.getAllFileObjects() as any,
     panOffset: panOffset.value,
@@ -1038,6 +1039,7 @@ const saveDrawing = async () => {
     cameraState: cameraStateCenter.value,
     activeCameraIndex: activeCameraIndex.value,
     allImportImgs: worldApi.allImportImgs.map(v => v.fileTypeId),
+    environmentConfig: worldApi.environmentConfig,
   }
 
   const zip = new JSZip();
@@ -1180,6 +1182,7 @@ const handleLoadProgramFileChange = async (e: Event) => {
       zoomLevel: number
       cameraState: CameraState
       activeCameraIndex: number
+      environmentConfig?: EnvironmentConfig
     } = JSON.parse(sceneJsonText as string)
     initWorldLoading.value = true
     await initWorldByData(data)
@@ -1196,6 +1199,7 @@ async function initWorldByData(data: fileData & {
   zoomLevel: number
   cameraState: CameraState
   activeCameraIndex: number
+  environmentConfig?: EnvironmentConfig
 }) {
   const allFileTypeId = new Set()
   if (data.outFile) {
@@ -1236,6 +1240,9 @@ async function initWorldByData(data: fileData & {
   }
   if (data.activeCameraIndex !== undefined) {
     changeCamera2State(data.activeCameraIndex)
+  }
+  if (data.environmentConfig) {
+    worldApi.setEnvironMent(data.environmentConfig)
   }
   drawWrapper2DAnd3D()
 }
