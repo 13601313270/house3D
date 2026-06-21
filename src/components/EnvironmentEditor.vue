@@ -33,10 +33,11 @@ const environmentValue = ref<{
 onMounted(() => {
   const worldApi = (window as any).worldApi
   const savedSkyType = worldApi?.environmentConfig?.skyType || 1
+  const savedAmbientLightIntensity = worldApi?.environmentConfig?.ambientLightIntensity ?? 1.5
   
   environmentValue.value = {
     skyType: savedSkyType,
-    ambientLight: 0,
+    ambientLightIntensity: savedAmbientLightIntensity,
   }
 })
 const editPropConfigInfo = ref<editItem[]>([
@@ -78,6 +79,15 @@ const editPropConfigInfo = ref<editItem[]>([
         img: '/skyImg/sky6.jpg',
       },
     ],
+  },
+  {
+    id: 'ambientLightIntensity',
+    label: '环境补充光强度',
+    dataType: 'number',
+    min: 0,
+    max: 4,
+    step: 0.1,
+    value: 1.5,
   }
 ])
 function handleUpdate(key: string, value: number | string | boolean) {
@@ -87,7 +97,8 @@ function handleUpdate(key: string, value: number | string | boolean) {
     const worldApi = (window as any).worldApi
     if (worldApi && worldApi.setEnvironMent) {
       const config: EnvironmentConfig = {
-        skyType: environmentValue.value.skyType as number || 1,
+        ...worldApi.environmentConfig,
+        [key]: value,
       }
       worldApi.setEnvironMent(config)
     }

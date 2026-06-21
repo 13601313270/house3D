@@ -16,6 +16,7 @@ type WorldChangeType = 'add' | 'remove' | 'change'
 
 export interface EnvironmentConfig {
   skyType: number
+  ambientLightIntensity?: number
 }
 
 export class World {
@@ -43,7 +44,11 @@ export class World {
 
   activeCameraIndex: number = -1
 
-  environmentConfig: EnvironmentConfig = { skyType: 1 }
+  environmentConfig: EnvironmentConfig = { skyType: 1, ambientLightIntensity: 1.5 }
+
+  ambientLight: THREE.AmbientLight | null = null
+
+  directionalLight: THREE.DirectionalLight | null = null
 
   scene: THREE.Scene
 
@@ -66,12 +71,21 @@ export class World {
     if (config) {
       this.environmentConfig = config
     }
-    const ambientLight = new THREE.AmbientLight(0xffffff, 1)
-    this.scene.add(ambientLight)
+    const intensity = this.environmentConfig.ambientLightIntensity !== undefined ? this.environmentConfig.ambientLightIntensity : 1.5
+    console.log('intensity', intensity, this.environmentConfig.ambientLightIntensity);
 
-    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8)
-    directionalLight.position.set(100, 200, 100)
-    this.scene.add(directionalLight)
+    if (this.ambientLight) {
+      this.ambientLight.intensity = intensity === 0 ? 0.1 : intensity
+    } else {
+      this.ambientLight = new THREE.AmbientLight(0xffffff, intensity)
+      this.scene.add(this.ambientLight)
+    }
+
+    if (!this.directionalLight) {
+      this.directionalLight = new THREE.DirectionalLight(0xffffff, 0.8)
+      this.directionalLight.position.set(100, 200, 100)
+      this.scene.add(this.directionalLight)
+    }
 
     const skyType = this.environmentConfig.skyType || 1;
     const skyImgMap: Record<number, string> = {
