@@ -72,6 +72,11 @@ const editPropConfigInfo = ref<editItem[]>([
         name: '夜晚（满月）',
         img: '/skyImg/sky5.jpg',
       },
+      {
+        id: 6,
+        name: '夜晚（新月）',
+        img: '/skyImg/sky6.jpg',
+      },
     ],
   }
 ])

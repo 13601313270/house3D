@@ -14,6 +14,9 @@
             <div @click="loadProgramFile" class="childItem">
               加载
             </div>
+            <div @click="clearDrawing" class="childItem">
+              清空
+            </div>
           </div>
         </div>
         <div class="toolbar-item" @click="onlyDemos = true, showDemos = true">
@@ -56,9 +59,6 @@
             @onShowHelpModal="showHelpModal = true" />
           <button @click="triggerImportFile" type="button">
             导入模型
-          </button>
-          <button @click="clearDrawing" type="button">
-            清空
           </button>
           <button @click="showAllObjSelect = true" type="button">
             对象列表({{ allObjCount }})
@@ -1471,6 +1471,7 @@ const clearDrawing = () => {
   if (confirm('确定要清空所有绘制内容吗？')) {
     worldApi.clearAll();
     drawWrapper2DAnd3D()
+    activeToolsIndex.value = -1
   }
 }
 

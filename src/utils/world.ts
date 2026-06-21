@@ -51,13 +51,6 @@ export class World {
     this.scene = new THREE.Scene()
     this.scene.background = new THREE.Color(0xf0f0f0)
 
-    const ambientLight = new THREE.AmbientLight(0xffffff, 1.5)
-    this.scene.add(ambientLight)
-
-    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8)
-    directionalLight.position.set(100, 200, 100)
-    this.scene.add(directionalLight)
-
     const gridHelper = new THREE.GridHelper(1000, 50, 0xcccccc, 0xeeeeee)
     gridHelper.layers.set(2)
     this.scene.add(gridHelper)
@@ -67,30 +60,19 @@ export class World {
     this.scene.add(axesHelper)
 
     this.setEnvironMent()
-
-    const loader2 = new THREE.TextureLoader();
-    loader2.load('grand.jpg', (texture) => {
-      // 增加一个地面平面
-      const groundGeometry = new THREE.PlaneGeometry(20000, 20000, 1, 1)
-      // 设置纹理重复两次
-      texture.wrapS = THREE.RepeatWrapping;
-      texture.wrapT = THREE.RepeatWrapping;
-      texture.repeat.set(12, 12);
-
-      const groundMaterial = new THREE.MeshBasicMaterial({
-        map: texture,
-      })
-      const ground = new THREE.Mesh(groundGeometry, groundMaterial)
-      ground.rotation.x = -Math.PI / 2
-      ground.position.y = -10
-      this.scene.add(ground)
-    });
   }
 
   setEnvironMent(config?: EnvironmentConfig) {
     if (config) {
       this.environmentConfig = config
     }
+    const ambientLight = new THREE.AmbientLight(0xffffff, 1)
+    this.scene.add(ambientLight)
+
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8)
+    directionalLight.position.set(100, 200, 100)
+    this.scene.add(directionalLight)
+
     const skyType = this.environmentConfig.skyType || 1;
     const skyImgMap: Record<number, string> = {
       1: '/skyImg/sky.jpg',
@@ -98,15 +80,37 @@ export class World {
       3: '/skyImg/sky3.jpg',
       4: '/skyImg/sky4.jpg',
       5: '/skyImg/sky5.jpg',
+      6: '/skyImg/sky6.jpg',
     };
     const path = skyImgMap[skyType] || '/skyImg/sky.jpg';
     // === 加载 JPG 全景 ===
-    const loader = new THREE.TextureLoader();
-    loader.load(path, (texture) => {
+    const loaderSky = new THREE.TextureLoader();
+    loaderSky.load(path, (texture) => {
       texture.mapping = THREE.EquirectangularReflectionMapping;
 
       this.scene.background = texture;
       this.scene.environment = texture; // 可选：简单环境光
+    });
+
+    // 添加地面
+    const loaderGround = new THREE.TextureLoader();
+    loaderGround.load('grand.jpg', (texture) => {
+      // 增加一个地面平面
+      const groundGeometry = new THREE.PlaneGeometry(20000, 20000, 1, 1)
+      // 设置纹理重复两次
+      texture.wrapS = THREE.RepeatWrapping;
+      texture.wrapT = THREE.RepeatWrapping;
+      texture.repeat.set(12, 12);
+
+      const groundMaterial = new THREE.MeshStandardMaterial({
+        map: texture,
+        roughness: 0.8,
+        metalness: 0.2,
+      })
+      const ground = new THREE.Mesh(groundGeometry, groundMaterial)
+      ground.rotation.x = -Math.PI / 2
+      ground.position.y = -10
+      this.scene.add(ground)
     });
   }
 
