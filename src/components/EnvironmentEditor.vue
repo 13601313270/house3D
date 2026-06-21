@@ -34,10 +34,12 @@ onMounted(() => {
   const worldApi = (window as any).worldApi
   const savedSkyType = worldApi?.environmentConfig?.skyType || 1
   const savedAmbientLightIntensity = worldApi?.environmentConfig?.ambientLightIntensity ?? 1.5
+  const savedShowGround = worldApi?.environmentConfig?.showGround ?? true
   
   environmentValue.value = {
     skyType: savedSkyType,
     ambientLightIntensity: savedAmbientLightIntensity,
+    showGround: savedShowGround,
   }
 })
 const editPropConfigInfo = ref<editItem[]>([
@@ -78,6 +80,11 @@ const editPropConfigInfo = ref<editItem[]>([
         name: '夜晚（新月）',
         img: '/skyImg/sky6.jpg',
       },
+      {
+        id: 7,
+        name: '城市白天',
+        img: '/skyImg/sky7.jpg',
+      },
     ],
   },
   {
@@ -88,6 +95,12 @@ const editPropConfigInfo = ref<editItem[]>([
     max: 4,
     step: 0.1,
     value: 1.5,
+  },
+  {
+    id: 'showGround',
+    label: '显示默认地面',
+    dataType: 'boolean',
+    value: true,
   }
 ])
 function handleUpdate(key: string, value: number | string | boolean) {

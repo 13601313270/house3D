@@ -17,6 +17,7 @@ type WorldChangeType = 'add' | 'remove' | 'change'
 export interface EnvironmentConfig {
   skyType: number
   ambientLightIntensity?: number
+  showGround?: boolean
 }
 
 export class World {
@@ -44,11 +45,13 @@ export class World {
 
   activeCameraIndex: number = -1
 
-  environmentConfig: EnvironmentConfig = { skyType: 1, ambientLightIntensity: 1.5 }
+  environmentConfig: EnvironmentConfig = { skyType: 1, ambientLightIntensity: 1.5, showGround: true }
 
   ambientLight: THREE.AmbientLight | null = null
 
   directionalLight: THREE.DirectionalLight | null = null
+
+  groundMesh: THREE.Mesh | null = null
 
   scene: THREE.Scene
 
@@ -95,6 +98,7 @@ export class World {
       4: '/skyImg/sky4.jpg',
       5: '/skyImg/sky5.jpg',
       6: '/skyImg/sky6.jpg',
+      7: '/skyImg/sky7.jpg',
     };
     const path = skyImgMap[skyType] || '/skyImg/sky.jpg';
     // === 加载 JPG 全景 ===
@@ -107,6 +111,15 @@ export class World {
     });
 
     // 添加地面
+    const showGround = this.environmentConfig.showGround ?? true
+    
+    if (this.groundMesh) {
+      this.groundMesh.visible = showGround
+      return
+    }
+    
+    if (!showGround) return
+    
     const loaderGround = new THREE.TextureLoader();
     loaderGround.load('grand.jpg', (texture) => {
       // 增加一个地面平面
@@ -121,10 +134,10 @@ export class World {
         roughness: 0.8,
         metalness: 0.2,
       })
-      const ground = new THREE.Mesh(groundGeometry, groundMaterial)
-      ground.rotation.x = -Math.PI / 2
-      ground.position.y = -10
-      this.scene.add(ground)
+      this.groundMesh = new THREE.Mesh(groundGeometry, groundMaterial)
+      this.groundMesh.rotation.x = -Math.PI / 2
+      this.groundMesh.position.y = -10
+      this.scene.add(this.groundMesh)
     });
   }
 
