@@ -162,7 +162,10 @@ function updateEditPropInputInfoString(value: string) {
 function updateEditPropInputInfoNumber(value: number) {
   emit('update:modelValue', value)
 }
-function updateEditPropByDataTexture(value: string) {
+function updateEditPropByDataTexture(value: {
+  viewImg: string,
+  value: any[],
+}) {
   console.log('updateEditPropByDataTexture', value)
   // emit('update:modelValue', value)
 }

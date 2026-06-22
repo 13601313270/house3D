@@ -14,6 +14,7 @@
       </div>
 
       <div class="actions">
+        <button class="action-btn" @click="saveData">保存</button>
         <button class="action-btn" @click="clearCanvas">清空</button>
         <button class="action-btn" @click="exportJSON">导出</button>
         <button class="action-btn" @click="importJSON">导入</button>
@@ -29,7 +30,8 @@
           @mouseup="handleMouseUp" @mouseleave="handleMouseUp" @wheel="handleWheel"></canvas>
         <canvas ref="previewCanvasRef" class="preview-canvas"></canvas>
 
-        <div v-if="textureWorld.isDrawing && (textureWorld.currentTool === 'polyline' || textureWorld.currentTool === 'polygon')"
+        <div
+          v-if="textureWorld.isDrawing && (textureWorld.currentTool === 'polyline' || textureWorld.currentTool === 'polygon')"
           class="hint">
           {{ textureWorld.currentTool === 'polygon' ? '点击画布添加顶点，双击完成绘制（至少3点），按Esc取消' : '点击画布添加点，双击完成绘制（至少2点），按Esc取消' }}
         </div>
@@ -90,7 +92,10 @@ import { PolygonElement } from './types/polygonElement'
 
 const emit = defineEmits<{
   (e: 'close'): void,
-  (e: 'update:modelValue', value: string): void,
+  (e: 'update:modelValue', value: {
+    value: BaseElement<BaseElementData>[],
+    viewImg: string
+  }): void,
 }>()
 const canvasRef = ref<HTMLCanvasElement | null>(null)
 const gridCanvasRef = ref<HTMLCanvasElement | null>(null)
@@ -482,6 +487,12 @@ function resizeCanvas() {
   }
 
   render()
+}
+
+function saveData() {
+  const data = textureWorld.exportElements()
+  const viewImg = canvasRef.value?.toDataURL('image/png') || ''
+  emit('update:modelValue', { value: data, viewImg })
 }
 
 function clearCanvas() {
