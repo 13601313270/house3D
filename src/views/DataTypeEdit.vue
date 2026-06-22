@@ -80,7 +80,7 @@
     </div>
   </div>
   <GroundTextureEditor v-if="groundTextureEditorShow" @close="groundTextureEditorShow = false"
-    @update:modelValue="updateEditPropByDataTexture" :width="200" :height="200" :modelValue="modelValue" />
+    @update:modelValue="updateEditPropByDataTexture" :width="record.width" :height="record.height" :modelValue="modelValue" />
 </template>
 <script setup lang="ts">
 import { ref } from 'vue'
@@ -93,7 +93,8 @@ import { loadImage } from '@/utils/imageCache'
 
 defineProps<{
   item: editItem,
-  modelValue: any
+  modelValue: any,
+  record: any,
 }>()
 
 const cornerTypeEdit = ref<enumItem[]>([
