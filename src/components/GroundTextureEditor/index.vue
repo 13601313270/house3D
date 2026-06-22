@@ -90,6 +90,11 @@ import { editItem } from '@/entities'
 import { PolylineElement, PolylineElementData } from './types/polylineElement'
 import { PolygonElement } from './types/polygonElement'
 
+const props = defineProps<{
+  width?: number
+  height?: number
+}>()
+
 const emit = defineEmits<{
   (e: 'close'): void,
   (e: 'update:modelValue', value: {
@@ -491,7 +496,7 @@ function resizeCanvas() {
 
 function saveData() {
   const data = textureWorld.exportElements()
-  const viewImg = canvasRef.value?.toDataURL('image/png') || ''
+  const viewImg = renderer?.exportFullImage(textureWorld) || ''
   emit('update:modelValue', { value: data, viewImg })
 }
 
@@ -624,7 +629,9 @@ onMounted(() => {
       gridCanvasRef.value,
       previewCanvasRef.value,
       initialWidth,
-      initialHeight
+      initialHeight,
+      props.width,
+      props.height
     )
     render()
   }

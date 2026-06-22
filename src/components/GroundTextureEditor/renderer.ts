@@ -12,6 +12,8 @@ export class CanvasRenderer {
   public height: number
   private readonly gridIntervals: number[] = [10, 20, 25, 50, 100, 200, 500, 1000, 2000]
   private readonly baseGridSize: number = 50
+  private limitWidth: number | null = null
+  private limitHeight: number | null = null
 
   private getGridSize(scale: number): number {
     const targetInterval = this.baseGridSize / scale
@@ -28,7 +30,9 @@ export class CanvasRenderer {
     gridCanvas: HTMLCanvasElement,
     previewCanvas: HTMLCanvasElement,
     width: number,
-    height: number
+    height: number,
+    limitWidth?: number,
+    limitHeight?: number
   ) {
     this.mainCanvas = mainCanvas
     this.mainCanvas.width = width
@@ -55,6 +59,8 @@ export class CanvasRenderer {
     this.previewCtx = previewCtx
     this.width = width
     this.height = height
+    this.limitWidth = limitWidth || null
+    this.limitHeight = limitHeight || null
   }
 
   private drawGrid(ctx: CanvasRenderingContext2D, scaledWidth: number, scaledHeight: number, scale: number, canvasOffsetX: number, canvasOffsetY: number): void {
@@ -189,6 +195,10 @@ export class CanvasRenderer {
   renderPreview(world: TextureWorld, mousePos: Point): void {
     this.previewCtx.clearRect(0, 0, this.width, this.height)
 
+    if (this.limitWidth && this.limitHeight) {
+      this.drawLimitedCanvasMask(world)
+    }
+
     if (world.isDrawing && world.drawingElement) {
       this.previewCtx.save()
       this.previewCtx.translate(world.canvasOffset.x, world.canvasOffset.y)
@@ -202,6 +212,34 @@ export class CanvasRenderer {
 
       this.previewCtx.restore()
     }
+  }
+
+  private drawLimitedCanvasMask(world: TextureWorld): void {
+    const width = this.limitWidth!
+    const height = this.limitHeight!
+
+    this.previewCtx.save()
+    this.previewCtx.translate(world.canvasOffset.x, world.canvasOffset.y)
+    this.previewCtx.scale(world.scale, world.scale)
+
+    const ctx = this.previewCtx
+
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.5)'
+    ctx.fillRect(-10000, -10000, 20000, 20000)
+
+    ctx.clearRect(-width / 2, -height / 2, width, height)
+
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)'
+    ctx.lineWidth = 3
+    ctx.strokeRect(-width / 2, -height / 2, width, height)
+
+    ctx.strokeStyle = 'rgba(0, 136, 255, 0.6)'
+    ctx.lineWidth = 1
+    ctx.setLineDash([10, 10])
+    ctx.strokeRect(-width / 2 - 10, -height / 2 - 10, width + 20, height + 20)
+    ctx.setLineDash([])
+
+    this.previewCtx.restore()
   }
 
   render(world: TextureWorld, mousePos: Point): void {
@@ -219,5 +257,95 @@ export class CanvasRenderer {
     this.gridCanvas.height = height
     this.previewCanvas.width = width
     this.previewCanvas.height = height
+  }
+
+  exportFullImage(world: TextureWorld): string {
+    if (this.limitWidth && this.limitHeight) {
+      return this.exportLimitedCanvas(world)
+    }
+
+    if (world.elements.length === 0) {
+      return ''
+    }
+
+    let minX = Infinity
+    let minY = Infinity
+    let maxX = -Infinity
+    let maxY = -Infinity
+
+    world.elements.forEach((element) => {
+      const bounds = element.getBounds()
+      minX = Math.min(minX, bounds.minX)
+      minY = Math.min(minY, bounds.minY)
+      maxX = Math.max(maxX, bounds.maxX)
+      maxY = Math.max(maxY, bounds.maxY)
+    })
+
+    const padding = 50
+    const width = maxX - minX + padding * 2
+    const height = maxY - minY + padding * 2
+
+    if (width <= 0 || height <= 0) {
+      return ''
+    }
+
+    const tempCanvas = document.createElement('canvas')
+    tempCanvas.width = width
+    tempCanvas.height = height
+    const tempCtx = tempCanvas.getContext('2d')
+
+    if (!tempCtx) {
+      return ''
+    }
+
+    tempCtx.fillStyle = '#ffffff'
+    tempCtx.fillRect(0, 0, width, height)
+
+    tempCtx.save()
+    tempCtx.translate(-minX + padding, -minY + padding)
+
+    const sortedElements = [...world.elements].sort(
+      (a, b) => a.data.zIndex - b.data.zIndex
+    )
+
+    sortedElements.forEach((element) => {
+      element.draw(tempCtx)
+    })
+
+    tempCtx.restore()
+
+    return tempCanvas.toDataURL('image/png')
+  }
+
+  private exportLimitedCanvas(world: TextureWorld): string {
+    const width = this.limitWidth!
+    const height = this.limitHeight!
+
+    const tempCanvas = document.createElement('canvas')
+    tempCanvas.width = width
+    tempCanvas.height = height
+    const tempCtx = tempCanvas.getContext('2d')
+
+    if (!tempCtx) {
+      return ''
+    }
+
+    tempCtx.fillStyle = '#ffffff'
+    tempCtx.fillRect(0, 0, width, height)
+
+    tempCtx.save()
+    tempCtx.translate(width / 2, height / 2)
+
+    const sortedElements = [...world.elements].sort(
+      (a, b) => a.data.zIndex - b.data.zIndex
+    )
+
+    sortedElements.forEach((element) => {
+      element.draw(tempCtx)
+    })
+
+    tempCtx.restore()
+
+    return tempCanvas.toDataURL('image/png')
   }
 }

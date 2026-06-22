@@ -169,6 +169,16 @@ export abstract class SpriteElement<T extends SpriteElementData> extends BaseEle
     this.data.y += dy
   }
 
+  getBounds(): { minX: number; minY: number; maxX: number; maxY: number } {
+    const { x, y, width, height } = this.data
+    return {
+      minX: x - width / 2,
+      minY: y - height / 2,
+      maxX: x + width / 2,
+      maxY: y + height / 2,
+    }
+  }
+
   resize(dx: number, dy: number, corner: 'tl' | 'br'): void {
     if (this.ratioLocked) {
       // 比例锁定模式：按照 defaultWidth/defaultHeight 的比例缩放

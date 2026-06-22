@@ -38,6 +38,8 @@ export abstract class BaseElement<T extends BaseElementData> {
 
   abstract translate(dx: number, dy: number): void
 
+  abstract getBounds(): { minX: number; minY: number; maxX: number; maxY: number }
+
   canFinishDrawing(): boolean {
     return true
   }

@@ -251,6 +251,29 @@ export abstract class PolygonElement<T extends PolygonElementData> extends BaseE
     })
   }
 
+  getBounds(): { minX: number; minY: number; maxX: number; maxY: number } {
+    const { points } = this.data
+    if (points.length === 0) {
+      return { minX: 0, minY: 0, maxX: 0, maxY: 0 }
+    }
+    let minX = Infinity
+    let minY = Infinity
+    let maxX = -Infinity
+    let maxY = -Infinity
+    points.forEach((point) => {
+      minX = Math.min(minX, point.x)
+      minY = Math.min(minY, point.y)
+      maxX = Math.max(maxX, point.x)
+      maxY = Math.max(maxY, point.y)
+    })
+    return {
+      minX,
+      minY,
+      maxX,
+      maxY,
+    }
+  }
+
   canFinishDrawing(): boolean {
     return this.data.points.length >= 3
   }

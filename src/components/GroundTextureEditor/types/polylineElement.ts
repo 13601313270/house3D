@@ -231,6 +231,30 @@ export abstract class PolylineElement<T extends PolylineElementData> extends Bas
     })
   }
 
+  getBounds(): { minX: number; minY: number; maxX: number; maxY: number } {
+    const { points, width } = this.data
+    if (points.length === 0) {
+      return { minX: 0, minY: 0, maxX: 0, maxY: 0 }
+    }
+    let minX = Infinity
+    let minY = Infinity
+    let maxX = -Infinity
+    let maxY = -Infinity
+    points.forEach((point) => {
+      minX = Math.min(minX, point.x)
+      minY = Math.min(minY, point.y)
+      maxX = Math.max(maxX, point.x)
+      maxY = Math.max(maxY, point.y)
+    })
+    const halfWidth = width / 2
+    return {
+      minX: minX - halfWidth,
+      minY: minY - halfWidth,
+      maxX: maxX + halfWidth,
+      maxY: maxY + halfWidth,
+    }
+  }
+
   canFinishDrawing(): boolean {
     return this.data.points.length >= 2
   }
