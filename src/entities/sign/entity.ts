@@ -11,7 +11,7 @@ import { allSnapFromType } from '@/types/baseEntity';
 import { loadImage as globalLoadImage } from '@/utils/imageCache'
 
 export class SignEntity extends PointEntityClass<SignData> {
-  name: string = '标志'
+  name: string = '交通标识'
   type: string = 'sign'
   isPointObj: boolean = true
   private circleRadius = 6
@@ -23,6 +23,7 @@ export class SignEntity extends PointEntityClass<SignData> {
       y: 0,
       z: 0,
       angleY: 0,
+      size: 80,
       img: {
         value: [],
         viewImg: '',
@@ -43,7 +44,7 @@ export class SignEntity extends PointEntityClass<SignData> {
   draw2DPreviewByData(ctx: CanvasRenderingContext2D, data: SignData, panOffset: Point, zoomLevel: number): void {
     const screenX = data.x * zoomLevel + panOffset.x
     const screenY = data.y * zoomLevel + panOffset.y
-    const { width } = { width: 100 };
+    const { size } = data;
     const { angleY } = data;
     const length = 10;
 
@@ -53,18 +54,18 @@ export class SignEntity extends PointEntityClass<SignData> {
 
     ctx.fillStyle = '#f0f0f0';
     ctx.fillRect(
-      width / -2 * zoomLevel,
+      size / -2 * zoomLevel,
       length / -2 * zoomLevel,
-      width * zoomLevel,
+      size * zoomLevel,
       length * zoomLevel
     );
 
     ctx.strokeStyle = '#333';
     ctx.lineWidth = 2 * zoomLevel;
     ctx.strokeRect(
-      width / -2 * zoomLevel,
+      size / -2 * zoomLevel,
       length / -2 * zoomLevel,
-      width * zoomLevel,
+      size * zoomLevel,
       length * zoomLevel
     );
 
@@ -81,7 +82,7 @@ export class SignEntity extends PointEntityClass<SignData> {
     const screenX = data.x * zoomLevel + panOffset.x
     const screenY = data.y * zoomLevel + panOffset.y
     const angleY = data.angleY || 0;// 历史数据问题，有的数据不存在angleY，所以用了一个【|| 0】给予默认值
-    const width = 100;
+    const { size } = data;
     const length = 10 + 4;
 
     // 控制点
@@ -93,7 +94,7 @@ export class SignEntity extends PointEntityClass<SignData> {
     ctx.fill()
     ctx.stroke()
 
-    const drawAngelLength = Math.max(width / 2, this.circleRadius * 2) * 0.9;// 0.9避免超过方块范围
+    const drawAngelLength = Math.max(size / 2, this.circleRadius * 2) * 0.9;// 0.9避免超过方块范围
     // 控制点向着angleY角度延伸10个单位后的坐标
     const rotatedXAdd = data.x + Math.cos(angleY) * drawAngelLength
     const rotatedYAdd = data.y - Math.sin(angleY) * drawAngelLength
@@ -155,7 +156,7 @@ export class SignEntity extends PointEntityClass<SignData> {
     const matchArea = new MatchRectArea({
       x: data.x,
       y: data.y,
-      width,
+      width: size,
       depth: length,
       angleY,
     })
@@ -183,16 +184,16 @@ export class SignEntity extends PointEntityClass<SignData> {
     const data = this.getData();
     const group = new THREE.Group()
     const { viewImg } = data.img
-    const { width, length } = { width: 100, length: 100 };
+    const { size } = data;
     const angleY = data.angleY || 0;// 历史数据问题，有的数据不存在angleY，所以用了一个【|| 0】给予默认值
 
     const material = (new THREE.MeshStandardMaterial({
       map: new THREE.TextureLoader().load(viewImg)
     }));
-    const plane = new THREE.PlaneGeometry(width, length)
+    const plane = new THREE.PlaneGeometry(size, size)
     const planeMesh = new THREE.Mesh(plane, material)
     // planeMesh.rotation.x = -Math.PI / 2
-    planeMesh.position.setY(length / 2)
+    planeMesh.position.setY(size / 2)
     group.add(planeMesh)
     group.rotateY(angleY);
     return [
@@ -201,10 +202,11 @@ export class SignEntity extends PointEntityClass<SignData> {
   }
 
   createBoundingBox(): [THREE.Vector3, THREE.Vector3, THREE.Vector3] {
-    const { angleY } = this.getData();
-    const { width, length } = { width: 100, length: 100 };
+    const { angleY, size } = this.getData();
+    const length = 10 + 4;
+
     return [
-      new THREE.Vector3(width, 1, length),
+      new THREE.Vector3(size, 1, length),
       new THREE.Vector3(0, 0, 0),
       new THREE.Vector3(0, angleY, 0)
     ]
@@ -212,20 +214,19 @@ export class SignEntity extends PointEntityClass<SignData> {
 
   showMatchHandel(x: number, y: number) {
     const data = this.getData();
-    const { width } = { width: 100 };
+    const { size, angleY } = data;
     const length = 10 + 4;
-    const angleY = data.angleY || 0;// 历史数据问题，有的数据不存在angleY，所以用了一个【|| 0】给予默认值
     if (isPointInRotatedRect(x, y, {
       x: data.x,
       y: data.y,
-      width: Math.max(width, length),
-      depth: Math.max(width, length),
+      width: Math.max(size, length),
+      depth: Math.max(size, length),
       angleY: angleY * -1,
     })) {
       return new MatchRectArea({
         x: data.x,
         y: data.y,
-        width,
+        width: size,
         depth: length,
         angleY,
       })
@@ -237,7 +238,7 @@ export class SignEntity extends PointEntityClass<SignData> {
     const data = this.getData();
     const dist = Math.hypot(x - data.x, y - data.y)
     const angleY = data.angleY || 0;// 历史数据问题，有的数据不存在angleY，所以用了一个【|| 0】给予默认值
-    const width = 100;
+    const { size } = data;
     if (dist < this.circleRadius + 3) {
       return {
         index: 0,
@@ -246,7 +247,7 @@ export class SignEntity extends PointEntityClass<SignData> {
         dist,
       }
     }
-    const drawAngelLength = Math.max(width / 2, this.circleRadius * 2) * 0.9;// 0.9避免超过方块范围
+    const drawAngelLength = Math.max(size / 2, this.circleRadius * 2) * 0.9;// 0.9避免超过方块范围
     // 控制点向着angleY角度延伸10个单位后的坐标
     const rotatedXAdd = data.x + Math.cos(angleY) * drawAngelLength
     const rotatedYAdd = data.y - Math.sin(angleY) * drawAngelLength
@@ -319,6 +320,15 @@ export class SignEntity extends PointEntityClass<SignData> {
         label: '图片',
         dataType: 'stitchImage',
         value: data.img,
+      },
+      {
+        id: 'size',
+        label: '大小',
+        dataType: 'number',
+        min: 20,
+        max: 500,
+        step: 1,
+        value: data.size,
       },
     ], async (val) => {
       this.setData({
