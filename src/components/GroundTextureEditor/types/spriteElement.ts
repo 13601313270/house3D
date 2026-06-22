@@ -1,7 +1,7 @@
 import type { BaseElementData, Point } from './index'
 import { BaseElement } from './baseElement'
-// import { ElementFactory } from './elementFactory'
 import { editItem } from '@/entities'
+import { loadImage, getCachedImage } from '@/utils/imageCache'
 
 export interface SpriteElementData extends BaseElementData {
   x: number
@@ -11,37 +11,14 @@ export interface SpriteElementData extends BaseElementData {
   rotation: number
 }
 
-// 图片缓存，避免重复加载
-const imageCache: Map<string, HTMLImageElement> = new Map()
-
 export abstract class SpriteElement<T extends SpriteElementData> extends BaseElement<T> {
   abstract texture: string
   abstract ratioLocked: boolean
   abstract defaultWidth: number
   abstract defaultHeight: number
 
-  private static loadImage(url: string): Promise<HTMLImageElement> {
-    return new Promise((resolve, reject) => {
-      if (imageCache.has(url)) {
-        resolve(imageCache.get(url)!)
-        return
-      }
-
-      const img = new Image()
-      img.crossOrigin = 'anonymous'
-      img.onload = () => {
-        imageCache.set(url, img)
-        resolve(img)
-      }
-      img.onerror = () => {
-        reject(new Error(`Failed to load image: ${url}`))
-      }
-      img.src = url
-    })
-  }
-
   async init(): Promise<void> {
-    await SpriteElement.loadImage(this.texture)
+    await loadImage(this.texture)
     this.isInitialized = true
   }
 
@@ -62,7 +39,7 @@ export abstract class SpriteElement<T extends SpriteElementData> extends BaseEle
     ctx.translate(x, y)
     ctx.rotate((rotation * Math.PI) / 180)
 
-    const cachedImg = imageCache.get(texture)
+    const cachedImg = getCachedImage(texture)
     if (cachedImg && cachedImg.complete) {
       ctx.drawImage(cachedImg, -width / 2, -height / 2, width, height)
     } else {
@@ -106,7 +83,7 @@ export abstract class SpriteElement<T extends SpriteElementData> extends BaseEle
     ctx.translate(mousePos.x, mousePos.y)
     ctx.rotate((rotation * Math.PI) / 180)
 
-    const cachedImg = imageCache.get(texture)
+    const cachedImg = getCachedImage(texture)
     if (cachedImg && cachedImg.complete) {
       ctx.drawImage(cachedImg, -width / 2, -height / 2, width, height)
     } else {

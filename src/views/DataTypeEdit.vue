@@ -88,6 +88,7 @@ import { allMaterial } from '@/material';
 import ImgEdit from './ImgEdit.vue'
 import CornerTypeEdit from './cornerTypeEdit.vue'
 import GroundTextureEditor from '@/components/GroundTextureEditor/index.vue'
+import { loadImage } from '@/utils/imageCache'
 
 defineProps<{
   item: editItem,
@@ -162,13 +163,16 @@ function updateEditPropInputInfoString(value: string) {
 function updateEditPropInputInfoNumber(value: number) {
   emit('update:modelValue', value)
 }
-function updateEditPropByDataTexture(value: {
+async function updateEditPropByDataTexture(value: {
   viewImg: string,
   value: any[],
 }) {
   groundTextureEditorShow.value = false
-  console.log('updateEditPropByDataTexture', value)
-  emit('update:modelValue', value)
+
+  if (value.viewImg) {
+    await loadImage(value.viewImg);
+    emit('update:modelValue', value)
+  }
 }
 </script>
 <style scoped lang="less">

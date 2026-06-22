@@ -10,14 +10,13 @@ import { MatchRectArea } from '@/utils/matchArea';
 import { importImgFileHead } from '../allObjs';
 import { allSnapFromType } from '@/types/baseEntity';
 
+import { loadImage as globalLoadImage, getCachedImage } from '@/utils/imageCache'
+
 export class SignEntity extends PointEntityClass<SignData> {
   name: string = '标志'
   type: string = 'sign'
   isPointObj: boolean = true
   private circleRadius = 6
-  private static textureLoader = new THREE.TextureLoader();
-  private static textureCache = new Map<string | File, THREE.Texture>();
-  private static imgCache = new Map<string, HTMLImageElement>();
 
   defaultValue(): SignData {
     const data: SignData = {
@@ -44,21 +43,7 @@ export class SignEntity extends PointEntityClass<SignData> {
   }
 
   private static loadImage(src: string): Promise<HTMLImageElement> {
-    return new Promise((resolve, reject) => {
-      if (SignEntity.imgCache.has(src)) {
-        resolve(SignEntity.imgCache.get(src)!);
-        return;
-      }
-
-      const img = new Image();
-      img.crossOrigin = 'anonymous';
-      img.onload = () => {
-        SignEntity.imgCache.set(src, img);
-        resolve(img);
-      };
-      img.onerror = reject;
-      img.src = src;
-    });
+    return globalLoadImage(src);
   }
 
   draw2DPreviewByData(ctx: CanvasRenderingContext2D, data: SignData, panOffset: Point, zoomLevel: number): void {
@@ -90,7 +75,8 @@ export class SignEntity extends PointEntityClass<SignData> {
     );
 
     if (viewImg) {
-      const image = SignEntity.imgCache.get(viewImg);
+      const image = getCachedImage(viewImg);
+      // console.log('cccccccc', viewImg, image)
       const imgWidth = width * zoomLevel * 0.9;
       const imgHeight = length * zoomLevel * 0.9;
       const imgX = -imgWidth / 2;
@@ -353,7 +339,7 @@ export class SignEntity extends PointEntityClass<SignData> {
         dataType: 'stitchImage',
         value: data.img,
       },
-    ], (val) => {
+    ], async (val) => {
       this.setData({
         ...data,
         ...val,
