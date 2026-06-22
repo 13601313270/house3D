@@ -1,4 +1,4 @@
-import { BaseObjData, PointObjData } from '@/types/map2d'
+import { BaseObjData } from '@/types/map2d'
 import wallPlugin from './wall'
 import windowPlugin from './window'
 import doorPlugin from './door'
@@ -16,6 +16,7 @@ import peoplePlugin from './people'
 import importFilePlugin from './importFile'
 import curtainInWallPlugin from './curtainInWall'
 import staircasePlugin from './staircase'
+import signPlugin from './sign'
 import { BaseEntityClass } from '@/types/baseEntity'
 import { World } from '@/utils/world'
 
@@ -83,6 +84,7 @@ export const allFileKeysObjType: Record<string, 'point' | 'polyline'> = {
   importFilePlugin,
   curtainInWallPlugin,
   staircasePlugin,
+  signPlugin,
 ].forEach(v => {
   allFileKeys.push(v.key)
   if (v.type === 'base') {
@@ -146,4 +148,9 @@ export type editItem = {
   value: number,
   panelDesc?: string,
   enumList: Array<enumItem>,
+} | {
+  id: string,
+  label: string,
+  dataType: 'stitchImage',
+  value: string,
 }

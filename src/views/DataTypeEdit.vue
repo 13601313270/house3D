@@ -50,6 +50,9 @@
         </slot>
       </CornerTypeEdit>
     </div>
+    <div v-else-if="item.dataType === 'stitchImage'">
+      ======
+    </div>
     <div class="allMaterialPanel" v-if="allMaterialShow && allMaterialShowPropId"
       @click.self="allMaterialShow = false, allMaterialShowPropId = undefined">
       <div class="allMaterialPanelInner">
