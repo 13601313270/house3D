@@ -329,7 +329,7 @@ export class WallEntity extends LineEntityClass<WallPoint, WallData> {
     for (let i = 0; i < points.length; i++) {
       const point = points[i]
       const dist = Math.hypot(x - point.x, y - point.y)
-      if (dist < this.getData().thickness) {
+      if (dist < Math.max(this.getData().thickness, 3)) {
         return new MatchCircleArea({
           x: point.x,
           y: point.y,
@@ -381,7 +381,7 @@ export class WallEntity extends LineEntityClass<WallPoint, WallData> {
     for (let i = 0; i < this.getData().points.length; i++) {
       const point = this.getData().points[i]
       const dist = Math.hypot(x - point.x, y - point.y)
-      if (dist < this.getData().thickness) {
+      if (dist < Math.max(this.getData().thickness, 3)) {
         return {
           id: data.id,
           type: this.type,
