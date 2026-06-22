@@ -93,6 +93,10 @@ import { PolygonElement } from './types/polygonElement'
 const props = defineProps<{
   width?: number
   height?: number
+  modelValue?: {
+    value: any[]
+    viewImg: string
+  }
 }>()
 
 const emit = defineEmits<{
@@ -608,13 +612,25 @@ watch(
 )
 
 watch(
+  () => props.modelValue,
+  async (newVal) => {
+    if (newVal && newVal.value && renderer) {
+      await textureWorld.importElements(newVal.value)
+      selectedElementId.value = null
+      render()
+    }
+  },
+  { deep: true }
+)
+
+watch(
   () => textureWorld.elements.length,
   () => {
     render()
   }
 )
 
-onMounted(() => {
+onMounted(async () => {
   if (!canvasWrapperRef.value) return
   const initialWidth = canvasWrapperRef.value.clientWidth
   const initialHeight = canvasWrapperRef.value.clientHeight
@@ -633,6 +649,11 @@ onMounted(() => {
       props.width,
       props.height
     )
+
+    if (props.modelValue && props.modelValue.value) {
+      await textureWorld.importElements(props.modelValue.value)
+    }
+
     render()
   }
 

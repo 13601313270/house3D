@@ -54,7 +54,7 @@
       <img :src="modelValue.viewImg" alt="stitchImage" class="img" />
       <button @click="groundTextureEditorShow = true, groundTextureEditorPropId = item.id">编辑纹理</button>
       <GroundTextureEditor v-if="groundTextureEditorShow" @close="groundTextureEditorShow = false"
-        @update:modelValue="updateEditPropByDataTexture" :width="100" :height="100" />
+        @update:modelValue="updateEditPropByDataTexture" :width="100" :height="100" :modelValue="modelValue" />
     </div>
     <div class="allMaterialPanel" v-if="allMaterialShow && allMaterialShowPropId"
       @click.self="allMaterialShow = false, allMaterialShowPropId = undefined">
