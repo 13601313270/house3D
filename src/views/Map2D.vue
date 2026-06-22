@@ -2327,18 +2327,6 @@ button {
   transition: width 0.1s ease;
 }
 
-.preview-label {
-  margin-bottom: 20px;
-  font-size: 16px;
-  color: #666;
-}
-
-.drawing-canvas-3d {
-  width: 100%;
-  height: 100%;
-  border-radius: 8px;
-}
-
 .cameraList {
   display: flex;
   flex-grow: 1;
@@ -2490,54 +2478,6 @@ button {
   }
 }
 
-/* 拖拽上传区域样式 */
-.drop-zone {
-  width: calc(100% - 16px);
-  margin: 8px;
-  height: 120px;
-  border: 2px dashed #d9d9d9;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  background: #fafafa;
-
-  &:hover {
-    border-color: #1890ff;
-    background: #e6f7ff;
-  }
-
-  &.drag-over {
-    border-color: #1890ff;
-    background: #e6f7ff;
-    box-shadow: 0 0 12px rgba(24, 144, 255, 0.4);
-  }
-
-  .drop-zone-content {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .drop-icon {
-    font-size: 36px;
-  }
-
-  .drop-text {
-    font-size: 16px;
-    color: #666;
-    font-weight: 500;
-  }
-
-  .drop-hint {
-    font-size: 12px;
-    color: #999;
-  }
-}
-
 .globalLoading {
   position: fixed;
   top: 0;
@@ -2584,53 +2524,6 @@ button {
 
     to {
       transform: rotate(360deg);
-    }
-  }
-}
-
-.insertObjTypeSelect {
-  position: fixed;
-  background-color: red;
-}
-
-.addOutFileChildList {
-  position: fixed;
-  top: -8px;
-  left: 100%;
-  width: 180px;
-  background: white;
-  border: 1px solid #d9d9d9;
-  box-sizing: border-box;
-  border-radius: 8px;
-  padding: 7px 0;
-  z-index: 1001;
-
-  .childItem {
-    border-bottom: 1px solid #f1f1f1;
-    margin: 0 8px;
-    padding: 4px 0;
-    cursor: default;
-    color: #2c3e50;
-    padding: 4px 0;
-    text-align: center;
-
-    &:last-child {
-      border-bottom: none;
-    }
-
-    &:hover {
-      background-color: #1890ff;
-      color: white;
-      font-weight: bold;
-
-      .desc {
-        color: white;
-      }
-    }
-
-    .desc {
-      font-size: 14px;
-      color: #666;
     }
   }
 }
