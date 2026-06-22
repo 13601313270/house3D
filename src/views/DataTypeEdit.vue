@@ -51,10 +51,9 @@
       </CornerTypeEdit>
     </div>
     <div class="stitchImage" v-else-if="item.dataType === 'stitchImage'">
-      <img :src="modelValue.viewImg" class="previewImg" alt="stitchImage" />
-      <button @click="groundTextureEditorShow = true, groundTextureEditorPropId = item.id">编辑纹理</button>
-      <GroundTextureEditor v-if="groundTextureEditorShow" @close="groundTextureEditorShow = false"
-        @update:modelValue="updateEditPropByDataTexture" :width="200" :height="200" :modelValue="modelValue" />
+      <img v-if="modelValue.viewImg" :src="modelValue.viewImg" class="previewImg" alt="stitchImage" />
+      <div v-else class="empty">无纹理</div>
+      <button class="editBtn" @click="groundTextureEditorShow = true, groundTextureEditorPropId = item.id">编辑纹理</button>
     </div>
     <div class="allMaterialPanel" v-if="allMaterialShow && allMaterialShowPropId"
       @click.self="allMaterialShow = false, allMaterialShowPropId = undefined">
@@ -80,6 +79,8 @@
       </div>
     </div>
   </div>
+  <GroundTextureEditor v-if="groundTextureEditorShow" @close="groundTextureEditorShow = false"
+    @update:modelValue="updateEditPropByDataTexture" :width="200" :height="200" :modelValue="modelValue" />
 </template>
 <script setup lang="ts">
 import { ref } from 'vue'
@@ -353,8 +354,31 @@ async function updateEditPropByDataTexture(value: {
 }
 
 .stitchImage {
+  position: relative;
+  height: 200px;
+
   .previewImg {
     height: 200px;
+  }
+
+  .empty {
+    width: 200px;
+    height: 200px;
+    align-items: center;
+    justify-content: center;
+    display: inline-flex;
+    font-size: 14px;
+    color: #b2b2b2;
+    text-align: center;
+    border-radius: 4px;
+    background-color: #f5f5f5;
+    border: solid 1px #b2b2b2;
+  }
+
+  .editBtn {
+    position: absolute;
+    top: 0;
+    right: 0;
   }
 }
 </style>
