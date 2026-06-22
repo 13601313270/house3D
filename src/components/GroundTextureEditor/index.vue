@@ -614,18 +614,6 @@ watch(
 )
 
 watch(
-  () => props.modelValue,
-  async (newVal) => {
-    if (newVal && newVal.value && renderer) {
-      await textureWorld.importElements(newVal.value)
-      selectedElementId.value = null
-      render()
-    }
-  },
-  { deep: true }
-)
-
-watch(
   () => textureWorld.elements.length,
   () => {
     render()

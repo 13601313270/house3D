@@ -265,14 +265,14 @@ export class TextureWorld {
       const option = ElementRegistry.mapIdToDefinition.get(type)
       if (option) {
         const ClassName = option.createClass
-        const element = new ClassName(this, item.data)
+        const defaultData = ClassName.defaultData()
+        const itemData = item.data || {}
+        const mergedData = { ...defaultData, ...itemData }
+        const element = new ClassName(this, mergedData)
         await element.init()
-        // 导入时按顺序分配 zIndex
-        element.data.zIndex = i
         this.elements.push(element)
       }
     }
-    // 重新分配 zIndex 确保连续
     this.reindexZIndex()
   }
 }
