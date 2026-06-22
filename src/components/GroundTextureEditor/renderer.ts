@@ -260,6 +260,7 @@ export class CanvasRenderer {
   }
 
   exportFullImage(world: TextureWorld): string {
+    world.selectedElementId = null
     if (this.limitWidth && this.limitHeight) {
       return this.exportLimitedCanvas(world)
     }

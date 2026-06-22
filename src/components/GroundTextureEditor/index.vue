@@ -500,8 +500,10 @@ function resizeCanvas() {
 
 function saveData() {
   const data = textureWorld.exportElements()
-  const viewImg = renderer?.exportFullImage(textureWorld) || ''
-  emit('update:modelValue', { value: data, viewImg })
+  if (renderer) {
+    const viewImg = renderer.exportFullImage(textureWorld)
+    emit('update:modelValue', { value: data, viewImg })
+  }
 }
 
 function clearCanvas() {

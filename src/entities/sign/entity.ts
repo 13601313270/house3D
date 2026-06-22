@@ -201,10 +201,7 @@ export class SignEntity extends PointEntityClass<SignData> {
     const data = this.getData();
     const group = new THREE.Group()
     const { viewImg } = data.img
-    // viewImg是一个图片的base64编码
-    console.log('ppppppp', viewImg)
-
-    const { width, length, color } = { width: 100, length: 100, color: 'red' };
+    const { width, length } = { width: 100, length: 100 };
     const angleY = data.angleY || 0;// 历史数据问题，有的数据不存在angleY，所以用了一个【|| 0】给予默认值
 
     const material = (new THREE.MeshStandardMaterial({
