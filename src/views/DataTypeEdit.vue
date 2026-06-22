@@ -53,7 +53,8 @@
     <div v-else-if="item.dataType === 'stitchImage'">
       <!-- <img :src="modelValue" alt="stitchImage" class="img" /> -->
       <Button @click="groundTextureEditorShow = true, groundTextureEditorPropId = item.id">编辑纹理</Button>
-      <GroundTextureEditor v-if="groundTextureEditorShow" @close="groundTextureEditorShow = false" @update:modelValue="updateEditPropInputInfoString" />
+      <GroundTextureEditor v-if="groundTextureEditorShow" @close="groundTextureEditorShow = false"
+        @update:modelValue="updateEditPropByDataTexture" />
     </div>
     <div class="allMaterialPanel" v-if="allMaterialShow && allMaterialShowPropId"
       @click.self="allMaterialShow = false, allMaterialShowPropId = undefined">
@@ -160,6 +161,10 @@ function updateEditPropInputInfoString(value: string) {
 }
 function updateEditPropInputInfoNumber(value: number) {
   emit('update:modelValue', value)
+}
+function updateEditPropByDataTexture(value: string) {
+  console.log('updateEditPropByDataTexture', value)
+  // emit('update:modelValue', value)
 }
 </script>
 <style scoped lang="less">

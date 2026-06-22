@@ -1,5 +1,5 @@
 import { editItem } from '@/entities'
-import { TextureWorld } from '../world'
+import { TextureWorld } from '../textureWorld'
 import type { Point } from './index'
 
 export type BaseElementData = {

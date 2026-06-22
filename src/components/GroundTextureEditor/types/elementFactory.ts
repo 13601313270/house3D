@@ -1,5 +1,5 @@
 import type { BaseElement, BaseElementData } from './baseElement'
-import type { TextureWorld } from '../world'
+import type { TextureWorld } from '../textureWorld'
 import type { ElementType } from './index'
 
 export type ElementCreator = (world: TextureWorld, data: any) => BaseElement<BaseElementData>

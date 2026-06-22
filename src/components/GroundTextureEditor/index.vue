@@ -2,8 +2,8 @@
   <div class="ground-texture-editor">
     <div class="toolbar">
       <div class="element-library">
-        <button v-for="item in world.spriteLibrary" :key="item.id" class="element-btn" :class="{
-          active: world.selectedSprite?.id === item.id,
+        <button v-for="item in textureWorld.spriteLibrary" :key="item.id" class="element-btn" :class="{
+          active: textureWorld.selectedSprite?.id === item.id,
           'sprite-type': item.type === 'sprite',
           'line-type': item.type === 'polyline',
           'polygon-type': item.type === 'polygon'
@@ -29,9 +29,9 @@
           @mouseup="handleMouseUp" @mouseleave="handleMouseUp" @wheel="handleWheel"></canvas>
         <canvas ref="previewCanvasRef" class="preview-canvas"></canvas>
 
-        <div v-if="world.isDrawing && (world.currentTool === 'polyline' || world.currentTool === 'polygon')"
+        <div v-if="textureWorld.isDrawing && (textureWorld.currentTool === 'polyline' || textureWorld.currentTool === 'polygon')"
           class="hint">
-          {{ world.currentTool === 'polygon' ? '点击画布添加顶点，双击完成绘制（至少3点），按Esc取消' : '点击画布添加点，双击完成绘制（至少2点），按Esc取消' }}
+          {{ textureWorld.currentTool === 'polygon' ? '点击画布添加顶点，双击完成绘制（至少3点），按Esc取消' : '点击画布添加点，双击完成绘制（至少2点），按Esc取消' }}
         </div>
       </div>
     </div>
@@ -80,7 +80,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, watch, computed } from 'vue'
-import { TextureWorld } from './world'
+import { TextureWorld } from './textureWorld'
 import { CanvasRenderer } from './renderer'
 import type { BaseElement, BaseElementData, BaseElementDefinition } from './types'
 import { SpriteElement, SpriteElementData } from './types/spriteElement'
@@ -88,14 +88,17 @@ import { editItem } from '@/entities'
 import { PolylineElement, PolylineElementData } from './types/polylineElement'
 import { PolygonElement } from './types/polygonElement'
 
-const emit = defineEmits(['close'])
+const emit = defineEmits<{
+  (e: 'close'): void,
+  (e: 'update:modelValue', value: string): void,
+}>()
 const canvasRef = ref<HTMLCanvasElement | null>(null)
 const gridCanvasRef = ref<HTMLCanvasElement | null>(null)
 const previewCanvasRef = ref<HTMLCanvasElement | null>(null)
 const canvasWrapperRef = ref<HTMLDivElement | null>(null)
 const fileInputRef = ref<HTMLInputElement | null>(null)
 
-const world = new TextureWorld()
+const textureWorld = new TextureWorld()
 let renderer: CanvasRenderer | null = null
 let resizeObserver: ResizeObserver | null = null
 
@@ -114,16 +117,16 @@ const resizeOffset = ref({ x: 0, y: 0 })
 
 const selectedElement = computed<BaseElement<any> | null>(() => {
   if (!selectedElementId.value) return null
-  return world.getElementById(selectedElementId.value) || null
+  return textureWorld.getElementById(selectedElementId.value) || null
 })
 
 async function selectSprite(item: BaseElementDefinition) {
   // 如果正在绘制，先取消（无论 drawingElement 是否存在）
-  if (world.isDrawing) {
-    world.cancelDrawing()
+  if (textureWorld.isDrawing) {
+    textureWorld.cancelDrawing()
   }
-  world.setTool(item.type)
-  await world.setSelectedSprite(item)
+  textureWorld.setTool(item.type)
+  await textureWorld.setSelectedSprite(item)
 }
 
 function getCanvasPos(e: MouseEvent) {
@@ -145,42 +148,42 @@ async function handleMouseDown(e: MouseEvent) {
   mousePos.value = pos
 
   const now = Date.now()
-  const isDoubleClick = now - world.lastClickTime < 300
-  world.lastClickTime = now
+  const isDoubleClick = now - textureWorld.lastClickTime < 300
+  textureWorld.lastClickTime = now
 
   const worldPos = {
-    x: Math.round((pos.x - world.canvasOffset.x) / world.scale),
-    y: Math.round((pos.y - world.canvasOffset.y) / world.scale),
+    x: Math.round((pos.x - textureWorld.canvasOffset.x) / textureWorld.scale),
+    y: Math.round((pos.y - textureWorld.canvasOffset.y) / textureWorld.scale),
   }
 
   // 正在绘制：处理绘制逻辑
-  if (world.isDrawing) {
-    if (world.currentTool === 'sprite' && world.drawingElement) {
-      const sprite = world.drawingElement as SpriteElement<SpriteElementData>
+  if (textureWorld.isDrawing) {
+    if (textureWorld.currentTool === 'sprite' && textureWorld.drawingElement) {
+      const sprite = textureWorld.drawingElement as SpriteElement<SpriteElementData>
       sprite.data.x = worldPos.x
       sprite.data.y = worldPos.y
       const elementId = sprite.data.id
-      world.finishDrawing()
+      textureWorld.finishDrawing()
       selectedElementId.value = elementId
       editParams.value = JSON.parse(JSON.stringify(sprite.setEditParams()))
-      renderer?.renderPreview(world, pos)
+      renderer?.renderPreview(textureWorld, pos)
       render()
       return
     }
 
-    if (world.currentTool === 'polyline' || world.currentTool === 'polygon') {
+    if (textureWorld.currentTool === 'polyline' || textureWorld.currentTool === 'polygon') {
       if (isDoubleClick) {
-        const minPoints = world.currentTool === 'polygon' ? 3 : 2
-        const drawing = world.drawingElement as PolylineElement<PolylineElementData>
+        const minPoints = textureWorld.currentTool === 'polygon' ? 3 : 2
+        const drawing = textureWorld.drawingElement as PolylineElement<PolylineElementData>
         if (drawing && drawing.data.points.length >= minPoints) {
           const elementId = drawing.data.id
-          world.finishDrawing()
+          textureWorld.finishDrawing()
           selectedElementId.value = elementId
           render()
           return
         }
       }
-      world.addDrawingPoint(worldPos)
+      textureWorld.addDrawingPoint(worldPos)
       return
     }
   }
@@ -193,14 +196,14 @@ async function handleMouseDown(e: MouseEvent) {
 // 统一的元素选择逻辑
 function selectElementAt(worldPos: { x: number; y: number }, screenPos: { x: number; y: number }) {
   // 0. 检测当前选中 Sprite 的缩放控制点（控制点可能超出元素边界）
-  const selectedEl = world.getSelectedElement()
+  const selectedEl = textureWorld.getSelectedElement()
   if (selectedEl && selectedEl instanceof SpriteElement && selectedEl.data.id === selectedElementId.value) {
     const hitCorner = selectedEl.hitTestResizeHandle(worldPos)
     if (hitCorner) {
       isResizing.value = true
       resizeCorner.value = hitCorner
-      world.isDragging = false
-      world.isPanning = false
+      textureWorld.isDragging = false
+      textureWorld.isPanning = false
 
       const sprite = selectedEl as SpriteElement<SpriteElementData>
       const { x, y, width, height } = sprite.data
@@ -216,7 +219,7 @@ function selectElementAt(worldPos: { x: number; y: number }, screenPos: { x: num
   }
 
   // 1. 检测 Polyline/Polygon 的顶点
-  for (const el of world.elements) {
+  for (const el of textureWorld.elements) {
     if (el instanceof PolylineElement || el instanceof PolygonElement) {
       const pointIndex = (el as PolylineElement<PolylineElementData>).hitTestPoint(worldPos)
       if (pointIndex !== -1) {
@@ -231,16 +234,16 @@ function selectElementAt(worldPos: { x: number; y: number }, screenPos: { x: num
   }
 
   // 2. 检测其他元素
-  const element = world.findElementAt(worldPos)
+  const element = textureWorld.findElementAt(worldPos)
   if (!element) {
     // 空白区域：取消选择，开始平移
-    world.selectElement(null)
+    textureWorld.selectElement(null)
     selectedElementId.value = null
     editParams.value = []
-    world.isDragging = false
-    world.isPanning = true
-    world.panStartPos = screenPos
-    world.panStartOffset = { ...world.canvasOffset }
+    textureWorld.isDragging = false
+    textureWorld.isPanning = true
+    textureWorld.panStartPos = screenPos
+    textureWorld.panStartOffset = { ...textureWorld.canvasOffset }
     return
   }
 
@@ -249,34 +252,34 @@ function selectElementAt(worldPos: { x: number; y: number }, screenPos: { x: num
 
   // 4. 根据元素类型设置拖拽模式
   if (element instanceof PolylineElement) {
-    world.isDragging = false
-    world.isPanning = true
-    world.panStartPos = screenPos
-    world.panStartOffset = { ...world.canvasOffset }
+    textureWorld.isDragging = false
+    textureWorld.isPanning = true
+    textureWorld.panStartPos = screenPos
+    textureWorld.panStartOffset = { ...textureWorld.canvasOffset }
   } else if (element instanceof PolygonElement) {
     const polygon = element
     if (polygon.hitTestDragHandle(worldPos)) {
-      world.isDragging = true
-      world.isPanning = false
+      textureWorld.isDragging = true
+      textureWorld.isPanning = false
       const center = polygon.getCenter()
-      world.dragOffset = {
+      textureWorld.dragOffset = {
         x: worldPos.x - center.x,
         y: worldPos.y - center.y,
       }
     } else {
-      world.isDragging = false
-      world.isPanning = true
-      world.panStartPos = screenPos
-      world.panStartOffset = { ...world.canvasOffset }
+      textureWorld.isDragging = false
+      textureWorld.isPanning = true
+      textureWorld.panStartPos = screenPos
+      textureWorld.panStartOffset = { ...textureWorld.canvasOffset }
     }
   } else {
     // Sprite 或其他元素
-    world.isDragging = true
-    world.isPanning = false
+    textureWorld.isDragging = true
+    textureWorld.isPanning = false
     const elementPos = 'x' in element.data
       ? { x: (element as SpriteElement<SpriteElementData>).data.x, y: (element as SpriteElement<SpriteElementData>).data.y }
       : (element as PolylineElement<PolylineElementData>).data.points[0]
-    world.dragOffset = {
+    textureWorld.dragOffset = {
       x: worldPos.x - elementPos.x,
       y: worldPos.y - elementPos.y,
     }
@@ -284,7 +287,7 @@ function selectElementAt(worldPos: { x: number; y: number }, screenPos: { x: num
 }
 
 function selectAndEdit(element: BaseElement<BaseElementData>) {
-  world.selectElement(element.data.id)
+  textureWorld.selectElement(element.data.id)
   selectedElementId.value = element.data.id
   editParams.value = JSON.parse(JSON.stringify(element.setEditParams()))
 }
@@ -297,33 +300,33 @@ function startDragPoint(element: PolylineElement<PolylineElementData>, pointInde
     x: worldPos.x - pointPos.x,
     y: worldPos.y - pointPos.y,
   }
-  world.isDragging = false
-  world.isPanning = false
+  textureWorld.isDragging = false
+  textureWorld.isPanning = false
 }
 
 function handleMouseMove(e: MouseEvent) {
   const pos = getCanvasPos(e)
   mousePos.value = pos
 
-  if (world.isPanning) {
-    world.updatePanOffset({
-      x: world.panStartOffset.x + (pos.x - world.panStartPos.x),
-      y: world.panStartOffset.y + (pos.y - world.panStartPos.y),
+  if (textureWorld.isPanning) {
+    textureWorld.updatePanOffset({
+      x: textureWorld.panStartOffset.x + (pos.x - textureWorld.panStartPos.x),
+      y: textureWorld.panStartOffset.y + (pos.y - textureWorld.panStartPos.y),
     })
     render()
     return
   }
 
   if (renderer) {
-    renderer.renderPreview(world, pos)
+    renderer.renderPreview(textureWorld, pos)
   }
 
   if (isResizing.value) {
     const worldPos = {
-      x: Math.round((pos.x - world.canvasOffset.x) / world.scale),
-      y: Math.round((pos.y - world.canvasOffset.y) / world.scale),
+      x: Math.round((pos.x - textureWorld.canvasOffset.x) / textureWorld.scale),
+      y: Math.round((pos.y - textureWorld.canvasOffset.y) / textureWorld.scale),
     }
-    const element = world.getSelectedElement()
+    const element = textureWorld.getSelectedElement()
     if (element && element instanceof SpriteElement) {
       const sprite = element as SpriteElement<SpriteElementData>
       const { x, y, width, height } = sprite.data
@@ -351,10 +354,10 @@ function handleMouseMove(e: MouseEvent) {
 
   if (isDraggingPoint.value) {
     const worldPos = {
-      x: Math.round((pos.x - world.canvasOffset.x) / world.scale),
-      y: Math.round((pos.y - world.canvasOffset.y) / world.scale),
+      x: Math.round((pos.x - textureWorld.canvasOffset.x) / textureWorld.scale),
+      y: Math.round((pos.y - textureWorld.canvasOffset.y) / textureWorld.scale),
     }
-    const element = world.getSelectedElement()
+    const element = textureWorld.getSelectedElement()
     if (element && element instanceof PolylineElement) {
       const polyline = element as PolylineElement<PolylineElementData>
       const newPos = {
@@ -374,42 +377,42 @@ function handleMouseMove(e: MouseEvent) {
     return
   }
 
-  if (world.isDragging) {
+  if (textureWorld.isDragging) {
     const worldPos = {
-      x: Math.round((pos.x - world.canvasOffset.x) / world.scale),
-      y: Math.round((pos.y - world.canvasOffset.y) / world.scale),
+      x: Math.round((pos.x - textureWorld.canvasOffset.x) / textureWorld.scale),
+      y: Math.round((pos.y - textureWorld.canvasOffset.y) / textureWorld.scale),
     }
-    const element = world.getSelectedElement()
+    const element = textureWorld.getSelectedElement()
     if (element) {
       if (element instanceof PolygonElement) {
         const polygon = element as PolygonElement<any>
         const center = polygon.getCenter()
-        const dx = worldPos.x - world.dragOffset.x - center.x
-        const dy = worldPos.y - world.dragOffset.y - center.y
-        world.translateSelectedElement(dx, dy)
+        const dx = worldPos.x - textureWorld.dragOffset.x - center.x
+        const dy = worldPos.y - textureWorld.dragOffset.y - center.y
+        textureWorld.translateSelectedElement(dx, dy)
       } else {
         const oldPos = element instanceof SpriteElement
           ? { x: (element as SpriteElement<SpriteElementData>).data.x, y: (element as SpriteElement<SpriteElementData>).data.y }
           : (element as any).data.points[0]
-        const newX = worldPos.x - world.dragOffset.x
+        const newX = worldPos.x - textureWorld.dragOffset.x
         const dx = newX - oldPos.x
-        const dy = (worldPos.y - world.dragOffset.y) - oldPos.y
-        world.translateSelectedElement(dx, dy)
+        const dy = (worldPos.y - textureWorld.dragOffset.y) - oldPos.y
+        textureWorld.translateSelectedElement(dx, dy)
       }
     }
     render()
     return
   }
 
-  if (world.isDrawing) {
+  if (textureWorld.isDrawing) {
     render()
   }
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 function handleMouseUp(_e: MouseEvent) {
-  world.isDragging = false
-  world.isPanning = false
+  textureWorld.isDragging = false
+  textureWorld.isPanning = false
   isResizing.value = false
   resizeCorner.value = null
   isDraggingPoint.value = false
@@ -424,28 +427,28 @@ function handleWheel(e: WheelEvent) {
   const pos = getCanvasPos(e as unknown as MouseEvent)
 
   const zoomFactor = e.deltaY > 0 ? 0.9 : 1.1
-  const newScale = Math.max(0.1, Math.min(5, world.scale * zoomFactor))
+  const newScale = Math.max(0.1, Math.min(5, textureWorld.scale * zoomFactor))
 
-  const worldX = (pos.x - world.canvasOffset.x) / world.scale
-  const worldY = (pos.y - world.canvasOffset.y) / world.scale
+  const worldX = (pos.x - textureWorld.canvasOffset.x) / textureWorld.scale
+  const worldY = (pos.y - textureWorld.canvasOffset.y) / textureWorld.scale
 
-  world.canvasOffset.x = pos.x - worldX * newScale
-  world.canvasOffset.y = pos.y - worldY * newScale
-  world.scale = newScale
+  textureWorld.canvasOffset.x = pos.x - worldX * newScale
+  textureWorld.canvasOffset.y = pos.y - worldY * newScale
+  textureWorld.scale = newScale
 
   render()
 }
 
 function handleKeyDown(e: KeyboardEvent) {
   if (e.key === 'Escape') {
-    if (world.isDrawing) {
-      const minPoints = world.currentTool === 'polygon' ? 3 : 2
-      if (world.drawingElement &&
-        (world.drawingElement as any).data.points.length >= minPoints) {
-        world.finishDrawing()
-        world.setTool('select')
+    if (textureWorld.isDrawing) {
+      const minPoints = textureWorld.currentTool === 'polygon' ? 3 : 2
+      if (textureWorld.drawingElement &&
+        (textureWorld.drawingElement as any).data.points.length >= minPoints) {
+        textureWorld.finishDrawing()
+        textureWorld.setTool('select')
       } else {
-        world.cancelDrawing()
+        textureWorld.cancelDrawing()
       }
       render()
     }
@@ -453,7 +456,7 @@ function handleKeyDown(e: KeyboardEvent) {
 }
 
 function render() {
-  renderer?.render(world, mousePos.value)
+  renderer?.render(textureWorld, mousePos.value)
 }
 
 function resizeCanvas() {
@@ -473,41 +476,41 @@ function resizeCanvas() {
   const offsetRatioX = newWidth / oldWidth
   const offsetRatioY = newHeight / oldHeight
 
-  world.canvasOffset = {
-    x: world.canvasOffset.x * offsetRatioX,
-    y: world.canvasOffset.y * offsetRatioY,
+  textureWorld.canvasOffset = {
+    x: textureWorld.canvasOffset.x * offsetRatioX,
+    y: textureWorld.canvasOffset.y * offsetRatioY,
   }
 
   render()
 }
 
 function clearCanvas() {
-  world.clear()
+  textureWorld.clear()
   selectedElementId.value = null
   render()
 }
 
 function bringForward() {
-  world.bringForward()
+  textureWorld.bringForward()
   render()
 }
 
 function sendBackward() {
-  world.sendBackward()
+  textureWorld.sendBackward()
   render()
 }
 
 function deleteElement() {
-  const element = world.getSelectedElement()
+  const element = textureWorld.getSelectedElement()
   if (element) {
-    world.removeElement(element)
+    textureWorld.removeElement(element)
     selectedElementId.value = null
     render()
   }
 }
 
 function exportJSON() {
-  const data = world.exportElements()
+  const data = textureWorld.exportElements()
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
@@ -532,7 +535,7 @@ async function handleFileSelect(event: Event) {
   reader.onload = async (e) => {
     try {
       const data = JSON.parse(e.target?.result as string)
-      await world.importElements(data)
+      await textureWorld.importElements(data)
       selectedElementId.value = null
       render()
     } catch (error) {
@@ -582,14 +585,14 @@ function exportImage() {
 }
 
 watch(
-  () => world.selectedElementId,
+  () => textureWorld.selectedElementId,
   () => {
     render()
   }
 )
 
 watch(
-  () => world.elements.length,
+  () => textureWorld.elements.length,
   () => {
     render()
   }
@@ -599,7 +602,7 @@ onMounted(() => {
   if (!canvasWrapperRef.value) return
   const initialWidth = canvasWrapperRef.value.clientWidth
   const initialHeight = canvasWrapperRef.value.clientHeight
-  world.canvasOffset = {
+  textureWorld.canvasOffset = {
     x: initialWidth / 2,
     y: initialHeight / 2,
   }
@@ -626,7 +629,7 @@ onMounted(() => {
 })
 
 watch(() => editParams.value, (newVal) => {
-  const element = world.getSelectedElement()
+  const element = textureWorld.getSelectedElement()
   if (element) {
     newVal.forEach((item) => {
       if (item.dataType === 'title') return
@@ -965,7 +968,7 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
+  z-index: 999;
 
   >img {
     width: 24px;

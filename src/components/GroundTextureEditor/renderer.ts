@@ -1,5 +1,5 @@
 import type { Point } from './types'
-import { TextureWorld } from './world'
+import { TextureWorld } from './textureWorld'
 
 export class CanvasRenderer {
   private mainCanvas: HTMLCanvasElement
