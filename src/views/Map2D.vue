@@ -240,13 +240,6 @@ const isDragOver = ref(false)
 const isUploading = ref(false)
 
 const store = useStore<Store>()
-// const cameraStateLeft = ref<OrthographicCamera>({
-//   targetPositionX: 0,
-//   targetPositionY: 0,
-//   targetPositionZ: 0,
-//   size: 300,
-//   length: 300,
-// })
 const aspectRatio1 = ref(1)
 const aspectRatio2 = ref(1)
 
@@ -502,7 +495,6 @@ const getSnapPoint = (
       yAxisDistance = distToYAxis
       yAxisSnappedXVal = {
         objType: point.objType,
-        // objId: point.objId,
         number: point.point.x
       }
     }
@@ -622,7 +614,6 @@ const getSnapPoint = (
       snappedY = angleSnapped.point.y
       return {
         objType: angleSnapped.objType,
-        // objId: angleSnapped.objId,
         snapFromType: 'line',
         point: roundNumberList({
           x: snappedX,
@@ -637,7 +628,6 @@ const getSnapPoint = (
     snappedY = xAxisSnappedYVal.number
     return {
       objType: yAxisSnappedXVal.objType,
-      // objId: yAxisSnappedXVal.objId,
       snapFromType: 'axis',
       point: roundNumberList({
         x: snappedX,
@@ -650,7 +640,6 @@ const getSnapPoint = (
     snappedY = current.y
     return {
       objType: yAxisSnappedXVal.objType,
-      // objId: yAxisSnappedXVal.objId,
       snapFromType: 'axis',
       point: roundNumberList({
         x: snappedX,
@@ -663,7 +652,6 @@ const getSnapPoint = (
     snappedY = xAxisSnappedYVal.number
     return {
       objType: xAxisSnappedYVal.objType,
-      // objId: xAxisSnappedYVal.objId,
       snapFromType: 'axis',
       point: roundNumberList({
         x: snappedX,
@@ -823,7 +811,6 @@ onMounted(async () => {
           allKey.forEach((key: string) => {
             if (key in getData && key in editPropInputInfo.value) {
               if (editPropInputInfo.value[key] !== getData[key]) {
-                console.log('dddddd------1111111', editPropInputInfo.value, getData, key)
                 editPropInputInfo.value[key] = getData[key]
               }
             }
@@ -837,11 +824,6 @@ onMounted(async () => {
       changeCamera2State(activeCameraIndex.value)
     }
   })
-  // const canvas2 = canvas2D2Ref.value
-  // ctxList.forEach(ctx => {
-  //   ctx.canvas.width = 800
-  //   ctx.canvas.height = 600;
-  // })
   nextTick(() => {
     // (0,0)位移到中央
     const canvasContainer = document.querySelector('.canvas-container')
@@ -857,63 +839,12 @@ onMounted(async () => {
     }
     const match = location.href.match(/initId=(\d+)/);
     if (match) {
-      // chooseDemo(1)
-      const initDefaultFile: any & {
-        panOffset: Point
-        zoomLevel: number
-        cameraState: CameraState
-        activeCameraIndex: number
-      } = {
-        "wall": [],
-        "door": [],
-        "window": [],
-        "camera": [],
-        "cube": [],
-        "sphere": [],
-        "cylinder": [],
-        "cone": [],
-        "plane": [],
-        "curtain": [],
-        "outFile": [
-          {
-            "id": "1780987800414",
-            "x": 0,
-            "y": 0,
-            "z": 0,
-            "tip": "",
-            "tipFontSize": 96,
-            "fileTypeId": Number(match[1]),
-            "angleY": 0,
-            "bm": null,
-            "color": "",
-            "canAngelZ": 1
-          }
-        ],
-        "outFileInWall": [],
-        "people": [],
-        "importFile": [],
-        "curtainInWall": [],
-        "panOffset": {
-          "x": 127.0703125,
-          "y": 373.5
-        },
-        "zoomLevel": 1,
-        "cameraState": {
-          "targetPositionX": 0,
-          "targetPositionY": 0,
-          "targetPositionZ": 0,
-          "radius": 800,
-          "angleX": 0,
-          "angleY": 0.7853981633974483,
-          "aspectW": 1,
-          "aspectH": 1
-        },
-        "activeCameraIndex": 0,
-        "allImportImgs": []
-      }
-      initWorldByData(initDefaultFile).finally(() => {
-        showDemos.value = false
-        demoIniting.value = false
+      import('@/utils/initByObjId').then(({ default: initByObjId }) => {
+        const data = initByObjId(Number(match[1]))
+        initWorldByData(data).finally(() => {
+          showDemos.value = false
+          demoIniting.value = false
+        })
       })
     }
   })
@@ -965,15 +896,6 @@ onMounted(async () => {
   }
 
   window.addEventListener('keydown', handleKeyDown)
-
-  // setTimeout(() => {
-  //   try {
-  //     initWorldByData(initDefaultFile)
-  //   } catch (error) {
-  //     console.error(error)
-  //   }
-  // }, 0)
-
   return () => {
     window.removeEventListener('keydown', handleKeyDown)
     window.removeEventListener('keydown', bindSave);
@@ -1054,14 +976,6 @@ const saveDrawing = async () => {
   a.href = url
   a.download = 'floor-plan.devt'
   a.click()
-  // URL.revokeObjectURL(url)
-  // const blob = new Blob([json], { type: 'application/json' })
-  // const url = URL.createObjectURL(blob)
-  // const a = document.createElement('a')
-  // a.href = url
-  // a.download = 'floor-plan.json'
-  // a.click()
-  // URL.revokeObjectURL(url)
 }
 
 const loadProgramFile = () => {
@@ -1081,7 +995,6 @@ const handleLoadProgramFileChange = async (e: Event) => {
 
   // 1. 解压 ZIP
   const zip = await JSZip.loadAsync(file);
-
   const t = await zip.file('scene.json');
   if (!t) {
     initWorldLoading.value = false
@@ -1105,8 +1018,6 @@ const handleLoadProgramFileChange = async (e: Event) => {
       const url = URL.createObjectURL(blob);
       const file = new File([blob], fileTypeId, { type: blob.type || 'application/octet-stream' })
 
-      // // console.log('blob', blob, url)
-      // const fileExtension = v.fileName ? v.fileName.split('.').pop()?.toLowerCase() || '' : '';
       console.log('blob', blob, url, file, file.name, extension)
       processUploadedFile(file, (object: THREE.Group, file: File) => {
         const customObjItem: ImportFileType = {
@@ -1114,7 +1025,6 @@ const handleLoadProgramFileChange = async (e: Event) => {
           mesh: object,
           file,
         }
-        // 添加到 ObjFileTypes
         worldApi.allImportFiles.push(customObjItem)
       })
     }
@@ -1124,30 +1034,12 @@ const handleLoadProgramFileChange = async (e: Event) => {
     for (const fileTypeId of sceneData.allImportImgs) {
       console.log('fileTypeId', fileTypeId)
       const read = await zip.file(`imgs/${fileTypeId}`);
-      // const extension = fileTypeId.split('.').pop()?.toLowerCase();
       if (!read) continue
       const blob = await read.async('blob');
-      // const url = URL.createObjectURL(blob);
       const file = new File([blob], fileTypeId, { type: blob.type || 'application/octet-stream' })
       worldApi.allImportImgs.push({ fileTypeId, file })
     }
   }
-
-  // // 3. 遍历场景对象
-  // for (const obj of sceneData.objects) {
-  //   const path = obj.file; // 如 assets/house.fbx
-
-  //   // 4. 从 ZIP 中读取二进制
-  //   const assetBlob = await zip.file(path).async('blob');
-
-  //   // 5. 创建临时 URL
-  //   const url = URL.createObjectURL(assetBlob);
-
-  //   // 6. 用 Three.js 加载
-  //   loadModel(url, obj);
-
-  //   // 7. 模型加载完成后记得 URL.revokeObjectURL(url)
-  // }
   try {
     const data: fileData & {
       panOffset: Point
@@ -1197,7 +1089,6 @@ async function initWorldByData(data: fileData & {
     worldApi.ObjFileTypes.push(v)
   })
 
-  console.log('data------', res)
   for (let i = 0; i < allFileKeys.length; i++) {
     const key = allFileKeys[i]
     if (data[key] && data[key].length > 0) {
@@ -1479,8 +1370,6 @@ const handleMouseMove = (e: MouseEvent) => {
     const ctxAction = canvasAction.getContext('2d')!
     // 如果正在拖拽，处理拖拽逻辑（即使当前工具不是 drag）
     if (matchHandelObj && matchedHandelInfo) {
-      // console.log('currentTool.value---1')
-      // console.log('matchHandelObj', currentTool.value)
       function temp(api: BaseEntityClass<BaseObjData>): boolean {
         if (matchHandelObj && matchedHandelInfo) {
           let beMatchPoints = api.getMineBeSnapPoints()
@@ -1563,7 +1452,6 @@ const handleMouseMove = (e: MouseEvent) => {
       ctxAction.clearRect(0, 0, canvasAction.width, canvasAction.height)
       matchHandelObj.draw2D(ctxAction, panOffset.value, zoom2DLevel.value)
 
-      // worldApi.draw2DWorldActionHandle(canvasAction, fileData, panOffset.value, zoom2DLevel.value);
       worldApi.draw3D()
       return;
     }
@@ -1577,7 +1465,6 @@ const handleMouseMove = (e: MouseEvent) => {
       drawWrapper2D(fileData)
       // 绘制操作句柄
       ctxAction.clearRect(0, 0, canvasAction.width, canvasAction.height)
-      // worldApi.draw2DWorldActionHandle(canvasAction, fileData, panOffset.value, zoom2DLevel.value);
     } else {
       // 鼠标浮动而过
       ctxAction.clearRect(0, 0, canvasAction.width, canvasAction.height)
@@ -1871,7 +1758,6 @@ const handleMouseMoveSplit = (e: MouseEvent) => {
   } else if (dragSplitIndex.value === 2) {
     const panel1StartWidth = panel1SplitWidthPer.value;
     const panel2StartWidth = panel2SplitWidthPer.value;
-    // console.log(panel2StartWidth - ((panel2StartWidth + panel1StartWidth) - mousePositionPer));
     panel2SplitWidthPer.value = panel2StartWidth - ((panel2StartWidth + panel1StartWidth) - mousePositionPer)
   }
 }
