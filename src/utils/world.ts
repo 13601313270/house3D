@@ -45,7 +45,7 @@ export class World {
 
   activeCameraIndex: number = -1
 
-  environmentConfig: EnvironmentConfig = { skyType: 1, ambientLightIntensity: 1.5, showGround: true }
+  environmentConfig: EnvironmentConfig = { skyType: 1, ambientLightIntensity: 1, showGround: true }
 
   ambientLight: THREE.AmbientLight | null = null
 
@@ -84,11 +84,11 @@ export class World {
       this.scene.add(this.ambientLight)
     }
 
-    if (!this.directionalLight) {
-      this.directionalLight = new THREE.DirectionalLight(0xffffff, 0.8)
-      this.directionalLight.position.set(100, 200, 100)
-      this.scene.add(this.directionalLight)
-    }
+    // if (!this.directionalLight) {
+    //   this.directionalLight = new THREE.DirectionalLight(0xffffff, 0.8)
+    //   this.directionalLight.position.set(100, 200, 100)
+    //   this.scene.add(this.directionalLight)
+    // }
 
     const skyType = this.environmentConfig.skyType || 1;
     const skyImgMap: Record<number, string> = {

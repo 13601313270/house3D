@@ -33,7 +33,7 @@ const environmentValue = ref<{
 onMounted(() => {
   const worldApi = (window as any).worldApi
   const savedSkyType = worldApi?.environmentConfig?.skyType || 1
-  const savedAmbientLightIntensity = worldApi?.environmentConfig?.ambientLightIntensity ?? 1.5
+  const savedAmbientLightIntensity = worldApi?.environmentConfig?.ambientLightIntensity ?? 1
   const savedShowGround = worldApi?.environmentConfig?.showGround ?? true
   
   environmentValue.value = {
@@ -94,7 +94,7 @@ const editPropConfigInfo = ref<editItem[]>([
     min: 0,
     max: 4,
     step: 0.1,
-    value: 1.5,
+    value: 1,
   },
   {
     id: 'showGround',
