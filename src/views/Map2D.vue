@@ -156,7 +156,7 @@
     </div>
   </teleport>
   <!-- <teleport to="#teleport">
-    <GroundTextureEditor class="dd" ref="groundTextureEditorRef" />
+    <GroundTextureEditor ref="groundTextureEditorRef" />
   </teleport> -->
 </template>
 
@@ -168,7 +168,8 @@ import JSZip from 'jszip';
 import request from '@/utils/request'
 import { Point } from '../types'
 import { snapThreshold, World, EnvironmentConfig } from '../utils/world'
-import Canvas3D, { CameraState } from '../components/Canvas3D.vue'
+import Canvas3D from '../components/Canvas3D.vue'
+import { CameraState } from '@/types/camera'
 import { WallData } from '@/entities/wall/index.d'
 import { allFileKeys, fileData, editItem, fileDataKeyToClass, allFileKeysObjType } from '@/entities'
 import { PointEntityClass } from '@/types/pointEntity'
@@ -2526,14 +2527,5 @@ button {
       transform: rotate(360deg);
     }
   }
-}
-
-.dd {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 1000;
 }
 </style>

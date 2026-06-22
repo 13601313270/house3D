@@ -1,4 +1,4 @@
-import { CameraState } from "@/components/Canvas3D.vue"
+import { CameraState } from "@/types/camera"
 import { Point } from "@/types"
 
 export default function (objId: number) {
