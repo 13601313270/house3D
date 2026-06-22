@@ -76,7 +76,7 @@ export class PlaneEntity extends PointEntityClass<PlaneData> {
 
     const drawAngelLength = Math.max(this.getData().width / 2, this.circleRadius * 2) * 0.9;// 0.9避免超过方块范围
     // alert(drawAngelLength)
-    console.log('drawAngelLength', angleY, drawAngelLength)
+    // console.log('drawAngelLength', angleY, drawAngelLength)
     // 控制点向着angleY角度延伸10个单位后的坐标
     const rotatedXAdd = data.x + Math.cos(angleY) * drawAngelLength
     const rotatedYAdd = data.y - Math.sin(angleY) * drawAngelLength

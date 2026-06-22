@@ -55,8 +55,7 @@
       <div class="left-panel" :style="{ width: panel1SplitWidthPer * 100 + '%' }">
         <div class="toolbar">
           <div style="flex-shrink: 0;">布局图</div>
-          <ObjTypeSelect :currentTool="currentTool" @select="changeObjTypeSelect"
-            @onShowHelpModal="showHelpModal = true" />
+          <ObjTypeSelect :currentTool="currentTool" @select="changeObjTypeSelect" />
           <button @click="triggerImportFile" type="button">
             导入模型
           </button>

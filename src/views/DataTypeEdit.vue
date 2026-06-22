@@ -51,8 +51,8 @@
       </CornerTypeEdit>
     </div>
     <div v-else-if="item.dataType === 'stitchImage'">
-      <!-- <img :src="modelValue" alt="stitchImage" class="img" /> -->
-      <Button @click="groundTextureEditorShow = true, groundTextureEditorPropId = item.id">编辑纹理</Button>
+      <img :src="modelValue.viewImg" alt="stitchImage" class="img" />
+      <button @click="groundTextureEditorShow = true, groundTextureEditorPropId = item.id">编辑纹理</button>
       <GroundTextureEditor v-if="groundTextureEditorShow" @close="groundTextureEditorShow = false"
         @update:modelValue="updateEditPropByDataTexture" />
     </div>
@@ -166,8 +166,9 @@ function updateEditPropByDataTexture(value: {
   viewImg: string,
   value: any[],
 }) {
+  groundTextureEditorShow.value = false
   console.log('updateEditPropByDataTexture', value)
-  // emit('update:modelValue', value)
+  emit('update:modelValue', value)
 }
 </script>
 <style scoped lang="less">

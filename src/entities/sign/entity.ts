@@ -25,8 +25,10 @@ export class SignEntity extends PointEntityClass<SignData> {
       y: 0,
       z: 0,
       angleY: 0,
-      value: [],
-      viewImg: '',
+      img: {
+        value: [],
+        viewImg: '',
+      },
     }
     return new SignDataClass(data)
   }
@@ -74,7 +76,7 @@ export class SignEntity extends PointEntityClass<SignData> {
 
     const drawAngelLength = Math.max(100, this.circleRadius * 2) * 0.9;// 0.9避免超过方块范围
     // alert(drawAngelLength)
-    console.log('drawAngelLength', angleY, drawAngelLength)
+    // console.log('drawAngelLength', angleY, drawAngelLength)
     // 控制点向着angleY角度延伸10个单位后的坐标
     const rotatedXAdd = data.x + Math.cos(angleY) * drawAngelLength
     const rotatedYAdd = data.y - Math.sin(angleY) * drawAngelLength
@@ -163,12 +165,16 @@ export class SignEntity extends PointEntityClass<SignData> {
   create3DMesh() {
     const data = this.getData();
     const group = new THREE.Group()
+    const { viewImg } = data.img
+    // viewImg是一个图片的base64编码
+    console.log('ppppppp', viewImg)
 
     const { width, length, color } = { width: 100, length: 100, color: 'red' };
     const angleY = data.angleY || 0;// 历史数据问题，有的数据不存在angleY，所以用了一个【|| 0】给予默认值
 
-    let material: THREE.Material | null = null;
-    material = (new THREE.MeshStandardMaterial({ color }));
+    const material = (new THREE.MeshStandardMaterial({
+      map: new THREE.TextureLoader().load(viewImg)
+    }));
     const plane = new THREE.PlaneGeometry(width, length)
     const planeMesh = new THREE.Mesh(plane, material)
     planeMesh.rotation.x = -Math.PI / 2
@@ -296,8 +302,7 @@ export class SignEntity extends PointEntityClass<SignData> {
         id: 'img',
         label: '图片',
         dataType: 'stitchImage',
-        value: data.value || [],
-        imgData: data.viewImg || '',
+        value: data.img,
       },
     ], (val) => {
       this.setData({
