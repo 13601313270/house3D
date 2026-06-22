@@ -204,10 +204,8 @@ function leaveObjTypeCate1() {
   isMouseInCate1.value = false
   setTimeout(() => {
     if (isMouseInCate2.value) {
-      console.log('111111')
       return
     } else {
-      console.log('111111---2')
       activeObjChildList.value = []
     }
   }, 10)

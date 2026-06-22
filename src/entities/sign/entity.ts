@@ -3,11 +3,9 @@ import * as THREE from 'three'
 import { SignData } from './index.d'
 import { PointEntityClass } from '@/types/pointEntity'
 import { editItem } from '..';
-import { getMaterialById } from '@/material';
 import { SignDataClass } from './dataClass'
 import { isPointInRotatedRect } from '@/utils/isPointInRotatedRect';
 import { MatchRectArea } from '@/utils/matchArea';
-import { importImgFileHead } from '../allObjs';
 import { allSnapFromType } from '@/types/baseEntity';
 
 import { loadImage as globalLoadImage, getCachedImage } from '@/utils/imageCache'
@@ -76,7 +74,6 @@ export class SignEntity extends PointEntityClass<SignData> {
 
     if (viewImg) {
       const image = getCachedImage(viewImg);
-      // console.log('cccccccc', viewImg, image)
       const imgWidth = width * zoomLevel * 0.9;
       const imgHeight = length * zoomLevel * 0.9;
       const imgX = -imgWidth / 2;
