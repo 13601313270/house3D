@@ -17,6 +17,7 @@ export class SignEntity extends PointEntityClass<SignData> {
   private circleRadius = 6
   private static textureLoader = new THREE.TextureLoader();
   private static textureCache = new Map<string | File, THREE.Texture>();
+  private static imgCache = new Map<string, HTMLImageElement>();
 
   defaultValue(): SignData {
     const data: SignData = {
@@ -33,25 +34,73 @@ export class SignEntity extends PointEntityClass<SignData> {
     return new SignDataClass(data)
   }
 
+  async init() {
+    await super.init()
+    const { img } = this.getData();
+    const { viewImg } = img;
+    if (viewImg) {
+      await SignEntity.loadImage(viewImg);
+    }
+  }
+
+  private static loadImage(src: string): Promise<HTMLImageElement> {
+    return new Promise((resolve, reject) => {
+      if (SignEntity.imgCache.has(src)) {
+        resolve(SignEntity.imgCache.get(src)!);
+        return;
+      }
+
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = () => {
+        SignEntity.imgCache.set(src, img);
+        resolve(img);
+      };
+      img.onerror = reject;
+      img.src = src;
+    });
+  }
+
   draw2DPreviewByData(ctx: CanvasRenderingContext2D, data: SignData, panOffset: Point, zoomLevel: number): void {
     const screenX = data.x * zoomLevel + panOffset.x
     const screenY = data.y * zoomLevel + panOffset.y
     const { width, length } = { width: 100, length: 100 };
-    const angleY = data.angleY || 0;// 历史数据问题
+    const { angleY, img } = data;
+    const { viewImg } = img;
 
-    // 绘制一个方块
-    ctx.fillStyle = 'red'
-    ctx.save(); // 保存当前状态
-    ctx.translate(screenX, screenY); // 移动原点到目标中心
-    ctx.rotate(angleY * -1); // 围绕新原点旋转
-    // 绘制一个方块
+    ctx.save();
+    ctx.translate(screenX, screenY);
+    ctx.rotate(angleY * -1);
+
+    ctx.fillStyle = '#f0f0f0';
     ctx.fillRect(
       width / -2 * zoomLevel,
       length / -2 * zoomLevel,
       width * zoomLevel,
       length * zoomLevel
-    )
-    ctx.restore(); // 恢复原始状态
+    );
+
+    ctx.strokeStyle = '#333';
+    ctx.lineWidth = 2 * zoomLevel;
+    ctx.strokeRect(
+      width / -2 * zoomLevel,
+      length / -2 * zoomLevel,
+      width * zoomLevel,
+      length * zoomLevel
+    );
+
+    if (viewImg) {
+      const image = SignEntity.imgCache.get(viewImg);
+      const imgWidth = width * zoomLevel * 0.9;
+      const imgHeight = length * zoomLevel * 0.9;
+      const imgX = -imgWidth / 2;
+      const imgY = -imgHeight / 2;
+      if (image) {
+        ctx.drawImage(image, imgX, imgY, imgWidth, imgHeight);
+      }
+    }
+
+    ctx.restore();
   }
 
   draw2DByData(

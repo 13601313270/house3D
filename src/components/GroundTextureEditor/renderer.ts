@@ -298,9 +298,6 @@ export class CanvasRenderer {
       return ''
     }
 
-    tempCtx.fillStyle = '#ffffff'
-    tempCtx.fillRect(0, 0, width, height)
-
     tempCtx.save()
     tempCtx.translate(-minX + padding, -minY + padding)
 
