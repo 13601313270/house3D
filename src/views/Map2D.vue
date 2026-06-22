@@ -175,6 +175,7 @@ import { PointEntityClass } from '@/types/pointEntity'
 import { EntityClassInWall, NearestWallResult } from '@/types/entityInWall'
 import { BaseObjData, HandelInfo, LineObjData, PointWithIndex } from '@/types/map2d'
 import pointToLineDistance from '@/utils/pointToLineDistance'
+import { getClosestPointOnLine, roundNumberList } from '@/utils/geometry'
 import { CameraData } from '@/entities/camera/index.d'
 import { WallEntity } from '@/entities/wall/entity'
 import { ImportFileType, ObjOutputFileType } from '@/entities/allObjs'
@@ -395,32 +396,6 @@ const getNearestWall = (point: Point): NearestWallResult | null => {
   }
 
   return null
-}
-
-const getClosestPointOnLine = (p: Point, a: Point, b: Point) => {
-  const A = p.x - a.x
-  const B = p.y - a.y
-  const C = b.x - a.x
-  const D = b.y - a.y
-
-  const dot = A * C + B * D
-  const lenSq = C * C + D * D
-  let param = -1
-
-  if (lenSq !== 0) {
-    param = dot / lenSq
-  }
-
-  if (param < 0) {
-    return { x: a.x, y: a.y }
-  } else if (param > 1) {
-    return { x: b.x, y: b.y }
-  } else {
-    return {
-      x: a.x + param * C,
-      y: a.y + param * D
-    }
-  }
 }
 
 const getSnapPoint = (
@@ -699,9 +674,6 @@ const getSnapPoint = (
   return null
 }
 
-function roundNumberList(point: { x: number, y: number }) {
-  return { x: Math.round(point.x), y: Math.round(point.y) }
-}
 const worldApi = new World()
 window.worldApi = worldApi
 const drawWrapper2DAnd3D = () => {

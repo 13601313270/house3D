@@ -126,7 +126,7 @@ export class WindowEntity extends EntityClassInWall<WindowData> {
       y: data.y,
       width: data.width,
       depth: Math.max(wallThickness + 20, 20),
-      angleY: data.angle,
+      angleY: data.angle * -1,
     })
     ctx.lineWidth = 2
     ctx.strokeStyle = 'red'

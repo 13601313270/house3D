@@ -1,6 +1,5 @@
 import { Point, LineObjData } from '@/types/map2d'
 
-
 export interface StaircasePoint extends Point {
   z: number,// 高度
 }
