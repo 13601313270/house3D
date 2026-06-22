@@ -50,8 +50,8 @@
         </slot>
       </CornerTypeEdit>
     </div>
-    <div v-else-if="item.dataType === 'stitchImage'">
-      <img :src="modelValue.viewImg" alt="stitchImage" class="img" />
+    <div class="stitchImage" v-else-if="item.dataType === 'stitchImage'">
+      <img :src="modelValue.viewImg" class="previewImg" alt="stitchImage" />
       <button @click="groundTextureEditorShow = true, groundTextureEditorPropId = item.id">编辑纹理</button>
       <GroundTextureEditor v-if="groundTextureEditorShow" @close="groundTextureEditorShow = false"
         @update:modelValue="updateEditPropByDataTexture" :width="200" :height="200" :modelValue="modelValue" />
@@ -350,5 +350,11 @@ async function updateEditPropByDataTexture(value: {
 .cornerTypeDesc {
   font-size: 14px;
   color: #b2b2b2;
+}
+
+.stitchImage {
+  .previewImg {
+    height: 200px;
+  }
 }
 </style>
