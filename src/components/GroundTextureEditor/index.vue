@@ -15,9 +15,9 @@
 
       <div class="actions">
         <button class="action-btn" @click="clearCanvas">清空</button>
-        <button class="action-btn" @click="exportJSON">导出JSON</button>
-        <button class="action-btn" @click="importJSON">导入JSON</button>
-        <button class="action-btn primary" @click="exportImage">导出PNG</button>
+        <button class="action-btn" @click="exportJSON">导出</button>
+        <button class="action-btn" @click="importJSON">导入</button>
+        <button class="action-btn primary" @click="exportImage">PNG</button>
       </div>
       <input ref="fileInputRef" type="file" accept=".json" class="file-input" @change="handleFileSelect" />
     </div>
@@ -71,6 +71,10 @@
         </div>
       </div>
     </div>
+
+    <div class="panel-close-btn" @click="emit('close')">
+      <img src="@/assets/close.svg" alt="close" />
+    </div>
   </div>
 </template>
 
@@ -84,6 +88,7 @@ import { editItem } from '@/entities'
 import { PolylineElement, PolylineElementData } from './types/polylineElement'
 import { PolygonElement } from './types/polygonElement'
 
+const emit = defineEmits(['close'])
 const canvasRef = ref<HTMLCanvasElement | null>(null)
 const gridCanvasRef = ref<HTMLCanvasElement | null>(null)
 const previewCanvasRef = ref<HTMLCanvasElement | null>(null)
@@ -948,6 +953,23 @@ onUnmounted(() => {
         background: #ff7875;
       }
     }
+  }
+}
+
+.panel-close-btn {
+  position: absolute;
+  top: 0px;
+  right: 0px;
+  width: 68px;
+  height: 68px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+
+  >img {
+    width: 24px;
+    height: 24px;
   }
 }
 </style>

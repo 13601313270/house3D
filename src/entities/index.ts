@@ -152,5 +152,6 @@ export type editItem = {
   id: string,
   label: string,
   dataType: 'stitchImage',
-  value: string,
+  value: Array<any>,
+  imgData: string,
 }

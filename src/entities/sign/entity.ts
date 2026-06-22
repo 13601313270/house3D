@@ -25,7 +25,8 @@ export class SignEntity extends PointEntityClass<SignData> {
       y: 0,
       z: 0,
       angleY: 0,
-      stitchImage: '[]',
+      value: [],
+      viewImg: '',
     }
     return new SignDataClass(data)
   }
@@ -295,7 +296,8 @@ export class SignEntity extends PointEntityClass<SignData> {
         id: 'img',
         label: '图片',
         dataType: 'stitchImage',
-        value: data.stitchImage || '',
+        value: data.value || [],
+        imgData: data.viewImg || '',
       },
     ], (val) => {
       this.setData({

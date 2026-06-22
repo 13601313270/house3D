@@ -51,7 +51,9 @@
       </CornerTypeEdit>
     </div>
     <div v-else-if="item.dataType === 'stitchImage'">
-      ======
+      <!-- <img :src="modelValue" alt="stitchImage" class="img" /> -->
+      <Button @click="groundTextureEditorShow = true, groundTextureEditorPropId = item.id">编辑纹理</Button>
+      <GroundTextureEditor v-if="groundTextureEditorShow" @close="groundTextureEditorShow = false" @update:modelValue="updateEditPropInputInfoString" />
     </div>
     <div class="allMaterialPanel" v-if="allMaterialShow && allMaterialShowPropId"
       @click.self="allMaterialShow = false, allMaterialShowPropId = undefined">
@@ -84,6 +86,7 @@ import { editItem, enumItem } from '@/entities';
 import { allMaterial } from '@/material';
 import ImgEdit from './ImgEdit.vue'
 import CornerTypeEdit from './cornerTypeEdit.vue'
+import GroundTextureEditor from '@/components/GroundTextureEditor/index.vue'
 
 defineProps<{
   item: editItem,
@@ -117,9 +120,13 @@ const cornerTypeEdit = ref<enumItem[]>([
     img: 'cornerTypeImgs/5.png',
   },
 ])
-
+// 材料选择面板
 const allMaterialShow = ref(false)
 const allMaterialShowPropId = ref<string>()
+
+// 纹理编辑器
+const groundTextureEditorShow = ref(false)
+const groundTextureEditorPropId = ref<string>()
 
 const emit = defineEmits(['update:modelValue'])
 

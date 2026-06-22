@@ -155,9 +155,6 @@
       <!-- <div>模型初始化中，请稍后...</div> -->
     </div>
   </teleport>
-  <!-- <teleport to="#teleport">
-    <GroundTextureEditor ref="groundTextureEditorRef" />
-  </teleport> -->
 </template>
 
 <script lang="ts" setup>
@@ -199,7 +196,6 @@ import { LineObjDataClass } from '@/entities/objData';
 import { CameraEntity } from '@/entities/camera/entity';
 import AllWorldObjSelect from '@/components/AllWorldObjSelect.vue'
 import message from '@/utils/message';
-import GroundTextureEditor from '@/components/GroundTextureEditor/index.vue'
 
 const canvas2DRef = ref<HTMLCanvasElement | null>(null)
 const canvas2D2Ref = ref<HTMLCanvasElement | null>(null)
