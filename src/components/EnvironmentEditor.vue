@@ -13,7 +13,7 @@
             <button class="actionButton" @click="item.value">{{ item.label }}</button>
           </div>
           <DataTypeEdit v-else-if="item.dataType !== 'title'" class="edit" :item="item"
-            :modelValue="environmentValue[item.id]" @update:modelValue="handleUpdate(item.id, $event)" />
+            :modelValue="environmentValue[item.id]" :record="environmentValue" @update:modelValue="handleUpdate(item.id, $event)" />
         </div>
       </div>
     </div>
