@@ -67,7 +67,7 @@ export class SignEntity extends PointEntityClass<SignData> {
     );
 
     ctx.strokeStyle = '#333';
-    ctx.lineWidth = 2 * zoomLevel;
+    ctx.lineWidth = 1 * zoomLevel;
     ctx.strokeRect(
       width / -2 * zoomLevel,
       length / -2 * zoomLevel,
@@ -355,10 +355,7 @@ export class SignEntity extends PointEntityClass<SignData> {
         uvAttr.needsUpdate = true;
 
         const groups = triangleGeometry.groups;
-        const indexAttr = triangleGeometry.getIndex();
-        const posAttr = triangleGeometry.getAttribute('position');
-
-        if (indexAttr && groups.length >= 1) {
+        if (groups.length >= 1) {
           const capGroup = groups[0];
 
           triangleGeometry.clearGroups();
@@ -374,8 +371,8 @@ export class SignEntity extends PointEntityClass<SignData> {
         }
 
         const materials = [
-          viewImg ? imageMaterial : sideMaterial,
           sideMaterial,
+          viewImg ? imageMaterial : sideMaterial,
           sideMaterial,
         ];
         signMesh = new THREE.Mesh(triangleGeometry, materials);
@@ -396,7 +393,7 @@ export class SignEntity extends PointEntityClass<SignData> {
       }
     }
     signMesh.position.setY(signZ + height / 2);
-    signMesh.position.setZ(poleRadius + thickness / 2 + 2);
+    signMesh.position.setZ(poleRadius / 2 + 2);
 
     group.add(signMesh);
     group.rotateY(angleY);
@@ -518,19 +515,19 @@ export class SignEntity extends PointEntityClass<SignData> {
         enumList: [{
           id: 'rect',
           name: '矩形',
-          img: 'rect.png'
+          img: '/shape/rect.png'
         }, {
           id: 'circle',
           name: '圆形',
-          img: 'circle.png'
+          img: '/shape/circle.png'
         }, {
           id: 'diamond',
           name: '菱形',
-          img: 'diamond.png'
+          img: '/shape/diamond.png'
         }, {
           id: 'triangle',
           name: '三角形',
-          img: 'triangle.png'
+          img: '/shape/triangle.png'
         }],
       },
       {
@@ -587,7 +584,7 @@ export class SignEntity extends PointEntityClass<SignData> {
         label: '柱子半径',
         dataType: 'number',
         min: 1,
-        max: 50,
+        max: 30,
         step: 1,
         value: data.poleRadius,
         unit: 'cm',
