@@ -209,33 +209,100 @@ export class SignEntity extends PointEntityClass<SignData> {
 
     let signMesh: THREE.Mesh;
 
-    if (shape === 'circle') {
-      const radius = Math.min(width, height) / 2;
-      const circleGeometry = new THREE.CylinderGeometry(radius, radius, thickness, 64);
-      const materials = [
-        sideMaterial,
-        viewImg ? imageMaterial : sideMaterial,
-        sideMaterial,
-        // viewImg ? imageMaterial : sideMaterial,
-      ];
-      signMesh = new THREE.Mesh(circleGeometry, materials);
-      signMesh.position.setY(poleHeight - height / 2);
-      signMesh.position.setZ(poleRadius + thickness / 2 + 2);
-      signMesh.rotation.x = Math.PI / 2;
-      signMesh.rotation.y = Math.PI / 2;
-    } else {
-      const materials = [
-        sideMaterial,
-        sideMaterial,
-        sideMaterial,
-        sideMaterial,
-        viewImg ? imageMaterial : sideMaterial,
-        sideMaterial
-      ];
-      const box = new THREE.BoxGeometry(width, height, thickness);
-      signMesh = new THREE.Mesh(box, materials);
-      signMesh.position.setY(poleHeight - height / 2);
-      signMesh.position.setZ(poleRadius + thickness / 2 + 2);
+    switch (shape) {
+      case 'circle': {
+        const radius = Math.min(width, height) / 2;
+        const circleGeometry = new THREE.CylinderGeometry(radius, radius, thickness, 64);
+        const materials = [
+          sideMaterial,
+          viewImg ? imageMaterial : sideMaterial,
+          sideMaterial,
+        ];
+        signMesh = new THREE.Mesh(circleGeometry, materials);
+        signMesh.position.setY(poleHeight - height / 2);
+        signMesh.position.setZ(poleRadius + thickness / 2 + 2);
+        signMesh.rotation.x = Math.PI / 2;
+        signMesh.rotation.y = Math.PI / 2;
+        break;
+      }
+      case 'diamond': {
+        const diamondShape = new THREE.Shape();
+        diamondShape.moveTo(0, -height / 2);
+        diamondShape.lineTo(width / 2, 0);
+        diamondShape.lineTo(0, height / 2);
+        diamondShape.lineTo(-width / 2, 0);
+        diamondShape.closePath();
+
+        const extrudeSettings = {
+          depth: thickness,
+          bevelEnabled: false,
+        };
+        const diamondGeometry = new THREE.ExtrudeGeometry(diamondShape, extrudeSettings);
+
+        // 修正 UV 映射，使纹理填满菱形正面
+        const positionAttr = diamondGeometry.getAttribute('position');
+        const uvAttr = diamondGeometry.getAttribute('uv');
+
+        for (let i = 0; i < positionAttr.count; i++) {
+          const x = positionAttr.getX(i);
+          const y = positionAttr.getY(i);
+          // 将菱形坐标映射到 [0, 1] UV 范围
+          const u = (x + width / 2) / width;
+          const v = (y + height / 2) / height;
+          uvAttr.setXY(i, u, v);
+        }
+        uvAttr.needsUpdate = true;
+
+        // ExtrudeGeometry 默认只有两个 group：正面+背面共用材质0，侧面用材质1
+        // 需要手动拆分 group，让正面和背面使用不同材质
+        const groups = diamondGeometry.groups;
+        if (groups.length >= 1) {
+          // 原始 group 包含正面和背面的所有顶点
+          const capGroup = groups[0];
+          const capStart = capGroup.start;
+          const capCount = capGroup.count;
+          
+          // 假设正面和背面各占一半顶点（ExtrudeGeometry 的生成顺序）
+          const halfCapCount = Math.floor(capCount / 2);
+          
+          // 清除原有 groups，重新添加
+          diamondGeometry.clearGroups();
+          
+          // 正面（前半部分）使用材质0
+          diamondGeometry.addGroup(capStart, halfCapCount, 0);
+          // 背面（后半部分）使用材质1
+          diamondGeometry.addGroup(capStart + halfCapCount, capCount - halfCapCount, 1);
+          // 侧面使用材质2
+          if (groups.length >= 2) {
+            const sideGroup = groups[1];
+            diamondGeometry.addGroup(sideGroup.start, sideGroup.count, 2);
+          }
+        }
+        const materials = [
+          sideMaterial, // 背面
+          viewImg ? imageMaterial : sideMaterial, // 正面
+          sideMaterial, // 背面
+        ];
+        signMesh = new THREE.Mesh(diamondGeometry, materials);
+        signMesh.position.setY(poleHeight - height / 2);
+        signMesh.position.setZ(poleRadius + thickness / 2 + 2);
+        break;
+      }
+      case 'rect': {
+        const materials = [
+          sideMaterial,
+          sideMaterial,
+          sideMaterial,
+          sideMaterial,
+          viewImg ? imageMaterial : sideMaterial,
+          sideMaterial
+        ];
+        const box = new THREE.BoxGeometry(width, height, thickness);
+        signMesh = new THREE.Mesh(box, materials);
+        signMesh.position.setY(poleHeight - height / 2);
+        signMesh.position.setZ(poleRadius + thickness / 2 + 2);
+        break;
+      }
     }
 
     group.add(signMesh);
@@ -363,6 +430,10 @@ export class SignEntity extends PointEntityClass<SignData> {
           id: 'circle',
           name: '圆形',
           img: 'circle.png'
+        }, {
+          id: 'diamond',
+          name: '菱形',
+          img: 'diamond.png'
         }],
       },
       {

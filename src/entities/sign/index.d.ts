@@ -1,4 +1,5 @@
 import { PointObjData } from '@/types/map2d'
+import type { CanvasShape } from '@/components/GroundTextureEditor/renderer'
 
 export type SignData = PointObjData & {
   angleY: number // 旋转角度
@@ -8,7 +9,7 @@ export type SignData = PointObjData & {
   poleRadius: number // 柱子半径
   bgColor: string // 背景颜色
   poleColor: string // 柱子颜色
-  shape: 'rect' | 'circle' // 形状
+  shape: CanvasShape // 形状
   img: {
     value: Array<any> // 图片数据（JSON格式）
     viewImg: string // 图片数据（JSON格式）

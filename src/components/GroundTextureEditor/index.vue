@@ -119,6 +119,12 @@ const shapeSizeConstraints: Record<string, SizeConstraint> = {
     minHeight: 20,
     maxHeight: 500,
   },
+  diamond: {
+    minWidth: 20,
+    maxWidth: 600,
+    minHeight: 20,
+    maxHeight: 600,
+  },
 }
 
 function getSizeConstraint(shape?: string): SizeConstraint {
@@ -128,7 +134,7 @@ function getSizeConstraint(shape?: string): SizeConstraint {
 const props = defineProps<{
   width?: number
   height?: number
-  shape?: 'rect' | 'circle' | string
+  shape?: 'rect' | 'circle' | 'diamond'
   modelValue: {
     value: any[]
     viewImg: string

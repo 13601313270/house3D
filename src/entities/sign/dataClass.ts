@@ -1,5 +1,6 @@
 import { SignData } from "./index.d"
 import { PointObjDataClass } from "../objData"
+import { CanvasShape } from "@/components/GroundTextureEditor/renderer"
 
 export class SignDataClass extends PointObjDataClass<SignData> {
   angleY: number // 旋转角度
@@ -9,7 +10,7 @@ export class SignDataClass extends PointObjDataClass<SignData> {
   poleRadius: number // 柱子半径
   bgColor: string // 背景颜色
   poleColor: string // 柱子颜色
-  shape: 'rect' | 'circle' // 形状
+  shape: CanvasShape // 形状
   img: {
     value: Array<any> // 图片数据（JSON格式）
     viewImg: string // 图片数据（JSON格式）

@@ -1,7 +1,7 @@
 import type { Point } from './types'
 import { TextureWorld } from './textureWorld'
 
-export type CanvasShape = 'rect' | 'circle' | string
+export type CanvasShape = 'rect' | 'circle' | 'diamond'
 
 export interface LimitConfig {
   width: number
@@ -219,6 +219,27 @@ export class CanvasRenderer {
     }
   }
 
+  private buildShapePath(ctx: CanvasRenderingContext2D, width: number, height: number, shape: CanvasShape, expand: number = 0): void {
+    const w = width + expand
+    const h = height + expand
+    ctx.beginPath()
+    switch (shape) {
+      case 'circle':
+        ctx.arc(0, 0, w / 2, 0, Math.PI * 2)
+        break
+      case 'diamond':
+        ctx.moveTo(0, -h / 2)
+        ctx.lineTo(w / 2, 0)
+        ctx.lineTo(0, h / 2)
+        ctx.lineTo(-w / 2, 0)
+        ctx.closePath()
+        break
+      case 'rect':
+        ctx.rect(-w / 2, -h / 2, w, h)
+        break
+    }
+  }
+
   private drawLimitedCanvasMask(world: TextureWorld): void {
     const { width, height, shape } = this.limitConfig!
 
@@ -231,12 +252,7 @@ export class CanvasRenderer {
     ctx.fillStyle = 'rgba(0, 0, 0, 0.5)'
     ctx.fillRect(-10000, -10000, 20000, 20000)
 
-    ctx.beginPath()
-    if (shape === 'circle') {
-      ctx.arc(0, 0, width / 2, 0, Math.PI * 2)
-    } else {
-      ctx.rect(-width / 2, -height / 2, width, height)
-    }
+    this.buildShapePath(ctx, width, height, shape)
     ctx.clip()
     ctx.clearRect(-width / 2 - 100, -height / 2 - 100, width + 200, height + 200)
     ctx.restore()
@@ -247,23 +263,13 @@ export class CanvasRenderer {
 
     ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)'
     ctx.lineWidth = 3
-    ctx.beginPath()
-    if (shape === 'circle') {
-      ctx.arc(0, 0, width / 2, 0, Math.PI * 2)
-    } else {
-      ctx.rect(-width / 2, -height / 2, width, height)
-    }
+    this.buildShapePath(ctx, width, height, shape)
     ctx.stroke()
 
     ctx.strokeStyle = 'rgba(0, 136, 255, 0.6)'
     ctx.lineWidth = 1
     ctx.setLineDash([10, 10])
-    ctx.beginPath()
-    if (shape === 'circle') {
-      ctx.arc(0, 0, width / 2 + 10, 0, Math.PI * 2)
-    } else {
-      ctx.rect(-width / 2 - 10, -height / 2 - 10, width + 20, height + 20)
-    }
+    this.buildShapePath(ctx, width, height, shape, 20)
     ctx.stroke()
     ctx.setLineDash([])
 
@@ -363,11 +369,24 @@ export class CanvasRenderer {
 
     tempCtx.save()
     
-    if (shape === 'circle') {
-      tempCtx.beginPath()
-      tempCtx.arc(width / 2, height / 2, width / 2, 0, Math.PI * 2)
-      tempCtx.clip()
+    // 在画布坐标系中绘制裁剪路径（中心点在 width/2, height/2）
+    tempCtx.beginPath()
+    switch (shape) {
+      case 'circle':
+        tempCtx.arc(width / 2, height / 2, width / 2, 0, Math.PI * 2)
+        break
+      case 'diamond':
+        tempCtx.moveTo(width / 2, height / 2 - height / 2)
+        tempCtx.lineTo(width / 2 + width / 2, height / 2)
+        tempCtx.lineTo(width / 2, height / 2 + height / 2)
+        tempCtx.lineTo(width / 2 - width / 2, height / 2)
+        tempCtx.closePath()
+        break
+      case 'rect':
+        tempCtx.rect(0, 0, width, height)
+        break
     }
+    tempCtx.clip()
 
     tempCtx.translate(width / 2, height / 2)
 
