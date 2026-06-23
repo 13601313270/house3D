@@ -200,7 +200,7 @@ export class SignEntity extends PointEntityClass<SignData> {
     poleMesh.position.setY(poleHeight / 2);
     group.add(poleMesh);
 
-    const thickness = 0.3;
+    const thickness = 2;
     const imageMaterial = new THREE.MeshStandardMaterial({
       map: new THREE.TextureLoader().load(viewImg)
     });

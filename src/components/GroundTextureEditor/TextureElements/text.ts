@@ -4,6 +4,8 @@ import { editItem } from '@/entities'
 
 interface TextElementData extends SpriteElementData {
   text: string
+  color: string
+  size: number
 }
 
 class TextClass extends SpriteElement<TextElementData> {
@@ -19,7 +21,7 @@ class TextClass extends SpriteElement<TextElementData> {
 
   draw(ctx: CanvasRenderingContext2D): void {
     const { ratioLocked, defaultWidth, defaultHeight } = this
-    const { x, y, rotation, opacity, text } = this.data
+    const { x, y, rotation, opacity, text, color, size } = this.data
 
     const width = this.data.width
     let height = this.data.height
@@ -33,8 +35,8 @@ class TextClass extends SpriteElement<TextElementData> {
     ctx.translate(x, y)
     ctx.rotate((rotation * Math.PI) / 180)
 
-    ctx.fillStyle = '#333333'
-    ctx.font = `${Math.min(width, height) * 0.6}px Arial`
+    ctx.fillStyle = color
+    ctx.font = `${size}px Arial`
     ctx.textAlign = 'center'
     ctx.textBaseline = 'middle'
     ctx.fillText(text, 0, 0)
@@ -55,7 +57,7 @@ class TextClass extends SpriteElement<TextElementData> {
 
   drawPreview(ctx: CanvasRenderingContext2D, mousePos: Point): void {
     const { ratioLocked, defaultWidth, defaultHeight } = this
-    const { rotation, text } = this.data
+    const { rotation, text, color, size, opacity } = this.data
 
     const width = this.data.width
     let height = this.data.height
@@ -65,12 +67,12 @@ class TextClass extends SpriteElement<TextElementData> {
     }
 
     ctx.save()
-    ctx.globalAlpha = 0.6
+    ctx.globalAlpha = opacity
     ctx.translate(mousePos.x, mousePos.y)
     ctx.rotate((rotation * Math.PI) / 180)
 
-    ctx.fillStyle = '#333333'
-    ctx.font = `${Math.min(width, height) * 0.6}px Arial`
+    ctx.fillStyle = color
+    ctx.font = `${size}px Arial`
     ctx.textAlign = 'center'
     ctx.textBaseline = 'middle'
     ctx.fillText(text, 0, 0)
@@ -92,8 +94,32 @@ class TextClass extends SpriteElement<TextElementData> {
         dataType: 'string',
         value: this.data.text,
       },
+      {
+        id: 'size',
+        label: '文字大小',
+        dataType: 'number',
+        min: 1,
+        max: 100,
+        step: 1,
+        value: this.data.size,
+      },
+      {
+        id: 'color',
+        label: '文字颜色',
+        dataType: 'color',
+        value: this.data.color,
+      },
       ...super.setEditParams(),
     ]
+  }
+
+  static defaultData(): TextElementData {
+    return {
+      ...SpriteElement.defaultData(),
+      text: '文字',
+      color: '#000000',
+      size: 20,
+    }
   }
 }
 export const textDefinition: BaseElementDefinition = {

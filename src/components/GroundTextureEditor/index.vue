@@ -468,6 +468,11 @@ function handleWheel(e: WheelEvent) {
 
 function handleKeyDown(e: KeyboardEvent) {
   if (e.key === 'Escape') {
+    if (textureWorld.drawingElement instanceof SpriteElement) {
+      textureWorld.setTool('select')
+      textureWorld.cancelDrawing()
+      return;
+    }
     if (textureWorld.isDrawing) {
       const minPoints = textureWorld.currentTool === 'polygon' ? 3 : 2
       if (textureWorld.drawingElement &&

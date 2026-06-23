@@ -37,7 +37,7 @@ export abstract class SpriteElement<T extends SpriteElementData> extends BaseEle
     ctx.save()
     ctx.globalAlpha = opacity
     ctx.translate(x, y)
-    ctx.rotate((rotation * Math.PI) / 180)
+    ctx.rotate(rotation)
 
     const cachedImg = getCachedImage(texture)
     if (cachedImg && cachedImg.complete) {
@@ -81,7 +81,7 @@ export abstract class SpriteElement<T extends SpriteElementData> extends BaseEle
     ctx.save()
     ctx.globalAlpha = 0.6
     ctx.translate(mousePos.x, mousePos.y)
-    ctx.rotate((rotation * Math.PI) / 180)
+    ctx.rotate(rotation)
 
     const cachedImg = getCachedImage(texture)
     if (cachedImg && cachedImg.complete) {
