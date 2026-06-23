@@ -15,5 +15,6 @@ export const grassDefinition: BaseElementDefinition = {
   name: '草坪',
   icon: '🌿',
   type: 'polygon',
+  dataType: 'groundTexture',
   createClass: GrassClass
 }

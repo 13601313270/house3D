@@ -4,10 +4,15 @@ type BaseElementCtor = (new (...args: any[]) => BaseElement<any>) & {
   defaultData: () => BaseElementData
 }
 
-export type BaseElementDefinition  = {
+type IconDataType = 'roadSigns' | 'groundTexture' | 'road'
+
+const allIconDataType: IconDataType[] = ['roadSigns', 'groundTexture', 'road']
+
+export type BaseElementDefinition = {
   id: string
   name: string
   icon: string
   type: ElementType
+  dataType: IconDataType
   createClass: BaseElementCtor
 }

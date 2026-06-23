@@ -80,7 +80,8 @@
     </div>
   </div>
   <GroundTextureEditor v-if="groundTextureEditorShow" @close="groundTextureEditorShow = false"
-    @update:modelValue="updateEditPropByDataTexture" :width="record.width" :height="record.height" :modelValue="modelValue" />
+    @update:modelValue="updateEditPropByDataTexture" :width="record.width" :height="record.height"
+    :modelValue="modelValue" />
 </template>
 <script setup lang="ts">
 import { ref } from 'vue'
@@ -356,10 +357,13 @@ async function updateEditPropByDataTexture(value: {
 
 .stitchImage {
   position: relative;
+  width: 200px;
   height: 200px;
 
   .previewImg {
+    width: 200px;
     height: 200px;
+    object-fit: contain;
   }
 
   .empty {

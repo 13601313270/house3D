@@ -14,5 +14,6 @@ export const signDefinition: BaseElementDefinition = {
   name: '警示牌',
   icon: '⚠️',
   type: 'sprite',
+  dataType: 'roadSigns',
   createClass: SignClass
 }

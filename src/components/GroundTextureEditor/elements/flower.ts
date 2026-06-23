@@ -14,5 +14,6 @@ export const flowerDefinition: BaseElementDefinition = {
   name: '花坛',
   icon: '🌸',
   type: 'sprite',
+  dataType: 'groundTexture',
   createClass: FlowerClass,
 }

@@ -21,5 +21,6 @@ export const roadDefinition: BaseElementDefinition = {
   name: '道路',
   icon: '🚗️',
   type: 'polyline',
+  dataType: 'road',
   createClass: RoadClass
 }

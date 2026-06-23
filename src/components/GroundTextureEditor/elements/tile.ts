@@ -15,6 +15,7 @@ export const tileDefinition: BaseElementDefinition = {
   id: 'tile',
   name: '地砖',
   icon: '🧱',
-  type: 'polygon' as const,
+  type: 'polygon',
+  dataType: 'groundTexture',
   createClass: TileClass
 }

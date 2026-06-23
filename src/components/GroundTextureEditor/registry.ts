@@ -3,7 +3,6 @@ import { manholeDefinition } from './elements/manhole'
 import { grassDefinition } from './elements/grass'
 import { tileDefinition } from './elements/tile'
 import { signDefinition } from './elements/sign'
-import { lampDefinition } from './elements/lamp'
 import { roadDefinition } from './elements/road'
 import { crosswalkDefinition } from './elements/crosswalk'
 import { flowerDefinition } from './elements/flower'
@@ -34,7 +33,6 @@ ElementRegistry.register(manholeDefinition)
 ElementRegistry.register(grassDefinition)
 ElementRegistry.register(tileDefinition)
 ElementRegistry.register(signDefinition)
-ElementRegistry.register(lampDefinition)
 ElementRegistry.register(roadDefinition)
 ElementRegistry.register(crosswalkDefinition)
 ElementRegistry.register(flowerDefinition)

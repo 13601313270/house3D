@@ -8,7 +8,7 @@ export interface SpriteLibraryItem {
   name: string
   icon: string
   color: string
-  drawType: 'sprite' | 'polyline' | 'polygon'
+  drawType: ElementType
   defaultWidth?: number
   defaultHeight?: number
 }

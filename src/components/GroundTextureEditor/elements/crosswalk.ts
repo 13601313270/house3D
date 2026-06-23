@@ -12,5 +12,6 @@ export const crosswalkDefinition: BaseElementDefinition = {
   name: '斑马线',
   icon: '🚦',
   type: 'polyline',
+  dataType: 'road',
   createClass: CrosswalkClass,
 }
