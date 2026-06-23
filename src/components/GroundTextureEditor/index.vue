@@ -12,19 +12,6 @@
           <span class="element-name">{{ item.name }}</span>
         </button>
       </div>
-
-      <div class="actions">
-        <div class="background-color-picker">
-          <label>背景色</label>
-          <input type="color" v-model="backgroundColor" @input="updateBackgroundColor" />
-        </div>
-        <button class="action-btn" @click="saveData">保存</button>
-        <button class="action-btn" @click="clearCanvas">清空</button>
-        <button class="action-btn" @click="exportJSON">导出</button>
-        <button class="action-btn" @click="importJSON">导入</button>
-        <button class="action-btn primary" @click="exportImage">PNG</button>
-      </div>
-      <input ref="fileInputRef" type="file" accept=".json" class="file-input" @change="handleFileSelect" />
     </div>
 
     <div class="canvas-container" ref="canvasWrapperRef">
@@ -83,8 +70,17 @@
       </div>
     </div>
 
-    <div class="panel-close-btn" @click="emit('close')">
-      <img src="@/assets/close.svg" alt="close" />
+    <div class="actions">
+      <div class="background-color-picker">
+        <label>背景</label>
+        <input type="color" v-model="backgroundColor" @input="updateBackgroundColor" />
+      </div>
+      <button class="action-btn" @click="saveData">保存</button>
+      <button class="action-btn" @click="clearCanvas">清空</button>
+      <button class="action-btn" @click="emit('close')">返回</button>
+      <!-- <div class="panel-close-btn" @click="emit('close')">
+        <img src="@/assets/close.svg" alt="close" />
+      </div> -->
     </div>
   </div>
 </template>
@@ -103,9 +99,10 @@ import { IconDataType } from './types/elementDefinition'
 const props = defineProps<{
   width?: number
   height?: number
-  modelValue?: {
+  modelValue: {
     value: any[]
     viewImg: string
+    backgroundColor: string
   }
   dataTypeList: IconDataType[]
 }>()
@@ -114,14 +111,14 @@ const emit = defineEmits<{
   (e: 'close'): void,
   (e: 'update:modelValue', value: {
     value: BaseElement<BaseElementData>[],
-    viewImg: string
+    viewImg: string,
+    backgroundColor: string
   }): void,
 }>()
 const canvasRef = ref<HTMLCanvasElement | null>(null)
 const gridCanvasRef = ref<HTMLCanvasElement | null>(null)
 const previewCanvasRef = ref<HTMLCanvasElement | null>(null)
 const canvasWrapperRef = ref<HTMLDivElement | null>(null)
-const fileInputRef = ref<HTMLInputElement | null>(null)
 
 const textureWorld = new TextureWorld()
 let renderer: CanvasRenderer | null = null
@@ -518,7 +515,7 @@ function saveData() {
   const data = textureWorld.exportElements()
   if (renderer) {
     const viewImg = renderer.exportFullImage(textureWorld)
-    emit('update:modelValue', { value: data, viewImg })
+    emit('update:modelValue', { value: data.elements, viewImg, backgroundColor: data.backgroundColor })
   }
 }
 
@@ -547,43 +544,6 @@ function deleteElement() {
   }
 }
 
-function exportJSON() {
-  const data = textureWorld.exportElements()
-  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
-  const url = URL.createObjectURL(blob)
-  const a = document.createElement('a')
-  a.href = url
-  a.download = `ground-texture-${Date.now()}.json`
-  document.body.appendChild(a)
-  a.click()
-  document.body.removeChild(a)
-  URL.revokeObjectURL(url)
-}
-
-function importJSON() {
-  fileInputRef.value?.click()
-}
-
-async function handleFileSelect(event: Event) {
-  const input = event.target as HTMLInputElement
-  const file = input.files?.[0]
-  if (!file) return
-
-  const reader = new FileReader()
-  reader.onload = async (e) => {
-    try {
-      const data = JSON.parse(e.target?.result as string)
-      await textureWorld.importElements(data)
-      selectedElementId.value = null
-      render()
-    } catch (error) {
-      alert('导入失败，请确保文件是有效的JSON格式')
-    }
-  }
-  reader.readAsText(file)
-  input.value = ''
-}
-
 function startPanelDrag(e: MouseEvent) {
   isDraggingPanel.value = true
   panelDragOffset.value = {
@@ -610,16 +570,6 @@ function stopPanelDrag() {
   isDraggingPanel.value = false
   document.removeEventListener('mousemove', handlePanelDrag)
   document.removeEventListener('mouseup', stopPanelDrag)
-}
-
-function exportImage() {
-  const canvas = canvasRef.value
-  if (!canvas) return
-
-  const link = document.createElement('a')
-  link.download = `ground-texture-${Date.now()}.png`
-  link.href = canvas.toDataURL('image/png')
-  link.click()
 }
 
 watch(
@@ -656,9 +606,12 @@ onMounted(async () => {
       props.height
     )
 
+    textureWorld.backgroundColor = props.modelValue.backgroundColor || '#fff'
+
     if (props.modelValue && props.modelValue.value) {
       await textureWorld.importElements(props.modelValue.value)
     }
+    backgroundColor.value = textureWorld.backgroundColor
 
     render()
   }
@@ -762,13 +715,21 @@ onUnmounted(() => {
 
 .actions {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   gap: 8px;
   margin-left: auto;
+  position: fixed;
+  z-index: 1000;
+  background: #ffffffba;
+  left: 50%;
+  top: 8px;
+  border-radius: 8px;
+  transform: translateX(-50%);
+  padding: 8px;
 
   .background-color-picker {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
     gap: 4px;
 
@@ -1044,23 +1005,6 @@ onUnmounted(() => {
         background: #ff7875;
       }
     }
-  }
-}
-
-.panel-close-btn {
-  position: absolute;
-  top: 0px;
-  right: 0px;
-  width: 68px;
-  height: 68px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 999;
-
-  >img {
-    width: 24px;
-    height: 24px;
   }
 }
 </style>

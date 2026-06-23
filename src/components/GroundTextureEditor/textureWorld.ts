@@ -249,19 +249,30 @@ export class TextureWorld {
     this.emit('elementsReindexed', null)
   }
 
-  exportElements(): any[] {
-    return this.elements.map((element) => ({
-      type: element.type,
-      data: { ...element.data },
-    }))
+  exportElements(): { backgroundColor: string; elements: any[] } {
+    return {
+      backgroundColor: this.backgroundColor,
+      elements: this.elements.map((element) => ({
+        type: element.type,
+        data: { ...element.data },
+      }))
+    }
   }
 
-  async importElements(data: any[]): Promise<void> {
+  async importElements(data: any): Promise<void> {
     this.elements = []
     this.selectedElementId = null
 
-    for (let i = 0; i < data.length; i++) {
-      const item = data[i]
+    // 兼容旧格式（数组）和新格式（对象）
+    const elementsData = Array.isArray(data) ? data : (data.elements || [])
+
+    // 如果是对象格式，恢复背景颜色
+    if (typeof data === 'object' && data.backgroundColor) {
+      this.backgroundColor = data.backgroundColor
+    }
+
+    for (let i = 0; i < elementsData.length; i++) {
+      const item = elementsData[i]
       const type = item.type as ElementType
       const option = ElementRegistry.mapIdToDefinition.get(type)
       if (option) {
