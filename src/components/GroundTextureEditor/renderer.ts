@@ -1,7 +1,7 @@
 import type { Point } from './types'
 import { TextureWorld } from './textureWorld'
 
-export type CanvasShape = 'rect' | 'circle' | 'diamond'
+export type CanvasShape = 'rect' | 'circle' | 'diamond' | 'triangle'
 
 export interface LimitConfig {
   width: number
@@ -225,13 +225,19 @@ export class CanvasRenderer {
     ctx.beginPath()
     switch (shape) {
       case 'circle':
-        ctx.arc(0, 0, w / 2, 0, Math.PI * 2)
+        ctx.ellipse(0, 0, w / 2, h / 2, 0, 0, Math.PI * 2)
         break
       case 'diamond':
         ctx.moveTo(0, -h / 2)
         ctx.lineTo(w / 2, 0)
         ctx.lineTo(0, h / 2)
         ctx.lineTo(-w / 2, 0)
+        ctx.closePath()
+        break
+      case 'triangle':
+        ctx.moveTo(0, -h / 2)
+        ctx.lineTo(w / 2, h / 2)
+        ctx.lineTo(-w / 2, h / 2)
         ctx.closePath()
         break
       case 'rect':
@@ -368,18 +374,24 @@ export class CanvasRenderer {
     tempCtx.fillRect(0, 0, width, height)
 
     tempCtx.save()
-    
+
     // 在画布坐标系中绘制裁剪路径（中心点在 width/2, height/2）
     tempCtx.beginPath()
     switch (shape) {
       case 'circle':
-        tempCtx.arc(width / 2, height / 2, width / 2, 0, Math.PI * 2)
+        tempCtx.ellipse(width / 2, height / 2, width / 2, height / 2, 0, 0, Math.PI * 2)
         break
       case 'diamond':
         tempCtx.moveTo(width / 2, height / 2 - height / 2)
         tempCtx.lineTo(width / 2 + width / 2, height / 2)
         tempCtx.lineTo(width / 2, height / 2 + height / 2)
         tempCtx.lineTo(width / 2 - width / 2, height / 2)
+        tempCtx.closePath()
+        break
+      case 'triangle':
+        tempCtx.moveTo(width / 2, height / 2 - height / 2)
+        tempCtx.lineTo(width / 2 + width / 2, height / 2 + height / 2)
+        tempCtx.lineTo(width / 2 - width / 2, height / 2 + height / 2)
         tempCtx.closePath()
         break
       case 'rect':

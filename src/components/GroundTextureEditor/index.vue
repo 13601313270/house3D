@@ -125,6 +125,12 @@ const shapeSizeConstraints: Record<string, SizeConstraint> = {
     minHeight: 20,
     maxHeight: 600,
   },
+  triangle: {
+    minWidth: 20,
+    maxWidth: 600,
+    minHeight: 20,
+    maxHeight: 600,
+  },
 }
 
 function getSizeConstraint(shape?: string): SizeConstraint {
@@ -134,7 +140,7 @@ function getSizeConstraint(shape?: string): SizeConstraint {
 const props = defineProps<{
   width?: number
   height?: number
-  shape?: 'rect' | 'circle' | 'diamond'
+  shape?: 'rect' | 'circle' | 'diamond' | 'triangle'
   modelValue: {
     value: any[]
     viewImg: string

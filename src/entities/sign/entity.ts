@@ -193,7 +193,7 @@ export class SignEntity extends PointEntityClass<SignData> {
     const { viewImg } = img
     const angleY = data.angleY || 0;
 
-    const poleHeight = signZ + height;
+    const poleHeight = signZ + height / 2;
 
     const poleGeometry = new THREE.CylinderGeometry(poleRadius, poleRadius, poleHeight, 32);
     const poleMaterial = new THREE.MeshStandardMaterial({ color: poleColor });
@@ -211,18 +211,61 @@ export class SignEntity extends PointEntityClass<SignData> {
 
     switch (shape) {
       case 'circle': {
-        const radius = Math.min(width, height) / 2;
-        const circleGeometry = new THREE.CylinderGeometry(radius, radius, thickness, 64);
+        const circleShape = new THREE.Shape();
+        const curve = new THREE.EllipseCurve(
+          0, 0,
+          width / 2, height / 2,
+          0, 2 * Math.PI,
+          false,
+          0
+        );
+        const points = curve.getPoints(64);
+        circleShape.moveTo(points[0].x, points[0].y);
+        for (let i = 1; i < points.length; i++) {
+          circleShape.lineTo(points[i].x, points[i].y);
+        }
+        circleShape.closePath();
+
+        const extrudeSettings = {
+          depth: thickness,
+          bevelEnabled: false,
+        };
+        const circleGeometry = new THREE.ExtrudeGeometry(circleShape, extrudeSettings);
+
+        const positionAttr = circleGeometry.getAttribute('position');
+        const uvAttr = circleGeometry.getAttribute('uv');
+
+        for (let i = 0; i < positionAttr.count; i++) {
+          const x = positionAttr.getX(i);
+          const y = positionAttr.getY(i);
+          const u = (x + width / 2) / width;
+          const v = (y + height / 2) / height;
+          uvAttr.setXY(i, u, v);
+        }
+        uvAttr.needsUpdate = true;
+
+        const groups = circleGeometry.groups;
+        if (groups.length >= 1) {
+          const capGroup = groups[0];
+          const capStart = capGroup.start;
+          const capCount = capGroup.count;
+          const halfCapCount = Math.floor(capCount / 2);
+
+          circleGeometry.clearGroups();
+          circleGeometry.addGroup(capStart, halfCapCount, 0);
+          circleGeometry.addGroup(capStart + halfCapCount, capCount - halfCapCount, 1);
+          if (groups.length >= 2) {
+            const sideGroup = groups[1];
+            circleGeometry.addGroup(sideGroup.start, sideGroup.count, 2);
+          }
+        }
+
         const materials = [
           sideMaterial,
           viewImg ? imageMaterial : sideMaterial,
           sideMaterial,
         ];
         signMesh = new THREE.Mesh(circleGeometry, materials);
-        signMesh.position.setY(poleHeight - height / 2);
-        signMesh.position.setZ(poleRadius + thickness / 2 + 2);
-        signMesh.rotation.x = Math.PI / 2;
-        signMesh.rotation.y = Math.PI / 2;
         break;
       }
       case 'diamond': {
@@ -261,13 +304,13 @@ export class SignEntity extends PointEntityClass<SignData> {
           const capGroup = groups[0];
           const capStart = capGroup.start;
           const capCount = capGroup.count;
-          
+
           // 假设正面和背面各占一半顶点（ExtrudeGeometry 的生成顺序）
           const halfCapCount = Math.floor(capCount / 2);
-          
+
           // 清除原有 groups，重新添加
           diamondGeometry.clearGroups();
-          
+
           // 正面（前半部分）使用材质0
           diamondGeometry.addGroup(capStart, halfCapCount, 0);
           // 背面（后半部分）使用材质1
@@ -284,8 +327,58 @@ export class SignEntity extends PointEntityClass<SignData> {
           sideMaterial, // 背面
         ];
         signMesh = new THREE.Mesh(diamondGeometry, materials);
-        signMesh.position.setY(poleHeight - height / 2);
-        signMesh.position.setZ(poleRadius + thickness / 2 + 2);
+        break;
+      }
+      case 'triangle': {
+        const triangleShape = new THREE.Shape();
+        triangleShape.moveTo(0, height / 2);
+        triangleShape.lineTo(width / 2, -height / 2);
+        triangleShape.lineTo(-width / 2, -height / 2);
+        triangleShape.closePath();
+
+        const extrudeSettings = {
+          depth: thickness,
+          bevelEnabled: false,
+        };
+        const triangleGeometry = new THREE.ExtrudeGeometry(triangleShape, extrudeSettings);
+
+        const positionAttr = triangleGeometry.getAttribute('position');
+        const uvAttr = triangleGeometry.getAttribute('uv');
+
+        for (let i = 0; i < positionAttr.count; i++) {
+          const x = positionAttr.getX(i);
+          const y = positionAttr.getY(i);
+          const u = (x + width / 2) / width;
+          const v = (y + height / 2) / height;
+          uvAttr.setXY(i, u, v);
+        }
+        uvAttr.needsUpdate = true;
+
+        const groups = triangleGeometry.groups;
+        const indexAttr = triangleGeometry.getIndex();
+        const posAttr = triangleGeometry.getAttribute('position');
+
+        if (indexAttr && groups.length >= 1) {
+          const capGroup = groups[0];
+
+          triangleGeometry.clearGroups();
+
+          const halfCapCount = Math.floor(capGroup.count / 2);
+          triangleGeometry.addGroup(capGroup.start, halfCapCount, 0);
+          triangleGeometry.addGroup(capGroup.start + halfCapCount, capGroup.count - halfCapCount, 1);
+
+          if (groups.length >= 2) {
+            const sideGroup = groups[1];
+            triangleGeometry.addGroup(sideGroup.start, sideGroup.count, 2);
+          }
+        }
+
+        const materials = [
+          viewImg ? imageMaterial : sideMaterial,
+          sideMaterial,
+          sideMaterial,
+        ];
+        signMesh = new THREE.Mesh(triangleGeometry, materials);
         break;
       }
       case 'rect': {
@@ -299,11 +392,11 @@ export class SignEntity extends PointEntityClass<SignData> {
         ];
         const box = new THREE.BoxGeometry(width, height, thickness);
         signMesh = new THREE.Mesh(box, materials);
-        signMesh.position.setY(poleHeight - height / 2);
-        signMesh.position.setZ(poleRadius + thickness / 2 + 2);
         break;
       }
     }
+    signMesh.position.setY(signZ + height / 2);
+    signMesh.position.setZ(poleRadius + thickness / 2 + 2);
 
     group.add(signMesh);
     group.rotateY(angleY);
@@ -434,6 +527,10 @@ export class SignEntity extends PointEntityClass<SignData> {
           id: 'diamond',
           name: '菱形',
           img: 'diamond.png'
+        }, {
+          id: 'triangle',
+          name: '三角形',
+          img: 'triangle.png'
         }],
       },
       {
