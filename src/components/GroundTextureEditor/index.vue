@@ -1,88 +1,91 @@
 <template>
-  <div class="ground-texture-editor">
-    <div class="toolbar">
-      <div class="element-library">
-        <button v-for="item in spriteLibrary" :key="item.id" class="element-btn" :class="{
-          active: textureWorld.selectedSprite?.id === item.id,
-          'sprite-type': item.type === 'sprite',
-          'line-type': item.type === 'polyline',
-          'polygon-type': item.type === 'polygon'
-        }" @click="selectSprite(item)" :title="item.name">
-          <span>{{ item.icon }}</span>
-          <span class="element-name">{{ item.name }}</span>
-        </button>
-      </div>
-    </div>
-
-    <div class="canvas-container" ref="canvasWrapperRef">
-      <div class="canvas-wrapper">
-        <canvas ref="gridCanvasRef" class="grid-canvas"></canvas>
-        <canvas ref="canvasRef" class="main-canvas" @mousedown="handleMouseDown" @mousemove="handleMouseMove"
-          @mouseup="handleMouseUp" @mouseleave="handleMouseUp" @wheel="handleWheel"></canvas>
-        <canvas ref="previewCanvasRef" class="preview-canvas"></canvas>
-
-        <div
-          v-if="textureWorld.isDrawing && (textureWorld.currentTool === 'polyline' || textureWorld.currentTool === 'polygon')"
-          class="hint">
-          {{ textureWorld.currentTool === 'polygon' ? '点击画布添加顶点，双击完成绘制（至少3点），按Esc取消' : '点击画布添加点，双击完成绘制（至少2点），按Esc取消' }}
+  <teleport to="#teleport">
+    <div class="ground-texture-editor">
+      <div class="toolbar">
+        <div class="element-library">
+          <button v-for="item in spriteLibrary" :key="item.id" class="element-btn" :class="{
+            active: textureWorld.selectedSprite?.id === item.id,
+            'sprite-type': item.type === 'sprite',
+            'line-type': item.type === 'polyline',
+            'polygon-type': item.type === 'polygon'
+          }" @click="selectSprite(item)" :title="item.name">
+            <span>{{ item.icon }}</span>
+            <span class="element-name">{{ item.name }}</span>
+          </button>
         </div>
       </div>
-    </div>
 
-    <div v-if="selectedElement" class="properties-panel"
-      :style="{ left: panelPosition.x + 'px', top: panelPosition.y + 'px' }">
-      <div class="panel-header" @mousedown="startPanelDrag">
-        <span class="drag-handle">
-          <img src="@/assets/move2.svg" alt="move" @mousedown.prevent />
-        </span>
-        <div class="title">属性</div>
-        <div class="close-btn"></div>
+      <div class="canvas-container" ref="canvasWrapperRef">
+        <div class="canvas-wrapper">
+          <canvas ref="gridCanvasRef" class="grid-canvas"></canvas>
+          <canvas ref="canvasRef" class="main-canvas" @mousedown="handleMouseDown" @mousemove="handleMouseMove"
+            @mouseup="handleMouseUp" @mouseleave="handleMouseUp" @wheel="handleWheel"></canvas>
+          <canvas ref="previewCanvasRef" class="preview-canvas"></canvas>
+
+          <div
+            v-if="textureWorld.isDrawing && (textureWorld.currentTool === 'polyline' || textureWorld.currentTool === 'polygon')"
+            class="hint">
+            {{ textureWorld.currentTool === 'polygon' ? '点击画布添加顶点，双击完成绘制（至少3点），按Esc取消' : '点击画布添加点，双击完成绘制（至少2点），按Esc取消'
+            }}
+          </div>
+        </div>
       </div>
-      <div class="panel-content">
-        <div class="property-list">
-          <div class="property-item" v-for="item in editParams" :key="item.id">
-            <label>{{ item.label }}</label>
-            <div v-if="item.dataType === 'string'" class="textContainer">
-              <input type="text" class="textInput" v-model="item.value" @input="render" />
-            </div>
-            <div v-else-if="item.dataType === 'number'" class="numberEdit">
-              <input type="range" v-model.number="item.value" :min="item.min" :max="item.max" :step="item.step"
-                @input="render" />
-              <div class="numberInputContainer">
-                <input type="number" class="numberInput" v-model.number="item.value" :min="item.min" :max="item.max"
-                  :step="item.step" @input="render" />
-                <div v-if="item.unit" class="unit">{{ item.unit }}</div>
+
+      <div v-if="selectedElement" class="properties-panel"
+        :style="{ left: panelPosition.x + 'px', top: panelPosition.y + 'px' }">
+        <div class="panel-header" @mousedown="startPanelDrag">
+          <span class="drag-handle">
+            <img src="@/assets/move2.svg" alt="move" @mousedown.prevent />
+          </span>
+          <div class="title">属性</div>
+          <div class="close-btn"></div>
+        </div>
+        <div class="panel-content">
+          <div class="property-list">
+            <div class="property-item" v-for="item in editParams" :key="item.id">
+              <label>{{ item.label }}</label>
+              <div v-if="item.dataType === 'string'" class="textContainer">
+                <input type="text" class="textInput" v-model="item.value" @input="render" />
               </div>
+              <div v-else-if="item.dataType === 'number'" class="numberEdit">
+                <input type="range" v-model.number="item.value" :min="item.min" :max="item.max" :step="item.step"
+                  @input="render" />
+                <div class="numberInputContainer">
+                  <input type="number" class="numberInput" v-model.number="item.value" :min="item.min" :max="item.max"
+                    :step="item.step" @input="render" />
+                  <div v-if="item.unit" class="unit">{{ item.unit }}</div>
+                </div>
+              </div>
+              <div v-else-if="item.dataType === 'color'" class="colorEdit">
+                <input type="color" v-model="item.value" @input="render" />
+              </div>
+              <span v-else-if="item.dataType === 'boolean'">{{ item.value ? '是' : '否' }}</span>
             </div>
-            <div v-else-if="item.dataType === 'color'" class="colorEdit">
-              <input type="color" v-model="item.value" @input="render" />
+          </div>
+          <div class="bottomTools">
+            <div class="layer-controls">
+              <button class="layer-btn" @click="bringForward" title="上移一层">⬆️ 上移</button>
+              <button class="layer-btn" @click="sendBackward" title="下移一层">⬇️ 下移</button>
             </div>
-            <span v-else-if="item.dataType === 'boolean'">{{ item.value ? '是' : '否' }}</span>
+            <button class="delete-btn" @click="deleteElement">删除元素</button>
           </div>
-        </div>
-        <div class="bottomTools">
-          <div class="layer-controls">
-            <button class="layer-btn" @click="bringForward" title="上移一层">⬆️ 上移</button>
-            <button class="layer-btn" @click="sendBackward" title="下移一层">⬇️ 下移</button>
-          </div>
-          <button class="delete-btn" @click="deleteElement">删除元素</button>
         </div>
       </div>
-    </div>
 
-    <div class="actions">
-      <div class="background-color-picker">
-        <label>背景</label>
-        <input type="color" v-model="backgroundColor" @input="updateBackgroundColor" />
-      </div>
-      <button class="action-btn" @click="saveData">保存</button>
-      <button class="action-btn" @click="clearCanvas">清空</button>
-      <button class="action-btn" @click="emit('close')">返回</button>
-      <!-- <div class="panel-close-btn" @click="emit('close')">
+      <div class="actions">
+        <div class="background-color-picker">
+          <label>背景</label>
+          <input type="color" v-model="backgroundColor" @input="updateBackgroundColor" />
+        </div>
+        <button class="action-btn" @click="saveData">保存</button>
+        <button class="action-btn" @click="clearCanvas">清空</button>
+        <button class="action-btn" @click="emit('close')">返回</button>
+        <!-- <div class="panel-close-btn" @click="emit('close')">
         <img src="@/assets/close.svg" alt="close" />
       </div> -->
+      </div>
     </div>
-  </div>
+  </teleport>
 </template>
 
 <script setup lang="ts">
@@ -99,6 +102,7 @@ import { IconDataType } from './types/elementDefinition'
 const props = defineProps<{
   width?: number
   height?: number
+  shape?: 'rect' | 'circle'
   modelValue: {
     value: any[]
     viewImg: string
@@ -525,7 +529,14 @@ function saveData() {
 }
 
 function clearCanvas() {
+  if (!canvasWrapperRef.value) return
+  const initialWidth = canvasWrapperRef.value.clientWidth
+  const initialHeight = canvasWrapperRef.value.clientHeight
   textureWorld.clear()
+  textureWorld.canvasOffset = {
+    x: initialWidth / 2,
+    y: initialHeight / 2,
+  }
   selectedElementId.value = null
   render()
 }

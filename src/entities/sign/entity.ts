@@ -26,6 +26,7 @@ export class SignEntity extends PointEntityClass<SignData> {
       width: 80,
       height: 80,
       signZ: 100,
+      shape: 'rect',
       poleRadius: 5,
       bgColor: '#ffffff',
       poleColor: '#666666',
@@ -331,6 +332,21 @@ export class SignEntity extends PointEntityClass<SignData> {
   editPropConfig(snapPoint: HandelInfo, editShow: (editInfoList: editItem[], callback: (val: any) => void) => void): void {
     const data = this.getData();
     editShow([
+      {
+        id: 'shape',
+        label: '形状',
+        dataType: 'enum',
+        value: data.shape,
+        enumList: [{
+          id: 'rect',
+          name: '矩形',
+          img: 'rect.png'
+        }, {
+          id: 'circle',
+          name: '圆形',
+          img: 'circle.png'
+        }],
+      },
       {
         id: 'img',
         label: '图片',

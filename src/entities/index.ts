@@ -23,7 +23,7 @@ import { IconDataType } from '@/components/GroundTextureEditor/types/elementDefi
 
 export type EntityConstructor = new (world: World, data?: BaseObjData) => BaseEntityClass<any>;
 export type enumItem = {
-  id: number,
+  id: number | string,
   name: string,
   img: string,
 }
@@ -146,7 +146,7 @@ export type editItem = {
   id: string,
   label: string,
   dataType: 'enum',
-  value: number,
+  value: number | string,
   panelDesc?: string,
   enumList: Array<enumItem>,
 } | {

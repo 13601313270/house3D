@@ -38,7 +38,7 @@ defineProps<{
 }>()
 const emit = defineEmits(['update:modelValue'])
 
-function change(val: number) {
+function change(val: number | string) {
   emit('update:modelValue', val)
   showAllCornerTypePanel.value = false
 }
@@ -49,9 +49,11 @@ function change(val: number) {
   flex-direction: column;
   align-items: end;
   width: 88px;
+  min-height: 20px;
 
   .img {
     width: 88px;
+    min-height: 20px;
     border-radius: 4px;
     border: solid 1px #d9d9d9;
   }
