@@ -7,6 +7,7 @@ import { roadDefinition } from './TextureElements/road'
 import { crosswalkDefinition } from './TextureElements/crosswalk'
 import { flowerDefinition } from './TextureElements/flower'
 import { textDefinition } from './TextureElements/text'
+import { lineDefinition } from './TextureElements/line'
 
 export class ElementRegistry {
   static mapIdToDefinition: Map<string, BaseElementDefinition> = new Map()
@@ -38,3 +39,4 @@ ElementRegistry.register(roadDefinition)
 ElementRegistry.register(crosswalkDefinition)
 ElementRegistry.register(flowerDefinition)
 ElementRegistry.register(textDefinition)
+ElementRegistry.register(lineDefinition)

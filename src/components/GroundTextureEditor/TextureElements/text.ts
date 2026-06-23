@@ -127,6 +127,6 @@ export const textDefinition: BaseElementDefinition = {
   name: '文字',
   icon: '文',
   type: 'sprite',
-  dataType: 'text',
+  dataType: 'basic',
   createClass: TextClass
 }

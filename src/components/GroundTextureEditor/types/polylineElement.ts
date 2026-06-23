@@ -63,7 +63,7 @@ export abstract class PolylineElement<T extends PolylineElementData> extends Bas
     }
 
     ctx.strokeStyle = '#333333'
-    ctx.lineWidth = width + 4
+    ctx.lineWidth = width
     ctx.lineCap = 'round'
     ctx.lineJoin = 'round'
     ctx.stroke()
@@ -84,12 +84,13 @@ export abstract class PolylineElement<T extends PolylineElementData> extends Bas
     ctx.lineCap = 'round'
     ctx.lineJoin = 'round'
     ctx.stroke()
+    const radius = Math.max(width / 2 + 1, 2);
 
     if (this.world.selectedElementId === this.data.id) {
       ctx.fillStyle = '#1890ff'
       points.forEach((point) => {
         ctx.beginPath()
-        ctx.arc(point.x, point.y, 10, 0, Math.PI * 2)
+        ctx.arc(point.x, point.y, radius, 0, Math.PI * 2)
         ctx.fill()
       })
     }
