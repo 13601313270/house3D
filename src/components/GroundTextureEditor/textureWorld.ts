@@ -18,6 +18,7 @@ export class TextureWorld {
   panStartOffset: Point = { x: 0, y: 0 }
   drawingElement: BaseElement<BaseElementData> | null = null
   lastClickTime: number = 0
+  backgroundColor: string = '#ffffff'
 
   get spriteLibrary(): BaseElementDefinition[] {
     return ElementRegistry.getAll()

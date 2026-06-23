@@ -14,6 +14,10 @@
       </div>
 
       <div class="actions">
+        <div class="background-color-picker">
+          <label>背景色</label>
+          <input type="color" v-model="backgroundColor" @input="updateBackgroundColor" />
+        </div>
         <button class="action-btn" @click="saveData">保存</button>
         <button class="action-btn" @click="clearCanvas">清空</button>
         <button class="action-btn" @click="exportJSON">导出</button>
@@ -130,6 +134,7 @@ const panelPosition = ref({ x: window.innerWidth - 360, y: 20 })
 const isDraggingPanel = ref(false)
 const panelDragOffset = ref({ x: 0, y: 0 })
 const isResizing = ref(false)
+const backgroundColor = ref('#ffffff')
 const resizeCorner = ref<'tl' | 'br' | null>(null)
 const isDraggingPoint = ref(false)
 const draggingPointIndex = ref(-1)
@@ -140,6 +145,11 @@ const selectedElement = computed<BaseElement<any> | null>(() => {
   if (!selectedElementId.value) return null
   return textureWorld.getElementById(selectedElementId.value) || null
 })
+
+function updateBackgroundColor() {
+  textureWorld.backgroundColor = backgroundColor.value
+  render()
+}
 
 async function selectSprite(item: BaseElementDefinition) {
   // 如果正在绘制，先取消（无论 drawingElement 是否存在）
@@ -755,6 +765,27 @@ onUnmounted(() => {
   flex-direction: column;
   gap: 8px;
   margin-left: auto;
+
+  .background-color-picker {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+
+    label {
+      font-size: 12px;
+      color: #666;
+    }
+
+    input[type='color'] {
+      width: 48px;
+      height: 32px;
+      border: 1px solid #d9d9d9;
+      border-radius: 4px;
+      cursor: pointer;
+      padding: 0;
+    }
+  }
 }
 
 .file-input {

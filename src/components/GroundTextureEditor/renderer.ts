@@ -155,7 +155,7 @@ export class CanvasRenderer {
 
   renderGrid(world: TextureWorld): void {
     this.gridCtx.clearRect(0, 0, this.width, this.height)
-    this.gridCtx.fillStyle = '#ffffff'
+    this.gridCtx.fillStyle = world.backgroundColor
     this.gridCtx.fillRect(0, 0, this.width, this.height)
 
     this.gridCtx.save()
@@ -299,6 +299,9 @@ export class CanvasRenderer {
       return ''
     }
 
+    tempCtx.fillStyle = world.backgroundColor
+    tempCtx.fillRect(0, 0, width, height)
+
     tempCtx.save()
     tempCtx.translate(-minX + padding, -minY + padding)
 
@@ -328,7 +331,7 @@ export class CanvasRenderer {
       return ''
     }
 
-    tempCtx.fillStyle = '#ffffff'
+    tempCtx.fillStyle = world.backgroundColor
     tempCtx.fillRect(0, 0, width, height)
 
     tempCtx.save()

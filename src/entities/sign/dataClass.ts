@@ -8,6 +8,7 @@ export class SignDataClass extends PointObjDataClass<SignData> {
   signZ: number // 牌子离地高度
   poleRadius: number // 柱子半径
   bgColor: string // 背景颜色
+  poleColor: string // 柱子颜色
   img: {
     value: Array<any> // 图片数据（JSON格式）
     viewImg: string // 图片数据（JSON格式）
@@ -21,6 +22,7 @@ export class SignDataClass extends PointObjDataClass<SignData> {
     this.signZ = data.signZ
     this.poleRadius = data.poleRadius
     this.bgColor = data.bgColor
+    this.poleColor = data.poleColor
     this.img = data.img
   }
 }

@@ -28,6 +28,7 @@ export class SignEntity extends PointEntityClass<SignData> {
       signZ: 100,
       poleRadius: 5,
       bgColor: '#ffffff',
+      poleColor: '#666666',
       img: {
         value: [],
         viewImg: '',
@@ -187,21 +188,20 @@ export class SignEntity extends PointEntityClass<SignData> {
   create3DMesh() {
     const data = this.getData();
     const group = new THREE.Group()
-    const { width, height, signZ, img, poleRadius, bgColor } = data;
+    const { width, height, signZ, img, poleRadius, bgColor, poleColor } = data;
     const { viewImg } = img
     const angleY = data.angleY || 0;
 
     const poleHeight = signZ + height;
 
     const poleGeometry = new THREE.CylinderGeometry(poleRadius, poleRadius, poleHeight, 32);
-    const poleMaterial = new THREE.MeshStandardMaterial({ color: bgColor });
+    const poleMaterial = new THREE.MeshStandardMaterial({ color: poleColor });
     const poleMesh = new THREE.Mesh(poleGeometry, poleMaterial);
     poleMesh.position.setY(poleHeight / 2);
     group.add(poleMesh);
 
     const thickness = 0.3;
     const imageMaterial = new THREE.MeshStandardMaterial({
-      color: bgColor,
       map: new THREE.TextureLoader().load(viewImg)
     });
     const sideMaterial = new THREE.MeshStandardMaterial({ color: bgColor });
@@ -336,13 +336,19 @@ export class SignEntity extends PointEntityClass<SignData> {
         label: '图片',
         dataType: 'stitchImage',
         value: data.img,
-        dataTypeList: ['roadSigns', 'text'],
+        dataTypeList: ['roadSigns', 'text', 'groundSigns'],
       },
       {
         id: 'bgColor',
-        label: '文字',
+        label: '牌子背景色',
         dataType: 'color',
         value: data.bgColor,
+      },
+      {
+        id: 'poleColor',
+        label: '柱子颜色',
+        dataType: 'color',
+        value: data.poleColor,
       },
       {
         id: 'width',
