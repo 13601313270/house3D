@@ -334,6 +334,7 @@ export class SignEntity extends PointEntityClass<SignData> {
         label: '图片',
         dataType: 'stitchImage',
         value: data.img,
+        dataTypeList: ['roadSigns'],
       },
       {
         id: 'width',

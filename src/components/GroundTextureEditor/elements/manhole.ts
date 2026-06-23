@@ -15,6 +15,6 @@ export const manholeDefinition: BaseElementDefinition = {
   name: '井盖',
   icon: '⭕️',
   type: 'sprite',
-  dataType: 'roadSigns',
+  dataType: 'groundSigns',
   createClass: ManholeClass
 }

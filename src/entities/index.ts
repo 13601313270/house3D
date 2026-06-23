@@ -19,6 +19,7 @@ import staircasePlugin from './staircase'
 import signPlugin from './sign'
 import { BaseEntityClass } from '@/types/baseEntity'
 import { World } from '@/utils/world'
+import { IconDataType } from '@/components/GroundTextureEditor/types/elementDefinition'
 
 export type EntityConstructor = new (world: World, data?: BaseObjData) => BaseEntityClass<any>;
 export type enumItem = {
@@ -156,4 +157,5 @@ export type editItem = {
     value: Array<any>,
     viewImg: string,
   },
+  dataTypeList: IconDataType[],
 }

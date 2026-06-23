@@ -2,7 +2,7 @@
   <div class="ground-texture-editor">
     <div class="toolbar">
       <div class="element-library">
-        <button v-for="item in textureWorld.spriteLibrary" :key="item.id" class="element-btn" :class="{
+        <button v-for="item in spriteLibrary" :key="item.id" class="element-btn" :class="{
           active: textureWorld.selectedSprite?.id === item.id,
           'sprite-type': item.type === 'sprite',
           'line-type': item.type === 'polyline',
@@ -89,6 +89,7 @@ import { SpriteElement, SpriteElementData } from './types/spriteElement'
 import { editItem } from '@/entities'
 import { PolylineElement, PolylineElementData } from './types/polylineElement'
 import { PolygonElement } from './types/polygonElement'
+import { IconDataType } from './types/elementDefinition'
 
 const props = defineProps<{
   width?: number
@@ -97,6 +98,7 @@ const props = defineProps<{
     value: any[]
     viewImg: string
   }
+  dataTypeList: IconDataType[]
 }>()
 
 const emit = defineEmits<{
@@ -423,7 +425,6 @@ function handleMouseMove(e: MouseEvent) {
   }
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function handleMouseUp(_e: MouseEvent) {
   textureWorld.isDragging = false
   textureWorld.isPanning = false
@@ -655,6 +656,10 @@ onMounted(async () => {
   }
 
   window.addEventListener('keydown', handleKeyDown)
+})
+
+const spriteLibrary = computed(() => {
+  return textureWorld.spriteLibrary.filter((item) => props.dataTypeList.includes(item.dataType))
 })
 
 watch(() => editParams.value, (newVal) => {

@@ -4,9 +4,9 @@ type BaseElementCtor = (new (...args: any[]) => BaseElement<any>) & {
   defaultData: () => BaseElementData
 }
 
-type IconDataType = 'roadSigns' | 'groundTexture' | 'road'
+export type IconDataType = 'groundSigns' | 'groundTexture' | 'road' | 'roadSigns'
 
-const allIconDataType: IconDataType[] = ['roadSigns', 'groundTexture', 'road']
+// const allIconDataType: IconDataType[] = ['groundSigns', 'groundTexture', 'road', 'roadSigns']
 
 export type BaseElementDefinition = {
   id: string
