@@ -189,7 +189,7 @@ export class SignEntity extends PointEntityClass<SignData> {
   create3DMesh() {
     const data = this.getData();
     const group = new THREE.Group()
-    const { width, height, signZ, img, poleRadius, bgColor, poleColor } = data;
+    const { width, height, signZ, img, poleRadius, bgColor, poleColor, shape } = data;
     const { viewImg } = img
     const angleY = data.angleY || 0;
 
@@ -207,20 +207,38 @@ export class SignEntity extends PointEntityClass<SignData> {
     });
     const sideMaterial = new THREE.MeshStandardMaterial({ color: bgColor });
 
-    const materials = [
-      sideMaterial,
-      sideMaterial,
-      sideMaterial,
-      sideMaterial,
-      viewImg ? imageMaterial : sideMaterial,
-      sideMaterial
-    ];
+    let signMesh: THREE.Mesh;
 
-    const box = new THREE.BoxGeometry(width, height, thickness)
-    const boxMesh = new THREE.Mesh(box, materials)
-    boxMesh.position.setY(poleHeight - height / 2);
-    boxMesh.position.setZ(poleRadius + thickness / 2 + 2);
-    group.add(boxMesh)
+    if (shape === 'circle') {
+      const radius = Math.min(width, height) / 2;
+      const circleGeometry = new THREE.CylinderGeometry(radius, radius, thickness, 64);
+      const materials = [
+        sideMaterial,
+        viewImg ? imageMaterial : sideMaterial,
+        sideMaterial,
+        // viewImg ? imageMaterial : sideMaterial,
+      ];
+      signMesh = new THREE.Mesh(circleGeometry, materials);
+      signMesh.position.setY(poleHeight - height / 2);
+      signMesh.position.setZ(poleRadius + thickness / 2 + 2);
+      signMesh.rotation.x = Math.PI / 2;
+      signMesh.rotation.y = Math.PI / 2;
+    } else {
+      const materials = [
+        sideMaterial,
+        sideMaterial,
+        sideMaterial,
+        sideMaterial,
+        viewImg ? imageMaterial : sideMaterial,
+        sideMaterial
+      ];
+      const box = new THREE.BoxGeometry(width, height, thickness);
+      signMesh = new THREE.Mesh(box, materials);
+      signMesh.position.setY(poleHeight - height / 2);
+      signMesh.position.setZ(poleRadius + thickness / 2 + 2);
+    }
+
+    group.add(signMesh);
     group.rotateY(angleY);
     return [
       group

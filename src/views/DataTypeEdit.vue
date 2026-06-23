@@ -81,7 +81,7 @@
   </div>
   <GroundTextureEditor v-if="groundTextureEditorShow && item.dataType === 'stitchImage'"
     @close="groundTextureEditorShow = false" @update:modelValue="updateEditPropByDataTexture" :width="record.width"
-    :height="record.height" :modelValue="modelValue" :dataTypeList="item.dataTypeList" />
+    :height="record.height" :modelValue="modelValue" :shape="record.shape" :dataTypeList="item.dataTypeList" />
 </template>
 <script setup lang="ts">
 import { ref } from 'vue'

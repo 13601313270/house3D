@@ -99,10 +99,36 @@ import { PolylineElement, PolylineElementData } from './types/polylineElement'
 import { PolygonElement } from './types/polygonElement'
 import { IconDataType } from './types/elementDefinition'
 
+interface SizeConstraint {
+  minWidth: number
+  maxWidth: number
+  minHeight: number
+  maxHeight: number
+}
+
+const shapeSizeConstraints: Record<string, SizeConstraint> = {
+  rect: {
+    minWidth: 20,
+    maxWidth: 1000,
+    minHeight: 20,
+    maxHeight: 1000,
+  },
+  circle: {
+    minWidth: 20,
+    maxWidth: 500,
+    minHeight: 20,
+    maxHeight: 500,
+  },
+}
+
+function getSizeConstraint(shape?: string): SizeConstraint {
+  return shapeSizeConstraints[shape || 'rect'] || shapeSizeConstraints.rect
+}
+
 const props = defineProps<{
   width?: number
   height?: number
-  shape?: 'rect' | 'circle'
+  shape?: 'rect' | 'circle' | string
   modelValue: {
     value: any[]
     viewImg: string
@@ -612,14 +638,19 @@ onMounted(async () => {
   }
 
   if (canvasRef.value && gridCanvasRef.value && previewCanvasRef.value) {
+    const limitConfig = props.width && props.height ? {
+      width: props.width,
+      height: props.height,
+      shape: props.shape || 'rect'
+    } : null
+    
     renderer = new CanvasRenderer(
       canvasRef.value,
       gridCanvasRef.value,
       previewCanvasRef.value,
       initialWidth,
       initialHeight,
-      props.width,
-      props.height
+      limitConfig
     )
 
     textureWorld.backgroundColor = props.modelValue.backgroundColor || '#fff'

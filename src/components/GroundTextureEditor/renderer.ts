@@ -1,6 +1,14 @@
 import type { Point } from './types'
 import { TextureWorld } from './textureWorld'
 
+export type CanvasShape = 'rect' | 'circle' | string
+
+export interface LimitConfig {
+  width: number
+  height: number
+  shape: CanvasShape
+}
+
 export class CanvasRenderer {
   private mainCanvas: HTMLCanvasElement
   private mainCtx: CanvasRenderingContext2D
@@ -12,8 +20,7 @@ export class CanvasRenderer {
   public height: number
   private readonly gridIntervals: number[] = [10, 20, 25, 50, 100, 200, 500, 1000, 2000]
   private readonly baseGridSize: number = 50
-  private limitWidth: number | null = null
-  private limitHeight: number | null = null
+  private limitConfig: LimitConfig | null = null
 
   private getGridSize(scale: number): number {
     const targetInterval = this.baseGridSize / scale
@@ -31,8 +38,7 @@ export class CanvasRenderer {
     previewCanvas: HTMLCanvasElement,
     width: number,
     height: number,
-    limitWidth?: number,
-    limitHeight?: number
+    limitConfig?: LimitConfig | null
   ) {
     this.mainCanvas = mainCanvas
     this.mainCanvas.width = width
@@ -59,8 +65,7 @@ export class CanvasRenderer {
     this.previewCtx = previewCtx
     this.width = width
     this.height = height
-    this.limitWidth = limitWidth || null
-    this.limitHeight = limitHeight || null
+    this.limitConfig = limitConfig || null
   }
 
   private drawGrid(ctx: CanvasRenderingContext2D, scaledWidth: number, scaledHeight: number, scale: number, canvasOffsetX: number, canvasOffsetY: number): void {
@@ -195,7 +200,7 @@ export class CanvasRenderer {
   renderPreview(world: TextureWorld, mousePos: Point): void {
     this.previewCtx.clearRect(0, 0, this.width, this.height)
 
-    if (this.limitWidth && this.limitHeight) {
+    if (this.limitConfig) {
       this.drawLimitedCanvasMask(world)
     }
 
@@ -215,8 +220,7 @@ export class CanvasRenderer {
   }
 
   private drawLimitedCanvasMask(world: TextureWorld): void {
-    const width = this.limitWidth!
-    const height = this.limitHeight!
+    const { width, height, shape } = this.limitConfig!
 
     this.previewCtx.save()
     this.previewCtx.translate(world.canvasOffset.x, world.canvasOffset.y)
@@ -227,16 +231,40 @@ export class CanvasRenderer {
     ctx.fillStyle = 'rgba(0, 0, 0, 0.5)'
     ctx.fillRect(-10000, -10000, 20000, 20000)
 
-    ctx.clearRect(-width / 2, -height / 2, width, height)
+    ctx.beginPath()
+    if (shape === 'circle') {
+      ctx.arc(0, 0, width / 2, 0, Math.PI * 2)
+    } else {
+      ctx.rect(-width / 2, -height / 2, width, height)
+    }
+    ctx.clip()
+    ctx.clearRect(-width / 2 - 100, -height / 2 - 100, width + 200, height + 200)
+    ctx.restore()
+
+    this.previewCtx.save()
+    this.previewCtx.translate(world.canvasOffset.x, world.canvasOffset.y)
+    this.previewCtx.scale(world.scale, world.scale)
 
     ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)'
     ctx.lineWidth = 3
-    ctx.strokeRect(-width / 2, -height / 2, width, height)
+    ctx.beginPath()
+    if (shape === 'circle') {
+      ctx.arc(0, 0, width / 2, 0, Math.PI * 2)
+    } else {
+      ctx.rect(-width / 2, -height / 2, width, height)
+    }
+    ctx.stroke()
 
     ctx.strokeStyle = 'rgba(0, 136, 255, 0.6)'
     ctx.lineWidth = 1
     ctx.setLineDash([10, 10])
-    ctx.strokeRect(-width / 2 - 10, -height / 2 - 10, width + 20, height + 20)
+    ctx.beginPath()
+    if (shape === 'circle') {
+      ctx.arc(0, 0, width / 2 + 10, 0, Math.PI * 2)
+    } else {
+      ctx.rect(-width / 2 - 10, -height / 2 - 10, width + 20, height + 20)
+    }
+    ctx.stroke()
     ctx.setLineDash([])
 
     this.previewCtx.restore()
@@ -261,7 +289,7 @@ export class CanvasRenderer {
 
   exportFullImage(world: TextureWorld): string {
     world.selectedElementId = null
-    if (this.limitWidth && this.limitHeight) {
+    if (this.limitConfig) {
       return this.exportLimitedCanvas(world)
     }
 
@@ -319,8 +347,7 @@ export class CanvasRenderer {
   }
 
   private exportLimitedCanvas(world: TextureWorld): string {
-    const width = this.limitWidth!
-    const height = this.limitHeight!
+    const { width, height, shape } = this.limitConfig!
 
     const tempCanvas = document.createElement('canvas')
     tempCanvas.width = width
@@ -335,6 +362,13 @@ export class CanvasRenderer {
     tempCtx.fillRect(0, 0, width, height)
 
     tempCtx.save()
+    
+    if (shape === 'circle') {
+      tempCtx.beginPath()
+      tempCtx.arc(width / 2, height / 2, width / 2, 0, Math.PI * 2)
+      tempCtx.clip()
+    }
+
     tempCtx.translate(width / 2, height / 2)
 
     const sortedElements = [...world.elements].sort(
