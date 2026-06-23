@@ -51,7 +51,9 @@
         <div class="property-list">
           <div class="property-item" v-for="item in editParams" :key="item.id">
             <label>{{ item.label }}</label>
-            <span v-if="item.dataType === 'string'">{{ item.value }}</span>
+            <div v-if="item.dataType === 'string'" class="textContainer">
+              <input type="text" class="textInput" v-model="item.value" @input="render" />
+            </div>
             <div v-else-if="item.dataType === 'number'" class="numberEdit">
               <input type="range" v-model.number="item.value" :min="item.min" :max="item.max" :step="item.step"
                 @input="render" />
@@ -942,6 +944,24 @@ onUnmounted(() => {
               outline: none;
               width: 44px;
             }
+          }
+        }
+
+        .textContainer {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border: 1px solid #b2b2b2;
+          border-radius: 4px;
+          overflow: hidden;
+          flex-shrink: 0;
+
+          .textInput {
+            margin-left: 2px;
+            height: 28px;
+            border: none;
+            outline: none;
+            width: 180px;
           }
         }
       }
