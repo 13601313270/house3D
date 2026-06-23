@@ -59,7 +59,10 @@
               <div v-else-if="item.dataType === 'color'" class="colorEdit">
                 <input type="color" v-model="item.value" @input="render" />
               </div>
-              <span v-else-if="item.dataType === 'boolean'">{{ item.value ? '是' : '否' }}</span>
+              <div v-else-if="item.dataType === 'boolean'">
+                {{ item.value ? '是' : '否' }}
+                <input type="checkbox" v-model="item.value" @change="render" />
+              </div>
             </div>
           </div>
           <div class="bottomTools">
@@ -284,6 +287,9 @@ function selectElementAt(worldPos: { x: number; y: number }, screenPos: { x: num
         x: worldPos.x - cornerPos.x,
         y: worldPos.y - cornerPos.y,
       }
+
+      // 隐藏属性弹窗
+      selectedElementId.value = null
       return
     }
   }
@@ -353,6 +359,9 @@ function selectElementAt(worldPos: { x: number; y: number }, screenPos: { x: num
       x: worldPos.x - elementPos.x,
       y: worldPos.y - elementPos.y,
     }
+
+    // 隐藏属性弹窗
+    selectedElementId.value = null
   }
 }
 
@@ -487,6 +496,14 @@ function handleMouseUp(_e: MouseEvent) {
   isDraggingPoint.value = false
   draggingPointIndex.value = -1
   dragPointOffset.value = { x: 0, y: 0 }
+
+  // 恢复属性弹窗
+  const element = textureWorld.getSelectedElement()
+  if (element) {
+    selectedElementId.value = element.data.id
+    editParams.value = JSON.parse(JSON.stringify(element.setEditParams()))
+  }
+
   render()
 }
 
@@ -655,7 +672,7 @@ onMounted(async () => {
       height: props.height,
       shape: props.shape || 'rect'
     } : null
-    
+
     renderer = new CanvasRenderer(
       canvasRef.value,
       gridCanvasRef.value,
