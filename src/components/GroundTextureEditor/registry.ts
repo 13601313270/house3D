@@ -9,6 +9,7 @@ import { flowerDefinition } from './TextureElements/flower'
 import { textDefinition } from './TextureElements/text'
 import { lineDefinition } from './TextureElements/line'
 import { circleDefinition } from './TextureElements/circle'
+import { rectDefinition } from './TextureElements/rect'
 
 export class ElementRegistry {
   static mapIdToDefinition: Map<string, BaseElementDefinition> = new Map()
@@ -42,3 +43,4 @@ ElementRegistry.register(flowerDefinition)
 ElementRegistry.register(textDefinition)
 ElementRegistry.register(lineDefinition)
 ElementRegistry.register(circleDefinition)
+ElementRegistry.register(rectDefinition)

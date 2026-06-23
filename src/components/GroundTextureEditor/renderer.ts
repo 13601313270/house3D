@@ -267,13 +267,8 @@ export class CanvasRenderer {
     this.previewCtx.translate(world.canvasOffset.x, world.canvasOffset.y)
     this.previewCtx.scale(world.scale, world.scale)
 
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)'
-    ctx.lineWidth = 3
-    this.buildShapePath(ctx, width, height, shape)
-    ctx.stroke()
-
     ctx.strokeStyle = 'rgba(0, 136, 255, 0.6)'
-    ctx.lineWidth = 1
+    ctx.lineWidth = 0
     ctx.setLineDash([10, 10])
     this.buildShapePath(ctx, width, height, shape, 20)
     ctx.stroke()

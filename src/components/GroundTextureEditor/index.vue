@@ -109,37 +109,6 @@ interface SizeConstraint {
   maxHeight: number
 }
 
-const shapeSizeConstraints: Record<string, SizeConstraint> = {
-  rect: {
-    minWidth: 20,
-    maxWidth: 1000,
-    minHeight: 20,
-    maxHeight: 1000,
-  },
-  circle: {
-    minWidth: 20,
-    maxWidth: 500,
-    minHeight: 20,
-    maxHeight: 500,
-  },
-  diamond: {
-    minWidth: 20,
-    maxWidth: 600,
-    minHeight: 20,
-    maxHeight: 600,
-  },
-  triangle: {
-    minWidth: 20,
-    maxWidth: 600,
-    minHeight: 20,
-    maxHeight: 600,
-  },
-}
-
-function getSizeConstraint(shape?: string): SizeConstraint {
-  return shapeSizeConstraints[shape || 'rect'] || shapeSizeConstraints.rect
-}
-
 const props = defineProps<{
   width?: number
   height?: number
