@@ -35,20 +35,20 @@
       </div>
     </div>
     <div v-else-if="item.dataType === 'cornerType'">
-      <CornerTypeEdit :modelValue="modelValue" @update:modelValue="updateEditPropInputInfoNumber" :item="item"
+      <EnumTypeEdit :modelValue="modelValue" @update:modelValue="updateEditPropInputInfoNumber" :item="item"
         :enums="cornerTypeEdit">
         <slot>
           <div class="cornerTypeDesc">{{ item.panelDesc }}</div>
         </slot>
-      </CornerTypeEdit>
+      </EnumTypeEdit>
     </div>
     <div v-else-if="item.dataType === 'enum'">
-      <CornerTypeEdit :modelValue="modelValue" @update:modelValue="updateEditPropInputInfoNumber" :item="item"
+      <EnumTypeEdit :modelValue="modelValue" @update:modelValue="updateEditPropInputInfoNumber" :item="item"
         :enums="item.enumList">
         <slot>
           <div class="cornerTypeDesc">{{ item.panelDesc }}</div>
         </slot>
-      </CornerTypeEdit>
+      </EnumTypeEdit>
     </div>
     <div class="stitchImage" v-else-if="item.dataType === 'stitchImage'">
       <img v-if="modelValue.viewImg" :src="modelValue.viewImg" class="previewImg" alt="stitchImage" />
@@ -88,7 +88,7 @@ import { ref } from 'vue'
 import { editItem, enumItem } from '@/entities';
 import { allMaterial } from '@/material';
 import ImgEdit from './ImgEdit.vue'
-import CornerTypeEdit from './cornerTypeEdit.vue'
+import EnumTypeEdit from './enumTypeEdit.vue'
 import GroundTextureEditor from '@/components/GroundTextureEditor/index.vue'
 import { loadImage } from '@/utils/imageCache'
 

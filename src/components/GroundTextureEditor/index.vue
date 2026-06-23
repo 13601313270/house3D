@@ -56,6 +56,9 @@
                   <div v-if="item.unit" class="unit">{{ item.unit }}</div>
                 </div>
               </div>
+              <div v-else-if="item.dataType === 'enum'" class="enumEdit">
+                <EnumTypeEdit :item="item" v-model="item.value" :enums="item.enumList" @update:modelValue="render" />
+              </div>
               <div v-else-if="item.dataType === 'color'" class="colorEdit">
                 <input type="color" v-model="item.value" @input="render" />
               </div>
@@ -101,13 +104,7 @@ import { editItem } from '@/entities'
 import { PolylineElement, PolylineElementData } from './types/polylineElement'
 import { PolygonElement } from './types/polygonElement'
 import { IconDataType } from './types/elementDefinition'
-
-interface SizeConstraint {
-  minWidth: number
-  maxWidth: number
-  minHeight: number
-  maxHeight: number
-}
+import EnumTypeEdit from '@/views/enumTypeEdit.vue'
 
 const props = defineProps<{
   width?: number
