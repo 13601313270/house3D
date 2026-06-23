@@ -1,11 +1,11 @@
 import type { BaseElementDefinition } from './types'
-import { manholeDefinition } from './elements/manhole'
-import { grassDefinition } from './elements/grass'
-import { tileDefinition } from './elements/tile'
-import { signDefinition } from './elements/sign'
-import { roadDefinition } from './elements/road'
-import { crosswalkDefinition } from './elements/crosswalk'
-import { flowerDefinition } from './elements/flower'
+import { manholeDefinition } from './TextureElements/manhole'
+import { grassDefinition } from './TextureElements/grass'
+import { tileDefinition } from './TextureElements/tile'
+import { signDefinition } from './TextureElements/sign'
+import { roadDefinition } from './TextureElements/road'
+import { crosswalkDefinition } from './TextureElements/crosswalk'
+import { flowerDefinition } from './TextureElements/flower'
 
 export class ElementRegistry {
   static mapIdToDefinition: Map<string, BaseElementDefinition> = new Map()
