@@ -63,6 +63,9 @@
                 <div v-if="item.unit" class="unit">{{ item.unit }}</div>
               </div>
             </div>
+            <div v-else-if="item.dataType === 'color'" class="colorEdit">
+              <input type="color" v-model="item.value" @input="render" />
+            </div>
             <span v-else-if="item.dataType === 'boolean'">{{ item.value ? '是' : '否' }}</span>
           </div>
         </div>

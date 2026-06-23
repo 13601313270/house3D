@@ -86,13 +86,13 @@ class TextClass extends SpriteElement<TextElementData> {
 
   setEditParams(): Array<editItem> {
     return [
-      ...super.setEditParams(),
       {
         id: 'text',
         label: '文字',
         dataType: 'string',
         value: this.data.text,
       },
+      ...super.setEditParams(),
     ]
   }
 }
