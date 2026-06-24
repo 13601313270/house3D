@@ -4,6 +4,7 @@ import { SignData } from "./index.d"
 export default function (): DefaultItem<SignData>[] {
   const values: DefaultItem<SignData>[] = [
     {
+      name: '标志',
       data: {
         id: Date.now().toString(),
         x: 0,

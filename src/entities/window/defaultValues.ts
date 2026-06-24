@@ -25,6 +25,7 @@ export default function (): DefaultItem<WindowData>[] {
   };
   const values: DefaultItem<WindowData>[] = [
     {
+      name: '窗户',
       data
     }
   ]

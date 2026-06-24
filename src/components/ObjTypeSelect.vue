@@ -67,6 +67,7 @@ import { OutFileDataClass } from '@/entities/outFile/dataClass';
 import { OutFileEntity } from '@/entities/outFile/entity';
 import { OutFileData } from '@/entities/outFile/index.d'
 import { BaseEntityClass } from '@/types/baseEntity';
+import { DefaultItem } from '@/entities/pluginType';
 
 defineProps<{
   currentTool: string | 'drag'
@@ -161,9 +162,9 @@ async function changeCurrentToolToOutFile(id: string) {
 
 function changeCurrentTool(type: string) {
   const ClassName = fileDataKeyToClass[type];
-  const defaultValue = allPluginByKey[type].defaultValues()
+  const defaultValue: DefaultItem<any>[] = allPluginByKey[type].defaultValues()
   if (ClassName) {
-    const insertTempObj = new ClassName(worldApi, defaultValue[0])
+    const insertTempObj = new ClassName(worldApi, defaultValue[0].data)
     if (insertTempObj) {
       insertTempObj.init()
     }

@@ -19,6 +19,7 @@ export default function (): DefaultItem<DoorData>[] {
     openType: 1,
   }
   const values: DefaultItem<DoorData>[] = [{
+    name: '门',
     data
   }]
   return values

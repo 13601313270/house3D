@@ -4,6 +4,7 @@ import { DefaultItem } from "../pluginType";
 export default function (): DefaultItem<CameraData>[] {
   const defaultValues: DefaultItem<CameraData>[] = [
     {
+      name: '相机',
       data: {
         id: Date.now().toString(),
         x: 0,

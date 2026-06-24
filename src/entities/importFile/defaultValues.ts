@@ -17,7 +17,10 @@ export default function (): DefaultItem<ImportFileData>[] {
   }
 
   const values: DefaultItem<ImportFileData>[] = [
-    { data }
+    {
+      name: '导入对象',
+      data
+    }
   ]
   return values
 }

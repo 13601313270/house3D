@@ -4,6 +4,7 @@ import { DefaultItem } from "../pluginType";
 export default function (): DefaultItem<SphereData>[] {
   const values: DefaultItem<SphereData>[] = [
     {
+      name: '球',
       data: {
         id: Date.now().toString(),
         x: 0,

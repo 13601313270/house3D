@@ -17,6 +17,7 @@ export default function (): DefaultItem<CurtainInWallData>[] {
     isOuter: false,
   }
   const values: DefaultItem<CurtainInWallData>[] = [{
+    name: '窗帘',
     data
   }]
   return values

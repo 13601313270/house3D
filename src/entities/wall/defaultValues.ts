@@ -4,6 +4,7 @@ import { DefaultItem } from "../pluginType";
 export default function (): DefaultItem<WallData>[] {
   const values: DefaultItem<WallData>[] = [
     {
+      name: '墙',
       data: {
         id: Date.now().toString(),
         height: 280,

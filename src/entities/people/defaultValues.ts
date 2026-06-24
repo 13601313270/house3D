@@ -4,6 +4,7 @@ import { PeopleData } from "./index.d"
 export default function () {
   const values: DefaultItem<PeopleData>[] = [
     {
+      name: '人物',
       data: {
         id: Date.now().toString(),
         x: 0,

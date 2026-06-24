@@ -21,7 +21,10 @@ export default function (): DefaultItem<OutFileInWallData>[] {
   }
 
   const values: DefaultItem<OutFileInWallData>[] = [
-    { data }
+    {
+      name: '墙上的对象',
+      data
+    }
   ]
   return values
 }

@@ -4,6 +4,7 @@ import { DefaultItem } from "../pluginType";
 export default function (): DefaultItem<ConeData>[] {
   const values: DefaultItem<ConeData>[] = [
     {
+      name: '圆锥体',
       data: {
         id: Date.now().toString(),
         x: 0,

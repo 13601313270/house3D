@@ -4,6 +4,7 @@ import { PlaneData } from "./index.d"
 export default function (): DefaultItem<PlaneData>[] {
   const values: DefaultItem<PlaneData>[] = [
     {
+      name: '平面',
       data: {
         id: Date.now().toString(),
         x: 0,

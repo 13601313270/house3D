@@ -865,7 +865,7 @@ onMounted(async () => {
           const ClassName = fileDataKeyToClass[currentTool.value];
           const defaultValue = allPluginByKey[currentTool.value].defaultValues()
           if (ClassName) {
-            const insertTempObj = new ClassName(worldApi, defaultValue[0])
+            const insertTempObj = new ClassName(worldApi, defaultValue[0].data)
             if (insertTempObj instanceof LineEntityClass) {
               insertTempObj.setPreparePoint(tempPointInsertData.value.map(v => {
                 return {

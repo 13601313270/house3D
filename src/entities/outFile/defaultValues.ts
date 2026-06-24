@@ -16,7 +16,10 @@ export default function (): DefaultItem<OutFileData>[] {
     canAngelZ: findObjInfo.canAngelZ,
   }
   const values: DefaultItem<OutFileData>[] = [
-    { data }
+    {
+      name: '对象',
+      data
+    }
   ]
   return values
 }

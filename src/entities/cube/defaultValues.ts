@@ -4,6 +4,7 @@ import { DefaultItem } from "../pluginType";
 export default function (): DefaultItem<CubeData>[] {
   const values: DefaultItem<CubeData>[] = [
     {
+      name: '立方体',
       data: {
         id: Date.now().toString(),
         x: 0,

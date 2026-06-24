@@ -4,6 +4,7 @@ import { DefaultItem } from "../pluginType";
 export default function (): DefaultItem<StaircaseData>[] {
   const values: DefaultItem<StaircaseData>[] = [
     {
+      name: '楼梯',
       data: {
         id: Date.now().toString(),
         color: '#646591',

@@ -4,6 +4,7 @@ import { CurtainData } from "./index.d";
 export default function (): DefaultItem<CurtainData>[] {
   const values: DefaultItem<CurtainData>[] = [
     {
+      name: '窗帘',
       data: {
         id: Date.now().toString(),
         x: 0,

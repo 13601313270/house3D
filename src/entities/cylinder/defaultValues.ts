@@ -13,6 +13,7 @@ export default function (): DefaultItem<CylinderData>[] {
     mt: null,
   }
   const values: DefaultItem<CylinderData>[] = [{
+    name: '圆柱体',
     data
   }]
   return values
