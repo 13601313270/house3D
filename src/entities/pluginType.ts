@@ -14,7 +14,7 @@ type PluginType = {
   type: 'base' | 'house' | 'curtain' | 'other',
   entity: EntityConstructor,
   objType: 'point' | 'polyline',
-  defaultValues: () => DefaultItem[]
+  defaultValues: () => Promise<DefaultItem[]> | DefaultItem[]
 }
 
 export default PluginType

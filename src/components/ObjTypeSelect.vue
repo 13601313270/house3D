@@ -79,6 +79,7 @@ import { OutFileEntity } from '@/entities/outFile/entity';
 import { OutFileData } from '@/entities/outFile/index.d'
 import { BaseEntityClass } from '@/types/baseEntity';
 import { DefaultItem } from '@/entities/pluginType';
+import { BaseObjData } from '@/types/map2d';
 
 defineProps<{
   currentTool: string | 'drag'
@@ -111,9 +112,12 @@ const showDefaultValueModal = ref(false)
 const currentDefaultValues = ref<DefaultItem<any>[]>([])
 const currentToolType = ref('')
 
-function changeCurrentTool(type: string) {
+async function changeCurrentTool(type: string) {
   const ClassName = fileDataKeyToClass[type];
-  const defaultValue: DefaultItem<any>[] = allPluginByKey[type].defaultValues()
+  let defaultValue: DefaultItem<BaseObjData>[] | Promise<DefaultItem<BaseObjData>[]> = allPluginByKey[type].defaultValues()
+  if (defaultValue instanceof Promise) {
+    defaultValue = await defaultValue
+  }
 
   if (!ClassName) return
 

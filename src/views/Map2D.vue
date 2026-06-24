@@ -195,6 +195,7 @@ import { LineObjDataClass } from '@/entities/objData';
 import { CameraEntity } from '@/entities/camera/entity';
 import AllWorldObjSelect from '@/components/AllWorldObjSelect.vue'
 import message from '@/utils/message';
+import { DefaultItem } from '@/entities/pluginType';
 
 const canvas2DRef = ref<HTMLCanvasElement | null>(null)
 const canvas2D2Ref = ref<HTMLCanvasElement | null>(null)
@@ -863,7 +864,14 @@ onMounted(async () => {
       if (tempPointInsertData.value.length > 0) {
         if (tempPointInsertData.value.length > 1) {
           const ClassName = fileDataKeyToClass[currentTool.value];
-          const defaultValue = allPluginByKey[currentTool.value].defaultValues()
+          const defaultValue_: DefaultItem<BaseObjData>[] | Promise<DefaultItem<BaseObjData>[]> = await allPluginByKey[currentTool.value].defaultValues()
+          let defaultValue: DefaultItem<BaseObjData>[] = []
+          if (defaultValue_ instanceof Promise) {
+            defaultValue = await defaultValue_
+          } else {
+            defaultValue = defaultValue_
+          }
+
           if (ClassName) {
             const insertTempObj = new ClassName(worldApi, defaultValue[0].data)
             if (insertTempObj instanceof LineEntityClass) {
