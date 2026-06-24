@@ -38,7 +38,14 @@
     <div class="addOutFileChildList" ref="addOutFileChildListRef" @mouseenter="isMouseInCate2 = true"
       @mouseleave="leaveObjTypeCate2"
       :style="{ top: enterEventDomPosition?.y + 'px', left: enterEventDomPosition?.x + 'px' }"
-      v-if="activeObjChildList.length > 0">
+      v-if="activeObjChildList.length > 0 || activePluginChildList.length > 0">
+      <div v-for="item2 in activePluginChildList" :key="item2.key" class="childItem"
+        @click="changeCurrentTool(item2.key), isMouseInCate2 = false">
+        <div class="previewImg">
+          <img v-if="item2.previewImg" :src="item2.previewImg" alt="" />
+        </div>
+        <div class="name">{{ item2.name }}</div>
+      </div>
       <div v-for="item2 in activeObjChildList" class="childItem" :key="item2.id"
         @click="changeCurrentToolToOutFile(item2.id), isMouseInCate2 = false">
         <div class="previewImg">
@@ -76,7 +83,7 @@
 <script setup lang="ts">
 import { nextTick, onMounted, ref } from 'vue'
 import { ObjOutputFileType } from '@/entities/allObjs';
-import { allFileKeysName, fileDataKeyToClass, allFileKeysGroup, allPluginByKey } from '@/entities'
+import { allFileKeysName, fileDataKeyToClass, allFileKeysGroup, allPluginByKey, allFileWithGroupId } from '@/entities'
 import axios from 'axios';
 import { OutFileInWallData } from '@/entities/outFileInWall/index.d'
 import { OutFileInWallDataClass } from '@/entities/outFileInWall/dataClass';
@@ -85,7 +92,7 @@ import { OutFileDataClass } from '@/entities/outFile/dataClass';
 import { OutFileEntity } from '@/entities/outFile/entity';
 import { OutFileData } from '@/entities/outFile/index.d'
 import { BaseEntityClass } from '@/types/baseEntity';
-import { DefaultItem } from '@/entities/pluginType';
+import PluginType, { DefaultItem } from '@/entities/pluginType';
 import { BaseObjData } from '@/types/map2d';
 
 defineProps<{
@@ -111,7 +118,13 @@ type ObjFileType = {
   }[]
 }
 const ObjFileTypes = ref<Array<ObjFileType>>([])
-const activeObjChildList = ref<Array<{ id: string, name: string, type: number, previewImg?: string }>>([])
+const activePluginChildList = ref<Array<PluginType>>([])
+const activeObjChildList = ref<Array<{
+  id: string,
+  name: string,
+  type: number,
+  previewImg?: string
+}>>([])
 
 const worldApi = window.worldApi
 
@@ -167,6 +180,7 @@ onMounted(async () => {
 })
 async function changeCurrentToolToOutFile(id: string) {
   activeObjChildList.value = []
+  activePluginChildList.value = []
   const index = worldApi.ObjFileTypes.findIndex(item => item.id === id);
   if (index === -1) {
     const { data } = await axios.get('https://api.studying1v1.com/video/objectFileById/' + id)
@@ -230,6 +244,10 @@ async function mouseEnterType(event: MouseEvent, type: ObjFileType) {
     })
   }
   activeObjChildList.value = type.child
+
+  const allFileInThisType = allFileWithGroupId[type.id]
+  activePluginChildList.value = allFileInThisType;
+
   const dom = event.target as HTMLElement;
   const { right, top } = dom.getBoundingClientRect()
   enterEventDomPosition.value = { x: right, y: top }
@@ -254,6 +272,7 @@ function leaveObjTypeCate1() {
       return
     } else {
       activeObjChildList.value = []
+      activePluginChildList.value = []
     }
   }, 10)
 }
@@ -261,10 +280,12 @@ function leaveObjTypeCate1() {
 function leaveObjTypeCate2() {
   isMouseInCate2.value = false
   activeObjChildList.value = []
+  activePluginChildList.value = []
 }
 
 function clearCate1List() {
   activeObjChildList.value = []
+  activePluginChildList.value = []
 }
 
 function showHelpModal() {

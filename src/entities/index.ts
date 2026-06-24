@@ -59,6 +59,10 @@ export const allFileKeysGroup: TypeGroup = [
   }
 ]
 
+export const allFileWithGroupId: { [key in string]: PluginType[] } = {
+
+}
+
 export const allFileKeysName: Record<string, string> = {
 }
 
@@ -101,6 +105,11 @@ export const allPluginByKey: Record<string, PluginType> = {
     allFileKeysGroup[2].child.push(v.key)
   } else if (v.type === 'other') {
     allFileKeysGroup[3].child.push(v.key)
+  } else if (typeof v.type === 'number') {
+    if (!allFileWithGroupId[v.type]) {
+      allFileWithGroupId[v.type] = []
+    }
+    allFileWithGroupId[v.type].push(v)
   }
   allFileKeysName[v.key] = v.name
   fileDataKeyToClass[v.key] = v.entity
