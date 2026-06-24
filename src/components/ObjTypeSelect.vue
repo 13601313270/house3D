@@ -487,6 +487,7 @@ function showHelpModal() {
     border-radius: 8px;
     padding: 16px;
     min-width: 280px;
+    max-width: 80vw;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 
     .modalTitle {
@@ -521,6 +522,7 @@ function showHelpModal() {
           border: solid 1px #eaeaea;
           border-radius: 4px;
           margin-bottom: 4px;
+          object-fit: contain;
           // background-color: white;
         }
 
