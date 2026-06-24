@@ -12,6 +12,7 @@ export type SignData = PointObjData & {
   shape: CanvasShape // 形状
   img: {
     value: Array<any> // 图片数据（JSON格式）
+    backgroundColor: string // 背景颜色
     viewImg: string // 图片数据（JSON格式）
   }
 }

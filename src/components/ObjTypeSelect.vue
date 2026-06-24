@@ -59,7 +59,9 @@
         <div class="defaultValueList">
           <div v-for="(item, index) in currentDefaultValues" :key="index" class="defaultValueItem"
             @click="createObjWithDefaultValue(currentToolType, item)">
-            {{ item.name }}
+            <img class="img" v-if="item.img" :src="item.img" alt="" />
+            <img class="img" v-else src="../assets/Empty.png" alt="" />
+            <div class="name">{{ item.name }}</div>
           </div>
         </div>
       </div>
@@ -497,16 +499,35 @@ function showHelpModal() {
 
     .defaultValueList {
       display: flex;
-      flex-direction: column;
+      flex-direction: row;
       gap: 8px;
+      flex-wrap: wrap;
 
       .defaultValueItem {
-        padding: 12px 16px;
+        width: 142px;
+        height: 142px;
+        box-sizing: border-box;
+        padding: 4px;
         border-radius: 4px;
         cursor: pointer;
         text-align: center;
+        border: solid 1px #eaeaea;
         color: #2c3e50;
         transition: background-color 0.2s;
+
+        .img {
+          width: 100px;
+          height: 100px;
+          border: solid 1px #eaeaea;
+          border-radius: 4px;
+          margin-bottom: 4px;
+          background-color: white;
+        }
+
+        .name {
+          font-size: 14px;
+          color: #666;
+        }
 
         &:hover {
           background-color: #1890ff;

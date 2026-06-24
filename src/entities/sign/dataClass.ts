@@ -14,6 +14,7 @@ export class SignDataClass extends PointObjDataClass<SignData> {
   img: {
     value: Array<any> // 图片数据（JSON格式）
     viewImg: string // 图片数据（JSON格式）
+    backgroundColor: string // 背景颜色
   }
 
   constructor(data: SignData) {

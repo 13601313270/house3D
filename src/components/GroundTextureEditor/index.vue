@@ -564,6 +564,7 @@ function saveData(scale: number) {
   const data = textureWorld.exportElements()
   if (renderer) {
     const viewImg = renderer.exportFullImage(textureWorld, scale)
+    console.log('testRun', { value: data.elements, viewImg, backgroundColor: data.backgroundColor })
     emit('update:modelValue', { value: data.elements, viewImg, backgroundColor: data.backgroundColor })
   }
 }
