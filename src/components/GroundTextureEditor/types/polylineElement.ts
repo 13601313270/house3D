@@ -170,9 +170,9 @@ export abstract class PolylineElement<T extends PolylineElementData> extends Bas
     return false
   }
 
-  hitTestPoint(pos: Point): number {
+  hitTestPoint(pos: Point, handleRadius: number = 20): number {
     const { points } = this.data
-    const handleRadius = 20
+
     for (let i = 0; i < points.length; i++) {
       const dist = Math.sqrt(
         Math.pow(pos.x - points[i].x, 2) +

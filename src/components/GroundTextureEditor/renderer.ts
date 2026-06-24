@@ -366,8 +366,8 @@ export class CanvasRenderer {
       return ''
     }
 
-    tempCtx.fillStyle = world.backgroundColor
-    tempCtx.fillRect(0, 0, width * scale, height * scale)
+    // tempCtx.fillStyle = world.backgroundColor
+    // tempCtx.fillRect(0, 0, width * scale, height * scale)
 
     tempCtx.save()
 
@@ -395,6 +395,10 @@ export class CanvasRenderer {
         break
     }
     tempCtx.clip()
+
+    // 只在裁剪范围内绘制背景色，限制范围外保持透明
+    tempCtx.fillStyle = world.backgroundColor
+    tempCtx.fillRect(0, 0, width * scale, height * scale)
 
     tempCtx.scale(scale, scale)
     tempCtx.translate(width / 2, height / 2)

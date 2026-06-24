@@ -282,7 +282,7 @@ function selectElementAt(worldPos: { x: number; y: number }, screenPos: { x: num
   // 1. 检测 Polyline/Polygon 的顶点
   for (const el of textureWorld.elements) {
     if (el instanceof PolylineElement || el instanceof PolygonElement) {
-      const pointIndex = (el as PolylineElement<PolylineElementData>).hitTestPoint(worldPos)
+      const pointIndex = (el as PolylineElement<PolylineElementData>).hitTestPoint(worldPos, el.data.width)
       if (pointIndex !== -1) {
         const isAlreadySelected = el.data.id === selectedElementId.value
         selectAndEdit(el)
