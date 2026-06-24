@@ -5,6 +5,7 @@ type EntityConstructor = new (...args: any[]) => BaseEntityClass<any>;
 
 export type DefaultItem<T extends BaseObjData = BaseObjData> = {
   name: string,
+  img?: string,
   data: T
 }
 

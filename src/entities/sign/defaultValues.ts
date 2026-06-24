@@ -1,7 +1,7 @@
 import { DefaultItem } from "../pluginType"
 import { SignData } from "./index.d"
 
-export default function (): DefaultItem<SignData>[] {
+export default function (): Promise<DefaultItem<SignData>[]> {
   const values: DefaultItem<SignData>[] = [
     {
       name: '方形',
@@ -88,5 +88,9 @@ export default function (): DefaultItem<SignData>[] {
       }
     }
   ]
-  return values
+  return new Promise(resolve => {
+    setTimeout(() => {
+      resolve(values)
+    }, 3000)
+  })
 }

@@ -65,6 +65,11 @@
       </div>
     </div>
   </teleport>
+  <teleport to="#teleport">
+    <div v-if="loading" class="loading">
+      <img src="../assets/loading_white.svg" alt="loading" />
+    </div>
+  </teleport>
 </template>
 <script setup lang="ts">
 import { nextTick, onMounted, ref } from 'vue'
@@ -111,13 +116,16 @@ const worldApi = window.worldApi
 const showDefaultValueModal = ref(false)
 const currentDefaultValues = ref<DefaultItem<any>[]>([])
 const currentToolType = ref('')
+const loading = ref(false)
 
 async function changeCurrentTool(type: string) {
   const ClassName = fileDataKeyToClass[type];
   let defaultValue: DefaultItem<BaseObjData>[] | Promise<DefaultItem<BaseObjData>[]> = allPluginByKey[type].defaultValues()
   if (defaultValue instanceof Promise) {
+    loading.value = true
     defaultValue = await defaultValue
   }
+  loading.value = false
 
   if (!ClassName) return
 
@@ -505,6 +513,35 @@ function showHelpModal() {
           color: white;
         }
       }
+    }
+  }
+}
+
+.loading {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 100;
+
+  >img {
+    width: 32px;
+    height: 32px;
+    animation: loading 2s linear infinite;
+  }
+
+  @keyframes loading {
+    0% {
+      transform: rotate(0deg);
+    }
+
+    100% {
+      transform: rotate(360deg);
     }
   }
 }
