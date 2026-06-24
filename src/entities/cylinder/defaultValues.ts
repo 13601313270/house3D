@@ -1,6 +1,7 @@
+import { DefaultItem } from "../pluginType"
 import { CylinderData } from "./index.d"
 
-export default function () {
+export default function (): DefaultItem<CylinderData>[] {
   const data: CylinderData = {
     id: Date.now().toString(),
     x: 0,
@@ -11,6 +12,8 @@ export default function () {
     color: '#e67e22',
     mt: null,
   }
-  const values: CylinderData[] = [data]
+  const values: DefaultItem<CylinderData>[] = [{
+    data
+  }]
   return values
 }

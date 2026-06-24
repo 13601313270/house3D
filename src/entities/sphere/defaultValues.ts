@@ -1,15 +1,18 @@
-import { SphereData } from "./index.d"
+import { SphereData } from "./index.d";
+import { DefaultItem } from "../pluginType";
 
-export default function () {
-  const values: SphereData[] = [
+export default function (): DefaultItem<SphereData>[] {
+  const values: DefaultItem<SphereData>[] = [
     {
-      id: Date.now().toString(),
-      x: 0,
-      y: 0,
-      z: 0,
-      r: 50,
-      color: '#e67e22',
-      mt: null,
+      data: {
+        id: Date.now().toString(),
+        x: 0,
+        y: 0,
+        z: 0,
+        r: 50,
+        color: '#e67e22',
+        mt: null,
+      }
     }
   ]
   return values

@@ -1,6 +1,7 @@
+import { DefaultItem } from "../pluginType"
 import { DoorData } from "./index.d"
 
-export default function () {
+export default function (): DefaultItem<DoorData>[] {
   const data: DoorData = {
     id: Date.now().toString(),
     wallPointId: -1,
@@ -17,6 +18,8 @@ export default function () {
     mt: 3,
     openType: 1,
   }
-  const values: DoorData[] = [data]
+  const values: DefaultItem<DoorData>[] = [{
+    data
+  }]
   return values
 }

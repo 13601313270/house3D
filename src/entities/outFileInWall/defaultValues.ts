@@ -1,6 +1,7 @@
+import { DefaultItem } from "../pluginType";
 import { OutFileInWallData } from "./index.d"
 
-export default function () {
+export default function (): DefaultItem<OutFileInWallData>[] {
   // @ts-ignore
   const findObjInfo = window.ObjFiles[0];
   const data: OutFileInWallData = {
@@ -19,8 +20,8 @@ export default function () {
     canAngelZ: findObjInfo.canAngelZ,
   }
 
-  const values: OutFileInWallData[] = [
-    data
+  const values: DefaultItem<OutFileInWallData>[] = [
+    { data }
   ]
   return values
 }

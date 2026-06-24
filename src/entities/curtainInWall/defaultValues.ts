@@ -1,6 +1,7 @@
 import { CurtainInWallData } from "./index.d"
+import { DefaultItem } from "../pluginType"
 
-export default function () {
+export default function (): DefaultItem<CurtainInWallData>[] {
   const data: CurtainInWallData = {
     width: 200,
     height: 200,
@@ -15,6 +16,8 @@ export default function () {
     img: '',
     isOuter: false,
   }
-  const values: CurtainInWallData[] = [data]
+  const values: DefaultItem<CurtainInWallData>[] = [{
+    data
+  }]
   return values
 }

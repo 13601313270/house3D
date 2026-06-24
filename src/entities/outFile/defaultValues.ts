@@ -1,6 +1,7 @@
+import { DefaultItem } from "../pluginType";
 import { OutFileData } from "./index.d"
 
-export default function () {
+export default function (): DefaultItem<OutFileData>[] {
   // @ts-ignore
   const findObjInfo = window.ObjFiles[0];
   const data: OutFileData = {
@@ -14,8 +15,8 @@ export default function () {
     color: '#0c7f25',
     canAngelZ: findObjInfo.canAngelZ,
   }
-  const values: OutFileData[] = [
-    data
+  const values: DefaultItem<OutFileData>[] = [
+    { data }
   ]
   return values
 }

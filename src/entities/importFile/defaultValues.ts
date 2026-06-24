@@ -1,6 +1,7 @@
+import { DefaultItem } from "../pluginType";
 import { ImportFileData } from "./index.d"
 
-export default function () {
+export default function (): DefaultItem<ImportFileData>[] {
   // @ts-ignore
   const findObjInfo = window.ObjFiles[0];
   const data: ImportFileData = {
@@ -15,6 +16,8 @@ export default function () {
     color: '#0c7f25',
   }
 
-  const values: ImportFileData[] = [data]
+  const values: DefaultItem<ImportFileData>[] = [
+    { data }
+  ]
   return values
 }

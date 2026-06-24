@@ -45,7 +45,8 @@ module.exports = {
     'quote-props': 'off',
     'comma-spacing': 'off',
     'func-call-spacing': 'off',
-    'multiline-ternary': 'off'
+    'multiline-ternary': 'off',
+    'no-debugger': 'off'
   },
   env: {
     'vue/setup-compiler-macros': true
