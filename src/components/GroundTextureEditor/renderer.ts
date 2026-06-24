@@ -294,10 +294,10 @@ export class CanvasRenderer {
     this.previewCanvas.height = height
   }
 
-  exportFullImage(world: TextureWorld): string {
+  exportFullImage(world: TextureWorld, scale: number): string {
     world.selectedElementId = null
     if (this.limitConfig) {
-      return this.exportLimitedCanvas(world)
+      return this.exportLimitedCanvas(world, scale)
     }
 
     if (world.elements.length === 0) {
@@ -326,8 +326,8 @@ export class CanvasRenderer {
     }
 
     const tempCanvas = document.createElement('canvas')
-    tempCanvas.width = width
-    tempCanvas.height = height
+    tempCanvas.width = width * scale
+    tempCanvas.height = height * scale
     const tempCtx = tempCanvas.getContext('2d')
 
     if (!tempCtx) {
@@ -335,9 +335,10 @@ export class CanvasRenderer {
     }
 
     tempCtx.fillStyle = world.backgroundColor
-    tempCtx.fillRect(0, 0, width, height)
+    tempCtx.fillRect(0, 0, width * scale, height * scale)
 
     tempCtx.save()
+    tempCtx.scale(scale, scale)
     tempCtx.translate(-minX + padding, -minY + padding)
 
     const sortedElements = [...world.elements].sort(
@@ -353,12 +354,12 @@ export class CanvasRenderer {
     return tempCanvas.toDataURL('image/png')
   }
 
-  private exportLimitedCanvas(world: TextureWorld): string {
+  private exportLimitedCanvas(world: TextureWorld, scale: number = 1): string {
     const { width, height, shape } = this.limitConfig!
 
     const tempCanvas = document.createElement('canvas')
-    tempCanvas.width = width
-    tempCanvas.height = height
+    tempCanvas.width = width * scale
+    tempCanvas.height = height * scale
     const tempCtx = tempCanvas.getContext('2d')
 
     if (!tempCtx) {
@@ -366,7 +367,7 @@ export class CanvasRenderer {
     }
 
     tempCtx.fillStyle = world.backgroundColor
-    tempCtx.fillRect(0, 0, width, height)
+    tempCtx.fillRect(0, 0, width * scale, height * scale)
 
     tempCtx.save()
 
@@ -374,27 +375,28 @@ export class CanvasRenderer {
     tempCtx.beginPath()
     switch (shape) {
       case 'circle':
-        tempCtx.ellipse(width / 2, height / 2, width / 2, height / 2, 0, 0, Math.PI * 2)
+        tempCtx.ellipse(width * scale / 2, height * scale / 2, width * scale / 2, height * scale / 2, 0, 0, Math.PI * 2)
         break
       case 'diamond':
-        tempCtx.moveTo(width / 2, height / 2 - height / 2)
-        tempCtx.lineTo(width / 2 + width / 2, height / 2)
-        tempCtx.lineTo(width / 2, height / 2 + height / 2)
-        tempCtx.lineTo(width / 2 - width / 2, height / 2)
+        tempCtx.moveTo(width * scale / 2, height * scale / 2 - height * scale / 2)
+        tempCtx.lineTo(width * scale / 2 + width * scale / 2, height * scale / 2)
+        tempCtx.lineTo(width * scale / 2, height * scale / 2 + height * scale / 2)
+        tempCtx.lineTo(width * scale / 2 - width * scale / 2, height * scale / 2)
         tempCtx.closePath()
         break
       case 'triangle':
-        tempCtx.moveTo(width / 2, height / 2 - height / 2)
-        tempCtx.lineTo(width / 2 + width / 2, height / 2 + height / 2)
-        tempCtx.lineTo(width / 2 - width / 2, height / 2 + height / 2)
+        tempCtx.moveTo(width * scale / 2, height * scale / 2 - height * scale / 2)
+        tempCtx.lineTo(width * scale / 2 + width * scale / 2, height * scale / 2 + height * scale / 2)
+        tempCtx.lineTo(width * scale / 2 - width * scale / 2, height * scale / 2 + height * scale / 2)
         tempCtx.closePath()
         break
       case 'rect':
-        tempCtx.rect(0, 0, width, height)
+        tempCtx.rect(0, 0, width * scale, height * scale)
         break
     }
     tempCtx.clip()
 
+    tempCtx.scale(scale, scale)
     tempCtx.translate(width / 2, height / 2)
 
     const sortedElements = [...world.elements].sort(

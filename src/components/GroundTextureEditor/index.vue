@@ -83,7 +83,26 @@
           <label>背景</label>
           <input type="color" v-model="backgroundColor" @input="updateBackgroundColor" />
         </div>
-        <button class="action-btn" @click="saveData">保存</button>
+        <!-- <div class="btnGroup">
+          <button class="action-btn" @click="saveData(1)">保存</button>
+        </div> -->
+        <div class="dropdown">
+          <div class="dropdown-btn" @click="saveData(1)">
+            保存(1X)
+          </div>
+          <div class="dropdown-content-container">
+            <div class="dropdown-icon-container">
+              <svg class="dropdown-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M6 9l6 6 6-6" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </div>
+            <div class="dropdown-content">
+              <button v-for="scale in [2, 3, 4, 5, 6, 7, 8, 9, 10]" :key="scale" @click="saveData(scale)">
+                保存({{ scale }}X)
+              </button>
+            </div>
+          </div>
+        </div>
         <button class="action-btn" @click="clearCanvas">清空</button>
         <button class="action-btn" @click="emit('close')">返回</button>
         <!-- <div class="panel-close-btn" @click="emit('close')">
@@ -541,10 +560,10 @@ function resizeCanvas() {
   render()
 }
 
-function saveData() {
+function saveData(scale: number) {
   const data = textureWorld.exportElements()
   if (renderer) {
-    const viewImg = renderer.exportFullImage(textureWorld)
+    const viewImg = renderer.exportFullImage(textureWorld, scale)
     emit('update:modelValue', { value: data.elements, viewImg, backgroundColor: data.backgroundColor })
   }
 }
@@ -795,10 +814,26 @@ onUnmounted(() => {
   display: none;
 }
 
+.btnGroup {
+  .action-btn {
+    border-radius: 0;
+    border-left: none;
+
+    &:first-child {
+      border-radius: 6px 0 0 6px;
+      border-left: solid 1px #d9d9d9;
+    }
+
+    &:last-child {
+      border-radius: 0 6px 6px 0;
+    }
+  }
+}
+
 .action-btn {
   padding: 6px 16px;
   border: 1px solid #d9d9d9;
-  border-radius: 4px;
+  border-radius: 6px;
   background: #fff;
   cursor: pointer;
   font-size: 14px;
@@ -806,8 +841,8 @@ onUnmounted(() => {
 }
 
 .action-btn:hover {
-  border-color: #1890ff;
-  color: #1890ff;
+  background: #1890ff;
+  color: white;
 }
 
 .action-btn.primary {
@@ -818,6 +853,82 @@ onUnmounted(() => {
 
 .action-btn.primary:hover {
   background: #40a9ff;
+}
+
+.dropdown {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid #d9d9d9;
+  border-radius: 6px;
+  background: #fff;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s;
+
+  .dropdown-btn {
+    display: flex;
+    align-items: center;
+    padding: 6px 16px;
+  }
+
+  .dropdown-content-container {
+    height: 32px;
+    display: flex;
+    align-items: center;
+
+    &:hover .dropdown-content {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .dropdown-icon-container {
+      padding: 0 8px;
+      height: 24px;
+      border-left: solid 1px #d9d9d9;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      .dropdown-icon {
+        width: 14px;
+        height: 14px;
+        transition: transform 0.2s;
+      }
+    }
+
+    .dropdown-content {
+      position: absolute;
+      top: 100%;
+      right: 0;
+      min-width: 120px;
+      background: #fff;
+      border: 1px solid #d9d9d9;
+      border-radius: 6px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.2s;
+      z-index: 100;
+    }
+
+    .dropdown-content button {
+      display: block;
+      width: 100%;
+      padding: 8px 16px;
+      border: none;
+      background: none;
+      cursor: pointer;
+      text-align: left;
+      font-size: 14px;
+      transition: background 0.2s;
+    }
+
+    .dropdown-content button:hover {
+      background: #e8f4ff;
+      color: #1890ff;
+    }
+  }
 }
 
 .canvas-container {

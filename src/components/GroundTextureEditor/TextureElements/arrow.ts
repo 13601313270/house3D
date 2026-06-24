@@ -231,7 +231,7 @@ class ArrowClass extends PolylineElement<ArrowElementData> {
       const lastPoint = points[points.length - 1]
       const secondLastPoint = points[points.length - 2]
       const angle = Math.atan2(lastPoint.y - secondLastPoint.y, lastPoint.x - secondLastPoint.x)
-      console.log('endArrowSize', endArrowSize)
+      // console.log('endArrowSize', endArrowSize)
       this.drawArrowHead(ctx, lastPoint.x, lastPoint.y, angle, arrowSizeEnd, endArrow)
     }
 
