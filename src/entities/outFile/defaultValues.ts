@@ -14,6 +14,7 @@ export default function (): DefaultItem<OutFileData>[] {
     z: findObjInfo.defaultZ || 0,
     color: '#0c7f25',
     canAngelZ: findObjInfo.canAngelZ,
+    zoom: 1,
   }
   const values: DefaultItem<OutFileData>[] = [
     {

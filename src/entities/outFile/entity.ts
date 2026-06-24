@@ -10,7 +10,6 @@ import { MTLLoader } from 'three/addons/loaders/MTLLoader.js';
 // @ts-ignore
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { getMaterialById } from '@/material'
-import { OutFileDataClass } from './dataClass';
 import { MatchCircleArea, MatchRectArea } from '@/utils/matchArea'
 import { isPointInRotatedRect } from '@/utils/isPointInRotatedRect'
 import { OrigionSnapPoint } from '@/types/baseEntity'
@@ -48,8 +47,10 @@ export class OutFileEntity extends PointEntityClass<OutFileData> {
     const screenX = data.x * zoomLevel + panOffset.x
     const screenY = data.y * zoomLevel + panOffset.y
     const previewAngleY = data.angleY;
-    const findObjInfo = this.world.ObjFileTypes.find(item => item.id === data.fileTypeId)
-    const preImgScale = findObjInfo?.preImgScale || 1
+    const { fileTypeId } = data
+    const zoom = data.zoom || 1
+    const findObjInfo = this.world.ObjFileTypes.find(item => item.id === fileTypeId)
+    const preImgScale = (findObjInfo?.preImgScale || 1) * zoom
     const { width, height } = this.img;
     ctx.save(); // 保存当前状态
     ctx.translate(screenX, screenY); // 移动原点到目标中心
@@ -72,8 +73,9 @@ export class OutFileEntity extends PointEntityClass<OutFileData> {
   ): void {
     const screenX = data.x * zoomLevel + panOffset.x
     const screenY = data.y * zoomLevel + panOffset.y
-
-    const findObjInfo = this.world.ObjFileTypes.find(item => item.id === data.fileTypeId)
+    const { fileTypeId } = data
+    const zoom = data.zoom || 1
+    const findObjInfo = this.world.ObjFileTypes.find(item => item.id === fileTypeId)
     let centerCircleRadius = this.circleRadius
     if (findObjInfo) {
       if (findObjInfo.matchAreaType === 1) {
@@ -82,7 +84,7 @@ export class OutFileEntity extends PointEntityClass<OutFileData> {
         centerCircleRadius = findObjInfo.matchAreaNumber1 / 10
       }
     }
-    centerCircleRadius = Math.max(centerCircleRadius, this.circleRadius)
+    centerCircleRadius = Math.max(centerCircleRadius, this.circleRadius) * zoom;
 
     // 控制点
     ctx.fillStyle = '#fff'
@@ -96,7 +98,7 @@ export class OutFileEntity extends PointEntityClass<OutFileData> {
     if (findObjInfo && !findObjInfo.canAngelZ) {
       return;
     }
-    const drawAngelLength = Math.max(findObjInfo?.drawAngelLength || this.baseDrawAngelLength, this.circleRadius * 2)
+    const drawAngelLength = Math.max(findObjInfo?.drawAngelLength || this.baseDrawAngelLength, this.circleRadius * 2) * zoom
 
     const drawAngelHandelAngel = data.angleY + (findObjInfo?.drawAngelAngel || 0);
 
@@ -182,10 +184,10 @@ export class OutFileEntity extends PointEntityClass<OutFileData> {
         ctx.rotate(matchArea.data.angleY * -1); // 围绕新原点旋转
         // 绘制一个方块
         ctx.strokeRect(
-          matchArea.data.width / -2 * zoomLevel,
-          matchArea.data.depth / -2 * zoomLevel,
-          matchArea.data.width * zoomLevel,
-          matchArea.data.depth * zoomLevel,
+          matchArea.data.width / -2 * zoomLevel * zoom,
+          matchArea.data.depth / -2 * zoomLevel * zoom,
+          matchArea.data.width * zoomLevel * zoom,
+          matchArea.data.depth * zoomLevel * zoom,
         )
         ctx.restore(); // 恢复原始状态
       } else if (matchAreaType === 2) {
@@ -219,6 +221,8 @@ export class OutFileEntity extends PointEntityClass<OutFileData> {
     const data = this.getData();
     const group = new THREE.Group()
     const { fileTypeId, bm, color } = data
+    const zoom = data.zoom || 1
+    console.log('zoomzoomzoom', zoom)
     const findObjInfo = this.world.ObjFileTypes.find(item => item.id === fileTypeId)
 
     if (!findObjInfo) {
@@ -260,7 +264,7 @@ export class OutFileEntity extends PointEntityClass<OutFileData> {
       const loader = new OBJLoader()
       const materLoader = new MTLLoader()
       function render(object: THREE.Group) {
-        object.scale.set(scaleX, scaleY, scaleZ)
+        object.scale.set(scaleX * zoom, scaleY * zoom, scaleZ * zoom)
         object.rotation.y = angleY
 
         if (!materialUrl) {
@@ -313,7 +317,7 @@ export class OutFileEntity extends PointEntityClass<OutFileData> {
       const loader = new GLTFLoader()
       loader.load(url, (gltf: any) => {
         gltf.scene.rotation.y = angleY
-        gltf.scene.scale.set(scaleX, scaleY, scaleZ)
+        gltf.scene.scale.set(scaleX * zoom, scaleY * zoom, scaleZ * zoom)
         if (defaultColor || materialId) {
           // @ts-ignore
           gltf.scene.material = material
@@ -347,6 +351,7 @@ export class OutFileEntity extends PointEntityClass<OutFileData> {
     const data = this.getData();
 
     const { fileTypeId, angleY } = data
+    const zoom = data.zoom || 1
     const findObjInfo = this.world.ObjFileTypes.find(item => item.id === fileTypeId)
     if (!findObjInfo) {
       console.error('未找到对应的文件类型:', fileTypeId)
@@ -388,9 +393,9 @@ export class OutFileEntity extends PointEntityClass<OutFileData> {
     const finalOffsetZ = -offsetX * Math.sin(angleY) + offsetZ * Math.cos(angleY);
 
     return [
-      new THREE.Vector3(width, height, depth),
-      new THREE.Vector3(finalOffsetX, height / 2, finalOffsetZ),
-      new THREE.Vector3(0, angleY, 0)
+      new THREE.Vector3(width * zoom, height * zoom, depth * zoom),
+      new THREE.Vector3(finalOffsetX * zoom, height / 2 * zoom, finalOffsetZ * zoom),
+      new THREE.Vector3(0, angleY * zoom, 0 * zoom)
     ]
   }
 
@@ -421,6 +426,7 @@ export class OutFileEntity extends PointEntityClass<OutFileData> {
     const data = this.getData();
     const dist = Math.hypot(x - data.x, y - data.y)
     const { fileTypeId } = data
+    const zoom = data.zoom || 1
     const findObjInfo = this.world.ObjFileTypes.find(item => item.id === fileTypeId)
 
     if (findObjInfo) {
@@ -429,31 +435,31 @@ export class OutFileEntity extends PointEntityClass<OutFileData> {
         if (isPointInRotatedRect(x, y, {
           x: data.x + matchAreaOffsetX * Math.cos(data.angleY) + matchAreaOffsetY * Math.sin(data.angleY),
           y: data.y - matchAreaOffsetX * Math.sin(data.angleY) + matchAreaOffsetY * Math.cos(data.angleY),
-          width: Math.max(matchAreaNumber1, 30),
-          depth: Math.max(matchAreaNumber2, 30),
+          width: Math.max(matchAreaNumber1, 30) * zoom,
+          depth: Math.max(matchAreaNumber2, 30) * zoom,
           angleY: data.angleY * -1,
         })) {
           return new MatchRectArea({
             x: data.x + matchAreaOffsetX * Math.cos(data.angleY) + matchAreaOffsetY * Math.sin(data.angleY),
             y: data.y - matchAreaOffsetX * Math.sin(data.angleY) + matchAreaOffsetY * Math.cos(data.angleY),
-            width: Math.max(matchAreaNumber1, 30),
-            depth: Math.max(matchAreaNumber2, 30),
+            width: Math.max(matchAreaNumber1, 30) * zoom,
+            depth: Math.max(matchAreaNumber2, 30) * zoom,
             angleY: data.angleY,
           })
         }
       } else if (matchAreaType === 2) {
-        if (dist < matchAreaNumber1) {
+        if (dist < matchAreaNumber1 * zoom) {
           return new MatchCircleArea({
             x: data.x,
             y: data.y,
-            r: matchAreaNumber1
+            r: matchAreaNumber1 * zoom
           })
         }
       }
       return null
     } else {
-      if (dist < this.circleRadius + 10) {
-        return new MatchCircleArea({ x: data.x, y: data.y, r: this.circleRadius })
+      if (dist < this.circleRadius * zoom + 10) {
+        return new MatchCircleArea({ x: data.x, y: data.y, r: this.circleRadius * zoom })
       }
       return null;
     }
@@ -461,6 +467,7 @@ export class OutFileEntity extends PointEntityClass<OutFileData> {
 
   matchHandelInfo(x: number, y: number) {
     const data = this.getData();
+    const zoom = data.zoom || 1;
     const dist = Math.hypot(x - data.x, y - data.y)
 
     const findObjInfo = this.world.ObjFileTypes.find(item => item.id === data.fileTypeId)
@@ -472,7 +479,7 @@ export class OutFileEntity extends PointEntityClass<OutFileData> {
         centerCircleRadius = findObjInfo.matchAreaNumber1 / 10
       }
     }
-    centerCircleRadius = Math.max(centerCircleRadius, this.circleRadius)
+    centerCircleRadius = Math.max(centerCircleRadius, this.circleRadius) * zoom
     // console.log('dist', dist)
     if (dist < centerCircleRadius + 3) {
       return {
@@ -485,11 +492,12 @@ export class OutFileEntity extends PointEntityClass<OutFileData> {
     const drawAngelHandelAngel = data.angleY + (findObjInfo?.drawAngelAngel || 0);
     const drawAngelLength = Math.max(findObjInfo?.drawAngelLength || this.baseDrawAngelLength, centerCircleRadius * 2)
     // 控制点向着angleY角度延伸10个单位后的坐标
-    const rotatedXAdd = data.x + Math.cos(drawAngelHandelAngel) * drawAngelLength
-    const rotatedYAdd = data.y - Math.sin(drawAngelHandelAngel) * drawAngelLength
+    const rotatedXAdd = data.x + Math.cos(drawAngelHandelAngel) * drawAngelLength * zoom
+    const rotatedYAdd = data.y - Math.sin(drawAngelHandelAngel) * drawAngelLength * zoom
 
     const dist2 = Math.hypot(x - rotatedXAdd, y - rotatedYAdd)
     // console.log('dist2', dist2)
+    console.log('centerCircleRadius', dist2, centerCircleRadius)
     if (dist2 < centerCircleRadius + 3) {
       return {
         index: 1,
@@ -587,7 +595,16 @@ export class OutFileEntity extends PointEntityClass<OutFileData> {
         min: -180,
         max: 180,
         value: data.angleY,
-      }
+      },
+      {
+        id: 'zoom',
+        label: '缩放',
+        dataType: 'number',
+        min: 0.1,
+        max: 2,
+        step: 0.1,
+        value: data.zoom || 1,
+      },
     ]
     editShow(configList, (val) => {
       this.setData({
