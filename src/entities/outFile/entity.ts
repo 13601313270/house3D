@@ -557,6 +557,7 @@ export class OutFileEntity extends PointEntityClass<OutFileData> {
 
   editPropConfig(snapPoint: HandelInfo, editShow: (editInfoList: editItem[], callback: (val: any) => void) => void): void {
     const data = this.getData();
+    console.log('val---0', data.angleY, data.angleY * 180 / Math.PI)
     const configList: editItem[] = [
       {
         id: 'bm',
@@ -578,6 +579,14 @@ export class OutFileEntity extends PointEntityClass<OutFileData> {
         label: '颜色',
         dataType: 'color',
         value: data.color,
+      },
+      {
+        id: 'angleY',
+        label: '旋转角度',
+        dataType: 'angle',
+        min: -180,
+        max: 180,
+        value: data.angleY,
       }
     ]
     editShow(configList, (val) => {

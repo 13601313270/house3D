@@ -163,4 +163,11 @@ export type editItem = {
     viewImg: string,
   },
   dataTypeList: IconDataType[],
+} | {
+  id: string,
+  label: string,
+  dataType: 'angle',
+  min: number,
+  max: number,
+  value: number
 }

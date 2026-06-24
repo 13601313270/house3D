@@ -34,6 +34,8 @@
         </div>
       </div>
     </div>
+    <AngleEdit v-else-if="item.dataType === 'angle'" :modelValue="modelValue"
+      @update:modelValue="updateEditPropInputInfoNumber" :item="item" />
     <div v-else-if="item.dataType === 'cornerType'">
       <EnumTypeEdit :modelValue="modelValue" @update:modelValue="updateEditPropInputInfoNumber" :item="item"
         :enums="cornerTypeEdit">
@@ -90,6 +92,7 @@ import { allMaterial } from '@/material';
 import ImgEdit from './ImgEdit.vue'
 import EnumTypeEdit from './enumTypeEdit.vue'
 import GroundTextureEditor from '@/components/GroundTextureEditor/index.vue'
+import AngleEdit from '@/components/angleEdit.vue'
 import { loadImage } from '@/utils/imageCache'
 
 defineProps<{
@@ -163,7 +166,7 @@ function updateEditPropInputInfoBoolean(event: Event) {
 function updateEditPropInputInfoString(value: string) {
   emit('update:modelValue', value)
 }
-function updateEditPropInputInfoNumber(value: number) {
+function updateEditPropInputInfoNumber(value: number | null) {
   emit('update:modelValue', value)
 }
 async function updateEditPropByDataTexture(value: {
