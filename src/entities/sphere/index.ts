@@ -1,5 +1,6 @@
 import { SphereEntity } from "./entity"
 import PluginType from "../pluginType"
+import defaultValues from "./defaultValues"
 
 const spherePlugin: PluginType = {
   name: '球体',
@@ -7,5 +8,6 @@ const spherePlugin: PluginType = {
   type: 'base',
   entity: SphereEntity,
   objType: 'point',
+  defaultValues,
 }
 export default spherePlugin

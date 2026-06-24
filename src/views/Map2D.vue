@@ -167,7 +167,7 @@ import { snapThreshold, World, EnvironmentConfig } from '../utils/world'
 import Canvas3D from '../components/Canvas3D.vue'
 import { CameraState } from '@/types/camera'
 import { WallData } from '@/entities/wall/index.d'
-import { allFileKeys, fileData, editItem, fileDataKeyToClass, allFileKeysObjType } from '@/entities'
+import { allFileKeys, fileData, editItem, fileDataKeyToClass, allFileKeysObjType, allPluginByKey } from '@/entities'
 import { PointEntityClass } from '@/types/pointEntity'
 import { EntityClassInWall, NearestWallResult } from '@/types/entityInWall'
 import { BaseObjData, HandelInfo, LineObjData, PointWithIndex } from '@/types/map2d'
@@ -863,8 +863,9 @@ onMounted(async () => {
       if (tempPointInsertData.value.length > 0) {
         if (tempPointInsertData.value.length > 1) {
           const ClassName = fileDataKeyToClass[currentTool.value];
+          const defaultValue = allPluginByKey[currentTool.value].defaultValues()
           if (ClassName) {
-            const insertTempObj = new ClassName(worldApi)
+            const insertTempObj = new ClassName(worldApi, defaultValue[0])
             if (insertTempObj instanceof LineEntityClass) {
               insertTempObj.setPreparePoint(tempPointInsertData.value.map(v => {
                 return {

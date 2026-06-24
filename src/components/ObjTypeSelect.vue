@@ -58,7 +58,7 @@
 <script setup lang="ts">
 import { nextTick, onMounted, ref } from 'vue'
 import { ObjOutputFileType } from '@/entities/allObjs';
-import { allFileKeysName, fileDataKeyToClass, allFileKeysGroup } from '@/entities'
+import { allFileKeysName, fileDataKeyToClass, allFileKeysGroup, allPluginByKey } from '@/entities'
 import axios from 'axios';
 import { OutFileInWallData } from '@/entities/outFileInWall/index.d'
 import { OutFileInWallDataClass } from '@/entities/outFileInWall/dataClass';
@@ -161,8 +161,9 @@ async function changeCurrentToolToOutFile(id: string) {
 
 function changeCurrentTool(type: string) {
   const ClassName = fileDataKeyToClass[type];
+  const defaultValue = allPluginByKey[type].defaultValues()
   if (ClassName) {
-    const insertTempObj = new ClassName(worldApi)
+    const insertTempObj = new ClassName(worldApi, defaultValue[0])
     if (insertTempObj) {
       insertTempObj.init()
     }

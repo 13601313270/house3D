@@ -14,20 +14,6 @@ export class CylinderEntity extends PointEntityClass<CylinderData> {
   isPointObj: boolean = true
   private circleRadius = 6
 
-  defaultValue(): CylinderData {
-    const door: CylinderData = {
-      id: Date.now().toString(),
-      x: 0,
-      y: 0,
-      z: 0,
-      r: 50,
-      h: 100,
-      color: '#e67e22',
-      mt: null,
-    }
-    return new CylinderDataClass(door)
-  }
-
   draw2DPreviewByData(ctx: CanvasRenderingContext2D, data: CylinderData, panOffset: Point, zoomLevel: number): void {
     const { r } = data;
     // 实现门的2D绘制逻辑

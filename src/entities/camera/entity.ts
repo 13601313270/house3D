@@ -26,23 +26,6 @@ export class CameraEntity extends PointEntityClass<CameraData> {
   active: boolean = false // 这个不存在数据库里，只是在前端动态调整
   private circleRadius = 6
 
-  defaultValue(): CameraData {
-    const camera: CameraData = {
-      id: Date.now().toString(),
-      x: 0,
-      y: 0,
-      z: 100,
-      aspectW: 9,
-      aspectH: 16,
-      // 相机目标位置
-      targetPositionX: 0,
-      targetPositionY: 0,
-      targetPositionZ: 100,
-      fov: 55,
-    }
-    return new CameraDataClass(camera)
-  }
-
   draw2DPreviewByData(ctx: CanvasRenderingContext2D, data: CameraData, panOffset: Point, zoomLevel: number): void {
     let index: number = -1;
     if (this.world.allFileMapObjects.camera) {

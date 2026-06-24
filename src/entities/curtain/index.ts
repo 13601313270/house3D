@@ -1,5 +1,6 @@
 import { CurtainEntity } from "./entity"
 import PluginType from "../pluginType"
+import defaultValues from "./defaultValues"
 
 const CurtainPlugin: PluginType = {
   name: '垂直方形幕布',
@@ -7,5 +8,6 @@ const CurtainPlugin: PluginType = {
   type: 'curtain',
   entity: CurtainEntity,
   objType: 'point',
+  defaultValues,
 }
 export default CurtainPlugin

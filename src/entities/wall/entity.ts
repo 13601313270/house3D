@@ -26,11 +26,6 @@ export class WallEntity extends LineEntityClass<WallPoint, WallData> {
     }
   }
 
-  defaultValue(): WallData {
-    const wall: WallData = defaultWallData
-    return new WallDataClass(wall)
-  }
-
   draw2DPreviewByData(ctx: CanvasRenderingContext2D, data: WallData, panOffset: Point, zoomLevel: number): void {
     if (data.hb) {
       ctx.strokeStyle = 'black'

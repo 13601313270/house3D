@@ -44,23 +44,6 @@ export class OutFileEntity extends PointEntityClass<OutFileData> {
     })
   }
 
-  defaultValue(): OutFileData {
-    // @ts-ignore
-    const findObjInfo = window.ObjFiles[0];
-    const data: OutFileData = {
-      fileTypeId: findObjInfo.id,
-      id: Date.now().toString(),
-      angleY: 0,
-      bm: null,
-      x: 0,
-      y: 0,
-      z: findObjInfo.defaultZ || 0,
-      color: '#0c7f25',
-      canAngelZ: findObjInfo.canAngelZ,
-    }
-    return new OutFileDataClass(data)
-  }
-
   draw2DPreviewByData(ctx: CanvasRenderingContext2D, data: OutFileData, panOffset: Point, zoomLevel: number): void {
     const screenX = data.x * zoomLevel + panOffset.x
     const screenY = data.y * zoomLevel + panOffset.y

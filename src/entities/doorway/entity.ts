@@ -32,24 +32,6 @@ export class DoorEntity extends EntityClassInWall<DoorData> {
     }
   }
 
-  defaultValue(): DoorData {
-    const door: DoorData = {
-      id: Date.now().toString(),
-      wallPointId: -1,
-      x: 0,
-      y: 0,
-      z: 0,
-      width: 110,
-      height: 180,
-      bottom: 0,
-      angle: 0,
-      hasBorder: false,
-      color: '#e67e22',
-      mt: 3,
-    }
-    return new DoorDataClass(door)
-  }
-
   draw2DPreviewByData(ctx: CanvasRenderingContext2D, data: DoorData, panOffset: Point, zoomLevel: number): void {
     if (!this.world.allFileMapObjects.wall) {
       this.world.allFileMapObjects.wall = []

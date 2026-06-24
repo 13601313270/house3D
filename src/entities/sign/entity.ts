@@ -16,28 +16,6 @@ export class SignEntity extends PointEntityClass<SignData> {
   isPointObj: boolean = true
   private circleRadius = 6
 
-  defaultValue(): SignData {
-    const data: SignData = {
-      id: Date.now().toString(),
-      x: 0,
-      y: 0,
-      z: 0,
-      angleY: 0,
-      width: 80,
-      height: 80,
-      signZ: 100,
-      shape: 'rect',
-      poleRadius: 5,
-      bgColor: '#ffffff',
-      poleColor: '#666666',
-      img: {
-        value: [],
-        viewImg: '',
-      },
-    }
-    return new SignDataClass(data)
-  }
-
   async init() {
     await super.init()
     const { img } = this.getData();

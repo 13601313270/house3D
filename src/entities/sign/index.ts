@@ -1,5 +1,6 @@
 import { SignEntity } from "./entity"
 import PluginType from "../pluginType"
+import defaultValues from "./defaultValues"
 
 const SignPlugin: PluginType = {
   name: '交通标识',
@@ -7,5 +8,6 @@ const SignPlugin: PluginType = {
   type: 'other',
   entity: SignEntity,
   objType: 'point',
+  defaultValues,
 }
 export default SignPlugin

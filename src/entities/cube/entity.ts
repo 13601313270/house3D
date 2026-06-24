@@ -15,22 +15,6 @@ export class CubeEntity extends PointEntityClass<CubeData> {
   isPointObj: boolean = true
   private circleRadius = 6
 
-  defaultValue(): CubeData {
-    const door: CubeData = {
-      id: Date.now().toString(),
-      x: 0,
-      y: 0,
-      z: 0,
-      width: 110,
-      height: 180,
-      depth: 100,
-      color: '#b1b1b1',
-      mt: null,
-      angleY: 0,
-    }
-    return new CubeDataClass(door)
-  }
-
   draw2DPreviewByData(ctx: CanvasRenderingContext2D, data: CubeData, panOffset: Point, zoomLevel: number): void {
     const screenX = data.x * zoomLevel + panOffset.x
     const screenY = data.y * zoomLevel + panOffset.y

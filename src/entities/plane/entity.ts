@@ -18,21 +18,6 @@ export class PlaneEntity extends PointEntityClass<PlaneData> {
   private static textureLoader = new THREE.TextureLoader();
   private static textureCache = new Map<string | File, THREE.Texture>();
 
-  defaultValue(): PlaneData {
-    const data: PlaneData = {
-      id: Date.now().toString(),
-      x: 0,
-      y: 0,
-      z: 0,
-      width: 200,
-      length: 200,
-      color: '#a3998fff',
-      mt: null,
-      angleY: 0,
-    }
-    return new PlaneDataClass(data)
-  }
-
   draw2DPreviewByData(ctx: CanvasRenderingContext2D, data: PlaneData, panOffset: Point, zoomLevel: number): void {
     const screenX = data.x * zoomLevel + panOffset.x
     const screenY = data.y * zoomLevel + panOffset.y

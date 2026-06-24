@@ -27,20 +27,6 @@ export class PeopleEntity extends PointEntityClass<PeopleData> {
 
   ManClean: THREE.Group | null = null
 
-  defaultValue(): PeopleData {
-    const people: PeopleData = {
-      id: Date.now().toString(),
-      x: 0,
-      y: 0,
-      z: 0,
-      angle: 0,
-      color: '#DEDEDE',
-      height: 170,
-      bone: [],
-    }
-    return new PeopleDataClass(people)
-  }
-
   draw2DPreviewByData(ctx: CanvasRenderingContext2D, data: PeopleData, panOffset: Point, zoomLevel: number): void {
     const screenX = data.x * zoomLevel + panOffset.x
     const screenY = data.y * zoomLevel + panOffset.y

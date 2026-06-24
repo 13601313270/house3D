@@ -20,8 +20,9 @@ import signPlugin from './sign'
 import { BaseEntityClass } from '@/types/baseEntity'
 import { World } from '@/utils/world'
 import { IconDataType } from '@/components/GroundTextureEditor/types/elementDefinition'
+import PluginType from './pluginType'
 
-export type EntityConstructor = new (world: World, data?: BaseObjData) => BaseEntityClass<any>;
+export type EntityConstructor = new (world: World, data: BaseObjData) => BaseEntityClass<any>;
 export type enumItem = {
   id: number | string,
   name: string,
@@ -67,6 +68,9 @@ export const fileDataKeyToClass: Record<string, EntityConstructor> = {
 export const allFileKeysObjType: Record<string, 'point' | 'polyline'> = {
 };
 
+export const allPluginByKey: Record<string, PluginType> = {
+};
+
 ([
   wallPlugin,
   doorPlugin,
@@ -87,6 +91,7 @@ export const allFileKeysObjType: Record<string, 'point' | 'polyline'> = {
   staircasePlugin,
   signPlugin,
 ].forEach(v => {
+  allPluginByKey[v.key] = v
   allFileKeys.push(v.key)
   if (v.type === 'base') {
     allFileKeysGroup[0].child.push(v.key)

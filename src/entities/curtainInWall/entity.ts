@@ -26,24 +26,6 @@ export class CurtainInWallEntity extends EntityClassInWall<CurtainInWallData> {
   private static textureLoader = new THREE.TextureLoader();
   private static textureCache = new Map<string | File, THREE.Texture>();
 
-  defaultValue(): CurtainInWallData {
-    const data: CurtainInWallData = {
-      width: 200,
-      height: 200,
-      wallPointId: -1,
-      wallId: '',
-      angle: 0,
-      bottom: 40,
-      id: Date.now().toString(),
-      x: 0,
-      y: 0,
-      z: 0,
-      img: '',
-      isOuter: false,
-    }
-    return new CurtainInWallDataClass(data)
-  }
-
   draw2DPreviewByData(ctx: CanvasRenderingContext2D, data: CurtainInWallData, panOffset: Point, zoomLevel: number): void {
     const screenX = data.x * zoomLevel + panOffset.x
     const screenY = data.y * zoomLevel + panOffset.y

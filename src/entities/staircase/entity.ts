@@ -28,11 +28,6 @@ export class StaircaseEntity extends LineEntityClass<StaircasePoint, StaircaseDa
     }
   }
 
-  defaultValue(): StaircaseData {
-    const staircase: StaircaseData = defaultStaircaseData
-    return new StaircaseDataClass(staircase)
-  }
-
   setPreparePoint(point: (Point & StaircasePoint)[]): void {
     this.getData().points = point
     this.data.points.forEach((v, i) => {

@@ -45,27 +45,6 @@ export class OutFileInWallEntity extends EntityClassInWall<OutFileInWallData> {
     })
   }
 
-  defaultValue(): OutFileInWallData {
-    // @ts-ignore
-    const findObjInfo = window.ObjFiles[0];
-    const data: OutFileInWallData = {
-      wallPointId: -1,
-      wallId: '',
-      angle: 0,
-      bottom: 40,
-      fileTypeId: findObjInfo.id,
-      id: Date.now().toString(),
-      bm: null,
-      x: 0,
-      y: 0,
-      z: 0,
-      color: '#0c7f25',
-      isOuter: false,
-      canAngelZ: findObjInfo.canAngelZ,
-    }
-    return new OutFileInWallDataClass(data)
-  }
-
   draw2DPreviewByData(ctx: CanvasRenderingContext2D, data: OutFileInWallData, panOffset: Point, zoomLevel: number): void {
     const { x, y, isOuter, angle, wallId, fileTypeId } = data
     const screenX = x * zoomLevel + panOffset.x

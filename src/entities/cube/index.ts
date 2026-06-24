@@ -1,11 +1,13 @@
 import { CubeEntity } from "./entity"
 import PluginType from "../pluginType"
+import defaultValues from "./defaultValues"
 
-const cubePlugin: PluginType = {
+const CubePlugin: PluginType = {
   name: '方块',
   key: 'cube',
   type: 'base',
   entity: CubeEntity,
   objType: 'point',
+  defaultValues,
 }
-export default cubePlugin
+export default CubePlugin

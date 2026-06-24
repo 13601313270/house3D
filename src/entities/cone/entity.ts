@@ -14,20 +14,6 @@ export class ConeEntity extends PointEntityClass<ConeData> {
   isPointObj: boolean = true
   private circleRadius = 6
 
-  defaultValue(): ConeData {
-    const data: ConeData = {
-      id: Date.now().toString(),
-      x: 0,
-      y: 0,
-      z: 0,
-      r: 50,
-      h: 100,
-      color: '#e67e22',
-      mt: null,
-    }
-    return new ConeDataClass(data)
-  }
-
   draw2DPreviewByData(ctx: CanvasRenderingContext2D, data: ConeData, panOffset: Point, zoomLevel: number): void {
     const { r } = data;
     // 实现门的2D绘制逻辑

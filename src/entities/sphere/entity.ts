@@ -14,19 +14,6 @@ export class SphereEntity extends PointEntityClass<SphereData> {
   isPointObj: boolean = true
   private circleRadius = 6
 
-  defaultValue(): SphereData {
-    const door: SphereData = {
-      id: Date.now().toString(),
-      x: 0,
-      y: 0,
-      z: 0,
-      r: 50,
-      color: '#e67e22',
-      mt: null,
-    }
-    return new SphereDataClass(door)
-  }
-
   draw2DPreviewByData(ctx: CanvasRenderingContext2D, data: SphereData, panOffset: Point, zoomLevel: number): void {
     const { r } = data;
     // 实现门的2D绘制逻辑

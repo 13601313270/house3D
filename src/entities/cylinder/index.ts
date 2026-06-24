@@ -1,11 +1,13 @@
 import { CylinderEntity } from "./entity"
 import PluginType from "../pluginType"
+import defaultValues from "./defaultValues"
 
-const cylinderPlugin: PluginType = {
+const CylinderPlugin: PluginType = {
   name: '圆柱体',
   key: 'cylinder',
   type: 'base',
   entity: CylinderEntity,
   objType: 'point',
+  defaultValues,
 }
-export default cylinderPlugin
+export default CylinderPlugin

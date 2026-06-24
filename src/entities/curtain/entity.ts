@@ -389,18 +389,4 @@ export class CurtainEntity extends PointEntityClass<CurtainData> {
     const data = this.getData();
     return this.name + `(${Math.round(data.width).toString()}cm×${Math.round(data.height).toString()}cm)`
   }
-
-  defaultValue(): CurtainData {
-    const data: CurtainData = {
-      id: Date.now().toString(),
-      x: 0,
-      y: 0,
-      z: 0,
-      width: 200,
-      height: 200,
-      angleY: 0,
-      img: '', // https://q0.itc.cn/q_70/images03/20250729/b9252b83f9a64720b2077345a655f144.jpeg
-    }
-    return new CurtainDataClass(data)
-  }
 }

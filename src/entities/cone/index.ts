@@ -1,5 +1,6 @@
 import { ConeEntity } from "./entity"
 import PluginType from "../pluginType"
+import defaultValues from "./defaultValues"
 
 const ConePlugin: PluginType = {
   name: '圆锥体',
@@ -7,5 +8,6 @@ const ConePlugin: PluginType = {
   type: 'base',
   entity: ConeEntity,
   objType: 'point',
+  defaultValues,
 }
 export default ConePlugin

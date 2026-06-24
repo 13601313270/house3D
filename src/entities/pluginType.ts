@@ -1,5 +1,4 @@
 import { BaseEntityClass } from "@/types/baseEntity";
-import { PointEntityClass } from "@/types/pointEntity";
 
 type EntityConstructor = new (...args: any[]) => BaseEntityClass<any>;
 
@@ -8,7 +7,8 @@ type PluginType = {
   key: string,
   type: 'base' | 'house' | 'curtain' | 'other',
   entity: EntityConstructor,
-  objType: 'point' | 'polyline'
+  objType: 'point' | 'polyline',
+  defaultValues: () => any[]
 }
 
 export default PluginType
