@@ -53,6 +53,17 @@
         </div>
       </div>
     </div>
+    <div class="defaultValueModal" v-if="showDefaultValueModal" @click.self="showDefaultValueModal = false">
+      <div class="modalContent">
+        <div class="modalTitle">初始化方案</div>
+        <div class="defaultValueList">
+          <div v-for="(item, index) in currentDefaultValues" :key="index" class="defaultValueItem"
+            @click="createObjWithDefaultValue(currentToolType, item)">
+            {{ item.name }}
+          </div>
+        </div>
+      </div>
+    </div>
   </teleport>
 </template>
 <script setup lang="ts">
@@ -95,6 +106,38 @@ const ObjFileTypes = ref<Array<ObjFileType>>([])
 const activeObjChildList = ref<Array<{ id: string, name: string, type: number, previewImg?: string }>>([])
 
 const worldApi = window.worldApi
+
+const showDefaultValueModal = ref(false)
+const currentDefaultValues = ref<DefaultItem<any>[]>([])
+const currentToolType = ref('')
+
+function changeCurrentTool(type: string) {
+  const ClassName = fileDataKeyToClass[type];
+  const defaultValue: DefaultItem<any>[] = allPluginByKey[type].defaultValues()
+
+  if (!ClassName) return
+
+  if (defaultValue.length > 1) {
+    currentDefaultValues.value = defaultValue
+    currentToolType.value = type
+    showDefaultValueModal.value = true
+  } else if (defaultValue.length === 1) {
+    createObjWithDefaultValue(type, defaultValue[0])
+  }
+}
+
+function createObjWithDefaultValue(type: string, defaultItem: DefaultItem<any>) {
+  const ClassName = fileDataKeyToClass[type]
+  if (ClassName) {
+    const insertTempObj = new ClassName(worldApi, defaultItem.data)
+    if (insertTempObj) {
+      insertTempObj.init()
+    }
+    emits('select', type, insertTempObj)
+  }
+  showDefaultValueModal.value = false
+}
+
 onMounted(async () => {
   const res = await axios.get('https://api.studying1v1.com/video/objectFileType')
   const data = res.data as Array<{
@@ -157,18 +200,6 @@ async function changeCurrentToolToOutFile(id: string) {
     const insertTempObj = new OutFileEntity(worldApi, insertTempObjData)
     insertTempObj.init()
     emits('select', 'outFile', insertTempObj)
-  }
-}
-
-function changeCurrentTool(type: string) {
-  const ClassName = fileDataKeyToClass[type];
-  const defaultValue: DefaultItem<any>[] = allPluginByKey[type].defaultValues()
-  if (ClassName) {
-    const insertTempObj = new ClassName(worldApi, defaultValue[0].data)
-    if (insertTempObj) {
-      insertTempObj.init()
-    }
-    emits('select', type, insertTempObj)
   }
 }
 
@@ -421,6 +452,55 @@ function showHelpModal() {
     .desc {
       font-size: 14px;
       color: #666;
+    }
+  }
+}
+
+.defaultValueModal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+
+  .modalContent {
+    background: white;
+    border-radius: 8px;
+    padding: 16px;
+    min-width: 280px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+
+    .modalTitle {
+      font-size: 18px;
+      font-weight: bold;
+      text-align: center;
+      margin-bottom: 16px;
+      color: #2c3e50;
+    }
+
+    .defaultValueList {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+
+      .defaultValueItem {
+        padding: 12px 16px;
+        border-radius: 4px;
+        cursor: pointer;
+        text-align: center;
+        color: #2c3e50;
+        transition: background-color 0.2s;
+
+        &:hover {
+          background-color: #1890ff;
+          color: white;
+        }
+      }
     }
   }
 }
