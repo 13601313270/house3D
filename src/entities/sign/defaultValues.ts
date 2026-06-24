@@ -1,10 +1,13 @@
 import { DefaultItem } from "../pluginType"
 import { SignData } from "./index.d"
 
-export default function (): Promise<DefaultItem<SignData>[]> {
-  const values: DefaultItem<SignData>[] = [
-    {
-      name: '方形',
+export default async function (): Promise<DefaultItem<SignData>[]> {
+  const { default: loadData } = await import('./asyncImportDefaultValue')
+  const values = loadData()
+  return values.map(v => {
+    const item: DefaultItem<SignData> = {
+      name: v.name,
+      img: v.data.img.viewImg,
       data: {
         id: Date.now().toString(),
         x: 0,
@@ -14,83 +17,13 @@ export default function (): Promise<DefaultItem<SignData>[]> {
         width: 80,
         height: 80,
         signZ: 100,
-        shape: 'rect',
-        poleRadius: 5,
-        bgColor: '#ffffff',
-        poleColor: '#666666',
-        img: {
-          value: [],
-          viewImg: '',
-        },
+        shape: v.data.shape,
+        poleRadius: v.data.poleRadius,
+        bgColor: v.data.bgColor,
+        poleColor: v.data.poleColor,
+        img: v.data.img,
       }
-    },
-    {
-      name: '圆形',
-      data: {
-        id: Date.now().toString(),
-        x: 0,
-        y: 0,
-        z: 0,
-        angleY: 0,
-        width: 80,
-        height: 80,
-        signZ: 100,
-        shape: 'circle',
-        poleRadius: 5,
-        bgColor: '#ffffff',
-        poleColor: '#666666',
-        img: {
-          value: [],
-          viewImg: '',
-        },
-      }
-    },
-    {
-      name: '菱形',
-      data: {
-        id: Date.now().toString(),
-        x: 0,
-        y: 0,
-        z: 0,
-        angleY: 0,
-        width: 80,
-        height: 80,
-        signZ: 100,
-        shape: 'diamond',
-        poleRadius: 5,
-        bgColor: '#ffffff',
-        poleColor: '#666666',
-        img: {
-          value: [],
-          viewImg: '',
-        },
-      }
-    },
-    {
-      name: '三角形',
-      data: {
-        id: Date.now().toString(),
-        x: 0,
-        y: 0,
-        z: 0,
-        angleY: 0,
-        width: 80,
-        height: 80,
-        signZ: 100,
-        shape: 'triangle',
-        poleRadius: 5,
-        bgColor: '#ffffff',
-        poleColor: '#666666',
-        img: {
-          value: [],
-          viewImg: '',
-        },
-      }
-    }
-  ]
-  return new Promise(resolve => {
-    setTimeout(() => {
-      resolve(values)
-    }, 3000)
+    };
+    return item
   })
 }
