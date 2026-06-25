@@ -923,6 +923,11 @@ const handleImportFileChange = async (e: Event) => {
 }
 
 const saveDrawing = async () => {
+  if (!store.state.main.userInfo) {
+    alert('请先登录')
+    showLogin.value = true
+    return
+  }
   activeToolsIndex.value = -1
   const data: fileData & {
     panOffset: Point
