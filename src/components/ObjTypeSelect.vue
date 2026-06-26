@@ -1,11 +1,12 @@
 <template>
   <div class="toolbar-item" @mouseleave="leaveObjTypeCate1">
-    <button class="addButton" type="button" @mouseenter="isMouseInCate1 = true">
+    <button class="addButton" type="button" @mouseenter="isMouseInCate1 = true, activeObjTypeId = undefined">
       添加
     </button>
     <div class="list insertObjTypeSelect" @mouseenter="isMouseInCate1 = true" v-show="isMouseInCate1 || isMouseInCate2">
       <template v-if="lastChooseOutFile">
-        <div class="childItem" @click="changeCurrentToolToOutFile(lastChooseOutFile.id), isMouseInCate1 = false">
+        <div class="childItem" @click="changeCurrentToolToOutFile(lastChooseOutFile.id), isMouseInCate1 = false"
+          @mouseenter="activeObjTypeId = undefined">
           最近使用：{{ lastChooseOutFile.name }}
         </div>
         <div class="splitLine"></div>
@@ -270,14 +271,14 @@ async function mouseEnterType(event: MouseEvent, type: ObjFileType) {
 
 function leaveObjTypeCate1() {
   isMouseInCate1.value = false
-  activeObjTypeId.value = undefined
+  // activeObjTypeId.value = undefined
 
   setTimeout(() => {
     if (isMouseInCate2.value) {
       return
     } else {
-      // activeObjChildList.value = []
-      // activePluginChildList.value = []
+      activeObjChildList.value = []
+      activePluginChildList.value = []
     }
   }, 10)
 }
