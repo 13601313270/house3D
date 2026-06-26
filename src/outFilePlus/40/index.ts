@@ -5,20 +5,26 @@ import { editItem } from "@/entities";
 export default class OutFilePlus68 extends OutFilePlusBase {
   static outFileDataExtension(data: Record<string, any>): editItem[] {
     return [
-    //   {
-    //     id: 'foldAngle',
-    //     label: '闸杆折叠角度',
-    //     dataType: 'angle',
-    //     value: data.foldAngle || 0,
-    //     min: 0,
-    //     max: 90,
-    //   }
+      {
+        id: 'frameColor',
+        label: '车架颜色',
+        dataType: 'color',
+        value: data.frameColor || '#B70000',
+      }
     ]
   }
 
   static modify3DMesh(data: Record<string, any>, mesh: THREE.Group): void {
-    console.log(1)
-    // const foldAngle = data.foldAngle || 0
-    // mesh.children[0].children[2].rotation.x = foldAngle * -1
+    const material: THREE.MeshStandardMaterial = ((mesh.children[9] as THREE.Mesh).material as THREE.MeshStandardMaterial).clone();
+    // console.log('ddddddd', data, data.frameColor, material.color);
+    material.color.set(data.frameColor || '#B70000');
+
+    (mesh.children[9] as THREE.Mesh).material = material;
+    (mesh.children[10] as THREE.Mesh).material = material;
+    (mesh.children[11] as THREE.Mesh).material = material;
+    (mesh.children[23] as THREE.Mesh).material = material;
+    (mesh.children[24] as THREE.Mesh).material = material;
+    (mesh.children[25] as THREE.Mesh).material = material;
+    (mesh.children[26] as THREE.Mesh).material = material;
   }
 }
