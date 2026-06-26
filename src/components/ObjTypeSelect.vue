@@ -39,6 +39,12 @@
       @mouseleave="leaveObjTypeCate2"
       :style="{ top: enterEventDomPosition?.y + 'px', left: enterEventDomPosition?.x + 'px' }"
       v-if="activeObjChildList.length > 0 || activePluginChildList.length > 0">
+      <div class="childItem help" @click="showHelpModal()">
+        <div>
+          <div>联系售后添加</div>
+          <div class="desc">（24小时内添加）</div>
+        </div>
+      </div>
       <div v-for="item2 in activePluginChildList" :key="item2.key" class="childItem"
         @click="changeCurrentTool(item2.key), isMouseInCate2 = false">
         <div class="previewImg">
@@ -52,12 +58,6 @@
           <img v-if="item2.previewImg" :src="item2.previewImg" alt="" />
         </div>
         <div class="name">{{ item2.name }}</div>
-      </div>
-      <div class="childItem" @click="showHelpModal, isMouseInCate2 = false">
-        <div>
-          <div>联系售后添加</div>
-          <div class="desc">（24小时内添加）</div>
-        </div>
       </div>
     </div>
     <div class="defaultValueModal" v-if="showDefaultValueModal" @click.self="showDefaultValueModal = false">
@@ -258,7 +258,7 @@ async function mouseEnterType(event: MouseEvent, type: ObjFileType) {
       if (bottom > window.innerHeight) {
         enterEventDomPosition.value = {
           x: right,
-          y: top - (bottom - window.innerHeight)
+          y: top - (bottom - window.innerHeight) - 4
         }
       }
     }
@@ -271,8 +271,8 @@ function leaveObjTypeCate1() {
     if (isMouseInCate2.value) {
       return
     } else {
-      activeObjChildList.value = []
-      activePluginChildList.value = []
+      // activeObjChildList.value = []
+      // activePluginChildList.value = []
     }
   }, 10)
 }
@@ -289,6 +289,7 @@ function clearCate1List() {
 }
 
 function showHelpModal() {
+  isMouseInCate2.value = false;
   emits('showHelpModal')
 }
 </script>
@@ -441,23 +442,30 @@ function showHelpModal() {
   border-radius: 8px;
   padding: 7px 0;
   z-index: 1001;
+  padding: 8px;
+  gap: 8px;
+  width: auto;
+  // max-height: 8;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
 
   .childItem {
     background: white;
-    border-bottom: 1px solid #f1f1f1;
-    margin: 0 8px;
+    border: solid 1px #eaeaea;
+    border-radius: 4px;
     padding: 4px 0;
     cursor: default;
     color: #2c3e50;
     padding: 4px 0;
     text-align: center;
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     align-items: center;
-
-    &:last-child {
-      border-bottom: none;
-    }
+    justify-content: center;
+    box-sizing: border-box;
+    height: 113px;
 
     &:hover {
       background-color: #1890ff;
@@ -469,12 +477,18 @@ function showHelpModal() {
       }
     }
 
+    &.help {
+      font-size: 12px;
+
+      .desc {
+        font-size: 12px;
+      }
+    }
+
     .previewImg {
-      width: 40px;
-      height: 40px;
-      border: solid 1px #eaeaea;
-      border-radius: 4px;
-      margin-left: 4px;
+      width: 83px;
+      height: 83px;
+      margin-left: 8px;
       margin-right: 8px;
       background-color: white;
 
@@ -482,6 +496,12 @@ function showHelpModal() {
         width: 100%;
         height: 100%;
       }
+    }
+
+    .name {
+      font-size: 14px;
+      color: #2c3e50;
+      padding-right: 8px;
     }
 
     .desc {

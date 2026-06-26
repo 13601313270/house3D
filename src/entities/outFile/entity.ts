@@ -13,6 +13,7 @@ import { getMaterialById } from '@/material'
 import { MatchCircleArea, MatchRectArea } from '@/utils/matchArea'
 import { isPointInRotatedRect } from '@/utils/isPointInRotatedRect'
 import { OrigionSnapPoint } from '@/types/baseEntity'
+import { outFileDataExtension } from '@/outFilePlus/index'
 
 export class OutFileEntity extends PointEntityClass<OutFileData> {
   name: string = '外部文件'
@@ -605,6 +606,7 @@ export class OutFileEntity extends PointEntityClass<OutFileData> {
         step: 0.1,
         value: data.zoom || 1,
       },
+      ...outFileDataExtension(data.fileTypeId),
     ]
     editShow(configList, (val) => {
       this.setData({
