@@ -7,4 +7,5 @@ export type OutFileData = PointObjData & {
   color: string
   canAngelZ: boolean,// 是否可以旋转Z轴角度
   zoom?: number,
+  data?: Record<string, any>,
 }

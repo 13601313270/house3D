@@ -8,6 +8,7 @@ export class OutFileDataClass extends PointObjDataClass<OutFileData> {
   color: string
   canAngelZ: boolean// 是否可以旋转Z轴角度
   zoom: number// 自定义缩放
+  data?: Record<string, any>
 
   constructor(data: OutFileData) {
     super(data)
@@ -17,5 +18,6 @@ export class OutFileDataClass extends PointObjDataClass<OutFileData> {
     this.color = data.color
     this.canAngelZ = data.canAngelZ
     this.zoom = data.zoom || 1
+    this.data = data.data || {}
   }
 }
