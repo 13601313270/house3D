@@ -11,7 +11,7 @@ export async function outFileDataExtension(fileTypeId: string, data: Record<stri
   try {
     if (allPlugins[+fileTypeId]) {
       const plugin = await allPlugins[+fileTypeId]()
-      return await plugin.default.outFileDataExtension(fileTypeId, data)
+      return await plugin.default.outFileDataExtension(data)
     } else {
       return [];
     }
@@ -24,7 +24,7 @@ export function modify3DMesh(fileTypeId: string, data: Record<string, any>, mesh
   if (allPlugins[+fileTypeId]) {
     allPlugins[+fileTypeId]().then(plugin => {
       console.log('plugin', plugin.default)
-      plugin.default.modify3DMesh(fileTypeId, data, mesh)
+      plugin.default.modify3DMesh(data, mesh)
     })
   }
 }
