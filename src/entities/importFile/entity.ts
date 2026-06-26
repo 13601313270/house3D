@@ -20,8 +20,6 @@ export class ImportFileEntity extends PointEntityClass<ImportFileData> {
   img: HTMLImageElement = new Image()
 
   init(): Promise<void> {
-    // const findObjInfo = this.world.ObjFileTypes.find(item => item.id === this.getData().fileTypeId)
-    // const preImg = findObjInfo?.preImg || ''
     this.img.src = 'favicon.ico'
     return new Promise((resolve, reject) => {
       this.img.onload = () => {
@@ -37,8 +35,7 @@ export class ImportFileEntity extends PointEntityClass<ImportFileData> {
     const screenX = data.x * zoomLevel + panOffset.x
     const screenY = data.y * zoomLevel + panOffset.y
     const angleY = data.angleY;// * -1 + Math.PI / 2
-    const findObjInfo = this.world.ObjFileTypes.find(item => item.id === data.fileTypeId)
-    const preImgScale = findObjInfo?.preImgScale || 1
+    const preImgScale = 1
     const { width, height } = this.img;
     ctx.save(); // 保存当前状态
     ctx.translate(screenX, screenY); // 移动原点到目标中心
@@ -71,8 +68,7 @@ export class ImportFileEntity extends PointEntityClass<ImportFileData> {
     ctx.fill()
     ctx.stroke()
 
-    const findObjInfo = this.world.ObjFileTypes.find(item => item.id === data.fileTypeId)
-    const drawAngelLength = findObjInfo?.drawAngelLength || this.baseDrawAngelLength
+    const drawAngelLength = this.baseDrawAngelLength
 
     // 控制点向着angleY角度延伸10个单位后的坐标
     const rotatedXAdd = data.x + Math.cos(data.angleY) * drawAngelLength
@@ -192,7 +188,7 @@ export class ImportFileEntity extends PointEntityClass<ImportFileData> {
       // 获取模型的尺寸
       const box = new THREE.Box3().setFromObject(clonedObject)
       const size = box.getSize(new THREE.Vector3())
-      this.boxData[0] = size
+      this.boxData[0].y = size.y
       return [group]
     }
 
@@ -322,8 +318,8 @@ export class ImportFileEntity extends PointEntityClass<ImportFileData> {
     const data = this.getData();
     const dist = Math.hypot(x - data.x, y - data.y)
     // console.log('dist', dist)
-    if (dist < this.circleRadius + 3) {
-      return new MatchCircleArea({ x: data.x, y: data.y, r: this.circleRadius })
+    if (dist < this.baseDrawAngelLength + this.circleRadius) {
+      return new MatchCircleArea({ x: data.x, y: data.y, r: this.baseDrawAngelLength + this.circleRadius })
     }
     return null;
   }
@@ -340,8 +336,7 @@ export class ImportFileEntity extends PointEntityClass<ImportFileData> {
         dist,
       }
     }
-    const findObjInfo = this.world.ObjFileTypes.find(item => item.id === data.fileTypeId)
-    const drawAngelLength = findObjInfo?.drawAngelLength || this.baseDrawAngelLength
+    const drawAngelLength = this.baseDrawAngelLength
     // 控制点向着angleY角度延伸10个单位后的坐标
     const rotatedXAdd = data.x + Math.cos(data.angleY) * drawAngelLength
     const rotatedYAdd = data.y - Math.sin(data.angleY) * drawAngelLength
