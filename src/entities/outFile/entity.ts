@@ -13,7 +13,7 @@ import { getMaterialById } from '@/material'
 import { MatchCircleArea, MatchRectArea } from '@/utils/matchArea'
 import { isPointInRotatedRect } from '@/utils/isPointInRotatedRect'
 import { OrigionSnapPoint } from '@/types/baseEntity'
-import { outFileDataExtension } from '@/outFilePlus/index'
+import { outFileDataExtension, modify3DMesh } from '@/outFilePlus/index'
 
 export class OutFileEntity extends PointEntityClass<OutFileData> {
   name: string = '外部文件'
@@ -286,6 +286,7 @@ export class OutFileEntity extends PointEntityClass<OutFileData> {
           }
         })
         group.add(object)
+        modify3DMesh(fileTypeId, data, object)
         // console.log('OBJ文件加载成功:', url)
       }
       // console.log('material-material', getMaterialById(materialId))
@@ -334,6 +335,7 @@ export class OutFileEntity extends PointEntityClass<OutFileData> {
           gltf.scene.material = material
         }
         group.add(gltf.scene)
+        modify3DMesh(fileTypeId, data, gltf.scene)
       }, () => {
         // 加载进度
         // const percent = (progress.loaded / progress.total * 100).toFixed(2)
@@ -606,7 +608,7 @@ export class OutFileEntity extends PointEntityClass<OutFileData> {
         step: 0.1,
         value: data.zoom || 1,
       },
-      ...outFileDataExtension(data.fileTypeId),
+      ...outFileDataExtension(data.fileTypeId, data),
     ]
     editShow(configList, (val) => {
       this.setData({
