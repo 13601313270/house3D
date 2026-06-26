@@ -569,51 +569,53 @@ export class OutFileEntity extends PointEntityClass<OutFileData> {
   editPropConfig(snapPoint: HandelInfo, editShow: (editInfoList: editItem[], callback: (val: any) => void) => void): void {
     const data = this.getData();
     console.log('val---0', data.angleY, data.angleY * 180 / Math.PI)
-    const configList: editItem[] = [
-      {
-        id: 'bm',
-        label: '材质',
-        dataType: 'material',
-        value: data.bm,
-      },
-      {
-        id: 'z',
-        label: '距离地面',
-        dataType: 'number',
-        min: -100,
-        max: 200,
-        step: 1,
-        value: data.z,
-      },
-      {
-        id: 'color',
-        label: '颜色',
-        dataType: 'color',
-        value: data.color,
-      },
-      {
-        id: 'angleY',
-        label: '旋转角度',
-        dataType: 'angle',
-        min: -180,
-        max: 180,
-        value: data.angleY,
-      },
-      {
-        id: 'zoom',
-        label: '缩放',
-        dataType: 'number',
-        min: 0.1,
-        max: 2,
-        step: 0.1,
-        value: data.zoom || 1,
-      },
-      ...outFileDataExtension(data.fileTypeId, data),
-    ]
-    editShow(configList, (val) => {
-      this.setData({
-        ...this.getData(),
-        ...val,
+    outFileDataExtension(data.fileTypeId, data).then(moreConfig => {
+      const configList: editItem[] = [
+        {
+          id: 'bm',
+          label: '材质',
+          dataType: 'material',
+          value: data.bm,
+        },
+        {
+          id: 'z',
+          label: '距离地面',
+          dataType: 'number',
+          min: -100,
+          max: 200,
+          step: 1,
+          value: data.z,
+        },
+        {
+          id: 'color',
+          label: '颜色',
+          dataType: 'color',
+          value: data.color,
+        },
+        {
+          id: 'angleY',
+          label: '旋转角度',
+          dataType: 'angle',
+          min: -180,
+          max: 180,
+          value: data.angleY,
+        },
+        {
+          id: 'zoom',
+          label: '缩放',
+          dataType: 'number',
+          min: 0.1,
+          max: 2,
+          step: 0.1,
+          value: data.zoom || 1,
+        },
+        ...moreConfig,
+      ]
+      editShow(configList, (val) => {
+        this.setData({
+          ...this.getData(),
+          ...val,
+        })
       })
     })
   }

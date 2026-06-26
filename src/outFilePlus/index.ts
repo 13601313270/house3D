@@ -1,28 +1,30 @@
 import * as THREE from 'three'
 import { editItem } from "@/entities";
+import { OutFilePlusBase } from './OutFilePlusBase';
 
-// type sss = Record<string, any>;
+const allPlugins: Record<number, () => Promise<{ default: typeof OutFilePlusBase }>> = {
+  68: () => import('./68/index'),
+}
 // 暂时没有扩展项，原本是考虑根据fileTypeId来扩展项，比如窗帘，控制是否折叠
-export function outFileDataExtension(fileTypeId: string, data: Record<string, any>): editItem[] {
+export async function outFileDataExtension(fileTypeId: string, data: Record<string, any>): Promise<editItem[]> {
   console.log('fileTypeId', fileTypeId)
-  if (+fileTypeId === 68) {
-    return [
-      {
-        id: 'foldAngle',
-        label: '闸杆折叠角度',
-        dataType: 'angle',
-        value: data.foldAngle || 0,
-        min: 0,
-        max: 90,
-      }
-    ]
+  try {
+    if (allPlugins[+fileTypeId]) {
+      const plugin = await allPlugins[+fileTypeId]()
+      return await plugin.default.outFileDataExtension(fileTypeId, data)
+    } else {
+      return [];
+    }
+  } catch (error) {
+    return [];
   }
-  return []
 }
 
 export function modify3DMesh(fileTypeId: string, data: Record<string, any>, mesh: THREE.Group): void {
-  if (+fileTypeId === 68) {
-    const foldAngle = data.foldAngle || 0
-    mesh.children[0].children[2].rotation.x = foldAngle * -1
+  if (allPlugins[+fileTypeId]) {
+    allPlugins[+fileTypeId]().then(plugin => {
+      console.log('plugin', plugin.default)
+      plugin.default.modify3DMesh(fileTypeId, data, mesh)
+    })
   }
 }
