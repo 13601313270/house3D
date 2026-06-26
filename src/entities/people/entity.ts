@@ -498,6 +498,14 @@ export class PeopleEntity extends PointEntityClass<PeopleData> {
         dataType: 'color',
         value: data.color || '#DEDEDE',
       },
+      {
+        id: 'angle',
+        label: '旋转角度',
+        dataType: 'angle',
+        min: -180,
+        max: 180,
+        value: data.angle,
+      },
     ], (val) => {
       this.setData({
         ...data,

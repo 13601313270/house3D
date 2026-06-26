@@ -345,6 +345,14 @@ export class PlaneEntity extends PointEntityClass<PlaneData> {
         dataType: 'color',
         value: data.color,
       },
+      {
+        id: 'angleY',
+        label: '旋转角度',
+        dataType: 'angle',
+        min: -180,
+        max: 180,
+        value: data.angleY,
+      },
     ], (val) => {
       this.setData({
         ...data,
