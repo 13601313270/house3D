@@ -11,9 +11,9 @@
         <div class="splitLine"></div>
       </template>
       <div v-for="item in allFileKeysGroup.filter(item => item.id !== 'other')" :key="item.id" class="typeItemContent"
-        @mouseenter="clearCate1List">
-        <div class="typeName">{{ item.name }}</div>
-        <div class="childItemList" v-if="item.child && item.child.length > 0">
+        :class="{ active: activeObjTypeId === item.id }">
+        <div class="typeName" @mouseenter="mouseenterGroup(item.id)">{{ item.name }}</div>
+        <div class="childItemList" v-if="activeObjTypeId === item.id && item.child && item.child.length > 0">
           <div v-for="item2 in item.child" class="childItem" :key="item2"
             @click="changeCurrentTool(item2), isMouseInCate1 = false">
             {{ allFileKeysName[item2] }}
@@ -23,12 +23,13 @@
       <div class="childItem"
         v-for="value in (allFileKeysGroup.find(item => item.id === 'other') || { child: [] }).child.filter(item => item !== 'outFile' && item !== 'outFileInWall' && item !== 'importFile')"
         :key="value" :class="{ active: currentTool === value }"
-        @click="changeCurrentTool(value), isMouseInCate1 = false" @mouseenter="clearCate1List">
+        @click="changeCurrentTool(value), isMouseInCate1 = false" @mouseenter="mouseenterOtherGroup(value)">
         {{ allFileKeysName[value] }}
       </div>
       <div class="splitLine"></div>
       <div>
-        <div v-for="item in ObjFileTypes" :key="item.id" class="typeItemContent">
+        <div v-for="item in ObjFileTypes" :key="item.id" class="typeItemContent"
+          :class="{ active: activeObjTypeId === item.id }">
           <div class="typeName" @mouseenter="mouseEnterType($event, item)">{{ item.name }}</div>
         </div>
       </div>
@@ -119,6 +120,7 @@ type ObjFileType = {
 }
 const ObjFileTypes = ref<Array<ObjFileType>>([])
 const activePluginChildList = ref<Array<PluginType>>([])
+const activeObjTypeId = ref<number | string>()
 const activeObjChildList = ref<Array<{
   id: string,
   name: string,
@@ -243,6 +245,7 @@ async function mouseEnterType(event: MouseEvent, type: ObjFileType) {
       type.child.push(v)
     })
   }
+  activeObjTypeId.value = type.id
   activeObjChildList.value = type.child
 
   const allFileInThisType = allFileWithGroupId[type.id]
@@ -267,6 +270,8 @@ async function mouseEnterType(event: MouseEvent, type: ObjFileType) {
 
 function leaveObjTypeCate1() {
   isMouseInCate1.value = false
+  activeObjTypeId.value = undefined
+
   setTimeout(() => {
     if (isMouseInCate2.value) {
       return
@@ -283,7 +288,14 @@ function leaveObjTypeCate2() {
   activePluginChildList.value = []
 }
 
-function clearCate1List() {
+function mouseenterGroup(groupName: string) {
+  console.log(111, groupName);
+  activeObjTypeId.value = groupName;
+  activeObjChildList.value = []
+  activePluginChildList.value = []
+}
+function mouseenterOtherGroup(groupName: string) {
+  activeObjTypeId.value = groupName
   activeObjChildList.value = []
   activePluginChildList.value = []
 }
@@ -346,7 +358,24 @@ function showHelpModal() {
 .typeItemContent {
   position: relative;
 
-  &:hover {
+  // &:hover {
+  //   .typeName {
+  //     background-color: #1890ff;
+  //     color: white;
+  //     font-weight: bold;
+  //     position: relative;
+
+  //     &::after {
+  //       color: white;
+  //     }
+  //   }
+
+  //   .childItemList {
+  //     display: block;
+  //   }
+  // }
+
+  &.active {
     .typeName {
       background-color: #1890ff;
       color: white;
@@ -390,7 +419,7 @@ function showHelpModal() {
 
   .childItemList {
     position: absolute;
-    display: none;
+    // display: none;
     top: -8px;
     left: 100%;
     width: 180px;
