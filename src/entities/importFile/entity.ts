@@ -188,6 +188,11 @@ export class ImportFileEntity extends PointEntityClass<ImportFileData> {
       })
       group.add(clonedObject)
       console.log('本地模型加载成功---')
+
+      // 获取模型的尺寸
+      const box = new THREE.Box3().setFromObject(clonedObject)
+      const size = box.getSize(new THREE.Vector3())
+      this.boxData[0] = size
       return [group]
     }
 
@@ -279,12 +284,15 @@ export class ImportFileEntity extends PointEntityClass<ImportFileData> {
     ]
   }
 
+  // 第一个是尺寸，第二个是位置偏移，第三个是旋转角度
+  boxData: [THREE.Vector3, THREE.Vector3, THREE.Vector3] = [
+    new THREE.Vector3(10, 10, 10),
+    new THREE.Vector3(0, 0, 0),
+    new THREE.Vector3(0, 0, 0)
+  ]
+
   createBoundingBox(): [THREE.Vector3, THREE.Vector3, THREE.Vector3] {
-    return [
-      new THREE.Vector3(10, 10, 0),
-      new THREE.Vector3(0, 0, 0),
-      new THREE.Vector3(0, 0, 0)
-    ]
+    return this.boxData
   }
 
   // 当前对象是否需要重新生成3D模型状态
