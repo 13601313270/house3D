@@ -3,6 +3,7 @@ import { editItem } from "@/entities";
 import { OutFilePlusBase } from './OutFilePlusBase';
 
 const allPlugins: Record<number, () => Promise<{ default: typeof OutFilePlusBase }>> = {
+  12: () => import('./12/index'),
   68: () => import('./68/index'),
   40: () => import('./40/index'),
   71: () => import('./71/index'),

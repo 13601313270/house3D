@@ -133,8 +133,9 @@ function changeTypeSelect() {
     color: #666666;
     font-size: 14px;
     height: 32px;
-    width: 75px;
+    width: 80px;
     flex-shrink: 0;
+    text-align: center;
 
     &:focus {
       outline: none;
@@ -152,6 +153,7 @@ function changeTypeSelect() {
   }
 
   .fileInput {
+    padding-left: 16px;
     flex-grow: 1;
     border: solid 1px #b2b2b2;
     border-radius: 0 8px 8px 0;
