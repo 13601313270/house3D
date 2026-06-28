@@ -60,8 +60,8 @@ export class OutFileInWallEntity extends EntityClassInWall<OutFileInWallData> {
     }) as WallEntity
     const wallThickness = wall ? wall.getData().thickness : 10;
     // 沿着angleY角度移动10像素的偏移量
-    const offsetX = Math.cos(angle + (isOuter ? Math.PI / -2 : Math.PI / 2)) * wallThickness * zoomLevel;
-    const offsetY = Math.sin(angle + (isOuter ? Math.PI / -2 : Math.PI / 2)) * wallThickness * zoomLevel;
+    const offsetX = Math.cos(angle + (isOuter ? Math.PI / -2 : Math.PI / 2)) * wallThickness / 2 * zoomLevel;
+    const offsetY = Math.sin(angle + (isOuter ? Math.PI / -2 : Math.PI / 2)) * wallThickness / 2 * zoomLevel;
     // console.log('=======', angleY, offsetX, offsetY)
     ctx.save(); // 保存当前状态
     ctx.translate(screenX + offsetX, screenY + offsetY); // 移动原点到目标中心
@@ -113,13 +113,11 @@ export class OutFileInWallEntity extends EntityClassInWall<OutFileInWallData> {
     }) as WallEntity
     const wallThickness = wall ? wall.getData().thickness : 10;
     const { scaleX, scaleY, scaleZ, url, materialUrl, angleY, materialVec, defaultColor, materialId } = findObjInfo
-    // console.log('materialVec', materialVec)
-    // console.log('materialId', bm);
     const materialUseId = (bm === null) ? (materialId || -1) : bm
     // console.log('materialId', color);
     // console.log('scaleX', scaleX, 'scaleY', scaleY, 'scaleZ', scaleZ)
-    const offsetX = Math.cos(angleY + (isOuter ? Math.PI / -2 : Math.PI / 2)) * wallThickness;
-    const offsetY = Math.sin(angleY + (isOuter ? Math.PI / -2 : Math.PI / 2)) * wallThickness;
+    const offsetX = Math.cos(angleY + (isOuter ? Math.PI / -2 : Math.PI / 2)) * wallThickness / 2;
+    const offsetY = Math.sin(angleY + (isOuter ? Math.PI / -2 : Math.PI / 2)) * wallThickness / 2;
     // 将方向向量旋转90度
     const rotatedDirection = materialVec ? new THREE.Vector3(...materialVec) : new THREE.Vector3(-1, 1, 1)
     const material: THREE.Material | undefined = (() => {
