@@ -2,7 +2,7 @@ import { OutFilePlusBase } from "@/outFilePlus/OutFilePlusBase";
 import * as THREE from 'three'
 import { editItem } from "@/entities";
 
-export default class OutFilePlus68 extends OutFilePlusBase {
+export default class OutFilePlus40 extends OutFilePlusBase {
   static outFileDataExtension(data: Record<string, any>): editItem[] {
     return [
       {
