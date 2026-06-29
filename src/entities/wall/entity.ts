@@ -678,6 +678,28 @@ export class WallEntity extends LineEntityClass<WallPoint, WallData> {
           value: data.points[pointIndex].snw,
         },
         {
+          id: 'delete',
+          label: '插入顶点',
+          dataType: 'button',
+          value: () => {
+            const index = (snapPoint.index + 1) / 2;
+            console.log('index', index)
+            this.setData({
+              ...data,
+              points: [
+                ...data.points.slice(0, index),
+                {
+                  x: (data.points[index - 1].x + data.points[index].x) / 2,
+                  y: (data.points[index - 1].y + data.points[index].y) / 2,
+                  snw: false,
+                },
+                ...data.points.slice(index)
+              ],
+            })
+            close()
+          },
+        },
+        {
           id: 'title',
           label: '整个墙体属性',
           dataType: 'title',

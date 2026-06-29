@@ -1215,6 +1215,7 @@ const handleContextMenu = (e: MouseEvent) => {
             })
           }, () => {
             contextMenu.value = null
+            drawWrapper2DAnd3D()
           })
           return;
         }
