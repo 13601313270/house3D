@@ -35,7 +35,7 @@ export class ImportFileEntity extends PointEntityClass<ImportFileData> {
     const screenX = data.x * zoomLevel + panOffset.x
     const screenY = data.y * zoomLevel + panOffset.y
     const angleY = data.angleY;// * -1 + Math.PI / 2
-    const preImgScale = 10
+    const preImgScale = 1
     const { width, height } = this.img;
     ctx.save(); // 保存当前状态
     ctx.translate(screenX, screenY); // 移动原点到目标中心
@@ -154,7 +154,9 @@ export class ImportFileEntity extends PointEntityClass<ImportFileData> {
       // 获取模型的尺寸
       const box = new THREE.Box3().setFromObject(clonedObject)
       const size = box.getSize(new THREE.Vector3())
-      this.boxData[0].y = size.y
+      this.boxData[0].y = size.y * scale
+      this.boxData[0].x = size.x * scale
+      this.boxData[0].z = size.z * scale
       return [group]
     }
 
