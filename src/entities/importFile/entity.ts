@@ -135,55 +135,21 @@ export class ImportFileEntity extends PointEntityClass<ImportFileData> {
   create3DMesh(): THREE.Group[] {
     const data = this.getData();
     const group = new THREE.Group()
-    const { fileTypeId, bm, color, scale } = data
+    const { fileTypeId, scale } = data
     const findObjInfo = this.world.allImportFiles.find(item => item.fileTypeId === fileTypeId)
 
     if (!findObjInfo) {
       console.error('未找到对应的文件类型:', fileTypeId)
       return []
     }
-    // const { scaleX, scaleY, scaleZ, url, materialUrl, angleY, materialVec, defaultColor, materialId } = findObjInfo
-
     // @ts-ignore
     const threeObject = findObjInfo.mesh as THREE.Group | undefined;
-
-    // console.log('materialVec', materialVec)
-    // console.log('materialId', bm);
-    const materialUseId = bm || -1
-    // console.log('materialId', color);
-    // console.log('scaleX', scaleX, 'scaleY', scaleY, 'scaleZ', scaleZ)
-    // 将方向向量旋转90度
-    const rotatedDirection = new THREE.Vector3(-1, 1, 1);// materialVec ? new THREE.Vector3(...materialVec) : new THREE.Vector3(-1, 1, 1)
-    const material: THREE.Material | undefined = (() => {
-      if (materialUseId !== -1 && materialUseId !== null) {
-        const mater = getMaterialById(materialUseId);
-        if (mater) {
-          return mater.material(rotatedDirection)
-        }
-      }
-      return new THREE.MeshStandardMaterial({
-        color,
-        roughness: 0.7,
-        metalness: 0.1
-      });
-    })();
 
     // 如果有预加载的本地模型对象，直接使用
     if (threeObject) {
       const clonedObject = threeObject.clone()
       clonedObject.scale.set(scale, scale, scale)
-      // clonedObject.rotation.y = angleY
-
-      // 添加默认材质（如果模型没有材质）
-      clonedObject.traverse((child) => {
-        if (child instanceof THREE.Mesh) {
-          if (!child.material || ((materialUseId !== -1) && (materialUseId !== null))) {
-            child.material = material
-          }
-        }
-      })
       group.add(clonedObject)
-      console.log('本地模型加载成功---')
 
       // 获取模型的尺寸
       const box = new THREE.Box3().setFromObject(clonedObject)
@@ -191,89 +157,6 @@ export class ImportFileEntity extends PointEntityClass<ImportFileData> {
       this.boxData[0].y = size.y
       return [group]
     }
-
-    // if (url && url.endsWith('.obj')) {
-    //   const loader = new OBJLoader()
-    //   const materLoader = new MTLLoader()
-    //   function render(object: THREE.Group) {
-    //     object.scale.set(scaleX, scaleY, scaleZ)
-    //     object.rotation.y = angleY
-
-    //     if (!materialUrl) {
-    //       // @ts-ignore
-    //       object.material = material
-    //     }
-
-    //     // 添加默认材质（如果模型没有材质）
-    //     object.traverse((child) => {
-    //       if (child instanceof THREE.Mesh) {
-    //         if (materialUseId !== -1 && materialUseId !== null) {
-    //           child.material = material
-    //         } else {
-    //           if (!materialUrl) {
-    //             child.material = material
-    //           }
-    //         }
-    //       }
-    //     })
-    //     group.add(object)
-    //     console.log('OBJ文件加载成功:', url)
-    //   }
-    //   // console.log('material-material', getMaterialById(materialId))
-    //   if (materialUrl) {
-    //     materLoader.load(materialUrl, (mtl: any) => {
-    //       mtl.preload();
-    //       loader.setMaterials(mtl);
-    //       loader.load(url, (object: THREE.Group) => {
-    //         render(object)
-    //       }, (progress: any) => {
-    //         // 加载进度
-    //         const percent = (progress.loaded / progress.total * 100).toFixed(2)
-    //         console.log('加载进度:', percent + '%')
-    //       }, (error: any) => {
-    //         console.error('OBJ文件加载失败:', error)
-    //       })
-    //     })
-    //   } else {
-    //     loader.load(url, (object: THREE.Group) => {
-    //       render(object)
-    //     }, (progress: any) => {
-    //       // 加载进度
-    //       const percent = (progress.loaded / progress.total * 100).toFixed(2)
-    //       console.log('加载进度:', percent + '%')
-    //     }, (error: any) => {
-    //       console.error('OBJ文件加载失败:', error)
-    //     })
-    //   }
-    // } else if (url.endsWith('.glb')) {
-    //   const loader = new GLTFLoader()
-    //   loader.load(url, (gltf: any) => {
-    //     gltf.scene.rotation.y = angleY
-    //     gltf.scene.scale.set(scaleX, scaleY, scaleZ)
-    //     if (defaultColor || materialId) {
-    //       // @ts-ignore
-    //       gltf.scene.material = material
-    //       gltf.scene.traverse((child: any) => {
-    //         if (child instanceof THREE.Mesh) {
-    //           if (materialUseId !== -1 && materialUseId !== null) {
-    //             child.material = material
-    //           } else {
-    //             child.material = material
-    //           }
-    //         }
-    //       })
-    //       gltf.scene.material = material
-    //     }
-    //     group.add(gltf.scene)
-    //   }, (progress: any) => {
-    //     // 加载进度
-    //     const percent = (progress.loaded / progress.total * 100).toFixed(2)
-    //     console.log('加载进度:', percent + '%')
-    //   }, (error: any) => {
-    //     console.error('OBJ文件加载失败:', error)
-    //   })
-    // }
-    // group.position.set(data.x, data.z, data.y)
 
     return [
       group
@@ -299,6 +182,7 @@ export class ImportFileEntity extends PointEntityClass<ImportFileData> {
       y: undefined,
       z: undefined,
       angleY: undefined,
+      scale: undefined,
     }
     // console.log('dddd', this.type + JSON.stringify(cacheData))
     return this.type + JSON.stringify(cacheData)
@@ -311,6 +195,7 @@ export class ImportFileEntity extends PointEntityClass<ImportFileData> {
     this.meshList.forEach(v => {
       v.position.set(data.x, data.z, data.y)
       v.rotation.y = data.angleY
+      v.scale.set(data.scale, data.scale, data.scale)
     })
   }
 
@@ -415,12 +300,6 @@ export class ImportFileEntity extends PointEntityClass<ImportFileData> {
     const data = this.getData();
     const configList: editItem[] = [
       {
-        id: 'bm',
-        label: '材质',
-        dataType: 'material',
-        value: data.bm,
-      },
-      {
         id: 'z',
         label: '高度',
         dataType: 'number',
@@ -428,12 +307,6 @@ export class ImportFileEntity extends PointEntityClass<ImportFileData> {
         max: 100,
         step: 1,
         value: data.z,
-      },
-      {
-        id: 'color',
-        label: '颜色',
-        dataType: 'color',
-        value: data.color,
       },
       {
         id: 'scale',

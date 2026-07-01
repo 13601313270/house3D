@@ -1864,8 +1864,8 @@ async function importOutObj(file: File) {
   const fileName = file.name.toLowerCase()
 
   // 检查文件类型
-  if (!fileName.endsWith('.fbx') && !fileName.endsWith('.obj')) {
-    alert('请上传 FBX 或 OBJ 格式的文件')
+  if (!fileName.endsWith('.fbx') && !fileName.endsWith('.obj') && !fileName.endsWith('.glb')) {
+    alert('请上传 FBX、OBJ 或 GLB 格式的文件')
     return
   }
 

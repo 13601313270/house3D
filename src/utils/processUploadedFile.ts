@@ -3,6 +3,8 @@ import * as THREE from 'three'
 import { OBJLoader } from 'three/addons/loaders/OBJLoader.js'
 // @ts-ignore
 import { FBXLoader } from 'three/addons/loaders/FBXLoader.js'
+// @ts-ignore
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
 // import { ImportFileData } from '@/entities/importFile/index.d'
 
 const processUploadedFile = async (file: File, callback: (object: THREE.Group, file: File, type: string) => void): Promise<void> => {
@@ -53,6 +55,44 @@ const processUploadedFile = async (file: File, callback: (object: THREE.Group, f
       }
       reader.onerror = (error) => {
         console.error('FBX 文件读取失败:', error)
+        console.error('文件信息:', {
+          name: file.name,
+          size: file.size,
+          type: file.type,
+          lastModified: new Date(file.lastModified)
+        })
+        reject(new Error('文件读取失败'))
+      }
+      reader.readAsArrayBuffer(file)
+    } else if (fileName.endsWith('.glb')) {
+      console.log('开始读取 GLB 文件:', file.name, '大小:', file.size, 'bytes')
+      const reader = new FileReader()
+      reader.onload = (event) => {
+        try {
+          console.log('GLB 文件读取成功，开始解析')
+          const arrayBuffer = event.target?.result as ArrayBuffer
+          if (!arrayBuffer) {
+            reject(new Error('文件读取失败'))
+            return
+          }
+
+          console.log('ArrayBuffer 大小:', arrayBuffer.byteLength)
+          const loader = new GLTFLoader()
+          loader.parse(arrayBuffer, '', (gltf: any) => {
+            console.log('GLB 文件解析成功，对象:', gltf.scene)
+            callback(gltf.scene, file, 'glb')
+            resolve()
+          }, (error: any) => {
+            console.error('GLB 文件解析失败:', error)
+            reject(error)
+          })
+        } catch (error) {
+          console.error('GLB 文件解析失败:', error)
+          reject(error)
+        }
+      }
+      reader.onerror = (error) => {
+        console.error('GLB 文件读取失败:', error)
         console.error('文件信息:', {
           name: file.name,
           size: file.size,
