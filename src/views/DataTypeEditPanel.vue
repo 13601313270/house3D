@@ -35,14 +35,15 @@
           <div v-if="item.dataType === 'button'" class="edit">
             <button class="actionButton" @click="item.value">{{ item.label }}</button>
           </div>
-          <DataTypeEdit v-else-if="item.dataType !== 'title'" :item="item"
-            :modelValue="modelValue[item.id]" :record="modelValue" @update:modelValue="handleUpdate(item.id, $event)" />
+          <DataTypeEdit v-else-if="item.dataType !== 'title'" :item="item" :modelValue="modelValue[item.id]"
+            :record="modelValue" @update:modelValue="handleUpdate(item.id, $event)" />
         </div>
       </div>
       <div class="buttonGroup">
         <div class="leftGroup">
           <button v-if="typeKey === 'people'" @click="showBoneEdit">姿态编辑</button>
           <button @click="LockObj(!modelValue.isLocked)">{{ modelValue.isLocked ? '解锁' : '锁定' }}</button>
+          <button @click="copyEntity">复制</button>
         </div>
         <div style="flex-grow: 1;"></div>
         <button class="deleteButton" @click="deleteContextMenuEntity">删除</button>
@@ -225,6 +226,9 @@ function LockObj(value: boolean) {
     duration: 5000,
     position: 'top-center',
   })
+}
+function copyEntity() {
+  // emit('copyEntity', props.modelValue)
 }
 </script>
 <style scoped lang="less">

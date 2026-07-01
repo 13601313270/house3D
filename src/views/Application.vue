@@ -1980,9 +1980,7 @@ const handleLoadedObject = async (object: THREE.Group | THREE.Mesh, file: File, 
     x: position.x,
     y: position.y,
     z: position.z,
-    bm: null,
     angleY: 0,
-    color: '#0c7f25',
     scale: scaleFactor,
   }
   await worldApi.add('importFile', [new ImportFileDataClass(data)])

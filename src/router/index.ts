@@ -1,11 +1,11 @@
 import { createRouter, RouteRecordRaw, createWebHistory } from 'vue-router'
-import Map2D from '../views/Map2D.vue'
+import Application from '../views/Application.vue'
 
 const routes: Array<RouteRecordRaw> = [
   {
     path: '/',
     name: 'home',
-    component: Map2D
+    component: Application
   },
 ]
 
