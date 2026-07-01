@@ -149,14 +149,36 @@ export class CubeEntity extends PointEntityClass<CubeData> {
 
     const { width, height, depth, color, mt, angleY } = data;
 
-    // group添加门框
     const geometry = new THREE.BoxGeometry(
       width,
       height,
       depth
     );
-    const material = mt ? (getMaterialById(mt)?.material(new THREE.Vector3(1, 0, 1))) : (new THREE.MeshStandardMaterial({ color }));
-    const mesh = new THREE.Mesh(geometry, material)
+
+    const materials = [];
+    if (mt) {
+      const getMat = getMaterialById(mt);
+      if (getMat) {
+        materials.push(getMat.material(new THREE.Vector3(1, 0, 0)));
+        materials.push(getMat.material(new THREE.Vector3(1, 0, 0)));
+        materials.push(getMat.material(new THREE.Vector3(0, 1, 0)));
+        materials.push(getMat.material(new THREE.Vector3(0, 1, 0)));
+        materials.push(getMat.material(new THREE.Vector3(0, 0, 1)));
+        materials.push(getMat.material(new THREE.Vector3(0, 0, 1)));
+      } else {
+        const defaultMat = new THREE.MeshStandardMaterial({ color });
+        for (let i = 0; i < 6; i++) {
+          materials.push(defaultMat);
+        }
+      }
+    } else {
+      const defaultMat = new THREE.MeshStandardMaterial({ color });
+      for (let i = 0; i < 6; i++) {
+        materials.push(defaultMat);
+      }
+    }
+
+    const mesh = new THREE.Mesh(geometry, materials)
     mesh.position.setY(data.height / 2)
     group.add(mesh);
     group.rotateY(angleY);
