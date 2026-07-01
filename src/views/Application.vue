@@ -662,11 +662,11 @@ const getSnapPoint = (
 const worldApi = new World()
 window.worldApi = worldApi
 const drawWrapper2DAnd3D = () => {
-  const fileData: fileData = worldApi.getAllFileObjects()
-  drawWrapper2D(fileData);
+  drawWrapper2D();
   worldApi.draw3D()
 }
-const drawWrapper2D = (fileData: fileData) => {
+const drawWrapper2D = () => {
+  const fileData: fileData = worldApi.getAllFileObjects()
   const canvas = canvas2DRef.value
   const canvasAction = canvas2D2Ref.value;
   if (canvas && canvasAction) {
@@ -1375,7 +1375,6 @@ const handleMouseMove = (e: MouseEvent) => {
   const y = (screenY - panOffset.value.y) / zoom2DLevel.value
 
   if (currentTool.value === 'drag') { // drag代表拖拽和鼠标移动
-    const fileData: fileData = worldApi.getAllFileObjects()
     const canvasAction = canvas2D2Ref.value!;
     // 绘制操作句柄
     const ctxAction = canvasAction.getContext('2d')!
@@ -1458,7 +1457,7 @@ const handleMouseMove = (e: MouseEvent) => {
         startX: matchHandelStartPoint ? matchHandelStartPoint.x : undefined,
         startY: matchHandelStartPoint ? matchHandelStartPoint.y : undefined,
       }, matchedHandelInfo)
-      drawWrapper2D(fileData);
+      drawWrapper2D();
       // 绘制操作句柄
       ctxAction.clearRect(0, 0, canvasAction.width, canvasAction.height)
       matchHandelObj.draw2D(ctxAction, panOffset.value, zoom2DLevel.value)
@@ -1473,7 +1472,7 @@ const handleMouseMove = (e: MouseEvent) => {
       panOffset.value.y += dy
       panStartScreenX = screenX
       panStartScreenY = screenY
-      drawWrapper2D(fileData)
+      drawWrapper2D()
       // 绘制操作句柄
       ctxAction.clearRect(0, 0, canvasAction.width, canvasAction.height)
     } else {
@@ -2025,8 +2024,7 @@ function handleLocationPosition(position: { x: number, y: number }) {
     // y: position.y - dy
     y: dy - (position.y * zoom2DLevel.value),
   }
-  const fileData: fileData = worldApi.getAllFileObjects()
-  drawWrapper2D(fileData)
+  drawWrapper2D()
 }
 function handleObjChange(baseObj: BaseEntityClass<BaseObjData>) {
   console.log('baseObj', baseObj)
