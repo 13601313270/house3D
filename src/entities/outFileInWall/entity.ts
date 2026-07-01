@@ -16,6 +16,7 @@ import { MatchCircleArea, MatchRectArea } from '@/utils/matchArea'
 import { isPointInRotatedRect } from '@/utils/isPointInRotatedRect'
 import { OrigionSnapPoint } from '@/types/baseEntity'
 import { WallEntity } from '../wall/entity'
+import { modify3DMesh, outFileDataExtension } from '@/outFilePlus'
 
 export class OutFileInWallEntity extends EntityClassInWall<OutFileInWallData> {
   name: string = '外部文件'
@@ -160,6 +161,7 @@ export class OutFileInWallEntity extends EntityClassInWall<OutFileInWallData> {
           }
         })
         group.add(object)
+        modify3DMesh(fileTypeId, data, object)
         // console.log('OBJ文件加载成功:', url)
       }
       // console.log('material-material', getMaterialById(materialId))
@@ -210,6 +212,7 @@ export class OutFileInWallEntity extends EntityClassInWall<OutFileInWallData> {
           gltf.scene.material = material
         }
         group.add(gltf.scene)
+        modify3DMesh(fileTypeId, data, gltf.scene)
       }, () => {
         // 加载进度
         // const percent = (progress.loaded / progress.total * 100).toFixed(2)
@@ -387,39 +390,42 @@ export class OutFileInWallEntity extends EntityClassInWall<OutFileInWallData> {
 
   editPropConfig(snapPoint: HandelInfo, editShow: (editInfoList: editItem[], callback: (val: any) => void) => void): void {
     const data = this.getData();
-    const configList: editItem[] = [
-      {
-        id: 'bm',
-        label: '材质',
-        dataType: 'material',
-        value: data.bm,
-      },
-      {
-        id: 'z',
-        label: '距离地面',
-        dataType: 'number',
-        min: 0,
-        max: 200,
-        step: 1,
-        value: data.z,
-      },
-      {
-        id: 'color',
-        label: '颜色',
-        dataType: 'color',
-        value: data.color,
-      },
-      {
-        id: 'isOuter',
-        label: '是否挂在外墙',
-        dataType: 'boolean',
-        value: data.isOuter,
-      },
-    ]
-    editShow(configList, (val) => {
-      this.setData({
-        ...this.getData(),
-        ...val,
+    outFileDataExtension(data.fileTypeId, data).then(moreConfig => {
+      const configList: editItem[] = [
+        {
+          id: 'bm',
+          label: '材质',
+          dataType: 'material',
+          value: data.bm,
+        },
+        {
+          id: 'z',
+          label: '距离地面',
+          dataType: 'number',
+          min: 0,
+          max: 200,
+          step: 1,
+          value: data.z,
+        },
+        {
+          id: 'color',
+          label: '颜色',
+          dataType: 'color',
+          value: data.color,
+        },
+        {
+          id: 'isOuter',
+          label: '是否挂在外墙',
+          dataType: 'boolean',
+          value: data.isOuter,
+        },
+        ...moreConfig,
+      ]
+      editShow(configList, (val) => {
+        this.setData({
+          ...this.getData(),
+          ...val,
+        })
       })
     })
   }
