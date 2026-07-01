@@ -1,4 +1,3 @@
-
 // 位置+角度
 type camera1 = {
   targetPositionX: number

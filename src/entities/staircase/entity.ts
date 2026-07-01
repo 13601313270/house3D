@@ -521,6 +521,16 @@ export class StaircaseEntity extends LineEntityClass<StaircasePoint, StaircaseDa
           //   name: '斜边连接台阶',
           //   img: 'staircaseImgs/4.jpg',
           // },
+          // {
+          //   id: 5,
+          //   name: '斜坡',
+          //   img: 'staircaseImgs/5.jpg',
+          // },
+          // {
+          //   id: 6,
+          //   name: '落地斜坡',
+          //   img: 'staircaseImgs/6.jpg',
+          // },
         ],
       }
     ];
