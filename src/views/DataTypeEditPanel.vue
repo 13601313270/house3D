@@ -43,7 +43,7 @@
         <div class="leftGroup">
           <button v-if="typeKey === 'people'" @click="showBoneEdit">姿态编辑</button>
           <button @click="LockObj(!modelValue.isLocked)">{{ modelValue.isLocked ? '解锁' : '锁定' }}</button>
-          <button @click="copyEntity">复制</button>
+          <!-- <button @click="copyEntity">复制</button> -->
         </div>
         <div style="flex-grow: 1;"></div>
         <button class="deleteButton" @click="deleteContextMenuEntity">删除</button>

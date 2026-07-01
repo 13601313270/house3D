@@ -35,7 +35,7 @@ export class ImportFileEntity extends PointEntityClass<ImportFileData> {
     const screenX = data.x * zoomLevel + panOffset.x
     const screenY = data.y * zoomLevel + panOffset.y
     const angleY = data.angleY;// * -1 + Math.PI / 2
-    const preImgScale = 1
+    const preImgScale = 10
     const { width, height } = this.img;
     ctx.save(); // 保存当前状态
     ctx.translate(screenX, screenY); // 移动原点到目标中心
@@ -148,7 +148,7 @@ export class ImportFileEntity extends PointEntityClass<ImportFileData> {
     // 如果有预加载的本地模型对象，直接使用
     if (threeObject) {
       const clonedObject = threeObject.clone()
-      clonedObject.scale.set(scale, scale, scale)
+      // clonedObject.scale.set(scale, scale, scale)
       group.add(clonedObject)
 
       // 获取模型的尺寸
