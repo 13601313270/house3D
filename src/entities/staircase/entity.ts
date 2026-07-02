@@ -52,8 +52,8 @@ export class StaircaseEntity extends LineEntityClass<StaircasePoint, StaircaseDa
 
       ctx.beginPath()
       for (let j = 0; j < box.length; j++) {
-        const screenX = box[j].x * zoomLevel + panOffset.x
-        const screenY = box[j].y * zoomLevel + panOffset.y
+        const screenX = (box[j].x + this.offset.x) * zoomLevel + panOffset.x
+        const screenY = (box[j].y + this.offset.y) * zoomLevel + panOffset.y
         if (j === 0) {
           ctx.moveTo(screenX, screenY)
         } else {
@@ -89,8 +89,8 @@ export class StaircaseEntity extends LineEntityClass<StaircasePoint, StaircaseDa
       ctx.setLineDash([])
       ctx.beginPath()
       for (let j = 0; j < box.length; j++) {
-        const screenX = box[j].x * zoomLevel + panOffset.x
-        const screenY = box[j].y * zoomLevel + panOffset.y
+        const screenX = (box[j].x + this.offset.x) * zoomLevel + panOffset.x
+        const screenY = (box[j].y + this.offset.y) * zoomLevel + panOffset.y
         if (j === 0) {
           ctx.moveTo(screenX, screenY)
         } else {
@@ -109,8 +109,8 @@ export class StaircaseEntity extends LineEntityClass<StaircasePoint, StaircaseDa
       points.forEach((point: Point, index: number) => {
         ctx.strokeStyle = 'red'
         ctx.fillStyle = 'white'
-        const screenX = point.x * zoomLevel + panOffset.x
-        const screenY = point.y * zoomLevel + panOffset.y
+        const screenX = (point.x + this.offset.x) * zoomLevel + panOffset.x
+        const screenY = (point.y + this.offset.y) * zoomLevel + panOffset.y
         ctx.beginPath()
         ctx.arc(screenX, screenY, this.circleRadius * zoomLevel + 3, 0, Math.PI * 2)
         ctx.stroke()

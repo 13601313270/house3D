@@ -48,11 +48,11 @@ function change(val: number | string) {
   display: flex;
   flex-direction: column;
   align-items: end;
-  width: 88px;
+  height: 88px;
   min-height: 20px;
 
   .img {
-    width: 88px;
+    height: 88px;
     min-height: 20px;
     border-radius: 4px;
     border: solid 1px #d9d9d9;
