@@ -45,7 +45,6 @@ export class PlaneEntity extends PointEntityClass<PlaneData> {
     panOffset: Point,
     zoomLevel: number,
   ): void {
-    // 实现门的2D绘制逻辑
     const screenX = data.x * zoomLevel + panOffset.x
     const screenY = data.y * zoomLevel + panOffset.y
     const angleY = data.angleY || 0;// 历史数据问题，有的数据不存在angleY，所以用了一个【|| 0】给予默认值

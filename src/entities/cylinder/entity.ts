@@ -16,7 +16,6 @@ export class CylinderEntity extends PointEntityClass<CylinderData> {
 
   draw2DPreviewByData(ctx: CanvasRenderingContext2D, data: CylinderData, panOffset: Point, zoomLevel: number): void {
     const { r } = data;
-    // 实现门的2D绘制逻辑
     const screenX = data.x * zoomLevel + panOffset.x
     const screenY = data.y * zoomLevel + panOffset.y
 

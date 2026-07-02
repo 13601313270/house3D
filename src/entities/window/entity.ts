@@ -82,7 +82,6 @@ export class WindowEntity extends EntityClassInWall<WindowData> {
     if (findWall) {
       wallThickness = findWall.getData().thickness;
     }
-    // 实现门的2D绘制逻辑
     const screenX = data.x * zoomLevel + panOffset.x
     const screenY = data.y * zoomLevel + panOffset.y
     ctx.beginPath()

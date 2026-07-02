@@ -41,7 +41,6 @@ export class CubeEntity extends PointEntityClass<CubeData> {
     panOffset: Point,
     zoomLevel: number,
   ): void {
-    // 实现门的2D绘制逻辑
     const screenX = data.x * zoomLevel + panOffset.x
     const screenY = data.y * zoomLevel + panOffset.y
 

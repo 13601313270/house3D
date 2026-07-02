@@ -41,7 +41,6 @@ export class DoorEntity extends EntityClassInWall<DoorData> {
     if (findWall) {
       wallThickness = findWall.getData().thickness;
     }
-    // 实现门的2D绘制逻辑
     const screenX = data.x * zoomLevel + panOffset.x
     const screenY = data.y * zoomLevel + panOffset.y
     // const wallThickness = 10; // walls.find((wall) => wall.id === this.wallId)?.thickness || 0;

@@ -16,7 +16,6 @@ export class SphereEntity extends PointEntityClass<SphereData> {
 
   draw2DPreviewByData(ctx: CanvasRenderingContext2D, data: SphereData, panOffset: Point, zoomLevel: number): void {
     const { r } = data;
-    // 实现门的2D绘制逻辑
     const screenX = data.x * zoomLevel + panOffset.x
     const screenY = data.y * zoomLevel + panOffset.y
 
@@ -43,7 +42,6 @@ export class SphereEntity extends PointEntityClass<SphereData> {
     panOffset: Point,
     zoomLevel: number,
   ): void {
-    // 实现门的2D绘制逻辑
     const screenX = data.x * zoomLevel + panOffset.x
     const screenY = data.y * zoomLevel + panOffset.y
 
