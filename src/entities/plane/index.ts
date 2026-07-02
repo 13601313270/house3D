@@ -8,6 +8,7 @@ const PlanePlugin: PluginType = {
   type: 'base',
   entity: PlaneEntity,
   objType: 'point',
+  previewImg: '/toolType/plane.png',
   defaultValues,
 }
 export default PlanePlugin

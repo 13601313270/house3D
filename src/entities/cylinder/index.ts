@@ -8,6 +8,7 @@ const CylinderPlugin: PluginType = {
   type: 'base',
   entity: CylinderEntity,
   objType: 'point',
+  previewImg: '/toolType/cylinder.png',
   defaultValues,
 }
 export default CylinderPlugin

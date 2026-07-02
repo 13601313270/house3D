@@ -8,6 +8,7 @@ const CurtainPlugin: PluginType = {
   type: 'curtain',
   entity: CurtainEntity,
   objType: 'point',
+  previewImg: '/toolType/curtain.png',
   defaultValues,
 }
 export default CurtainPlugin

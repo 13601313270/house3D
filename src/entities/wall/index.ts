@@ -8,6 +8,7 @@ const wallPlugin: PluginType = {
   type: 'house',
   entity: WallEntity,
   objType: 'polyline',
+  previewImg: '/toolType/wall.png',
   defaultValues,
 }
 export default wallPlugin

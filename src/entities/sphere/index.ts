@@ -8,6 +8,7 @@ const spherePlugin: PluginType = {
   type: 'base',
   entity: SphereEntity,
   objType: 'point',
+  previewImg: '/toolType/sphere.png',
   defaultValues,
 }
 export default spherePlugin

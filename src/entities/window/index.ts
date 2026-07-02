@@ -9,5 +9,6 @@ const windowPlugin: PluginType = {
   entity: WindowEntity,
   objType: 'point',
   defaultValues,
+  previewImg: '/toolType/window.png',
 }
 export default windowPlugin

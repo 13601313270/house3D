@@ -8,6 +8,7 @@ const ConePlugin: PluginType = {
   type: 'base',
   entity: ConeEntity,
   objType: 'point',
+  previewImg: '/toolType/cone.png',
   defaultValues,
 }
 export default ConePlugin

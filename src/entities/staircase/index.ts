@@ -9,5 +9,6 @@ const staircasePlugin: PluginType = {
   entity: StaircaseEntity,
   objType: 'polyline',
   defaultValues,
+  previewImg: '/toolType/staircase.png',
 }
 export default staircasePlugin

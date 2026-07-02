@@ -17,7 +17,8 @@
         <div class="childItemList" v-if="activeObjTypeId === item.id && item.child && item.child.length > 0">
           <div v-for="item2 in item.child" class="childItem" :key="item2"
             @click="changeCurrentTool(item2), isMouseInCate1 = false">
-            {{ allFileKeysName[item2] }}
+            <img v-if="allPluginByKey[item2].previewImg" :src="allPluginByKey[item2].previewImg" alt="" class="icon" />
+            <div class="name">{{ allPluginByKey[item2].name }}</div>
           </div>
         </div>
       </div>
@@ -25,7 +26,7 @@
         v-for="value in (allFileKeysGroup.find(item => item.id === 'other') || { child: [] }).child.filter(item => item !== 'outFile' && item !== 'outFileInWall' && item !== 'importFile')"
         :key="value" :class="{ active: currentTool === value }"
         @click="changeCurrentTool(value), isMouseInCate1 = false" @mouseenter="mouseenterOtherGroup(value)">
-        {{ allFileKeysName[value] }}
+        {{ allPluginByKey[value]?.name }}
       </div>
       <div class="splitLine"></div>
       <div>
@@ -420,10 +421,9 @@ function showHelpModal() {
 
   .childItemList {
     position: absolute;
-    // display: none;
     top: -8px;
     left: 100%;
-    width: 180px;
+    min-width: 120px;
     background: white;
     border: 1px solid #d9d9d9;
     box-sizing: border-box;
@@ -436,6 +436,9 @@ function showHelpModal() {
       padding: 4px 0;
       text-align: center;
       margin: 0 8px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
 
       &:last-child {
         border-bottom: none;
@@ -449,6 +452,19 @@ function showHelpModal() {
         .desc {
           color: white;
         }
+      }
+
+      >img {
+        width: 24px;
+        height: 24px;
+        margin: 0 4px;
+        flex-shrink: 0;
+      }
+
+      .name {
+        flex-grow: 1;
+        text-align: center;
+        text-wrap: nowrap;
       }
 
       .desc {

@@ -9,5 +9,6 @@ const DoorPlugin: PluginType = {
   entity: DoorEntity,
   objType: 'point',
   defaultValues,
+  previewImg: '/toolType/door.png',
 }
 export default DoorPlugin

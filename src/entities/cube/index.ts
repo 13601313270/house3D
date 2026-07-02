@@ -8,6 +8,7 @@ const CubePlugin: PluginType = {
   type: 'base',
   entity: CubeEntity,
   objType: 'point',
+  previewImg: '/toolType/cube.png',
   defaultValues,
 }
 export default CubePlugin

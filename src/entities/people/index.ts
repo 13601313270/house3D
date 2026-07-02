@@ -8,6 +8,7 @@ const PeoplePlugin: PluginType = {
   type: 'other',
   entity: PeopleEntity,
   objType: 'point',
+  previewImg: '/toolType/people.png',
   defaultValues,
 }
 export default PeoplePlugin
