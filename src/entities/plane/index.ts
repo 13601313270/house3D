@@ -3,7 +3,7 @@ import PluginType from "../pluginType"
 import defaultValues from "./defaultValues"
 
 const PlanePlugin: PluginType = {
-  name: '平面',
+  name: '方形平面',
   key: 'plane',
   type: 'base',
   entity: PlaneEntity,

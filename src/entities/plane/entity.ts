@@ -11,7 +11,7 @@ import { importImgFileHead } from '../allObjs';
 import { allSnapFromType } from '@/types/baseEntity';
 
 export class PlaneEntity extends PointEntityClass<PlaneData> {
-  name: string = '平面'
+  name: string = '方形平面'
   type: string = 'plane'
   isPointObj: boolean = true
   private circleRadius = 6
@@ -154,7 +154,6 @@ export class PlaneEntity extends PointEntityClass<PlaneData> {
     const angleY = data.angleY || 0;// 历史数据问题，有的数据不存在angleY，所以用了一个【|| 0】给予默认值
 
     let material: THREE.Material | null = null;
-    // 平面
     if (img) {
       let texture = PlaneEntity.textureCache.get(img);
       if (!texture) {
