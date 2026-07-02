@@ -118,7 +118,7 @@
       <DataTypeEditPanel v-if="contextMenu?.visible && editPropTypeKey" :typeKey="editPropTypeKey"
         :editPropConfigInfo="editPropConfigInfo" v-model="editPropInputInfo"
         :initPosition="{ x: contextMenu.x, y: contextMenu.y }" @deleteContextMenuEntity="deleteContextMenuEntity"
-        @close="contextMenu = null" />
+        @close="contextMenu = null" @copyEntity="copyEntity" />
       <AllWorldObjSelect v-if="showAllObjSelect" :zoom2DLevel="zoom2DLevel" :panOffset="panOffset"
         @close="showAllObjSelect = false" @locationPosition="handleLocationPosition" @onChange="handleObjChange" />
       <EnvironmentEditor v-if="showEnvironmentEditor" @close="showEnvironmentEditor = false" />
@@ -264,6 +264,7 @@ type ObjFileType = {
   }[]
 }
 const ObjFileTypes = ref<Array<ObjFileType>>([])
+let menuEntity: BaseEntityClass<any> | null = null
 
 let insertTempObj: BaseEntityClass<any> | null = null
 const insertAdding = ref(false)
@@ -1145,6 +1146,7 @@ const handleContextMenu = (e: MouseEvent) => {
       }
       for (let j = 0; j < worldApi.getObjects(type).length; j++) {
         const api: BaseEntityClass<any> = worldApi.allFileMapObjects[type][j]
+        menuEntity = api
         const snapPoint = api.matchHandelInfo(x, y)
         if (snapPoint) {
           if (api.getData().isLocked) {
@@ -2030,6 +2032,19 @@ function handleObjChange(baseObj: BaseEntityClass<BaseObjData>) {
   console.log('baseObj', baseObj)
   // 刷新2D和3D场景
   drawWrapper2DAnd3D()
+}
+async function copyEntity() {
+  if (menuEntity) {
+    const type = menuEntity.type
+    const values = JSON.parse(JSON.stringify(menuEntity.getData()));
+    console.log('values', values)
+    values.id = Date.now().toString()
+    values.x = values.x + 100
+    await worldApi.add(type, [values])
+    contextMenu.value = null
+    currentTool.value = 'drag'
+    drawWrapper2DAnd3D()
+  }
 }
 </script>
 

@@ -43,7 +43,7 @@
         <div class="leftGroup">
           <button v-if="typeKey === 'people'" @click="showBoneEdit">姿态编辑</button>
           <button @click="LockObj(!modelValue.isLocked)">{{ modelValue.isLocked ? '解锁' : '锁定' }}</button>
-          <!-- <button @click="copyEntity">复制</button> -->
+          <button @click="copyEntity">复制</button>
         </div>
         <div style="flex-grow: 1;"></div>
         <button class="deleteButton" @click="deleteContextMenuEntity">删除</button>
@@ -100,6 +100,7 @@ const emit = defineEmits<{
   (e: 'update:modelValue', value: Record<string, any>): void
   (e: 'deleteContextMenuEntity'): void
   (e: 'close'): void
+  (e: 'copyEntity'): void
 }>()
 
 function handleUpdate(id: string, value: any) {
@@ -228,7 +229,7 @@ function LockObj(value: boolean) {
   })
 }
 function copyEntity() {
-  // emit('copyEntity', props.modelValue)
+  emit('copyEntity')
 }
 </script>
 <style scoped lang="less">
