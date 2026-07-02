@@ -425,7 +425,7 @@ export class World {
     return returnData
   }
 
-  async add(type: string, data: BaseObjDataClass<any>[]) {
+  async add(type: string, data: BaseObjDataClass<any>[]): Promise<BaseEntityClass<any>[]> {
     const EntityClassItem: EntityConstructor = fileDataKeyToClass[type] as any;
     if (!this.allFileMapObjects[type]) {
       this.allFileMapObjects[type] = []
@@ -442,6 +442,7 @@ export class World {
       }
     }
     this._callAllOnChangeCallback('add', apiList)
+    return apiList;
   }
 
   splice(type: string, index: number, count: number = 1) {

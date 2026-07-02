@@ -55,7 +55,8 @@
       <div class="left-panel" :style="{ width: panel1SplitWidthPer * 100 + '%' }">
         <div class="toolbar">
           <div style="flex-shrink: 0;">布局图</div>
-          <ObjTypeSelect :currentTool="currentTool" @select="changeObjTypeSelect" @showHelpModal="showHelpModal = true" />
+          <ObjTypeSelect :currentTool="currentTool" @select="changeObjTypeSelect"
+            @showHelpModal="showHelpModal = true" />
           <button @click="triggerImportFile" type="button">
             导入模型
           </button>
@@ -265,6 +266,7 @@ type ObjFileType = {
 }
 const ObjFileTypes = ref<Array<ObjFileType>>([])
 let menuEntity: BaseEntityClass<any> | null = null
+let beCopyEntity: BaseEntityClass<any> | null = null;// 被复制移动中的对象
 
 let insertTempObj: BaseEntityClass<any> | null = null
 const insertAdding = ref(false)
@@ -1243,6 +1245,11 @@ const deleteContextMenuEntity = () => {
 }
 
 const handleCanvasClick = async (e: MouseEvent) => {
+  if (beCopyEntity) {
+    beCopyEntity = null
+    drawWrapper2DAnd3D()
+    return
+  }
   // 如果当前是拖拽模式，不执行任何操作
   if (currentTool.value === 'drag') {
     return
@@ -1375,7 +1382,12 @@ const handleMouseMove = (e: MouseEvent) => {
   const screenY = e.clientY - rect.top
   const x = (screenX - panOffset.value.x) / zoom2DLevel.value
   const y = (screenY - panOffset.value.y) / zoom2DLevel.value
-
+  if (beCopyEntity) {
+    if (beCopyEntity instanceof PointEntityClass) {
+      beCopyEntity.changePosition({ x, y })
+      drawWrapper2DAnd3D()
+    }
+  }
   if (currentTool.value === 'drag') { // drag代表拖拽和鼠标移动
     const canvasAction = canvas2D2Ref.value!;
     // 绘制操作句柄
@@ -2039,8 +2051,9 @@ async function copyEntity() {
     const values = JSON.parse(JSON.stringify(menuEntity.getData()));
     console.log('values', values)
     values.id = Date.now().toString()
-    values.x = values.x + 100
-    await worldApi.add(type, [values])
+    values.x = values.x
+    const apiList = await worldApi.add(type, [values])
+    beCopyEntity = apiList[0]
     contextMenu.value = null
     currentTool.value = 'drag'
     drawWrapper2DAnd3D()

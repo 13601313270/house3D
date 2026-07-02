@@ -3,11 +3,11 @@
     <!-- <input type="range" :value="modelValue" @input="updateEditPropInputNumberInfo"
       :min="item.min === -Infinity ? -500 : item.min" :max="item.max === Infinity ? 500 : item.max" :step="item.step"
       class="numberInputRange" /> -->
-    <div class="angleStr">弧度：{{ modelValue.toFixed(2) || '' }}</div>
+    <div class="angleStr" v-if="modelValue !== undefined">弧度：{{ modelValue.toFixed(2) || '' }}</div>
     <div class="angleNumberTitle">角度：</div>
     <div class="numberInputContainer">
-      <input type="number" :value="inputNumber" :min="item.min" :max="item.max" @change="updateEditPropInputNumberInfo" :step="1"
-        class="numberInput" />
+      <input type="number" :value="inputNumber" :min="item.min" :max="item.max" @change="updateEditPropInputNumberInfo"
+        :step="1" class="numberInput" />
       <div class="unit">°</div>
     </div>
   </div>
