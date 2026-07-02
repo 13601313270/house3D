@@ -10,6 +10,7 @@ import outFilePlugin from './outFile'
 import outFileInWallPlugin from './outFileInWall'
 import cylinderPlugin from './cylinder'
 import planePlugin from './plane'
+import circlePlanePlugin from './circlePlane'
 import curtainPlugin from './curtain'
 import conePlugin from './cone'
 import peoplePlugin from './people'
@@ -86,6 +87,7 @@ export const allPluginByKey: Record<string, PluginType> = {
   cylinderPlugin,
   conePlugin,
   planePlugin,
+  circlePlanePlugin,
   curtainPlugin,
   outFilePlugin,
   outFileInWallPlugin,
