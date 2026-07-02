@@ -33,4 +33,16 @@ export abstract class LineEntityClass<V, T extends LineObjData<V>> extends BaseE
 
   // 待添加状态（鼠标新增悬浮的时候的点）
   abstract setPreparePoint(points: (V & Point)[]): void
+
+  // 偏移坐标（移动位置的时候，临时使用，完成移动，会叠加到data上人，然后自己重新归0）
+  public offset = { x: 0, y: 0 }
+
+  // 把偏移坐标叠加到data上
+  public applyOffsetToData() {
+    this.data.points.forEach(point => {
+      point.x += this.offset.x
+      point.y += this.offset.y
+    })
+    this.offset = { x: 0, y: 0 }
+  }
 }

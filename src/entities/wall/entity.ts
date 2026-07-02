@@ -35,10 +35,12 @@ export class WallEntity extends LineEntityClass<WallPoint, WallData> {
       ctx.beginPath()
       for (let i = 0; i < data.points.length; i++) {
         const point = data.points[i]
+        const screenX = (point.x + this.offset.x) * zoomLevel + panOffset.x;
+        const screenY = (point.y + this.offset.y) * zoomLevel + panOffset.y;
         if (i === 0) {
-          ctx.moveTo(point.x * zoomLevel + panOffset.x, point.y * zoomLevel + panOffset.y)
+          ctx.moveTo(screenX, screenY)
         } else {
-          ctx.lineTo(point.x * zoomLevel + panOffset.x, point.y * zoomLevel + panOffset.y)
+          ctx.lineTo(screenX, screenY)
         }
       }
       ctx.stroke()
@@ -62,8 +64,8 @@ export class WallEntity extends LineEntityClass<WallPoint, WallData> {
 
       ctx.beginPath()
       for (let j = 0; j < box.length; j++) {
-        const screenX = box[j].x * zoomLevel + panOffset.x
-        const screenY = box[j].y * zoomLevel + panOffset.y
+        const screenX = (box[j].x + this.offset.x) * zoomLevel + panOffset.x
+        const screenY = (box[j].y + this.offset.y) * zoomLevel + panOffset.y
         if (j === 0) {
           ctx.moveTo(screenX, screenY)
         } else {

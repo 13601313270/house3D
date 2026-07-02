@@ -266,8 +266,9 @@ type ObjFileType = {
 }
 const ObjFileTypes = ref<Array<ObjFileType>>([])
 let menuEntity: BaseEntityClass<any> | null = null
+let menuEntiryHandelInfo: HandelInfo | null = null;// 选中的对象的柄信息
 let beCopyEntity: BaseEntityClass<any> | null = null;// 被复制移动中的对象
-
+let beCopyEntityHandelInfo: HandelInfo & Point | null = null;// 被复制移动中的对象的柄信息(非引用，是拷贝)
 let insertTempObj: BaseEntityClass<any> | null = null
 const insertAdding = ref(false)
 
@@ -1148,9 +1149,10 @@ const handleContextMenu = (e: MouseEvent) => {
       }
       for (let j = 0; j < worldApi.getObjects(type).length; j++) {
         const api: BaseEntityClass<any> = worldApi.allFileMapObjects[type][j]
-        menuEntity = api
         const snapPoint = api.matchHandelInfo(x, y)
         if (snapPoint) {
+          menuEntity = api
+          menuEntiryHandelInfo = snapPoint;
           if (api.getData().isLocked) {
             message.warning('锁定对象不能编辑，请去[对象列表]解锁', { position: 'top-center' })
             continue
@@ -1246,7 +1248,11 @@ const deleteContextMenuEntity = () => {
 
 const handleCanvasClick = async (e: MouseEvent) => {
   if (beCopyEntity) {
+    if (beCopyEntity instanceof LineEntityClass) {
+      beCopyEntity.applyOffsetToData()
+    }
     beCopyEntity = null
+    beCopyEntityHandelInfo = null
     drawWrapper2DAnd3D()
     return
   }
@@ -1386,6 +1392,15 @@ const handleMouseMove = (e: MouseEvent) => {
     if (beCopyEntity instanceof PointEntityClass) {
       beCopyEntity.changePosition({ x, y })
       drawWrapper2DAnd3D()
+    } else if (beCopyEntity instanceof LineEntityClass) {
+      if (beCopyEntityHandelInfo) {
+        console.log('beCopyEntityHandelInfo', x - beCopyEntityHandelInfo.x)
+        beCopyEntity.offset.x = x - beCopyEntityHandelInfo.x
+        beCopyEntity.offset.y = y - beCopyEntityHandelInfo.y
+        drawWrapper2DAnd3D()
+      }
+      // beCopyEntity.changePosition({ x, y })
+      // drawWrapper2DAnd3D()
     }
   }
   if (currentTool.value === 'drag') { // drag代表拖拽和鼠标移动
@@ -2049,14 +2064,38 @@ async function copyEntity() {
   if (menuEntity) {
     const type = menuEntity.type
     const values = JSON.parse(JSON.stringify(menuEntity.getData()));
-    console.log('values', values)
     values.id = Date.now().toString()
-    values.x = values.x
     const apiList = await worldApi.add(type, [values])
     beCopyEntity = apiList[0]
+    if (menuEntity && menuEntiryHandelInfo) {
+      if (menuEntity instanceof LineEntityClass) {
+        const { points } = (menuEntity as LineEntityClass<Point, LineObjData<Point>>).getData()
+        const { index } = menuEntiryHandelInfo
+        if (index % 2 === 0) {
+          // 拖动的是点
+          console.log('points', points, index, points[index / 2])
+          beCopyEntityHandelInfo = {
+            ...menuEntiryHandelInfo,
+            x: points[index / 2].x,
+            y: points[index / 2].y,
+          };
+        }
+      } else if (menuEntity instanceof PointEntityClass) {
+        beCopyEntityHandelInfo = {
+          ...menuEntiryHandelInfo,
+          x: values.x,
+          y: values.y,
+        };
+      }
+    }
     contextMenu.value = null
     currentTool.value = 'drag'
     drawWrapper2DAnd3D()
+    // if (menuEntity instanceof PointEntityClass) {
+
+    // } else if (menuEntity instanceof LineEntityClass) {
+    //   // continue
+    // }
   }
 }
 </script>
