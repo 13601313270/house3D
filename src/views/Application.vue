@@ -290,8 +290,10 @@ const updateCanvasSize = () => {
 
     if (width > 0 && height > 0) {
       ctxList.forEach(ctx => {
-        ctx.width = width
-        ctx.height = height
+        if (ctx) {
+          ctx.width = width
+          ctx.height = height
+        }
       })
       canvasSize.value = { width, height }
     }
@@ -2073,11 +2075,16 @@ async function copyEntity() {
         const { index } = menuEntiryHandelInfo
         if (index % 2 === 0) {
           // 拖动的是点
-          console.log('points', points, index, points[index / 2])
           beCopyEntityHandelInfo = {
             ...menuEntiryHandelInfo,
             x: points[index / 2].x,
             y: points[index / 2].y,
+          };
+        } else if (index % 2 === 1) {
+          beCopyEntityHandelInfo = {
+            ...menuEntiryHandelInfo,
+            x: points[(index - 1) / 2].x,
+            y: points[(index - 1) / 2].y,
           };
         }
       } else if (menuEntity instanceof PointEntityClass) {
