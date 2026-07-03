@@ -28,15 +28,6 @@ export class World {
   // 锁定状态的对象列表
   lockedObjList: BaseEntityClass<BaseObjData>[] = []
 
-  // private allObjFiles: {
-  //   id: string
-  //   url: string
-  //   scale: number,
-  //   x: number,
-  //   y: number,
-  //   z: number,
-  // }[] = []
-
   ObjFileTypes: ObjOutputFileType[] = []
 
   allImportFiles: ImportFileType[] = []
@@ -266,10 +257,6 @@ export class World {
 
   draw2DWorld(
     canvasBgRef: HTMLCanvasElement | null,
-    // fileData: fileData,
-    hoverPoint: Point | null,
-    xAxisSnappedY: number | null,
-    yAxisSnappedX: number | null,
     panOffset: Point = { x: 0, y: 0 },
     canvasWidth: number = 800,
     canvasHeight: number = 600,
@@ -318,32 +305,6 @@ export class World {
 
     // 绘制轴
     drawAxes(ctx, panOffset, zoomLevel, canvasWidth, canvasHeight)
-
-    // 绘制轴对齐参考线
-    if (hoverPoint) {
-      // const hoverScreenX = hoverPoint.x * zoomLevel + panOffset.x
-      // const hoverScreenY = hoverPoint.y * zoomLevel + panOffset.y
-      ctx.strokeStyle = '#999'
-      ctx.lineWidth = 1
-
-      // 垂直线（y轴对齐）
-      if (yAxisSnappedX !== null) {
-        const screenX = yAxisSnappedX * zoomLevel + panOffset.x
-        ctx.beginPath()
-        ctx.moveTo(screenX, 0)
-        ctx.lineTo(screenX, canvasHeight)
-        ctx.stroke()
-      }
-
-      // 水平线（x轴对齐）
-      if (xAxisSnappedY !== null) {
-        const screenY = xAxisSnappedY * zoomLevel + panOffset.y
-        ctx.beginPath()
-        ctx.moveTo(0, screenY)
-        ctx.lineTo(canvasWidth, screenY)
-        ctx.stroke()
-      }
-    }
   }
 
   // 绘制操作句柄

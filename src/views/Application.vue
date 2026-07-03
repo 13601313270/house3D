@@ -646,14 +646,38 @@ const drawWrapper2D = () => {
   if (canvas && canvasAction) {
     worldApi.draw2DWorld(
       canvas,
-      hoverPoint.value,
-      xAxisSnappedY.value === null ? null : xAxisSnappedY.value,
-      yAxisSnappedX.value === null ? null : yAxisSnappedX.value,
       panOffset.value,
       canvasSize.value.width,
       canvasSize.value.height,
       zoom2DLevel.value,
     )
+    // 绘制磁吸点的参考轴
+    if (hoverPoint.value) {
+      (() => {
+        const ctx = canvas.getContext('2d')
+        if (!ctx) return
+        ctx.strokeStyle = '#999'
+        ctx.lineWidth = 1
+
+        // 垂直线（y轴对齐）
+        if (yAxisSnappedX.value !== null) {
+          const screenX = yAxisSnappedX.value * zoom2DLevel.value + panOffset.value.x
+          ctx.beginPath()
+          ctx.moveTo(screenX, 0)
+          ctx.lineTo(screenX, canvasSize.value.height)
+          ctx.stroke()
+        }
+
+        // 水平线（x轴对齐）
+        if (xAxisSnappedY.value !== null) {
+          const screenY = xAxisSnappedY.value * zoom2DLevel.value + panOffset.value.y
+          ctx.beginPath()
+          ctx.moveTo(0, screenY)
+          ctx.lineTo(canvasSize.value.width, screenY)
+          ctx.stroke()
+        }
+      })();
+    }
     const ctx = canvas.getContext('2d')
     if (ctx) {
       if (insertTempObj && insertTempObj instanceof PointEntityClass) {
