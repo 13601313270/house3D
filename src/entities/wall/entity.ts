@@ -481,6 +481,7 @@ export class WallEntity extends LineEntityClass<WallPoint, WallData> {
   //   super.markObjectIsDirty()
   // }
 
+  // 本对象某个HandelInfo进入一个吸附对象的区域
   inSceneSnapPointArea(
     newPosition: MatchSnapPoint,
     dragHandelInfo: HandelInfo

@@ -213,14 +213,14 @@ const tempPointInsertData = ref<{
 }[]>([])
 const hoverPoint = ref<Point | null>(null)
 const lastPoint = ref<Point | null>(null)
-const xAxisSnappedY = ref<{ objType: string; number: number } | null>(null)
-const yAxisSnappedX = ref<{ objType: string; number: number } | null>(null)
+const xAxisSnappedY = ref<number | null>(null)
+const yAxisSnappedX = ref<number | null>(null)
 const dragOffset = ref<Point | null>(null)
 const dragStartPoint = ref<Point | null>(null)
 const panOffset = ref<Point>({ x: 0, y: 0 })
 const isPanningScreen = ref(false);// 平移屏幕
-const panel1SplitWidthPer = ref(0.35)
-const panel2SplitWidthPer = ref(0.35)
+const panel1SplitWidthPer = ref(0.5)
+const panel2SplitWidthPer = ref(0.25)
 const isSplitting = ref(false)
 const canvasSize = ref({ width: 0, height: 0 })
 const zoom2DLevel = ref(1)
@@ -359,31 +359,17 @@ const editPropTypeIndex = ref<number>(-1)
 const showAllObjSelect = ref(false)
 const showEnvironmentEditor = ref(false)
 
-const getSnapPoint = (
+function getSnapPoint1(
   current: Point,
-  startPoints: Array<MatchSnapPoint>, // 这里的点会计算角度磁吸
   allPoints: Array<MatchSnapPoint> = [], // 点磁吸和轴磁吸
-): MatchSnapPoint | null => {
-  // 找到距离 current 最近的 start 点
-  let nearestStart: MatchSnapPoint | null = null
-  let minDistance = Infinity
-
-  for (const start of startPoints) {
-    const dist = Math.hypot(current.x - start.point.x, current.y - start.point.y)
-    if (dist < minDistance) {
-      minDistance = dist
-      nearestStart = start
-    }
-  }
+) {
   // 一、计算三组磁吸数据
   // 计算点磁吸数据
   let pointSnapped: MatchSnapPoint | null = null
   let pointDistance = Infinity
-
   for (const point of allPoints) {
     const dist = Math.hypot(current.x - point.point.x, current.y - point.point.y)
-    // 排除与 nearestStart 完全重合的点
-    if (dist < 10 && !(nearestStart && point.point.x === nearestStart.point.x && point.point.y === nearestStart.point.y)) {
+    if (dist < 10) {
       if (dist < pointDistance) {
         pointDistance = dist
         pointSnapped = {
@@ -401,26 +387,19 @@ const getSnapPoint = (
     return {
       objType: pointSnapped.objType,
       snapFromType: pointSnapped.snapFromType,
-      // objId: pointSnapped.objId,
       point: {
         ...roundNumberList(pointSnapped.point),
         index: (pointSnapped.point as PointWithIndex).index,
       } as PointWithIndex
     };
   }
+}
+function getTempPointInsertDataLastAngel() {
+  if (tempPointInsertData.value.length && tempPointInsertData.value.length >= 2) {
+    const prevPoint = tempPointInsertData.value[tempPointInsertData.value.length - 2]
+    const lastPoint = tempPointInsertData.value[tempPointInsertData.value.length - 1]
 
-  let snappedX = current.x
-  let snappedY = current.y
-
-  const snapAngles = [0, 45, 90, 135, 180, -135, -90, -45]
-
-  if (tempPointInsertData.value.length && tempPointInsertData.value.length > 1) {
-    const prev = tempPointInsertData.value[tempPointInsertData.value.length - 2]
-    const last = tempPointInsertData.value[tempPointInsertData.value.length - 1]
-    const prevDx = last.x - prev.x
-    const prevDy = last.y - prev.y
-    const prevAngle = Math.atan2(prevDy, prevDx)
-    const prevAngleDeg = prevAngle * 180 / Math.PI
+    const prevAngleDeg = Math.atan2(lastPoint.y - prevPoint.y, lastPoint.x - prevPoint.x) * 180 / Math.PI
 
     let perpendicularAngle1 = prevAngleDeg + 90
     let perpendicularAngle2 = prevAngleDeg - 90
@@ -429,9 +408,20 @@ const getSnapPoint = (
     if (perpendicularAngle1 < -180) perpendicularAngle1 += 360
     if (perpendicularAngle2 > 180) perpendicularAngle2 -= 360
     if (perpendicularAngle2 < -180) perpendicularAngle2 += 360
-
-    snapAngles.push(perpendicularAngle1, perpendicularAngle2)
+    return [perpendicularAngle1, perpendicularAngle2]
+  } else {
+    return []
   }
+}
+function getSnapPointAndLine(
+  current: Point,
+  anglePoints: Array<MatchSnapPoint>, // 这里的点会计算角度磁吸
+  snapAngles: Array<number>,// 角度磁吸角度
+  allPoints: Array<MatchSnapPoint>, // 点磁吸和轴磁吸
+): MatchSnapPoint | null {
+  // 计算点磁吸数据
+  const pointSnapped = getSnapPoint1(current, allPoints)
+  if (pointSnapped) return pointSnapped
 
   // 2. 第二优先级：角度+轴对齐组合（计算交点）
   // 3. 计算轴对齐磁吸数据
@@ -468,11 +458,26 @@ const getSnapPoint = (
     }
   }
 
-  // 更新ref值用于绘制参考线
-  xAxisSnappedY.value = xAxisSnappedYVal
-  yAxisSnappedX.value = yAxisSnappedXVal
+  // 找到距离 current 最近的 start 点
+  let nearestStart: MatchSnapPoint | null = null
+  let minDistance = Infinity
 
-  if (startPoints.length && nearestStart) {
+  for (const start of anglePoints) {
+    const dist = Math.hypot(current.x - start.point.x, current.y - start.point.y)
+    if (dist < minDistance) {
+      minDistance = dist
+      nearestStart = start
+    }
+  }
+
+  let snappedX = current.x
+  let snappedY = current.y
+
+  // 更新ref值用于绘制参考线
+  xAxisSnappedY.value = xAxisSnappedYVal?.number || null
+  yAxisSnappedX.value = yAxisSnappedXVal?.number || null
+
+  if (anglePoints.length && nearestStart) {
     const dx = current.x - nearestStart.point.x
     const dy = current.y - nearestStart.point.y
     let nearestSnapAngle = 0 // 最近的角度(startPoints里比对)
@@ -493,7 +498,6 @@ const getSnapPoint = (
     // 1. 计算角度磁吸数据
     let angleSnapped: {
       objType: string,
-      // objId: string,
       point: Point
     } | null = null
     if (minAngleDiff < 10) {
@@ -643,8 +647,8 @@ const drawWrapper2D = () => {
     worldApi.draw2DWorld(
       canvas,
       hoverPoint.value,
-      xAxisSnappedY.value === null ? null : xAxisSnappedY.value?.number,
-      yAxisSnappedX.value === null ? null : yAxisSnappedX.value?.number,
+      xAxisSnappedY.value === null ? null : xAxisSnappedY.value,
+      yAxisSnappedX.value === null ? null : yAxisSnappedX.value,
       panOffset.value,
       canvasSize.value.width,
       canvasSize.value.height,
@@ -1256,12 +1260,15 @@ const handleCanvasClick = async (e: MouseEvent) => {
             allPoints.push(point)
           })
         })
-        let snapped22 = getSnapPoint(clickPoint,
+        const snapAngles = [0, 45, 90, 135, 180, -135, -90, -45]
+        snapAngles.push(...getTempPointInsertDataLastAngel())
+        let snapped22 = getSnapPointAndLine(clickPoint,
           [{
             objType: currentTool.value,
             snapFromType: 'point',
             point: last
           }],
+          snapAngles,
           allPoints.map((v, index) => ({
             objType: currentTool.value,
             snapFromType: 'point',
@@ -1269,7 +1276,7 @@ const handleCanvasClick = async (e: MouseEvent) => {
               ...v,
               index,
             }
-          }))
+          })),
         )
         if (snapped22 === null) {
           snapped22 = {
@@ -1281,6 +1288,7 @@ const handleCanvasClick = async (e: MouseEvent) => {
         const dist = Math.hypot(snapped22.point.x - last.x, snapped22.point.y - last.y)
 
         if (dist < 10 * zoom2DLevel.value) {
+          console.log('===dist---排除掉最后一个节点', dist)
           return
         }
         clickPoint = snapped22.point
@@ -1372,9 +1380,12 @@ const handleMouseMove = (e: MouseEvent) => {
     const ctxAction = canvasAction.getContext('2d')!
     // 如果正在拖拽，处理拖拽逻辑（即使当前工具不是 drag）
     if (matchHandelObj && matchedHandelInfo) {
-      function temp(api: BaseEntityClass<BaseObjData>): boolean {
+      function temp(wall: WallEntity): boolean {
+        if (wall === matchHandelObj) {
+          return false;
+        }
         if (matchHandelObj && matchedHandelInfo) {
-          let beMatchPoints = api.getMineBeSnapPoints()
+          let beMatchPoints = wall.getMineBeSnapPoints()
           // 排出掉和自己磁吸
           beMatchPoints = beMatchPoints.filter(v => {
             if (v.snapFromType === 'point') {
@@ -1385,11 +1396,17 @@ const handleMouseMove = (e: MouseEvent) => {
             return true;
           })
           if (beMatchPoints.length > 0) {
-            const snapped33 = getSnapPoint({ x, y }, [], beMatchPoints)
+            const snapped33 = getSnapPointAndLine(
+              { x, y },
+              [],
+              [],
+              beMatchPoints,
+            )
             if (snapped33 !== null) {
+              console.log('is me', wall === matchHandelObj, snapped33)
               const result = matchHandelObj.inSceneSnapPointArea(
                 {
-                  objType: api.type,
+                  objType: wall.type,
                   snapFromType: 'point',
                   point: snapped33.point
                 },
@@ -1401,7 +1418,7 @@ const handleMouseMove = (e: MouseEvent) => {
               }
             }
           }
-          const beMatchLines = api.getMineBeSnapLines()
+          const beMatchLines = wall.getMineBeSnapLines()
           if (beMatchLines.length > 0 && matchHandelObj instanceof PointEntityClass) {
             let nearestPoint: Point | null = null
             let minDistance = Infinity
@@ -1417,7 +1434,7 @@ const handleMouseMove = (e: MouseEvent) => {
             }
             if (nearestPoint && minDistance < snapThreshold) {
               if (matchLine) {
-                const result2 = matchHandelObj.inSceneSnapLineArea(api, matchLine, nearestPoint)
+                const result2 = matchHandelObj.inSceneSnapLineArea(wall, matchLine, nearestPoint)
                 if (result2) {
                   drawWrapper2DAnd3D()
                   return true;
@@ -1541,42 +1558,40 @@ const handleMouseMove = (e: MouseEvent) => {
     // alert(allFileKeysObjType[currentTool.value]);
     if (tempPointInsertData.value && tempPointInsertData.value.length > 0) {
       const last = tempPointInsertData.value[tempPointInsertData.value.length - 1]
-      const dist = Math.hypot(x - last.x, y - last.y)
-
-      if (dist < snapThreshold) {
-        hoverPoint.value = { ...last }
-      } else {
-        // 收集所有点（包括临时折线和已绘制的墙上的点）
-        const allPoints = [...tempPointInsertData.value];
-        (worldApi.getObjects(currentTool.value) as LineObjDataClass<any, LineObjData<any>>[]).forEach((item: LineObjDataClass<any, LineObjData<any>>) => {
-          item.points.forEach((point: any) => {
-            allPoints.push(point)
-          })
+      // 收集所有点（包括临时折线和已绘制的墙上的点）
+      const allPoints = [...tempPointInsertData.value];
+      (worldApi.getObjects(currentTool.value) as LineObjDataClass<any, LineObjData<any>>[]).forEach((item: LineObjDataClass<any, LineObjData<any>>) => {
+        item.points.forEach((point: any) => {
+          allPoints.push(point)
         })
-        let snappedPoint44 = getSnapPoint(
-          { x, y },
-          [{
-            objType: currentTool.value,
-            snapFromType: 'point',
-            point: last
-          }],
-          allPoints.map(v => ({
-            objType: currentTool.value,
-            // objId: (tempDrawWall.value as WallData).id,
-            snapFromType: 'point',
-            point: v
-          }))
-        )
-        if (snappedPoint44 === null) {
-          snappedPoint44 = {
-            objType: currentTool.value,
-            snapFromType: 'point',
-            point: { x, y }
-          }
+      })
+      const snapAngles = [0, 45, 90, 135, 180, -135, -90, -45]
+      snapAngles.push(...getTempPointInsertDataLastAngel())
+      let snappedPoint44 = getSnapPointAndLine(
+        { x, y },
+        [{
+          objType: currentTool.value,
+          snapFromType: 'point',
+          point: last
+        }],
+        snapAngles,
+        allPoints.map(v => ({
+          objType: currentTool.value,
+          // objId: (tempDrawWall.value as WallData).id,
+          snapFromType: 'point',
+          point: v
+        })),
+      )
+      if (snappedPoint44 === null) {
+        // console.log('===dist---find', snappedPoint44)
+        snappedPoint44 = {
+          objType: currentTool.value,
+          snapFromType: 'point',
+          point: { x, y }
         }
-        if (snappedPoint44) {
-          hoverPoint.value = snappedPoint44.point
-        }
+      }
+      if (snappedPoint44) {
+        hoverPoint.value = snappedPoint44.point
       }
     }
     drawWrapper2DAnd3D()

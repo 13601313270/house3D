@@ -157,7 +157,7 @@ export abstract class BaseEntityClass<T extends BaseObjData> {
 
   abstract change3DMeshState(): void
 
-  // 本对象进入一个吸附对象的区域
+  // 本对象进入一个吸附点的区域
   abstract inSceneSnapPointArea(
     newPosition: MatchSnapPoint,
     dragHandelInfo: HandelInfo,

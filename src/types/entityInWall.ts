@@ -29,6 +29,7 @@ export abstract class EntityClassInWall<T extends ObjInWallData> extends PointEn
     this.setData(newData)
   }
 
+  // 本对象进入一个吸附点的区域
   inSceneSnapPointArea(newPosition: MatchSnapPoint) {
     if (newPosition.objType === 'wall' && newPosition.snapFromType === 'line') {
       return true
