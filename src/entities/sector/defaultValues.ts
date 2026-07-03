@@ -15,7 +15,7 @@ export default function (): DefaultItem<SectorData>[] {
     endAngle: Math.PI / 2,
   }
   const values: DefaultItem<SectorData>[] = [{
-    name: '扇形',
+    name: '扇形体',
     data
   }]
   return values

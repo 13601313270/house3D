@@ -8,10 +8,10 @@ import { MatchCircleArea, MatchRectArea } from '@/utils/matchArea';
 import { allSnapFromType } from '@/types/baseEntity';
 
 export class SectorEntity extends PointEntityClass<SectorData> {
-  name: string = '扇形'
+  name: string = '扇形体'
   type: string = 'sector'
   isPointObj: boolean = true
-  private circleRadius = 6
+  private circleRadius = 3
 
   draw2DPreviewByData(ctx: CanvasRenderingContext2D, data: SectorData, panOffset: Point, zoomLevel: number): void {
     const { r, startAngle, endAngle, x, y } = data;
@@ -42,18 +42,14 @@ export class SectorEntity extends PointEntityClass<SectorData> {
     panOffset: Point,
     zoomLevel: number,
   ): void {
-    const { r, startAngle, endAngle, x, y } = data;
+    let { r, startAngle, endAngle, x, y } = data;
+    startAngle = startAngle % (Math.PI * 2)
+    endAngle = endAngle % (Math.PI * 2)
+    if (endAngle < startAngle) {
+      endAngle += Math.PI * 2;
+    }
     const screenX = x * zoomLevel + panOffset.x
     const screenY = y * zoomLevel + panOffset.y
-
-    // 控制点
-    ctx.fillStyle = '#fff'
-    ctx.strokeStyle = '#e67e22'
-    ctx.lineWidth = 2
-    ctx.beginPath()
-    ctx.arc(screenX, screenY, Math.max(this.circleRadius * zoomLevel, 3), 0, Math.PI * 2)
-    ctx.fill()
-    ctx.stroke()
 
     // 绘制轮廓
     const circleArea = new MatchCircleArea({ x, y, r })
@@ -76,6 +72,55 @@ export class SectorEntity extends PointEntityClass<SectorData> {
     ctx.lineTo(0, 0);
     ctx.stroke()
     ctx.restore(); // 恢复原始状态
+
+    // 控制点
+    const circleRadius = this.circleRadius;
+    ctx.fillStyle = '#fff'
+    ctx.strokeStyle = '#e67e22'
+    ctx.lineWidth = 2
+    ctx.beginPath()
+    ctx.arc(screenX, screenY, Math.max(circleRadius * zoomLevel, 6), 0, Math.PI * 2)
+    ctx.fill()
+    ctx.stroke()
+
+    // 绘制startAngle的点
+    ctx.beginPath()
+    ctx.arc(
+      screenX + r * Math.cos(startAngle) * zoomLevel,
+      screenY - r * Math.sin(startAngle) * zoomLevel,
+      Math.max(circleRadius * zoomLevel, 6),
+      0,
+      Math.PI * 2
+    )
+    ctx.fill()
+    ctx.stroke()
+    ctx.closePath()
+
+    // 绘制endAngle的点
+    ctx.beginPath()
+    ctx.arc(
+      screenX + r * Math.cos(endAngle) * zoomLevel,
+      screenY - r * Math.sin(endAngle) * zoomLevel,
+      Math.max(circleRadius * zoomLevel, 6),
+      0,
+      Math.PI * 2
+    )
+    ctx.fill()
+    ctx.stroke()
+    ctx.closePath()
+
+    // 绘制一个缩放尺寸的点
+    ctx.beginPath()
+    ctx.arc(
+      screenX + r * Math.cos((startAngle + endAngle) / 2) * zoomLevel,
+      screenY - r * Math.sin((startAngle + endAngle) / 2) * zoomLevel,
+      Math.max(circleRadius * zoomLevel, 6),
+      0,
+      Math.PI * 2
+    )
+    ctx.fill()
+    ctx.stroke()
+    ctx.closePath()
   }
 
   glbObj: THREE.Group | null = null;
@@ -125,7 +170,8 @@ export class SectorEntity extends PointEntityClass<SectorData> {
   showMatchHandel(x: number, y: number) {
     const data = this.getData();
     let { r, startAngle, endAngle } = data;
-    if (Math.abs(x - data.x) > r || Math.abs(y - data.y) > r) {
+    const circleRadius = this.circleRadius * 1.5
+    if (Math.abs(x - data.x) > r + circleRadius || Math.abs(y - data.y) > r + circleRadius) {
       return null
     }
     startAngle = startAngle % (Math.PI * 2)
@@ -133,7 +179,7 @@ export class SectorEntity extends PointEntityClass<SectorData> {
     if (endAngle < startAngle) {
       endAngle += Math.PI * 2;
     }
-    console.log('startAngle', startAngle, endAngle, endAngle - startAngle)
+    // console.log('startAngle', startAngle, endAngle, endAngle - startAngle)
     // 获取沿着(data.x,data.y)角度为startAngle，长度为r的点的坐标
     const pointList = [
       {
@@ -191,17 +237,20 @@ export class SectorEntity extends PointEntityClass<SectorData> {
         y: data.y + r,
       })
     }
-    const minX = Math.min(...pointList.map(item => item.x))
-    const minY = Math.min(...pointList.map(item => item.y))
-    const maxX = Math.max(...pointList.map(item => item.x))
-    const maxY = Math.max(...pointList.map(item => item.y))
-    const circleRadius = this.circleRadius * 1.5
-    if (x > (minX - circleRadius) && (maxX + circleRadius) > x && y > (minY - circleRadius) && (maxY + circleRadius) > y) {
+    let minX = Math.min(...pointList.map(item => item.x))
+    let maxX = Math.max(...pointList.map(item => item.x))
+    let minY = Math.min(...pointList.map(item => item.y))
+    let maxY = Math.max(...pointList.map(item => item.y))
+    minX -= circleRadius;
+    maxX += circleRadius;
+    minY -= circleRadius;
+    maxY += circleRadius;
+    if (x > minX && maxX > x && y > minY && maxY > y) {
       return new MatchRectArea({
-        x: minX + (maxX - minX) / 2,
-        y: minY + (maxY - minY) / 2,
-        width: maxX - minX + circleRadius * 2,
-        depth: maxY - minY + circleRadius * 2,
+        x: (maxX + minX) / 2,
+        y: (maxY + minY) / 2,
+        width: maxX - minX,
+        depth: maxY - minY,
         angleY: 0,
       })
     }
@@ -210,13 +259,62 @@ export class SectorEntity extends PointEntityClass<SectorData> {
 
   matchHandelInfo(x: number, y: number) {
     const data = this.getData();
+    let { startAngle, endAngle, r } = data;
+    if (Math.abs(x - data.x) > r + this.circleRadius * 1.5 || Math.abs(y - data.y) > r + this.circleRadius * 1.5) {
+      return null
+    }
+    startAngle = startAngle % (Math.PI * 2)
+    endAngle = endAngle % (Math.PI * 2)
+    if (endAngle < startAngle) {
+      endAngle += Math.PI * 2;
+    }
+    // console.log('mmmmmmmm');
     const dist = Math.hypot(x - data.x, y - data.y)
-    if (dist < this.circleRadius + 3) {
+    if (dist < this.circleRadius) {
       return {
         index: 0,
         type: this.type,
         id: data.id,
         dist,
+      }
+    }
+
+    // startAngle控制点
+    const startAngleX = data.x + r * Math.cos(startAngle)
+    const startAngleY = data.y - r * Math.sin(startAngle)
+    const distStart = Math.hypot(x - startAngleX, y - startAngleY)
+    if (distStart < this.circleRadius) {
+      return {
+        index: 1,
+        type: this.type,
+        id: data.id,
+        dist: distStart,
+      }
+    }
+
+    // endAngle控制点
+    const endAngleX = data.x + r * Math.cos(endAngle)
+    const endAngleY = data.y - r * Math.sin(endAngle)
+    const distEnd = Math.hypot(x - endAngleX, y - endAngleY)
+    if (distEnd < this.circleRadius) {
+      return {
+        index: 2,
+        type: this.type,
+        id: data.id,
+        dist: distEnd,
+      }
+    }
+
+    // 绘制一个缩放尺寸的点
+    const centerAngelX = data.x + r * Math.cos((startAngle + endAngle) / 2)
+    const centerAngelY = data.y - r * Math.sin((startAngle + endAngle) / 2)
+    const distCenter = Math.hypot(x - centerAngelX, y - centerAngelY)
+    if (distCenter < this.circleRadius) {
+      return {
+        index: 3,
+        type: this.type,
+        id: data.id,
+        dist: distCenter,
       }
     }
     return null;
@@ -225,9 +323,34 @@ export class SectorEntity extends PointEntityClass<SectorData> {
   matchHandelMoveCallback(position: {
     x: number,
     y: number,
-  }) {
+  }, matchHandelInfo: HandelInfo) {
+    const data = this.getData();
+    const { index } = matchHandelInfo;
     const { x, y } = position
-    this.changePosition({ x, y })
+    if (index === 0) {
+      this.changePosition({ x, y })
+    } else if (index === 1) {
+      // 计算(x,y)到(data.x,data.y)的角度
+      const angle = Math.atan2(y - data.y, x - data.x)
+      this.setData({
+        ...data,
+        startAngle: angle * -1,
+      })
+    } else if (index === 2) {
+      // 计算(x,y)到(data.x,data.y)的角度
+      const angle = Math.atan2(y - data.y, x - data.x)
+      this.setData({
+        ...data,
+        endAngle: angle * -1,
+      })
+    } else if (index === 3) {
+      // 计算(x,y)到(data.x,data.y)的距离
+      const dist = Math.hypot(x - data.x, y - data.y)
+      this.setData({
+        ...data,
+        r: dist,
+      })
+    }
   }
 
   getMineBeSnapPoints() {
