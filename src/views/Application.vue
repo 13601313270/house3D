@@ -681,15 +681,8 @@ const drawWrapper2D = () => {
     const ctx = canvas.getContext('2d')
     if (ctx) {
       if (insertTempObj && insertTempObj instanceof PointEntityClass) {
-        if (insertTempObj instanceof EntityClassInWall) {
-          if (hoverPoint.value) {
-            insertTempObj.draw2DPreview(ctx, panOffset.value, zoom2DLevel.value)
-            insertTempObj.draw2D(ctx, panOffset.value, zoom2DLevel.value)
-          }
-        } else {
-          insertTempObj.draw2DPreview(ctx, panOffset.value, zoom2DLevel.value)
-          insertTempObj.draw2D(ctx, panOffset.value, zoom2DLevel.value)
-        }
+        insertTempObj.draw2DPreview(ctx, panOffset.value, zoom2DLevel.value)
+        insertTempObj.draw2D(ctx, panOffset.value, zoom2DLevel.value)
       }
     }
 
@@ -1627,12 +1620,9 @@ const handleMouseMove = (e: MouseEvent) => {
       hoverPoint.value = null
     }
     if (insertTempObj instanceof EntityClassInWall) {
-      if (nearest) {
-        insertTempObj.setPrepareState(x, y, nearest)
-        drawWrapper2DAnd3D()
-      }
+      insertTempObj.setPrepareState(x, y, nearest || undefined)
+      drawWrapper2DAnd3D()
     } else if (insertTempObj instanceof PointEntityClass) {
-      // console.log('nearest---1', nearest)
       insertTempObj.setPrepareState(x, y)
       drawWrapper2DAnd3D()
     }

@@ -12,21 +12,29 @@ export interface NearestWallResult {
 
 export abstract class EntityClassInWall<T extends ObjInWallData> extends PointEntityClass<T> {
   // 待添加状态（鼠标新增悬浮的时候）
-  setPrepareState(x: number, y: number, nearest: NearestWallResult) {
-    const { pointOnWall, angle } = nearest
-    const wallScreenX = pointOnWall.x
-    const wallScreenY = pointOnWall.y
+  setPrepareState(x: number, y: number, nearest?: NearestWallResult) {
+    if (nearest) {
+      const { pointOnWall, angle } = nearest
+      const wallScreenX = pointOnWall.x
+      const wallScreenY = pointOnWall.y
 
-    const newData: ObjInWallData = {
-      ...this.getData(),
-      wallId: nearest.wall.id,
-      wallPointId: nearest.lineIndex,
-      x: wallScreenX,
-      y: wallScreenY,
-      angle,
-    };
-    // @ts-ignore
-    this.setData(newData)
+      const newData: T = {
+        ...this.getData(),
+        wallId: nearest.wall.id,
+        wallPointId: nearest.lineIndex,
+        x: wallScreenX,
+        y: wallScreenY,
+        angle,
+      };
+      this.setData(newData)
+    } else {
+      const newData: T = {
+        ...this.getData(),
+        x: x,
+        y: y,
+      };
+      this.setData(newData)
+    }
   }
 
   // 本对象进入一个吸附点的区域
