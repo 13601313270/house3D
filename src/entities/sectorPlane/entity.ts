@@ -1,0 +1,490 @@
+import { HandelInfo, Point } from '@/types/map2d'
+import * as THREE from 'three'
+import { SectorPlaneData } from './index.d'
+import { PointEntityClass } from '@/types/pointEntity'
+import { editItem } from '..';
+import { getMaterialById } from '@/material';
+import { MatchCircleArea, MatchRectArea } from '@/utils/matchArea';
+import { allSnapFromType } from '@/types/baseEntity';
+import { importImgFileHead } from '../allObjs';
+
+export class SectorPlaneEntity extends PointEntityClass<SectorPlaneData> {
+  name: string = '扇形平面'
+  type: string = 'sectorPlane'
+  isPointObj: boolean = true
+  private circleRadius = 3
+  private static textureLoader = new THREE.TextureLoader();
+  private static textureCache = new Map<string | File, THREE.Texture>();
+
+  draw2DPreviewByData(ctx: CanvasRenderingContext2D, data: SectorPlaneData, panOffset: Point, zoomLevel: number): void {
+    const { r, startAngle, endAngle, x, y } = data;
+    const screenX = x * zoomLevel + panOffset.x
+    const screenY = y * zoomLevel + panOffset.y
+
+    // 绘制一个圆形
+    ctx.fillStyle = data.color
+    ctx.strokeStyle = 'grey'
+    ctx.lineWidth = 1
+    ctx.beginPath()
+    ctx.moveTo(screenX, screenY)
+    ctx.arc(
+      screenX,
+      screenY,
+      r * zoomLevel,
+      endAngle * -1,
+      startAngle * -1,
+    )
+    ctx.fill()
+    ctx.stroke()
+    ctx.closePath()
+  }
+
+  draw2DByData(
+    ctx: CanvasRenderingContext2D,
+    data: SectorPlaneData,
+    panOffset: Point,
+    zoomLevel: number,
+  ): void {
+    let { r, startAngle, endAngle, x, y } = data;
+    startAngle = startAngle % (Math.PI * 2)
+    endAngle = endAngle % (Math.PI * 2)
+    if (endAngle < startAngle) {
+      endAngle += Math.PI * 2;
+    }
+    const screenX = x * zoomLevel + panOffset.x
+    const screenY = y * zoomLevel + panOffset.y
+
+    // 绘制轮廓
+    const circleArea = new MatchCircleArea({ x, y, r })
+    ctx.lineWidth = 2
+    ctx.strokeStyle = 'blue'
+    ctx.save(); // 保存当前状态
+    ctx.translate(
+      circleArea.data.x * zoomLevel + panOffset.x,
+      circleArea.data.y * zoomLevel + panOffset.y
+    );
+    ctx.beginPath()
+    ctx.moveTo(0, 0)
+    ctx.arc(
+      0,
+      0,
+      circleArea.data.r * zoomLevel,
+      endAngle * -1,
+      startAngle * -1,
+    )
+    ctx.lineTo(0, 0);
+    ctx.stroke()
+    ctx.restore(); // 恢复原始状态
+
+    // 控制点
+    const circleRadius = this.circleRadius;
+    ctx.fillStyle = '#fff'
+    ctx.strokeStyle = '#e67e22'
+    ctx.lineWidth = 2
+    ctx.beginPath()
+    ctx.arc(screenX, screenY, Math.max(circleRadius * zoomLevel, 6), 0, Math.PI * 2)
+    ctx.fill()
+    ctx.stroke()
+
+    // 绘制startAngle的点
+    ctx.beginPath()
+    ctx.arc(
+      screenX + r * Math.cos(startAngle) * zoomLevel,
+      screenY - r * Math.sin(startAngle) * zoomLevel,
+      Math.max(circleRadius * zoomLevel, 6),
+      0,
+      Math.PI * 2
+    )
+    ctx.fill()
+    ctx.stroke()
+    ctx.closePath()
+
+    // 绘制endAngle的点
+    ctx.beginPath()
+    ctx.arc(
+      screenX + r * Math.cos(endAngle) * zoomLevel,
+      screenY - r * Math.sin(endAngle) * zoomLevel,
+      Math.max(circleRadius * zoomLevel, 6),
+      0,
+      Math.PI * 2
+    )
+    ctx.fill()
+    ctx.stroke()
+    ctx.closePath()
+
+    // 绘制一个缩放尺寸的点
+    ctx.beginPath()
+    ctx.arc(
+      screenX + r * Math.cos((startAngle + endAngle) / 2) * zoomLevel,
+      screenY - r * Math.sin((startAngle + endAngle) / 2) * zoomLevel,
+      Math.max(circleRadius * zoomLevel, 6),
+      0,
+      Math.PI * 2
+    )
+    ctx.fill()
+    ctx.stroke()
+    ctx.closePath()
+  }
+
+  glbObj: THREE.Group | null = null;
+
+  create3DMesh() {
+    const data = this.getData();
+    const group = new THREE.Group()
+
+    const { r, color, mt, startAngle, endAngle, ds, img } = data;
+
+    const sectorShape = new THREE.Shape();
+    sectorShape.moveTo(0, 0);
+    sectorShape.lineTo(r * Math.cos(startAngle), r * Math.sin(startAngle));
+    sectorShape.absarc(0, 0, r, startAngle, endAngle, false);
+    sectorShape.lineTo(0, 0);
+
+    const geometry = new THREE.ShapeGeometry(sectorShape);
+
+    let material: THREE.Material | null = null;
+    if (img) {
+      let texture = SectorPlaneEntity.textureCache.get(img);
+      if (!texture) {
+        if (img.startsWith(importImgFileHead)) {
+          const findImportFile = this.world.allImportImgs.find(item => item.fileTypeId === img);
+          if (findImportFile) {
+            const imgFile: File = findImportFile.file as File;
+            const objectUrl = URL.createObjectURL(imgFile);
+            texture = SectorPlaneEntity.textureLoader.load(objectUrl);
+            // texture.flipY = false;
+            SectorPlaneEntity.textureCache.set(img, texture);
+          }
+        } else {
+          texture = SectorPlaneEntity.textureLoader.load(img);
+          // texture.flipY = false;
+          SectorPlaneEntity.textureCache.set(img, texture);
+        }
+      }
+      material = new THREE.MeshStandardMaterial({
+        map: texture,
+        color: '#ffffff',
+        transparent: true,
+        alphaTest: 0.1,
+      });
+    } else {
+      const materialById = mt ? getMaterialById(mt) : null;
+      if (mt && materialById) {
+        material = materialById.material(new THREE.Vector3(0, 1, 0))
+      } else {
+        material = (new THREE.MeshStandardMaterial({ color }));
+      }
+    }
+    if (material && ds) {
+      material.side = THREE.DoubleSide;
+    }
+    const mesh = new THREE.Mesh(geometry, material)
+    mesh.rotation.x = -Math.PI / 2;
+    group.add(mesh);
+
+    return [
+      group
+    ]
+  }
+
+  createBoundingBox(): [THREE.Vector3, THREE.Vector3, THREE.Vector3] {
+    const { r } = this.getData();
+    return [
+      new THREE.Vector3(r * 2, 0, r * 2),
+      new THREE.Vector3(0, 0, 0),
+      new THREE.Vector3(0, 0, 0)
+    ]
+  }
+
+  showMatchHandel(x: number, y: number) {
+    const data = this.getData();
+    let { r, startAngle, endAngle } = data;
+    const circleRadius = this.circleRadius * 1.5
+    if (Math.abs(x - data.x) > r + circleRadius || Math.abs(y - data.y) > r + circleRadius) {
+      return null
+    }
+    startAngle = startAngle % (Math.PI * 2)
+    endAngle = endAngle % (Math.PI * 2)
+    if (endAngle < startAngle) {
+      endAngle += Math.PI * 2;
+    }
+    // console.log('startAngle', startAngle, endAngle, endAngle - startAngle)
+    // 获取沿着(data.x,data.y)角度为startAngle，长度为r的点的坐标
+    const pointList = [
+      {
+        x: data.x,
+        y: data.y,
+      },
+      {
+        x: data.x + r * Math.cos(startAngle),
+        y: data.y - r * Math.sin(startAngle),
+      },
+      {
+        x: data.x + r * Math.cos(endAngle),
+        y: data.y - r * Math.sin(endAngle),
+      },
+    ];
+    if (startAngle < Math.PI / -2 * 3 && endAngle > Math.PI / -2 * 3) {
+      pointList.push({
+        x: data.x,
+        y: data.y - r,
+      })
+    }
+    if (startAngle < Math.PI * -1 && endAngle > Math.PI * -1) {
+      pointList.push({
+        x: data.x - r,
+        y: data.y,
+      })
+    }
+    if (startAngle < Math.PI / -2 && endAngle > Math.PI / -2) {
+      pointList.push({
+        x: data.x,
+        y: data.y + r,
+      })
+    }
+    if (startAngle < 0 && endAngle > 0) {
+      pointList.push({
+        x: data.x + r,
+        y: data.y,
+      })
+    }
+    if (startAngle < Math.PI / 2 && endAngle > Math.PI / 2) {
+      pointList.push({
+        x: data.x,
+        y: data.y - r,
+      })
+    }
+    if (startAngle < Math.PI && endAngle > Math.PI) {
+      pointList.push({
+        x: data.x - r,
+        y: data.y,
+      })
+    }
+    if (startAngle < Math.PI / 2 * 3 && endAngle > Math.PI / 2 * 3) {
+      pointList.push({
+        x: data.x,
+        y: data.y + r,
+      })
+    }
+    let minX = Math.min(...pointList.map(item => item.x))
+    let maxX = Math.max(...pointList.map(item => item.x))
+    let minY = Math.min(...pointList.map(item => item.y))
+    let maxY = Math.max(...pointList.map(item => item.y))
+    minX -= circleRadius;
+    maxX += circleRadius;
+    minY -= circleRadius;
+    maxY += circleRadius;
+    if (x > minX && maxX > x && y > minY && maxY > y) {
+      return new MatchRectArea({
+        x: (maxX + minX) / 2,
+        y: (maxY + minY) / 2,
+        width: maxX - minX,
+        depth: maxY - minY,
+        angleY: 0,
+      })
+    }
+    return null;
+  }
+
+  matchHandelInfo(x: number, y: number) {
+    const data = this.getData();
+    let { startAngle, endAngle, r } = data;
+    if (Math.abs(x - data.x) > r + this.circleRadius * 1.5 || Math.abs(y - data.y) > r + this.circleRadius * 1.5) {
+      return null
+    }
+    startAngle = startAngle % (Math.PI * 2)
+    endAngle = endAngle % (Math.PI * 2)
+    if (endAngle < startAngle) {
+      endAngle += Math.PI * 2;
+    }
+    // console.log('mmmmmmmm');
+    const dist = Math.hypot(x - data.x, y - data.y)
+    if (dist < this.circleRadius) {
+      return {
+        index: 0,
+        type: this.type,
+        id: data.id,
+        dist,
+      }
+    }
+
+    // startAngle控制点
+    const startAngleX = data.x + r * Math.cos(startAngle)
+    const startAngleY = data.y - r * Math.sin(startAngle)
+    const distStart = Math.hypot(x - startAngleX, y - startAngleY)
+    if (distStart < this.circleRadius) {
+      return {
+        index: 1,
+        type: this.type,
+        id: data.id,
+        dist: distStart,
+      }
+    }
+
+    // endAngle控制点
+    const endAngleX = data.x + r * Math.cos(endAngle)
+    const endAngleY = data.y - r * Math.sin(endAngle)
+    const distEnd = Math.hypot(x - endAngleX, y - endAngleY)
+    if (distEnd < this.circleRadius) {
+      return {
+        index: 2,
+        type: this.type,
+        id: data.id,
+        dist: distEnd,
+      }
+    }
+
+    // 绘制一个缩放尺寸的点
+    const centerAngelX = data.x + r * Math.cos((startAngle + endAngle) / 2)
+    const centerAngelY = data.y - r * Math.sin((startAngle + endAngle) / 2)
+    const distCenter = Math.hypot(x - centerAngelX, y - centerAngelY)
+    if (distCenter < this.circleRadius) {
+      return {
+        index: 3,
+        type: this.type,
+        id: data.id,
+        dist: distCenter,
+      }
+    }
+    return null;
+  }
+
+  matchHandelMoveCallback(position: {
+    x: number,
+    y: number,
+  }, matchHandelInfo: HandelInfo) {
+    const data = this.getData();
+    const { index } = matchHandelInfo;
+    const { x, y } = position
+    if (index === 0) {
+      this.changePosition({ x, y })
+    } else if (index === 1) {
+      // 计算(x,y)到(data.x,data.y)的角度
+      const angle = Math.atan2(y - data.y, x - data.x)
+      this.setData({
+        ...data,
+        startAngle: angle * -1,
+      })
+    } else if (index === 2) {
+      // 计算(x,y)到(data.x,data.y)的角度
+      const angle = Math.atan2(y - data.y, x - data.x)
+      this.setData({
+        ...data,
+        endAngle: angle * -1,
+      })
+    } else if (index === 3) {
+      // 计算(x,y)到(data.x,data.y)的距离
+      const dist = Math.hypot(x - data.x, y - data.y)
+      this.setData({
+        ...data,
+        r: dist,
+      })
+    }
+  }
+
+  getMineBeSnapPoints() {
+    const key: allSnapFromType = 'point';
+    const data = this.getData();
+    return [{
+      objType: this.type,
+      objId: data.id,
+      snapFromType: key,
+      point: {
+        index: 0,
+        x: data.x,
+        y: data.y,
+      },
+    }]
+  }
+
+  getMineBeSnapLines(): [Point, Point][] {
+    return []
+  }
+
+  editPropConfig(snapPoint: HandelInfo, editShow: (editInfoList: editItem[], callback: (val: any) => void) => void): void {
+    const data = this.getData();
+    editShow([
+      {
+        id: 'r',
+        label: '半径',
+        dataType: 'number',
+        min: 1,
+        max: Infinity,
+        step: 1,
+        value: data.r,
+      },
+      {
+        id: 'mt',
+        label: '材质',
+        dataType: 'material',
+        value: data.mt,
+      },
+      {
+        id: 'color',
+        label: '颜色',
+        dataType: 'color',
+        value: data.color,
+      },
+      {
+        id: 'img',
+        label: '图片',
+        dataType: 'img',
+        value: data.img || '',
+      },
+      {
+        id: 'z',
+        label: '距离地面',
+        dataType: 'number',
+        min: -100,
+        max: 100,
+        step: 1,
+        value: data.z,
+      },
+      {
+        id: 'startAngle',
+        label: '开始角度',
+        dataType: 'number',
+        min: -Math.PI,
+        max: Math.PI,
+        step: 0.1,
+        value: data.startAngle,
+      },
+      {
+        id: 'endAngle',
+        label: '结束角度',
+        dataType: 'number',
+        min: -Math.PI,
+        max: Math.PI,
+        step: 0.1,
+        value: data.endAngle,
+      },
+      {
+        id: 'ds',
+        label: '是否双面可见',
+        dataType: 'boolean',
+        value: data.ds,
+      },
+    ], (val) => {
+      this.setData({
+        ...data,
+        ...val,
+      })
+    })
+  }
+
+  inSceneSnapPointArea() {
+    return false
+  }
+
+  inSceneSnapLineArea() {
+    return false
+  }
+
+  setPrepareState(x: number, y: number): void {
+    this.setData({
+      ...this.getData(),
+      x,
+      y,
+    })
+  }
+}

@@ -19,6 +19,7 @@ import curtainInWallPlugin from './curtainInWall'
 import staircasePlugin from './staircase'
 import signPlugin from './sign'
 import sectorPlugin from './sector'
+import sectorPlanePlugin from './sectorPlane'
 import { BaseEntityClass } from '@/types/baseEntity'
 import { World } from '@/utils/world'
 import { IconDataType } from '@/components/GroundTextureEditor/types/elementDefinition'
@@ -98,6 +99,7 @@ export const allPluginByKey: Record<string, PluginType> = {
   staircasePlugin,
   signPlugin,
   sectorPlugin,
+  sectorPlanePlugin,
 ].forEach(v => {
   allPluginByKey[v.key] = v
   allFileKeys.push(v.key)
