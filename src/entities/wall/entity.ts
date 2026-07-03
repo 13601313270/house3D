@@ -653,6 +653,43 @@ export class WallEntity extends LineEntityClass<WallPoint, WallData> {
           },
         },
         {
+          id: 'split',
+          label: '从此顶点断成两截',
+          dataType: 'button',
+          value: async () => {
+            if (data.points.length > 2) {
+              const index = snapPoint.index / 2;
+              if (index === 0) {
+                message.error('只能从中间节点断开')
+                return;
+              }
+              if (index === data.points.length - 1) {
+                message.error('只能从中间节点断开')
+                return;
+              }
+              const wall1Points = [...data.points.slice(0, index + 1)]
+              const wall2Points = [...data.points.slice(index)]
+              // 克隆出一个新的墙
+              const type = this.type;
+              const values = JSON.parse(JSON.stringify(this.getData()));
+              values.id = Date.now().toString()
+              const apiList = await window.worldApi.add(type, [values])
+              const beCopyEntity = apiList[0]
+              beCopyEntity.setData({
+                ...values,
+                points: [...wall2Points],
+              })
+              this.setData({
+                ...data,
+                points: [...wall1Points],
+              })
+              close()
+            } else {
+              message.error('只能从中间节点断开')
+            }
+          },
+        },
+        {
           id: 'title',
           label: '整个墙体属性',
           dataType: 'title',
