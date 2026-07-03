@@ -14,6 +14,7 @@ export default function (): DefaultItem<SectorPlaneData>[] {
     endAngle: Math.PI / 2,
     ds: true,
     img: '',
+    imgAngelY: 0,
   }
   const values: DefaultItem<SectorPlaneData>[] = [{
     name: '扇形平面',

@@ -12,7 +12,7 @@ export class SectorPlaneEntity extends PointEntityClass<SectorPlaneData> {
   name: string = '扇形平面'
   type: string = 'sectorPlane'
   isPointObj: boolean = true
-  private circleRadius = 3
+  private circleRadius = 5
   private static textureLoader = new THREE.TextureLoader();
   private static textureCache = new Map<string | File, THREE.Texture>();
 
@@ -132,7 +132,7 @@ export class SectorPlaneEntity extends PointEntityClass<SectorPlaneData> {
     const data = this.getData();
     const group = new THREE.Group()
 
-    const { r, color, mt, startAngle, endAngle, ds, img } = data;
+    const { r, color, mt, startAngle, endAngle, ds, img, imgAngelY } = data;
 
     const sectorShape = new THREE.Shape();
     sectorShape.moveTo(0, 0);
@@ -141,6 +141,19 @@ export class SectorPlaneEntity extends PointEntityClass<SectorPlaneData> {
     sectorShape.lineTo(0, 0);
 
     const geometry = new THREE.ShapeGeometry(sectorShape);
+
+    const positions = geometry.attributes.position;
+    const uvs = geometry.attributes.uv;
+    const cos = Math.cos(imgAngelY);
+    const sin = Math.sin(imgAngelY);
+    for (let i = 0; i < positions.count; i++) {
+      const x = positions.getX(i);
+      const y = positions.getY(i);
+      const rotatedX = x * cos - y * sin;
+      const rotatedY = x * sin + y * cos;
+      uvs.setXY(i, rotatedX / (2 * r) + 0.5, rotatedY / (2 * r) + 0.5);
+    }
+    uvs.needsUpdate = true;
 
     let material: THREE.Material | null = null;
     if (img) {
@@ -432,6 +445,14 @@ export class SectorPlaneEntity extends PointEntityClass<SectorPlaneData> {
         value: data.img || '',
       },
       {
+        id: 'imgAngelY',
+        label: '图片角度Y',
+        dataType: 'angle',
+        min: -360,
+        max: 360,
+        value: data.imgAngelY,
+      },
+      {
         id: 'z',
         label: '距离地面',
         dataType: 'number',
@@ -439,6 +460,12 @@ export class SectorPlaneEntity extends PointEntityClass<SectorPlaneData> {
         max: 100,
         step: 1,
         value: data.z,
+      },
+      {
+        id: 'ds',
+        label: '是否双面可见',
+        dataType: 'boolean',
+        value: data.ds,
       },
       {
         id: 'startAngle',
@@ -457,12 +484,6 @@ export class SectorPlaneEntity extends PointEntityClass<SectorPlaneData> {
         max: Math.PI,
         step: 0.1,
         value: data.endAngle,
-      },
-      {
-        id: 'ds',
-        label: '是否双面可见',
-        dataType: 'boolean',
-        value: data.ds,
       },
     ], (val) => {
       this.setData({

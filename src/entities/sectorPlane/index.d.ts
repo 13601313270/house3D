@@ -8,4 +8,5 @@ export type SectorPlaneData = PointObjData & {
   endAngle: number // 结束角度
   ds: boolean // 是否双面可见
   img: string // 图片
+  imgAngelY: number // 图片角度Y
 }

@@ -9,6 +9,7 @@ export class SectorPlaneDataClass extends PointObjDataClass<SectorPlaneData> {
   endAngle: number // 结束角度
   ds: boolean // 是否双面可见
   img: string // 图片
+  imgAngelY: number // 图片角度Y
 
   constructor(data: SectorPlaneData) {
     super(data)
@@ -19,5 +20,6 @@ export class SectorPlaneDataClass extends PointObjDataClass<SectorPlaneData> {
     this.endAngle = data.endAngle
     this.ds = data.ds
     this.img = data.img
+    this.imgAngelY = data.imgAngelY
   }
 }
