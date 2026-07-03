@@ -266,7 +266,7 @@ export class World {
 
   draw2DWorld(
     canvasBgRef: HTMLCanvasElement | null,
-    fileData: fileData,
+    // fileData: fileData,
     hoverPoint: Point | null,
     xAxisSnappedY: number | null,
     yAxisSnappedX: number | null,
@@ -288,6 +288,7 @@ export class World {
       this.allFileMapObjects.wall = []
     }
 
+    const fileData = this.getAllFileObjects()
     const allObj: PointEntityClass<any>[] = [];
     allFileKeys.forEach((key) => {
       if (fileData[key]) {

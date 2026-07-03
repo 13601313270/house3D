@@ -197,6 +197,7 @@ import { CameraEntity } from '@/entities/camera/entity';
 import AllWorldObjSelect from '@/components/AllWorldObjSelect.vue'
 import message from '@/utils/message';
 import { DefaultItem } from '@/entities/pluginType';
+import getNearestWall from '@/utils/getNearestWall';
 
 const canvas2DRef = ref<HTMLCanvasElement | null>(null)
 const canvas2D2Ref = ref<HTMLCanvasElement | null>(null)
@@ -357,42 +358,6 @@ const editSnapPoint = ref<HandelInfo>()
 const editPropTypeIndex = ref<number>(-1)
 const showAllObjSelect = ref(false)
 const showEnvironmentEditor = ref(false)
-
-const getNearestWall = (point: Point): NearestWallResult | null => {
-  let nearestWall: WallData | null = null
-  let nearestPoint: Point | null = null
-  let minDistance = Infinity
-  let nearestAngle = 0
-  let lineIndex: number = -1;
-
-  (worldApi.getObjects('wall') as WallData[]).forEach((wall: WallData) => {
-    for (let i = 0; i < wall.points.length - 1; i++) {
-      const p1 = wall.points[i]
-      const p2 = wall.points[i + 1]
-
-      const distance = pointToLineDistance(point, p1, p2)
-
-      if (distance < minDistance) {
-        minDistance = distance
-        nearestWall = wall
-        lineIndex = i;
-        nearestPoint = getClosestPointOnLine(point, p1, p2)
-        nearestAngle = Math.atan2(p2.y - p1.y, p2.x - p1.x)
-      }
-    }
-  })
-
-  if (nearestPoint && lineIndex > -1 && minDistance < snapThreshold && nearestWall) {
-    return {
-      lineIndex,
-      wall: nearestWall,
-      pointOnWall: nearestPoint,
-      angle: nearestAngle
-    }
-  }
-
-  return null
-}
 
 const getSnapPoint = (
   current: Point,
@@ -672,13 +637,11 @@ const drawWrapper2DAnd3D = () => {
   worldApi.draw3D()
 }
 const drawWrapper2D = () => {
-  const fileData: fileData = worldApi.getAllFileObjects()
   const canvas = canvas2DRef.value
   const canvasAction = canvas2D2Ref.value;
   if (canvas && canvasAction) {
     worldApi.draw2DWorld(
       canvas,
-      fileData,
       hoverPoint.value,
       xAxisSnappedY.value === null ? null : xAxisSnappedY.value?.number,
       yAxisSnappedX.value === null ? null : yAxisSnappedX.value?.number,
@@ -1401,8 +1364,6 @@ const handleMouseMove = (e: MouseEvent) => {
         beCopyEntity.offset.y = y - beCopyEntityHandelInfo.y
         drawWrapper2DAnd3D()
       }
-      // beCopyEntity.changePosition({ x, y })
-      // drawWrapper2DAnd3D()
     }
   }
   if (currentTool.value === 'drag') { // drag代表拖拽和鼠标移动
@@ -1905,10 +1866,10 @@ async function importOutObj(file: File) {
     return
   }
 
-  // 检查文件大小限制（例如 100MB）
-  const maxSize = 100 * 1024 * 1024 // 100MB
-  if (file.size > maxSize) {
-    alert(`文件 "${file.name}" 太大（${(file.size / 1024 / 1024).toFixed(2)} MB），请上传小于 100MB 的文件`)
+  // 检查文件大小限制
+  const maxSize = 300
+  if (file.size > maxSize * 1024 * 1024) {
+    alert(`文件 "${file.name}" 太大（${(file.size / 1024 / 1024).toFixed(2)} MB），请上传小于 ${maxSize}MB 的文件`)
     return
   }
 
@@ -1964,7 +1925,6 @@ async function importOutObj(file: File) {
               v.position.z
             )
             console.log(centerZ)
-            // v.position.copy(newPosition)
             await handleLoadedObject(v, file, type, scaleFactor * v.scale.x, newPosition)
             await sleep(100)
           }
