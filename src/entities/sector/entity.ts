@@ -4,7 +4,7 @@ import { SectorData } from './index.d'
 import { PointEntityClass } from '@/types/pointEntity'
 import { editItem } from '..';
 import { getMaterialById } from '@/material';
-import { MatchCircleArea } from '@/utils/matchArea';
+import { MatchCircleArea, MatchRectArea } from '@/utils/matchArea';
 import { allSnapFromType } from '@/types/baseEntity';
 
 export class SectorEntity extends PointEntityClass<SectorData> {
@@ -28,8 +28,8 @@ export class SectorEntity extends PointEntityClass<SectorData> {
       screenX,
       screenY,
       r * zoomLevel,
-      startAngle,
-      endAngle
+      endAngle * -1,
+      startAngle * -1,
     )
     ctx.fill()
     ctx.stroke()
@@ -51,7 +51,7 @@ export class SectorEntity extends PointEntityClass<SectorData> {
     ctx.strokeStyle = '#e67e22'
     ctx.lineWidth = 2
     ctx.beginPath()
-    ctx.arc(screenX, screenY, this.circleRadius * zoomLevel + 3, 0, Math.PI * 2)
+    ctx.arc(screenX, screenY, Math.max(this.circleRadius * zoomLevel, 3), 0, Math.PI * 2)
     ctx.fill()
     ctx.stroke()
 
@@ -70,8 +70,8 @@ export class SectorEntity extends PointEntityClass<SectorData> {
       0,
       0,
       circleArea.data.r * zoomLevel,
-      startAngle,
-      endAngle,
+      endAngle * -1,
+      startAngle * -1,
     )
     ctx.lineTo(0, 0);
     ctx.stroke()
@@ -84,21 +84,30 @@ export class SectorEntity extends PointEntityClass<SectorData> {
     const data = this.getData();
     const group = new THREE.Group()
 
-    const { r, h, color, mt } = data;
+    const { r, h, color, mt, startAngle, endAngle } = data;
 
-    const geometryRight = new THREE.CylinderGeometry(
-      r,
-      r,
-      h,
-      32
-    );
-    const material = mt ? (getMaterialById(mt)?.material(new THREE.Vector3(0, 0, 1))) : (new THREE.MeshStandardMaterial({ color }));
+    const sectorShape = new THREE.Shape();
+    // sectorShape.moveTo(0, 0);
+    // sectorShape.lineTo(r * Math.cos(startAngle), r * Math.sin(startAngle));
+    // sectorShape.absarc(0, 0, r, startAngle, endAngle, true);
+    // sectorShape.lineTo(0, 0);
+
+    sectorShape.moveTo(0, 0);
+    sectorShape.lineTo(r * Math.cos(startAngle), r * Math.sin(startAngle));
+    sectorShape.absarc(0, 0, r, startAngle, endAngle, false);
+    sectorShape.lineTo(0, 0);
+
+    const geometryRight = new THREE.ExtrudeGeometry(sectorShape, {
+      depth: h,
+      bevelEnabled: false,
+    });
+
+    const material = mt ? (getMaterialById(mt)?.material(new THREE.Vector3(0, 0, 1))) : (new THREE.MeshStandardMaterial({ color, side: THREE.DoubleSide }));
     const doorMeshRight = new THREE.Mesh(geometryRight, material)
-    doorMeshRight.position.setY(h / 2)
+    doorMeshRight.rotation.x = -Math.PI / 2;
+    // doorMeshRight.position.setY(h / 2);
     group.add(doorMeshRight);
 
-    // group.position.set(data.x, data.r, data.y)
-    // group.rotateY(data.angle * -1);
     return [
       group
     ]
@@ -115,9 +124,86 @@ export class SectorEntity extends PointEntityClass<SectorData> {
 
   showMatchHandel(x: number, y: number) {
     const data = this.getData();
-    const dist = Math.hypot(x - data.x, y - data.y)
-    if (dist < data.r) {
-      return new MatchCircleArea({ x: data.x, y: data.y, r: data.r })
+    let { r, startAngle, endAngle } = data;
+    if (Math.abs(x - data.x) > r || Math.abs(y - data.y) > r) {
+      return null
+    }
+    startAngle = startAngle % (Math.PI * 2)
+    endAngle = endAngle % (Math.PI * 2)
+    if (endAngle < startAngle) {
+      endAngle += Math.PI * 2;
+    }
+    console.log('startAngle', startAngle, endAngle, endAngle - startAngle)
+    // 获取沿着(data.x,data.y)角度为startAngle，长度为r的点的坐标
+    const pointList = [
+      {
+        x: data.x,
+        y: data.y,
+      },
+      {
+        x: data.x + r * Math.cos(startAngle),
+        y: data.y - r * Math.sin(startAngle),
+      },
+      {
+        x: data.x + r * Math.cos(endAngle),
+        y: data.y - r * Math.sin(endAngle),
+      },
+    ];
+    if (startAngle < Math.PI / -2 * 3 && endAngle > Math.PI / -2 * 3) {
+      pointList.push({
+        x: data.x,
+        y: data.y - r,
+      })
+    }
+    if (startAngle < Math.PI * -1 && endAngle > Math.PI * -1) {
+      pointList.push({
+        x: data.x - r,
+        y: data.y,
+      })
+    }
+    if (startAngle < Math.PI / -2 && endAngle > Math.PI / -2) {
+      pointList.push({
+        x: data.x,
+        y: data.y + r,
+      })
+    }
+    if (startAngle < 0 && endAngle > 0) {
+      pointList.push({
+        x: data.x + r,
+        y: data.y,
+      })
+    }
+    if (startAngle < Math.PI / 2 && endAngle > Math.PI / 2) {
+      pointList.push({
+        x: data.x,
+        y: data.y - r,
+      })
+    }
+    if (startAngle < Math.PI && endAngle > Math.PI) {
+      pointList.push({
+        x: data.x - r,
+        y: data.y,
+      })
+    }
+    if (startAngle < Math.PI / 2 * 3 && endAngle > Math.PI / 2 * 3) {
+      pointList.push({
+        x: data.x,
+        y: data.y + r,
+      })
+    }
+    const minX = Math.min(...pointList.map(item => item.x))
+    const minY = Math.min(...pointList.map(item => item.y))
+    const maxX = Math.max(...pointList.map(item => item.x))
+    const maxY = Math.max(...pointList.map(item => item.y))
+    const circleRadius = this.circleRadius * 1.5
+    if (x > (minX - circleRadius) && (maxX + circleRadius) > x && y > (minY - circleRadius) && (maxY + circleRadius) > y) {
+      return new MatchRectArea({
+        x: minX + (maxX - minX) / 2,
+        y: minY + (maxY - minY) / 2,
+        width: maxX - minX + circleRadius * 2,
+        depth: maxY - minY + circleRadius * 2,
+        angleY: 0,
+      })
     }
     return null;
   }
@@ -172,7 +258,7 @@ export class SectorEntity extends PointEntityClass<SectorData> {
         dataType: 'number',
         min: 1,
         max: Infinity,
-        step: 10,
+        step: 1,
         value: data.r,
       },
       {
@@ -181,7 +267,7 @@ export class SectorEntity extends PointEntityClass<SectorData> {
         dataType: 'number',
         min: 1,
         max: Infinity,
-        step: 10,
+        step: 1,
         value: data.h,
       },
       {
@@ -204,6 +290,24 @@ export class SectorEntity extends PointEntityClass<SectorData> {
         max: 100,
         step: 1,
         value: data.z,
+      },
+      {
+        id: 'startAngle',
+        label: '开始角度',
+        dataType: 'number',
+        min: -Math.PI,
+        max: Math.PI,
+        step: 0.1,
+        value: data.startAngle,
+      },
+      {
+        id: 'endAngle',
+        label: '结束角度',
+        dataType: 'number',
+        min: -Math.PI,
+        max: Math.PI,
+        step: 0.1,
+        value: data.endAngle,
       }
     ], (val) => {
       this.setData({
