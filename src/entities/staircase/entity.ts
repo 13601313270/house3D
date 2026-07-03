@@ -28,13 +28,12 @@ export class StaircaseEntity extends LineEntityClass<StaircasePoint, StaircaseDa
     }
   }
 
-  setPreparePoint(point: (Point & StaircasePoint)[]): void {
-    this.getData().points = point
-    this.data.points.forEach((v, i) => {
-      if (v.z === undefined) {
-        v.z = i * 30
-      }
-    })
+  setPreparePoint(points: (Point & StaircasePoint)[]): void {
+    this.getData().points = points
+      .map((v, i) => ({
+        ...v,
+        z: v.z || i * 30,
+      }))
   }
 
   draw2DPreviewByData(ctx: CanvasRenderingContext2D, data: StaircaseData, panOffset: Point, zoomLevel: number): void {

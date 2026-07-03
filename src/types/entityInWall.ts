@@ -30,8 +30,8 @@ export abstract class EntityClassInWall<T extends ObjInWallData> extends PointEn
     } else {
       const newData: T = {
         ...this.getData(),
-        x: x,
-        y: y,
+        x,
+        y,
       };
       this.setData(newData)
     }

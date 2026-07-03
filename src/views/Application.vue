@@ -679,21 +679,15 @@ const drawWrapper2D = () => {
       })();
     }
     const ctx = canvas.getContext('2d')
-    if (ctx) {
-      if (insertTempObj && insertTempObj instanceof PointEntityClass) {
+    if (ctx && insertTempObj) {
+      if (insertTempObj instanceof LineEntityClass) {
+        insertTempObj.draw2DPreview(ctx, panOffset.value, zoom2DLevel.value)
+        insertTempObj.draw2D(ctx, panOffset.value, zoom2DLevel.value)
+      } else if (insertTempObj instanceof PointEntityClass) {
         insertTempObj.draw2DPreview(ctx, panOffset.value, zoom2DLevel.value)
         insertTempObj.draw2D(ctx, panOffset.value, zoom2DLevel.value)
       }
     }
-
-    // 绘制临时点阵
-    worldApi.drawTempPointInsertData(
-      canvas,
-      tempPointInsertData.value || [],
-      hoverPoint.value,
-      panOffset.value,
-      zoom2DLevel.value,
-    )
   }
 }
 
@@ -851,37 +845,20 @@ onMounted(async () => {
 
   const handleKeyDown = async (e: KeyboardEvent) => {
     if (e.key === 'Escape') {
-      if (tempPointInsertData.value.length > 0) {
-        if (tempPointInsertData.value.length > 1) {
-          const ClassName = fileDataKeyToClass[currentTool.value];
-          const defaultValue_: DefaultItem<BaseObjData>[] | Promise<DefaultItem<BaseObjData>[]> = await allPluginByKey[currentTool.value].defaultValues()
-          let defaultValue: DefaultItem<BaseObjData>[] = []
-          if (defaultValue_ instanceof Promise) {
-            defaultValue = await defaultValue_
-          } else {
-            defaultValue = defaultValue_
-          }
-
-          if (ClassName) {
-            const insertTempObj = new ClassName(worldApi, defaultValue[0].data)
-            if (insertTempObj instanceof LineEntityClass) {
-              insertTempObj.setPreparePoint(tempPointInsertData.value.map(v => {
-                return {
-                  ...v,
-                }
-              }))
-            }
-            const value = insertTempObj.getData()
-            if (value !== undefined) {
-              await worldApi.add(currentTool.value, [value])
-            }
-          }
-        }
-        tempPointInsertData.value = []
-        lastPoint.value = null
-        hoverPoint.value = null
-      } else {
-        if (insertTempObj && currentTool.value !== 'drag') {
+      if (insertTempObj && currentTool.value !== 'drag') {
+        if (insertTempObj instanceof LineEntityClass) {
+          insertAdding.value = true
+          insertTempObj.setPreparePoint(tempPointInsertData.value)
+          const insertData = insertTempObj.getData()
+          await worldApi.add(currentTool.value, [insertData])
+          insertTempObj = null;
+          tempPointInsertData.value = []
+          lastPoint.value = null
+          hoverPoint.value = null
+          setTimeout(() => {
+            insertAdding.value = false
+          }, 300)// 至少停留300毫秒，防止出现那种闪现的效果。
+        } else {
           insertTempObj = null;
         }
       }
@@ -1261,64 +1238,16 @@ const handleCanvasClick = async (e: MouseEvent) => {
     return
   }
 
-  if (allFileKeysObjType[currentTool.value] === 'polyline') {
-    let clickPoint: Point = { x, y }
-
-    if (tempPointInsertData.value) {
-      if (tempPointInsertData.value.length > 0) {
-        const last = {
-          ...tempPointInsertData.value[tempPointInsertData.value.length - 1],
-          index: tempPointInsertData.value.length - 1,
-        }
-        // 收集所有点（包括临时折线和已绘制的墙上的点）
-        const allPoints: Point[] = [...tempPointInsertData.value];
-        (worldApi.getObjects(currentTool.value) as WallData[]).forEach((item: WallData) => {
-          item.points.forEach((point: any) => {
-            allPoints.push(point)
-          })
-        })
-        const snapAngles = [0, 45, 90, 135, 180, -135, -90, -45]
-        snapAngles.push(...getTempPointInsertDataLastAngel())
-        let snapped22 = getSnapPointAndLine(clickPoint,
-          [{
-            objType: currentTool.value,
-            snapFromType: 'point',
-            point: last
-          }],
-          snapAngles,
-          allPoints.map((v, index) => ({
-            objType: currentTool.value,
-            snapFromType: 'point',
-            point: {
-              ...v,
-              index,
-            }
-          })),
-        )
-        if (snapped22 === null) {
-          snapped22 = {
-            objType: currentTool.value,
-            snapFromType: 'point',
-            point: clickPoint
-          }
-        }
-        const dist = Math.hypot(snapped22.point.x - last.x, snapped22.point.y - last.y)
-
-        if (dist < 10 * zoom2DLevel.value) {
-          console.log('===dist---排除掉最后一个节点', dist)
-          return
-        }
-        clickPoint = snapped22.point
-      }
-      tempPointInsertData.value.push({
-        ...clickPoint,
-      })
+  if (insertTempObj && insertTempObj instanceof LineEntityClass) {
+    const data = insertTempObj.getData()
+    if (hoverPoint.value) {
+      tempPointInsertData.value.push(hoverPoint.value)
     } else {
-      tempPointInsertData.value = [{
-        ...clickPoint,
-      }]
+      tempPointInsertData.value.push({ x, y })
     }
-    lastPoint.value = clickPoint
+    data.points = tempPointInsertData.value;
+    insertTempObj.setData(data)
+    drawWrapper2D();
   } else if (insertTempObj && insertTempObj instanceof PointEntityClass) {
     if (insertTempObj instanceof EntityClassInWall) {
       if (hoverPoint.value && insertAdding.value === false) {
@@ -1571,8 +1500,7 @@ const handleMouseMove = (e: MouseEvent) => {
         }
       }
     }
-  } else if (allFileKeysObjType[currentTool.value] === 'polyline') {
-    // alert(allFileKeysObjType[currentTool.value]);
+  } else if (insertTempObj instanceof LineEntityClass) {
     if (tempPointInsertData.value && tempPointInsertData.value.length > 0) {
       const last = tempPointInsertData.value[tempPointInsertData.value.length - 1]
       // 收集所有点（包括临时折线和已绘制的墙上的点）
@@ -1607,11 +1535,26 @@ const handleMouseMove = (e: MouseEvent) => {
           point: { x, y }
         }
       }
-      if (snappedPoint44) {
-        hoverPoint.value = snappedPoint44.point
-      }
+      insertTempObj.setPreparePoint([
+        ...tempPointInsertData.value,
+        snappedPoint44.point
+      ])
+      hoverPoint.value = snappedPoint44.point
+
+      drawWrapper2DAnd3D()
+      const hoverScreenX = hoverPoint.value.x * zoom2DLevel.value + panOffset.value.x
+      const hoverScreenY = hoverPoint.value.y * zoom2DLevel.value + panOffset.value.y
+      const canvasAction = canvas2DRef.value!;
+      const ctxAction = canvasAction.getContext('2d')!
+      ctxAction.font = '24px Arial'
+      ctxAction.textBaseline = 'middle'
+      ctxAction.strokeStyle = 'white'
+      ctxAction.lineWidth = 3
+      ctxAction.lineJoin = 'round'
+      ctxAction.fillStyle = '#b94242ff'
+      ctxAction.strokeText('ESC 结束', hoverScreenX, hoverScreenY + 20)
+      ctxAction.fillText('ESC 结束', hoverScreenX, hoverScreenY + 20)
     }
-    drawWrapper2DAnd3D()
   } else {
     const nearest = getNearestWall({ x, y })
     if (nearest) {
@@ -2025,9 +1968,7 @@ function changeObjTypeSelect(type: string, baseObj: BaseEntityClass<any>) {
   insertTempObj = null
 
   if (allFileKeys.includes(type as any)) {
-    if (baseObj instanceof PointEntityClass) {
-      insertTempObj = baseObj
-    }
+    insertTempObj = baseObj
     currentTool.value = type
   }
 }

@@ -529,8 +529,8 @@ export class WallEntity extends LineEntityClass<WallPoint, WallData> {
     return lines;
   }
 
-  setPreparePoint(point: (Point & WallPoint)[]): void {
-    this.getData().points = point
+  setPreparePoint(points: (Point & WallPoint)[]): void {
+    this.getData().points = points
   }
 
   editPropConfig(snapPoint: HandelInfo, editShow: (editInfoList: editItem[], callback: (val: any) => void) => void, close: () => void): void {

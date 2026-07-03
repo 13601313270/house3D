@@ -103,14 +103,14 @@ export class World {
 
     // 添加地面
     const showGround = this.environmentConfig.showGround ?? true
-    
+
     if (this.groundMesh) {
       this.groundMesh.visible = showGround
       return
     }
-    
+
     if (!showGround) return
-    
+
     const loaderGround = new THREE.TextureLoader();
     loaderGround.load('grand.jpg', (texture) => {
       // 增加一个地面平面
@@ -130,129 +130,6 @@ export class World {
       this.groundMesh.position.y = -10
       this.scene.add(this.groundMesh)
     });
-  }
-
-  drawTempPointInsertData(
-    canvasBgRef: HTMLCanvasElement | null,
-    tempWallPoints: Point[],
-    hoverPoint: Point | null,
-    panOffset: Point = { x: 0, y: 0 },
-    zoomLevel: number = 1,
-  ) {
-    if (!canvasBgRef) return
-    const ctx = canvasBgRef.getContext('2d')
-    if (!ctx) return
-    if (tempWallPoints.length > 0) {
-      ctx.strokeStyle = '#42b983'
-      ctx.lineWidth = 10
-      ctx.beginPath()
-      ctx.moveTo(tempWallPoints[0].x * zoomLevel + panOffset.x, tempWallPoints[0].y * zoomLevel + panOffset.y)
-      for (let i = 1; i < tempWallPoints.length; i++) {
-        ctx.lineTo(tempWallPoints[i].x * zoomLevel + panOffset.x, tempWallPoints[i].y * zoomLevel + panOffset.y)
-      }
-      if (hoverPoint) {
-        ctx.lineTo(hoverPoint.x * zoomLevel + panOffset.x, hoverPoint.y * zoomLevel + panOffset.y)
-      }
-      ctx.stroke()
-      ctx.fillStyle = '#b94242'
-      ctx.font = '20px Arial'
-      ctx.textAlign = 'center'
-      ctx.strokeStyle = 'white'
-      ctx.lineWidth = 3
-      ctx.lineJoin = 'round'
-      tempWallPoints.forEach((point, index) => {
-        const screenX = point.x * zoomLevel + panOffset.x
-        const screenY = point.y * zoomLevel + panOffset.y
-        drawPoint(ctx, screenX, screenY, '#b94242')
-        if (index > 0) {
-          const prev = tempWallPoints[index - 1]
-          const prevScreenX = prev.x * zoomLevel + panOffset.x
-          const prevScreenY = prev.y * zoomLevel + panOffset.y
-          const dist = Math.round(Math.hypot(point.x - prev.x, point.y - prev.y))
-          const midX = (screenX + prevScreenX) / 2
-          const midY = (screenY + prevScreenY) / 2
-          ctx.strokeText(`${dist}cm`, midX, midY)
-          ctx.fillText(`${dist}cm`, midX, midY)
-
-          // 绘制角度标记
-          if (index > 1) {
-            const prev2 = tempWallPoints[index - 2]
-            const prev2ScreenX = prev2.x * zoomLevel + panOffset.x
-            const prev2ScreenY = prev2.y * zoomLevel + panOffset.y
-            const angleResult = calculateAngle(
-              { x: prev2ScreenX, y: prev2ScreenY },
-              { x: prevScreenX, y: prevScreenY },
-              { x: screenX, y: screenY }
-            )
-            if (angleResult !== null) {
-              const { angle } = angleResult
-              const angleText = `${Math.round(angle)}°`
-              // 计算角度文本位置：在夹角内侧
-              // 如果夹角太小（< 30度），显示在外侧；否则显示在内侧
-              const offset = angle < 30 ? 15 : -15
-              const angleX = prevScreenX - 10
-              const angleY = prevScreenY + offset
-              ctx.strokeText(angleText, angleX, angleY)
-              ctx.fillText(angleText, angleX, angleY)
-            }
-          }
-        }
-      })
-
-      // console.log('tempWallPoints.length', hoverPoint)
-
-      if (hoverPoint) {
-        const hoverScreenX = hoverPoint.x * zoomLevel + panOffset.x
-        const hoverScreenY = hoverPoint.y * zoomLevel + panOffset.y
-        drawPoint(ctx, hoverScreenX, hoverScreenY, '#b94242')
-        ctx.setLineDash([])
-        ctx.font = '24px Arial'
-        ctx.textBaseline = 'middle'
-        ctx.strokeStyle = 'white'
-        ctx.lineWidth = 3
-        ctx.lineJoin = 'round'
-        ctx.fillStyle = '#b94242ff'
-        ctx.strokeText('ESC 结束', hoverScreenX, hoverScreenY + 20)
-        ctx.fillText('ESC 结束', hoverScreenX, hoverScreenY + 20)
-
-        // 绘制最后一个转角的角度标记
-        if (tempWallPoints.length > 0) {
-          const prev = tempWallPoints[tempWallPoints.length - 1]
-          const prevScreenX = prev.x * zoomLevel + panOffset.x
-          const prevScreenY = prev.y * zoomLevel + panOffset.y
-
-          const screenX = hoverPoint.x * zoomLevel + panOffset.x
-          const screenY = hoverPoint.y * zoomLevel + panOffset.y
-
-          const dist = Math.round(Math.hypot(hoverPoint.x - prev.x, hoverPoint.y - prev.y))
-          const midX = (screenX + prevScreenX) / 2
-          const midY = (screenY + prevScreenY) / 2
-          ctx.strokeText(`${dist}cm`, midX, midY)
-          ctx.fillText(`${dist}cm`, midX, midY)
-          if (tempWallPoints.length > 1) {
-            const prev2 = tempWallPoints[tempWallPoints.length - 2]
-            const prev2ScreenX = prev2.x * zoomLevel + panOffset.x
-            const prev2ScreenY = prev2.y * zoomLevel + panOffset.y
-            const angleResult = calculateAngle(
-              { x: prev2ScreenX, y: prev2ScreenY },
-              { x: prevScreenX, y: prevScreenY },
-              { x: hoverScreenX, y: hoverScreenY }
-            )
-            if (angleResult !== null) {
-              const { angle } = angleResult
-              const angleText = `${Math.round(angle)}°`
-              // 计算角度文本位置：在夹角内侧
-              // 如果夹角太小（< 30度），显示在外侧；否则显示在内侧
-              const offset = angle < 30 ? 15 : -15
-              const angleX = prevScreenX - 10
-              const angleY = prevScreenY + offset
-              ctx.strokeText(angleText, angleX, angleY)
-              ctx.fillText(angleText, angleX, angleY)
-            }
-          }
-        }
-      }
-    }
   }
 
   draw2DWorld(
