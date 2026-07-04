@@ -581,9 +581,21 @@ onMounted(async () => {
   function bindSave(event: any) {
     console.log('event', event)
     // 检测 Ctrl+S (Windows/Linux) 或 Command+S (Mac)
-    if ((event.ctrlKey || event.metaKey) && event.key === 's') {
-      event.preventDefault(); // 阻止浏览器保存网页
-      saveDrawing();
+    if ((event.ctrlKey || event.metaKey)) {
+      if (event.key === 's') {
+        event.preventDefault(); // 阻止浏览器保存网页
+        saveDrawing();
+      } else if (event.key === 'z') {
+        console.log('撤销一步')
+        if (insertTempObj && insertTempObj instanceof LineEntityClass) {
+          const data = insertTempObj.getData()
+          // tempPointInsertData去掉最后一项
+          tempPointInsertData.value.pop()
+          data.points = tempPointInsertData.value;
+          insertTempObj.setData(data)
+          drawWrapper2D();
+        }
+      }
     }
   }
   // 劫持Ctrl+S保存事件
@@ -1307,14 +1319,18 @@ const handleMouseMove = (e: MouseEvent) => {
       const hoverScreenY = hoverPoint.value.y * zoom2DLevel.value + panOffset.value.y
       const canvasAction = canvas2DRef.value!;
       const ctxAction = canvasAction.getContext('2d')!
-      ctxAction.font = '24px Arial'
+      const startY = snappedPoint44.point.y > last.y ? hoverScreenY + 10 : hoverScreenY - 50;
+      // 绘制一个背景矩形
+      ctxAction.fillStyle = 'rgba(0, 0, 0, 0.5)'
+      ctxAction.fillRect(hoverScreenX - 50, startY, 100, 34)
+
+      ctxAction.font = '14px Arial'
       ctxAction.textBaseline = 'middle'
       ctxAction.strokeStyle = 'white'
-      ctxAction.lineWidth = 3
-      ctxAction.lineJoin = 'round'
-      ctxAction.fillStyle = '#b94242ff'
-      ctxAction.strokeText('ESC 结束', hoverScreenX, hoverScreenY + 20)
-      ctxAction.fillText('ESC 结束', hoverScreenX, hoverScreenY + 20)
+      ctxAction.fillStyle = 'white'
+      ctxAction.textAlign = 'center'
+      ctxAction.fillText(`ESC 结束绘制`, hoverScreenX, startY + 11)
+      ctxAction.fillText(`ctrl+z 撤销一点`, hoverScreenX, startY + 26)
     }
   } else {
     const nearest = getNearestWall({ x, y })
