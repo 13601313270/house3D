@@ -589,11 +589,19 @@ onMounted(async () => {
         console.log('撤销一步')
         if (insertTempObj && insertTempObj instanceof LineEntityClass) {
           const data = insertTempObj.getData()
-          // tempPointInsertData去掉最后一项
-          tempPointInsertData.value.pop()
-          data.points = tempPointInsertData.value;
-          insertTempObj.setData(data)
-          drawWrapper2D();
+          if (tempPointInsertData.value.length === 1) {
+            insertTempObj = null;
+            tempPointInsertData.value = []
+            lastPoint.value = null
+            hoverPoint.value = null
+            message.info('退出绘制')
+          } else {
+            // tempPointInsertData去掉最后一项
+            tempPointInsertData.value.pop()
+            data.points = tempPointInsertData.value;
+            insertTempObj.setData(data)
+            drawWrapper2D();
+          }
         }
       }
     }
