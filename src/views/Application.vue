@@ -199,6 +199,7 @@ import message from '@/utils/message';
 import { DefaultItem } from '@/entities/pluginType';
 import getNearestWall from '@/utils/getNearestWall';
 import getSnapPointAndLine from '@/utils/getSnapPoint';
+import importOutObj from '@/utils/importOutObj';
 
 const canvas2DRef = ref<HTMLCanvasElement | null>(null)
 const canvas2D2Ref = ref<HTMLCanvasElement | null>(null)
@@ -237,7 +238,6 @@ const demoIniting = ref(false)
 
 // 拖拽上传相关状态
 const isDragOver = ref(false)
-const isUploading = ref(false)
 
 const store = useStore<Store>()
 const aspectRatio1 = ref(1)
@@ -307,11 +307,8 @@ const updateCanvasSize = () => {
       const canvasRect = leftCanvasContainer.getBoundingClientRect()
       const width = Math.floor(canvasRect.width)
       const height = Math.floor(canvasRect.height)
-      // console.log('===width---', width)
-
       if (width > 0 && height > 0) {
         aspectRatio1.value = width / height
-        // aspectRatio2.value = width / height
       }
     }
     const centerPanelContainer = document.querySelector('.right-panel-content')
@@ -319,10 +316,8 @@ const updateCanvasSize = () => {
       const canvasRect = centerPanelContainer.getBoundingClientRect()
       const width = Math.floor(canvasRect.width)
       const height = Math.floor(canvasRect.height)
-      // console.log('===width---', width)
 
       if (width > 0 && height > 0) {
-        // aspectRatio1.value = width / height
         aspectRatio2.value = width / height
       }
     }
@@ -652,7 +647,7 @@ const handleImportFileChange = async (e: Event) => {
   const file = input.files?.[0]
   if (!file) return
 
-  await importOutObj(file)
+  await importOutObj2(file)
 }
 
 const saveDrawing = async () => {
@@ -1069,8 +1064,8 @@ const handleMouseMove = (e: MouseEvent) => {
   if (!canvas) return
 
   const rect = canvas.getBoundingClientRect()
-  const screenX = e.clientX - rect.left
-  const screenY = e.clientY - rect.top
+  const screenX = Math.round(e.clientX - rect.left)
+  const screenY = Math.round(e.clientY - rect.top)
   const x = (screenX - panOffset.value.x) / zoom2DLevel.value
   const y = (screenY - panOffset.value.y) / zoom2DLevel.value
   if (beCopyEntity) {
@@ -1367,8 +1362,8 @@ const handleMouseDown = (e: MouseEvent) => {
   if (!canvas) return
 
   const rect = canvas.getBoundingClientRect()
-  const screenX = e.clientX - rect.left
-  const screenY = e.clientY - rect.top
+  const screenX = Math.round(e.clientX - rect.left)
+  const screenY = Math.round(e.clientY - rect.top)
   const x = (screenX - panOffset.value.x) / zoom2DLevel.value
   const y = (screenY - panOffset.value.y) / zoom2DLevel.value
 
@@ -1552,15 +1547,15 @@ const handleWheel = (e: WheelEvent) => {
   ctxAction.clearRect(0, 0, canvasAction.width, canvasAction.height)
 
   const rect = canvas.getBoundingClientRect()
-  const mouseX = e.clientX - rect.left
-  const mouseY = e.clientY - rect.top
+  const screenX = Math.round(e.clientX - rect.left)
+  const screenY = Math.round(e.clientY - rect.top)
 
   const zoomFactor = e.deltaY < 0 ? 1.1 : 0.9
   const newZoomLevel = Math.max(0.01, Math.min(5, zoom2DLevel.value * zoomFactor))
 
   const zoomRatio = newZoomLevel / zoom2DLevel.value
-  const newPanX = mouseX - (mouseX - panOffset.value.x) * zoomRatio
-  const newPanY = mouseY - (mouseY - panOffset.value.y) * zoomRatio
+  const newPanX = screenX - (screenX - panOffset.value.x) * zoomRatio
+  const newPanY = screenY - (screenY - panOffset.value.y) * zoomRatio
 
   zoom2DLevel.value = newZoomLevel
   panOffset.value = { x: newPanX, y: newPanY }
@@ -1608,94 +1603,10 @@ const onDragLeave = (e: DragEvent) => {
 }
 
 // 导入外部模型
-async function importOutObj(file: File) {
-  const fileName = file.name.toLowerCase()
-
-  // 检查文件类型
-  if (!fileName.endsWith('.fbx') && !fileName.endsWith('.obj') && !fileName.endsWith('.glb')) {
-    alert('请上传 FBX、OBJ 或 GLB 格式的文件')
-    return
-  }
-
-  // 检查文件大小
-  if (file.size === 0) {
-    alert(`文件 "${file.name}" 大小为 0 字节，请检查文件是否损坏或为空`)
-    return
-  }
-
-  // 检查文件大小限制
-  const maxSize = 300
-  if (file.size > maxSize * 1024 * 1024) {
-    alert(`文件 "${file.name}" 太大（${(file.size / 1024 / 1024).toFixed(2)} MB），请上传小于 ${maxSize}MB 的文件`)
-    return
-  }
-
-  isUploading.value = true
-
-  try {
-    await processUploadedFile(file, async (object, file, type) => {
-      console.log('导入---object', object.children)
-      const scaleFactor = (() => {
-        // 计算模型的包围盒以确定尺寸
-        const box = new THREE.Box3().setFromObject(object)
-        const size = box.getSize(new THREE.Vector3())
-        // 计算缩放因子，使模型最大边为 100
-        const maxDimension = Math.max(size.x, size.y, size.z)
-        const targetMaxSize = 100 // 最大边目标尺寸
-        return maxDimension > 0 ? targetMaxSize / maxDimension : 1
-      })();
-      if (object.children && object.children.length > 10000000) {
-        for (let i = 0; i < object.children.length; i++) {
-          const v = object.children[i]
-          console.log('导入---object', v.scale)
-          if (v instanceof THREE.Mesh) {
-            const vertices: any = v.geometry.attributes.position.array;
-            let centerX = 0;
-            let centerY = 0;
-            let centerZ = 0;
-            vertices.forEach((v: number, i: number) => {
-              if (i % 3 === 0) {
-                centerX += v
-              } else if (i % 3 === 1) {
-                centerY += v
-              } else if (i % 3 === 2) {
-                centerZ += v
-              }
-            })
-            centerX /= vertices.length / 3
-            console.log('centerX', centerX)
-            centerY /= vertices.length / 3
-            centerZ /= vertices.length / 3
-            vertices.forEach((v: number, i: number) => {
-              if (i % 3 === 0) {
-                vertices[i] -= centerX
-              } else if (i % 3 === 1) {
-                // vertices[i] -= centerY
-              }
-            })
-            // v.geometry.attributes.position.array = vertices;
-            v.geometry.vertices = vertices;
-            const zoomTemp = 100;
-            const newPosition = new THREE.Vector3(
-              centerX * zoomTemp,
-              centerY * zoomTemp,
-              v.position.z
-            )
-            console.log(centerZ)
-            await handleLoadedObject(v, file, type, scaleFactor * v.scale.x, newPosition)
-            await sleep(100)
-          }
-        }
-      } else {
-        await handleLoadedObject(object, file, type, scaleFactor, new THREE.Vector3())
-      }
-    })
-  } catch (error) {
-    console.error('文件处理失败:', error)
-    alert('文件处理失败，请重试')
-  } finally {
-    isUploading.value = false
-  }
+async function importOutObj2(file: File) {
+  importOutObj(file, async (object, file, type, scaleFactor, position) => {
+    handleLoadedObject(object, file, type, scaleFactor, position)
+  })
 }
 const onDrop = async (e: DragEvent) => {
   isDragOver.value = false
@@ -1704,7 +1615,7 @@ const onDrop = async (e: DragEvent) => {
   if (!files || files.length === 0) return
 
   const file = files[0]
-  importOutObj(file)
+  importOutObj2(file)
 }
 
 const handleLoadedObject = async (object: THREE.Group | THREE.Mesh, file: File, type: string, scaleFactor: number, position: THREE.Vector3) => {
