@@ -8,6 +8,8 @@ export class PolygonPlaneDataClass extends LineObjDataClass<PolygonPlanePoint, P
   // height: number
   // cornerType: 0 | 1 | 2 | 3 | 4 | 5 // 角点类型
   z: number
+  ds: boolean // 是否双面可见
+  mt: number | null // 方块材质
 
   constructor(data: PolygonPlaneData) {
     super(data)
@@ -16,5 +18,7 @@ export class PolygonPlaneDataClass extends LineObjDataClass<PolygonPlanePoint, P
     this.color = data.color
     // this.cornerType = data.cornerType !== undefined ? data.cornerType : 1
     this.z = data.z
+    this.ds = data.ds
+    this.mt = data.mt
   }
 }

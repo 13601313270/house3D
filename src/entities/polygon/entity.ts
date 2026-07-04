@@ -10,23 +10,23 @@ import { isPointInRotatedRect } from '@/utils/isPointInRotatedRect'
 import { allSnapFromType, MatchSnapPoint } from '@/types/baseEntity'
 import { LineEntityClass } from '@/types/lineEntity'
 import { World } from '@/utils/world'
-import { PolygonPlanePoint, PolygonPlaneData } from './index.d'
+import { PolygonPoint, PolygonData } from './index.d'
 
-export class PolygonPlaneEntity extends LineEntityClass<PolygonPlanePoint, PolygonPlaneData> {
-  name: string = '折线平面'
-  type: string = 'polygonPlane'
+export class PolygonEntity extends LineEntityClass<PolygonPoint, PolygonData> {
+  name: string = '折线体'
+  type: string = 'polygon'
   isPointObj: boolean = false
   private circleRadius = 6
   private thickness = 10
 
-  // constructor(world: World, data: PolygonPlaneData) {
+  // constructor(world: World, data: PolygonData) {
   //   super(world, data);
   //   // if (this.data.cornerType === undefined) {
   //   //   this.data.cornerType = 1
   //   // }
   // }
 
-  draw2DPreviewByData(ctx: CanvasRenderingContext2D, data: PolygonPlaneData, panOffset: Point, zoomLevel: number): void {
+  draw2DPreviewByData(ctx: CanvasRenderingContext2D, data: PolygonData, panOffset: Point, zoomLevel: number): void {
     ctx.strokeStyle = 'black'
     ctx.fillStyle = data.color
     ctx.lineWidth = 2
@@ -53,7 +53,7 @@ export class PolygonPlaneEntity extends LineEntityClass<PolygonPlanePoint, Polyg
 
   draw2DByData(
     ctx: CanvasRenderingContext2D,
-    data: PolygonPlaneData,
+    data: PolygonData,
     panOffset: Point,
     zoomLevel: number,
   ): void {
@@ -156,28 +156,29 @@ export class PolygonPlaneEntity extends LineEntityClass<PolygonPlanePoint, Polyg
 
   create3DMesh() {
     const data = this.getData()
-    const { z, color, ds, mt } = data
+    const { z, color, height } = data
     const meshList: THREE.Group[] = []
 
-    const points: THREE.Vector2[] = []
+    const points: THREE.Vector2[] = [];
     data.points.forEach((mesh: Point) => {
       points.push(new THREE.Vector2(mesh.x, mesh.y * -1))
     })
     if (points.length) {
       const shape = new THREE.Shape(points)
-      const geometry = new THREE.ShapeGeometry(shape)
-      geometry.rotateX(-Math.PI / 2)
-      let material: THREE.Material | null = null;
-      const materialById = mt ? getMaterialById(mt) : null;
-      if (mt && materialById) {
-        material = materialById.material(new THREE.Vector3(0, 1, 0))
-      } else {
-        material = (new THREE.MeshStandardMaterial({ color }));
+      const extrudeSettingsBottom = {
+        steps: 1,
+        depth: height,
+        bevelEnabled: true,
       }
-      if (ds) {
-        material.side = THREE.DoubleSide
-      }
-      const floorMesh = new THREE.Mesh(geometry, material)
+      // alert(height)
+      const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettingsBottom)
+      geometry.rotateX(-Math.PI / 2);   // 将 XY 平面旋转成 XZ 平面
+      const materialBottom = (new THREE.MeshStandardMaterial({
+        color,
+        side: THREE.DoubleSide
+      }));
+      const floorMesh = new THREE.Mesh(geometry, materialBottom)
+      // floorMesh.position.set(0, height * -1, 0)
       const group = new THREE.Group()
       group.add(floorMesh)
       group.position.setY(z)
@@ -400,7 +401,7 @@ export class PolygonPlaneEntity extends LineEntityClass<PolygonPlanePoint, Polyg
     return lines;
   }
 
-  setPreparePoint(points: (Point & PolygonPlanePoint)[]): void {
+  setPreparePoint(points: (Point & PolygonPoint)[]): void {
     this.getData().points = points
   }
 
@@ -424,6 +425,16 @@ export class PolygonPlaneEntity extends LineEntityClass<PolygonPlanePoint, Polyg
         value: data.color,
       },
       {
+        id: 'height',
+        label: '高度',
+        dataType: 'number',
+        min: 1,
+        max: Infinity,
+        step: 1,
+        value: data.height,
+        unit: 'cm',
+      },
+      {
         id: 'z',
         label: 'Z轴',
         dataType: 'number',
@@ -432,19 +443,7 @@ export class PolygonPlaneEntity extends LineEntityClass<PolygonPlanePoint, Polyg
         step: 1,
         value: data.z,
         unit: 'cm',
-      },
-      {
-        id: 'ds',
-        label: '是否双面可见',
-        dataType: 'boolean',
-        value: data.ds,
-      },
-      {
-        id: 'mt',
-        label: '材质',
-        dataType: 'material',
-        value: data.mt,
-      },
+      }
       // {
       //   id: 'cornerType',
       //   label: '转角类型',

@@ -7,11 +7,12 @@ export default function (): DefaultItem<PolygonPlaneData>[] {
       name: '折线平面',
       data: {
         id: Date.now().toString(),
-        // height: 280,
         color: '#fff',
         points: [],
         // cornerType: 1,
         z: 0,
+        ds: true,
+        mt: null,
       }
     }
   ]

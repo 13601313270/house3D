@@ -763,28 +763,3 @@ export class WallEntity extends LineEntityClass<WallPoint, WallData> {
     }
   }
 }
-
-const defaultWallData: WallData = {
-  id: Date.now().toString(),
-  // x: 0,
-  // y: 0,
-  // z: 0,
-  height: 280,
-  color: '#fff',
-  wmt: 0,
-  points: [],
-  thickness: 20,
-  hb: true,
-  bc: '#aaa',
-  bmt: 2,
-  ht: true,
-  tc: '#fff',
-  tmt: 2,
-  td: false,
-  bottom: 0,
-  cornerType: 1,
-}
-
-export {
-  defaultWallData
-};
