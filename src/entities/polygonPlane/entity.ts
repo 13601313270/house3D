@@ -13,23 +13,23 @@ import { World } from '@/utils/world'
 import { PolygonPlanePoint, PolygonPlaneData } from './index.d'
 
 export class PolygonPlaneEntity extends LineEntityClass<PolygonPlanePoint, PolygonPlaneData> {
-  name: string = '折线面墙'
+  name: string = '折线平面'
   type: string = 'polygonPlane'
   isPointObj: boolean = false
   private circleRadius = 6
+  private thickness = 10
 
-  constructor(world: World, data: PolygonPlaneData) {
-    super(world, data);
-    if (this.data.cornerType === undefined) {
-      this.data.cornerType = 1
-    }
-  }
+  // constructor(world: World, data: PolygonPlaneData) {
+  //   super(world, data);
+  //   // if (this.data.cornerType === undefined) {
+  //   //   this.data.cornerType = 1
+  //   // }
+  // }
 
   draw2DPreviewByData(ctx: CanvasRenderingContext2D, data: PolygonPlaneData, panOffset: Point, zoomLevel: number): void {
     ctx.strokeStyle = 'black'
     ctx.fillStyle = data.color
     ctx.lineWidth = 2
-    ctx.setLineDash([5, 5])
     ctx.beginPath()
     for (let i = 0; i < data.points.length; i++) {
       const point = data.points[i]
@@ -41,9 +41,14 @@ export class PolygonPlaneEntity extends LineEntityClass<PolygonPlanePoint, Polyg
         ctx.lineTo(screenX, screenY)
       }
     }
+    if (data.points.length >= 2) {
+      ctx.lineTo(
+        (data.points[0].x + this.offset.x) * zoomLevel + panOffset.x,
+        (data.points[0].y + this.offset.y) * zoomLevel + panOffset.y
+      )
+    }
     ctx.stroke()
     ctx.fill()
-    ctx.setLineDash([])
   }
 
   draw2DByData(
@@ -52,12 +57,10 @@ export class PolygonPlaneEntity extends LineEntityClass<PolygonPlanePoint, Polyg
     panOffset: Point,
     zoomLevel: number,
   ): void {
-    const wall = data;
-
-    if (wall.points && wall.points.length >= 2) {
+    if (data.points && data.points.length > 2) {
       // 绘制墙上的点
       ctx.lineWidth = 3
-      wall.points.forEach((point: Point, index: number) => {
+      data.points.forEach((point: Point, index: number) => {
         ctx.strokeStyle = 'red'
         ctx.fillStyle = 'white'
         const screenX = point.x * zoomLevel + panOffset.x
@@ -67,9 +70,9 @@ export class PolygonPlaneEntity extends LineEntityClass<PolygonPlanePoint, Polyg
         ctx.stroke()
         ctx.fill()
         ctx.closePath()
-        if (index > 0 && index < wall.points.length - 1) {
-          const prev = wall.points[index - 1]
-          const next = wall.points[index + 1]
+        if (index < data.points.length) {
+          const prev = index === 0 ? data.points[data.points.length - 1] : data.points[index - 1]
+          const next = index === data.points.length - 1 ? data.points[0] : data.points[index + 1]
           const angleResult = calculateAngle(prev, point, next)
           if (angleResult) {
             const { angle } = angleResult
@@ -117,9 +120,9 @@ export class PolygonPlaneEntity extends LineEntityClass<PolygonPlanePoint, Polyg
       });
       ctx.fillStyle = 'white'
       // 每两个点之间，再绘制一个点，代表边的控制器
-      for (let i = 0; i < wall.points.length - 1; i++) {
-        const p1 = wall.points[i]
-        const p2 = wall.points[i + 1]
+      for (let i = 0; i < data.points.length; i++) {
+        const p1 = data.points[i]
+        const p2 = i === data.points.length - 1 ? data.points[0] : data.points[i + 1]
         const midX = (p1.x + p2.x) / 2
         const midY = (p1.y + p2.y) / 2
         const screenX = midX * zoomLevel + panOffset.x
@@ -153,6 +156,7 @@ export class PolygonPlaneEntity extends LineEntityClass<PolygonPlanePoint, Polyg
 
   create3DMesh() {
     const data = this.getData()
+    const { z, color } = data
     const meshList: THREE.Group[] = []
 
     const points: THREE.Vector2[] = []; // wall.points.map((p) => new THREE.Vector2(p.x, p.y))
@@ -171,13 +175,14 @@ export class PolygonPlaneEntity extends LineEntityClass<PolygonPlanePoint, Polyg
       const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettingsBottom)
       geometry.rotateX(-Math.PI / 2);   // 将 XY 平面旋转成 XZ 平面
       const materialBottom = (new THREE.MeshStandardMaterial({
-        color: data.color,
+        color,
         side: THREE.DoubleSide
       }));
       const floorMesh = new THREE.Mesh(geometry, materialBottom)
       floorMesh.position.set(0, floorDepth * -1 + 1, 0)
       const group = new THREE.Group()
       group.add(floorMesh)
+      group.position.setY(z)
       meshList.push(group)
     }
     return meshList
@@ -193,19 +198,19 @@ export class PolygonPlaneEntity extends LineEntityClass<PolygonPlanePoint, Polyg
     for (let i = 0; i < points.length; i++) {
       const point = points[i]
       const dist = Math.hypot(x - point.x, y - point.y)
-      if (dist < 3) {
+      if (dist < Math.max(this.thickness, 3)) {
         return new MatchCircleArea({
           x: point.x,
           y: point.y,
-          r: 3,
+          r: this.thickness,
         })
       }
     }
 
     // 每两个点之间，再绘制一个点，代表边的控制器
-    for (let i = 0; i < points.length - 1; i++) {
+    for (let i = 0; i < points.length; i++) {
       const p1 = points[i]
-      const p2 = points[i + 1]
+      const p2 = i === points.length - 1 ? points[0] : points[i + 1]
       const midX = (p1.x + p2.x) / 2
       const midY = (p1.y + p2.y) / 2
       const width = Math.hypot(p2.x - p1.x, p2.y - p1.y)
@@ -214,17 +219,25 @@ export class PolygonPlaneEntity extends LineEntityClass<PolygonPlanePoint, Polyg
         x: midX,
         y: midY,
         width,
-        depth: 3,
+        depth: this.thickness + 2,
         angleY: angel,
       })) {
         return new MatchRectArea({
           x: midX,
           y: midY,
           width,
-          depth: 3,
+          depth: this.thickness + 2,
           angleY: angel * -1,
         })
       }
+      // const dist = Math.hypot(x - midX, y - midY)
+      // if (dist < this.getData().thickness) {
+      //   return new MatchCircleArea({
+      //     x: midX,
+      //     y: midY,
+      //     r: this.getData().thickness,
+      //   })
+      // }
     }
     return null
   }
@@ -234,10 +247,11 @@ export class PolygonPlaneEntity extends LineEntityClass<PolygonPlanePoint, Polyg
   // 命中可拖拽具柄
   matchHandelInfo(x: number, y: number) {
     const data = this.getData();
-    for (let i = 0; i < this.getData().points.length; i++) {
-      const point = this.getData().points[i]
+    const { points } = data;
+    for (let i = 0; i < points.length; i++) {
+      const point = points[i]
       const dist = Math.hypot(x - point.x, y - point.y)
-      if (dist < 3) {
+      if (dist < Math.max(this.thickness, 3)) {
         return {
           id: data.id,
           type: this.type,
@@ -248,13 +262,13 @@ export class PolygonPlaneEntity extends LineEntityClass<PolygonPlanePoint, Polyg
     }
 
     // 每两个点之间，再绘制一个点，代表边的控制器
-    for (let i = 0; i < this.getData().points.length - 1; i++) {
-      const p1 = this.getData().points[i]
-      const p2 = this.getData().points[i + 1]
+    for (let i = 0; i < points.length; i++) {
+      const p1 = points[i]
+      const p2 = i === points.length - 1 ? points[0] : points[i + 1]
       const midX = (p1.x + p2.x) / 2
       const midY = (p1.y + p2.y) / 2
       const dist = Math.hypot(x - midX, y - midY)
-      if (dist < 3) {
+      if (dist < this.thickness / 2) {
         this.prePointStartPosition = p1;
         this.nextPointStartPosition = p2;
 
@@ -395,29 +409,39 @@ export class PolygonPlaneEntity extends LineEntityClass<PolygonPlanePoint, Polyg
   editPropConfig(snapPoint: HandelInfo, editShow: (editInfoList: editItem[], callback: (val: any) => void) => void, close: () => void): void {
     const data = this.getData();
     const wallBaseConfig: editItem[] = [
-      {
-        id: 'height',
-        label: '墙体高度',
-        dataType: 'number',
-        min: 1,
-        max: Infinity,
-        step: 1,
-        value: data.height,
-        unit: 'cm',
-      },
+      // {
+      //   id: 'height',
+      //   label: '高度',
+      //   dataType: 'number',
+      //   min: 1,
+      //   max: Infinity,
+      //   step: 1,
+      //   value: data.height,
+      //   unit: 'cm',
+      // },
       {
         id: 'color',
-        label: '墙体颜色',
+        label: '颜色',
         dataType: 'color',
         value: data.color,
       },
       {
-        id: 'cornerType',
-        label: '转角类型',
-        dataType: 'cornerType',
-        value: data.cornerType,
-        panelDesc: '某些角类型3D渲染是一致的，但是区分“独立墙蹲”，区别在于隐藏墙的时候，独立墙蹲不会隐藏。',
+        id: 'z',
+        label: 'Z轴',
+        dataType: 'number',
+        min: -Infinity,
+        max: Infinity,
+        step: 1,
+        value: data.z,
+        unit: 'cm',
       }
+      // {
+      //   id: 'cornerType',
+      //   label: '转角类型',
+      //   dataType: 'cornerType',
+      //   value: data.cornerType,
+      //   panelDesc: '某些角类型3D渲染是一致的，但是区分“独立墙蹲”，区别在于隐藏墙的时候，独立墙蹲不会隐藏。',
+      // }
     ];
     if (snapPoint.index % 2 === 0) {
       const configList: editItem[] = [...wallBaseConfig]
@@ -444,46 +468,46 @@ export class PolygonPlaneEntity extends LineEntityClass<PolygonPlanePoint, Polyg
             }
           },
         },
-        {
-          id: 'split',
-          label: '从此顶点断成两截',
-          dataType: 'button',
-          value: async () => {
-            if (data.points.length > 2) {
-              const index = snapPoint.index / 2;
-              if (index === 0) {
-                message.error('只能从中间节点断开')
-                return;
-              }
-              if (index === data.points.length - 1) {
-                message.error('只能从中间节点断开')
-                return;
-              }
-              const wall1Points = [...data.points.slice(0, index + 1)]
-              const wall2Points = [...data.points.slice(index)]
-              // 克隆出一个新的墙
-              const type = this.type;
-              const values = JSON.parse(JSON.stringify(this.getData()));
-              values.id = Date.now().toString()
-              const apiList = await window.worldApi.add(type, [values])
-              const beCopyEntity = apiList[0]
-              beCopyEntity.setData({
-                ...values,
-                points: [...wall2Points],
-              })
-              this.setData({
-                ...data,
-                points: [...wall1Points],
-              })
-              close()
-            } else {
-              message.error('只能从中间节点断开')
-            }
-          },
-        },
+        // {
+        //   id: 'split',
+        //   label: '从此顶点断成两截',
+        //   dataType: 'button',
+        //   value: async () => {
+        //     if (data.points.length > 2) {
+        //       const index = snapPoint.index / 2;
+        //       if (index === 0) {
+        //         message.error('只能从中间节点断开')
+        //         return;
+        //       }
+        //       if (index === data.points.length - 1) {
+        //         message.error('只能从中间节点断开')
+        //         return;
+        //       }
+        //       const wall1Points = [...data.points.slice(0, index + 1)]
+        //       const wall2Points = [...data.points.slice(index)]
+        //       // 克隆出一个新的墙
+        //       const type = this.type;
+        //       const values = JSON.parse(JSON.stringify(this.getData()));
+        //       values.id = Date.now().toString()
+        //       const apiList = await window.worldApi.add(type, [values])
+        //       const beCopyEntity = apiList[0]
+        //       beCopyEntity.setData({
+        //         ...values,
+        //         points: [...wall2Points],
+        //       })
+        //       this.setData({
+        //         ...data,
+        //         points: [...wall1Points],
+        //       })
+        //       close()
+        //     } else {
+        //       message.error('只能从中间节点断开')
+        //     }
+        //   },
+        // },
         {
           id: 'title',
-          label: '整个墙体属性',
+          label: '整个面属性',
           dataType: 'title',
         },
         ...configList,
@@ -508,14 +532,16 @@ export class PolygonPlaneEntity extends LineEntityClass<PolygonPlanePoint, Polyg
           dataType: 'button',
           value: () => {
             const index = (snapPoint.index + 1) / 2;
-            console.log('index', index)
+            console.log('index', index, data.points.length)
+            const prePoint = data.points[index - 1]
+            const nextPoint = index === data.points.length ? data.points[0] : data.points[index]
             this.setData({
               ...data,
               points: [
                 ...data.points.slice(0, index),
                 {
-                  x: (data.points[index - 1].x + data.points[index].x) / 2,
-                  y: (data.points[index - 1].y + data.points[index].y) / 2,
+                  x: (prePoint.x + nextPoint.x) / 2,
+                  y: (prePoint.y + nextPoint.y) / 2,
                 },
                 ...data.points.slice(index)
               ],
@@ -525,7 +551,7 @@ export class PolygonPlaneEntity extends LineEntityClass<PolygonPlanePoint, Polyg
         },
         {
           id: 'title',
-          label: '整个墙体属性',
+          label: '整个面属性',
           dataType: 'title',
         },
         ...wallBaseConfig
@@ -549,10 +575,11 @@ export class PolygonPlaneEntity extends LineEntityClass<PolygonPlanePoint, Polyg
 
 const defaultPolygonPlaneData: PolygonPlaneData = {
   id: Date.now().toString(),
-  height: 280,
+  // height: 280,
   color: '#fff',
   points: [],
-  cornerType: 1,
+  z: 0,
+  // cornerType: 1,
 }
 
 export {

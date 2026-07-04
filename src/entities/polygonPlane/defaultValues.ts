@@ -4,13 +4,14 @@ import { DefaultItem } from "../pluginType";
 export default function (): DefaultItem<PolygonPlaneData>[] {
   const values: DefaultItem<PolygonPlaneData>[] = [
     {
-      name: '墙',
+      name: '折线平面',
       data: {
         id: Date.now().toString(),
-        height: 280,
+        // height: 280,
         color: '#fff',
         points: [],
-        cornerType: 1,
+        // cornerType: 1,
+        z: 0,
       }
     }
   ]

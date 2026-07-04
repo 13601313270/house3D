@@ -6,6 +6,7 @@ export interface PolygonPlanePoint {
 
 export type PolygonPlaneData = LineObjData<PolygonPlanePoint> & {
   color: string
-  height: number
-  cornerType: 0 | 1 | 2 | 3 | 4 | 5 // 角点类型
+  z: number
+  // height: number
+  // cornerType: 0 | 1 | 2 | 3 | 4 | 5 // 角点类型
 }
