@@ -187,9 +187,9 @@ export class CirclePlaneEntity extends PointEntityClass<CirclePlaneData> {
     if (material && ds) {
       material.side = THREE.DoubleSide;
     }
-    const doorMeshRight = new THREE.Mesh(geometryRight, material)
-    doorMeshRight.rotation.x = -Math.PI / 2
-    group.add(doorMeshRight);
+    const mesh = new THREE.Mesh(geometryRight, material)
+    mesh.rotation.x = -Math.PI / 2
+    group.add(mesh);
     group.rotateY(angleY);
     return [
       group

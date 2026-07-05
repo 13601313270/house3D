@@ -4,7 +4,6 @@ import { ConeData } from './index.d'
 import { PointEntityClass } from '@/types/pointEntity'
 import { editItem } from '..';
 import { getMaterialById } from '@/material';
-import { ConeDataClass } from './dataClass'
 import { MatchCircleArea } from '@/utils/matchArea';
 import { allSnapFromType } from '@/types/baseEntity';
 
@@ -13,6 +12,7 @@ export class ConeEntity extends PointEntityClass<ConeData> {
   type: string = 'cone'
   isPointObj: boolean = true
   private circleRadius = 6
+  public radialSegments = 32
 
   draw2DPreviewByData(ctx: CanvasRenderingContext2D, data: ConeData, panOffset: Point, zoomLevel: number): void {
     const { r } = data;
@@ -75,8 +75,6 @@ export class ConeEntity extends PointEntityClass<ConeData> {
     ctx.restore(); // 恢复原始状态
   }
 
-  glbObj: THREE.Group | null = null;
-
   create3DMesh() {
     const data = this.getData();
     const group = new THREE.Group()
@@ -87,12 +85,12 @@ export class ConeEntity extends PointEntityClass<ConeData> {
       0,
       r,
       h,
-      32
+      this.radialSegments,
     );
     const material = mt ? (getMaterialById(mt)?.material(new THREE.Vector3(0, 0, 1))) : (new THREE.MeshStandardMaterial({ color }));
-    const doorMeshRight = new THREE.Mesh(geometryRight, material)
-    doorMeshRight.position.setY(h / 2)
-    group.add(doorMeshRight);
+    const mesh = new THREE.Mesh(geometryRight, material)
+    mesh.position.setY(h / 2)
+    group.add(mesh);
 
     // group.position.set(data.x, data.r, data.y)
     // group.rotateY(data.angle * -1);

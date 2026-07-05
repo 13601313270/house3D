@@ -132,10 +132,6 @@ export class SectorEntity extends PointEntityClass<SectorData> {
     const { r, h, color, mt, startAngle, endAngle } = data;
 
     const sectorShape = new THREE.Shape();
-    // sectorShape.moveTo(0, 0);
-    // sectorShape.lineTo(r * Math.cos(startAngle), r * Math.sin(startAngle));
-    // sectorShape.absarc(0, 0, r, startAngle, endAngle, true);
-    // sectorShape.lineTo(0, 0);
 
     sectorShape.moveTo(0, 0);
     sectorShape.lineTo(r * Math.cos(startAngle), r * Math.sin(startAngle));
@@ -148,10 +144,9 @@ export class SectorEntity extends PointEntityClass<SectorData> {
     });
 
     const material = mt ? (getMaterialById(mt)?.material(new THREE.Vector3(0, 0, 1))) : (new THREE.MeshStandardMaterial({ color, side: THREE.DoubleSide }));
-    const doorMeshRight = new THREE.Mesh(geometryRight, material)
-    doorMeshRight.rotation.x = -Math.PI / 2;
-    // doorMeshRight.position.setY(h / 2);
-    group.add(doorMeshRight);
+    const mesh = new THREE.Mesh(geometryRight, material)
+    mesh.rotation.x = -Math.PI / 2;
+    group.add(mesh);
 
     return [
       group
