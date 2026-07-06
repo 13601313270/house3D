@@ -8,6 +8,8 @@ import { ref, onMounted, onUnmounted, watch, nextTick } from 'vue'
 import * as THREE from 'three'
 import { World } from '@/utils/world'
 import { CameraState, OrthographicCamera } from '@/types/camera'
+import { PointEntityClass } from '@/types/pointEntity';
+import { BaseEntityClass } from '@/types/baseEntity';
 
 const props = defineProps<{
   world: World,
@@ -182,17 +184,21 @@ const initThree = () => {
   }
 
   (() => {
+    let canvas1IsMouseAngel = false;
+    let camera1AngelStartX = 0;
+    let camera1AngelStartY = 0;
+
+    let canvas1IsMouseMove = false;
     let camera1TargetPositionStartX = 0;
     let camera1TargetPositionStartY = 0;
     let camera1TargetPositionStartZ = 0;
 
-    let canvas1IsMouseAngel = false;
-    let canvas1IsMouseMove = false;
+    let canvas1IsMouseMoveObj = false;
+    let camera1MouseMoveStartZ = 0;
+    let canvas1HoveredObject: THREE.Object3D<THREE.Object3DEventMap> | null = null;
+
     let canvas1LastMouseX = 0;
     let canvas1LastMouseY = 0;
-
-    let camera1AngelStartX = 0;
-    let camera1AngelStartY = 0;
 
     updateCameraAngel()
 
@@ -238,7 +244,7 @@ const initThree = () => {
     const container = containerRef.value
     if (!container) return
 
-    container.addEventListener('mousedown', (e) => {
+    renderer.domElement.addEventListener('mousedown', (e) => {
       if (props.cameraType === 'orthographic') {
         if (e.button === 2) {
         } else if (e.button === 0) {
@@ -262,14 +268,30 @@ const initThree = () => {
           canvas1LastMouseY = e.clientY;
           e.preventDefault();
         } else if (e.button === 0) {
-          // 移动
-          camera1TargetPositionStartX = cameraStateZ.value.targetPositionX;
-          camera1TargetPositionStartY = cameraStateZ.value.targetPositionY;
-          camera1TargetPositionStartZ = cameraStateZ.value.targetPositionZ;
-          canvas1IsMouseMove = true;
-          canvas1LastMouseX = e.clientX;
-          canvas1LastMouseY = e.clientY;
-          e.preventDefault();
+          const hoveredObject = raycastObjects(e)
+          if (hoveredObject) {
+            // 移动对象
+            // @ts-ignore
+            const entity = hoveredObject.entity as BaseEntityClass<any>
+            if (entity instanceof PointEntityClass) {
+              canvas1IsMouseMoveObj = true;
+              canvas1LastMouseX = e.clientX;
+              canvas1LastMouseY = e.clientY;
+              canvas1HoveredObject = hoveredObject
+              // console.log('entity.getData().z', entity.getData().z)
+              camera1MouseMoveStartZ = entity.getData().z;
+            }
+            // console.log('hoveredObject', hoveredObject)
+          } else {
+            // 移动相机
+            camera1TargetPositionStartX = cameraStateZ.value.targetPositionX;
+            camera1TargetPositionStartY = cameraStateZ.value.targetPositionY;
+            camera1TargetPositionStartZ = cameraStateZ.value.targetPositionZ;
+            canvas1IsMouseMove = true;
+            canvas1LastMouseX = e.clientX;
+            canvas1LastMouseY = e.clientY;
+            e.preventDefault();
+          }
         }
       }
     })
@@ -295,28 +317,44 @@ const initThree = () => {
         }
       }
       else if ('radius' in cameraStateZ.value) {
+        const deltaX = e.clientX - canvas1LastMouseX;
+        const deltaY = e.clientY - canvas1LastMouseY;
         if (canvas1IsMouseAngel) {
           // 镜头旋转
-          const delta2DDiffX = e.clientX - canvas1LastMouseX;
-          const delta2DDiffY = e.clientY - canvas1LastMouseY;
-          cameraStateZ.value.angleX = camera1AngelStartX + delta2DDiffX * 0.01;
-          const angleY = camera1AngelStartY + delta2DDiffY * 0.01;
+          cameraStateZ.value.angleX = camera1AngelStartX + deltaX * 0.01;
+          const angleY = camera1AngelStartY + deltaY * 0.01;
           cameraStateZ.value.angleY = Math.max(-Math.PI / 2 + 0.05, Math.min(Math.PI / 2 - 0.05, angleY)); // 因为camera，是采用控制position和lookat的逻辑，所以在angleY==Math.PI/2的定点的时候，无法控制方向，所以这里限制一下，只允许angleY在[-Math.PI/2+0.05, Math.PI/2-0.05]之间
           updateCameraAngel()
         } else if (canvas1IsMouseMove) {
-          const deltaX = e.clientX - canvas1LastMouseX;
-          const deltaY = e.clientY - canvas1LastMouseY;
           // console.log('cameraStateZ.value.radius', cameraStateZ.value.radius)
           const sensitivity = cameraStateZ.value.radius / 450;
           cameraStateZ.value.targetPositionX = camera1TargetPositionStartX - (deltaX * Math.cos(cameraStateZ.value.angleX) - deltaY * Math.sin(cameraStateZ.value.angleX)) * sensitivity;
           cameraStateZ.value.targetPositionZ = camera1TargetPositionStartZ - (deltaX * Math.sin(cameraStateZ.value.angleX) + deltaY * Math.cos(cameraStateZ.value.angleX)) * sensitivity;
           updateCameraAngel()
-        } else {
-          const hoveredObject = raycastObjects(e)
-          if (hoveredObject) {
+        } else if (canvas1IsMouseMoveObj) {
+          // @ts-ignore
+          if (canvas1HoveredObject && canvas1HoveredObject?.entity) {
+            // @ts-ignore
+            const entity = canvas1HoveredObject.entity as BaseEntityClass<any>
+            if (entity instanceof PointEntityClass) {
+              console.log('entity.getData().z', deltaY * -1)
+              entity.getData().z = camera1MouseMoveStartZ + (deltaY * -1)
+              window.worldApi.draw3D()
+              // entity.changePosition(
+              //   entity.position.x,
+              //   entity.position.y + deltaY * 1,
+              //   entity.position.z
+              // )
+              // entity.position.set(
+              //   entity.position.x,
+              //   entity.position.y + deltaY * sensitivity,
+              //   entity.position.z
+              // )
+            }
             // console.log('hoveredObject', hoveredObject)
           }
-          console.log('hoveredObject', hoveredObject)
+          // @ts-ignore
+          // console.log('hoveredObject', hoveredObject, hoveredObject?.entity)
           // emit('objectHover', hoveredObject)
         }
       }
@@ -330,6 +368,7 @@ const initThree = () => {
           canvas1IsMouseAngel = false
           emitCameraState()
         } else if (e.button === 0) {
+          canvas1IsMouseMoveObj = false
           canvas1IsMouseMove = false
           emitCameraState()
         }

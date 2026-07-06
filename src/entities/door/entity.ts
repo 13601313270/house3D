@@ -254,9 +254,10 @@ export class DoorEntity extends EntityClassInWall<DoorData> {
   createBoundingBox(): [THREE.Vector3, THREE.Vector3, THREE.Vector3] {
     const { width, height, bottom, z, angle } = this.getData();
     const thickness = 20;
+    // 第一个是尺寸，第二个是位置偏移，第三个是旋转角度
     return [
       new THREE.Vector3(width, height, thickness + 10),
-      new THREE.Vector3(0, height / 2 + (bottom || 0) + z, 0),
+      new THREE.Vector3(0, height / 2 + (bottom || 0), 0),
       new THREE.Vector3(0, angle * -1, 0)
     ]
   }
