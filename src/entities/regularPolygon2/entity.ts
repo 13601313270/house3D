@@ -260,7 +260,7 @@ export class RegularPolygonEntity extends PointEntityClass<RegularPolygon2Data> 
 
     geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3))
     geometry.setIndex(indices)
-    geometry.computeVertexNormals()
+    // geometry.computeVertexNormals()
 
     const material = new THREE.MeshStandardMaterial({ color })
     const mesh = new THREE.Mesh(geometry, material)
