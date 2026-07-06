@@ -9,6 +9,7 @@ import { BaseObjDataClass } from '@/entities/objData'
 import { ImportFileType, ImportImgType, ObjOutputFileType } from '@/entities/allObjs';
 import { BaseEntityClass } from '@/types/baseEntity'
 import { BaseObjData } from '@/types/map2d'
+import { CameraEntity } from '@/entities/camera/entity'
 
 export const canvasHeight = 600
 export const snapThreshold = 20
@@ -45,6 +46,8 @@ export class World {
   groundMesh: THREE.Mesh | null = null
 
   scene: THREE.Scene
+
+  isShowBoundingBox: boolean = false
 
   constructor() {
     this.scene = new THREE.Scene()
@@ -212,11 +215,12 @@ export class World {
         (this.allFileMapObjects[key] as BaseEntityClass<any>[]).forEach((item) => {
           item.reCreate3DMeshIfNeed()
           item.change3DMeshState()
-          if (item instanceof PointEntityClass) {
+          if (item instanceof PointEntityClass && !(item instanceof CameraEntity)) {
             setTimeout(() => {
               const boundingBox = item.createBoundingBox();
-              if (boundingBox) {
+              if (boundingBox && this.isShowBoundingBox) {
                 const data = item.getData();
+                // console.log('this.isShowBoundingBox', this.isShowBoundingBox);
                 // 第一个是尺寸，第二个是位置偏移，第三个是旋转角度
                 const [boxVector3, offsetVector3, rotateVector3] = boundingBox;
                 item.boundingBoxData = [boxVector3, offsetVector3, rotateVector3]
@@ -224,7 +228,7 @@ export class World {
                 item.boundingBox.children[0].rotation.set(rotateVector3.x, rotateVector3.y, rotateVector3.z)
                 item.boundingBox.children[0].scale.set(boxVector3.x, boxVector3.y, boxVector3.z)
                 item.boundingBox.children[0].position.set(offsetVector3.x, offsetVector3.y, offsetVector3.z)
-                item.boundingBox.visible = false
+                item.boundingBox.visible = this.isShowBoundingBox
                 if (item.spriteGroup) {
                   item.spriteGroup.position.set(data.x, data.z, data.y)
                   item.spriteGroup.children[0].position.set(0, boxVector3.y / 2 + offsetVector3.y + 12, 0)

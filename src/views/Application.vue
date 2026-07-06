@@ -87,6 +87,12 @@
       <div class="right-panel" :style="{ width: panel2SplitWidthPer * 100 + '%' }">
         <div class="tools">
           <div style="flex-shrink: 0;">全景图</div>
+
+          <div style="margin-left: 12px;">
+            <label for="showBoundingBox">显示边界框</label>
+            <input type="checkbox" class="checkBox" id="showBoundingBox" :checked="worldApi.isShowBoundingBox"
+              @change="worldApi.isShowBoundingBox = !worldApi.isShowBoundingBox, worldApi.draw3D()" />
+          </div>
         </div>
         <!-- {{ insertTempDoor }} -->
         <div class="right-panel-content">

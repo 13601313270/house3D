@@ -289,7 +289,7 @@ const initThree = () => {
         } else if (canvas1IsMouseMove) {
           const deltaX = e.clientX - canvas1LastMouseX;
           const deltaY = e.clientY - canvas1LastMouseY;
-          console.log('cameraStateZ.value.radius', cameraStateZ.value.radius)
+          // console.log('cameraStateZ.value.radius', cameraStateZ.value.radius)
           const sensitivity = cameraStateZ.value.radius / 450;
           cameraStateZ.value.targetPositionX = camera1TargetPositionStartX - (deltaX * Math.cos(cameraStateZ.value.angleX) - deltaY * Math.sin(cameraStateZ.value.angleX)) * sensitivity;
           cameraStateZ.value.targetPositionZ = camera1TargetPositionStartZ - (deltaX * Math.sin(cameraStateZ.value.angleX) + deltaY * Math.cos(cameraStateZ.value.angleX)) * sensitivity;
