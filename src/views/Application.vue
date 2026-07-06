@@ -1350,12 +1350,32 @@ const handleMouseMove = (e: MouseEvent) => {
     } else {
       hoverPoint.value = null
     }
+    let tipTexts: string[] = []
     if (insertTempObj instanceof EntityClassInWall) {
-      insertTempObj.setPrepareState(x, y, nearest || undefined)
+      tipTexts = insertTempObj.setPrepareState(x, y, nearest || undefined)
       drawWrapper2DAnd3D()
     } else if (insertTempObj instanceof PointEntityClass) {
-      insertTempObj.setPrepareState(x, y)
+      tipTexts = insertTempObj.setPrepareState(x, y)
       drawWrapper2DAnd3D()
+    }
+    if (tipTexts.length > 0) {
+      const canvasAction = canvas2DRef.value!;
+      const ctxAction = canvasAction.getContext('2d')!
+
+      const hoverScreenX = x * zoom2DLevel.value + panOffset.value.x
+      const hoverScreenY = y * zoom2DLevel.value + panOffset.value.y
+      const startY = hoverScreenY + 14;
+      // 绘制一个背景矩形
+      ctxAction.fillStyle = 'rgba(0, 0, 0, 0.5)'
+      ctxAction.fillRect(hoverScreenX - 50, startY, 100, 8 + 15 * tipTexts.length);
+      ctxAction.font = '14px Arial'
+      ctxAction.textBaseline = 'middle'
+      ctxAction.strokeStyle = 'white'
+      ctxAction.fillStyle = 'white'
+      ctxAction.textAlign = 'center'
+      tipTexts.forEach((v, index) => {
+        ctxAction.fillText(v, hoverScreenX, startY + 15 * index + 13)
+      })
     }
   }
 }

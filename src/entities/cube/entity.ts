@@ -351,12 +351,13 @@ export class CubeEntity extends PointEntityClass<CubeData> {
     return false
   }
 
-  setPrepareState(x: number, y: number): void {
+  setPrepareState(x: number, y: number): string[] {
     this.setData({
       ...this.getData(),
       x,
       y,
     })
+    return [];
   }
 
   meshNeedChangeKey() {

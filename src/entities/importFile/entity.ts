@@ -290,12 +290,13 @@ export class ImportFileEntity extends PointEntityClass<ImportFileData> {
     return false
   }
 
-  setPrepareState(x: number, y: number): void {
+  setPrepareState(x: number, y: number): string[] {
     this.setData({
       ...this.getData(),
       x,
       y,
     })
+    return [];
   }
 
   editPropConfig(snapPoint: HandelInfo, editShow: (editInfoList: editItem[], callback: (val: any) => void) => void): void {

@@ -12,7 +12,7 @@ export interface NearestWallResult {
 
 export abstract class EntityClassInWall<T extends ObjInWallData> extends PointEntityClass<T> {
   // 待添加状态（鼠标新增悬浮的时候）
-  setPrepareState(x: number, y: number, nearest?: NearestWallResult) {
+  setPrepareState(x: number, y: number, nearest?: NearestWallResult): string[] {
     if (nearest) {
       const { pointOnWall, angle } = nearest
       const wallScreenX = pointOnWall.x
@@ -27,6 +27,7 @@ export abstract class EntityClassInWall<T extends ObjInWallData> extends PointEn
         angle,
       };
       this.setData(newData)
+      return [];
     } else {
       const newData: T = {
         ...this.getData(),
@@ -34,6 +35,9 @@ export abstract class EntityClassInWall<T extends ObjInWallData> extends PointEn
         y,
       };
       this.setData(newData)
+      return [
+        '请放置在墙上'
+      ];
     }
   }
 

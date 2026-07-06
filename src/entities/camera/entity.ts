@@ -496,7 +496,7 @@ export class CameraEntity extends PointEntityClass<CameraData> {
     return false;
   }
 
-  setPrepareState(x: number, y: number): void {
+  setPrepareState(x: number, y: number): string[] {
     this.setData({
       ...this.getData(),
       x,
@@ -504,6 +504,7 @@ export class CameraEntity extends PointEntityClass<CameraData> {
       targetPositionX: x + 100,
       targetPositionY: y,
     })
+    return [];
   }
 
   editPropConfig(snapPoint: HandelInfo, editShow: (editInfoList: editItem[], callback: (val: any) => void) => void): void {

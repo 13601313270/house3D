@@ -385,11 +385,12 @@ export class SectorEntity extends PointEntityClass<SectorData> {
     return false
   }
 
-  setPrepareState(x: number, y: number): void {
+  setPrepareState(x: number, y: number): string[] {
     this.setData({
       ...this.getData(),
       x,
       y,
     })
+    return [];
   }
 }

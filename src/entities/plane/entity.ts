@@ -367,11 +367,12 @@ export class PlaneEntity extends PointEntityClass<PlaneData> {
     return false
   }
 
-  setPrepareState(x: number, y: number): void {
+  setPrepareState(x: number, y: number): string[] {
     this.setData({
       ...this.getData(),
       x,
       y,
     })
+    return [];
   }
 }

@@ -425,12 +425,13 @@ export class RegularPolygonEntity extends PointEntityClass<RegularPolygon2Data> 
     return false
   }
 
-  setPrepareState(x: number, y: number): void {
+  setPrepareState(x: number, y: number): string[] {
     this.setData({
       ...this.getData(),
       x,
       y,
     })
+    return [];
   }
 
   meshNeedChangeKey() {
