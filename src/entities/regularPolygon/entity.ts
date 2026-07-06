@@ -1,6 +1,6 @@
 import * as THREE from 'three'
 import { HandelInfo, Point } from '@/types/map2d'
-import { RegularPolygonPlaneData } from './index.d'
+import { RegularPolygonData } from "./index.d"
 import { PointEntityClass } from '@/types/pointEntity'
 import { editItem } from '..';
 import { getMaterialById } from '@/material';
@@ -24,13 +24,13 @@ function getAllPointsByN(x: number, y: number, n: number, r: number, angle: numb
   return points
 }
 
-export class RegularPolygonPlaneEntity extends PointEntityClass<RegularPolygonPlaneData> {
+export class RegularPolygonEntity extends PointEntityClass<RegularPolygonData> {
   name: string = 'N边形体'
   type: string = 'cube'
   isPointObj: boolean = true
   private circleRadius = 6
 
-  draw2DPreviewByData(ctx: CanvasRenderingContext2D, data: RegularPolygonPlaneData, panOffset: Point, zoomLevel: number): void {
+  draw2DPreviewByData(ctx: CanvasRenderingContext2D, data: RegularPolygonData, panOffset: Point, zoomLevel: number): void {
     const screenX = data.x * zoomLevel + panOffset.x
     const screenY = data.y * zoomLevel + panOffset.y
     const { n, r, angleY } = data;
@@ -60,7 +60,7 @@ export class RegularPolygonPlaneEntity extends PointEntityClass<RegularPolygonPl
 
   draw2DByData(
     ctx: CanvasRenderingContext2D,
-    data: RegularPolygonPlaneData,
+    data: RegularPolygonData,
     panOffset: Point,
     zoomLevel: number,
   ): void {
@@ -164,7 +164,7 @@ export class RegularPolygonPlaneEntity extends PointEntityClass<RegularPolygonPl
     const data = this.getData();
     const group = new THREE.Group()
 
-    const { n, r, height, color, angleY } = data;
+    const { n, r, h, color, angleY } = data;
 
     const polygonPoints = getAllPointsByN(0, 0, n, r, angleY)
     if (polygonPoints.length < 3) {
@@ -176,7 +176,7 @@ export class RegularPolygonPlaneEntity extends PointEntityClass<RegularPolygonPl
 
     const extrudeSettings = {
       steps: 1,
-      depth: height,
+      depth: h,
       bevelEnabled: false,
     }
 
@@ -197,11 +197,12 @@ export class RegularPolygonPlaneEntity extends PointEntityClass<RegularPolygonPl
   }
 
   createBoundingBox(): [THREE.Vector3, THREE.Vector3, THREE.Vector3] {
-    const { n, r, height, angleY } = this.getData();
+    const { r, h } = this.getData();
+    // 第一个是尺寸，第二个是位置偏移，第三个是旋转角度
     return [
-      new THREE.Vector3(r, r, height),
-      new THREE.Vector3(0, r / 2, 0),
-      new THREE.Vector3(0, angleY, 0)
+      new THREE.Vector3(r * 2, 100, r * 2),
+      new THREE.Vector3(0, h / 2, 0),
+      new THREE.Vector3(0, 0, 0)
     ]
   }
 
@@ -315,7 +316,16 @@ export class RegularPolygonPlaneEntity extends PointEntityClass<RegularPolygonPl
         max: 100,
         step: 1,
         value: data.z,
-      }
+      },
+      {
+        id: 'h',
+        label: '高度',
+        dataType: 'number',
+        min: 0,
+        max: Infinity,
+        step: 1,
+        value: data.h,
+      },
     ], (val) => {
       this.setData({
         ...data,

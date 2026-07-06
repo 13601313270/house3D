@@ -159,7 +159,7 @@ export class SectorEntity extends PointEntityClass<SectorData> {
     const { r, startAngle, endAngle, x, y, h } = data;
     const { minX, maxX, minY, maxY } = getMatchRectAreaBySector(data.x, data.y, r, startAngle, endAngle)
     // 第一个是尺寸，第二个是位置偏移，第三个是旋转角度
-    console.log('minX', minX, 'maxX', maxX, 'minY', minY, 'maxY', maxY)
+    // console.log('minX', minX, 'maxX', maxX, 'minY', minY, 'maxY', maxY)
     return [
       new THREE.Vector3(maxX - minX, h, maxY - minY),
       new THREE.Vector3(
