@@ -15,11 +15,15 @@ export abstract class PointEntityClass<T extends PointObjData> extends BaseEntit
       const geometry = new THREE.BoxGeometry(1, 1, 1);
       const edges = new THREE.EdgesGeometry(geometry);
       const lineMaterial = new THREE.LineBasicMaterial({ color: 0x000000, transparent: true, opacity: 1 });
-      const box = new THREE.LineSegments(edges, lineMaterial);
+      // const box = new THREE.LineSegments(edges, lineMaterial);
+      const boxMesh = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.2 }));
       const group = new THREE.Group()
-      group.add(box);
+      // group.add(box);
+      group.add(boxMesh);
       // @ts-ignore
-      box.entity = this;
+      // box.entity = this;
+      // @ts-ignore
+      boxMesh.entity = this;
       this.boundingBox = group;
       this.world.scene.add(group)
     })();

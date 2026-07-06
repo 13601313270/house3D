@@ -17,8 +17,8 @@ const props = defineProps<{
   cameraType: 'perspective' | 'orthographic'
 }>()
 
-const emit = defineEmits<{ 
-  (e: 'update:cameraState', value: CameraState | OrthographicCamera): void 
+const emit = defineEmits<{
+  (e: 'update:cameraState', value: CameraState | OrthographicCamera): void
   (e: 'objectHover', object: THREE.Object3D | null): void
   (e: 'objectClick', object: THREE.Object3D | null): void
 }>()
@@ -28,7 +28,7 @@ const containerRef = ref<HTMLDivElement | null>(null)
 // let scene: THREE.Scene | null = null
 let camera: THREE.PerspectiveCamera | THREE.OrthographicCamera | null = null
 let renderer: THREE.WebGLRenderer | null = null
-// const raycaster: THREE.Raycaster = new THREE.Raycaster()
+const raycaster: THREE.Raycaster = new THREE.Raycaster()
 // const mouse: THREE.Vector2 = new THREE.Vector2()
 
 const cameraStateZ = ref<CameraState | OrthographicCamera>({
@@ -42,31 +42,40 @@ const cameraStateZ = ref<CameraState | OrthographicCamera>({
   aspectH: 1,
 })
 
-// function raycastObjects(event: MouseEvent): THREE.Object3D | null {
-//   if (!camera || !containerRef.value || !renderer) return null
-  
-//   const rect = containerRef.value.getBoundingClientRect()
-//   const canvasRect = renderer.domElement.getBoundingClientRect()
-  
-//   const scaleX = canvasRect.width / rect.width
-//   const scaleY = canvasRect.height / rect.height
-  
-//   const x = ((event.clientX - rect.left) * scaleX / canvasRect.width) * 2 - 1
-//   const y = -((event.clientY - rect.top) * scaleY / canvasRect.height) * 2 + 1
-  
-//   mouse.set(x, y)
-//   raycaster.setFromCamera(mouse, camera)
-  
-//   const scene = props.world.scene
-//   if (!scene) return null
-  
-//   // const intersects = raycaster.intersectObjects(props.world.boundingBoxList, true)
-  
-//   // if (intersects.length > 0) {
-//   //   return intersects[0].object
-//   // }
-//   return null
-// }
+function raycastObjects(event: MouseEvent): THREE.Object3D | null {
+  if (!camera || !containerRef.value || !renderer) return null
+
+  // const rect = containerRef.value.getBoundingClientRect()
+  // const canvasRect = renderer.domElement.getBoundingClientRect()
+
+  // const scaleX = canvasRect.width / rect.width
+  // const scaleY = canvasRect.height / rect.height
+
+  // const x = ((event.clientX - rect.left) * scaleX / canvasRect.width) * 2 - 1
+  // const y = -((event.clientY - rect.top) * scaleY / canvasRect.height) * 2 + 1
+  // @ts-ignore
+  const x = event.offsetX / event.target!.offsetWidth * 2 - 1
+  // @ts-ignore
+  const y = -(event.offsetY / event.target!.offsetHeight) * 2 + 1
+
+  const mouse = new THREE.Vector2(x, y)
+  // @ts-ignore
+  // window.fffff = event;
+  // console.log('hoveredObject-x', x)
+  // console.log('hoveredObject-y', y)
+  mouse.set(x, y)
+  raycaster.setFromCamera(mouse, camera)
+
+  const scene = props.world.scene
+  if (!scene) return null
+
+  const intersects = raycaster.intersectObjects(props.world.boundingBoxList(), true)
+
+  if (intersects.length > 0) {
+    return intersects[0].object
+  }
+  return null
+}
 
 function updateCameraAngel() {
   if (props.cameraType === 'orthographic') {
@@ -164,6 +173,14 @@ const initThree = () => {
     camera.layers.disable(2);
   }
 
+  renderer = new THREE.WebGLRenderer({ antialias: true })
+  renderer.setPixelRatio(window.devicePixelRatio)
+  renderer.shadowMap.enabled = true
+
+  if (container) {
+    container.appendChild(renderer.domElement)
+  }
+
   (() => {
     let camera1TargetPositionStartX = 0;
     let camera1TargetPositionStartY = 0;
@@ -256,7 +273,7 @@ const initThree = () => {
         }
       }
     })
-    container.addEventListener('mousemove', (e) => {
+    renderer.domElement.addEventListener('mousemove', (e) => {
       if (props.cameraType === 'orthographic') {
         if (canvas1IsMouseAngel) {
 
@@ -295,7 +312,11 @@ const initThree = () => {
           cameraStateZ.value.targetPositionZ = camera1TargetPositionStartZ - (deltaX * Math.sin(cameraStateZ.value.angleX) + deltaY * Math.cos(cameraStateZ.value.angleX)) * sensitivity;
           updateCameraAngel()
         } else {
-          // const hoveredObject = raycastObjects(e)
+          const hoveredObject = raycastObjects(e)
+          if (hoveredObject) {
+            // console.log('hoveredObject', hoveredObject)
+          }
+          console.log('hoveredObject', hoveredObject)
           // emit('objectHover', hoveredObject)
         }
       }
@@ -348,14 +369,6 @@ const initThree = () => {
       }
     });
   })();
-
-  renderer = new THREE.WebGLRenderer({ antialias: true })
-  renderer.setPixelRatio(window.devicePixelRatio)
-  renderer.shadowMap.enabled = true
-
-  if (container) {
-    container.appendChild(renderer.domElement)
-  }
 }
 
 const animate = () => {

@@ -47,7 +47,7 @@ export class World {
 
   scene: THREE.Scene
 
-  isShowBoundingBox: boolean = false
+  isShowBoundingBox: boolean = true
 
   constructor() {
     this.scene = new THREE.Scene()
@@ -207,6 +207,20 @@ export class World {
         })
       }
     })
+  }
+
+  boundingBoxList(): THREE.Group[] {
+    const boundingBoxList: THREE.Group[] = []
+    allFileKeys.forEach((key) => {
+      if (this.allFileMapObjects[key]) {
+        (this.allFileMapObjects[key] as PointEntityClass<any>[]).forEach((item) => {
+          if (item.boundingBox) {
+            boundingBoxList.push(item.boundingBox)
+          }
+        })
+      }
+    })
+    return boundingBoxList
   }
 
   draw3D() {
