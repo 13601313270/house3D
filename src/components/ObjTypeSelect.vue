@@ -433,7 +433,7 @@ function showHelpModal() {
 
     .childItem {
       border-bottom: 1px solid #f1f1f1;
-      padding: 4px 0;
+      padding: 4px 12px;
       text-align: center;
       margin: 0 8px;
       display: flex;
@@ -455,8 +455,8 @@ function showHelpModal() {
       }
 
       >img {
-        width: 24px;
-        height: 24px;
+        width: 36px;
+        height: 36px;
         margin: 0 4px;
         flex-shrink: 0;
       }

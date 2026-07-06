@@ -1,6 +1,6 @@
 import * as THREE from 'three'
 import { HandelInfo, Point } from '@/types/map2d'
-import { RegularPolygonData } from "./index.d"
+import { RegularPolygon2Data } from "./index.d"
 import { PointEntityClass } from '@/types/pointEntity'
 import { editItem } from '..';
 import { getMaterialById } from '@/material';
@@ -24,25 +24,25 @@ function getAllPointsByN(x: number, y: number, n: number, r: number, angle: numb
   return points
 }
 
-export class RegularPolygonEntity extends PointEntityClass<RegularPolygonData> {
-  name: string = 'N边形体'
-  type: string = 'regularPolygon';
+export class RegularPolygonEntity extends PointEntityClass<RegularPolygon2Data> {
+  name: string = 'N边形锥'
+  type: string = 'regularPolygon2';
   isPointObj: boolean = true
   private circleRadius = 6
 
-  draw2DPreviewByData(ctx: CanvasRenderingContext2D, data: RegularPolygonData, panOffset: Point, zoomLevel: number): void {
+  draw2DPreviewByData(ctx: CanvasRenderingContext2D, data: RegularPolygon2Data, panOffset: Point, zoomLevel: number): void {
     const screenX = data.x * zoomLevel + panOffset.x
     const screenY = data.y * zoomLevel + panOffset.y
-    const { n, r, angleY } = data;
+    const { n, r, r2, angleY } = data;
 
     ctx.fillStyle = data.color
     ctx.save();
     ctx.translate(screenX, screenY);
 
-    const polygonPoints = getAllPointsByN(0, 0, n, r, angleY * -1)
-    if (polygonPoints.length >= 3) {
+    const bottomPoints = getAllPointsByN(0, 0, n, r, angleY * -1)
+    if (bottomPoints.length >= 3) {
       ctx.beginPath()
-      polygonPoints.forEach((point, index) => {
+      bottomPoints.forEach((point, index) => {
         const px = point.x * zoomLevel
         const py = point.y * zoomLevel
         if (index === 0) {
@@ -55,18 +55,38 @@ export class RegularPolygonEntity extends PointEntityClass<RegularPolygonData> {
       ctx.fill()
     }
 
+    if (r2 > 0) {
+      const topPoints = getAllPointsByN(0, 0, n, r2, angleY * -1)
+      if (topPoints.length >= 3) {
+        ctx.strokeStyle = 'rgba(0,0,0,0.3)'
+        ctx.lineWidth = 2 * zoomLevel
+        ctx.beginPath()
+        topPoints.forEach((point, index) => {
+          const px = point.x * zoomLevel
+          const py = point.y * zoomLevel
+          if (index === 0) {
+            ctx.moveTo(px, py)
+          } else {
+            ctx.lineTo(px, py)
+          }
+        })
+        ctx.closePath()
+        ctx.stroke()
+      }
+    }
+
     ctx.restore();
   }
 
   draw2DByData(
     ctx: CanvasRenderingContext2D,
-    data: RegularPolygonData,
+    data: RegularPolygon2Data,
     panOffset: Point,
     zoomLevel: number,
   ): void {
     const screenX = data.x * zoomLevel + panOffset.x
     const screenY = data.y * zoomLevel + panOffset.y
-    const { n, r, angleY } = data
+    const { n, r, angleY, r2 } = data
 
     // 控制点
     ctx.fillStyle = '#fff'
@@ -139,12 +159,12 @@ export class RegularPolygonEntity extends PointEntityClass<RegularPolygonData> {
     ctx.stroke()
 
     // 绘制 轮廓
-    const polygonPoints = getAllPointsByN(data.x, data.y, n, r, angleY * -1)
-    if (polygonPoints.length >= 3) {
+    const bottomPoints = getAllPointsByN(data.x, data.y, n, r, angleY * -1)
+    if (bottomPoints.length >= 3) {
       ctx.lineWidth = 2
       ctx.strokeStyle = 'blue'
       ctx.beginPath()
-      polygonPoints.forEach((point, index) => {
+      bottomPoints.forEach((point, index) => {
         const px = point.x * zoomLevel + panOffset.x
         const py = point.y * zoomLevel + panOffset.y
         if (index === 0) {
@@ -156,6 +176,28 @@ export class RegularPolygonEntity extends PointEntityClass<RegularPolygonData> {
       ctx.closePath()
       ctx.stroke()
     }
+
+    if (r2 > 0) {
+      const topPoints = getAllPointsByN(data.x, data.y, n, r2, angleY * -1)
+      if (topPoints.length >= 3) {
+        ctx.lineWidth = 2
+        ctx.strokeStyle = 'green'
+        ctx.setLineDash([5 * zoomLevel, 5 * zoomLevel])
+        ctx.beginPath()
+        topPoints.forEach((point, index) => {
+          const px = point.x * zoomLevel + panOffset.x
+          const py = point.y * zoomLevel + panOffset.y
+          if (index === 0) {
+            ctx.moveTo(px, py)
+          } else {
+            ctx.lineTo(px, py)
+          }
+        })
+        ctx.closePath()
+        ctx.stroke()
+        ctx.setLineDash([])
+      }
+    }
   }
 
   glbObj: THREE.Group | null = null;
@@ -164,32 +206,64 @@ export class RegularPolygonEntity extends PointEntityClass<RegularPolygonData> {
     const data = this.getData();
     const group = new THREE.Group()
 
-    const { n, r, h, color, angleY } = data;
+    const { n, r, r2, h, color, angleY } = data;
 
-    const polygonPoints = getAllPointsByN(0, 0, n, r, angleY)
-    if (polygonPoints.length < 3) {
+    const bottomPoints = getAllPointsByN(0, 0, n, r, angleY)
+    if (bottomPoints.length < 3) {
       return [group]
     }
 
-    const shapePoints: THREE.Vector2[] = polygonPoints.map(p => new THREE.Vector2(p.x, p.y * -1))
-    const shape = new THREE.Shape(shapePoints)
+    const geometry = new THREE.BufferGeometry()
+    const vertices: number[] = []
+    const indices: number[] = []
 
-    const extrudeSettings = {
-      steps: 1,
-      depth: h,
-      bevelEnabled: false,
+    const addPoint = (x: number, y: number, z: number) => {
+      vertices.push(x, y, z)
     }
 
-    const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings)
-    geometry.rotateX(-Math.PI / 2)
+    const bottomOffset = 0
+    bottomPoints.forEach(p => {
+      addPoint(p.x, 0, p.y * -1)
+    })
 
-    const materials = [];
-    const defaultMat = new THREE.MeshStandardMaterial({ color });
-    for (let i = 0; i < 6; i++) {
-      materials.push(defaultMat);
+    const isPyramid = r2 <= 0
+    const topOffset = bottomPoints.length
+
+    if (isPyramid) {
+      addPoint(0, h, 0)
+    } else {
+      const topPoints = getAllPointsByN(0, 0, n, r2, angleY)
+      topPoints.forEach(p => {
+        addPoint(p.x, h, p.y * -1)
+      })
     }
 
-    const mesh = new THREE.Mesh(geometry, materials)
+    for (let i = 0; i < n; i++) {
+      const next = (i + 1) % n
+      if (isPyramid) {
+        indices.push(bottomOffset + i, bottomOffset + next, topOffset)
+      } else {
+        indices.push(bottomOffset + i, bottomOffset + next, topOffset + i)
+        indices.push(topOffset + i, bottomOffset + next, topOffset + next)
+      }
+    }
+
+    if (!isPyramid) {
+      for (let i = 2; i < n; i++) {
+        indices.push(topOffset, topOffset + i, topOffset + i - 1)
+      }
+    }
+
+    for (let i = 2; i < n; i++) {
+      indices.push(bottomOffset, bottomOffset + i - 1, bottomOffset + i)
+    }
+
+    geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3))
+    geometry.setIndex(indices)
+    geometry.computeVertexNormals()
+
+    const material = new THREE.MeshStandardMaterial({ color })
+    const mesh = new THREE.Mesh(geometry, material)
     group.add(mesh);
     return [
       group
@@ -295,13 +369,22 @@ export class RegularPolygonEntity extends PointEntityClass<RegularPolygonData> {
       },
       {
         id: 'r',
-        label: '半径',
+        label: '底部半径',
         dataType: 'number',
         min: 0,
         max: Infinity,
         step: 1,
         value: data.r,
       },
+      // {
+      //   id: 'r2',
+      //   label: '顶部半径',
+      //   dataType: 'number',
+      //   min: 0,
+      //   max: Infinity,
+      //   step: 1,
+      //   value: data.r2,
+      // },
       {
         id: 'color',
         label: '颜色',
