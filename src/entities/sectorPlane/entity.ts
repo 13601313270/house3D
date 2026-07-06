@@ -7,6 +7,7 @@ import { getMaterialById } from '@/material';
 import { MatchCircleArea, MatchRectArea } from '@/utils/matchArea';
 import { allSnapFromType } from '@/types/baseEntity';
 import { importImgFileHead } from '../allObjs';
+import getMatchRectAreaBySector from '@/utils/getMatchRectAreaBySector';
 
 export class SectorPlaneEntity extends PointEntityClass<SectorPlaneData> {
   name: string = '扇形平面'
@@ -201,88 +202,29 @@ export class SectorPlaneEntity extends PointEntityClass<SectorPlaneData> {
   }
 
   createBoundingBox(): [THREE.Vector3, THREE.Vector3, THREE.Vector3] {
-    const { r } = this.getData();
+    const data = this.getData();
+    const { r, startAngle, endAngle, x, y } = data;
+    const { minX, maxX, minY, maxY } = getMatchRectAreaBySector(data.x, data.y, r, startAngle, endAngle)
+    // 第一个是尺寸，第二个是位置偏移，第三个是旋转角度
+    console.log('minX', minX, 'maxX', maxX, 'minY', minY, 'maxY', maxY)
     return [
-      new THREE.Vector3(r * 2, 0, r * 2),
-      new THREE.Vector3(0, 0, 0),
+      new THREE.Vector3(maxX - minX, 1, maxY - minY),
+      new THREE.Vector3(
+        (Math.abs(maxX - x) - Math.abs(minX - x)) / 2,
+        0,
+        (Math.abs(maxY - y) - Math.abs(minY - y)) / 2),
       new THREE.Vector3(0, 0, 0)
     ]
   }
 
   showMatchHandel(x: number, y: number) {
     const data = this.getData();
-    let { r, startAngle, endAngle } = data;
+    const { r, startAngle, endAngle } = data;
     const circleRadius = this.circleRadius * 1.5
     if (Math.abs(x - data.x) > r + circleRadius || Math.abs(y - data.y) > r + circleRadius) {
       return null
     }
-    startAngle = startAngle % (Math.PI * 2)
-    endAngle = endAngle % (Math.PI * 2)
-    if (endAngle < startAngle) {
-      endAngle += Math.PI * 2;
-    }
-    // console.log('startAngle', startAngle, endAngle, endAngle - startAngle)
-    // 获取沿着(data.x,data.y)角度为startAngle，长度为r的点的坐标
-    const pointList = [
-      {
-        x: data.x,
-        y: data.y,
-      },
-      {
-        x: data.x + r * Math.cos(startAngle),
-        y: data.y - r * Math.sin(startAngle),
-      },
-      {
-        x: data.x + r * Math.cos(endAngle),
-        y: data.y - r * Math.sin(endAngle),
-      },
-    ];
-    if (startAngle < Math.PI / -2 * 3 && endAngle > Math.PI / -2 * 3) {
-      pointList.push({
-        x: data.x,
-        y: data.y - r,
-      })
-    }
-    if (startAngle < Math.PI * -1 && endAngle > Math.PI * -1) {
-      pointList.push({
-        x: data.x - r,
-        y: data.y,
-      })
-    }
-    if (startAngle < Math.PI / -2 && endAngle > Math.PI / -2) {
-      pointList.push({
-        x: data.x,
-        y: data.y + r,
-      })
-    }
-    if (startAngle < 0 && endAngle > 0) {
-      pointList.push({
-        x: data.x + r,
-        y: data.y,
-      })
-    }
-    if (startAngle < Math.PI / 2 && endAngle > Math.PI / 2) {
-      pointList.push({
-        x: data.x,
-        y: data.y - r,
-      })
-    }
-    if (startAngle < Math.PI && endAngle > Math.PI) {
-      pointList.push({
-        x: data.x - r,
-        y: data.y,
-      })
-    }
-    if (startAngle < Math.PI / 2 * 3 && endAngle > Math.PI / 2 * 3) {
-      pointList.push({
-        x: data.x,
-        y: data.y + r,
-      })
-    }
-    let minX = Math.min(...pointList.map(item => item.x))
-    let maxX = Math.max(...pointList.map(item => item.x))
-    let minY = Math.min(...pointList.map(item => item.y))
-    let maxY = Math.max(...pointList.map(item => item.y))
+    let { minX, maxX, minY, maxY } = getMatchRectAreaBySector(data.x, data.y, r, startAngle, endAngle)
     minX -= circleRadius;
     maxX += circleRadius;
     minY -= circleRadius;
