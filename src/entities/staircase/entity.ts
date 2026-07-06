@@ -28,12 +28,16 @@ export class StaircaseEntity extends LineEntityClass<StaircasePoint, StaircaseDa
     }
   }
 
-  setPreparePoint(points: (Point & StaircasePoint)[]): void {
+  setPreparePoint(points: (Point & StaircasePoint)[]): string[] {
     this.getData().points = points
       .map((v, i) => ({
         ...v,
         z: v.z || i * 30,
       }))
+    return [
+      'ESC 结束绘制',
+      'ctrl+z 撤销一点',
+    ];
   }
 
   draw2DPreviewByData(ctx: CanvasRenderingContext2D, data: StaircaseData, panOffset: Point, zoomLevel: number): void {

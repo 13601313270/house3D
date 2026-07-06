@@ -419,8 +419,6 @@ export class WallEntity extends LineEntityClass<WallPoint, WallData> {
     const {
       x,
       y,
-      // startX,
-      // startY
     } = position
     if (matchHandelInfo.index !== undefined) {
       this.markObjectIsDirty()
@@ -527,10 +525,6 @@ export class WallEntity extends LineEntityClass<WallPoint, WallData> {
       lines.push([p1, p2])
     }
     return lines;
-  }
-
-  setPreparePoint(points: (Point & WallPoint)[]): void {
-    this.getData().points = points
   }
 
   editPropConfig(snapPoint: HandelInfo, editShow: (editInfoList: editItem[], callback: (val: any) => void) => void, close: () => void): void {

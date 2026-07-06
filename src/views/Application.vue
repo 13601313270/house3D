@@ -616,7 +616,9 @@ onMounted(async () => {
           insertAdding.value = true
           insertTempObj.setPreparePoint(tempPointInsertData.value)
           const insertData = insertTempObj.getData()
-          await worldApi.add(currentTool.value, [insertData])
+          if (tempPointInsertData.value.length >= 2) {
+            await worldApi.add(currentTool.value, [insertData])
+          }
           insertTempObj = null;
           tempPointInsertData.value = []
           lastPoint.value = null
@@ -1316,29 +1318,30 @@ const handleMouseMove = (e: MouseEvent) => {
       } else {
         // console.log('match point 99999', snappedPoint44.point.x, last.x, snappedPoint44.point.y, last.y)
       }
-      insertTempObj.setPreparePoint(points)
+      const tipTexts = insertTempObj.setPreparePoint(points)
       hoverPoint.value = {
         x: snappedPoint44.point.x,
         y: snappedPoint44.point.y,
       }
-
       drawWrapper2DAnd3D()
       const hoverScreenX = hoverPoint.value.x * zoom2DLevel.value + panOffset.value.x
       const hoverScreenY = hoverPoint.value.y * zoom2DLevel.value + panOffset.value.y
       const canvasAction = canvas2DRef.value!;
       const ctxAction = canvasAction.getContext('2d')!
-      const startY = snappedPoint44.point.y > last.y ? hoverScreenY + 10 : hoverScreenY - 50;
-      // 绘制一个背景矩形
-      ctxAction.fillStyle = 'rgba(0, 0, 0, 0.5)'
-      ctxAction.fillRect(hoverScreenX - 50, startY, 100, 34)
-
-      ctxAction.font = '14px Arial'
-      ctxAction.textBaseline = 'middle'
-      ctxAction.strokeStyle = 'white'
-      ctxAction.fillStyle = 'white'
-      ctxAction.textAlign = 'center'
-      ctxAction.fillText(`ESC 结束绘制`, hoverScreenX, startY + 11)
-      ctxAction.fillText(`ctrl+z 撤销一点`, hoverScreenX, startY + 26)
+      const startY = snappedPoint44.point.y > last.y ? hoverScreenY + 14 : hoverScreenY - 15 * tipTexts.length - 22;
+      if (tipTexts.length > 0) {
+        // 绘制一个背景矩形
+        ctxAction.fillStyle = 'rgba(0, 0, 0, 0.5)'
+        ctxAction.fillRect(hoverScreenX - 50, startY, 100, 8 + 15 * tipTexts.length);
+        ctxAction.font = '14px Arial'
+        ctxAction.textBaseline = 'middle'
+        ctxAction.strokeStyle = 'white'
+        ctxAction.fillStyle = 'white'
+        ctxAction.textAlign = 'center'
+        tipTexts.forEach((v, index) => {
+          ctxAction.fillText(v, hoverScreenX, startY + 15 * index + 13)
+        })
+      }
     }
   } else {
     const nearest = getNearestWall({ x, y })

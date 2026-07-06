@@ -408,10 +408,6 @@ export class PolygonEntity extends LineEntityClass<PolygonPoint, PolygonData> {
     return lines;
   }
 
-  setPreparePoint(points: (Point & PolygonPoint)[]): void {
-    this.getData().points = points
-  }
-
   editPropConfig(snapPoint: HandelInfo, editShow: (editInfoList: editItem[], callback: (val: any) => void) => void, close: () => void): void {
     const data = this.getData();
     const wallBaseConfig: editItem[] = [

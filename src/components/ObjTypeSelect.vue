@@ -259,7 +259,7 @@ async function mouseEnterType(event: MouseEvent, type: ObjFileType) {
   nextTick(() => {
     if (addOutFileChildListRef.value) {
       const { bottom } = addOutFileChildListRef.value!.getBoundingClientRect()
-      console.log('addOutFileChildListRef', bottom, window.innerHeight)
+      // console.log('addOutFileChildListRef', bottom, window.innerHeight)
       if (bottom > window.innerHeight) {
         enterEventDomPosition.value = {
           x: right,
@@ -291,7 +291,7 @@ function leaveObjTypeCate2() {
 }
 
 function mouseenterGroup(groupName: string) {
-  console.log(111, groupName);
+  // console.log(111, groupName);
   activeObjTypeId.value = groupName;
   activeObjChildList.value = []
   activePluginChildList.value = []

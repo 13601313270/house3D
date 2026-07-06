@@ -32,7 +32,13 @@ export abstract class LineEntityClass<V, T extends LineObjData<V>> extends BaseE
   }
 
   // 待添加状态（鼠标新增悬浮的时候的点）
-  abstract setPreparePoint(points: (V & Point)[]): void
+  setPreparePoint(points: (V & Point)[]): string[] {
+    this.getData().points = points
+    return [
+      'ESC 结束绘制',
+      'ctrl+z 撤销一点',
+    ]
+  }
 
   // 偏移坐标（移动位置的时候，临时使用，完成移动，会叠加到data上人，然后自己重新归0）
   public offset = { x: 0, y: 0 }
