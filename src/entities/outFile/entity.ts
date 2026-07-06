@@ -529,6 +529,9 @@ export class OutFileEntity extends PointEntityClass<OutFileData> {
         ...this.getData(),
         angleY: angleY * -1 - (findObjInfo?.drawAngelAngel || 0),
       })
+      return [
+        '角度:' + (angleY * -180 / Math.PI).toFixed(2) + '°',
+      ]
     }
   }
 

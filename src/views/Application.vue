@@ -1176,7 +1176,7 @@ const handleMouseMove = (e: MouseEvent) => {
       if (matchHandelObj instanceof PointEntityClass) {
         matchHandelObj.notInSceneSnapLineArea()
       }
-      matchHandelObj.matchHandelMoveCallback({
+      const tipTexts = matchHandelObj.matchHandelMoveCallback({
         x,
         y,
         startX: matchHandelStartPoint ? matchHandelStartPoint.x : undefined,
@@ -1186,8 +1186,26 @@ const handleMouseMove = (e: MouseEvent) => {
       // 绘制操作句柄
       ctxAction.clearRect(0, 0, canvasAction.width, canvasAction.height)
       matchHandelObj.draw2D(ctxAction, panOffset.value, zoom2DLevel.value)
-
       worldApi.draw3D()
+      if (tipTexts && tipTexts.length > 0) {
+        const canvasAction = canvas2DRef.value!;
+        const ctxAction = canvasAction.getContext('2d')!
+
+        const hoverScreenX = x * zoom2DLevel.value + panOffset.value.x
+        const hoverScreenY = y * zoom2DLevel.value + panOffset.value.y
+        const startY = hoverScreenY + 14;
+        // 绘制一个背景矩形
+        ctxAction.fillStyle = 'rgba(0, 0, 0, 0.5)'
+        ctxAction.fillRect(hoverScreenX - 60, startY, 120, 8 + 15 * tipTexts.length);
+        ctxAction.font = '14px Arial'
+        ctxAction.textBaseline = 'middle'
+        ctxAction.strokeStyle = 'white'
+        ctxAction.fillStyle = 'white'
+        ctxAction.textAlign = 'center'
+        tipTexts.forEach((v, index) => {
+          ctxAction.fillText(v, hoverScreenX, startY + 15 * index + 13)
+        })
+      }
       return;
     }
     if (isPanningScreen.value) {

@@ -142,7 +142,7 @@ export abstract class BaseEntityClass<T extends BaseObjData> {
     y: number,
     startX?: number,
     startY?: number,
-  }, matchHandelInfo: HandelInfo): void;
+  }, matchHandelInfo: HandelInfo): string[] | void;
 
   // 本对象可以被其他对象对齐参考点（注意是被对齐，提供给其他拖动磁吸的参考点）
   abstract getMineBeSnapPoints(): Array<OrigionSnapPoint>;
