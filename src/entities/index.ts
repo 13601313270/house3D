@@ -1,3 +1,7 @@
+import { BaseEntityClass } from '@/types/baseEntity'
+import { World } from '@/utils/world'
+import { IconDataType } from '@/components/GroundTextureEditor/types/elementDefinition'
+import PluginType from './pluginType'
 import { BaseObjData } from '@/types/map2d'
 import wallPlugin from './wall'
 import windowPlugin from './window'
@@ -22,10 +26,7 @@ import sectorPlugin from './sector'
 import sectorPlanePlugin from './sectorPlane'
 import polygonPlanePlugin from './polygonPlane'
 import polygonPlugin from './polygon'
-import { BaseEntityClass } from '@/types/baseEntity'
-import { World } from '@/utils/world'
-import { IconDataType } from '@/components/GroundTextureEditor/types/elementDefinition'
-import PluginType from './pluginType'
+import regularPolygonPlanePlugin from './regularPolygonPlane'
 
 export type EntityConstructor = new (world: World, data: BaseObjData) => BaseEntityClass<any>;
 export type enumItem = {
@@ -104,6 +105,7 @@ export const allPluginByKey: Record<string, PluginType> = {
   sectorPlanePlugin,
   polygonPlanePlugin,
   polygonPlugin,
+  regularPolygonPlanePlugin,
 ].forEach(v => {
   allPluginByKey[v.key] = v
   allFileKeys.push(v.key)
