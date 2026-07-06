@@ -409,7 +409,7 @@ export class WindowEntity extends EntityClassInWall<WindowData> {
       );
       subtractGeometry.rotateY(data.angle * -1);
       const cylinderBrush = new Brush(subtractGeometry);
-      cylinderBrush.position.set(data.x, data.height / 2 - 1 + (data.bottom || 0), data.y)
+      cylinderBrush.position.set(data.x, data.height / 2 - 1 + (data.bottom || 0) + data.z, data.y)
       cylinderBrush.updateMatrixWorld()
       // console.log('dddddddd', countPerPoint, wallGroup)
       const firstMesh = wallGroup.children.find(child => child instanceof THREE.Mesh) as THREE.Mesh;
@@ -448,7 +448,7 @@ export class WindowEntity extends EntityClassInWall<WindowData> {
     const thickness = 20;
     return [
       new THREE.Vector3(width, height, thickness),
-      new THREE.Vector3(0, height / 2 + (bottom || 0) + z, 0),
+      new THREE.Vector3(0, height / 2 + (bottom || 0), 0),
       new THREE.Vector3(0, angle * -1, 0)
     ]
   }

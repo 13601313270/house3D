@@ -338,18 +338,12 @@ const initThree = () => {
             const entity = canvas1HoveredObject.entity as BaseEntityClass<any>
             if (entity instanceof PointEntityClass) {
               console.log('entity.getData().z', deltaY * -1)
-              entity.getData().z = camera1MouseMoveStartZ + (deltaY * -1)
+              // entity.getData().z = camera1MouseMoveStartZ + (deltaY * -1)
+              entity.setData({
+                ...entity.getData(),
+                z: camera1MouseMoveStartZ + (deltaY * -1)
+              })
               window.worldApi.draw3D()
-              // entity.changePosition(
-              //   entity.position.x,
-              //   entity.position.y + deltaY * 1,
-              //   entity.position.z
-              // )
-              // entity.position.set(
-              //   entity.position.x,
-              //   entity.position.y + deltaY * sensitivity,
-              //   entity.position.z
-              // )
             }
             // console.log('hoveredObject', hoveredObject)
           }

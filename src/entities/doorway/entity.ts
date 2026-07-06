@@ -196,7 +196,7 @@ export class DoorEntity extends EntityClassInWall<DoorData> {
     const thickness = 20;
     return [
       new THREE.Vector3(width, height, thickness + 10),
-      new THREE.Vector3(0, height / 2 + (bottom || 0) + z, 0),
+      new THREE.Vector3(0, height / 2 + (bottom || 0), 0),
       new THREE.Vector3(0, angle * -1, 0)
     ]
   }
