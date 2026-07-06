@@ -223,6 +223,20 @@ export class World {
     return boundingBoxList
   }
 
+  moveZBoxList(): THREE.Group[] {
+    const boundingBoxList: THREE.Group[] = []
+    allFileKeys.forEach((key) => {
+      if (this.allFileMapObjects[key]) {
+        (this.allFileMapObjects[key] as PointEntityClass<any>[]).forEach((item) => {
+          if (item.moveZBox) {
+            boundingBoxList.push(item.moveZBox)
+          }
+        })
+      }
+    })
+    return boundingBoxList
+  }
+
   draw3D() {
     allFileKeys.forEach((key) => {
       if (this.allFileMapObjects[key]) {
@@ -246,6 +260,17 @@ export class World {
                 if (item.spriteGroup) {
                   item.spriteGroup.position.set(data.x, data.z, data.y)
                   item.spriteGroup.children[0].position.set(0, boxVector3.y / 2 + offsetVector3.y + 12, 0)
+                }
+                if (item.moveZBox) {
+                  item.moveZBox.position.set(data.x, data.z, data.y)
+                  item.moveZBox.children[0].rotation.set(rotateVector3.x, rotateVector3.y, rotateVector3.z)
+                  item.moveZBox.children[0].scale.set(
+                    Math.min(boxVector3.x, boxVector3.z) / 5,
+                    boxVector3.y * 0.5,
+                    Math.min(boxVector3.x, boxVector3.z) / 5
+                  )
+                  item.moveZBox.children[0].position.set(offsetVector3.x, boxVector3.y * 0.75 + offsetVector3.y, offsetVector3.z)
+                  item.moveZBox.visible = false
                 }
               } else {
                 item.boundingBox.visible = false

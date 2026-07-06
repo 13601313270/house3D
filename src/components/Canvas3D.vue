@@ -44,7 +44,7 @@ const cameraStateZ = ref<CameraState | OrthographicCamera>({
   aspectH: 1,
 })
 
-function raycastObjects(event: MouseEvent): THREE.Object3D | null {
+function raycastObjects(list: THREE.Group[], event: MouseEvent): THREE.Object3D | null {
   if (!camera || !containerRef.value || !renderer) return null
 
   // const rect = containerRef.value.getBoundingClientRect()
@@ -71,7 +71,7 @@ function raycastObjects(event: MouseEvent): THREE.Object3D | null {
   const scene = props.world.scene
   if (!scene) return null
 
-  const intersects = raycaster.intersectObjects(props.world.boundingBoxList(), true)
+  const intersects = raycaster.intersectObjects(list, true)
 
   if (intersects.length > 0) {
     return intersects[0].object
@@ -268,7 +268,7 @@ const initThree = () => {
           canvas1LastMouseY = e.clientY;
           e.preventDefault();
         } else if (e.button === 0) {
-          const hoveredObject = raycastObjects(e)
+          const hoveredObject = raycastObjects(props.world.moveZBoxList(), e)
           if (hoveredObject) {
             // 移动对象
             // @ts-ignore
@@ -326,12 +326,13 @@ const initThree = () => {
           cameraStateZ.value.angleY = Math.max(-Math.PI / 2 + 0.05, Math.min(Math.PI / 2 - 0.05, angleY)); // 因为camera，是采用控制position和lookat的逻辑，所以在angleY==Math.PI/2的定点的时候，无法控制方向，所以这里限制一下，只允许angleY在[-Math.PI/2+0.05, Math.PI/2-0.05]之间
           updateCameraAngel()
         } else if (canvas1IsMouseMove) {
-          // console.log('cameraStateZ.value.radius', cameraStateZ.value.radius)
+          // 移动相机
           const sensitivity = cameraStateZ.value.radius / 450;
           cameraStateZ.value.targetPositionX = camera1TargetPositionStartX - (deltaX * Math.cos(cameraStateZ.value.angleX) - deltaY * Math.sin(cameraStateZ.value.angleX)) * sensitivity;
           cameraStateZ.value.targetPositionZ = camera1TargetPositionStartZ - (deltaX * Math.sin(cameraStateZ.value.angleX) + deltaY * Math.cos(cameraStateZ.value.angleX)) * sensitivity;
           updateCameraAngel()
         } else if (canvas1IsMouseMoveObj) {
+          // 移动对象
           // @ts-ignore
           if (canvas1HoveredObject && canvas1HoveredObject?.entity) {
             // @ts-ignore
@@ -345,11 +346,30 @@ const initThree = () => {
               })
               window.worldApi.draw3D()
             }
+          }
+        } else {
+          const allBoundingBox = props.world.boundingBoxList()
+          const allMoveZBox = props.world.moveZBoxList()
+          allMoveZBox.forEach((item) => {
+            // @ts-ignore
+            const entity = item.children[0].entity as BaseEntityClass<any>
+            // @ts-ignore
+            // console.log('===entity===', item, item.children[0].entity)
+            if (entity instanceof PointEntityClass) {
+              entity.moveZBox.visible = false
+            }
+          })
+          const hoveredObject = raycastObjects([...allBoundingBox, ...allMoveZBox], e)
+          if (hoveredObject) {
+            // 移动对象
+            // @ts-ignore
+            const entity = hoveredObject.entity as BaseEntityClass<any>
+            if (entity instanceof PointEntityClass) {
+              entity.moveZBox.visible = true
+              // entity.moveZBox.children[0].material.opacity = 0.5
+            }
             // console.log('hoveredObject', hoveredObject)
           }
-          // @ts-ignore
-          // console.log('hoveredObject', hoveredObject, hoveredObject?.entity)
-          // emit('objectHover', hoveredObject)
         }
       }
     })

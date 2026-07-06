@@ -6,6 +6,7 @@ import { BaseEntityClass } from './baseEntity'
 export abstract class PointEntityClass<T extends PointObjData> extends BaseEntityClass<T> {
   abstract isPointObj: boolean // 点状对象，如窗户/门。非点状的如墙
   boundingBox: THREE.Group
+  moveZBox: THREE.Group
   boundingBoxData: [THREE.Vector3, THREE.Vector3, THREE.Vector3] | null = null // 第一个是尺寸，第二个是位置偏移，第三个是旋转角度
   spriteGroup: THREE.Group | null = null
 
@@ -27,6 +28,18 @@ export abstract class PointEntityClass<T extends PointObjData> extends BaseEntit
       this.boundingBox = group;
       this.world.scene.add(group)
     })();
+    (() => {
+      const geometry = new THREE.BoxGeometry(1, 1, 1);
+      const boxMesh = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({ color: 0x00ff00, transparent: true, opacity: 1 }));
+      const group = new THREE.Group()
+      group.add(boxMesh);
+      // @ts-ignore
+      // box.entity = this;
+      // @ts-ignore
+      boxMesh.entity = this;
+      this.moveZBox = group;
+      this.world.scene.add(group)
+    })();
   }
 
   // 创建包裹立方体
@@ -46,9 +59,9 @@ export abstract class PointEntityClass<T extends PointObjData> extends BaseEntit
     }
     // 容器包裹立方体
     (() => {
-      const boundingBox = this.createBoundingBox();
-      this.boundingBoxData = boundingBox
-      if (!boundingBox) {
+      const boundingBoxData = this.createBoundingBox();
+      this.boundingBoxData = boundingBoxData
+      if (!boundingBoxData) {
         return;
       }
       // const [boxVector3, offsetVector3, rotateVector3] = boundingBox;
@@ -151,6 +164,9 @@ export abstract class PointEntityClass<T extends PointObjData> extends BaseEntit
     const scene: THREE.Scene = this.world.scene
     if (this.boundingBox) {
       scene.remove(this.boundingBox)
+    }
+    if (this.moveZBox) {
+      scene.remove(this.moveZBox)
     }
     if (this.spriteGroup) {
       scene.remove(this.spriteGroup)
