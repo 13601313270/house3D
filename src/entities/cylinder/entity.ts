@@ -81,14 +81,14 @@ export class CylinderEntity extends PointEntityClass<CylinderData> {
 
     const { r, h, color, mt } = data;
 
-    const geometryRight = new THREE.CylinderGeometry(
+    const geometry = new THREE.CylinderGeometry(
       r,
       r,
       h,
       this.radialSegments,
     );
     const material = mt ? (getMaterialById(mt)?.material(new THREE.Vector3(0, 0, 1))) : (new THREE.MeshStandardMaterial({ color }));
-    const mesh = new THREE.Mesh(geometryRight, material)
+    const mesh = new THREE.Mesh(geometry, material)
     mesh.position.setY(h / 2)
     group.add(mesh);
 

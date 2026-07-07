@@ -139,13 +139,13 @@ export class SectorEntity extends PointEntityClass<SectorData> {
     sectorShape.absarc(0, 0, r, startAngle, endAngle, false);
     sectorShape.lineTo(0, 0);
 
-    const geometryRight = new THREE.ExtrudeGeometry(sectorShape, {
+    const geometry = new THREE.ExtrudeGeometry(sectorShape, {
       depth: h,
       bevelEnabled: false,
     });
 
     const material = mt ? (getMaterialById(mt)?.material(new THREE.Vector3(0, 0, 1))) : (new THREE.MeshStandardMaterial({ color, side: THREE.DoubleSide }));
-    const mesh = new THREE.Mesh(geometryRight, material)
+    const mesh = new THREE.Mesh(geometry, material)
     mesh.rotation.x = -Math.PI / 2;
     group.add(mesh);
 

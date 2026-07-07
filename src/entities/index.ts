@@ -28,6 +28,7 @@ import polygonPlanePlugin from './polygonPlane'
 import polygonPlugin from './polygon' 
 import regularPolygonPlugin from './regularPolygon'
 import regularPolygon2Plugin from './regularPolygon2'
+import torusPlugin from './torus'
 
 export type EntityConstructor = new (world: World, data: BaseObjData) => BaseEntityClass<any>;
 export type enumItem = {
@@ -108,6 +109,7 @@ export const allPluginByKey: Record<string, PluginType> = {
   polygonPlugin,
   regularPolygonPlugin,
   regularPolygon2Plugin,
+  torusPlugin,
 ].forEach(v => {
   allPluginByKey[v.key] = v
   allFileKeys.push(v.key)

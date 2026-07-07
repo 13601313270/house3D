@@ -1,20 +1,20 @@
 import { HandelInfo, Point } from '@/types/map2d'
 import * as THREE from 'three'
-import { ConeData } from './index.d'
+import { TorusData } from './index.d'
 import { PointEntityClass } from '@/types/pointEntity'
 import { editItem } from '..';
 import { getMaterialById } from '@/material';
 import { MatchCircleArea } from '@/utils/matchArea';
 import { allSnapFromType } from '@/types/baseEntity';
 
-export class ConeEntity extends PointEntityClass<ConeData> {
-  name: string = '圆锥体'
-  type: string = 'cone'
+export class TorusEntity extends PointEntityClass<TorusData> {
+  name: string = '环体'
+  type: string = 'torus'
   isPointObj: boolean = true
   private circleRadius = 6
   public radialSegments = 32
 
-  draw2DPreviewByData(ctx: CanvasRenderingContext2D, data: ConeData, panOffset: Point, zoomLevel: number): void {
+  draw2DPreviewByData(ctx: CanvasRenderingContext2D, data: TorusData, panOffset: Point, zoomLevel: number): void {
     const { r } = data;
     const screenX = data.x * zoomLevel + panOffset.x
     const screenY = data.y * zoomLevel + panOffset.y
@@ -38,7 +38,7 @@ export class ConeEntity extends PointEntityClass<ConeData> {
 
   draw2DByData(
     ctx: CanvasRenderingContext2D,
-    data: ConeData,
+    data: TorusData,
     panOffset: Point,
     zoomLevel: number,
   ): void {
@@ -79,31 +79,31 @@ export class ConeEntity extends PointEntityClass<ConeData> {
     const data = this.getData();
     const group = new THREE.Group()
 
-    const { r, h, color, mt } = data;
+    const { r, t, color, mt } = data;
 
-    const geometry = new THREE.CylinderGeometry(
-      0,
-      r,
-      h,
-      this.radialSegments,
+    const geometry = new THREE.TorusGeometry(
+      r,      // 主半径
+      t,      // 管道半径
+      16,     // 管道分段
+      64      // 环分段
     );
     const material = mt ? (getMaterialById(mt)?.material(new THREE.Vector3(0, 0, 1))) : (new THREE.MeshStandardMaterial({ color }));
     const mesh = new THREE.Mesh(geometry, material)
-    mesh.position.setY(h / 2)
+    mesh.position.setY(t)
+    mesh.rotation.x = -Math.PI / 2
     group.add(mesh);
-
-    // group.position.set(data.x, data.r, data.y)
-    // group.rotateY(data.angle * -1);
     return [
       group
     ]
   }
 
   createBoundingBox(): [THREE.Vector3, THREE.Vector3, THREE.Vector3] {
-    const { r, h } = this.getData();
+    const { r, t } = this.getData();
+    // 第一个是尺寸，第二个是位置偏移，第三个是旋转角度
+    const w = r * 2 + t * 2;
     return [
-      new THREE.Vector3(r * 2, h, r * 2),
-      new THREE.Vector3(0, h / 2, 0),
+      new THREE.Vector3(w, t * 2, w),
+      new THREE.Vector3(0, t, 0),
       new THREE.Vector3(0, 0, 0)
     ]
   }
@@ -167,17 +167,17 @@ export class ConeEntity extends PointEntityClass<ConeData> {
         dataType: 'number',
         min: 1,
         max: Infinity,
-        step: 10,
+        step: 1,
         value: data.r,
       },
       {
-        id: 'h',
-        label: '高度',
+        id: 't',
+        label: '管道半径',
         dataType: 'number',
         min: 1,
         max: Infinity,
-        step: 10,
-        value: data.h,
+        step: 1,
+        value: data.t,
       },
       {
         id: 'mt',

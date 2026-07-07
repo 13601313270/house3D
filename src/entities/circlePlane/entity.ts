@@ -148,7 +148,7 @@ export class CirclePlaneEntity extends PointEntityClass<CirclePlaneData> {
 
     const { color, mt, r, ds, img, angleY } = data;
 
-    const geometryRight = new THREE.CircleGeometry(r, 32);
+    const geometry = new THREE.CircleGeometry(r, 32);
     let material: THREE.Material | null = null;
 
     if (img) {
@@ -187,7 +187,7 @@ export class CirclePlaneEntity extends PointEntityClass<CirclePlaneData> {
     if (material && ds) {
       material.side = THREE.DoubleSide;
     }
-    const mesh = new THREE.Mesh(geometryRight, material)
+    const mesh = new THREE.Mesh(geometry, material)
     mesh.rotation.x = -Math.PI / 2
     group.add(mesh);
     group.rotateY(angleY);
