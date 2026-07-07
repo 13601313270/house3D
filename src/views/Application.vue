@@ -1102,12 +1102,9 @@ const handleMouseMove = (e: MouseEvent) => {
     if (matchHandelObj && matchedHandelInfo) {
       // console.log('MatchSnapPoint-3-2')
       function temp(wall: WallEntity): boolean {
-        if (wall === matchHandelObj) {
-          return false;
-        }
         if (matchHandelObj && matchedHandelInfo) {
           let beMatchPoints = wall.getMineBeSnapPoints()
-          // 排出掉和自己磁吸
+          // 排除掉和自己磁吸
           beMatchPoints = beMatchPoints.filter(v => {
             if (v.snapFromType === 'point') {
               if (v.point.index === matchedHandelInfo?.index && v.objId === matchedHandelInfo.id) {

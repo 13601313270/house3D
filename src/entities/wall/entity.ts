@@ -523,16 +523,9 @@ export class WallEntity extends LineEntityClass<WallPoint, WallData> {
     dragHandelInfo: HandelInfo
   ) {
     if (newPosition.snapFromType === 'point') {
-      // 暂时没有考虑好怎么写磁吸到边的情况，因为暂时无法排除自己，所以只命中point磁吸
-      // const wallIndex = (this.world.allFileMapObjects?.wall || []).indexOf(this)
-      if (this.getData().id === newPosition.objId) {
-        return false;
-      }
-      // @ts-ignore
       if (dragHandelInfo.type === 'wall' && 'index' in newPosition.point) {
         console.log('MatchSnapPoint-3', this.getData().id, newPosition.point.index)
         if (dragHandelInfo.index % 2 === 0) {
-          // 和自己排除的逻辑，总是写不好，所以暂时注销掉。
           const index = dragHandelInfo.index / 2;
           this.getData().points[index] = {
             x: newPosition.point.x,
@@ -540,15 +533,6 @@ export class WallEntity extends LineEntityClass<WallPoint, WallData> {
             snw: this.getData().points[index].snw,
           }
           return true
-          // console.log('newPosition', index, (newPosition.point as PointWithIndex))
-          // if ((newPosition.point as PointWithIndex).index && index !== (newPosition.point as PointWithIndex).index) {
-          //   this.getData().points[index] = {
-          //     x: newPosition.point.x,
-          //     y: newPosition.point.y,
-          //     snw: this.getData().points[index].snw,
-          //   }
-          //   return true
-          // }
         }
       }
     }
