@@ -335,6 +335,10 @@ const initThree = () => {
           // 移动对象
           // @ts-ignore
           if (canvas1HoveredObject && canvas1HoveredObject?.entity) {
+            const allBoundingBox = props.world.boundingBoxList()
+            allBoundingBox.forEach((item) => {
+              item.visible = false
+            })
             // @ts-ignore
             const entity = canvas1HoveredObject.entity as BaseEntityClass<any>
             if (entity instanceof PointEntityClass) {
@@ -348,6 +352,11 @@ const initThree = () => {
             }
           }
         } else {
+          const allBoundingBox = props.world.boundingBoxList()
+          allBoundingBox.forEach((item) => {
+            item.visible = false
+          })
+
           const allMoveZBox = props.world.moveZBoxList()
           const allLastTextBox: any[] = [];
           allMoveZBox.forEach((item) => {
@@ -359,13 +368,16 @@ const initThree = () => {
             allLastTextBox.push(item.children[0]);
           })
           // @ts-ignore
-          const hoveredObject = raycastObjects([...props.world.boundingBoxList(), ...allLastTextBox], e)
+          const hoveredObject = raycastObjects([...allBoundingBox, ...allLastTextBox], e)
           if (hoveredObject) {
             // 移动对象
             // @ts-ignore
             const entity = hoveredObject.entity as BaseEntityClass<any>
             if (entity instanceof PointEntityClass) {
               entity.moveZBox.visible = true
+              entity.boundingBox.visible = true
+              entity.boundingBox.children[1].visible = true
+
             }
           }
         }

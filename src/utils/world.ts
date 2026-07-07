@@ -255,6 +255,11 @@ export class World {
                 item.boundingBox.children[0].rotation.set(rotateVector3.x, rotateVector3.y, rotateVector3.z)
                 item.boundingBox.children[0].scale.set(boxVector3.x, boxVector3.y, boxVector3.z)
                 item.boundingBox.children[0].position.set(offsetVector3.x, offsetVector3.y, offsetVector3.z)
+
+                item.boundingBox.children[1].rotation.set(rotateVector3.x, rotateVector3.y, rotateVector3.z)
+                item.boundingBox.children[1].scale.set(boxVector3.x, boxVector3.y, boxVector3.z)
+                item.boundingBox.children[1].position.set(offsetVector3.x, offsetVector3.y, offsetVector3.z)
+
                 item.boundingBox.visible = this.isShowBoundingBox
                 if (item.spriteGroup) {
                   item.spriteGroup.position.set(data.x, data.z, data.y)
@@ -263,8 +268,8 @@ export class World {
                 if (item.moveZBox) {
                   item.moveZBox.position.set(data.x, data.z, data.y)
                   // const height = Math.max(Math.min(40, boxVector3.y), 20);
-                  const radio = Math.max(Math.min(boxVector3.x, boxVector3.z) / 8, 10);
-                  const height = radio * 3;// Math.max(Math.min(40, boxVector3.y), 20);
+                  const radio = Math.max(Math.min(boxVector3.x / 8, boxVector3.z / 8, 20), 8);
+                  const height = radio * 3;
                   item.moveZBox.children[0].scale.set(
                     radio,
                     height,
