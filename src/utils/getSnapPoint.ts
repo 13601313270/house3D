@@ -49,7 +49,6 @@ function getSnapPointAndLine(
   // 精确计算点磁吸数据
   const pointSnapped = getSnapPoint1(current, allPoints)
   if (pointSnapped) {
-    console.log('match point', 1)
     return {
       ...pointSnapped,
       xAxisSnappedY: null,// pointSnapped.point.y,
@@ -189,7 +188,6 @@ function getSnapPointAndLine(
           snappedX = intersect2X
           snappedY = xAxisSnappedYVal.number
         }
-        console.log('match point', 2.1)
       } else if (yAxisSnappedXVal !== null) {
         // 命中y轴对齐：交点是 (yAxisSnappedXVal, k * yAxisSnappedXVal + b)
         // 处理垂直线情况（90度或-90度）
@@ -200,21 +198,17 @@ function getSnapPointAndLine(
           snappedX = yAxisSnappedXVal.number
           snappedY = k * yAxisSnappedXVal.number + b
         }
-        console.log('match point', 2.2)
       } else if (xAxisSnappedYVal !== null) {
         // 命中x轴对齐：交点是 ((xAxisSnappedYVal - b) / k, xAxisSnappedYVal)
         // 处理水平线情况（0度或180度，k=0）和垂直线情况（90度或-90度）
         if (Math.abs(angleRad - Math.PI / 2) < 0.01 || Math.abs(angleRad + Math.PI / 2) < 0.01) {
           // 垂直线：x保持不变
           snappedX = current.x
-          console.log('match point', 2.31, snappedX)
         } else if (Math.abs(angleRad) < 0.01 || Math.abs(angleRad - Math.PI) < 0.01 || Math.abs(angleRad + Math.PI) < 0.01) {
           // 水平线：y保持为xAxisSnappedYVal，x使用angleSnapped.x
           snappedX = matchSnappedAngle.point.x
-          console.log('match point', 2.32, matchSnappedAngle.origin, xAxisSnappedYVal.point)
         } else {
           snappedX = (xAxisSnappedYVal.number - b) / k
-          console.log('match point', 2.33, matchSnappedAngle.origin, xAxisSnappedYVal.point)
         }
         snappedY = xAxisSnappedYVal.number
       }
@@ -233,7 +227,6 @@ function getSnapPointAndLine(
     if (matchSnappedAngle) {
       snappedX = matchSnappedAngle.point.x
       snappedY = matchSnappedAngle.point.y
-      console.log('match point', 3)
       return {
         objType: matchSnappedAngle.objType,
         snapFromType: 'line',
@@ -250,7 +243,6 @@ function getSnapPointAndLine(
   if (xAxisSnappedYVal !== null && yAxisSnappedXVal !== null) {
     snappedX = yAxisSnappedXVal.number
     snappedY = xAxisSnappedYVal.number
-    console.log('match point', 4)
     return {
       objType: yAxisSnappedXVal.objType,
       snapFromType: 'axis',
@@ -265,7 +257,6 @@ function getSnapPointAndLine(
   if (yAxisSnappedXVal !== null) {
     snappedX = yAxisSnappedXVal.number
     snappedY = current.y
-    console.log('match point', 5)
     return {
       objType: yAxisSnappedXVal.objType,
       snapFromType: 'axis',
@@ -280,7 +271,6 @@ function getSnapPointAndLine(
   if (xAxisSnappedYVal !== null) {
     snappedX = current.x
     snappedY = xAxisSnappedYVal.number
-    console.log('match point', 6)
     return {
       objType: xAxisSnappedYVal.objType,
       snapFromType: 'axis',

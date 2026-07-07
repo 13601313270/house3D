@@ -486,7 +486,11 @@ export class WallEntity extends LineEntityClass<WallPoint, WallData> {
             }
           }
         }
-        this.getData().points[index] = { x, y, snw: this.getData().points[index].snw, }
+        this.getData().points[index] = {
+          x: Math.round(x),
+          y: Math.round(y),
+          snw: this.getData().points[index].snw
+        }
       } else {
         // 拖拽线开启后，墙上的窗户移动的时候，无法被触发，所以关闭掉。
         // if (startX !== undefined && startY !== undefined) {
@@ -524,7 +528,6 @@ export class WallEntity extends LineEntityClass<WallPoint, WallData> {
   ) {
     if (newPosition.snapFromType === 'point') {
       if (dragHandelInfo.type === 'wall' && 'index' in newPosition.point) {
-        console.log('MatchSnapPoint-3', this.getData().id, newPosition.point.index)
         if (dragHandelInfo.index % 2 === 0) {
           const index = dragHandelInfo.index / 2;
           this.getData().points[index] = {
