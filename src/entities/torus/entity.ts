@@ -15,25 +15,23 @@ export class TorusEntity extends PointEntityClass<TorusData> {
   public radialSegments = 32
 
   draw2DPreviewByData(ctx: CanvasRenderingContext2D, data: TorusData, panOffset: Point, zoomLevel: number): void {
-    const { r } = data;
+    const { r, t, arc } = data;
     const screenX = data.x * zoomLevel + panOffset.x
     const screenY = data.y * zoomLevel + panOffset.y
 
-    // 绘制一个圆形
+    const outerRadius = (r + t) * zoomLevel
+    const innerRadius = (r - t) * zoomLevel
+    const arcRad = arc / 360 * Math.PI * 2
+
     ctx.fillStyle = data.color
     ctx.strokeStyle = 'grey'
     ctx.lineWidth = 1
     ctx.beginPath()
-    ctx.arc(
-      screenX,
-      screenY,
-      r * zoomLevel,
-      0,
-      Math.PI * 2
-    )
+    ctx.arc(screenX, screenY, outerRadius, 0, -arcRad, true)
+    ctx.arc(screenX, screenY, innerRadius, -arcRad, 0, false)
+    ctx.closePath()
     ctx.fill()
     ctx.stroke()
-    ctx.closePath()
   }
 
   draw2DByData(
@@ -44,6 +42,7 @@ export class TorusEntity extends PointEntityClass<TorusData> {
   ): void {
     const screenX = data.x * zoomLevel + panOffset.x
     const screenY = data.y * zoomLevel + panOffset.y
+    const { r, t } = data;
 
     // 控制点
     ctx.fillStyle = '#fff'
@@ -55,7 +54,7 @@ export class TorusEntity extends PointEntityClass<TorusData> {
     ctx.stroke()
 
     // 绘制轮廓
-    const circleArea = new MatchCircleArea({ x: data.x, y: data.y, r: data.r })
+    const circleArea = new MatchCircleArea({ x: data.x, y: data.y, r: r + t })
     ctx.lineWidth = 2
     ctx.strokeStyle = 'red'
     ctx.save(); // 保存当前状态
@@ -113,9 +112,10 @@ export class TorusEntity extends PointEntityClass<TorusData> {
 
   showMatchHandel(x: number, y: number) {
     const data = this.getData();
+    const { r, t } = data;
     const dist = Math.hypot(x - data.x, y - data.y)
-    if (dist < data.r) {
-      return new MatchCircleArea({ x: data.x, y: data.y, r: data.r })
+    if (dist < r + t + 1) {
+      return new MatchCircleArea({ x: data.x, y: data.y, r: r + t + 1 })
     }
     return null;
   }
@@ -199,7 +199,7 @@ export class TorusEntity extends PointEntityClass<TorusData> {
         label: '弧度',
         dataType: 'number',// 不能是angle，因为angle为360度的时候，会重新归位为0
         min: 0,
-        max: 361,
+        max: 360,
         step: 1,
         value: data.arc,
       },
