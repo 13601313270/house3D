@@ -263,12 +263,12 @@ export class World {
                 if (item.moveZBox) {
                   item.moveZBox.position.set(data.x, data.z, data.y)
                   // const height = Math.max(Math.min(40, boxVector3.y), 20);
-                  const radio = Math.min(boxVector3.x, boxVector3.z) / 8;
+                  const radio = Math.max(Math.min(boxVector3.x, boxVector3.z) / 8, 10);
                   const height = radio * 3;// Math.max(Math.min(40, boxVector3.y), 20);
                   item.moveZBox.children[0].scale.set(
-                    Math.max(radio, 10),
+                    radio,
                     height,
-                    Math.max(radio, 10)
+                    radio
                   )
                   item.moveZBox.children[0].position.set(offsetVector3.x, boxVector3.y / 2 + height / 2 + offsetVector3.y, offsetVector3.z)
                   item.moveZBox.visible = false
