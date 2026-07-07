@@ -377,7 +377,6 @@ const initThree = () => {
               entity.moveZBox.visible = true
               entity.boundingBox.visible = true
               entity.boundingBox.children[1].visible = true
-
             }
           }
         }
