@@ -1009,9 +1009,15 @@ const handleCanvasClick = async (e: MouseEvent) => {
   if (insertTempObj && insertTempObj instanceof LineEntityClass) {
     const data = insertTempObj.getData()
     if (hoverPoint.value) {
-      tempPointInsertData.value.push(hoverPoint.value)
+      tempPointInsertData.value.push({
+        x: Math.round(hoverPoint.value.x),
+        y: Math.round(hoverPoint.value.y)
+      })
     } else {
-      tempPointInsertData.value.push({ x, y })
+      tempPointInsertData.value.push({
+        x: Math.round(x),
+        y: Math.round(y)
+      })
     }
     data.points = tempPointInsertData.value;
     insertTempObj.setData(data)

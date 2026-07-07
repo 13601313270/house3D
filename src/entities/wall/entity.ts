@@ -47,7 +47,9 @@ export class WallEntity extends LineEntityClass<WallPoint, WallData> {
       ctx.fill()
       ctx.setLineDash([])
     }
-    const { data: wallBoxList, countPerPoint: countPerPointPerPoint } = createAllWallFromPoints(data, data.cornerType)
+    const isEndByStart = data.points.length > 2 && data.points[0].x === data.points[data.points.length - 1].x && data.points[0].y === data.points[data.points.length - 1].y
+    console.log('wall-data', isEndByStart)
+    const { data: wallBoxList, countPerPoint: countPerPointPerPoint } = createAllWallFromPoints(data.points, data.thickness, data.cornerType)
     ctx.strokeStyle = 'black'
     ctx.fillStyle = data.color
     ctx.lineWidth = 3
@@ -87,10 +89,7 @@ export class WallEntity extends LineEntityClass<WallPoint, WallData> {
   ): void {
     const wall = data;
     // 用红色绘制墙
-    const { data: wallBoxList, countPerPoint: countPerPointPerPoint } = createAllWallFromPoints({
-      points: data.points,
-      thickness: data.thickness + 1,
-    }, data.cornerType)
+    const { data: wallBoxList, countPerPoint: countPerPointPerPoint } = createAllWallFromPoints(data.points, data.thickness + 1, data.cornerType)
     ctx.strokeStyle = 'red'
     ctx.fillStyle = data.color
     ctx.lineWidth = 1
@@ -221,7 +220,7 @@ export class WallEntity extends LineEntityClass<WallPoint, WallData> {
   create3DMesh() {
     const data = this.getData()
     const meshList: THREE.Group[] = []
-    const { data: wallBoxList, countPerPoint: countPerPointPerPoint } = createAllWallFromPoints(data, data.cornerType);
+    const { data: wallBoxList, countPerPoint: countPerPointPerPoint } = createAllWallFromPoints(data.points, data.thickness, data.cornerType);
     const wallHeight = data.height
     const bottom = data.bottom || 0
     // console.log(1)

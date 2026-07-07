@@ -42,7 +42,7 @@ export class StaircaseEntity extends LineEntityClass<StaircasePoint, StaircaseDa
 
   draw2DPreviewByData(ctx: CanvasRenderingContext2D, data: StaircaseData, panOffset: Point, zoomLevel: number): void {
     const { cornerType } = data;
-    const { data: wallBoxList } = createAllWallFromPoints(data, cornerType)
+    const { data: wallBoxList } = createAllWallFromPoints(data.points, data.thickness, cornerType)
     ctx.strokeStyle = 'black'
     ctx.fillStyle = data.color
     ctx.lineWidth = 2
@@ -78,10 +78,7 @@ export class StaircaseEntity extends LineEntityClass<StaircasePoint, StaircaseDa
   ): void {
     const { cornerType, points, thickness } = data;
     // 用红色绘制墙
-    const { data: wallBoxList } = createAllWallFromPoints({
-      points,
-      thickness: thickness + 1,
-    }, cornerType)
+    const { data: wallBoxList } = createAllWallFromPoints(points, thickness + 1, cornerType)
     ctx.strokeStyle = 'red'
     ctx.fillStyle = data.color
     ctx.lineWidth = 1
@@ -176,7 +173,7 @@ export class StaircaseEntity extends LineEntityClass<StaircasePoint, StaircaseDa
     const meshList: THREE.Group[] = []
     const { cornerType, stepType, color } = data
     console.log('stepType', stepType)
-    const { data: wallBoxList, countPerPoint: countPerPointPerPoint } = createAllWallFromPoints(data, cornerType);
+    const { data: wallBoxList, countPerPoint: countPerPointPerPoint } = createAllWallFromPoints(data.points, data.thickness, cornerType);
     // console.log('countPerPointPerPoint', countPerPointPerPoint)
     const wallHeight = 10;
     const bottom = 0;

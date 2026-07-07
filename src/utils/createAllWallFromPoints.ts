@@ -8,13 +8,10 @@ import { Point } from '@/types';
 
 type wallBox = { x: number, y: number }[]
 
-export function createAllWallFromPoints(wallitem: {
-  points: {
-    x: number
-    y: number
-  }[]
-  thickness: number
-}, type: 0 | 1 | 2 | 3 | 4 | 5): {
+export function createAllWallFromPoints(points: {
+  x: number
+  y: number
+}[], thickness: number, type: 0 | 1 | 2 | 3 | 4 | 5): {
   data: wallBox[],
   countPerPoint: number
 } {
@@ -22,7 +19,7 @@ export function createAllWallFromPoints(wallitem: {
   const right: Point[] = [];
   const allWallBox: wallBox[] = []
   // console.log('========线========')
-  const radius = wallitem.thickness / 2;
+  const radius = thickness / 2;
   const countPerPoint = {
     0: 1,
     1: 1,
@@ -31,7 +28,7 @@ export function createAllWallFromPoints(wallitem: {
     4: 2,
     5: 2,
   }[type];
-  if (!wallitem.points || wallitem.points.length < 2) {
+  if (!points || points.length < 2) {
     return {
       data: [],
       countPerPoint: 0
@@ -39,10 +36,10 @@ export function createAllWallFromPoints(wallitem: {
   }
   // console.log('========点========')
   // console.log('===============pppLeftX-set===============')
-  for (let i = 0, len = wallitem.points.length; i < len; i++) {
-    const prev = wallitem.points[i - 1] || {} as Point;
-    const curr = wallitem.points[i];
-    const next = wallitem.points[i + 1] || {} as Point;
+  for (let i = 0, len = points.length; i < len; i++) {
+    const prev = points[i - 1] || {} as Point;
+    const curr = points[i];
+    const next = points[i + 1] || {} as Point;
 
     let v1: [number, number] = [curr.x - prev.x, curr.y - prev.y];
     let v2: [number, number] = [next.x - curr.x, next.y - curr.y];
@@ -144,7 +141,7 @@ export function createAllWallFromPoints(wallitem: {
     allWallBox.push(pointList)
   }
   const allWallBoxMerge: wallBox[] = []
-  for (let i = 0; i < wallitem.points.length - 1; i++) {
+  for (let i = 0; i < points.length - 1; i++) {
     if (type === 1) {
       const cirPre1 = allWallBox[i * 3 - 1]
       const cir1 = allWallBox[i * 3 + 1]
@@ -175,7 +172,7 @@ export function createAllWallFromPoints(wallitem: {
     } else {
       allWallBoxMerge.push(allWallBox[i * 3])
     }
-    if (i === wallitem.points.length - 2) {
+    if (i === points.length - 2) {
       break;
     }
     const cir1 = allWallBox[i * 3 + 1]
