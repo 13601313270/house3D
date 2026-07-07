@@ -256,7 +256,6 @@ export class CurtainInWallEntity extends EntityClassInWall<CurtainInWallData> {
 
     // return [{
     //   objType: this.type,
-    //   objId: id,
     //   snapFromType: 'point',
     //   point: {
     //     index: 0,

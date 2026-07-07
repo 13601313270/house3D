@@ -252,7 +252,6 @@ export class DoorEntity extends EntityClassInWall<DoorData> {
     const data = this.getData();
     return [{
       objType: this.type,
-      objId: data.id,
       snapFromType: key,
       point: {
         index: 0,

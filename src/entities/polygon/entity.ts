@@ -391,7 +391,6 @@ export class PolygonEntity extends LineEntityClass<PolygonPoint, PolygonData> {
     return this.getData().points.map((v: Point, index: number) => {
       return {
         objType: this.type,
-        objId: data.id,
         snapFromType: key,
         point: { ...v, index },
       }

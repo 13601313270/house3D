@@ -9,7 +9,7 @@ import { MatchCircleArea, MatchRectArea } from '@/utils/matchArea'
 import { calculateAngle } from '@/utils/calculateAngle'
 import message from '@/utils/message'
 import { isPointInRotatedRect } from '@/utils/isPointInRotatedRect'
-import { allSnapFromType, MatchSnapPoint } from '@/types/baseEntity'
+import { allSnapFromType, MatchSnapPoint, OrigionSnapPoint } from '@/types/baseEntity'
 import { LineEntityClass } from '@/types/lineEntity'
 import { World } from '@/utils/world'
 
@@ -539,17 +539,25 @@ export class WallEntity extends LineEntityClass<WallPoint, WallData> {
     return false;
   }
 
-  getMineBeSnapPoints() {
+  getMineBeSnapPoints(matchedHandelInfo: HandelInfo): Array<OrigionSnapPoint> {
     const key: allSnapFromType = 'point';
     const data = this.getData();
-    return this.getData().points.map((v: Point, index: number) => {
+    let allSnapPoints = this.getData().points.map((v: Point, index: number) => {
       return {
         objType: this.type,
-        objId: data.id,
         snapFromType: key,
         point: { ...v, index },
       }
     })
+    if (matchedHandelInfo.id === data.id) {
+      allSnapPoints = allSnapPoints.filter(v => {
+        if (v.snapFromType === 'point' && v.point.index === matchedHandelInfo?.index / 2) {
+          return false;
+        }
+        return true;
+      })
+    }
+    return allSnapPoints;
   }
 
   getMineBeSnapLines(): Array<[Point, Point]> {

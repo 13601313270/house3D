@@ -143,7 +143,6 @@ export class SphereEntity extends PointEntityClass<SphereData> {
     const data = this.getData();
     return [{
       objType: this.type,
-      objId: data.id,
       snapFromType: key,
       point: {
         index: 0,

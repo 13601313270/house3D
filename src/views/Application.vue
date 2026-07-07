@@ -1102,17 +1102,11 @@ const handleMouseMove = (e: MouseEvent) => {
     if (matchHandelObj && matchedHandelInfo) {
       // console.log('MatchSnapPoint-3-2')
       function temp(wall: WallEntity): boolean {
+        // if (wall === matchHandelObj) {
+        //   return false;
+        // }
         if (matchHandelObj && matchedHandelInfo) {
-          let beMatchPoints = wall.getMineBeSnapPoints()
-          // 排除掉和自己磁吸
-          beMatchPoints = beMatchPoints.filter(v => {
-            if (v.snapFromType === 'point') {
-              if (v.point.index === matchedHandelInfo?.index && v.objId === matchedHandelInfo.id) {
-                return false;
-              }
-            }
-            return true;
-          })
+          const beMatchPoints = wall.getMineBeSnapPoints(matchedHandelInfo)
           if (beMatchPoints.length > 0) {
             const snapped33 = getSnapPointAndLine(
               { x, y },
@@ -1125,7 +1119,6 @@ const handleMouseMove = (e: MouseEvent) => {
               yAxisSnappedX.value = snapped33.yAxisSnappedX || null
               const result = matchHandelObj.inSceneSnapPointArea(
                 {
-                  objId: wall.getData().id,
                   objType: wall.type,
                   snapFromType: 'point',
                   point: snapped33.point
@@ -1308,16 +1301,13 @@ const handleMouseMove = (e: MouseEvent) => {
       let snappedPoint44 = getSnapPointAndLine(
         { x, y },
         [{
-          objId: insertTempObjId,
           objType: currentTool.value,
           snapFromType: 'point',
           point: last
         }],
         snapAngles,
         allPoints.map(v => ({
-          objId: insertTempObjId,
           objType: currentTool.value,
-          // objId: (tempDrawWall.value as WallData).id,
           snapFromType: 'point',
           point: v
         })),
@@ -1325,7 +1315,6 @@ const handleMouseMove = (e: MouseEvent) => {
       if (snappedPoint44 === null) {
         // console.log('===dist---find', snappedPoint44)
         snappedPoint44 = {
-          objId: insertTempObjId,
           objType: currentTool.value,
           snapFromType: 'point',
           point: { x, y },

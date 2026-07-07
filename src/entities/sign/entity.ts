@@ -467,7 +467,6 @@ export class SignEntity extends PointEntityClass<SignData> {
     const data = this.getData();
     return [{
       objType: this.type,
-      objId: data.id,
       snapFromType: key,
       point: {
         index: 0,

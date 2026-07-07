@@ -261,7 +261,6 @@ export class CubeEntity extends PointEntityClass<CubeData> {
     const data = this.getData();
     return [{
       objType: this.type,
-      objId: data.id,
       snapFromType: key,
       point: {
         index: 0,

@@ -341,7 +341,6 @@ export class RegularPolygonEntity extends PointEntityClass<RegularPolygon2Data> 
     const data = this.getData();
     return [{
       objType: this.type,
-      objId: data.id,
       snapFromType: key,
       point: {
         index: 0,

@@ -144,7 +144,6 @@ export class ConeEntity extends PointEntityClass<ConeData> {
     const data = this.getData();
     return [{
       objType: this.type,
-      objId: data.id,
       snapFromType: key,
       point: {
         index: 0,

@@ -281,7 +281,6 @@ export class PlaneEntity extends PointEntityClass<PlaneData> {
     const data = this.getData();
     return [{
       objType: this.type,
-      objId: data.id,
       snapFromType: key,
       point: {
         index: 0,

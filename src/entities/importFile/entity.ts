@@ -271,9 +271,7 @@ export class ImportFileEntity extends PointEntityClass<ImportFileData> {
     // const rotatedY = x * Math.sin(angleY) + y * Math.cos(angleY)
 
     return [{
-      objId: id,
       objType: this.type,
-      // objId: id,
       snapFromType: 'point',
       point: {
         index: 0,

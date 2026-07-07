@@ -373,9 +373,7 @@ export class OutFileInWallEntity extends EntityClassInWall<OutFileInWallData> {
     // const rotatedY = x * Math.sin(angle) + y * Math.cos(angle)
 
     return [{
-      objId: id,
       objType: this.type,
-      // objId: id,
       snapFromType: 'point',
       point: {
         index: 0,
