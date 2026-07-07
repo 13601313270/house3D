@@ -16,6 +16,7 @@ function getSnapPoint1(
       if (dist < pointDistance) {
         pointDistance = dist
         pointSnapped = {
+          objId: point.objId,
           objType: point.objType,
           // objId: point.objId,
           snapFromType: point.snapFromType,
@@ -28,6 +29,7 @@ function getSnapPoint1(
   // 1. 最高优先级：点磁吸
   if (pointSnapped) {
     return {
+      objId: pointSnapped.objId,
       objType: pointSnapped.objType,
       snapFromType: pointSnapped.snapFromType,
       point: {
@@ -53,6 +55,7 @@ function getSnapPointAndLine(
     console.log('match point', 1)
     return {
       ...pointSnapped,
+      objId: pointSnapped.objId,
       xAxisSnappedY: null,// pointSnapped.point.y,
       yAxisSnappedX: null,// pointSnapped.point.x,
     }
@@ -60,11 +63,13 @@ function getSnapPointAndLine(
 
   // allPoints 里命中轴磁吸，计算轴对齐磁吸数据
   let xAxisSnappedYVal: {
+    objId: string,
     objType: string,
     number: number,
     point: Point,
   } | null = null // 命中的y坐标值（水平对齐，即y值与某个点一致）
   let yAxisSnappedXVal: {
+    objId: string,
     objType: string,
     number: number
     point: Point,
@@ -76,6 +81,7 @@ function getSnapPointAndLine(
     if (distToXAxis < 10 && distToXAxis < xAxisDistance) {
       xAxisDistance = distToXAxis
       xAxisSnappedYVal = {
+        objId: point.objId,
         objType: point.objType,
         number: point.point.y,
         point: point.point,
@@ -86,6 +92,7 @@ function getSnapPointAndLine(
     if (distToYAxis < 10 && distToYAxis < yAxisDistance) {
       yAxisDistance = distToYAxis
       yAxisSnappedXVal = {
+        objId: point.objId,
         objType: point.objType,
         number: point.point.x,
         point: point.point,
@@ -130,6 +137,7 @@ function getSnapPointAndLine(
     }
     // 1. 计算角度磁吸数据
     let matchSnappedAngle: {
+      objId: string,
       objType: string,
       point: Point,
       origin: Point,
@@ -142,6 +150,7 @@ function getSnapPointAndLine(
       const distToMouse = Math.hypot(snappedXTemp - current.x, snappedYTemp - current.y)
       if (distToMouse < 10) {
         matchSnappedAngle = {
+          objId: nearestAnglePoint.objId,
           objType: nearestAnglePoint.objType,
           // objId: nearestStart.objId,
           point: {
@@ -221,6 +230,7 @@ function getSnapPointAndLine(
         snappedY = xAxisSnappedYVal.number
       }
       return {
+        objId: nearestAnglePoint.objId,
         objType: nearestAnglePoint.objType,
         // objId: nearestStart.objId,
         snapFromType: 'line',
@@ -238,6 +248,7 @@ function getSnapPointAndLine(
       snappedY = matchSnappedAngle.point.y
       console.log('match point', 3)
       return {
+        objId: matchSnappedAngle.objId,
         objType: matchSnappedAngle.objType,
         snapFromType: 'line',
         point: roundNumberList({
@@ -255,6 +266,7 @@ function getSnapPointAndLine(
     snappedY = xAxisSnappedYVal.number
     console.log('match point', 4)
     return {
+      objId: yAxisSnappedXVal.objId,
       objType: yAxisSnappedXVal.objType,
       snapFromType: 'axis',
       point: roundNumberList({
@@ -270,6 +282,7 @@ function getSnapPointAndLine(
     snappedY = current.y
     console.log('match point', 5)
     return {
+      objId: yAxisSnappedXVal.objId,
       objType: yAxisSnappedXVal.objType,
       snapFromType: 'axis',
       point: roundNumberList({
@@ -285,6 +298,7 @@ function getSnapPointAndLine(
     snappedY = xAxisSnappedYVal.number
     console.log('match point', 6)
     return {
+      objId: xAxisSnappedYVal.objId,
       objType: xAxisSnappedYVal.objType,
       snapFromType: 'axis',
       point: roundNumberList({

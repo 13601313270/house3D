@@ -367,12 +367,13 @@ export class OutFileInWallEntity extends EntityClassInWall<OutFileInWallData> {
   }
 
   getMineBeSnapPoints(): Array<OrigionSnapPoint> {
-    const { x, y } = this.getData()
+    const { x, y, id } = this.getData()
     // 计算旋转后的点
     // const rotatedX = x * Math.cos(angle) - y * Math.sin(angle)
     // const rotatedY = x * Math.sin(angle) + y * Math.cos(angle)
 
     return [{
+      objId: id,
       objType: this.type,
       // objId: id,
       snapFromType: 'point',

@@ -433,6 +433,7 @@ export class PeopleEntity extends PointEntityClass<PeopleData> {
   getMineBeSnapPoints(): Array<OrigionSnapPoint> {
     const data = this.getData();
     return [{
+      objId: data.id,
       objType: this.type,
       // objId: data.id,
       snapFromType: 'point',

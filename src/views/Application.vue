@@ -1100,6 +1100,7 @@ const handleMouseMove = (e: MouseEvent) => {
     const ctxAction = canvasAction.getContext('2d')!
     // 如果正在拖拽，处理拖拽逻辑（即使当前工具不是 drag）
     if (matchHandelObj && matchedHandelInfo) {
+      // console.log('MatchSnapPoint-3-2')
       function temp(wall: WallEntity): boolean {
         if (wall === matchHandelObj) {
           return false;
@@ -1109,7 +1110,7 @@ const handleMouseMove = (e: MouseEvent) => {
           // 排出掉和自己磁吸
           beMatchPoints = beMatchPoints.filter(v => {
             if (v.snapFromType === 'point') {
-              if (v.point.index === matchedHandelInfo?.index) {
+              if (v.point.index === matchedHandelInfo?.index && v.objId === matchedHandelInfo.id) {
                 return false;
               }
             }
@@ -1123,11 +1124,11 @@ const handleMouseMove = (e: MouseEvent) => {
               beMatchPoints,
             )
             if (snapped33 !== null) {
-              console.log('is me', wall === matchHandelObj, snapped33)
               xAxisSnappedY.value = snapped33.xAxisSnappedY || null
               yAxisSnappedX.value = snapped33.yAxisSnappedX || null
               const result = matchHandelObj.inSceneSnapPointArea(
                 {
+                  objId: wall.getData().id,
                   objType: wall.type,
                   snapFromType: 'point',
                   point: snapped33.point
@@ -1296,6 +1297,7 @@ const handleMouseMove = (e: MouseEvent) => {
     }
   } else if (insertTempObj instanceof LineEntityClass) {
     if (tempPointInsertData.value && tempPointInsertData.value.length > 0) {
+      const insertTempObjId = insertTempObj.getData().id;
       const last = tempPointInsertData.value[tempPointInsertData.value.length - 1]
       // 收集所有点（包括临时折线和已绘制的墙上的点）
       const allPoints = [...tempPointInsertData.value];
@@ -1309,12 +1311,14 @@ const handleMouseMove = (e: MouseEvent) => {
       let snappedPoint44 = getSnapPointAndLine(
         { x, y },
         [{
+          objId: insertTempObjId,
           objType: currentTool.value,
           snapFromType: 'point',
           point: last
         }],
         snapAngles,
         allPoints.map(v => ({
+          objId: insertTempObjId,
           objType: currentTool.value,
           // objId: (tempDrawWall.value as WallData).id,
           snapFromType: 'point',
@@ -1324,6 +1328,7 @@ const handleMouseMove = (e: MouseEvent) => {
       if (snappedPoint44 === null) {
         // console.log('===dist---find', snappedPoint44)
         snappedPoint44 = {
+          objId: insertTempObjId,
           objType: currentTool.value,
           snapFromType: 'point',
           point: { x, y },
