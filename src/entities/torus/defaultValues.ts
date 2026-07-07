@@ -12,6 +12,9 @@ export default function (): DefaultItem<TorusData>[] {
         z: 0,
         r: 50,
         t: 10,
+        arc: 360,
+        thetaStart: 0,
+        thetaLength: Math.PI * 2,
         color: '#e67e22',
         mt: null,
       }

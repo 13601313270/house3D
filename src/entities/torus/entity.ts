@@ -79,13 +79,16 @@ export class TorusEntity extends PointEntityClass<TorusData> {
     const data = this.getData();
     const group = new THREE.Group()
 
-    const { r, t, color, mt } = data;
+    const { r, t, color, mt, arc, thetaStart, thetaLength } = data;
 
     const geometry = new THREE.TorusGeometry(
       r,      // 主半径
       t,      // 管道半径
       16,     // 管道分段
-      64      // 环分段
+      64,      // 环分段
+      arc / 360 * Math.PI * 2,
+      thetaStart,
+      thetaLength,
     );
     const material = mt ? (getMaterialById(mt)?.material(new THREE.Vector3(0, 0, 1))) : (new THREE.MeshStandardMaterial({ color }));
     const mesh = new THREE.Mesh(geometry, material)
@@ -192,6 +195,15 @@ export class TorusEntity extends PointEntityClass<TorusData> {
         value: data.color,
       },
       {
+        id: 'arc',
+        label: '弧度',
+        dataType: 'number',// 不能是angle，因为angle为360度的时候，会重新归位为0
+        min: 0,
+        max: 361,
+        step: 1,
+        value: data.arc,
+      },
+      {
         id: 'z',
         label: '距离地面',
         dataType: 'number',
@@ -199,7 +211,23 @@ export class TorusEntity extends PointEntityClass<TorusData> {
         max: 100,
         step: 1,
         value: data.z,
-      }
+      },
+      // {
+      //   id: 'thetaStart',
+      //   label: '管状开始角度',
+      //   dataType: 'angle',
+      //   min: 0,
+      //   max: 360,
+      //   value: data.thetaStart,
+      // },
+      // {
+      //   id: 'thetaLength',
+      //   label: '管状结束角度',
+      //   dataType: 'angle',
+      //   min: 0,
+      //   max: 360,
+      //   value: data.thetaLength,
+      // },
     ], (val) => {
       this.setData({
         ...data,
