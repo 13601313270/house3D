@@ -27,14 +27,15 @@ export class WallEntity extends LineEntityClass<WallPoint, WallData> {
   }
 
   draw2DPreviewByData(ctx: CanvasRenderingContext2D, data: WallData, panOffset: Point, zoomLevel: number): void {
-    if (data.hb) {
+    const { points, thickness, cornerType, hb, bc, color } = data;
+    if (hb) {
       ctx.strokeStyle = 'black'
-      ctx.fillStyle = data.bc
+      ctx.fillStyle = bc
       ctx.lineWidth = 2
       ctx.setLineDash([5, 5])
       ctx.beginPath()
-      for (let i = 0; i < data.points.length; i++) {
-        const point = data.points[i]
+      for (let i = 0; i < points.length; i++) {
+        const point = points[i]
         const screenX = (point.x + this.offset.x) * zoomLevel + panOffset.x;
         const screenY = (point.y + this.offset.y) * zoomLevel + panOffset.y;
         if (i === 0) {
@@ -47,22 +48,41 @@ export class WallEntity extends LineEntityClass<WallPoint, WallData> {
       ctx.fill()
       ctx.setLineDash([])
     }
-    const isEndByStart = data.points.length > 2 && data.points[0].x === data.points[data.points.length - 1].x && data.points[0].y === data.points[data.points.length - 1].y
-    console.log('wall-data', isEndByStart)
-    const { data: wallBoxList, countPerPoint: countPerPointPerPoint } = createAllWallFromPoints(data.points, data.thickness, data.cornerType)
+    const pointsTemp = [...points];
+    const isEndByStart = points.length > 2 && points[0].x === points[points.length - 1].x && points[0].y === points[points.length - 1].y;// 是否首尾衔接
+    // 如果首尾衔接，需要处理拐角，两头各自增加一个点，这样会多绘制两个面，生成完成后，再把多生成的两个面裁切掉
+    if (isEndByStart) {
+      pointsTemp.unshift({
+        x: points[points.length - 2].x,
+        y: points[points.length - 2].y,
+        snw: points[points.length - 1].snw
+      })
+      pointsTemp.push({
+        x: points[1].x,
+        y: points[1].y,
+        snw: points[1].snw
+      })
+    }
+    const { data: wallBoxList, countPerPoint: countPerPointPerPoint } = createAllWallFromPoints(pointsTemp, thickness, cornerType)
+
+    if (isEndByStart) {
+      wallBoxList.shift() // wallBoxList去掉第一个元素
+      wallBoxList.pop() // wallBoxList去掉最后一个
+    }
+    // alert(wallBoxList.length)
     ctx.strokeStyle = 'black'
-    ctx.fillStyle = data.color
+    ctx.fillStyle = color
     ctx.lineWidth = 3
     ctx.setLineDash([])
 
     for (let i = 0; i < wallBoxList.length; i++) {
       const box = wallBoxList[i]
 
-      if (i % countPerPointPerPoint === 0 && data.points[i / countPerPointPerPoint].snw) {
-        ctx.setLineDash([10 * zoomLevel, 10 * zoomLevel])
-      } else {
-        ctx.setLineDash([])
-      }
+      // if (i % countPerPointPerPoint === 0 && points[i / countPerPointPerPoint].snw) {
+      //   ctx.setLineDash([10 * zoomLevel, 10 * zoomLevel])
+      // } else {
+      //   ctx.setLineDash([])
+      // }
 
       ctx.beginPath()
       for (let j = 0; j < box.length; j++) {
@@ -87,18 +107,18 @@ export class WallEntity extends LineEntityClass<WallPoint, WallData> {
     panOffset: Point,
     zoomLevel: number,
   ): void {
-    const wall = data;
+    const { points, thickness, cornerType, color } = data;
     // 用红色绘制墙
-    const { data: wallBoxList, countPerPoint: countPerPointPerPoint } = createAllWallFromPoints(data.points, data.thickness + 1, data.cornerType)
+    const { data: wallBoxList, countPerPoint: countPerPointPerPoint } = createAllWallFromPoints(points, thickness + 1, cornerType)
     ctx.strokeStyle = 'red'
-    ctx.fillStyle = data.color
+    ctx.fillStyle = color
     ctx.lineWidth = 1
     ctx.setLineDash([])
 
     for (let i = 0; i < wallBoxList.length; i++) {
       const box = wallBoxList[i]
 
-      if (i % countPerPointPerPoint === 0 && data.points[i / countPerPointPerPoint].snw) {
+      if (i % countPerPointPerPoint === 0 && points[i / countPerPointPerPoint].snw) {
         ctx.setLineDash([10 * zoomLevel, 10 * zoomLevel])
       } else {
         ctx.setLineDash([])
@@ -120,10 +140,10 @@ export class WallEntity extends LineEntityClass<WallPoint, WallData> {
     }
     ctx.setLineDash([])
 
-    if (wall.points && wall.points.length >= 2) {
+    if (points && points.length >= 2) {
       // 绘制墙上的点
       ctx.lineWidth = 3
-      wall.points.forEach((point: Point, index: number) => {
+      points.forEach((point: Point, index: number) => {
         ctx.strokeStyle = 'red'
         ctx.fillStyle = 'white'
         const screenX = point.x * zoomLevel + panOffset.x
@@ -133,9 +153,9 @@ export class WallEntity extends LineEntityClass<WallPoint, WallData> {
         ctx.stroke()
         ctx.fill()
         ctx.closePath()
-        if (index > 0 && index < wall.points.length - 1) {
-          const prev = wall.points[index - 1]
-          const next = wall.points[index + 1]
+        if (index > 0 && index < points.length - 1) {
+          const prev = points[index - 1]
+          const next = points[index + 1]
           const angleResult = calculateAngle(prev, point, next)
           if (angleResult) {
             const { angle } = angleResult
@@ -183,9 +203,9 @@ export class WallEntity extends LineEntityClass<WallPoint, WallData> {
       });
       ctx.fillStyle = 'white'
       // 每两个点之间，再绘制一个点，代表边的控制器
-      for (let i = 0; i < wall.points.length - 1; i++) {
-        const p1 = wall.points[i]
-        const p2 = wall.points[i + 1]
+      for (let i = 0; i < points.length - 1; i++) {
+        const p1 = points[i]
+        const p2 = points[i + 1]
         const midX = (p1.x + p2.x) / 2
         const midY = (p1.y + p2.y) / 2
         const screenX = midX * zoomLevel + panOffset.x
@@ -220,10 +240,29 @@ export class WallEntity extends LineEntityClass<WallPoint, WallData> {
   create3DMesh() {
     const data = this.getData()
     const meshList: THREE.Group[] = []
-    const { data: wallBoxList, countPerPoint: countPerPointPerPoint } = createAllWallFromPoints(data.points, data.thickness, data.cornerType);
+    const { points, thickness, cornerType } = data;
     const wallHeight = data.height
     const bottom = data.bottom || 0
-    // console.log(1)
+    const pointsTemp = [...points];
+    const isEndByStart = points.length > 2 && points[0].x === points[points.length - 1].x && points[0].y === points[points.length - 1].y;// 是否首尾衔接
+    // 如果首尾衔接，需要处理拐角，两头各自增加一个点，这样会多绘制两个面，生成完成后，再把多生成的两个面裁切掉
+    if (isEndByStart) {
+      pointsTemp.unshift({
+        x: points[points.length - 2].x,
+        y: points[points.length - 2].y,
+        snw: points[points.length - 1].snw
+      })
+      pointsTemp.push({
+        x: points[1].x,
+        y: points[1].y,
+        snw: points[1].snw
+      })
+    }
+    const { data: wallBoxList, countPerPoint: countPerPointPerPoint } = createAllWallFromPoints(pointsTemp, thickness, cornerType);
+    if (isEndByStart) {
+      wallBoxList.shift() // wallBoxList去掉第一个元素
+      wallBoxList.pop() // wallBoxList去掉最后一个
+    }
     const extrudeSettings = {
       steps: 1,
       depth: wallHeight,
@@ -232,12 +271,12 @@ export class WallEntity extends LineEntityClass<WallPoint, WallData> {
     for (let i = 0; i < wallBoxList.length; i++) {
       const box = wallBoxList[i]
 
-      const points = [];
+      const wallItemPoints = [];
       for (let j = 0; j < box.length; j++) {
-        points.push(new THREE.Vector2(box[j].x, box[j].y * -1))
+        wallItemPoints.push(new THREE.Vector2(box[j].x, box[j].y * -1))
       }
-      if (points.length) {
-        const shape = new THREE.Shape(points)
+      if (wallItemPoints.length) {
+        const shape = new THREE.Shape(wallItemPoints)
         const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings)
         geometry.rotateX(-Math.PI / 2);   // 将 XY 平面旋转成 XZ 平面
         // 计算点points[0]到points[1]的方向向量
@@ -266,12 +305,12 @@ export class WallEntity extends LineEntityClass<WallPoint, WallData> {
       }
     }
 
-    const points: THREE.Vector2[] = []; // wall.points.map((p) => new THREE.Vector2(p.x, p.y))
+    const planePoints: THREE.Vector2[] = []; // wall.points.map((p) => new THREE.Vector2(p.x, p.y))
     data.points.forEach((mesh: Point) => {
-      points.push(new THREE.Vector2(mesh.x, mesh.y * -1))
+      planePoints.push(new THREE.Vector2(mesh.x, mesh.y * -1))
     })
-    if (points.length) {
-      const shape = new THREE.Shape(points)
+    if (planePoints.length) {
+      const shape = new THREE.Shape(planePoints)
       // 盖一个地板
       if (data.hb) {
         const floorDepth = 1
