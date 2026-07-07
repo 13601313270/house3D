@@ -14,31 +14,39 @@ export abstract class PointEntityClass<T extends PointObjData> extends BaseEntit
     super(world, data);
     (() => {
       const geometry = new THREE.BoxGeometry(1, 1, 1);
-      // const edges = new THREE.EdgesGeometry(geometry);
-      // const lineMaterial = new THREE.LineBasicMaterial({ color: 0x000000, transparent: true, opacity: 1 });
-      // const box = new THREE.LineSegments(edges, lineMaterial);
-      const boxMesh = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.2 }));
+      const boxMesh = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.4 }));
       const group = new THREE.Group()
-      // group.add(box);
       group.add(boxMesh);
       // @ts-ignore
-      // box.entity = this;
-      // @ts-ignore
       boxMesh.entity = this;
+      boxMesh.visible = false
       this.boundingBox = group;
       this.world.scene.add(group)
     })();
     (() => {
-      const geometry = new THREE.BoxGeometry(1, 1, 1);
-      const boxMesh = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({ color: 0x00ff00, transparent: true, opacity: 1 }));
+      const shaftGeometry = new THREE.BoxGeometry(1, 1, 1);
+      const shaftMesh = new THREE.Mesh(shaftGeometry, new THREE.MeshBasicMaterial({ color: 0x0000ff, transparent: true, opacity: 1 }));
+
+      const arrowheadGeometry = new THREE.ConeGeometry(1.5, 0.7, 4);
+      const arrowheadMesh = new THREE.Mesh(arrowheadGeometry, new THREE.MeshBasicMaterial({ color: 0x0000ff, transparent: true, opacity: 1 }));
+      arrowheadMesh.rotation.y = Math.PI / 4;
+      arrowheadMesh.position.y = 0.7;
+
       const group = new THREE.Group()
-      group.add(boxMesh);
+      group.add(shaftMesh);
       // @ts-ignore
-      // box.entity = this;
+      shaftMesh.entity = this
       // @ts-ignore
-      boxMesh.entity = this;
-      this.moveZBox = group;
-      this.world.scene.add(group)
+      arrowheadMesh.entity = this
+      group.add(arrowheadMesh);
+      // @ts-ignore
+      group.entity = this
+      const group2 = new THREE.Group()
+      group2.add(group)
+      // @ts-ignore
+      group2.entity = this
+      this.moveZBox = group2;
+      this.world.scene.add(group2)
     })();
   }
 

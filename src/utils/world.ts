@@ -248,7 +248,6 @@ export class World {
               const boundingBox = item.createBoundingBox();
               if (boundingBox && this.isShowBoundingBox) {
                 const data = item.getData();
-                // console.log('this.isShowBoundingBox', this.isShowBoundingBox);
                 // 第一个是尺寸，第二个是位置偏移，第三个是旋转角度
                 const [boxVector3, offsetVector3, rotateVector3] = boundingBox;
                 item.boundingBoxData = [boxVector3, offsetVector3, rotateVector3]
@@ -263,13 +262,15 @@ export class World {
                 }
                 if (item.moveZBox) {
                   item.moveZBox.position.set(data.x, data.z, data.y)
-                  item.moveZBox.children[0].rotation.set(rotateVector3.x, rotateVector3.y, rotateVector3.z)
+                  // const height = Math.max(Math.min(40, boxVector3.y), 20);
+                  const radio = Math.min(boxVector3.x, boxVector3.z) / 8;
+                  const height = radio * 3;// Math.max(Math.min(40, boxVector3.y), 20);
                   item.moveZBox.children[0].scale.set(
-                    Math.min(boxVector3.x, boxVector3.z) / 5,
-                    boxVector3.y * 0.5,
-                    Math.min(boxVector3.x, boxVector3.z) / 5
+                    Math.max(radio, 10),
+                    height,
+                    Math.max(radio, 10)
                   )
-                  item.moveZBox.children[0].position.set(offsetVector3.x, boxVector3.y * 0.75 + offsetVector3.y, offsetVector3.z)
+                  item.moveZBox.children[0].position.set(offsetVector3.x, boxVector3.y / 2 + height / 2 + offsetVector3.y, offsetVector3.z)
                   item.moveZBox.visible = false
                 }
               } else {

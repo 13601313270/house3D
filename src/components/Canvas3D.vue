@@ -348,27 +348,25 @@ const initThree = () => {
             }
           }
         } else {
-          const allBoundingBox = props.world.boundingBoxList()
           const allMoveZBox = props.world.moveZBoxList()
+          const allLastTextBox: any[] = [];
           allMoveZBox.forEach((item) => {
             // @ts-ignore
             const entity = item.children[0].entity as BaseEntityClass<any>
-            // @ts-ignore
-            // console.log('===entity===', item, item.children[0].entity)
             if (entity instanceof PointEntityClass) {
               entity.moveZBox.visible = false
             }
+            allLastTextBox.push(item.children[0]);
           })
-          const hoveredObject = raycastObjects([...allBoundingBox, ...allMoveZBox], e)
+          // @ts-ignore
+          const hoveredObject = raycastObjects([...props.world.boundingBoxList(), ...allLastTextBox], e)
           if (hoveredObject) {
             // 移动对象
             // @ts-ignore
             const entity = hoveredObject.entity as BaseEntityClass<any>
             if (entity instanceof PointEntityClass) {
               entity.moveZBox.visible = true
-              // entity.moveZBox.children[0].material.opacity = 0.5
             }
-            // console.log('hoveredObject', hoveredObject)
           }
         }
       }
