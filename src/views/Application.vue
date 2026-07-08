@@ -94,8 +94,8 @@
           </div> -->
         </div>
         <!-- {{ insertTempDoor }} -->
-        <div class="right-panel-content">
-          <Canvas3D ref="canvas3DRef" :world="worldApi" v-model:cameraState="cameraStateCenter"
+        <div class="center-panel-content">
+          <Canvas3D ref="canvas3DRefCenter" :world="worldApi" v-model:cameraState="cameraStateCenter"
             :aspectRatio="aspectRatio2" :showCamera="true" cameraType="perspective" @objectHover="handleObjectHover"
             @objectClick="handleObjectClick" />
         </div>
@@ -205,7 +205,7 @@ import { CameraBase } from '@/types/CameraBase';
 const canvas2DRef = ref<HTMLCanvasElement | null>(null)
 const canvas2D2Ref = ref<HTMLCanvasElement | null>(null)
 const canvas3DRef1 = ref<typeof Canvas3D | null>(null)
-const canvas3DRef = ref<typeof Canvas3D | null>(null)
+const canvas3DRefCenter = ref<typeof Canvas3D | null>(null)
 const canvas3DRef2 = ref<typeof Canvas3D | null>(null)
 const activeToolsIndex = ref(-1)
 const currentTool = ref<string | 'drag'>('drag')
@@ -301,30 +301,30 @@ const updateCanvasSize = () => {
       canvasSize.value = { width, height }
     }
   }
-  const canvas3D1Panel = canvas3DRef1.value
-  if (canvas3D1Panel) {
-    const leftCanvasContainer = document.querySelector('.canvas-container')
-    if (leftCanvasContainer) {
-      const canvasRect = leftCanvasContainer.getBoundingClientRect()
-      const width = Math.floor(canvasRect.width)
-      const height = Math.floor(canvasRect.height)
-      if (width > 0 && height > 0) {
-        aspectRatio1.value = width / height
-      }
+  const leftCanvasContainer = document.querySelector('.canvas-container')
+  if (leftCanvasContainer) {
+    const canvasRect = leftCanvasContainer.getBoundingClientRect()
+    const width = Math.floor(canvasRect.width)
+    const height = Math.floor(canvasRect.height)
+    if (width > 0 && height > 0) {
+      aspectRatio1.value = width / height
     }
-    const centerPanelContainer = document.querySelector('.right-panel-content')
+  }
+  if (canvas3DRefCenter.value) {
+    const centerPanelContainer = document.querySelector('.center-panel-content')
     if (centerPanelContainer) {
       const canvasRect = centerPanelContainer.getBoundingClientRect()
       const width = Math.floor(canvasRect.width)
       const height = Math.floor(canvasRect.height)
 
       if (width > 0 && height > 0) {
+        console.log('ddddddd', width / height)
         aspectRatio2.value = width / height
       }
     }
   }
 
-  const canvas3DPanel = canvas3DRef.value
+  const canvas3DPanel = canvas3DRefCenter.value
   if (canvas3DPanel) {
     canvas3DPanel.resize();
   }
@@ -2058,6 +2058,13 @@ button {
     padding: 4px;
     background-color: white;
     height: 40px;
+  }
+
+  .center-panel-content {
+    // padding: 8px;
+    width: 100%;
+    flex-grow: 1;
+    box-sizing: border-box;
   }
 
   .right-panel-content {
