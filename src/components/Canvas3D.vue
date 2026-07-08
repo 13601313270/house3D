@@ -31,7 +31,7 @@ const containerRef = ref<HTMLDivElement | null>(null)
 let camera: THREE.PerspectiveCamera | THREE.OrthographicCamera | null = null
 let renderer: THREE.WebGLRenderer | null = null
 const raycaster: THREE.Raycaster = new THREE.Raycaster()
-// const mouse: THREE.Vector2 = new THREE.Vector2()
+raycaster.layers.set(2)
 
 const cameraStateZ = ref<CameraState | OrthographicCamera>({
   targetPositionX: 0,

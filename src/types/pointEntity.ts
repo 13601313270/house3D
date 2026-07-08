@@ -16,12 +16,14 @@ export abstract class PointEntityClass<T extends PointObjData> extends BaseEntit
       const geometry = new THREE.BoxGeometry(1, 1, 1);
       const boxMesh = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0 }));
       boxMesh.visible = false
+      boxMesh.layers.set(2)
       const group = new THREE.Group()
 
       const edges = new THREE.EdgesGeometry(geometry);
       const lineMaterial = new THREE.LineBasicMaterial({ color: 0x000000, transparent: true, opacity: 1 });
       const lineBox = new THREE.LineSegments(edges, lineMaterial);
       lineBox.visible = false
+      lineBox.layers.set(2)
 
       group.add(boxMesh);
       group.add(lineBox);
@@ -37,9 +39,11 @@ export abstract class PointEntityClass<T extends PointObjData> extends BaseEntit
     (() => {
       const shaftGeometry = new THREE.BoxGeometry(1, 1, 1);
       const shaftMesh = new THREE.Mesh(shaftGeometry, new THREE.MeshBasicMaterial({ color: 0x0000ff, transparent: true, opacity: 1 }));
+      shaftMesh.layers.set(2)
 
       const arrowheadGeometry = new THREE.ConeGeometry(1.5, 0.7, 4);
       const arrowheadMesh = new THREE.Mesh(arrowheadGeometry, new THREE.MeshBasicMaterial({ color: 0x0000ff, transparent: true, opacity: 1 }));
+      arrowheadMesh.layers.set(2)
       arrowheadMesh.rotation.y = Math.PI / 4;
       arrowheadMesh.position.y = 0.7;
 
