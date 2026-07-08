@@ -14,7 +14,7 @@ import { BaseEntityClass } from '@/types/baseEntity';
 const props = defineProps<{
   world: World,
   cameraState: CameraState | OrthographicCamera,
-  // camera: THREE.PerspectiveCamera | THREE.OrthographicCamera,
+  camera: THREE.PerspectiveCamera | THREE.OrthographicCamera,
   aspectRatio: number
   showCamera: boolean
   cameraType: 'perspective'// | 'orthographic'
@@ -122,16 +122,16 @@ function updateCameraAngel() {
     }
   } else if ('fov' in cameraStateZ.value) {
     if (camera) {
-      camera.position.set(
-        cameraStateZ.value.positionX,
-        cameraStateZ.value.positionZ,
-        cameraStateZ.value.positionY,
-      );
-      camera.lookAt(
-        cameraStateZ.value.targetPositionX,
-        cameraStateZ.value.targetPositionZ,
-        cameraStateZ.value.targetPositionY
-      );
+      // camera.position.set(
+      //   cameraStateZ.value.positionX,
+      //   cameraStateZ.value.positionZ,
+      //   cameraStateZ.value.positionY,
+      // );
+      // camera.lookAt(
+      //   cameraStateZ.value.targetPositionX,
+      //   cameraStateZ.value.targetPositionZ,
+      //   cameraStateZ.value.targetPositionY
+      // );
       camera.updateProjectionMatrix()
     }
   }
@@ -165,7 +165,7 @@ const initThree = () => {
   //     props.cameraState.targetPositionY
   //   )
   // } else {
-  camera = new THREE.PerspectiveCamera(55, props.aspectRatio, 0.1, maxCamera1Radius)
+  camera = props.camera;// || new THREE.PerspectiveCamera(55, props.aspectRatio, 0.1, maxCamera1Radius)
   camera.position.set(0, 800, 1200)
   camera.lookAt(0, 0, 0);
   // }

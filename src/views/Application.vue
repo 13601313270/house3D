@@ -96,8 +96,8 @@
         <!-- {{ insertTempDoor }} -->
         <div class="center-panel-content">
           <Canvas3D ref="canvas3DRefCenter" :world="worldApi" v-model:cameraState="cameraStateCenter"
-            :aspectRatio="aspectRatio2" :showCamera="true" cameraType="perspective" @objectHover="handleObjectHover"
-            @objectClick="handleObjectClick" />
+            :camera="cameraCenterPanel" :aspectRatio="aspectRatio2" :showCamera="true" cameraType="perspective"
+            @objectHover="handleObjectHover" @objectClick="handleObjectClick" />
         </div>
       </div>
 
@@ -110,13 +110,14 @@
               :class="{ active: activeCameraIndex === index }" class="cameraItem">{{ index + 1 }}
             </div>
           </div>
-          <div v-if="allCamera.length && cameraState2">
+          <div v-if="allCamera.length && cameraRightState">
             <button type="button" @click="exportImage">导出图片</button>
           </div>
         </div>
         <div class="right-panel-content">
-          <Canvas3D v-if="allCamera.length && cameraState2" ref="canvas3DRef2" :world="worldApi"
-            :cameraState="cameraState2" :aspectRatio="cameraState2.aspectW / cameraState2.aspectH" :showCamera="false"
+          <Canvas3D v-if="allCamera.length && cameraRightState && cameraRightPanel" ref="canvas3DRef2" :world="worldApi"
+            :camera="cameraRightPanel" :cameraState="cameraRightState"
+            :aspectRatio="cameraRightState.aspectW / cameraRightState.aspectH" :showCamera="false"
             cameraType="perspective" />
           <div v-else class="noCamera">请至少在场景中添加一个摄像机</div>
         </div>
@@ -201,6 +202,7 @@ import getNearestWall from '@/utils/getNearestWall';
 import getSnapPointAndLine from '@/utils/getSnapPoint';
 import importOutObj from '@/utils/importOutObj';
 import { CameraBase } from '@/types/CameraBase';
+import { sleep } from '@/utils/sleep';
 
 const canvas2DRef = ref<HTMLCanvasElement | null>(null)
 const canvas2D2Ref = ref<HTMLCanvasElement | null>(null)
@@ -255,7 +257,7 @@ const cameraStateCenter = ref<CameraState>({
   aspectH: 1,
 })
 const allCamera = ref<CameraState[]>([])
-const cameraState2 = ref<CameraState | null>(null)
+const cameraRightState = ref<CameraState | null>(null)
 const lockObjCount = ref(0)
 const allObjCount = ref(0)
 type ObjFileType = {
@@ -274,6 +276,9 @@ let beCopyEntity: BaseEntityClass<any> | null = null;// 被复制移动中的对
 let beCopyEntityHandelInfo: HandelInfo & Point | null = null;// 被复制移动中的对象的柄信息(非引用，是拷贝)
 let insertTempObj: BaseEntityClass<any> | null = null
 const insertAdding = ref(false)
+
+const cameraCenterPanel = ref(new THREE.PerspectiveCamera(55, aspectRatio2.value, 0.1, 20000));
+const cameraRightPanel = ref<THREE.PerspectiveCamera | THREE.OrthographicCamera>();
 
 let panStartScreenX = 0
 let panStartScreenY = 0
@@ -434,14 +439,28 @@ const drawWrapper2D = () => {
 }
 
 const activeCameraIndex = ref(0)
-function changeCamera2State(activeIndex: number = 0) {
+async function changeCamera2State(activeIndex: number = 0) {
   const allCameraTypeKey = ['camera', 'directionCamera'];
   const allTypesCameraList: BaseObjDataClass<any>[] = []
+  const allTypesCameraObjList: CameraBase<CameraData>[] = []
   allCameraTypeKey.forEach(typeKey => {
+    if (worldApi.allFileMapObjects[typeKey]) {
+      worldApi.allFileMapObjects[typeKey].forEach(item => {
+        if (item instanceof CameraBase) {
+          allTypesCameraObjList.push(item);
+        }
+      })
+    }
     console.log('typeKey=======', typeKey, worldApi.getObjects(typeKey))
     allTypesCameraList.push(...worldApi.getObjects(typeKey));
   })
+  if (allTypesCameraObjList[activeIndex] && allTypesCameraObjList[activeIndex].realyCamera) {
+    cameraRightPanel.value = allTypesCameraObjList[activeIndex].realyCamera
+  }
+
   if (allTypesCameraList) {
+    // cameraRightPanel.value = allTypesCameraList[activeIndex];
+    await sleep(10);
     const allCameraList: CameraState[] = [];
     (allTypesCameraList as CameraData[]).forEach(cameraData => {
       allCameraList.push({
@@ -457,7 +476,27 @@ function changeCamera2State(activeIndex: number = 0) {
       });
     })
     allCamera.value = allCameraList
-    cameraState2.value = allCameraList[activeIndex]
+    cameraRightState.value = allCameraList[activeIndex]
+    // if (allCameraList[activeIndex]) {
+    //   if (!cameraRightPanel.value) {
+    //     cameraRightPanel.value = new THREE.PerspectiveCamera(55, cameraRightState.value.aspectW / cameraRightState.value.aspectH, 0.1, 20000);
+    //     await sleep(10);
+    //   }
+    //   if ('fov' in allCameraList[activeIndex]) {
+    //     console.log('xxxxx-1')
+    //     cameraRightPanel.value.position.set(
+    //       allCameraList[activeIndex].positionX,
+    //       allCameraList[activeIndex].positionZ,
+    //       allCameraList[activeIndex].positionY,
+    //     )
+    //     cameraRightPanel.value.lookAt(
+    //       allCameraList[activeIndex].targetPositionX,
+    //       allCameraList[activeIndex].targetPositionZ,
+    //       allCameraList[activeIndex].targetPositionY
+    //     );
+    //     cameraRightPanel.value.updateProjectionMatrix()
+    //   }
+    // }
     activeCameraIndex.value = activeIndex
     worldApi.activeCameraIndex = activeIndex
     const allCameraObjList: BaseEntityClass<BaseObjData>[] = [];
@@ -489,7 +528,7 @@ function changeCamera2State(activeIndex: number = 0) {
     }
   } else {
     allCamera.value = []
-    cameraState2.value = null
+    cameraRightState.value = null
   }
 }
 
@@ -855,7 +894,7 @@ async function initWorldByData(data: fileData & {
     cameraStateCenter.value = data.cameraState
   }
   if (data.activeCameraIndex !== undefined) {
-    changeCamera2State(data.activeCameraIndex)
+    await changeCamera2State(data.activeCameraIndex)
   }
   if (data.environmentConfig) {
     worldApi.setEnvironMent(data.environmentConfig)

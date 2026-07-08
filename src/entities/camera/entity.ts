@@ -31,6 +31,22 @@ export class CameraEntity extends CameraBase<CameraData> {
   constructor(world: World, data: CameraData) {
     super(world, data)
     this.realyCamera = new THREE.PerspectiveCamera(data.fov, data.aspectW / data.aspectH, 0.1, 1000)
+    setTimeout(() => {
+      if (this.realyCamera) {
+        this.realyCamera.position.set(
+          data.x,
+          data.z,
+          data.y,
+        )
+        this.realyCamera.lookAt(
+          data.targetPositionX,
+          data.targetPositionZ,
+          data.targetPositionY
+        );
+        this.realyCamera.updateProjectionMatrix()
+      }
+      // 需要等Application里面把Canvas3D初始化之后realyCamera的修改位置才有意义。
+    }, 100)
   }
 
   draw2DPreviewByData(ctx: CanvasRenderingContext2D, data: CameraData, panOffset: Point, zoomLevel: number): void {
@@ -373,6 +389,20 @@ export class CameraEntity extends CameraBase<CameraData> {
     this.meshList.forEach(v => {
       v.position.set(data.x, data.z, data.y)
     })
+    if (this.realyCamera) {
+      this.realyCamera.position.set(data.x, data.z, data.y)
+      this.realyCamera.position.set(
+        data.x,
+        data.z,
+        data.y,
+      )
+      this.realyCamera.lookAt(
+        data.targetPositionX,
+        data.targetPositionZ,
+        data.targetPositionY
+      );
+      this.realyCamera.updateProjectionMatrix()
+    }
   }
 
   meshNeedChangeKey() {
