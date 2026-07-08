@@ -9,7 +9,7 @@ import { BaseObjDataClass } from '@/entities/objData'
 import { ImportFileType, ImportImgType, ObjOutputFileType } from '@/entities/allObjs';
 import { BaseEntityClass } from '@/types/baseEntity'
 import { BaseObjData } from '@/types/map2d'
-import { CameraEntity } from '@/entities/camera/entity'
+import { CameraBase } from '@/types/CameraBase'
 
 export const canvasHeight = 600
 export const snapThreshold = 20
@@ -243,7 +243,7 @@ export class World {
         (this.allFileMapObjects[key] as BaseEntityClass<any>[]).forEach((item) => {
           item.reCreate3DMeshIfNeed()
           item.change3DMeshState()
-          if (item instanceof PointEntityClass && !(item instanceof CameraEntity)) {
+          if (item instanceof PointEntityClass && !(item instanceof CameraBase)) {
             setTimeout(() => {
               const boundingBox = item.createBoundingBox();
               if (boundingBox && this.isShowBoundingBox) {

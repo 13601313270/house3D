@@ -10,11 +10,12 @@ import kamera from './kamera.png'
 import { CameraDataClass } from './dataClass'
 import { MatchCircleArea } from '@/utils/matchArea'
 import { OrigionSnapPoint } from '@/types/baseEntity'
+import { CameraBase } from '@/types/CameraBase'
 
 const img = new Image()
 img.src = kamera || ''
 
-export class CameraEntity extends PointEntityClass<CameraData> {
+export class CameraEntity extends CameraBase<CameraData> {
   name: string = '相机'
   type: string = 'camera'
   isPointObj: boolean = true

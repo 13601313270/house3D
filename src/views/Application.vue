@@ -172,39 +172,35 @@ import { Point } from '../types'
 import { snapThreshold, World, EnvironmentConfig } from '../utils/world'
 import Canvas3D from '../components/Canvas3D.vue'
 import { CameraState } from '@/types/camera'
-import { WallData } from '@/entities/wall/index.d'
-import { allFileKeys, fileData, editItem, fileDataKeyToClass, allFileKeysObjType, allPluginByKey } from '@/entities'
+import { allFileKeys, fileData, editItem } from '@/entities'
 import { PointEntityClass } from '@/types/pointEntity'
-import { EntityClassInWall, NearestWallResult } from '@/types/entityInWall'
-import { BaseObjData, HandelInfo, LineObjData, PointWithIndex } from '@/types/map2d'
+import { EntityClassInWall } from '@/types/entityInWall'
+import { BaseObjData, HandelInfo, LineObjData } from '@/types/map2d'
 import pointToLineDistance from '@/utils/pointToLineDistance'
-import { getClosestPointOnLine, roundNumberList } from '@/utils/geometry'
+import { getClosestPointOnLine } from '@/utils/geometry'
 import { CameraData } from '@/entities/camera/index.d'
 import { WallEntity } from '@/entities/wall/entity'
 import { ImportFileType, ObjOutputFileType } from '@/entities/allObjs'
 import ObjTypeSelect from '@/components/ObjTypeSelect.vue'
 import EnvironmentEditor from '@/components/EnvironmentEditor.vue'
-
 import { ImportFileDataClass } from '@/entities/importFile/dataClass';
 import { ImportFileData } from '@/entities/importFile/index.d';
 import Login from '@/components/Login.vue'
 import { useStore } from 'vuex';
 import { Store } from '@/store';
 import Help from '@/components/help.vue'
-import { sleep } from '@/utils/sleep';
 import { MatchCircleArea, MatchRectArea } from '@/utils/matchArea';
 import processUploadedFile from '@/utils/processUploadedFile';
 import DataTypeEditPanel from './DataTypeEditPanel.vue'
-import { BaseEntityClass, MatchSnapPoint } from '@/types/baseEntity';
+import { BaseEntityClass } from '@/types/baseEntity';
 import { LineEntityClass } from '@/types/lineEntity';
-import { LineObjDataClass } from '@/entities/objData';
-import { CameraEntity } from '@/entities/camera/entity';
+import { BaseObjDataClass, LineObjDataClass } from '@/entities/objData';
 import AllWorldObjSelect from '@/components/AllWorldObjSelect.vue'
 import message from '@/utils/message';
-import { DefaultItem } from '@/entities/pluginType';
 import getNearestWall from '@/utils/getNearestWall';
 import getSnapPointAndLine from '@/utils/getSnapPoint';
 import importOutObj from '@/utils/importOutObj';
+import { CameraBase } from '@/types/CameraBase';
 
 const canvas2DRef = ref<HTMLCanvasElement | null>(null)
 const canvas2D2Ref = ref<HTMLCanvasElement | null>(null)
@@ -439,10 +435,15 @@ const drawWrapper2D = () => {
 
 const activeCameraIndex = ref(0)
 function changeCamera2State(activeIndex: number = 0) {
-  const allTypesCamera = worldApi.getObjects('camera');
-  if (allTypesCamera) {
+  const allCameraTypeKey = ['camera', 'directionCamera'];
+  const allTypesCameraList: BaseObjDataClass<any>[] = []
+  allCameraTypeKey.forEach(typeKey => {
+    console.log('typeKey=======', typeKey, worldApi.getObjects(typeKey))
+    allTypesCameraList.push(...worldApi.getObjects(typeKey));
+  })
+  if (allTypesCameraList) {
     const allCameraList: CameraState[] = [];
-    (allTypesCamera as CameraData[]).forEach(cameraData => {
+    (allTypesCameraList as CameraData[]).forEach(cameraData => {
       allCameraList.push({
         targetPositionX: cameraData.targetPositionX,
         targetPositionY: cameraData.targetPositionY,
@@ -459,21 +460,28 @@ function changeCamera2State(activeIndex: number = 0) {
     cameraState2.value = allCameraList[activeIndex]
     activeCameraIndex.value = activeIndex
     worldApi.activeCameraIndex = activeIndex
-    if (worldApi.allFileMapObjects.camera) {
-      worldApi.allFileMapObjects.camera.forEach((camera, index) => {
+    const allCameraObjList: BaseEntityClass<BaseObjData>[] = [];
+    allCameraTypeKey.forEach(typeKey => {
+      const typeItemList = worldApi.allFileMapObjects[typeKey];
+      if (typeItemList) {
+        allCameraObjList.push(...typeItemList);
+      }
+    })
+    if (allCameraObjList) {
+      allCameraObjList.forEach((cameraItem, index) => {
         if (index === activeIndex) {
           // @ts-ignore
-          if (camera.active === false) {
+          if (cameraItem.active === false) {
             // @ts-ignore
-            camera.active = true
-            camera.markObjectIsDirty()
+            cameraItem.active = true
+            cameraItem.markObjectIsDirty()
           }
         } else {
           // @ts-ignore
-          if (camera.active === true) {
+          if (cameraItem.active === true) {
             // @ts-ignore
-            camera.active = false
-            camera.markObjectIsDirty()
+            cameraItem.active = false
+            cameraItem.markObjectIsDirty()
           }
         }
       })
@@ -546,7 +554,7 @@ onMounted(async () => {
       }
     }
     lockObjCount.value = worldApi.lockedObjList.length
-    const find = objList.find((item) => item instanceof CameraEntity)
+    const find = objList.find((item) => item instanceof CameraBase)
     if (find) {
       changeCamera2State(activeCameraIndex.value)
     }

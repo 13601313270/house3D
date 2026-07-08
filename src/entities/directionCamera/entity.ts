@@ -9,11 +9,12 @@ import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
 import kamera from './kamera.png'
 import { MatchCircleArea } from '@/utils/matchArea'
 import { OrigionSnapPoint } from '@/types/baseEntity'
+import { CameraBase } from '@/types/CameraBase'
 
 const img = new Image()
 img.src = kamera || ''
 
-export class DirectionCameraEntity extends PointEntityClass<DirectionCameraData> {
+export class DirectionCameraEntity extends CameraBase<DirectionCameraData> {
   name: string = '相机(相机位置+方向)'
   type: string = 'directionCamera'
   isPointObj: boolean = true
