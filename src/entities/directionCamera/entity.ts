@@ -25,16 +25,17 @@ export class DirectionCameraEntity extends CameraBase<DirectionCameraData> {
   colorOpacityActive: string = 'red'
   active: boolean = false // 这个不存在数据库里，只是在前端动态调整
   private circleRadius = 6
+  private distance = 20;
 
   draw2DPreviewByData(ctx: CanvasRenderingContext2D, data: DirectionCameraData, panOffset: Point, zoomLevel: number): void {
     let index: number = -1;
     if (this.world.allFileMapObjects.camera) {
       index = this.world.allFileMapObjects.camera.indexOf(this)
     }
-
+    const { angleY } = data;
     const screenX = data.x * zoomLevel + panOffset.x
     const screenY = data.y * zoomLevel + panOffset.y
-    const angleY = Math.atan2(data.targetPositionY - data.y, data.targetPositionX - data.x);
+    // const angleY = Math.atan2(data.targetPositionY - data.y, data.targetPositionX - data.x);
     const preImgScale = 0.2
     ctx.save(); // 保存当前状态
     const { width, height } = img;
@@ -48,9 +49,11 @@ export class DirectionCameraEntity extends CameraBase<DirectionCameraData> {
       preImgScale * height * zoomLevel
     ); // 以新原点为中心绘制
     ctx.restore(); // 恢复原始状态
-
-    const targetX = data.targetPositionX * zoomLevel + panOffset.x
-    const targetY = data.targetPositionY * zoomLevel + panOffset.y
+    const targetPositionX = this.distance * Math.cos(data.angleY * Math.PI / 180);
+    const targetPositionY = this.distance * Math.sin(data.angleY * Math.PI / 180);
+    
+    const targetX = targetPositionX * zoomLevel + panOffset.x
+    const targetY = targetPositionY * zoomLevel + panOffset.y
     const distance = Math.hypot(targetX - screenX, targetY - screenY)
     const radius = distance
 
@@ -97,8 +100,8 @@ export class DirectionCameraEntity extends CameraBase<DirectionCameraData> {
     ctx.lineWidth = 1
     ctx.beginPath()
     ctx.arc(
-      data.targetPositionX * zoomLevel + panOffset.x,
-      data.targetPositionY * zoomLevel + panOffset.y,
+      targetPositionX * zoomLevel + panOffset.x,
+      targetPositionY * zoomLevel + panOffset.y,
       this.circleRadius * zoomLevel + 3, 0, Math.PI * 2)
     // ctx.fill()
     ctx.stroke()
@@ -144,9 +147,11 @@ export class DirectionCameraEntity extends CameraBase<DirectionCameraData> {
     ctx.strokeStyle = '#e67e22'
     ctx.lineWidth = 2
     ctx.beginPath()
+    const targetPositionX = this.distance * Math.cos(data.angleY * Math.PI / 180);// * zoomLevel + panOffset.x
+    const targetPositionY = this.distance * Math.sin(data.angleY * Math.PI / 180);// * zoomLevel + panOffset.y
     ctx.arc(
-      data.targetPositionX * zoomLevel + panOffset.x,
-      data.targetPositionY * zoomLevel + panOffset.y,
+      targetPositionX,
+      targetPositionY,
       this.circleRadius * zoomLevel + 3, 0, Math.PI * 2)
     ctx.fill()
     ctx.stroke()
@@ -178,103 +183,111 @@ export class DirectionCameraEntity extends CameraBase<DirectionCameraData> {
 
   create3DMesh(): THREE.Group[] {
     const data = this.getData();
-    const dx = data.targetPositionX - data.x
-    const dy = data.targetPositionY - data.y
-    const dz = data.targetPositionZ - data.z
-
-    // Calculate distance
-    const distance = Math.sqrt(dx * dx + dy * dy + dz * dz)
-    const halfFov = (data.fov * Math.PI) / 360
-    const baseSize = distance * Math.tan(halfFov) * 2
-    const depth = data.aspectH / data.aspectW * baseSize;   // 长方形长
-    const width = baseSize;   // 长方形宽
-
-    const apex = new THREE.Vector3(data.x, data.z, data.y);
-    const center = new THREE.Vector3(data.targetPositionX, data.targetPositionZ, data.targetPositionY);
-    const up = apex.clone().sub(center).normalize();
-
-    const temp = Math.abs(up.y) < 0.999
-      ? new THREE.Vector3(0, 1, 0)
-      : new THREE.Vector3(1, 0, 0);
-
-    const right = new THREE.Vector3().crossVectors(temp, up).normalize();
-    const forward = new THREE.Vector3().crossVectors(up, right).normalize();
-
-    const hw = width / 2;
-    const hd = depth / 2;
-
-    const p0 = center.clone().addScaledVector(right, -hw).addScaledVector(forward, -hd);
-    const p1 = center.clone().addScaledVector(right, hw).addScaledVector(forward, -hd);
-    const p2 = center.clone().addScaledVector(right, hw).addScaledVector(forward, hd);
-    const p3 = center.clone().addScaledVector(right, -hw).addScaledVector(forward, hd);
-
-    const geometry = new THREE.BufferGeometry();
-
-    const vertices = new Float32Array([
-      p0.x, p0.y, p0.z,
-      p1.x, p1.y, p1.z,
-      p2.x, p2.y, p2.z,
-      p3.x, p3.y, p3.z,
-      apex.x, apex.y, apex.z
-    ]);
-
-    const indices = [
-      0, 1, 2,
-      0, 2, 3,
-      0, 1, 4,
-      1, 2, 4,
-      2, 3, 4,
-      3, 0, 4
-    ];
-
-    geometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
-    geometry.setIndex(indices);
-    geometry.computeVertexNormals();
-
-    const edges = new THREE.EdgesGeometry(geometry);
-    const lineMaterial = new THREE.LineBasicMaterial({
-      color: this.active ? this.color3DActive : this.color3D,
-      linewidth: 1
-    });
-    const line = new THREE.LineSegments(edges, lineMaterial);
-    line.position.set(-data.x, -data.z, -data.y)
     const group = new THREE.Group()
-    line.layers.set(2)
-    group.add(line)
-
-    const loader = new OBJLoader()
-    // 将方向向量旋转90度
-    const material = new THREE.MeshStandardMaterial({
-      color: 0x888888,
-      roughness: 0.7,
-      metalness: 0.1
-    })
-    loader.load('./kamera.obj', (object: THREE.Group) => {
-      object.scale.set(5, 5, 5)
-      object.lookAt(up);
-      object.rotateX(Math.PI);  // 如果需要绕 X 轴翻转 180 度
-      object.rotateZ(Math.PI);  // 如果需要绕 Y 轴翻转 180 度
-      // 添加默认材质（如果模型没有材质）
-      object.traverse((child) => {
-        if (child instanceof THREE.Mesh) {
-          child.layers.set(2)
-          child.material = material
-        }
-      })
-      // @ts-ignore
-      object.isCameraObj = true;
-      group.add(object)
-      // console.log('OBJ文件加载成功:', url)
-    }, () => {
-      // 加载进度
-      // const percent = (progress.loaded / progress.total * 100).toFixed(2)
-      // console.log('加载进度:', percent + '%')
-    }, (error: any) => {
-      console.error('OBJ文件加载失败:', error)
-    })
     return [
-      group
+      group,
     ]
+    // // const dx = data.targetPositionX - data.x
+    // // const dy = data.targetPositionY - data.y
+    // // const dz = data.targetPositionZ - data.z
+
+    // // Calculate distance
+    // const distance = this.distance;// Math.sqrt(dx * dx + dy * dy + dz * dz)
+    // const halfFov = (data.fov * Math.PI) / 360
+    // const baseSize = distance * Math.tan(halfFov) * 2
+    // const depth = data.aspectH / data.aspectW * baseSize;   // 长方形长
+    // const width = baseSize;   // 长方形宽
+
+    // const targetPositionX = this.distance * Math.cos(data.angleY * Math.PI / 180);
+    // const targetPositionY = this.distance * Math.sin(data.angleY * Math.PI / 180);
+    // const targetPositionZ = 0;
+
+    // const apex = new THREE.Vector3(data.x, data.z, data.y);
+    // const center = new THREE.Vector3(targetPositionX, targetPositionZ, targetPositionY);
+    // const up = apex.clone().sub(center).normalize();
+
+    // const temp = Math.abs(up.y) < 0.999
+    //   ? new THREE.Vector3(0, 1, 0)
+    //   : new THREE.Vector3(1, 0, 0);
+
+    // const right = new THREE.Vector3().crossVectors(temp, up).normalize();
+    // const forward = new THREE.Vector3().crossVectors(up, right).normalize();
+
+    // const hw = width / 2;
+    // const hd = depth / 2;
+
+    // const p0 = center.clone().addScaledVector(right, -hw).addScaledVector(forward, -hd);
+    // const p1 = center.clone().addScaledVector(right, hw).addScaledVector(forward, -hd);
+    // const p2 = center.clone().addScaledVector(right, hw).addScaledVector(forward, hd);
+    // const p3 = center.clone().addScaledVector(right, -hw).addScaledVector(forward, hd);
+
+    // const geometry = new THREE.BufferGeometry();
+
+    // const vertices = new Float32Array([
+    //   p0.x, p0.y, p0.z,
+    //   p1.x, p1.y, p1.z,
+    //   p2.x, p2.y, p2.z,
+    //   p3.x, p3.y, p3.z,
+    //   apex.x, apex.y, apex.z
+    // ]);
+
+    // const indices = [
+    //   0, 1, 2,
+    //   0, 2, 3,
+    //   0, 1, 4,
+    //   1, 2, 4,
+    //   2, 3, 4,
+    //   3, 0, 4
+    // ];
+
+    // geometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
+    // geometry.setIndex(indices);
+    // geometry.computeVertexNormals();
+
+    // const edges = new THREE.EdgesGeometry(geometry);
+    // const lineMaterial = new THREE.LineBasicMaterial({
+    //   color: this.active ? this.color3DActive : this.color3D,
+    //   linewidth: 1
+    // });
+    // const line = new THREE.LineSegments(edges, lineMaterial);
+    // line.position.set(-data.x, -data.z, -data.y)
+    // const group = new THREE.Group()
+    // line.layers.set(2)
+    // group.add(line)
+
+    // const loader = new OBJLoader()
+    // // 将方向向量旋转90度
+    // const material = new THREE.MeshStandardMaterial({
+    //   color: 0x888888,
+    //   roughness: 0.7,
+    //   metalness: 0.1
+    // })
+    // loader.load('./kamera.obj', (object: THREE.Group) => {
+    //   object.scale.set(5, 5, 5)
+    //   object.lookAt(up);
+    //   object.rotateX(Math.PI);  // 如果需要绕 X 轴翻转 180 度
+    //   object.rotateZ(Math.PI);  // 如果需要绕 Y 轴翻转 180 度
+    //   // 添加默认材质（如果模型没有材质）
+    //   object.traverse((child) => {
+    //     if (child instanceof THREE.Mesh) {
+    //       child.layers.set(2)
+    //       child.material = material
+    //     }
+    //   })
+    //   // @ts-ignore
+    //   object.isCameraObj = true;
+    //   group.add(object)
+    //   // console.log('OBJ文件加载成功:', url)
+    // }, () => {
+    //   // 加载进度
+    //   // const percent = (progress.loaded / progress.total * 100).toFixed(2)
+    //   // console.log('加载进度:', percent + '%')
+    // }, (error: any) => {
+    //   console.error('OBJ文件加载失败:', error)
+    // })
+    // return [
+    //   group
+    // ]
   }
 
   createBoundingBox(): [THREE.Vector3, THREE.Vector3, THREE.Vector3] {
@@ -288,84 +301,89 @@ export class DirectionCameraEntity extends CameraBase<DirectionCameraData> {
 
   private lastChangeStateKey = '';
   change3DMeshState(): void {
-    const data = this.getData();
-    const ttt = JSON.stringify(data)
-    if (this.lastChangeStateKey === ttt) {
-      this.meshList.forEach(v => {
-        v.position.set(data.x, data.z, data.y)
-      })
-      return
-    }
-    this.lastChangeStateKey = ttt
-    const dx = data.targetPositionX - data.x
-    const dy = data.targetPositionY - data.y
-    const dz = data.targetPositionZ - data.z
+    // const data = this.getData();
+    // const ttt = JSON.stringify(data)
+    // if (this.lastChangeStateKey === ttt) {
+    //   this.meshList.forEach(v => {
+    //     v.position.set(data.x, data.z, data.y)
+    //   })
+    //   return
+    // }
+    // this.lastChangeStateKey = ttt
+    // // const dx = data.targetPositionX - data.x
+    // // const dy = data.targetPositionY - data.y
+    // // const dz = data.targetPositionZ - data.z
 
-    // Calculate distance
-    const distance = Math.sqrt(dx * dx + dy * dy + dz * dz)
-    const halfFov = (data.fov * Math.PI) / 360
-    const baseSize = distance * Math.tan(halfFov) * 2
-    const depth = data.aspectH / data.aspectW * baseSize;   // 长方形长
-    const width = baseSize;   // 长方形宽
+    // // Calculate distance
+    // const distance = this.distance;// Math.sqrt(dx * dx + dy * dy + dz * dz)
+    // const halfFov = (data.fov * Math.PI) / 360
+    // const baseSize = distance * Math.tan(halfFov) * 2
+    // const depth = data.aspectH / data.aspectW * baseSize;   // 长方形长
+    // const width = baseSize;   // 长方形宽
 
-    const apex = new THREE.Vector3(data.x, data.z, data.y);
-    const center = new THREE.Vector3(data.targetPositionX, data.targetPositionZ, data.targetPositionY);
-    const up = apex.clone().sub(center).normalize();
+    // const apex = new THREE.Vector3(data.x, data.z, data.y);
 
-    const temp = Math.abs(up.y) < 0.999
-      ? new THREE.Vector3(0, 1, 0)
-      : new THREE.Vector3(1, 0, 0);
+    // const targetPositionX = this.distance * Math.cos(data.angleY * Math.PI / 180);
+    // const targetPositionY = this.distance * Math.sin(data.angleY * Math.PI / 180);
+    // const targetPositionZ = 0;
+    
+    // const center = new THREE.Vector3(targetPositionX, targetPositionZ, targetPositionY);
+    // const up = apex.clone().sub(center).normalize();
 
-    const right = new THREE.Vector3().crossVectors(temp, up).normalize();
-    const forward = new THREE.Vector3().crossVectors(up, right).normalize();
+    // const temp = Math.abs(up.y) < 0.999
+    //   ? new THREE.Vector3(0, 1, 0)
+    //   : new THREE.Vector3(1, 0, 0);
 
-    const hw = width / 2;
-    const hd = depth / 2;
+    // const right = new THREE.Vector3().crossVectors(temp, up).normalize();
+    // const forward = new THREE.Vector3().crossVectors(up, right).normalize();
 
-    const p0 = center.clone().addScaledVector(right, -hw).addScaledVector(forward, -hd);
-    const p1 = center.clone().addScaledVector(right, hw).addScaledVector(forward, -hd);
-    const p2 = center.clone().addScaledVector(right, hw).addScaledVector(forward, hd);
-    const p3 = center.clone().addScaledVector(right, -hw).addScaledVector(forward, hd);
+    // const hw = width / 2;
+    // const hd = depth / 2;
 
-    const geometry = new THREE.BufferGeometry();
+    // const p0 = center.clone().addScaledVector(right, -hw).addScaledVector(forward, -hd);
+    // const p1 = center.clone().addScaledVector(right, hw).addScaledVector(forward, -hd);
+    // const p2 = center.clone().addScaledVector(right, hw).addScaledVector(forward, hd);
+    // const p3 = center.clone().addScaledVector(right, -hw).addScaledVector(forward, hd);
 
-    const vertices = new Float32Array([
-      p0.x, p0.y, p0.z,
-      p1.x, p1.y, p1.z,
-      p2.x, p2.y, p2.z,
-      p3.x, p3.y, p3.z,
-      apex.x, apex.y, apex.z
-    ]);
+    // const geometry = new THREE.BufferGeometry();
 
-    const indices = [
-      0, 1, 2,
-      0, 2, 3,
-      0, 1, 4,
-      1, 2, 4,
-      2, 3, 4,
-      3, 0, 4
-    ];
+    // const vertices = new Float32Array([
+    //   p0.x, p0.y, p0.z,
+    //   p1.x, p1.y, p1.z,
+    //   p2.x, p2.y, p2.z,
+    //   p3.x, p3.y, p3.z,
+    //   apex.x, apex.y, apex.z
+    // ]);
 
-    geometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
-    geometry.setIndex(indices);
-    geometry.computeVertexNormals();
+    // const indices = [
+    //   0, 1, 2,
+    //   0, 2, 3,
+    //   0, 1, 4,
+    //   1, 2, 4,
+    //   2, 3, 4,
+    //   3, 0, 4
+    // ];
 
-    const edges = new THREE.EdgesGeometry(geometry);
-    const oldLine = this.meshList[0].children[0] as THREE.LineSegments
-    oldLine.geometry = edges
-    oldLine.position.set(-data.x, -data.z, -data.y)
+    // geometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
+    // geometry.setIndex(indices);
+    // geometry.computeVertexNormals();
 
-    // console.log('children', this.meshList[0].children)
+    // const edges = new THREE.EdgesGeometry(geometry);
+    // const oldLine = this.meshList[0].children[0] as THREE.LineSegments
+    // oldLine.geometry = edges
+    // oldLine.position.set(-data.x, -data.z, -data.y)
 
-    // @ts-ignore
-    const object: THREE.Group | undefined = this.meshList[0].children.find(v => v.isCameraObj)
+    // // console.log('children', this.meshList[0].children)
 
-    if (object) {
-      object.lookAt(center);
-    }
-    this.meshList.forEach(v => {
-      v.position.set(data.x, data.z, data.y)
-    })
+    // // @ts-ignore
+    // const object: THREE.Group | undefined = this.meshList[0].children.find(v => v.isCameraObj)
+
+    // if (object) {
+    //   object.lookAt(center);
+    // }
+    // this.meshList.forEach(v => {
+    //   v.position.set(data.x, data.z, data.y)
+    // })
   }
 
   meshNeedChangeKey() {
@@ -380,9 +398,14 @@ export class DirectionCameraEntity extends CameraBase<DirectionCameraData> {
     const data = this.getData();
     const screenX = data.x;//  * zoomLevel + panOffset.x
     const screenY = data.y;// * zoomLevel + panOffset.y
-    const targetX = data.targetPositionX;// * zoomLevel + panOffset.x
-    const targetY = data.targetPositionY;// * zoomLevel + panOffset.y
-    const distance = Math.hypot(targetX - screenX, targetY - screenY)
+
+    const targetPositionX = this.distance * Math.cos(data.angleY * Math.PI / 180);
+    const targetPositionY = this.distance * Math.sin(data.angleY * Math.PI / 180);
+    const targetPositionZ = 0;
+
+    const targetX = targetPositionX;// * zoomLevel + panOffset.x
+    const targetY = targetPositionY;// * zoomLevel + panOffset.y
+    const distance = this.distance;// Math.hypot(targetX - screenX, targetY - screenY)
     const radius = distance
 
     // 计算FOV的半角
@@ -394,13 +417,6 @@ export class DirectionCameraEntity extends CameraBase<DirectionCameraData> {
     const dirLength = Math.sqrt(dirX * dirX + dirY * dirY)
     const unitDirX = dirX / dirLength
     const unitDirY = dirY / dirLength
-
-    // 计算垂直方向向量
-    // const perpX = -unitDirY
-    // const perpY = unitDirX
-
-    // 计算三角形底边长
-    // const baseHalfLength = radius * Math.tan(halfFov)
 
     // 计算三角形的两个底点
     const midX = screenX + unitDirX * radius
@@ -423,10 +439,6 @@ export class DirectionCameraEntity extends CameraBase<DirectionCameraData> {
         r: 30,
       })
     }
-    // const distToTarget = Math.hypot(x - data.targetPositionX, y - data.targetPositionY)
-    // if (distToTarget < this.circleRadius + 3) {
-    //   return true
-    // }
     return null;
   }
 
@@ -441,7 +453,9 @@ export class DirectionCameraEntity extends CameraBase<DirectionCameraData> {
         dist,
       }
     }
-    const distToTarget = Math.hypot(x - data.targetPositionX, y - data.targetPositionY)
+    const targetPositionX = this.distance * Math.cos(data.angleY * Math.PI / 180);// * zoomLevel + panOffset.x
+    const targetPositionY = this.distance * Math.sin(data.angleY * Math.PI / 180);// * zoomLevel + panOffset.y
+    const distToTarget = Math.hypot(x - targetPositionX, y - targetPositionY)
     if (distToTarget < this.circleRadius + 3) {
       return {
         index: 1,
@@ -459,11 +473,11 @@ export class DirectionCameraEntity extends CameraBase<DirectionCameraData> {
   }, matchHandelInfo: HandelInfo) {
     const { x, y } = position
     const data = this.getData();
+    const angleYNew = Math.atan2(y - data.y, x - data.x) * 180 / Math.PI;
     if (matchHandelInfo.index === 1) {
       this.setData({
         ...data,
-        targetPositionX: x,
-        targetPositionY: y,
+        angleY: angleYNew,
       })
     } else {
       this.changePosition({ x, y })
@@ -500,8 +514,7 @@ export class DirectionCameraEntity extends CameraBase<DirectionCameraData> {
       ...this.getData(),
       x,
       y,
-      targetPositionX: x + 100,
-      targetPositionY: y,
+      angleY: 0,
     })
     return [];
   }
@@ -545,15 +558,6 @@ export class DirectionCameraEntity extends CameraBase<DirectionCameraData> {
         step: 1,
         value: data.z,
       },
-      {
-        id: 'targetPositionZ',
-        label: '目标Z轴',
-        dataType: 'number',
-        min: -Infinity,
-        max: Infinity,
-        step: 1,
-        value: data.targetPositionZ,
-      }
     ], (val) => {
       this.setData({
         ...data,
