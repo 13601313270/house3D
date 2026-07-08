@@ -8,6 +8,7 @@ import windowPlugin from './window'
 import doorPlugin from './door'
 import doorwayPlugin from './doorway'
 import cameraPlugin from './camera'
+import directionCameraPlugin from './directionCamera'
 import cubePlugin from './cube'
 import spherePlugin from './sphere'
 import outFilePlugin from './outFile'
@@ -25,7 +26,7 @@ import signPlugin from './sign'
 import sectorPlugin from './sector'
 import sectorPlanePlugin from './sectorPlane'
 import polygonPlanePlugin from './polygonPlane'
-import polygonPlugin from './polygon' 
+import polygonPlugin from './polygon'
 import regularPolygonPlugin from './regularPolygon'
 import regularPolygon2Plugin from './regularPolygon2'
 import torusPlugin from './torus'
@@ -61,6 +62,11 @@ export const allFileKeysGroup: TypeGroup = [
     child: []
   },
   {
+    id: 'camera',
+    name: '相机',
+    child: []
+  },
+  {
     id: 'other',
     name: '其他类型',
     child: [],
@@ -89,6 +95,7 @@ export const allPluginByKey: Record<string, PluginType> = {
   doorwayPlugin,
   windowPlugin,
   cameraPlugin,
+  directionCameraPlugin,
   cubePlugin,
   spherePlugin,
   cylinderPlugin,
@@ -119,8 +126,10 @@ export const allPluginByKey: Record<string, PluginType> = {
     allFileKeysGroup[1].child.push(v.key)
   } else if (v.type === 'house') {
     allFileKeysGroup[2].child.push(v.key)
-  } else if (v.type === 'other') {
+  } else if (v.type === 'camera') {
     allFileKeysGroup[3].child.push(v.key)
+  } else if (v.type === 'other') {
+    allFileKeysGroup[4].child.push(v.key)
   } else if (typeof v.type === 'number') {
     if (!allFileWithGroupId[v.type]) {
       allFileWithGroupId[v.type] = []

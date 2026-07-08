@@ -439,10 +439,10 @@ const drawWrapper2D = () => {
 
 const activeCameraIndex = ref(0)
 function changeCamera2State(activeIndex: number = 0) {
-  if (worldApi.getObjects('camera')) {
+  const allTypesCamera = worldApi.getObjects('camera');
+  if (allTypesCamera) {
     const allCameraList: CameraState[] = [];
-    // console.log('生成摄像机', JSON.stringify(worldApi.getObjects('camera') as CameraData[]));
-    (worldApi.getObjects('camera') as CameraData[]).forEach(cameraData => {
+    (allTypesCamera as CameraData[]).forEach(cameraData => {
       allCameraList.push({
         targetPositionX: cameraData.targetPositionX,
         targetPositionY: cameraData.targetPositionY,
