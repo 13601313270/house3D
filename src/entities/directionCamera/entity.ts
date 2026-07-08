@@ -1,7 +1,6 @@
 import { HandelInfo, Point } from '@/types/map2d'
 import * as THREE from 'three'
 import { DirectionCameraData } from './index.d'
-import { PointEntityClass } from '@/types/pointEntity'
 import { editItem } from '..'
 // @ts-ignore
 import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
@@ -31,6 +30,33 @@ export class DirectionCameraEntity extends CameraBase<DirectionCameraData> {
   constructor(world: World, data: DirectionCameraData) {
     super(world, data)
     this.realyCamera = new THREE.PerspectiveCamera(data.fov, data.aspectW / data.aspectH, 0.1, 1000)
+    setTimeout(() => {
+      if (this.realyCamera) {
+        const targetPosition = this.getTargetPosition();
+        const targetPositionX = targetPosition.x;// Math.cos(data.angleY) * this.distance;// data.targetPositionX;
+        const targetPositionY = targetPosition.y;// Math.sin(data.angleY) * this.distance;// data.targetPositionY;
+        const targetPositionZ = data.z;// data.targetPositionZ;
+        this.realyCamera.position.set(
+          data.x,
+          data.z,
+          data.y,
+        )
+        this.realyCamera.lookAt(
+          targetPositionX,
+          targetPositionZ,
+          targetPositionY
+        );
+        this.realyCamera.updateProjectionMatrix()
+      }
+      // 需要等Application里面把Canvas3D初始化之后realyCamera的修改位置才有意义。
+    }, 100)
+  }
+
+  getTargetPosition(): Point {
+    return {
+      x: this.data.x + this.distance * Math.cos(this.data.angleY),
+      y: this.data.y + this.distance * Math.sin(this.data.angleY),
+    }
   }
 
   draw2DPreviewByData(ctx: CanvasRenderingContext2D, data: DirectionCameraData, panOffset: Point, zoomLevel: number): void {
@@ -38,29 +64,29 @@ export class DirectionCameraEntity extends CameraBase<DirectionCameraData> {
     if (this.world.allFileMapObjects.camera) {
       index = this.world.allFileMapObjects.camera.indexOf(this)
     }
+
     const screenX = data.x * zoomLevel + panOffset.x
     const screenY = data.y * zoomLevel + panOffset.y
-    // const angleY = Math.atan2(data.targetPositionY - data.y, data.targetPositionX - data.x);
-    // const preImgScale = 0.2
-    // // ctx.save(); // 保存当前状态
-    // const { width, height } = img;
-    // ctx.translate(screenX, screenY); // 移动原点到目标中心
-    // ctx.rotate(angleY - Math.PI / 2); // 围绕新原点旋转
-    // ctx.drawImage(
-    //   img,
-    //   preImgScale / -2 * width * zoomLevel,
-    //   preImgScale / -2 * height * zoomLevel,
-    //   preImgScale * width * zoomLevel,
-    //   preImgScale * height * zoomLevel
-    // ); // 以新原点为中心绘制
-    // ctx.restore(); // 恢复原始状态
-    const targetPositionX = this.distance * Math.cos(data.angleY * Math.PI / 180);
-    const targetPositionY = this.distance * Math.sin(data.angleY * Math.PI / 180);
-    console.log('angleY', data.angleY, targetPositionX, targetPositionY)
+    // const targetPosition = this.getTargetPosition();
+    const angleY = this.data.angleY;// Math.atan2(data.targetPositionY - data.y, data.targetPositionX - data.x);
+    const preImgScale = 0.2
+    ctx.save(); // 保存当前状态
+    const { width, height } = img;
+    ctx.translate(screenX, screenY); // 移动原点到目标中心
+    ctx.rotate(angleY - Math.PI / 2); // 围绕新原点旋转
+    ctx.drawImage(
+      img,
+      preImgScale / -2 * width * zoomLevel,
+      preImgScale / -2 * height * zoomLevel,
+      preImgScale * width * zoomLevel,
+      preImgScale * height * zoomLevel
+    ); // 以新原点为中心绘制
+    ctx.restore(); // 恢复原始状态
 
-    const targetX = (data.x + targetPositionX) * zoomLevel + panOffset.x
-    const targetY = (data.y + targetPositionY) * zoomLevel + panOffset.y
-    const distance = this.distance;
+    const targetPosition = this.getTargetPosition();
+    const targetX = targetPosition.x * zoomLevel + panOffset.x
+    const targetY = targetPosition.y * zoomLevel + panOffset.y
+    const distance = Math.hypot(targetX - screenX, targetY - screenY)
     const radius = distance
 
     // 计算FOV的半角
@@ -99,34 +125,35 @@ export class DirectionCameraEntity extends CameraBase<DirectionCameraData> {
     ctx.lineTo(p1X, p1Y)
     ctx.lineTo(p2X, p2Y)
     ctx.closePath()
+    // ctx.fill()
     ctx.stroke()
 
-    ctx.strokeStyle = '#e67e22'
+    // ctx.strokeStyle = '#e67e22'
     ctx.lineWidth = 1
     ctx.beginPath()
     ctx.arc(
-      targetX,
-      targetY,
+      targetPosition.x * zoomLevel + panOffset.x,
+      targetPosition.y * zoomLevel + panOffset.y,
       this.circleRadius * zoomLevel + 3, 0, Math.PI * 2)
     // ctx.fill()
     ctx.stroke()
 
-    // if (index > -1 && zoomLevel > 0.4) {
-    //   const str = (index + 1).toString()
-    //   ctx.font = `${Math.max(16 * zoomLevel, 16)}px sans-serif`
-    //   ctx.textAlign = 'center'
-    //   ctx.textBaseline = 'middle'
-    //   const radius = Math.max(10 * zoomLevel, 10)
-    //   ctx.fillStyle = '#fff'
-    //   ctx.beginPath()
-    //   ctx.arc(screenX, screenY, radius, 0, Math.PI * 2)
-    //   ctx.fill()
-    //   ctx.strokeStyle = this.active ? this.colorOpacityActive : this.colorOpacity
-    //   ctx.lineWidth = 2 * zoomLevel
-    //   ctx.stroke()
-    //   ctx.fillStyle = this.active ? this.colorOpacityActive : this.colorOpacity
-    //   ctx.fillText(str, screenX, screenY)
-    // }
+    if (index > -1 && zoomLevel > 0.4) {
+      const str = (index + 1).toString()
+      ctx.font = `${Math.max(16 * zoomLevel, 16)}px sans-serif`
+      ctx.textAlign = 'center'
+      ctx.textBaseline = 'middle'
+      const radius = Math.max(10 * zoomLevel, 10)
+      ctx.fillStyle = '#fff'
+      ctx.beginPath()
+      ctx.arc(screenX, screenY, radius, 0, Math.PI * 2)
+      ctx.fill()
+      ctx.strokeStyle = this.active ? this.colorOpacityActive : this.colorOpacity
+      ctx.lineWidth = 2 * zoomLevel
+      ctx.stroke()
+      ctx.fillStyle = this.active ? this.colorOpacityActive : this.colorOpacity
+      ctx.fillText(str, screenX, screenY)
+    }
   }
 
   draw2DByData(
@@ -135,76 +162,68 @@ export class DirectionCameraEntity extends CameraBase<DirectionCameraData> {
     panOffset: Point,
     zoomLevel: number
   ): void {
-    // const screenX = data.x * zoomLevel + panOffset.x
-    // const screenY = data.y * zoomLevel + panOffset.y
+    const screenX = data.x * zoomLevel + panOffset.x
+    const screenY = data.y * zoomLevel + panOffset.y
 
-    // // 控制点
-    // ctx.fillStyle = '#fff'
-    // ctx.strokeStyle = '#e67e22'
-    // ctx.lineWidth = 2
-    // ctx.beginPath()
-    // ctx.arc(screenX, screenY, this.circleRadius * zoomLevel + 3, 0, Math.PI * 2)
-    // ctx.fill()
-    // ctx.stroke()
+    // 控制点
+    ctx.fillStyle = '#fff'
+    ctx.strokeStyle = '#e67e22'
+    ctx.lineWidth = 2
+    ctx.beginPath()
+    ctx.arc(screenX, screenY, this.circleRadius * zoomLevel + 3, 0, Math.PI * 2)
+    ctx.fill()
+    ctx.stroke()
 
-    // // targetPosition 控制点
-    // ctx.fillStyle = '#fff'
-    // ctx.strokeStyle = '#e67e22'
-    // ctx.lineWidth = 2
-    // ctx.beginPath()
-    // const targetPositionX = this.distance * Math.cos(data.angleY * Math.PI / 180);// * zoomLevel + panOffset.x
-    // const targetPositionY = this.distance * Math.sin(data.angleY * Math.PI / 180);// * zoomLevel + panOffset.y
-    // ctx.arc(
-    //   targetPositionX,
-    //   targetPositionY,
-    //   this.circleRadius * zoomLevel + 3, 0, Math.PI * 2)
-    // ctx.fill()
-    // ctx.stroke()
+    // targetPosition 控制点
+    ctx.fillStyle = '#fff'
+    ctx.strokeStyle = '#e67e22'
+    ctx.lineWidth = 2
+    ctx.beginPath()
+    const targetPosition = this.getTargetPosition();
+    ctx.arc(
+      targetPosition.x * zoomLevel + panOffset.x,
+      targetPosition.y * zoomLevel + panOffset.y,
+      this.circleRadius * zoomLevel + 3, 0, Math.PI * 2)
+    ctx.fill()
+    ctx.stroke()
 
-    // // 绘制轮廓
-    // const circleArea = new MatchCircleArea({
-    //   x: data.x,
-    //   y: data.y,
-    //   r: 30,
-    // })
-    // ctx.lineWidth = 2
-    // ctx.strokeStyle = 'red'
-    // ctx.save(); // 保存当前状态
-    // ctx.translate(
-    //   circleArea.data.x * zoomLevel + panOffset.x,
-    //   circleArea.data.y * zoomLevel + panOffset.y
-    // );
-    // ctx.beginPath()
-    // ctx.arc(
-    //   0,
-    //   0,
-    //   circleArea.data.r * zoomLevel,
-    //   0,
-    //   Math.PI * 2,
-    // )
-    // ctx.stroke()
-    // ctx.restore(); // 恢复原始状态
+    // 绘制轮廓
+    const circleArea = new MatchCircleArea({
+      x: data.x,
+      y: data.y,
+      r: 30,
+    })
+    ctx.lineWidth = 2
+    ctx.strokeStyle = 'red'
+    ctx.save(); // 保存当前状态
+    ctx.translate(
+      circleArea.data.x * zoomLevel + panOffset.x,
+      circleArea.data.y * zoomLevel + panOffset.y
+    );
+    ctx.beginPath()
+    ctx.arc(
+      0,
+      0,
+      circleArea.data.r * zoomLevel,
+      0,
+      Math.PI * 2,
+    )
+    ctx.stroke()
+    ctx.restore(); // 恢复原始状态
   }
 
   create3DMesh(): THREE.Group[] {
     const data = this.getData();
-    // const dx = data.targetPositionX - data.x
-    // const dy = data.targetPositionY - data.y
-    // const dz = data.targetPositionZ - data.z
-
-    // Calculate distance
+    const targetPosition = this.getTargetPosition();
+    const dz = data.z
     const distance = this.distance;// Math.sqrt(dx * dx + dy * dy + dz * dz)
     const halfFov = (data.fov * Math.PI) / 360
     const baseSize = distance * Math.tan(halfFov) * 2
     const depth = data.aspectH / data.aspectW * baseSize;   // 长方形长
     const width = baseSize;   // 长方形宽
 
-    const targetPositionX = this.distance * Math.cos(data.angleY * Math.PI / 180);
-    const targetPositionY = this.distance * Math.sin(data.angleY * Math.PI / 180);
-    const targetPositionZ = 0;
-
     const apex = new THREE.Vector3(data.x, data.z, data.y);
-    const center = new THREE.Vector3(targetPositionX, targetPositionZ, targetPositionY);
+    const center = new THREE.Vector3(targetPosition.x, dz, targetPosition.y);
     const up = apex.clone().sub(center).normalize();
 
     const temp = Math.abs(up.y) < 0.999
@@ -312,24 +331,22 @@ export class DirectionCameraEntity extends CameraBase<DirectionCameraData> {
     }
     this.lastChangeStateKey = ttt
 
+    const targetPosition = this.getTargetPosition();
+
+    const dx = targetPosition.x - data.x
+    const dy = targetPosition.y - data.y
+    const dz = data.z
+
     // Calculate distance
     const distance = this.distance;// Math.sqrt(dx * dx + dy * dy + dz * dz)
     const halfFov = (data.fov * Math.PI) / 360
     const baseSize = distance * Math.tan(halfFov) * 2
     const depth = data.aspectH / data.aspectW * baseSize;   // 长方形长
     const width = baseSize;   // 长方形宽
+    console.log('baseSize-2', width)
 
     const apex = new THREE.Vector3(data.x, data.z, data.y);
-
-    const targetPositionX = this.distance * Math.cos(data.angleY * Math.PI / 180);
-    const targetPositionY = this.distance * Math.sin(data.angleY * Math.PI / 180);
-    const targetPositionZ = data.z;
-
-    const center = new THREE.Vector3(
-      data.x + targetPositionX,
-      data.z + targetPositionZ,
-      data.y + targetPositionY
-    );
+    const center = new THREE.Vector3(targetPosition.x, dz, targetPosition.y);
     const up = apex.clone().sub(center).normalize();
 
     const temp = Math.abs(up.y) < 0.999
@@ -386,24 +403,27 @@ export class DirectionCameraEntity extends CameraBase<DirectionCameraData> {
     this.meshList.forEach(v => {
       v.position.set(data.x, data.z, data.y)
     })
-    console.log('this.realyCamera----1', this.realyCamera)
     if (this.realyCamera) {
       this.realyCamera.position.set(data.x, data.z, data.y)
+      this.realyCamera.position.set(
+        data.x,
+        data.z,
+        data.y,
+      )
+      const targetPosition = this.getTargetPosition();
       this.realyCamera.lookAt(
-        data.x + targetPositionX,
-        data.z + targetPositionZ,
-        data.y + targetPositionY
+        targetPosition.x,
+        dz,
+        targetPosition.y
       );
       this.realyCamera.updateProjectionMatrix()
     }
   }
 
   meshNeedChangeKey() {
-    const data: DirectionCameraData = this.getData();
     const cacheData = {
-      tip: data.tip,
-      tipFontSize: data.tipFontSize,
-      angleY: data.angleY,
+      tip: this.getData().tip,
+      tipFontSize: this.getData().tipFontSize,
     }
     return this.type + JSON.stringify(cacheData)
   }
@@ -412,14 +432,10 @@ export class DirectionCameraEntity extends CameraBase<DirectionCameraData> {
     const data = this.getData();
     const screenX = data.x;//  * zoomLevel + panOffset.x
     const screenY = data.y;// * zoomLevel + panOffset.y
-
-    const targetPositionX = this.distance * Math.cos(data.angleY * Math.PI / 180);
-    const targetPositionY = this.distance * Math.sin(data.angleY * Math.PI / 180);
-    const targetPositionZ = data.z;
-
-    const targetX = targetPositionX;// * zoomLevel + panOffset.x
-    const targetY = targetPositionY;// * zoomLevel + panOffset.y
-    const distance = this.distance;// Math.hypot(targetX - screenX, targetY - screenY)
+    const targetPosition = this.getTargetPosition();
+    const targetX = targetPosition.x;// * zoomLevel + panOffset.x
+    const targetY = targetPosition.y;// * zoomLevel + panOffset.y
+    const distance = Math.hypot(targetX - screenX, targetY - screenY)
     const radius = distance
 
     // 计算FOV的半角
@@ -431,6 +447,13 @@ export class DirectionCameraEntity extends CameraBase<DirectionCameraData> {
     const dirLength = Math.sqrt(dirX * dirX + dirY * dirY)
     const unitDirX = dirX / dirLength
     const unitDirY = dirY / dirLength
+
+    // 计算垂直方向向量
+    // const perpX = -unitDirY
+    // const perpY = unitDirX
+
+    // 计算三角形底边长
+    // const baseHalfLength = radius * Math.tan(halfFov)
 
     // 计算三角形的两个底点
     const midX = screenX + unitDirX * radius
@@ -453,6 +476,10 @@ export class DirectionCameraEntity extends CameraBase<DirectionCameraData> {
         r: 30,
       })
     }
+    // const distToTarget = Math.hypot(x - data.targetPositionX, y - data.targetPositionY)
+    // if (distToTarget < this.circleRadius + 3) {
+    //   return true
+    // }
     return null;
   }
 
@@ -467,10 +494,10 @@ export class DirectionCameraEntity extends CameraBase<DirectionCameraData> {
         dist,
       }
     }
-    const targetPositionX = this.distance * Math.cos(data.angleY * Math.PI / 180);// * zoomLevel + panOffset.x
-    const targetPositionY = this.distance * Math.sin(data.angleY * Math.PI / 180);// * zoomLevel + panOffset.y
-    const distToTarget = Math.hypot(x - targetPositionX, y - targetPositionY)
+    const targetPosition = this.getTargetPosition();
+    const distToTarget = Math.hypot(x - targetPosition.x, y - targetPosition.y)
     if (distToTarget < this.circleRadius + 3) {
+      console.log('mmmmmmm-1')
       return {
         index: 1,
         type: this.type,
@@ -487,11 +514,13 @@ export class DirectionCameraEntity extends CameraBase<DirectionCameraData> {
   }, matchHandelInfo: HandelInfo) {
     const { x, y } = position
     const data = this.getData();
-    const angleYNew = Math.atan2(y - data.y, x - data.x) * 180 / Math.PI;
     if (matchHandelInfo.index === 1) {
+      const angleY = Math.atan2(y - data.y, x - data.x)
       this.setData({
         ...data,
-        angleY: angleYNew,
+        angleY,
+        // targetPositionX: x,
+        // targetPositionY: y,
       })
     } else {
       this.changePosition({ x, y })
@@ -524,11 +553,15 @@ export class DirectionCameraEntity extends CameraBase<DirectionCameraData> {
   }
 
   setPrepareState(x: number, y: number): string[] {
+    // const targetPosition = this.getTargetPosition();
+    const angleY = 0;// Math.atan2(y - data.y, x - data.x)
     this.setData({
       ...this.getData(),
       x,
       y,
-      angleY: 0,
+      angleY,
+      // targetPositionX: x + 100,
+      // targetPositionY: y,
     })
     return [];
   }
@@ -572,6 +605,15 @@ export class DirectionCameraEntity extends CameraBase<DirectionCameraData> {
         step: 1,
         value: data.z,
       },
+      // {
+      //   id: 'targetPositionZ',
+      //   label: '目标Z轴',
+      //   dataType: 'number',
+      //   min: -Infinity,
+      //   max: Infinity,
+      //   step: 1,
+      //   value: data.targetPositionZ,
+      // }
     ], (val) => {
       this.setData({
         ...data,
