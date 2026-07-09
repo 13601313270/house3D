@@ -96,7 +96,7 @@
         <!-- {{ insertTempDoor }} -->
         <div class="center-panel-content">
           <Canvas3D ref="canvas3DRefCenter" :world="worldApi" v-model:cameraState="cameraStateCenter"
-            :camera="cameraCenterPanel" :aspectRatio="aspectRatio2" :showCamera="true" cameraType="perspective"
+            :camera="centerPanelCamera" :aspectRatio="aspectRatio2" :showCamera="true" cameraType="perspective"
             @objectHover="handleObjectHover" @objectClick="handleObjectClick" />
         </div>
       </div>
@@ -115,8 +115,8 @@
           </div>
         </div>
         <div class="right-panel-content">
-          <Canvas3D v-if="allCamera.length && cameraRightState && cameraRightPanel" ref="canvas3DRef2" :world="worldApi"
-            :camera="cameraRightPanel" :cameraState="cameraRightState"
+          <Canvas3D v-if="allCamera.length && cameraRightState && rightPanelCamera" ref="canvas3DRef2" :world="worldApi"
+            :camera="rightPanelCamera" :cameraState="cameraRightState"
             :aspectRatio="cameraRightState.aspectW / cameraRightState.aspectH" :showCamera="false"
             cameraType="perspective" />
           <div v-else class="noCamera">请至少在场景中添加一个摄像机</div>
@@ -277,8 +277,8 @@ let beCopyEntityHandelInfo: HandelInfo & Point | null = null;// 被复制移动�
 let insertTempObj: BaseEntityClass<any> | null = null
 const insertAdding = ref(false)
 
-const cameraCenterPanel = ref(new THREE.PerspectiveCamera(55, aspectRatio2.value, 0.1, 20000));
-const cameraRightPanel = ref<THREE.PerspectiveCamera | THREE.OrthographicCamera>();
+const centerPanelCamera = ref(new THREE.PerspectiveCamera(55, aspectRatio2.value, 0.1, 20000));
+const rightPanelCamera = ref<THREE.PerspectiveCamera | THREE.OrthographicCamera>();
 
 let panStartScreenX = 0
 let panStartScreenY = 0
@@ -323,7 +323,6 @@ const updateCanvasSize = () => {
       const height = Math.floor(canvasRect.height)
 
       if (width > 0 && height > 0) {
-        console.log('ddddddd', width / height)
         aspectRatio2.value = width / height
       }
     }
@@ -454,11 +453,6 @@ async function changeCamera2State(activeIndex: number = 0) {
     console.log('typeKey=======', typeKey, worldApi.getObjects(typeKey))
     allTypesCameraList.push(...worldApi.getObjects(typeKey));
   })
-  console.log('cameraRightPanel---1', cameraRightPanel.value)
-  if (allTypesCameraObjList[activeIndex] && allTypesCameraObjList[activeIndex].realyCamera) {
-    console.log('cameraRightPanel---2', cameraRightPanel.value)
-    cameraRightPanel.value = allTypesCameraObjList[activeIndex].realyCamera
-  }
 
   if (allTypesCameraList) {
     // cameraRightPanel.value = allTypesCameraList[activeIndex];
@@ -528,6 +522,12 @@ async function changeCamera2State(activeIndex: number = 0) {
       })
       drawWrapper2DAnd3D()
     }
+    // console.trace('ddddddd')
+    // console.log('cameraRightPanel---1', cameraRightPanel.value)
+    if (allTypesCameraObjList[activeIndex] && allTypesCameraObjList[activeIndex].realyCamera) {
+      // console.log('cameraRightPanel---2', cameraRightPanel.value)
+      rightPanelCamera.value = allTypesCameraObjList[activeIndex].realyCamera
+    }
   } else {
     allCamera.value = []
     cameraRightState.value = null
@@ -595,8 +595,12 @@ onMounted(async () => {
       }
     }
     lockObjCount.value = worldApi.lockedObjList.length
-    const find = objList.find((item) => item instanceof CameraBase)
-    if (find) {
+    const findCamera = objList.find((item) => item instanceof CameraBase)
+    if (findCamera) {
+      if (type === 'remove' && activeCameraIndex.value === allCamera.value.length - 1) {
+        activeCameraIndex.value = 0;
+      }
+      // console.log('allCamera-d', allCamera.value.length, activeCameraIndex.value)
       changeCamera2State(activeCameraIndex.value)
     }
   })
