@@ -454,7 +454,9 @@ async function changeCamera2State(activeIndex: number = 0) {
     console.log('typeKey=======', typeKey, worldApi.getObjects(typeKey))
     allTypesCameraList.push(...worldApi.getObjects(typeKey));
   })
+  console.log('cameraRightPanel---1', cameraRightPanel.value)
   if (allTypesCameraObjList[activeIndex] && allTypesCameraObjList[activeIndex].realyCamera) {
+    console.log('cameraRightPanel---2', cameraRightPanel.value)
     cameraRightPanel.value = allTypesCameraObjList[activeIndex].realyCamera
   }
 

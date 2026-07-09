@@ -13,7 +13,7 @@ import { BaseEntityClass } from '@/types/baseEntity';
 
 const props = defineProps<{
   world: World,
-  cameraState: CameraState | OrthographicCamera,
+  cameraState: CameraState,//  | OrthographicCamera,
   camera: THREE.PerspectiveCamera | THREE.OrthographicCamera,
   aspectRatio: number
   showCamera: boolean
@@ -570,6 +570,12 @@ watch(() => props.cameraState, (newVal) => {
   }
 }, {
   deep: true
+})
+
+watch(() => props.camera, (newVal) => {
+  if (newVal) {
+    camera = newVal
+  }
 })
 
 watch(() => props.aspectRatio, (newVal) => {
