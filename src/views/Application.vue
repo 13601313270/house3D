@@ -203,6 +203,8 @@ import getSnapPointAndLine from '@/utils/getSnapPoint';
 import importOutObj from '@/utils/importOutObj';
 import { CameraBase } from '@/types/CameraBase';
 import { sleep } from '@/utils/sleep';
+import saveWorld from '@/utils/saveWorld';
+import { getHandleInAreaInfoByXY, getHandleInfoByXY } from '@/utils/getHandleInfoByXY';
 
 const canvas2DRef = ref<HTMLCanvasElement | null>(null)
 const canvas2D2Ref = ref<HTMLCanvasElement | null>(null)
@@ -717,63 +719,12 @@ const saveDrawing = async () => {
     return
   }
   activeToolsIndex.value = -1
-  const data: fileData & {
-    panOffset: Point
-    zoomLevel: number
-    cameraState: CameraState
-    activeCameraIndex: number
-    allImportImgs: string[]
-    environmentConfig: EnvironmentConfig
-  } = {
-    ...worldApi.getAllFileObjects() as any,
-    panOffset: panOffset.value,
-    zoomLevel: zoom2DLevel.value,
-    cameraState: cameraStateCenter.value,
-    activeCameraIndex: activeCameraIndex.value,
-    allImportImgs: worldApi.allImportImgs.map(v => v.fileTypeId),
-    environmentConfig: worldApi.environmentConfig,
-  }
-
-  const zip = new JSZip();
-
-  const json = JSON.stringify(data, null, 2)
-
-  // 保存 JSON 配置
-  zip.file(
-    'scene.json',
-    json
-  );
-
-  const allImportFiles = worldApi.allImportFiles
-  console.log('allImportFiles', allImportFiles)
-
-  // 保存资源文件
-  const assetsFolder = zip.folder('assets');
-  if (assetsFolder) {
-    for (const file of allImportFiles) {
-      assetsFolder.file(file.fileTypeId, file.file);
-    }
-  }
-
-  const allImportImg = worldApi.allImportImgs
-  console.log('allImportImg', allImportImg)
-  const imgsFolder = zip.folder('imgs');
-  if (imgsFolder) {
-    for (const img of allImportImg) {
-      imgsFolder.file(img.fileTypeId, img.file);
-    }
-  }
-
-  // 生成 ZIP
-  const blob = await zip.generateAsync({
-    type: 'blob'
-  });
-
-  const url = URL.createObjectURL(blob)
-  const a = document.createElement('a')
-  a.href = url
-  a.download = 'floor-plan.devt'
-  a.click()
+  await saveWorld(
+    panOffset.value,
+    zoom2DLevel.value,
+    cameraStateCenter.value,
+    activeCameraIndex.value
+  )
 }
 
 const loadProgramFile = () => {
@@ -1493,85 +1444,6 @@ const handleMouseDown = (e: MouseEvent) => {
   }
 }
 
-function getHandleInfoByXY(x: number, y: number): {
-  classInfo: BaseEntityClass<BaseObjData>
-  handle: HandelInfo,
-  startPoint: Point,
-  dist: number,
-} | null {
-  let minDistance = Infinity
-  let matchHandelInfoList: {
-    classInfo: BaseEntityClass<any>
-    handle: HandelInfo,
-    startPoint: Point,
-    dist: number,
-  } | null = null
-  for (let i = 0; i < allFileKeys.length; i++) {
-    const key = allFileKeys[i];
-    if (!worldApi.allFileMapObjects[key]) {
-      continue
-    }
-    for (let j = 0; j < worldApi.getObjects(key).length; j++) {
-      const api: BaseEntityClass<any> = worldApi.allFileMapObjects[key][j] as BaseEntityClass<any>;
-      const matchInfo = api.matchHandelInfo(x, y)
-      if (matchInfo) {
-        if (matchInfo.dist < minDistance) {
-          matchHandelInfoList = {
-            classInfo: api,
-            handle: matchInfo,
-            startPoint: { x, y },
-            dist: matchInfo.dist,
-          }
-          minDistance = matchInfo.dist
-        }
-      }
-    }
-  }
-  return matchHandelInfoList;
-}
-
-function getHandleInAreaInfoByXY(x: number, y: number): {
-  classInfo: BaseEntityClass<any>,
-  matchArea: MatchRectArea | MatchCircleArea,
-  dist: number,
-} | null {
-  let minDistance = Infinity
-  let matchHandelInfoList: {
-    classInfo: BaseEntityClass<any>,
-    matchArea: MatchRectArea | MatchCircleArea
-    dist: number,
-  } | null = null
-  for (let i = 0; i < allFileKeys.length; i++) {
-    const key = allFileKeys[i];
-    if (!worldApi.allFileMapObjects[key]) {
-      continue
-    }
-    for (let j = 0; j < worldApi.getObjects(key).length; j++) {
-      const api: BaseEntityClass<any> = worldApi.allFileMapObjects[key][j] as BaseEntityClass<any>;
-      if (api.getData().isLocked) continue
-      const matchInfo = api.showMatchHandel(x, y)
-      if (matchInfo) {
-        const data = api.getData();
-        let dist: number;
-        if (api instanceof LineEntityClass) {
-          dist = Infinity;// 线段没有距离概念，命中点对象优先级更高。
-        } else {
-          dist = Math.hypot(x - data.x || 0, y - data.y || 0)
-        }
-        if (dist < minDistance || minDistance === Infinity) {
-          matchHandelInfoList = {
-            classInfo: api,
-            matchArea: matchInfo,
-            dist,
-          }
-          minDistance = dist
-        }
-      }
-    }
-  }
-  return matchHandelInfoList
-}
-
 const handleMouseUp = () => {
   matchHandelObj = null
   matchedHandelInfo = null
@@ -1717,17 +1589,12 @@ const onDrop = async (e: DragEvent) => {
 const handleLoadedObject = async (object: THREE.Group | THREE.Mesh, file: File, type: string, scaleFactor: number, position: THREE.Vector3) => {
   const fileTypeId = `custom_${Date.now()}.${type}`
   console.log('fileTypeId', fileTypeId)
-  // 创建自定义的 ObjItem 用于 worldApi
   const customObjItem: ImportFileType = {
     fileTypeId,
     mesh: object,
     file,
   }
-
-  // 添加到 ObjFileTypes
   worldApi.allImportFiles.push(customObjItem)
-
-  // 创建 outFile 数据并添加到场景
   const data: ImportFileData = {
     fileTypeId,
     id: Date.now().toString(),
@@ -1747,8 +1614,6 @@ function logout() {
 }
 function handleObjectHover(object: THREE.Object3D | null) {
   if (object) {
-    // @ts-ignore
-    // console.log('object', object.entity)
   }
 }
 
@@ -1772,9 +1637,7 @@ function handleLocationPosition(position: { x: number, y: number }) {
   const dx = canvasRect.width / 2
   const dy = canvasRect.height / 2
   panOffset.value = {
-    // x: position.x - dx,
     x: dx - (position.x * zoom2DLevel.value),
-    // y: position.y - dy
     y: dy - (position.y * zoom2DLevel.value),
   }
   drawWrapper2D()
@@ -1820,11 +1683,6 @@ async function copyEntity() {
     contextMenu.value = null
     currentTool.value = 'drag'
     drawWrapper2DAnd3D()
-    // if (menuEntity instanceof PointEntityClass) {
-
-    // } else if (menuEntity instanceof LineEntityClass) {
-    //   // continue
-    // }
   }
 }
 </script>
