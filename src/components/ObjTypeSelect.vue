@@ -11,13 +11,15 @@
         </div>
         <div class="splitLine"></div>
       </template>
-      <div v-for="item in allFileKeysGroup.filter(item => item.id !== 'other')" :key="item.id" class="typeItemContent"
-        :class="{ active: activeObjTypeId === item.id }">
-        <div class="typeName" @mouseenter="mouseenterGroup(item.id)">{{ item.name }}</div>
-        <div class="childItemList" v-if="activeObjTypeId === item.id && item.child && item.child.length > 0">
-          <div v-for="item2 in item.child" class="childItem" :key="item2"
+      <div v-for="groupItem in allFileKeysGroup.filter(item => item.id !== 'other')" :key="groupItem.id"
+        class="typeItemContent" :class="{ active: activeObjTypeId === groupItem.id }">
+        <div class="typeName" @mouseenter="mouseenterGroup(groupItem.id)">{{ groupItem.name }}</div>
+        <div class="childItemList"
+          v-if="activeObjTypeId === groupItem.id && groupItem.child && groupItem.child.length > 0">
+          <div v-for="item2 in groupItem.child" class="childItem" :key="item2"
             @click="changeCurrentTool(item2), isMouseInCate1 = false">
-            <img v-if="allPluginByKey[item2].previewImg" :src="allPluginByKey[item2].previewImg" alt="" class="icon" />
+            <img v-if="allPluginByKey[item2].previewImg" :src="allPluginByKey[item2].previewImg" alt="" class="icon"
+              :style="{ width: groupItem.id === 'camera' ? '88px' : '44px' }" />
             <div class="name">{{ allPluginByKey[item2].name }}</div>
           </div>
         </div>
@@ -455,8 +457,7 @@ function showHelpModal() {
       }
 
       >img {
-        width: 36px;
-        height: 36px;
+        width: 44px;
         margin: 0 4px;
         flex-shrink: 0;
       }

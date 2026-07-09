@@ -8,6 +8,7 @@ const DirectionCameraPlugin: PluginType = {
   type: 'camera',
   entity: DirectionCameraEntity,
   objType: 'point',
+  previewImg: '/toolType/directionCamera.png',
   defaultValues,
 }
 export default DirectionCameraPlugin

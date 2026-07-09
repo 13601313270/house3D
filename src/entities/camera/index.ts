@@ -8,6 +8,7 @@ const CameraPlugin: PluginType = {
   type: 'camera',
   entity: CameraEntity,
   objType: 'point',
+  previewImg: '/toolType/camera.png',
   defaultValues,
 }
 export default CameraPlugin
