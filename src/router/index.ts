@@ -7,6 +7,11 @@ const routes: Array<RouteRecordRaw> = [
     name: 'home',
     component: Application
   },
+  {
+    path: '/alipay/buySuccess',
+    name: 'alipayBuySuccess',
+    component: () => import('../views/alipayBuySuccess.vue')
+  }
 ]
 
 const router = createRouter({
