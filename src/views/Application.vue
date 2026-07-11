@@ -114,7 +114,7 @@
             </div>
           </div>
           <div class="buttons" v-if="allCamera.length && cameraRightState">
-            <button type="button" @click="showAiPic">AI渲染</button>
+            <!-- <button type="button" @click="showAiPic">AI渲染</button> -->
             <button type="button" @click="exportImage">导出图片</button>
           </div>
         </div>
