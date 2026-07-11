@@ -1,4 +1,4 @@
-import { createRouter, RouteRecordRaw, createWebHistory } from 'vue-router'
+import { createRouter, RouteRecordRaw, createWebHashHistory } from 'vue-router'
 import Application from '../views/Application.vue'
 
 const routes: Array<RouteRecordRaw> = [
@@ -8,14 +8,14 @@ const routes: Array<RouteRecordRaw> = [
     component: Application
   },
   {
-    path: '/alipay/buySuccess',
+    path: '/alipayBuySuccess',
     name: 'alipayBuySuccess',
     component: () => import('../views/alipayBuySuccess.vue')
   }
 ]
 
 const router = createRouter({
-  history: createWebHistory(),
+  history: createWebHashHistory(),
   routes
 })
 
