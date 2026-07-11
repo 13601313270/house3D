@@ -2,6 +2,11 @@
   <div class="aiPic">
     <div class="header">
       <div class="title">AI渲染</div>
+      <div style="flex: 1;"></div>
+      <div class="userInfo">
+        <img src="money.png" />
+        <span>{{ store.state.main.userInfo.money }}金币</span>
+      </div>
       <button class="close-btn" @click="handleClose">&times;</button>
     </div>
 
@@ -86,6 +91,8 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import service from '@/utils/request'
+import { useStore } from 'vuex';
+import { Store } from '@/store';
 
 type qwenImageEditRes = {
   output: {
@@ -125,6 +132,7 @@ const generatedImage = ref('')
 const isGenerating = ref(false)
 const fileInput = ref<HTMLInputElement | null>(null)
 const currentUploadIndex = ref(0)
+const store = useStore<Store>()
 
 interface PromptTemplate {
   name: string
@@ -286,9 +294,22 @@ const handleDownload = () => {
       margin-left: 8px;
     }
 
+    .userInfo {
+      color: white;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+
+      >img {
+        height: 18px;
+        margin-right: 4px;
+      }
+    }
+
     .close-btn {
       width: 32px;
       height: 32px;
+      margin-left: 8px;
       border: none;
       background: rgba(255, 255, 255, 0.2);
       color: white;

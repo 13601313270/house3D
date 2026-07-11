@@ -38,8 +38,16 @@
       <div class="toolbar right">
         <div class="toolbar-item" @mouseleave="activeToolsIndex = -1">
           <div v-if="store.state.main.userInfo">
-            <div class="userInfo" @mouseenter="activeToolsIndex = 2">欢迎登录：{{ store.state.main.userInfo.email }}</div>
+            <div class="userInfo" @mouseenter="activeToolsIndex = 2">
+              <span>欢迎登录：{{ store.state.main.userInfo.email }}（</span>
+              <img src="money.png" />
+              <span>{{ store.state.main.userInfo.money }}金币）</span>
+            </div>
             <div class="list" v-show="activeToolsIndex === 2">
+              <div class="userMoney">
+                <span>当前金币：{{ store.state.main.userInfo.money }}</span>
+                <img src="money.png" />
+              </div>
               <div @click="showPayModal = true" class="childItem">
                 充值
               </div>
@@ -171,7 +179,7 @@
       height: aiPicSize.height,
     }" @close="isShowAiPic = false" />
   </teleport>
-  <ShowPayModal v-if="showPayModal" @close="showPayModal = false" />
+  <ShowPayModal v-if="showPayModal" @close="showPayModal = false" @paySuccess="handlePaySuccess" />
 </template>
 
 <script lang="ts" setup>
@@ -1085,10 +1093,10 @@ const clearDrawing = () => {
 const handleLogin = (email: string, password: string) => {
   console.log('Login attempt:', email, password)
   showLogin.value = false
-  loginByToken();
+  initUserInfo();
 }
 
-const loginByToken = () => {
+const initUserInfo = () => {
   request.get('/video/user/info').then(res => {
     console.log(res)
     if (res.status === 200) {
@@ -1516,7 +1524,7 @@ const handleMouseUpSplit = () => {
 }
 
 onMounted(() => {
-  loginByToken();
+  initUserInfo();
   window.addEventListener('mousemove', handleMouseMoveSplit)
   window.addEventListener('mouseup', handleMouseUpSplit)
 })
@@ -1725,6 +1733,11 @@ function showAiPic() {
     }
   }
 }
+
+function handlePaySuccess() {
+  showPayModal.value = false
+  initUserInfo()
+}
 </script>
 
 <style scoped lang="less">
@@ -1785,6 +1798,31 @@ function showAiPic() {
   .userInfo {
     color: white;
     cursor: pointer;
+    display: flex;
+    align-items: center;
+
+    >img {
+      height: 18px;
+    }
+  }
+
+  .userMoney {
+    color: #333;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: bold;
+    margin: 0 8px 8px;
+    border: 1px solid #d9d9d9;
+    border-radius: 4px;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+
+    >img {
+      height: 18px;
+      margin-left: 8px;
+    }
   }
 }
 
