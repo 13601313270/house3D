@@ -41,6 +41,8 @@
 </template>
 <script setup lang="ts">
 import { Store } from '@/store';
+import request from '@/utils/request';
+import axios from 'axios';
 import { ref } from 'vue'
 import { useStore } from 'vuex';
 
@@ -59,12 +61,15 @@ const closeModal = () => {
   emit('close')
 }
 
-const handlePay = (payType: 'alipay' | 'wechat') => {
+const handlePay = async (payType: 'alipay' | 'wechat') => {
   const userInfo = store.state.main.userInfo
   console.log('userInfo', userInfo)
   if (userInfo && userInfo.id) {
     if (payType === 'alipay') {
-      window.open('https://api.studying1v1.com/video/alipay/pay?uid=' + userInfo.id + '&price=' + selectedAmount.value, '_blank')
+      const res = await request.get('https://api.studying1v1.com/video/alipay/createOrder?uid=' + userInfo.id + '&price=' + selectedAmount.value)
+      const orderId: number = res.data as number;
+      console.log('orderId', orderId)
+      window.open('https://api.studying1v1.com/video/alipay/pay?orderId=' + orderId, '_blank')
     } else if (payType === 'wechat') {
       // window.open('https://api.studying1v1.com/wechat/pay', '_blank')
     }
