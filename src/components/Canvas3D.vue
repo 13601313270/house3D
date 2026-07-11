@@ -587,9 +587,21 @@ watch(() => props.aspectRatio, (newVal) => {
   immediate: true
 })
 
+const getImageData = (): string | null => {
+  if (renderer && renderer.domElement) {
+    const scene = props.world.scene
+    if (scene && camera) {
+      renderer.render(scene, camera)
+    }
+    return renderer.domElement.toDataURL('image/png')
+  }
+  return null
+}
+
 defineExpose({
   resize,
-  exportImage
+  exportImage,
+  getImageData
 })
 function calcVerticalFovByHorizontalFov(hFov: number, aspect: number) {
   const vFov = 2 * Math.atan(Math.tan((hFov * Math.PI / 180) / 2) / aspect)

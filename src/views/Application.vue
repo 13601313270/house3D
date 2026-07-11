@@ -110,7 +110,8 @@
               :class="{ active: activeCameraIndex === index }" class="cameraItem">{{ index + 1 }}
             </div>
           </div>
-          <div v-if="allCamera.length && cameraRightState">
+          <div class="buttons" v-if="allCamera.length && cameraRightState">
+            <button type="button" @click="showAiPic">AI渲染</button>
             <button type="button" @click="exportImage">导出图片</button>
           </div>
         </div>
@@ -161,6 +162,12 @@
       <!-- <div>模型初始化中，请稍后...</div> -->
     </div>
   </teleport>
+  <teleport to="#teleport" v-if="isShowAiPic">
+    <AiPic :initial-image="aiPicInitialImage" :image-size="{
+      width: aiPicSize.width,
+      height: aiPicSize.height,
+    }" @close="isShowAiPic = false" />
+  </teleport>
 </template>
 
 <script lang="ts" setup>
@@ -205,6 +212,7 @@ import { CameraBase } from '@/types/CameraBase';
 import { sleep } from '@/utils/sleep';
 import saveWorld from '@/utils/saveWorld';
 import { getHandleInAreaInfoByXY, getHandleInfoByXY } from '@/utils/getHandleInfoByXY';
+import AiPic from '@/components/aiPic.vue'
 
 const canvas2DRef = ref<HTMLCanvasElement | null>(null)
 const canvas2D2Ref = ref<HTMLCanvasElement | null>(null)
@@ -262,6 +270,12 @@ const allCamera = ref<CameraState[]>([])
 const cameraRightState = ref<CameraState | null>(null)
 const lockObjCount = ref(0)
 const allObjCount = ref(0)
+const isShowAiPic = ref(false)
+const aiPicInitialImage = ref('')
+const aiPicSize = ref({
+  width: 1024,
+  height: 768,
+})
 type ObjFileType = {
   id: number,
   name: string,
@@ -1685,6 +1699,21 @@ async function copyEntity() {
     drawWrapper2DAnd3D()
   }
 }
+function showAiPic() {
+  if (canvas3DRef2.value) {
+    const imageData = canvas3DRef2.value.getImageData()
+    const initialImage = new Image()
+    initialImage.src = imageData
+    initialImage.onload = () => {
+      aiPicInitialImage.value = imageData
+      aiPicSize.value = {
+        width: initialImage.width,
+        height: initialImage.height,
+      }
+      isShowAiPic.value = true
+    }
+  }
+}
 </script>
 
 <style scoped lang="less">
@@ -1995,40 +2024,48 @@ button {
   transition: width 0.1s ease;
 }
 
-.cameraList {
-  display: flex;
-  flex-grow: 1;
+.right-panel {
+  .cameraList {
+    display: flex;
+    flex-grow: 1;
 
-  .cameraItem {
-    border: solid 1px black;
-    width: 28px;
-    height: 28px;
-    line-height: 30px;
-    text-align: center;
-    border-radius: 4px;
-    margin-left: 4px;
-    cursor: pointer;
+    .cameraItem {
+      border: solid 1px black;
+      width: 28px;
+      height: 28px;
+      line-height: 30px;
+      text-align: center;
+      border-radius: 4px;
+      margin-left: 4px;
+      cursor: pointer;
 
-    &:hover {
-      background-color: #f5f5f5;
-    }
+      &:hover {
+        background-color: #f5f5f5;
+      }
 
-    &.active {
-      background-color: #1890ff;
-      border: solid 1px #1890ff;
-      color: white;
+      &.active {
+        background-color: #1890ff;
+        border: solid 1px #1890ff;
+        color: white;
+      }
     }
   }
-}
 
-.noCamera {
-  font-size: 14px;
-  color: #ff4d4f;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  height: 100%;
+  .buttons {
+    >button {
+      margin-left: 4px;
+    }
+  }
+
+  .noCamera {
+    font-size: 14px;
+    color: #ff4d4f;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+  }
 }
 
 .allDemosContent {
