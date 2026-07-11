@@ -19,7 +19,11 @@
             <div class="amountList">
               <div v-for="amount in amounts" :key="amount" class="amountItem"
                 :class="{ active: selectedAmount === amount }" @click="selectedAmount = amount">
-                ¥{{ amount }}
+                <div class="amountText">¥ {{ amount }}</div>
+                <div class="coinInfo">
+                  <img src="/money.png" class="coinIcon" />
+                  <span class="coinText">{{ amount * 10 }}金币</span>
+                </div>
               </div>
             </div>
           </div>
@@ -160,25 +164,62 @@ window.addEventListener('focus', handleFocus)
 
         .amountItem {
           width: calc(25% - 9px);
-          padding: 12px 0;
+          padding: 10px 0;
           text-align: center;
           border: 2px solid #eee;
           border-radius: 8px;
-          font-size: 16px;
-          color: #333;
           cursor: pointer;
           transition: all 0.2s;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 4px;
+
+          .amountText {
+            font-size: 16px;
+            color: #333;
+            font-weight: bold;
+          }
+
+          .coinInfo {
+            display: flex;
+            align-items: center;
+            gap: 2px;
+
+            .coinIcon {
+              width: 12px;
+              height: 12px;
+            }
+
+            .coinText {
+              font-size: 12px;
+              color: #999;
+            }
+          }
 
           &:hover {
             border-color: #1677ff;
-            color: #1677ff;
+
+            .amountText {
+              color: #1677ff;
+            }
+
+            .coinText {
+              color: #1677ff;
+            }
           }
 
           &.active {
             border-color: #1677ff;
             background-color: #e6f4ff;
-            color: #1677ff;
-            font-weight: bold;
+
+            .amountText {
+              color: #1677ff;
+            }
+
+            .coinText {
+              color: #1677ff;
+            }
           }
         }
       }
