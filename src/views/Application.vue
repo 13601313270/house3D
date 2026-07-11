@@ -40,6 +40,9 @@
           <div v-if="store.state.main.userInfo">
             <div class="userInfo" @mouseenter="activeToolsIndex = 2">欢迎登录：{{ store.state.main.userInfo.email }}</div>
             <div class="list" v-show="activeToolsIndex === 2">
+              <div @click="showPayModal = true" class="childItem">
+                充值
+              </div>
               <div @click="logout" class="childItem">
                 退出
               </div>
@@ -168,6 +171,7 @@
       height: aiPicSize.height,
     }" @close="isShowAiPic = false" />
   </teleport>
+  <ShowPayModal v-if="showPayModal" @close="showPayModal = false" />
 </template>
 
 <script lang="ts" setup>
@@ -213,6 +217,7 @@ import { sleep } from '@/utils/sleep';
 import saveWorld from '@/utils/saveWorld';
 import { getHandleInAreaInfoByXY, getHandleInfoByXY } from '@/utils/getHandleInfoByXY';
 import AiPic from '@/components/aiPic.vue'
+import ShowPayModal from '@/components/showPayModal.vue'
 
 const canvas2DRef = ref<HTMLCanvasElement | null>(null)
 const canvas2D2Ref = ref<HTMLCanvasElement | null>(null)
@@ -295,6 +300,8 @@ const insertAdding = ref(false)
 
 const centerPanelCamera = ref(new THREE.PerspectiveCamera(55, aspectRatio2.value, 0.1, 20000));
 const rightPanelCamera = ref<THREE.PerspectiveCamera | THREE.OrthographicCamera>();
+
+const showPayModal = ref(false)
 
 let panStartScreenX = 0
 let panStartScreenY = 0
