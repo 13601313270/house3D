@@ -1087,7 +1087,7 @@ const loginByToken = () => {
     if (res.status === 200) {
       store.dispatch('main/setUserInfo', res.data)
     }
-  }).catch((err) => {
+  }).catch(() => {
     store.dispatch('main/setUserInfo', null)
   })
 }
@@ -1625,8 +1625,10 @@ const handleLoadedObject = async (object: THREE.Group | THREE.Mesh, file: File, 
   drawWrapper2DAnd3D()
 }
 function logout() {
-  store.dispatch('main/setUserInfo', null)
-  localStorage.removeItem('token')
+  if (confirm('确定要退出登录吗？')) {
+    store.dispatch('main/setUserInfo', null)
+    localStorage.removeItem('token')
+  }
 }
 function handleObjectHover(object: THREE.Object3D | null) {
   if (object) {
