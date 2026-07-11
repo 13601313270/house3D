@@ -73,6 +73,26 @@
 import { ref, onMounted } from 'vue'
 import service from '@/utils/request'
 
+type qwenImageEditRes = {
+  output: {
+    choices: Array<{
+      finish_reason: string;
+      message: {
+        content: Array<{
+          image: string;
+        }>;
+        role: string;
+      };
+    }>;
+  };
+  usage: {
+    height: number;
+    image_count: number;
+    width: number;
+  };
+  request_id: string;
+}
+
 const props = defineProps<{
   initialImage?: string,
   imageSize: {
@@ -159,7 +179,6 @@ const handleDeleteImage = (index: number) => {
 }
 
 const handleGenerate = async () => {
-  alert(JSON.stringify(props.imageSize));
   if (!images.value[0] || isGenerating.value) return
   if (!prompt.value.trim()) {
     alert('请输入提示词')
@@ -172,16 +191,22 @@ const handleGenerate = async () => {
   try {
     const validImages = images.value.filter(img => img)
 
-    const response = await service.post('/admin/qwenImageEdit', {
+    const response: {
+      data: qwenImageEditRes,
+      status: number,
+      statusText: string,
+    } = await service.post('/video/ai/qwenImageEdit', {
       imgUrls: validImages,
       prompt: prompt.value,
       size: `${props.imageSize.width}*${props.imageSize.height}`,
     })
 
-    if (response.data.success && response.data.data) {
-      generatedImage.value = response.data.data
+    console.log('response:', response)
+
+    if (response.status === 200) {
+      generatedImage.value = response.data.output.choices[0].message.content[0].image
     } else {
-      alert(response.data.message || '生成失败')
+      alert(response.statusText || '生成失败')
     }
   } catch (error) {
     console.error('生成图片失败:', error)
