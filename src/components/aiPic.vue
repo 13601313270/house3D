@@ -7,16 +7,30 @@
 
     <div class="content">
       <div class="image-section">
-        <div class="section-title">图片（最多4张）</div>
-        <div class="image-list">
-          <div v-for="(image, index) in images" :key="index" class="image-item" :class="{ 'empty': !image }"
-            @click="handleImageClick(index)">
-            <img v-if="image" :src="image" alt="" class="preview-img" />
+        <div class="basic-image-list">
+          <div class="image-item">
+            <img v-if="initialImage" :src="initialImage" alt="" class="preview-img" />
             <div v-else class="upload-hint">
               <svg class="plus-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M12 5v14M5 12h14" stroke-linecap="round" />
               </svg>
-              <span>{{ index === 0 ? '主图' : `第${index + 1}张` }}</span>
+            </div>
+            <span class="imgIndex">图1</span>
+          </div>
+        </div>
+        <div class="section-title">额外参考图片（最多4张）</div>
+        <div class="image-list">
+          <div v-for="(image, index) in images" :key="index" class="image-item" :class="{ 'empty': !image }"
+            @click="handleImageClick(index)">
+            <div v-if="image" style="height: 100%;">
+              <img :src="image" alt="" class="preview-img" />
+              <span class="imgIndex">{{ `图${index + 2}` }}</span>
+            </div>
+            <div v-else class="upload-hint">
+              <svg class="plus-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 5v14M5 12h14" stroke-linecap="round" />
+              </svg>
+              <span class="imgIndex">{{ `图${index + 2}` }}</span>
             </div>
             <button v-if="image" class="delete-btn" @click.stop="handleDeleteImage(index)">
               <img src="@/assets/close.svg" alt="删除" />
@@ -45,7 +59,7 @@
       </div>
 
       <div class="action-section">
-        <button class="generate-btn" :disabled="isGenerating || !images[0]" @click="handleGenerate">
+        <button class="generate-btn" :disabled="isGenerating || !initialImage || !prompt" @click="handleGenerate">
           <span v-if="isGenerating" class="loading-text">生成中...</span>
           <span v-else>生成图片</span>
         </button>
@@ -120,36 +134,36 @@ interface PromptTemplate {
 
 const promptTemplates = ref<PromptTemplate[]>([
   {
-    name: '现代简约',
-    prompt: 'modern minimalist interior design, clean lines, white walls, wooden floor, natural light, 3D render, photorealistic',
+    name: '超真实',
+    prompt: '图1为布局草图，生成图片。超写实摄影风格，真实照片质感，电影级画面，高质量摄影作品，8K超高清，细节丰富，真实皮肤纹理，真实毛发细节，真实服装材质，真实光影，PBR材质表现，全局光照，柔和自然光，体积光，景深效果，高动态范围（HDR），专业摄影，电影级调色，高级色彩，空气透视，环境光遮蔽，画面干净通透，真实阴影，真实反射，镜头虚化，照片级真实感，层次丰富，自然不过度锐化，高品质，高细节，大师级作品。',
     image: 'https://s1.aigei.com/src/img/jpg/ca/caf1560fc18149db99ecd27d7103ad60.jpg?imageMogr2/auto-orient/thumbnail/!282x282r/gravity/Center/crop/282x282/quality/85/%7CimageView2/2/w/282&e=2051020800&token=P7S2Xpzfz11vAkASLTkfHN7Fw-oOZBecqeJaxypL:o8myqx_-syBWhtRuCGy6ESfTzsA='
   },
-  {
-    name: '北欧风格',
-    prompt: 'Scandinavian style interior, cozy, warm lighting, wooden furniture, plants, bright and airy, 3D render, high quality',
-    image: 'https://s1.aigei.com/src/img/jpg/ca/caf1560fc18149db99ecd27d7103ad60.jpg?imageMogr2/auto-orient/thumbnail/!282x282r/gravity/Center/crop/282x282/quality/85/%7CimageView2/2/w/282&e=2051020800&token=P7S2Xpzfz11vAkASLTkfHN7Fw-oOZBecqeJaxypL:o8myqx_-syBWhtRuCGy6ESfTzsA='
-  },
-  {
-    name: '中式古典',
-    prompt: 'Chinese classical interior design, traditional furniture, red lanterns, wooden beams, elegant, cultural, 3D render',
-    image: 'https://s1.aigei.com/src/img/jpg/ca/caf1560fc18149db99ecd27d7103ad60.jpg?imageMogr2/auto-orient/thumbnail/!282x282r/gravity/Center/crop/282x282/quality/85/%7CimageView2/2/w/282&e=2051020800&token=P7S2Xpzfz11vAkASLTkfHN7Fw-oOZBecqeJaxypL:o8myqx_-syBWhtRuCGy6ESfTzsA='
-  },
-  {
-    name: '工业风',
-    prompt: 'industrial style interior, exposed brick walls, metal pipes, loft design, vintage lighting, concrete floor, 3D render',
-    image: 'https://s1.aigei.com/src/img/jpg/ca/caf1560fc18149db99ecd27d7103ad60.jpg?imageMogr2/auto-orient/thumbnail/!282x282r/gravity/Center/crop/282x282/quality/85/%7CimageView2/2/w/282&e=2051020800&token=P7S2Xpzfz11vAkASLTkfHN7Fw-oOZBecqeJaxypL:o8myqx_-syBWhtRuCGy6ESfTzsA='
-  }
+  // {
+  //   name: '北欧风格',
+  //   prompt: 'Scandinavian style interior, cozy, warm lighting, wooden furniture, plants, bright and airy, 3D render, high quality',
+  //   image: 'https://s1.aigei.com/src/img/jpg/ca/caf1560fc18149db99ecd27d7103ad60.jpg?imageMogr2/auto-orient/thumbnail/!282x282r/gravity/Center/crop/282x282/quality/85/%7CimageView2/2/w/282&e=2051020800&token=P7S2Xpzfz11vAkASLTkfHN7Fw-oOZBecqeJaxypL:o8myqx_-syBWhtRuCGy6ESfTzsA='
+  // },
+  // {
+  //   name: '中式古典',
+  //   prompt: 'Chinese classical interior design, traditional furniture, red lanterns, wooden beams, elegant, cultural, 3D render',
+  //   image: 'https://s1.aigei.com/src/img/jpg/ca/caf1560fc18149db99ecd27d7103ad60.jpg?imageMogr2/auto-orient/thumbnail/!282x282r/gravity/Center/crop/282x282/quality/85/%7CimageView2/2/w/282&e=2051020800&token=P7S2Xpzfz11vAkASLTkfHN7Fw-oOZBecqeJaxypL:o8myqx_-syBWhtRuCGy6ESfTzsA='
+  // },
+  // {
+  //   name: '工业风',
+  //   prompt: 'industrial style interior, exposed brick walls, metal pipes, loft design, vintage lighting, concrete floor, 3D render',
+  //   image: 'https://s1.aigei.com/src/img/jpg/ca/caf1560fc18149db99ecd27d7103ad60.jpg?imageMogr2/auto-orient/thumbnail/!282x282r/gravity/Center/crop/282x282/quality/85/%7CimageView2/2/w/282&e=2051020800&token=P7S2Xpzfz11vAkASLTkfHN7Fw-oOZBecqeJaxypL:o8myqx_-syBWhtRuCGy6ESfTzsA='
+  // }
 ])
 
 const applyTemplate = (template: PromptTemplate) => {
   prompt.value = template.prompt
 }
 
-onMounted(() => {
-  if (props.initialImage) {
-    images.value[0] = props.initialImage
-  }
-})
+// onMounted(() => {
+//   if (props.initialImage) {
+//     // images.value[0] = props.initialImage
+//   }
+// })
 
 const handleClose = () => {
   emit('close')
@@ -179,7 +193,7 @@ const handleDeleteImage = (index: number) => {
 }
 
 const handleGenerate = async () => {
-  if (!images.value[0] || isGenerating.value) return
+  if (!props.initialImage || isGenerating.value) return
   if (!prompt.value.trim()) {
     alert('请输入提示词')
     return
@@ -189,28 +203,33 @@ const handleGenerate = async () => {
   generatedImage.value = ''
 
   try {
-    const validImages = images.value.filter(img => img)
-
     const response: {
       data: qwenImageEditRes,
       status: number,
       statusText: string,
     } = await service.post('/video/ai/qwenImageEdit', {
-      imgUrls: validImages,
+      imgUrls: [
+        props.initialImage,
+        ...images.value.filter(v => v),
+      ],
       prompt: prompt.value,
       size: `${props.imageSize.width}*${props.imageSize.height}`,
     })
-
     console.log('response:', response)
-
     if (response.status === 200) {
       generatedImage.value = response.data.output.choices[0].message.content[0].image
     } else {
       alert(response.statusText || '生成失败')
     }
-  } catch (error) {
-    console.error('生成图片失败:', error)
-    alert('生成图片失败，请重试')
+  } catch (error: any) {
+    console.error('生成图片失败-------:', error)
+    if (error.response.status === 401) {
+      alert(error.response.data)
+      return
+    } else {
+      console.error('生成图片失败:', error.response)
+      alert('生成图片失败，请重试')
+    }
   } finally {
     isGenerating.value = false
   }
@@ -249,20 +268,22 @@ const handleDownload = () => {
   background: white;
   top: 0;
   left: 0;
-  overflow: auto;
+  overflow: hidden;
 
   .header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 16px 24px;
+    padding: 0 4px;
     background: linear-gradient(90deg, #141b44 0%, #190554 100%);
     color: white;
     flex-shrink: 0;
+    height: 40px;
 
     .title {
       font-size: 18px;
       font-weight: bold;
+      margin-left: 8px;
     }
 
     .close-btn {
@@ -291,33 +312,100 @@ const handleDownload = () => {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 24px;
+    overflow: auto;
 
     .section-title {
       font-size: 16px;
       font-weight: bold;
       color: #333;
-      margin-bottom: 12px;
+      margin-top: 12px;
     }
 
     .image-section {
       width: 100%;
       max-width: 800px;
 
-      .image-list {
+      .basic-image-list {
         display: grid;
         grid-template-columns: repeat(4, 1fr);
         gap: 12px;
 
         .image-item {
           position: relative;
-          aspect-ratio: 1;
           border: 2px dashed #d9d9d9;
           border-radius: 8px;
           overflow: hidden;
           cursor: pointer;
           transition: all 0.2s;
           background: #fafafa;
+
+          .preview-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+          }
+
+          .upload-hint {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #999;
+            gap: 8px;
+
+            .plus-icon {
+              width: 24px;
+              height: 24px;
+            }
+          }
+
+          .delete-btn {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            width: 24px;
+            height: 24px;
+            border: none;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+
+            &:hover {
+              background: rgba(255, 77, 79, 0.8);
+            }
+
+            img {
+              width: 12px;
+              height: 12px;
+            }
+          }
+        }
+      }
+
+      .image-list {
+        display: flex;
+        gap: 12px;
+        margin-top: 12px;
+
+        .image-item {
+          position: relative;
+          height: 200px;
+          border: 2px dashed #d9d9d9;
+          border-radius: 8px;
+          overflow: hidden;
+          cursor: pointer;
+          transition: all 0.2s;
+          background: #fafafa;
+
+          &.empty {
+            width: 130px;
+          }
 
           &:hover {
             border-color: #1890ff;
@@ -378,6 +466,18 @@ const handleDownload = () => {
       }
     }
 
+    .imgIndex {
+      position: absolute;
+      top: 4px;
+      left: 4px;
+      font-size: 12px;
+      color: #fff;
+      background: rgba(0, 0, 0, 0.5);
+      padding: 2px 4px;
+      border-radius: 4px;
+      z-index: 100;
+    }
+
     .templates-section {
       width: 100%;
       max-width: 800px;
@@ -385,6 +485,7 @@ const handleDownload = () => {
       .templates-list {
         display: flex;
         gap: 12px;
+        margin-top: 12px;
 
         .template-item {
           display: flex;
@@ -446,6 +547,7 @@ const handleDownload = () => {
         padding: 12px;
         border: 1px solid #d9d9d9;
         border-radius: 8px;
+        margin-top: 12px;
         font-size: 14px;
         resize: vertical;
         box-sizing: border-box;
@@ -467,6 +569,7 @@ const handleDownload = () => {
       max-width: 800px;
       display: flex;
       justify-content: center;
+      margin-top: 12px;
 
       .generate-btn {
         padding: 12px 48px;

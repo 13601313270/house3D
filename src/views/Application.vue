@@ -111,7 +111,7 @@
             </div>
           </div>
           <div class="buttons" v-if="allCamera.length && cameraRightState">
-            <!-- <button type="button" @click="showAiPic">AI渲染</button> -->
+            <button type="button" @click="showAiPic">AI渲染</button>
             <button type="button" @click="exportImage">导出图片</button>
           </div>
         </div>
@@ -1087,6 +1087,8 @@ const loginByToken = () => {
     if (res.status === 200) {
       store.dispatch('main/setUserInfo', res.data)
     }
+  }).catch((err) => {
+    store.dispatch('main/setUserInfo', null)
   })
 }
 
