@@ -64,10 +64,14 @@
       </div>
 
       <div class="action-section">
-        <button class="generate-btn" :disabled="isGenerating || !initialImage || !prompt" @click="handleGenerate">
-          <span v-if="isGenerating" class="loading-text">生成中...</span>
-          <span v-else>生成图片</span>
-        </button>
+        <div class="generate-btn" :disabled="isGenerating || !initialImage || !prompt" @click="handleGenerate">
+          <div v-if="isGenerating" class="loading-text">生成中...</div>
+          <div v-else style="display: flex; align-items: center;">
+            <span>生成图片&nbsp;（</span>
+            <img src="money.png" />
+            <span>6金币）</span>
+          </div>
+        </div>
       </div>
 
       <div v-if="generatedImage" class="result-section">
@@ -90,9 +94,10 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import service from '@/utils/request'
 import { useStore } from 'vuex';
 import { Store } from '@/store';
+import message from '@/utils/message';
+import request from '@/utils/request';
 
 type qwenImageEditRes = {
   output: {
@@ -215,7 +220,7 @@ const handleGenerate = async () => {
       data: qwenImageEditRes,
       status: number,
       statusText: string,
-    } = await service.post('/video/ai/qwenImageEdit', {
+    } = await request.post('/video/ai/qwenImageEdit', {
       imgUrls: [
         props.initialImage,
         ...images.value.filter(v => v),
@@ -225,9 +230,26 @@ const handleGenerate = async () => {
     })
     console.log('response:', response)
     if (response.status === 200) {
-      generatedImage.value = response.data.output.choices[0].message.content[0].image
+      if (response.data.output) {
+        generatedImage.value = response.data.output.choices[0].message.content[0].image
+        message.success('生成图片成功', {
+          duration: 6000,
+        })
+        request.get('/video/user/info').then(res => {
+          console.log(res)
+          if (res.status === 200) {
+            store.dispatch('main/setUserInfo', res.data)
+          }
+        })
+      } else {
+        // @ts-ignore
+        message.error(response.data.statusText || '生成图片失败', {
+          duration: 10000,
+        })
+        return
+      }
     } else {
-      alert(response.statusText || '生成失败')
+      message.error(response.statusText || '生成失败')
     }
   } catch (error: any) {
     console.error('生成图片失败-------:', error)
@@ -602,6 +624,11 @@ const handleDownload = () => {
         font-weight: bold;
         cursor: pointer;
         transition: all 0.2s;
+
+        img {
+          height: 18px;
+          margin: 0 2px;
+        }
 
         &:hover:not(:disabled) {
           transform: translateY(-2px);
