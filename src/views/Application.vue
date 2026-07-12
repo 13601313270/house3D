@@ -226,6 +226,7 @@ import saveWorld from '@/utils/saveWorld';
 import { getHandleInAreaInfoByXY, getHandleInfoByXY } from '@/utils/getHandleInfoByXY';
 import AiPic from '@/components/aiPic.vue'
 import ShowPayModal from '@/components/showPayModal.vue'
+import drawAxes from '@/utils/drawAxes';
 
 const canvas2DRef = ref<HTMLCanvasElement | null>(null)
 const canvas2D2Ref = ref<HTMLCanvasElement | null>(null)
@@ -420,18 +421,21 @@ const drawWrapper2DAnd3D = () => {
 const drawWrapper2D = () => {
   const canvas = canvas2DRef.value
   const canvasAction = canvas2D2Ref.value;
-  if (canvas && canvasAction) {
-    worldApi.draw2DWorld(
-      canvas,
+  if (canvas && canvasAction && canvas.getContext('2d')) {
+    const ctx = canvas.getContext('2d')!;
+    ctx.clearRect(0, 0, canvasSize.value.width, canvasSize.value.height)
+    ctx.fillStyle = '#f5f5f5'
+    ctx.fillRect(0, 0, canvasSize.value.width, canvasSize.value.height)
+    worldApi.draw2DPreviewByData2(
+      ctx,
       panOffset.value,
-      canvasSize.value.width,
-      canvasSize.value.height,
       zoom2DLevel.value,
     )
+    // 绘制轴
+    drawAxes(ctx, panOffset.value, zoom2DLevel.value, canvasSize.value.width, canvasSize.value.height)
     // 绘制磁吸点的参考轴
     if (hoverPoint.value) {
       (() => {
-        const ctx = canvas.getContext('2d')
         if (!ctx) return
         ctx.strokeStyle = '#999'
         ctx.lineWidth = 1
@@ -455,7 +459,6 @@ const drawWrapper2D = () => {
         }
       })();
     }
-    const ctx = canvas.getContext('2d')
     if (ctx && insertTempObj) {
       if (insertTempObj instanceof LineEntityClass) {
         insertTempObj.draw2DPreview(ctx, panOffset.value, zoom2DLevel.value)
