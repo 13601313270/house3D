@@ -63,12 +63,10 @@ onMounted(() => {
   reloadObjList();
 })
 function reloadObjList() {
-  let newCount = 0;
   allObjList.value = []
-  for (const key in window.worldApi.allFileMapObjects) {
-    if (window.worldApi.allFileMapObjects[key]) {
-      newCount += window.worldApi.allFileMapObjects[key].length
-      allObjList.value.push(...window.worldApi.allFileMapObjects[key].map((item) => {
+  for (const key of window.worldApi.getAllObjectTypes()) {
+    if (window.worldApi.getTypeListEntity(key)) {
+      allObjList.value.push(...window.worldApi.getTypeListEntity(key).map((item) => {
         const { id, isLocked, isHidden, tip } = item.getData()
         return {
           id,
@@ -81,7 +79,7 @@ function reloadObjList() {
       }))
     }
   }
-  allObjCount.value = newCount
+  allObjCount.value = window.worldApi.getAllObjectCount()
 }
 const position = ref<{ x: number, y: number }>({ x: window.innerWidth / 3, y: 100 })
 
@@ -154,7 +152,7 @@ function handleEnter(item: {
   type: string,
   isLocked: boolean,
 }) {
-  const thisTypeObjList = window.worldApi.allFileMapObjects[item.type]
+  const thisTypeObjList = window.worldApi.getTypeListEntity(item.type)
   if (!thisTypeObjList) return
   const thisObj = thisTypeObjList.find(v => {
     return v.getData().id === item.id
@@ -171,7 +169,7 @@ function handleEnter(item: {
 // }
 function handleUnLock(item: Item, isLocked: boolean) {
   const { id, type } = item
-  const group = window.worldApi.allFileMapObjects[type]
+  const group = window.worldApi.getTypeListEntity(type)
   if (!group) return
   const api = group.find(v => v.getData().id === id)
   if (!api) return
@@ -186,7 +184,7 @@ function handleUnLock(item: Item, isLocked: boolean) {
 }
 function handleLocation(item: Item) {
   const { id, type } = item
-  const group = window.worldApi.allFileMapObjects[type]
+  const group = window.worldApi.getTypeListEntity(type)
   if (!group) return
   const api = group.find(v => v.getData().id === id)
   if (!api) return

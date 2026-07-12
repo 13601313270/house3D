@@ -31,11 +31,7 @@ export class CurtainInWallEntity extends EntityClassInWall<CurtainInWallData> {
     const screenY = data.y * zoomLevel + panOffset.y
     const { width, isOuter, angle, wallId } = data;
     const angleY = data.angle || 0;// 历史数据问题
-
-    if (!this.world.allFileMapObjects.wall) {
-      this.world.allFileMapObjects.wall = []
-    }
-    const wall: WallEntity = this.world.allFileMapObjects.wall.find((entity) => {
+    const wall: WallEntity = this.world.getTypeListEntity('wall').find((entity) => {
       return entity.getData().id === wallId;
     }) as WallEntity
     const wallThickness = wall ? wall.getData().thickness : 10;
@@ -65,10 +61,7 @@ export class CurtainInWallEntity extends EntityClassInWall<CurtainInWallData> {
     zoomLevel: number
   ): void {
     const { isOuter, angle, wallId } = data;
-    if (!this.world.allFileMapObjects.wall) {
-      this.world.allFileMapObjects.wall = []
-    }
-    const wall: WallEntity = this.world.allFileMapObjects.wall.find((entity) => {
+    const wall: WallEntity = this.world.getTypeListEntity('wall').find((entity) => {
       return entity.getData().id === wallId;
     }) as WallEntity
     const wallThickness = wall ? wall.getData().thickness : 10;
@@ -92,10 +85,7 @@ export class CurtainInWallEntity extends EntityClassInWall<CurtainInWallData> {
     const data = this.getData();
     const group = new THREE.Group()
     const { wallId, img, width, height, isOuter } = data
-    if (!this.world.allFileMapObjects.wall) {
-      this.world.allFileMapObjects.wall = []
-    }
-    const wall: WallEntity = this.world.allFileMapObjects.wall.find((entity) => {
+    const wall: WallEntity = this.world.getTypeListEntity('wall').find((entity) => {
       return entity.getData().id === wallId;
     }) as WallEntity
     const wallThickness = wall ? wall.getData().thickness : 10;
@@ -183,11 +173,7 @@ export class CurtainInWallEntity extends EntityClassInWall<CurtainInWallData> {
   showMatchHandel(x: number, y: number) {
     const data = this.getData();
     const { isOuter, angle, wallId } = data;
-
-    if (!this.world.allFileMapObjects.wall) {
-      this.world.allFileMapObjects.wall = []
-    }
-    const wall: WallEntity = this.world.allFileMapObjects.wall.find((entity) => {
+    const wall: WallEntity = this.world.getTypeListEntity('wall').find((entity) => {
       return entity.getData().id === wallId;
     }) as WallEntity
     const wallThickness = wall ? wall.getData().thickness : 10;
@@ -214,11 +200,7 @@ export class CurtainInWallEntity extends EntityClassInWall<CurtainInWallData> {
   matchHandelInfo(x: number, y: number) {
     const data = this.getData();
     const { isOuter, angle, wallId } = data;
-
-    if (!this.world.allFileMapObjects.wall) {
-      this.world.allFileMapObjects.wall = []
-    }
-    const wall: WallEntity = this.world.allFileMapObjects.wall.find((entity) => {
+    const wall: WallEntity = this.world.getTypeListEntity('wall').find((entity) => {
       return entity.getData().id === wallId;
     }) as WallEntity
     const wallThickness = wall ? wall.getData().thickness : 10;

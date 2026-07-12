@@ -19,11 +19,11 @@ export function getHandleInfoByXY(x: number, y: number): {
   } | null = null
   for (let i = 0; i < allFileKeys.length; i++) {
     const key = allFileKeys[i];
-    if (!window.worldApi.allFileMapObjects[key]) {
+    if (!window.worldApi.getTypeListEntity(key)) {
       continue
     }
-    for (let j = 0; j < window.worldApi.getObjects(key).length; j++) {
-      const api: BaseEntityClass<any> = window.worldApi.allFileMapObjects[key][j] as BaseEntityClass<any>;
+    for (let j = 0; j < window.worldApi.getTypeListEntity(key).length; j++) {
+      const api: BaseEntityClass<any> = window.worldApi.getTypeListEntity(key)[j] as BaseEntityClass<any>;
       const matchInfo = api.matchHandelInfo(x, y)
       if (matchInfo) {
         if (matchInfo.dist < minDistance) {
@@ -54,11 +54,11 @@ export function getHandleInAreaInfoByXY(x: number, y: number): {
   } | null = null
   for (let i = 0; i < allFileKeys.length; i++) {
     const key = allFileKeys[i];
-    if (!window.worldApi.allFileMapObjects[key]) {
+    if (!window.worldApi.getTypeListEntity(key)) {
       continue
     }
-    for (let j = 0; j < window.worldApi.getObjects(key).length; j++) {
-      const api: BaseEntityClass<any> = window.worldApi.allFileMapObjects[key][j] as BaseEntityClass<any>;
+    for (let j = 0; j < window.worldApi.getTypeListEntity(key).length; j++) {
+      const api: BaseEntityClass<any> = window.worldApi.getTypeListEntity(key)[j] as BaseEntityClass<any>;
       if (api.getData().isLocked) continue
       const matchInfo = api.showMatchHandel(x, y)
       if (matchInfo) {

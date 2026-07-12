@@ -12,7 +12,7 @@ function getNearestWall(point: Point): NearestWallResult | null {
   let nearestAngle = 0
   let lineIndex: number = -1;
 
-  (window.worldApi.getObjects('wall') as WallData[]).forEach((wall: WallData) => {
+  (window.worldApi.getTypeObjectsData('wall') as WallData[]).forEach((wall: WallData) => {
     for (let i = 0; i < wall.points.length - 1; i++) {
       const p1 = wall.points[i]
       const p2 = wall.points[i + 1]

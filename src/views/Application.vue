@@ -477,15 +477,15 @@ async function changeCamera2State(activeIndex: number = 0) {
   const allTypesCameraList: BaseObjDataClass<any>[] = []
   const allTypesCameraObjList: CameraBase<CameraData>[] = []
   allCameraTypeKey.forEach(typeKey => {
-    if (worldApi.allFileMapObjects[typeKey]) {
-      worldApi.allFileMapObjects[typeKey].forEach(item => {
+    if (worldApi.getTypeListEntity(typeKey)) {
+      worldApi.getTypeListEntity(typeKey).forEach(item => {
         if (item instanceof CameraBase) {
           allTypesCameraObjList.push(item);
         }
       })
     }
-    console.log('typeKey=======', typeKey, worldApi.getObjects(typeKey))
-    allTypesCameraList.push(...worldApi.getObjects(typeKey));
+    console.log('typeKey=======', typeKey, worldApi.getTypeObjectsData(typeKey))
+    allTypesCameraList.push(...worldApi.getTypeObjectsData(typeKey));
   })
 
   if (allTypesCameraList) {
@@ -531,7 +531,7 @@ async function changeCamera2State(activeIndex: number = 0) {
     worldApi.activeCameraIndex = activeIndex
     const allCameraObjList: BaseEntityClass<BaseObjData>[] = [];
     allCameraTypeKey.forEach(typeKey => {
-      const typeItemList = worldApi.allFileMapObjects[typeKey];
+      const typeItemList = worldApi.getTypeListEntity(typeKey);
       if (typeItemList) {
         allCameraObjList.push(...typeItemList);
       }
@@ -590,13 +590,7 @@ onMounted(async () => {
 
   worldApi.onWorldChange((type, objList) => {
     if (['add', 'remove'].includes(type)) {
-      let newCount = 0;
-      for (const key in worldApi.allFileMapObjects) {
-        if (worldApi.allFileMapObjects[key]) {
-          newCount += worldApi.allFileMapObjects[key].length
-        }
-      }
-      allObjCount.value = newCount
+      allObjCount.value = worldApi.getAllObjectCount();
     } else if (type === 'change') {
       // console.log('contextMenu', objList)
       if (contextMenu.value && contextMenu.value.visible) {
@@ -605,7 +599,7 @@ onMounted(async () => {
         const index: number = contextMenu.value.index
         const find = objList.find((v) => {
           if (v.type === type) {
-            const typeList = window.worldApi.allFileMapObjects[type]
+            const typeList = window.worldApi.getTypeListEntity(type)
             if (typeList) {
               const obj = typeList[index]
               if (obj === v) {
@@ -911,11 +905,11 @@ const handleContextMenu = (e: MouseEvent) => {
   for (let i = 0; i < sortAllFileKeys.length; i++) {
     const type = sortAllFileKeys[i]
     if (sortAllFileKeys.includes(type)) {
-      if (!worldApi.allFileMapObjects[type]) {
+      if (!worldApi.getTypeListEntity(type)) {
         continue
       }
-      for (let j = 0; j < worldApi.getObjects(type).length; j++) {
-        const api: BaseEntityClass<any> = worldApi.allFileMapObjects[type][j]
+      for (let j = 0; j < worldApi.getTypeObjectsData(type).length; j++) {
+        const api: BaseEntityClass<any> = worldApi.getTypeListEntity(type)[j]
         const snapPoint = api.matchHandelInfo(x, y)
         if (snapPoint) {
           menuEntity = api
@@ -1196,9 +1190,9 @@ const handleMouseMove = (e: MouseEvent) => {
         }
         return false;
       }
-      if (worldApi.allFileMapObjects.wall) {
-        for (let i = 0; i < worldApi.getObjects('wall').length; i++) {
-          const api: WallEntity = worldApi.allFileMapObjects.wall[i] as WallEntity;
+      if (worldApi.getTypeListEntity('wall')) {
+        for (let i = 0; i < worldApi.getTypeObjectsData('wall').length; i++) {
+          const api: WallEntity = worldApi.getTypeListEntity('wall')[i] as WallEntity;
           // 类型“WallEntity”的参数不能赋给类型“BaseEntityClass<PointObjData>”的参数。
           if (temp(api)) {
             // 绘制操作句柄
@@ -1329,7 +1323,7 @@ const handleMouseMove = (e: MouseEvent) => {
       const last = tempPointInsertData.value[tempPointInsertData.value.length - 1]
       // 收集所有点（包括临时折线和已绘制的墙上的点）
       const allPoints = [...tempPointInsertData.value];
-      (worldApi.getObjects(currentTool.value) as LineObjDataClass<any, LineObjData<any>>[]).forEach((item: LineObjDataClass<any, LineObjData<any>>) => {
+      (worldApi.getTypeObjectsData(currentTool.value) as LineObjDataClass<any, LineObjData<any>>[]).forEach((item: LineObjDataClass<any, LineObjData<any>>) => {
         item.points.forEach((point: any) => {
           allPoints.push(point)
         })

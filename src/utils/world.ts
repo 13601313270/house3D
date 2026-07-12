@@ -23,9 +23,25 @@ export interface EnvironmentConfig {
 }
 
 export class World {
-  allFileMapObjects: {
+  private allFileMapObjects: {
     [key in string]?: BaseEntityClass<BaseObjData>[]
   } = {}
+
+  getTypeListEntity(key: string): BaseEntityClass<BaseObjData>[] {
+    return this.allFileMapObjects[key] || []
+  }
+
+  getAllObjectTypes() {
+    return Object.keys(this.allFileMapObjects)
+  }
+
+  getAllObjectCount() {
+    let count = 0
+    for (const key of allFileKeys) {
+      count += this.getTypeListEntity(key).length
+    }
+    return count
+  }
 
   // 锁定状态的对象列表
   lockedObjList: BaseEntityClass<BaseObjData>[] = []
@@ -142,17 +158,13 @@ export class World {
     zoomLevel: number = 1,
   ) {
     // 绘制墙体
-    if (!this.allFileMapObjects.wall) {
-      this.allFileMapObjects.wall = []
-    }
-
     const fileData = this.getAllFileObjects()
     const allObj: PointEntityClass<any>[] = [];
     allFileKeys.forEach((key) => {
       if (fileData[key]) {
         fileData[key].forEach((item, index) => {
           // @ts-ignore
-          const itemApi: DoorEntity = this.allFileMapObjects[key][index];
+          const itemApi: DoorEntity = this.getTypeListEntity(key)[index];
           if (itemApi) {
             allObj.push(itemApi)
           }
@@ -196,6 +208,14 @@ export class World {
   //     }
   //   })
   // }
+
+  getTypeObjectsData(type: string) {
+    const returnData: BaseObjDataClass<any>[] = [];
+    this.getTypeListEntity(type).forEach((item) => {
+      returnData.push(item.getData())
+    })
+    return returnData
+  }
 
   boundingBoxList(): THREE.Group[] {
     const boundingBoxList: THREE.Group[] = []
@@ -286,17 +306,6 @@ export class World {
           returnData[key].push(item.getData())
         })
       }
-    })
-    return returnData
-  }
-
-  getObjects(type: string) {
-    const returnData: BaseObjDataClass<any>[] = [];
-    if (!this.allFileMapObjects[type]) {
-      this.allFileMapObjects[type] = []
-    }
-    this.allFileMapObjects[type].forEach((item) => {
-      returnData.push(item.getData())
     })
     return returnData
   }

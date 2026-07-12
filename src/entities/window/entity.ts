@@ -21,10 +21,10 @@ export class WindowEntity extends EntityClassInWall<WindowData> {
   constructor(world: World, window: WindowData) {
     super(world, window)
     if (window && window.wallId) {
-      if (!this.world.allFileMapObjects.wall) {
-        this.world.allFileMapObjects.wall = []
-      }
-      const wall = this.world.allFileMapObjects.wall.find((entity) => {
+      // if (!this.world.getTypeListData('wall')) {
+      //   this.world.getTypeListData('wall') = []
+      // }
+      const wall = this.world.getTypeListEntity('wall').find((entity) => {
         return entity.getData().id === window.wallId
       });
       if (wall) {
@@ -35,10 +35,10 @@ export class WindowEntity extends EntityClassInWall<WindowData> {
   }
 
   draw2DPreviewByData(ctx: CanvasRenderingContext2D, data: WindowData, panOffset: Point, zoomLevel: number): void {
-    if (!this.world.allFileMapObjects.wall) {
-      this.world.allFileMapObjects.wall = []
-    }
-    const findWall: WallEntity = this.world.allFileMapObjects.wall.find((entity) => entity.getData().id === data.wallId) as WallEntity
+    // if (!this.world.allFileMapObjects.wall) {
+    //   this.world.allFileMapObjects.wall = []
+    // }
+    const findWall: WallEntity = this.world.getTypeListEntity('wall').find((entity) => entity.getData().id === data.wallId) as WallEntity
     let wallThickness = 10;
     if (findWall) {
       wallThickness = findWall.getData().thickness;
@@ -74,10 +74,10 @@ export class WindowEntity extends EntityClassInWall<WindowData> {
     panOffset: Point,
     zoomLevel: number,
   ): void {
-    if (!this.world.allFileMapObjects.wall) {
-      this.world.allFileMapObjects.wall = []
-    }
-    const findWall: WallEntity = this.world.allFileMapObjects.wall.find((entity) => entity.getData().id === data.wallId) as WallEntity
+    // if (!this.world.getTypeListData('wall')) {
+    //   this.world.getTypeListData('wall') = []
+    // }
+    const findWall: WallEntity = this.world.getTypeListEntity('wall').find((entity) => entity.getData().id === data.wallId) as WallEntity
     let wallThickness = 10;
     if (findWall) {
       wallThickness = findWall.getData().thickness;
@@ -122,10 +122,10 @@ export class WindowEntity extends EntityClassInWall<WindowData> {
 
   showMatchHandel(x: number, y: number) {
     const data = this.getData();
-    if (!this.world.allFileMapObjects.wall) {
-      this.world.allFileMapObjects.wall = []
-    }
-    const wall: WallEntity = this.world.allFileMapObjects.wall.find((entity) => {
+    // if (!this.world.getTypeListData('wall')) {
+    //   this.world.getTypeListData('wall') = []
+    // }
+    const wall: WallEntity = this.world.getTypeListEntity('wall').find((entity) => {
       return entity.getData().id === data.wallId;
     }) as WallEntity
     const wallThickness = wall ? wall.getData().thickness : 10;
@@ -180,10 +180,10 @@ export class WindowEntity extends EntityClassInWall<WindowData> {
       ic,
     } = data
     const baseZ = data.height / 2 + (data.bottom || 0);
-    if (!this.world.allFileMapObjects.wall) {
-      this.world.allFileMapObjects.wall = []
-    }
-    const wall: WallEntity = this.world.allFileMapObjects.wall.find((entity) => {
+    // if (!this.world.getTypeListData('wall')) {
+    //   this.world.getTypeListData('wall') = []
+    // }
+    const wall: WallEntity = this.world.getTypeListEntity('wall').find((entity) => {
       return entity.getData().id === data.wallId;
     }) as WallEntity
     const wallThickness = wall ? wall.getData().thickness : 10;

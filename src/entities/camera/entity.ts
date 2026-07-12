@@ -51,9 +51,7 @@ export class CameraEntity extends CameraBase<CameraData> {
 
   draw2DPreviewByData(ctx: CanvasRenderingContext2D, data: CameraData, panOffset: Point, zoomLevel: number): void {
     let index: number = -1;
-    if (this.world.allFileMapObjects.camera) {
-      index = this.world.allFileMapObjects.camera.indexOf(this)
-    }
+    index = this.world.getTypeListEntity('camera').indexOf(this)
 
     const screenX = data.x * zoomLevel + panOffset.x
     const screenY = data.y * zoomLevel + panOffset.y

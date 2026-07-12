@@ -23,10 +23,7 @@ export class DoorEntity extends EntityClassInWall<DoorData> {
   constructor(world: World, door: DoorData) {
     super(world, door)
     if (door && door.wallId) {
-      if (!this.world.allFileMapObjects.wall) {
-        this.world.allFileMapObjects.wall = []
-      }
-      const wall = this.world.allFileMapObjects.wall.find((entity) => entity.getData().id === door.wallId);
+      const wall = this.world.getTypeListEntity('wall').find((entity) => entity.getData().id === door.wallId);
       if (wall) {
         this.associationEntity.push(wall)
         wall.associationEntity.push(this)
@@ -35,10 +32,7 @@ export class DoorEntity extends EntityClassInWall<DoorData> {
   }
 
   draw2DPreviewByData(ctx: CanvasRenderingContext2D, data: DoorData, panOffset: Point, zoomLevel: number): void {
-    if (!this.world.allFileMapObjects.wall) {
-      this.world.allFileMapObjects.wall = []
-    }
-    const findWall: WallEntity = this.world.allFileMapObjects.wall.find((entity) => entity.getData().id === data.wallId) as WallEntity
+    const findWall: WallEntity = this.world.getTypeListEntity('wall').find((entity) => entity.getData().id === data.wallId) as WallEntity
     let wallThickness = 10;
     if (findWall) {
       wallThickness = findWall.getData().thickness;
@@ -69,10 +63,10 @@ export class DoorEntity extends EntityClassInWall<DoorData> {
     panOffset: Point,
     zoomLevel: number,
   ): void {
-    if (!this.world.allFileMapObjects.wall) {
-      this.world.allFileMapObjects.wall = []
-    }
-    const findWall: WallEntity = this.world.allFileMapObjects.wall.find((entity) => entity.getData().id === data.wallId) as WallEntity
+    // if (!this.world.getTypeListData('wall')) {
+    //   this.world.getTypeListData('wall') = []
+    // }
+    const findWall: WallEntity = this.world.getTypeListEntity('wall').find((entity) => entity.getData().id === data.wallId) as WallEntity
     const screenX = data.x * zoomLevel + panOffset.x
     const screenY = data.y * zoomLevel + panOffset.y
     let wallThickness = 10;
@@ -122,10 +116,10 @@ export class DoorEntity extends EntityClassInWall<DoorData> {
     // 加载 https://video-obj.oss-cn-beijing.aliyuncs.com/door.glb
     const data = this.getData();
     const group = new THREE.Group()
-    if (!this.world.allFileMapObjects.wall) {
-      this.world.allFileMapObjects.wall = []
-    }
-    const wall: WallEntity = this.world.allFileMapObjects.wall.find((entity) => {
+    // if (!this.world.allFileMapObjects.wall) {
+    //   this.world.allFileMapObjects.wall = []
+    // }
+    const wall: WallEntity = this.world.getTypeListEntity('wall').find((entity) => {
       return entity.getData().id === data.wallId
     }) as WallEntity
     const wallThickness = wall ? wall.getData().thickness : 10;
@@ -264,10 +258,10 @@ export class DoorEntity extends EntityClassInWall<DoorData> {
 
   showMatchHandel(x: number, y: number) {
     const data = this.getData();
-    if (!this.world.allFileMapObjects.wall) {
-      this.world.allFileMapObjects.wall = []
-    }
-    const wall: WallEntity = this.world.allFileMapObjects.wall.find((entity) => {
+    // if (!this.world.allFileMapObjects.wall) {
+    //   this.world.allFileMapObjects.wall = []
+    // }
+    const wall: WallEntity = this.world.getTypeListEntity('wall').find((entity) => {
       return entity.getData().id === data.wallId;
     }) as WallEntity
     const wallThickness = wall ? wall.getData().thickness : 10;

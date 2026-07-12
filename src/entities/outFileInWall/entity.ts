@@ -53,10 +53,10 @@ export class OutFileInWallEntity extends EntityClassInWall<OutFileInWallData> {
     const findObjInfo = this.world.ObjFileTypes.find(item => item.id === fileTypeId)
     const preImgScale = findObjInfo?.preImgScale || 1
     const { width, height } = this.img;
-    if (!this.world.allFileMapObjects.wall) {
-      this.world.allFileMapObjects.wall = []
-    }
-    const wall: WallEntity = this.world.allFileMapObjects.wall.find((entity) => {
+    // if (!this.world.allFileMapObjects.wall) {
+    //   this.world.allFileMapObjects.wall = []
+    // }
+    const wall: WallEntity = this.world.getTypeListEntity('wall').find((entity) => {
       return entity.getData().id === wallId;
     }) as WallEntity
     const wallThickness = wall ? wall.getData().thickness : 10;
@@ -106,10 +106,10 @@ export class OutFileInWallEntity extends EntityClassInWall<OutFileInWallData> {
       console.error('未找到对应的文件类型:', fileTypeId)
       return []
     }
-    if (!this.world.allFileMapObjects.wall) {
-      this.world.allFileMapObjects.wall = []
-    }
-    const wall: WallEntity = this.world.allFileMapObjects.wall.find((entity) => {
+    // if (!this.world.allFileMapObjects.wall) {
+    //   this.world.allFileMapObjects.wall = []
+    // }
+    const wall: WallEntity = this.world.getTypeListEntity('wall').find((entity) => {
       return entity.getData().id === wallId;
     }) as WallEntity
     const wallThickness = wall ? wall.getData().thickness : 10;
@@ -230,10 +230,10 @@ export class OutFileInWallEntity extends EntityClassInWall<OutFileInWallData> {
 
   createBoundingBox(): [THREE.Vector3, THREE.Vector3, THREE.Vector3] {
     const { wallId, fileTypeId, isOuter, angle } = this.getData()
-    if (!this.world.allFileMapObjects.wall) {
-      this.world.allFileMapObjects.wall = []
-    }
-    const wall: WallEntity = this.world.allFileMapObjects.wall.find((entity) => {
+    // if (!this.world.allFileMapObjects.wall) {
+    //   this.world.allFileMapObjects.wall = []
+    // }
+    const wall: WallEntity = this.world.getTypeListEntity('wall').find((entity) => {
       return entity.getData().id === wallId;
     }) as WallEntity
     const wallThickness = wall ? wall.getData().thickness : 10;
@@ -297,10 +297,10 @@ export class OutFileInWallEntity extends EntityClassInWall<OutFileInWallData> {
     if (findObjInfo) {
       const { matchAreaType, matchAreaNumber1, matchAreaNumber2 } = findObjInfo
       if (matchAreaType === 1) {
-        if (!this.world.allFileMapObjects.wall) {
-          this.world.allFileMapObjects.wall = []
-        }
-        const wall: WallEntity = this.world.allFileMapObjects.wall.find((entity) => {
+        // if (!this.world.allFileMapObjects.wall) {
+        //   this.world.allFileMapObjects.wall = []
+        // }
+        const wall: WallEntity = this.world.getTypeListEntity('wall').find((entity) => {
           return entity.getData().id === wallId;
         }) as WallEntity
         const wallThickness = wall ? wall.getData().thickness : 10;
