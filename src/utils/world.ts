@@ -220,8 +220,8 @@ export class World {
   boundingBoxList(): THREE.Group[] {
     const boundingBoxList: THREE.Group[] = []
     allFileKeys.forEach((key) => {
-      if (this.allFileMapObjects[key]) {
-        (this.allFileMapObjects[key] as PointEntityClass<any>[]).forEach((item) => {
+      if (this.getTypeListEntity(key)) {
+        (this.getTypeListEntity(key) as PointEntityClass<any>[]).forEach((item) => {
           if (item.boundingBox) {
             boundingBoxList.push(item.boundingBox)
           }
@@ -234,8 +234,8 @@ export class World {
   moveZBoxList(): THREE.Group[] {
     const boundingBoxList: THREE.Group[] = []
     allFileKeys.forEach((key) => {
-      if (this.allFileMapObjects[key]) {
-        (this.allFileMapObjects[key] as PointEntityClass<any>[]).forEach((item) => {
+      if (this.getTypeListEntity(key)) {
+        (this.getTypeListEntity(key) as PointEntityClass<any>[]).forEach((item) => {
           if (item.moveZBox) {
             boundingBoxList.push(item.moveZBox)
           }
@@ -247,8 +247,8 @@ export class World {
 
   draw3D() {
     allFileKeys.forEach((key) => {
-      if (this.allFileMapObjects[key]) {
-        (this.allFileMapObjects[key] as BaseEntityClass<any>[]).forEach((item) => {
+      if (this.getTypeListEntity(key)) {
+        (this.getTypeListEntity(key) as BaseEntityClass<any>[]).forEach((item) => {
           item.reCreate3DMeshIfNeed()
           item.change3DMeshState()
           if (item instanceof PointEntityClass && !(item instanceof CameraBase)) {
@@ -300,8 +300,8 @@ export class World {
     const returnData: fileData = {};
     allFileKeys.forEach((key) => {
       returnData[key] = []
-      if (this.allFileMapObjects[key]) {
-        (this.allFileMapObjects[key] as PointEntityClass<any>[]).forEach((item) => {
+      if (this.getTypeListEntity(key)) {
+        (this.getTypeListEntity(key) as PointEntityClass<any>[]).forEach((item) => {
           // @ts-ignore
           returnData[key].push(item.getData())
         })

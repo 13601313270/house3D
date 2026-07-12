@@ -33,9 +33,6 @@ export class DoorEntity extends EntityClassInWall<DoorData> {
   }
 
   draw2DPreviewByData(ctx: CanvasRenderingContext2D, data: DoorData, panOffset: Point, zoomLevel: number): void {
-    // if (!this.world.allFileMapObjects.wall) {
-    //   this.world.allFileMapObjects.wall = []
-    // }
     const findWall: WallEntity = this.world.getTypeListEntity('wall').find((entity) => entity.getData().id === data.wallId) as WallEntity
     let wallThickness = 10;
     if (findWall) {
@@ -77,9 +74,6 @@ export class DoorEntity extends EntityClassInWall<DoorData> {
     ctx.stroke()
 
     // 绘制轮廓
-    // if (!this.world.allFileMapObjects.wall) {
-    //   this.world.allFileMapObjects.wall = []
-    // }
     const wall: WallEntity = this.world.getTypeListEntity('wall').find((entity) => {
       return entity.getData().id === data.wallId;
     }) as WallEntity
@@ -104,12 +98,8 @@ export class DoorEntity extends EntityClassInWall<DoorData> {
   }
 
   create3DMesh() {
-    // 加载 https://video-obj.oss-cn-beijing.aliyuncs.com/door.glb
     const data = this.getData();
     const group = new THREE.Group()
-    // if (!this.world.allFileMapObjects.wall) {
-    //   this.world.allFileMapObjects.wall = []
-    // }
     const wall: WallEntity = this.world.getTypeListEntity('wall').find((entity) => {
       return entity.getData().id === data.wallId
     }) as WallEntity
@@ -203,15 +193,10 @@ export class DoorEntity extends EntityClassInWall<DoorData> {
 
   showMatchHandel(x: number, y: number) {
     const data = this.getData();
-    // if (!this.world.allFileMapObjects.wall) {
-    //   this.world.allFileMapObjects.wall = []
-    // }
     const wall: WallEntity = this.world.getTypeListEntity('wall').find((entity) => {
       return entity.getData().id === data.wallId;
     }) as WallEntity
     const wallThickness = wall ? wall.getData().thickness : 10;
-    // const dist = Math.hypot(x - data.x, y - data.y)
-    // console.log('zoomLevel---2', zoomLevel)
     if (isPointInRotatedRect(x, y, {
       x: data.x,
       y: data.y,

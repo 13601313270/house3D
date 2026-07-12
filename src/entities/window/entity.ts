@@ -35,9 +35,6 @@ export class WindowEntity extends EntityClassInWall<WindowData> {
   }
 
   draw2DPreviewByData(ctx: CanvasRenderingContext2D, data: WindowData, panOffset: Point, zoomLevel: number): void {
-    // if (!this.world.allFileMapObjects.wall) {
-    //   this.world.allFileMapObjects.wall = []
-    // }
     const findWall: WallEntity = this.world.getTypeListEntity('wall').find((entity) => entity.getData().id === data.wallId) as WallEntity
     let wallThickness = 10;
     if (findWall) {

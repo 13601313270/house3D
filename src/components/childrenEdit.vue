@@ -59,10 +59,10 @@ const allChild = ref<Item[]>([])
 onMounted(() => {
   let newCount = 0;
   allChild.value = []
-  for (const key in window.worldApi.allFileMapObjects) {
-    if (window.worldApi.allFileMapObjects[key]) {
-      newCount += window.worldApi.allFileMapObjects[key].length
-      allChild.value.push(...window.worldApi.allFileMapObjects[key]
+  for (const key of window.worldApi.getAllObjectTypes()) {
+    if (window.worldApi.getTypeListEntity(key)) {
+      newCount += window.worldApi.getTypeListEntity(key).length
+      allChild.value.push(...window.worldApi.getTypeListEntity(key)
         .filter(v => {
           return v.type !== 'pointGroup'
         })

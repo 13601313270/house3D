@@ -113,12 +113,8 @@ export class DoorEntity extends EntityClassInWall<DoorData> {
   glbObj: THREE.Group | null = null;
 
   create3DMesh() {
-    // 加载 https://video-obj.oss-cn-beijing.aliyuncs.com/door.glb
     const data = this.getData();
     const group = new THREE.Group()
-    // if (!this.world.allFileMapObjects.wall) {
-    //   this.world.allFileMapObjects.wall = []
-    // }
     const wall: WallEntity = this.world.getTypeListEntity('wall').find((entity) => {
       return entity.getData().id === data.wallId
     }) as WallEntity
@@ -258,9 +254,6 @@ export class DoorEntity extends EntityClassInWall<DoorData> {
 
   showMatchHandel(x: number, y: number) {
     const data = this.getData();
-    // if (!this.world.allFileMapObjects.wall) {
-    //   this.world.allFileMapObjects.wall = []
-    // }
     const wall: WallEntity = this.world.getTypeListEntity('wall').find((entity) => {
       return entity.getData().id === data.wallId;
     }) as WallEntity
