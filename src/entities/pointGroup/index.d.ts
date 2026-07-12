@@ -1,5 +1,10 @@
-import { PointObjData } from '@/types/map2d'
+import { BaseObjData, PointObjData } from '@/types/map2d'
+import { BaseEntityClass } from '@/types/baseEntity'
 
 export type PointGroupData = PointObjData & {
-  angleY: number
+  angleY: number,
+  groupData: Array<{
+    type: string,
+    data: BaseObjData,
+  }>
 }

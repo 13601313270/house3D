@@ -206,4 +206,11 @@ export type editItem = {
   min: number,
   max: number,
   value: number
+} | {
+  id: string,
+  dataType: 'children',
+  value: Array<{
+    type: string,
+    data: BaseObjData,
+  }>
 }

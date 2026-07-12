@@ -29,7 +29,7 @@
           <div class="label title" v-if="item.dataType === 'title'">
             {{ item.label }}
           </div>
-          <div class="label" v-else>
+          <div class="label" v-else-if="'label' in item">
             {{ item.label }}
           </div>
           <div v-if="item.dataType === 'button'" class="edit">

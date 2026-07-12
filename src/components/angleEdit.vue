@@ -14,7 +14,6 @@
 </template>
 <script setup lang="ts">
 import { editItem } from '@/entities';
-import { compute } from 'three/src/nodes/gpgpu/ComputeNode';
 import { computed } from 'vue';
 const props = defineProps<{
   item: editItem,

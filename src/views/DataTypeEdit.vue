@@ -57,6 +57,8 @@
       <div v-else class="empty">无纹理</div>
       <button class="editBtn" @click="groundTextureEditorShow = true, groundTextureEditorPropId = item.id">编辑纹理</button>
     </div>
+    <ChildrenEdit v-else-if="item.dataType === 'children'" :modelValue="modelValue"
+      @update:modelValue="updateEditPropInputInfoArray" :item="item" />
     <div class="allMaterialPanel" v-if="allMaterialShow && allMaterialShowPropId"
       @click.self="allMaterialShow = false, allMaterialShowPropId = undefined">
       <div class="allMaterialPanelInner">
@@ -93,6 +95,7 @@ import ImgEdit from './ImgEdit.vue'
 import EnumTypeEdit from './enumTypeEdit.vue'
 import GroundTextureEditor from '@/components/GroundTextureEditor/index.vue'
 import AngleEdit from '@/components/angleEdit.vue'
+import ChildrenEdit from '@/components/childrenEdit.vue';
 import { loadImage } from '@/utils/imageCache'
 
 defineProps<{
@@ -167,6 +170,9 @@ function updateEditPropInputInfoString(value: string) {
   emit('update:modelValue', value)
 }
 function updateEditPropInputInfoNumber(value: number | null) {
+  emit('update:modelValue', value)
+}
+function updateEditPropInputInfoArray(value: any[]) {
   emit('update:modelValue', value)
 }
 async function updateEditPropByDataTexture(value: {

@@ -11,6 +11,7 @@ export default function (): DefaultItem<PointGroupData>[] {
         y: 0,
         z: 0,
         angleY: 0,
+        groupData: [],
       }
     }
   ]

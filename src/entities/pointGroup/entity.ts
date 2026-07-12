@@ -295,6 +295,21 @@ export class PointGroupEntity extends PointEntityClass<PointGroupData> {
     const data = this.getData();
     editShow([
       {
+        id: 'title1',
+        label: '内部组件',
+        dataType: 'title',
+      },
+      {
+        id: 'groupData',
+        dataType: 'children',
+        value: data.groupData,
+      },
+      {
+        id: 'title2',
+        label: '组属性',
+        dataType: 'title',
+      },
+      {
         id: 'angleY',
         label: '旋转角度',
         dataType: 'number',
@@ -311,7 +326,7 @@ export class PointGroupEntity extends PointEntityClass<PointGroupData> {
         max: 100,
         step: 1,
         value: data.z,
-      }
+      },
     ], (val) => {
       this.setData({
         ...data,
