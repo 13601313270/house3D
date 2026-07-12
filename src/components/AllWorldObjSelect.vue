@@ -163,7 +163,7 @@ function handleEnter(item: {
     const canvasAction = document.getElementById('canvas2D2') as HTMLCanvasElement;
     const ctxAction = canvasAction.getContext('2d')!
     ctxAction.clearRect(0, 0, canvasAction.width, canvasAction.height)
-    thisObj.draw2D(ctxAction, props.panOffset, props.zoom2DLevel)
+    thisObj.draw2DActionHandle(ctxAction, props.panOffset, props.zoom2DLevel)
   }
 }
 // function openEditPanel(id: string) {

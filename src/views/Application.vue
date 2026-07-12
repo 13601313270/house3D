@@ -459,10 +459,10 @@ const drawWrapper2D = () => {
     if (ctx && insertTempObj) {
       if (insertTempObj instanceof LineEntityClass) {
         insertTempObj.draw2DPreview(ctx, panOffset.value, zoom2DLevel.value)
-        insertTempObj.draw2D(ctx, panOffset.value, zoom2DLevel.value)
+        insertTempObj.draw2DActionHandle(ctx, panOffset.value, zoom2DLevel.value)
       } else if (insertTempObj instanceof PointEntityClass) {
         insertTempObj.draw2DPreview(ctx, panOffset.value, zoom2DLevel.value)
-        insertTempObj.draw2D(ctx, panOffset.value, zoom2DLevel.value)
+        insertTempObj.draw2DActionHandle(ctx, panOffset.value, zoom2DLevel.value)
       }
     }
   }
@@ -1200,7 +1200,7 @@ const handleMouseMove = (e: MouseEvent) => {
           if (temp(api)) {
             // 绘制操作句柄
             ctxAction.clearRect(0, 0, canvasAction.width, canvasAction.height)
-            matchHandelObj.draw2D(ctxAction, panOffset.value, zoom2DLevel.value)
+            matchHandelObj.draw2DActionHandle(ctxAction, panOffset.value, zoom2DLevel.value)
             return;
           }
         }
@@ -1217,7 +1217,7 @@ const handleMouseMove = (e: MouseEvent) => {
       drawWrapper2D();
       // 绘制操作句柄
       ctxAction.clearRect(0, 0, canvasAction.width, canvasAction.height)
-      matchHandelObj.draw2D(ctxAction, panOffset.value, zoom2DLevel.value)
+      matchHandelObj.draw2DActionHandle(ctxAction, panOffset.value, zoom2DLevel.value)
       worldApi.draw3D()
       if (tipTexts && tipTexts.length > 0) {
         const canvasAction = canvas2DRef.value!;
@@ -1295,7 +1295,7 @@ const handleMouseMove = (e: MouseEvent) => {
           ctxAction.stroke()
           ctxAction.restore(); // 恢复原始状态
         }
-        classInfo.draw2D(ctxAction, panOffset.value, zoom2DLevel.value)
+        classInfo.draw2DActionHandle(ctxAction, panOffset.value, zoom2DLevel.value)
 
         if (classInfo instanceof PointEntityClass) {
           // 绘制文字（带边框）
@@ -1463,7 +1463,7 @@ const handleMouseDown = (e: MouseEvent) => {
         const canvasAction = canvas2D2Ref.value!;
         const ctxAction = canvasAction.getContext('2d')!
         ctxAction.clearRect(0, 0, canvasAction.width, canvasAction.height)
-        matchHandelObj.draw2D(ctxAction, panOffset.value, zoom2DLevel.value)
+        matchHandelObj.draw2DActionHandle(ctxAction, panOffset.value, zoom2DLevel.value)
         return
       }
     }

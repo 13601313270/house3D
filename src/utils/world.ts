@@ -188,26 +188,26 @@ export class World {
   }
 
   // 绘制操作句柄
-  draw2DWorldActionHandle(
-    canvasActionRef: HTMLCanvasElement,
-    fileData: fileData,
-    panOffset: Point = { x: 0, y: 0 },
-    zoomLevel: number = 1,
-  ) {
-    const ctxAction = canvasActionRef.getContext('2d')!
-    ctxAction.clearRect(0, 0, canvasActionRef.width, canvasActionRef.height)
-    allFileKeys.forEach((key) => {
-      if (fileData[key]) {
-        fileData[key].forEach((item, index) => {
-          // @ts-ignore
-          const itemApi: DoorEntity = this.allFileMapObjects[key][index];
-          if (itemApi) {
-            itemApi.draw2D(ctxAction, panOffset, zoomLevel)
-          }
-        })
-      }
-    })
-  }
+  // draw2DWorldActionHandle(
+  //   canvasActionRef: HTMLCanvasElement,
+  //   fileData: fileData,
+  //   panOffset: Point = { x: 0, y: 0 },
+  //   zoomLevel: number = 1,
+  // ) {
+  //   const ctxAction = canvasActionRef.getContext('2d')!
+  //   ctxAction.clearRect(0, 0, canvasActionRef.width, canvasActionRef.height)
+  //   allFileKeys.forEach((key) => {
+  //     if (fileData[key]) {
+  //       fileData[key].forEach((item, index) => {
+  //         // @ts-ignore
+  //         const itemApi: DoorEntity = this.allFileMapObjects[key][index];
+  //         if (itemApi) {
+  //           itemApi.draw2D(ctxAction, panOffset, zoomLevel)
+  //         }
+  //       })
+  //     }
+  //   })
+  // }
 
   boundingBoxList(): THREE.Group[] {
     const boundingBoxList: THREE.Group[] = []

@@ -85,7 +85,7 @@ export abstract class BaseEntityClass<T extends BaseObjData> {
     zoomLevel: number,
   ): void;
 
-  draw2D(
+  draw2DActionHandle(
     ctx: CanvasRenderingContext2D,
     panOffset: Point,
     zoomLevel: number,
