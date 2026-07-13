@@ -187,7 +187,7 @@ import { Point } from '../types'
 import { snapThreshold, Group, EnvironmentConfig } from '../entities/group/entity'
 import Canvas3D from '../components/Canvas3D.vue'
 import { CameraState } from '@/types/camera'
-import { allFileKeys, fileData, editItem } from '@/entities'
+import { allFileKeys, fileData } from '@/entities'
 import { PointEntityClass } from '@/types/pointEntity'
 import { EntityClassInWall } from '@/types/entityInWall'
 import { BaseObjData, HandelInfo, LineObjData } from '@/types/map2d'
@@ -221,6 +221,7 @@ import AiPic from '@/components/aiPic.vue'
 import ShowPayModal from '@/components/showPayModal.vue'
 import drawAxes from '@/utils/drawAxes';
 import WorldState from '@/utils/worldState';
+import { editItem } from '@/utils/editItem';
 
 const canvas2DRef = ref<HTMLCanvasElement | null>(null)
 const canvas2D2Ref = ref<HTMLCanvasElement | null>(null)
