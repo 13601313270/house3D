@@ -1,6 +1,6 @@
 import * as THREE from 'three'
 import { PointObjData, Point, BaseObjData } from './map2d'
-import { Group } from '@/entities/group/entity'
+import { GroupEntity } from '@/entities/group/entity'
 import { BaseEntityClass } from './baseEntity'
 
 export abstract class PointEntityClass<T extends PointObjData> extends BaseEntityClass<T> {
@@ -9,7 +9,7 @@ export abstract class PointEntityClass<T extends PointObjData> extends BaseEntit
   boundingBoxData: [THREE.Vector3, THREE.Vector3, THREE.Vector3] | null = null // 第一个是尺寸，第二个是位置偏移，第三个是旋转角度
   spriteGroup: THREE.Group | null = null
 
-  constructor(world: Group | null, data: T) {
+  constructor(world: GroupEntity | null, data: T) {
     super(world, data);
     (() => {
       const geometry = new THREE.BoxGeometry(1, 1, 1);

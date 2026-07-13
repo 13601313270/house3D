@@ -184,7 +184,7 @@ import * as THREE from 'three'
 import JSZip from 'jszip';
 import request from '@/utils/request'
 import { Point } from '../types'
-import { snapThreshold, Group, EnvironmentConfig } from '../entities/group/entity'
+import { snapThreshold, GroupEntity, EnvironmentConfig } from '../entities/group/entity'
 import Canvas3D from '../components/Canvas3D.vue'
 import { CameraState } from '@/types/camera'
 import { allFileKeys } from '@/entities'
@@ -412,7 +412,7 @@ function getTempPointInsertDataLastAngel() {
 const worldState = new WorldState()
 window.worldState = worldState
 
-const worldApi = new Group(null, {
+const worldApi = new GroupEntity(null, {
   id: 'world',
   x: 0,
   y: 0,

@@ -1,9 +1,9 @@
-import { Group } from './entities/group/entity'
+import { GroupEntity } from './entities/group/entity'
 import WorldState from './utils/worldState'
 
 declare global {
   interface Window {
-    worldApi: Group
+    worldApi: GroupEntity
     worldState: WorldState
   }
 }

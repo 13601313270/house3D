@@ -3,7 +3,7 @@ import { Point, HandelInfo } from '@/types/map2d'
 import { EntityClassInWall } from '@/types/entityInWall'
 import { WindowData } from './index.d'
 import { Brush, Evaluator, SUBTRACTION } from 'three-bvh-csg';
-import { Group } from '@/entities/group/entity';
+import { GroupEntity } from '@/entities/group/entity';
 import { editItem } from '@/utils/editItem';
 import { getMaterialById } from '@/material';
 import { MatchRectArea } from '@/utils/matchArea'
@@ -16,7 +16,7 @@ export class WindowEntity extends EntityClassInWall<WindowData> {
   type: string = 'window'
   private circleRadius = 6
 
-  constructor(world: Group, window: WindowData) {
+  constructor(world: GroupEntity, window: WindowData) {
     super(world, window)
     if (window && window.wallId && this.parentEntity) {
       const wall = this.parentEntity.getTypeListEntity('wall').find((entity) => {
