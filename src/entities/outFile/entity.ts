@@ -27,7 +27,7 @@ export class OutFileEntity extends PointEntityClass<OutFileData> {
   private circleRadius = 6
 
   init(): Promise<void> {
-    const findObjInfo = this.world.ObjFileTypes.find(item => item.id === this.getData().fileTypeId)
+    const findObjInfo = window.worldState.ObjFileTypes.find(item => item.id === this.getData().fileTypeId)
     const preImg = findObjInfo?.preImg || ''
     if (findObjInfo?.name) {
       this.name = findObjInfo.name
@@ -50,7 +50,7 @@ export class OutFileEntity extends PointEntityClass<OutFileData> {
     const previewAngleY = data.angleY;
     const { fileTypeId } = data
     const zoom = data.zoom || 1
-    const findObjInfo = this.world.ObjFileTypes.find(item => item.id === fileTypeId)
+    const findObjInfo = window.worldState.ObjFileTypes.find(item => item.id === fileTypeId)
     const preImgScale = (findObjInfo?.preImgScale || 1) * zoom
     const { width, height } = this.img;
     ctx.save(); // 保存当前状态
@@ -76,7 +76,7 @@ export class OutFileEntity extends PointEntityClass<OutFileData> {
     const screenY = data.y * zoomLevel + panOffset.y
     const { fileTypeId } = data
     const zoom = data.zoom || 1
-    const findObjInfo = this.world.ObjFileTypes.find(item => item.id === fileTypeId)
+    const findObjInfo = window.worldState.ObjFileTypes.find(item => item.id === fileTypeId)
     let centerCircleRadius = this.circleRadius
     if (findObjInfo) {
       if (findObjInfo.matchAreaType === 1) {
@@ -224,7 +224,7 @@ export class OutFileEntity extends PointEntityClass<OutFileData> {
     const { fileTypeId, bm, color } = data
     const zoom = data.zoom || 1
     console.log('zoomzoomzoom', zoom)
-    const findObjInfo = this.world.ObjFileTypes.find(item => item.id === fileTypeId)
+    const findObjInfo = window.worldState.ObjFileTypes.find(item => item.id === fileTypeId)
 
     if (!findObjInfo) {
       console.error('未找到对应的文件类型:', fileTypeId)
@@ -355,7 +355,7 @@ export class OutFileEntity extends PointEntityClass<OutFileData> {
 
     const { fileTypeId, angleY } = data
     const zoom = data.zoom || 1
-    const findObjInfo = this.world.ObjFileTypes.find(item => item.id === fileTypeId)
+    const findObjInfo = window.worldState.ObjFileTypes.find(item => item.id === fileTypeId)
     if (!findObjInfo) {
       console.error('未找到对应的文件类型:', fileTypeId)
       return null
@@ -430,7 +430,7 @@ export class OutFileEntity extends PointEntityClass<OutFileData> {
     const dist = Math.hypot(x - data.x, y - data.y)
     const { fileTypeId } = data
     const zoom = data.zoom || 1
-    const findObjInfo = this.world.ObjFileTypes.find(item => item.id === fileTypeId)
+    const findObjInfo = window.worldState.ObjFileTypes.find(item => item.id === fileTypeId)
 
     if (findObjInfo) {
       const { matchAreaType, matchAreaNumber1, matchAreaNumber2, matchAreaOffsetX, matchAreaOffsetY } = findObjInfo
@@ -473,7 +473,7 @@ export class OutFileEntity extends PointEntityClass<OutFileData> {
     const zoom = data.zoom || 1;
     const dist = Math.hypot(x - data.x, y - data.y)
 
-    const findObjInfo = this.world.ObjFileTypes.find(item => item.id === data.fileTypeId)
+    const findObjInfo = window.worldState.ObjFileTypes.find(item => item.id === data.fileTypeId)
     let centerCircleRadius = this.circleRadius
     if (findObjInfo) {
       if (findObjInfo.matchAreaType === 1) {
@@ -523,7 +523,7 @@ export class OutFileEntity extends PointEntityClass<OutFileData> {
       const data = this.getData();
       // 根据x,y计算angleY
       const angleY = Math.atan2(y - data.y, x - data.x)
-      const findObjInfo = this.world.ObjFileTypes.find(item => item.id === data.fileTypeId)
+      const findObjInfo = window.worldState.ObjFileTypes.find(item => item.id === data.fileTypeId)
       console.log(angleY)
       this.setData({
         ...this.getData(),

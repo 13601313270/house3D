@@ -29,7 +29,7 @@ export class OutFileInWallEntity extends EntityClassInWall<OutFileInWallData> {
   private circleRadius = 6
 
   init(): Promise<void> {
-    const findObjInfo = this.world.ObjFileTypes.find(item => item.id === this.getData().fileTypeId)
+    const findObjInfo = window.worldState.ObjFileTypes.find(item => item.id === this.getData().fileTypeId)
     const preImg = findObjInfo?.preImg || ''
     if (findObjInfo?.name) {
       this.name = findObjInfo.name
@@ -49,7 +49,7 @@ export class OutFileInWallEntity extends EntityClassInWall<OutFileInWallData> {
     const { x, y, isOuter, angle, wallId, fileTypeId } = data
     const screenX = x * zoomLevel + panOffset.x
     const screenY = y * zoomLevel + panOffset.y
-    const findObjInfo = this.world.ObjFileTypes.find(item => item.id === fileTypeId)
+    const findObjInfo = window.worldState.ObjFileTypes.find(item => item.id === fileTypeId)
     const preImgScale = findObjInfo?.preImgScale || 1
     const { width, height } = this.img;
     const wall: WallEntity = this.world.getTypeListEntity('wall').find((entity) => {
@@ -96,7 +96,7 @@ export class OutFileInWallEntity extends EntityClassInWall<OutFileInWallData> {
     const data = this.getData();
     const group = new THREE.Group()
     const { fileTypeId, bm, color, wallId, isOuter } = data
-    const findObjInfo = this.world.ObjFileTypes.find(item => item.id === fileTypeId)
+    const findObjInfo = window.worldState.ObjFileTypes.find(item => item.id === fileTypeId)
 
     if (!findObjInfo) {
       console.error('未找到对应的文件类型:', fileTypeId)
@@ -228,7 +228,7 @@ export class OutFileInWallEntity extends EntityClassInWall<OutFileInWallData> {
     }) as WallEntity
     const wallThickness = wall ? wall.getData().thickness : 10;
 
-    const findObjInfo = this.world.ObjFileTypes.find(item => item.id === fileTypeId)
+    const findObjInfo = window.worldState.ObjFileTypes.find(item => item.id === fileTypeId)
 
     if (!findObjInfo) {
       console.error('未找到对应的文件类型:', fileTypeId)
@@ -283,7 +283,7 @@ export class OutFileInWallEntity extends EntityClassInWall<OutFileInWallData> {
     const data = this.getData();
     const dist = Math.hypot(x - data.x, y - data.y)
     const { fileTypeId, angle, isOuter, wallId } = data
-    const findObjInfo = this.world.ObjFileTypes.find(item => item.id === fileTypeId)
+    const findObjInfo = window.worldState.ObjFileTypes.find(item => item.id === fileTypeId)
     if (findObjInfo) {
       const { matchAreaType, matchAreaNumber1, matchAreaNumber2 } = findObjInfo
       if (matchAreaType === 1) {

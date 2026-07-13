@@ -31,8 +31,6 @@ export class World {
   // 锁定状态的对象列表
   lockedObjList: BaseEntityClass<BaseObjData>[] = []
 
-  ObjFileTypes: ObjOutputFileType[] = []
-
   activeCameraIndex: number = -1
 
   environmentConfig: EnvironmentConfig = { skyType: 1, ambientLightIntensity: 1, showGround: true }

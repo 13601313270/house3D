@@ -185,16 +185,16 @@ onMounted(async () => {
 async function changeCurrentToolToOutFile(id: string) {
   activeObjChildList.value = []
   activePluginChildList.value = []
-  const index = worldApi.ObjFileTypes.findIndex(item => item.id === id);
+  const index = window.worldState.ObjFileTypes.findIndex(item => item.id === id);
   if (index === -1) {
     const { data } = await axios.get('https://api.studying1v1.com/video/objectFileById/' + id)
     const res: ObjOutputFileType = data;
     lastChooseOutFile.value = res;
-    worldApi.ObjFileTypes.push(res)
+    window.worldState.ObjFileTypes.push(res)
   } else {
-    lastChooseOutFile.value = worldApi.ObjFileTypes[index];
+    lastChooseOutFile.value = window.worldState.ObjFileTypes[index];
   }
-  const findObjInfo = worldApi.ObjFileTypes.find(item => item.id === id);
+  const findObjInfo = window.worldState.ObjFileTypes.find(item => item.id === id);
   if (!findObjInfo) return
 
   if (findObjInfo.inWall) {

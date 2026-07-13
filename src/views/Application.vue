@@ -872,7 +872,7 @@ async function initWorldByData(data: fileData & {
   })
 
   res.forEach((v: ObjOutputFileType) => {
-    worldApi.ObjFileTypes.push(v)
+    window.worldState.ObjFileTypes.push(v)
   })
 
   for (let i = 0; i < allFileKeys.length; i++) {
