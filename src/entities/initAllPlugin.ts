@@ -28,7 +28,31 @@ import regularPolygonPlugin from './regularPolygon'
 import regularPolygon2Plugin from './regularPolygon2'
 import torusPlugin from './torus'
 import groupPlugin from './group'
+import PluginType from './pluginType'
 
+function loadItem(v: PluginType) {
+  allPluginByKey[v.key] = v
+  allFileKeys.push(v.key)
+  if (v.type === 'base') {
+    allFileKeysGroup[0].child.push(v.key)
+  } else if (v.type === 'curtain') {
+    allFileKeysGroup[1].child.push(v.key)
+  } else if (v.type === 'house') {
+    allFileKeysGroup[2].child.push(v.key)
+  } else if (v.type === 'camera') {
+    allFileKeysGroup[3].child.push(v.key)
+  } else if (v.type === 'other') {
+    allFileKeysGroup[4].child.push(v.key)
+  } else if (typeof v.type === 'number') {
+    if (!allFileWithGroupId[v.type]) {
+      allFileWithGroupId[v.type] = []
+    }
+    allFileWithGroupId[v.type].push(v)
+  }
+  allFileKeysName[v.key] = v.name
+  fileDataKeyToClass[v.key] = v.entity
+  allFileKeysObjType[v.key] = v.objType
+}
 export default function () {
   [
     wallPlugin,
@@ -58,28 +82,9 @@ export default function () {
     regularPolygonPlugin,
     regularPolygon2Plugin,
     torusPlugin,
-    groupPlugin,
-  ].forEach(v => {
-    allPluginByKey[v.key] = v
-    allFileKeys.push(v.key)
-    if (v.type === 'base') {
-      allFileKeysGroup[0].child.push(v.key)
-    } else if (v.type === 'curtain') {
-      allFileKeysGroup[1].child.push(v.key)
-    } else if (v.type === 'house') {
-      allFileKeysGroup[2].child.push(v.key)
-    } else if (v.type === 'camera') {
-      allFileKeysGroup[3].child.push(v.key)
-    } else if (v.type === 'other') {
-      allFileKeysGroup[4].child.push(v.key)
-    } else if (typeof v.type === 'number') {
-      if (!allFileWithGroupId[v.type]) {
-        allFileWithGroupId[v.type] = []
-      }
-      allFileWithGroupId[v.type].push(v)
-    }
-    allFileKeysName[v.key] = v.name
-    fileDataKeyToClass[v.key] = v.entity
-    allFileKeysObjType[v.key] = v.objType
-  })
+  ].forEach(loadItem);
+  // 加载group插件，放在最后
+  [
+    groupPlugin
+  ].forEach(loadItem)
 }
