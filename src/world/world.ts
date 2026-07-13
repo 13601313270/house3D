@@ -2,6 +2,7 @@ import * as THREE from 'three'
 import { EnvironmentConfig } from "@/entities/group/entity";
 import { GroupData } from '@/entities/group/index.d';
 import { GroupBaseEntity } from '@/types/GroupBaseEntity';
+import { HandelInfo } from '@/types/map2d';
 
 type WorldData = GroupData & {
   temp: boolean,
@@ -101,6 +102,20 @@ class WorldGroup extends GroupBaseEntity {
       this.groundMesh.position.y = -10
       this.group.add(this.groundMesh)
     });
+  }
+
+  showMatchHandel(x: number, y: number) {
+    return null
+  }
+
+  matchHandelMoveCallback(position: {
+    x: number,
+    y: number,
+  }, matchHandelInfo: HandelInfo) {
+  }
+
+  matchHandelInfo(x: number, y: number) {
+    return null;
   }
 }
 export default WorldGroup

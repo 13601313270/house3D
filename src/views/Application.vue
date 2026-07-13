@@ -184,7 +184,7 @@ import * as THREE from 'three'
 import JSZip from 'jszip';
 import request from '@/utils/request'
 import { Point } from '../types'
-import { snapThreshold, EnvironmentConfig } from '../entities/group/entity'
+import { snapThreshold, EnvironmentConfig, GroupEntity } from '../entities/group/entity'
 import Canvas3D from '../components/Canvas3D.vue'
 import { CameraState } from '@/types/camera'
 import { allFileKeys } from '@/entities'
@@ -478,6 +478,9 @@ const drawWrapper2D = () => {
         insertTempObj.draw2DPreview(ctx, panOffset.value, zoom2DLevel.value)
         insertTempObj.draw2DActionHandle(ctx, panOffset.value, zoom2DLevel.value)
       } else if (insertTempObj instanceof PointEntityClass) {
+        insertTempObj.draw2DPreview(ctx, panOffset.value, zoom2DLevel.value)
+        insertTempObj.draw2DActionHandle(ctx, panOffset.value, zoom2DLevel.value)
+      } else if (insertTempObj instanceof GroupEntity) {
         insertTempObj.draw2DPreview(ctx, panOffset.value, zoom2DLevel.value)
         insertTempObj.draw2DActionHandle(ctx, panOffset.value, zoom2DLevel.value)
       }
@@ -1088,6 +1091,16 @@ const handleCanvasClick = async (e: MouseEvent) => {
         currentTool.value = 'drag'
       }
     }
+  } else if (insertTempObj && insertTempObj instanceof GroupEntity) {
+    if (insertAdding.value === false) {
+      insertAdding.value = true
+      await worldApi.add(currentTool.value, [insertTempObj.getData()])
+      insertTempObj = null;
+      setTimeout(() => {
+        insertAdding.value = false
+      }, 300)// 至少停留300毫秒，防止出现那种闪现的效果。
+      currentTool.value = 'drag'
+    }
   }
 
   drawWrapper2DAnd3D()
@@ -1420,6 +1433,9 @@ const handleMouseMove = (e: MouseEvent) => {
       tipTexts = insertTempObj.setPrepareState(x, y, nearest || undefined)
       drawWrapper2DAnd3D()
     } else if (insertTempObj instanceof PointEntityClass) {
+      tipTexts = insertTempObj.setPrepareState(x, y)
+      drawWrapper2DAnd3D()
+    } else if (insertTempObj instanceof GroupEntity) {
       tipTexts = insertTempObj.setPrepareState(x, y)
       drawWrapper2DAnd3D()
     }
