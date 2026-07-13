@@ -54,7 +54,7 @@ export abstract class BaseEntityClass<T extends BaseObjData> {
   }
 
   // 生成3D模型
-  abstract create3DMesh(scene: THREE.Scene, ...args: any[]): THREE.Group[]
+  abstract create3DMesh(): THREE.Group[]
 
   protected cacheKeyStr = '';
   public markObjectIsDirty() {
@@ -124,7 +124,7 @@ export abstract class BaseEntityClass<T extends BaseObjData> {
     // console.log('reCreate3DMeshIfNeed', this.cacheKeyStr, newKeyByData)
     const scene: THREE.Scene = window.worldState.scene
     this.meshList.forEach(mesh => scene.remove(mesh))
-    this.meshList = this.create3DMesh(scene);
+    this.meshList = this.create3DMesh();
     this.meshList.forEach(mesh => scene.add(mesh))
     this.cacheKeyStr = newKeyByData;
   }

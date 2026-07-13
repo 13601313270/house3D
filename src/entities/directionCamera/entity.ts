@@ -317,14 +317,14 @@ export class DirectionCameraEntity extends CameraBase<DirectionCameraData> {
   private lastChangeStateKey = '';
   change3DMeshState(): void {
     const data = this.getData();
-    const ttt = JSON.stringify(data)
-    if (this.lastChangeStateKey === ttt) {
+    const lastDataStr = JSON.stringify(data)
+    if (this.lastChangeStateKey === lastDataStr) {
       this.meshList.forEach(v => {
         v.position.set(data.x, data.z, data.y)
       })
       return
     }
-    this.lastChangeStateKey = ttt
+    this.lastChangeStateKey = lastDataStr
 
     const targetPosition = this.getTargetPosition();
 

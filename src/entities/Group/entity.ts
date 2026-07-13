@@ -170,7 +170,7 @@ export class Group extends PointEntityClass<GroupData> {
         boundingBoxList.push(item.moveZBox)
       }
     });
-    console.log('boundingBoxList-1', boundingBoxList)
+    // console.log('boundingBoxList-1', boundingBoxList)
     return boundingBoxList
   }
 
@@ -300,45 +300,8 @@ export class Group extends PointEntityClass<GroupData> {
     this.children.forEach(item => {
       item.reCreate3DMeshIfNeed()
       item.change3DMeshState()
-      if (item instanceof PointEntityClass && !(item instanceof CameraBase)) {
-        setTimeout(() => {
-          const boundingBox = item.createBoundingBox();
-          if (boundingBox) {
-            const data = item.getData();
-            // 第一个是尺寸，第二个是位置偏移，第三个是旋转角度
-            const [boxVector3, offsetVector3, rotateVector3] = boundingBox;
-            item.boundingBoxData = [boxVector3, offsetVector3, rotateVector3]
-            item.boundingBox.position.set(data.x, data.z, data.y)
-            item.boundingBox.children[0].rotation.set(rotateVector3.x, rotateVector3.y, rotateVector3.z)
-            item.boundingBox.children[0].scale.set(boxVector3.x, boxVector3.y, boxVector3.z)
-            item.boundingBox.children[0].position.set(offsetVector3.x, offsetVector3.y, offsetVector3.z)
-
-            item.boundingBox.children[1].rotation.set(rotateVector3.x, rotateVector3.y, rotateVector3.z)
-            item.boundingBox.children[1].scale.set(boxVector3.x, boxVector3.y, boxVector3.z)
-            item.boundingBox.children[1].position.set(offsetVector3.x, offsetVector3.y, offsetVector3.z)
-
-            item.boundingBox.visible = true
-            if (item.spriteGroup) {
-              item.spriteGroup.position.set(data.x, data.z, data.y)
-              item.spriteGroup.children[0].position.set(0, boxVector3.y / 2 + offsetVector3.y + 12, 0)
-            }
-            if (item.moveZBox) {
-              item.moveZBox.position.set(data.x, data.z, data.y)
-              // const height = Math.max(Math.min(40, boxVector3.y), 20);
-              const radio = Math.max(Math.min(boxVector3.x / 8, boxVector3.z / 8, 20), 8);
-              const height = radio * 3;
-              item.moveZBox.children[0].scale.set(
-                radio,
-                height,
-                radio
-              )
-              item.moveZBox.children[0].position.set(offsetVector3.x, boxVector3.y / 2 + height / 2 + offsetVector3.y, offsetVector3.z)
-              item.moveZBox.visible = false
-            }
-          } else {
-            item.boundingBox.visible = false
-          }
-        })
+      if (item instanceof PointEntityClass) {
+        item.changeBoundingBoxState()
       }
     })
   }

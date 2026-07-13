@@ -157,9 +157,49 @@ export abstract class PointEntityClass<T extends PointObjData> extends BaseEntit
   // 改变3D模型的状态
   // 例如：改变位置，旋转角度等
   change3DMeshState(): void {
+    const data = this.getData();
     this.meshList.forEach(v => {
-      v.position.set(this.data.x, this.data.z, this.data.y)
+      v.position.set(data.x, data.z, data.y)
     })
+  }
+
+  changeBoundingBoxState() {
+    const boundingBox = this.createBoundingBox();
+    if (boundingBox) {
+      const data = this.getData();
+      // 第一个是尺寸，第二个是位置偏移，第三个是旋转角度
+      const [boxVector3, offsetVector3, rotateVector3] = boundingBox;
+      this.boundingBoxData = [boxVector3, offsetVector3, rotateVector3]
+      this.boundingBox.position.set(data.x, data.z, data.y)
+      this.boundingBox.children[0].rotation.set(rotateVector3.x, rotateVector3.y, rotateVector3.z)
+      this.boundingBox.children[0].scale.set(boxVector3.x, boxVector3.y, boxVector3.z)
+      this.boundingBox.children[0].position.set(offsetVector3.x, offsetVector3.y, offsetVector3.z)
+
+      this.boundingBox.children[1].rotation.set(rotateVector3.x, rotateVector3.y, rotateVector3.z)
+      this.boundingBox.children[1].scale.set(boxVector3.x, boxVector3.y, boxVector3.z)
+      this.boundingBox.children[1].position.set(offsetVector3.x, offsetVector3.y, offsetVector3.z)
+
+      this.boundingBox.visible = true
+      if (this.spriteGroup) {
+        this.spriteGroup.position.set(data.x, data.z, data.y)
+        this.spriteGroup.children[0].position.set(0, boxVector3.y / 2 + offsetVector3.y + 12, 0)
+      }
+      if (this.moveZBox) {
+        this.moveZBox.position.set(data.x, data.z, data.y)
+        // const height = Math.max(Math.min(40, boxVector3.y), 20);
+        const radio = Math.max(Math.min(boxVector3.x / 8, boxVector3.z / 8, 20), 8);
+        const height = radio * 3;
+        this.moveZBox.children[0].scale.set(
+          radio,
+          height,
+          radio
+        )
+        this.moveZBox.children[0].position.set(offsetVector3.x, boxVector3.y / 2 + height / 2 + offsetVector3.y, offsetVector3.z)
+        this.moveZBox.visible = false
+      }
+    } else {
+      this.boundingBox.visible = false
+    }
   }
 
   // 当前对象进入到一根吸附线的区域

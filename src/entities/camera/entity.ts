@@ -305,14 +305,14 @@ export class CameraEntity extends CameraBase<CameraData> {
   private lastChangeStateKey = '';
   change3DMeshState(): void {
     const data = this.getData();
-    const ttt = JSON.stringify(data)
-    if (this.lastChangeStateKey === ttt) {
+    const lastDataStr = JSON.stringify(data)
+    if (this.lastChangeStateKey === lastDataStr) {
       this.meshList.forEach(v => {
         v.position.set(data.x, data.z, data.y)
       })
       return
     }
-    this.lastChangeStateKey = ttt
+    this.lastChangeStateKey = lastDataStr
     const dx = data.targetPositionX - data.x
     const dy = data.targetPositionY - data.y
     const dz = data.targetPositionZ - data.z
