@@ -422,7 +422,6 @@ export class OutFileEntity extends PointEntityClass<OutFileData> {
       v.position.set(data.x, data.z, data.y)
       v.rotation.y = data.angleY
     })
-    this.changeBoundingBoxState()
   }
 
   showMatchHandel(x: number, y: number) {

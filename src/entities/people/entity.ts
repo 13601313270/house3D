@@ -346,7 +346,6 @@ export class PeopleEntity extends PointEntityClass<PeopleData> {
         }
       })
     }
-    this.changeBoundingBoxState()
   }
 
   // 当前对象是否需要重新生成3D模型状态

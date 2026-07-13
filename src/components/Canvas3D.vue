@@ -344,7 +344,12 @@ const initThree = () => {
                 ...entity.getData(),
                 z: camera1MouseMoveStartZ + (deltaY * -1)
               })
-              window.worldApi.draw3D()
+              window.worldApi.reCreate3DMeshIfNeed()
+              window.worldApi.change3DMeshState()
+              entity.changeBoundingBoxState()
+              entity.moveZBox.visible = true
+              entity.boundingBox.visible = true
+              entity.boundingBox.children[1].visible = true
             }
           }
         } else {
@@ -446,7 +451,9 @@ const resize = () => {
 
 const updateScene = () => {
   if (window.worldState.scene) {
-    props.world.draw3D()
+    props.world.reCreate3DMeshIfNeed()
+    props.world.change3DMeshState()
+    props.world.changeBoundingBoxState()
     resize();
   }
 }

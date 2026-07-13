@@ -273,16 +273,6 @@ export class Group extends PointEntityClass<GroupData> {
     return this.type + JSON.stringify(cacheData)
   }
 
-  // 改变3D模型的状态
-  // 例如：改变位置，旋转角度等，模型本身不变
-  change3DMeshState(): void {
-    // const data = this.getData();
-    // this.meshList.forEach(v => {
-    //   v.position.set(data.x, data.z, data.y)
-    //   v.rotation.y = data.angleY
-    // })
-  }
-
   // associationEntity: BaseEntityClass<any>[] = []// 关联对象，就是本对象渲染，需要联动修改的对象。（比如：墙壁上被窗户挖洞，那么墙修改，需要重新挖洞）
 
   setData(data: GroupData) {
@@ -296,10 +286,25 @@ export class Group extends PointEntityClass<GroupData> {
     // this.world._callObjDataChange(this)
   }
 
-  draw3D() {
+  changeBoundingBoxState() {
+    this.children.forEach(item => {
+      if (item instanceof PointEntityClass) {
+        item.changeBoundingBoxState()
+      }
+    })
+  }
+
+  // 改变3D模型的状态
+  // 例如：改变位置，旋转角度等，模型本身不变
+  change3DMeshState(): void {
+    this.children.forEach(item => {
+      item.change3DMeshState()
+    })
+  }
+
+  reCreate3DMeshIfNeed() {
     this.children.forEach(item => {
       item.reCreate3DMeshIfNeed()
-      item.change3DMeshState()
     })
   }
 

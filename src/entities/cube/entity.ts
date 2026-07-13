@@ -377,6 +377,5 @@ export class CubeEntity extends PointEntityClass<CubeData> {
       v.position.set(data.x, data.z, data.y)
       v.rotation.y = data.angleY
     })
-    this.changeBoundingBoxState()
   }
 }

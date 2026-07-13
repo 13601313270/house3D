@@ -196,7 +196,6 @@ export class ImportFileEntity extends PointEntityClass<ImportFileData> {
       v.rotation.y = data.angleY
       v.scale.set(data.scale, data.scale, data.scale)
     })
-    this.changeBoundingBoxState()
   }
 
   showMatchHandel(x: number, y: number) {

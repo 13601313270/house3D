@@ -56,6 +56,7 @@ export abstract class PointEntityClass<T extends PointObjData> extends BaseEntit
       // @ts-ignore
       group.entity = this
       const group2 = new THREE.Group()
+      group2.visible = false
       group2.add(group)
       // @ts-ignore
       group2.entity = this
@@ -161,7 +162,6 @@ export abstract class PointEntityClass<T extends PointObjData> extends BaseEntit
     this.meshList.forEach(v => {
       v.position.set(data.x, data.z, data.y)
     })
-    this.changeBoundingBoxState()
   }
 
   changeBoundingBoxState() {
@@ -180,7 +180,7 @@ export abstract class PointEntityClass<T extends PointObjData> extends BaseEntit
       this.boundingBox.children[1].scale.set(boxVector3.x, boxVector3.y, boxVector3.z)
       this.boundingBox.children[1].position.set(offsetVector3.x, offsetVector3.y, offsetVector3.z)
 
-      this.boundingBox.visible = true
+      // this.boundingBox.visible = true
       if (this.spriteGroup) {
         this.spriteGroup.position.set(data.x, data.z, data.y)
         this.spriteGroup.children[0].position.set(0, boxVector3.y / 2 + offsetVector3.y + 12, 0)
@@ -196,10 +196,10 @@ export abstract class PointEntityClass<T extends PointObjData> extends BaseEntit
           radio
         )
         this.moveZBox.children[0].position.set(offsetVector3.x, boxVector3.y / 2 + height / 2 + offsetVector3.y, offsetVector3.z)
-        this.moveZBox.visible = false
+        // this.moveZBox.visible = false
       }
     } else {
-      this.boundingBox.visible = false
+      // this.boundingBox.visible = false
     }
   }
 

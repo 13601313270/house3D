@@ -423,7 +423,9 @@ window.worldApi = worldApi
 allObjCount.value = worldApi.getAllObjectCount()
 const drawWrapper2DAnd3D = () => {
   drawWrapper2D();
-  worldApi.draw3D()
+  worldApi.reCreate3DMeshIfNeed()
+  worldApi.change3DMeshState()
+  worldApi.changeBoundingBoxState()
 }
 const drawWrapper2D = () => {
   const canvas = canvas2DRef.value
@@ -1222,7 +1224,11 @@ const handleMouseMove = (e: MouseEvent) => {
       // 绘制操作句柄
       ctxAction.clearRect(0, 0, canvasAction.width, canvasAction.height)
       matchHandelObj.draw2DActionHandle(ctxAction, panOffset.value, zoom2DLevel.value)
-      worldApi.draw3D()
+
+      worldApi.reCreate3DMeshIfNeed()
+      worldApi.change3DMeshState()
+      worldApi.changeBoundingBoxState()
+
       if (tipTexts && tipTexts.length > 0) {
         const canvasAction = canvas2DRef.value!;
         const ctxAction = canvasAction.getContext('2d')!

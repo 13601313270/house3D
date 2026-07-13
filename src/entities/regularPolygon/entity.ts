@@ -367,6 +367,5 @@ export class RegularPolygonEntity extends PointEntityClass<RegularPolygonData> {
       v.position.set(data.x, data.z, data.y)
       v.rotation.y = data.angleY
     })
-    this.changeBoundingBoxState()
   }
 }
