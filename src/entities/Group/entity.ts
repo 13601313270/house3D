@@ -73,8 +73,8 @@ export class GroupEntity extends BaseEntityClass<GroupData> {
     zoomLevel: number,
   ) {
     const [width, height] = this.getSize()
-    const screenX = 0 * zoomLevel + panOffset.x;// data.x * zoomLevel + panOffset.x
-    const screenY = 0 * zoomLevel + panOffset.y;// data.y * zoomLevel + panOffset.y
+    const screenX = data.x * zoomLevel + panOffset.x;// data.x * zoomLevel + panOffset.x
+    const screenY = data.y * zoomLevel + panOffset.y;// data.y * zoomLevel + panOffset.y
     // console.log('setPrepareState---' + this.getData().id + '---preview', data.x, data.y)
     // 绘制一个方块
     ctx.fillStyle = 'red'

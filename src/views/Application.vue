@@ -417,6 +417,9 @@ const worldApi = new WorldGroup(null, {
   id: 'world',
   childrenData: [
   ],
+  x: 0,
+  y: 0,
+  z: 0,
   angleY: 0,
   temp: false,
 })

@@ -7,5 +7,8 @@ export type GroupData = BaseObjData & {
     type: string,
     value: BaseObjData,
   }>,
+  x: number
+  y: number
+  z: number,
   angleY: number
 }
