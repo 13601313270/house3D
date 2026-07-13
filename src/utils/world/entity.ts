@@ -62,7 +62,32 @@ export class World {
 
     const axesHelper = new THREE.AxesHelper(100)
     axesHelper.layers.set(2)
-    this.scene.add(axesHelper)
+    this.scene.add(axesHelper);
+
+    (async () => {
+      const apiList = [];
+      for (const item of data.childrenData) {
+        const type = item.type
+        const EntityClassItem: EntityConstructor = fileDataKeyToClass[type];
+        if (EntityClassItem) {
+          const api = new EntityClassItem(this, item.value);
+          await api.init()
+          apiList.push(api)
+          if (!this.allObjectsByGroup[type]) {
+            this.allObjectsByGroup[type] = []
+          }
+          this.allObjectsByGroup[type].push(api)
+          this.children.push(api)
+          this.worldAddBindList.forEach(callback => callback(api))
+          if (api.getData().isLocked) {
+            this.lockedObjList.push(api)
+          }
+        }
+      }
+      if (apiList.length > 0) {
+        this._callAllOnChangeCallback('add', apiList)
+      }
+    })();
 
     this.setEnvironMent()
   }
@@ -295,7 +320,7 @@ export class World {
       await api.init()
       apiList.push(api);
       this.allObjectsByGroup[type].push(api)
-      this.data.children.push(api.getData())
+      this.data.childrenData.push(api.getData())
       this.children.push(api);
       this.worldAddBindList.forEach(callback => callback(api))
       if (api.getData().isLocked) {
@@ -314,7 +339,7 @@ export class World {
 
       const index2 = this.children.indexOf(backup)
       this.children.splice(index2, 1)
-      this.data.children.splice(index2, 1)
+      this.data.childrenData.splice(index2, 1)
 
       if (backup.getData().isLocked) {
         const index = this.lockedObjList.indexOf(backup)
@@ -349,7 +374,7 @@ export class World {
         this.allObjectsByGroup[type] = []
       }
     })
-    this.data.children = []
+    this.data.childrenData = []
     this._callAllOnChangeCallback('remove', willRemoveList);
   }
 

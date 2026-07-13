@@ -415,10 +415,12 @@ const worldApi = new World({
   x: 0,
   y: 0,
   z: 0,
-  children: [],
+  childrenData: [
+  ],
   angleY: 0,
 })
 window.worldApi = worldApi
+allObjCount.value = worldApi.getAllObjectCount()
 const drawWrapper2DAnd3D = () => {
   drawWrapper2D();
   worldApi.draw3D()
