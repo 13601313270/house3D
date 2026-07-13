@@ -29,16 +29,16 @@ class WorldState {
 
   setEnvironMent(config?: EnvironmentConfig) {
     if (config) {
-      window.worldState.environmentConfig = config
+      this.environmentConfig = config
     }
-    const intensity = window.worldState.environmentConfig.ambientLightIntensity !== undefined ? window.worldState.environmentConfig.ambientLightIntensity : 1.5
-    console.log('intensity', intensity, window.worldState.environmentConfig.ambientLightIntensity);
+    const intensity = this.environmentConfig.ambientLightIntensity !== undefined ? this.environmentConfig.ambientLightIntensity : 1.5
+    console.log('intensity', intensity, this.environmentConfig.ambientLightIntensity);
 
-    if (window.worldState.ambientLight) {
-      window.worldState.ambientLight.intensity = intensity === 0 ? 0.1 : intensity
+    if (this.ambientLight) {
+      this.ambientLight.intensity = intensity === 0 ? 0.1 : intensity
     } else {
-      window.worldState.ambientLight = new THREE.AmbientLight(0xffffff, intensity)
-      window.worldState.scene.add(window.worldState.ambientLight)
+      this.ambientLight = new THREE.AmbientLight(0xffffff, intensity)
+      this.scene.add(this.ambientLight)
     }
 
     // if (!this.directionalLight) {
@@ -47,7 +47,7 @@ class WorldState {
     //   this.scene.add(this.directionalLight)
     // }
 
-    const skyType = window.worldState.environmentConfig.skyType || 1;
+    const skyType = this.environmentConfig.skyType || 1;
     const skyImgMap: Record<number, string> = {
       1: '/skyImg/sky.jpg',
       2: '/skyImg/sky2.jpg',
@@ -63,15 +63,15 @@ class WorldState {
     loaderSky.load(path, (texture) => {
       texture.mapping = THREE.EquirectangularReflectionMapping;
 
-      window.worldState.scene.background = texture;
-      window.worldState.scene.environment = texture; // 可选：简单环境光
+      this.scene.background = texture;
+      this.scene.environment = texture; // 可选：简单环境光
     });
 
     // 添加地面
-    const showGround = window.worldState.environmentConfig.showGround ?? true
+    const showGround = this.environmentConfig.showGround ?? true
 
-    if (window.worldState.groundMesh) {
-      window.worldState.groundMesh.visible = showGround
+    if (this.groundMesh) {
+      this.groundMesh.visible = showGround
       return
     }
 
@@ -91,10 +91,10 @@ class WorldState {
         roughness: 0.8,
         metalness: 0.2,
       })
-      window.worldState.groundMesh = new THREE.Mesh(groundGeometry, groundMaterial)
-      window.worldState.groundMesh.rotation.x = -Math.PI / 2
-      window.worldState.groundMesh.position.y = -10
-      window.worldState.scene.add(window.worldState.groundMesh)
+      this.groundMesh = new THREE.Mesh(groundGeometry, groundMaterial)
+      this.groundMesh.rotation.x = -Math.PI / 2
+      this.groundMesh.position.y = -10
+      this.scene.add(this.groundMesh)
     });
   }
 }

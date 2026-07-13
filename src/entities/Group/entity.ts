@@ -432,9 +432,9 @@ export class Group extends PointEntityClass<GroupData> {
         value: () => {
           const cubeData: CubeData = {
             id: Date.now().toString(),
-            x: data.x,
-            y: data.y,
-            z: data.z,
+            x: 0,
+            y: 0,
+            z: 0,
             angleY: data.angleY,
             color: 'red',
             mt: null,
