@@ -1,9 +1,12 @@
-import { fileData } from "@/entities"
 import { Point } from "@/types"
 import { CameraState } from "@/types/camera"
 import { EnvironmentConfig } from "../entities/group/entity"
 import JSZip from "jszip"
 import { BaseObjData } from "@/types/map2d"
+
+export type fileData = {
+  [key in string]?: BaseObjData[]
+}
 
 async function saveWorld(
   panOffset: Point,

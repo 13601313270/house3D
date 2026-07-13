@@ -187,7 +187,8 @@ import { Point } from '../types'
 import { snapThreshold, Group, EnvironmentConfig } from '../entities/group/entity'
 import Canvas3D from '../components/Canvas3D.vue'
 import { CameraState } from '@/types/camera'
-import { allFileKeys, fileData } from '@/entities'
+import { allFileKeys } from '@/entities'
+import initAllPlugin from '@/entities/initAllPlugin'
 import { PointEntityClass } from '@/types/pointEntity'
 import { EntityClassInWall } from '@/types/entityInWall'
 import { BaseObjData, HandelInfo, LineObjData } from '@/types/map2d'
@@ -215,7 +216,7 @@ import getSnapPointAndLine from '@/utils/getSnapPoint';
 import importOutObj from '@/utils/importOutObj';
 import { CameraBase } from '@/types/CameraBase';
 import { sleep } from '@/utils/sleep';
-import saveWorld from '@/utils/saveWorld';
+import saveWorld, { fileData } from '@/utils/saveWorld';
 import { getHandleInAreaInfoByXY, getHandleInfoByXY } from '@/utils/getHandleInfoByXY';
 import AiPic from '@/components/aiPic.vue'
 import ShowPayModal from '@/components/showPayModal.vue'
@@ -306,6 +307,7 @@ const centerPanelCamera = ref(new THREE.PerspectiveCamera(55, aspectRatio2.value
 const rightPanelCamera = ref<THREE.PerspectiveCamera | THREE.OrthographicCamera>();
 
 const showPayModal = ref(false)
+initAllPlugin();
 
 let panStartScreenX = 0
 let panStartScreenY = 0

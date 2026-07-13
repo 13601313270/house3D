@@ -5,7 +5,7 @@ import defaultValues from "./defaultValues"
 const GroupPlugin: PluginType = {
   name: '组',
   key: 'group',
-  type: 'base',
+  type: 'other',
   entity: Group,
   objType: 'point',
   previewImg: '/toolType/group.png',
