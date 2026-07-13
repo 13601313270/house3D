@@ -40,7 +40,7 @@ async function saveWorld(
     cameraState: cameraStateCenter,
     activeCameraIndex,
     allImportImgs: window.worldState.allImportImgs.map(v => v.fileTypeId),
-    environmentConfig: window.worldState.environmentConfig,
+    environmentConfig: window.worldApi.environmentConfig,
   }
 
   const zip = new JSZip();

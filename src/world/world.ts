@@ -8,7 +8,7 @@ type WorldData = GroupData & {
 
 class WorldGroup extends GroupEntity {
   // parentEntity: null;
-  group: THREE.Scene = new THREE.Scene()
+  // group: THREE.Scene = new THREE.Scene()
   environmentConfig: EnvironmentConfig = { skyType: 1, ambientLightIntensity: 1, showGround: true }
   groundMesh: THREE.Mesh | null = null
   ambientLight: THREE.AmbientLight | null = null
@@ -18,15 +18,15 @@ class WorldGroup extends GroupEntity {
   constructor(parent: null, data: WorldData) {
     super(parent, data)
 
-    this.group.background = new THREE.Color(0xf0f0f0)
+    window.worldState.scene.background = new THREE.Color(0xf0f0f0)
 
     const gridHelper = new THREE.GridHelper(1000, 50, 0xcccccc, 0xeeeeee)
     gridHelper.layers.set(2)
-    this.group.add(gridHelper)
+    window.worldState.scene.add(gridHelper)
 
     const axesHelper = new THREE.AxesHelper(100)
     axesHelper.layers.set(2)
-    this.group.add(axesHelper);
+    window.worldState.scene.add(axesHelper);
     this.setEnvironMent()
   }
 
@@ -41,7 +41,7 @@ class WorldGroup extends GroupEntity {
       this.ambientLight.intensity = intensity === 0 ? 0.1 : intensity
     } else {
       this.ambientLight = new THREE.AmbientLight(0xffffff, intensity)
-      this.group.add(this.ambientLight)
+      window.worldState.scene.add(this.ambientLight)
     }
 
     // if (!this.directionalLight) {
@@ -66,8 +66,8 @@ class WorldGroup extends GroupEntity {
     loaderSky.load(path, (texture) => {
       texture.mapping = THREE.EquirectangularReflectionMapping;
 
-      this.group.background = texture;
-      this.group.environment = texture; // 可选：简单环境光
+      window.worldState.scene.background = texture;
+      window.worldState.scene.environment = texture; // 可选：简单环境光
     });
 
     // 添加地面
@@ -97,7 +97,7 @@ class WorldGroup extends GroupEntity {
       this.groundMesh = new THREE.Mesh(groundGeometry, groundMaterial)
       this.groundMesh.rotation.x = -Math.PI / 2
       this.groundMesh.position.y = -10
-      this.group.add(this.groundMesh)
+      window.worldState.scene.add(this.groundMesh)
     });
   }
 }

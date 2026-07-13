@@ -31,9 +31,9 @@ const environmentValue = ref<{
 }>()
 
 onMounted(() => {
-  const savedSkyType = window.worldState.environmentConfig?.skyType || 1
-  const savedAmbientLightIntensity = window.worldState.environmentConfig?.ambientLightIntensity ?? 1
-  const savedShowGround = window.worldState.environmentConfig?.showGround ?? true
+  const savedSkyType = window.worldApi.environmentConfig?.skyType || 1
+  const savedAmbientLightIntensity = window.worldApi.environmentConfig?.ambientLightIntensity ?? 1
+  const savedShowGround = window.worldApi.environmentConfig?.showGround ?? true
   
   environmentValue.value = {
     skyType: savedSkyType,
@@ -106,12 +106,12 @@ function handleUpdate(key: string, value: number | string | boolean) {
   if (environmentValue.value) {
     environmentValue.value[key] = value
     
-    if (window.worldState && window.worldState.setEnvironMent) {
+    if (window.worldApi && window.worldApi.setEnvironMent) {
       const config: EnvironmentConfig = {
-        ...window.worldState.environmentConfig,
+        ...window.worldApi.environmentConfig,
         [key]: value,
       }
-      window.worldState.setEnvironMent(config)
+      window.worldApi.setEnvironMent(config)
     }
   }
 }

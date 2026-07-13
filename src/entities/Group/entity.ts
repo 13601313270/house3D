@@ -23,7 +23,7 @@ export interface EnvironmentConfig {
 export class GroupEntity extends PointEntityClass<GroupData> {
   name: string = 'group'
   type: string = 'group'
-  group: THREE.Object3D = new THREE.Group()
+  // group: THREE.Object3D = new THREE.Group()
 
   public children: BaseEntityClass<BaseObjData>[] = []
 
@@ -64,8 +64,6 @@ export class GroupEntity extends PointEntityClass<GroupData> {
         this._callAllOnChangeCallback('add', apiList)
       }
     })();
-
-    window.worldState.setEnvironMent()
   }
 
   draw2DPreviewByData(
