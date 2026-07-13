@@ -22,7 +22,7 @@ export interface EnvironmentConfig {
 export class World {
   protected data: GroupData
 
-  private children: BaseEntityClass<BaseObjData>[] = []
+  public children: BaseEntityClass<BaseObjData>[] = []
 
   private allObjectsByGroup: {
     [key in string]?: BaseEntityClass<BaseObjData>[]

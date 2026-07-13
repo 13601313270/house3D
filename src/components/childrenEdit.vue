@@ -58,7 +58,7 @@ type Item = {
 const allChild = ref<Item[]>([])
 onMounted(() => {
   allChild.value = []
-  window.worldApi.getData().children
+  window.worldApi.children
     .filter(v => v.type !== 'pointGroup')
     .forEach(item => {
       const { id, isLocked, isHidden, tip } = item.getData()

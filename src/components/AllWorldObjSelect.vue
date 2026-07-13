@@ -64,7 +64,7 @@ onMounted(() => {
 })
 function reloadObjList() {
   allObjList.value = []
-  window.worldApi.getData().children.forEach(v => {
+  window.worldApi.children.forEach(v => {
     const { id, isLocked, isHidden, tip } = v.getData()
     allObjList.value.push({
       id,
@@ -148,7 +148,7 @@ function handleEnter(item: {
   type: string,
   isLocked: boolean,
 }) {
-  const thisObj = window.worldApi.getData().children.find(v => v.getData().id === item.id)
+  const thisObj = window.worldApi.children.find(v => v.getData().id === item.id)
   if (thisObj) {
     const canvasAction = document.getElementById('canvas2D2') as HTMLCanvasElement;
     const ctxAction = canvasAction.getContext('2d')!
@@ -160,7 +160,7 @@ function handleEnter(item: {
 //   alert(id)
 // }
 function handleUnLock(item: Item, isLocked: boolean) {
-  const thisObj = window.worldApi.getData().children.find(v => v.getData().id === item.id)
+  const thisObj = window.worldApi.children.find(v => v.getData().id === item.id)
   if (thisObj) {
     thisObj.setData({
       ...thisObj.getData(),
@@ -172,7 +172,7 @@ function handleUnLock(item: Item, isLocked: boolean) {
   }
 }
 function handleLocation(item: Item) {
-  const api = window.worldApi.getData().children.find(v => v.getData().id === item.id)
+  const api = window.worldApi.children.find(v => v.getData().id === item.id)
   if (!api) return
 
   if (api instanceof PointEntityClass) {
