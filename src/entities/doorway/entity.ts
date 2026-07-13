@@ -4,7 +4,7 @@ import { DoorData } from './index.d'
 import { Brush, Evaluator, SUBTRACTION } from 'three-bvh-csg';
 import { EntityClassInWall } from '@/types/entityInWall'
 import { editItem } from '..';
-import { World } from '@/utils/world';
+import { World } from '@/utils/world/entity';
 import { getMaterialById } from '@/material';
 import { DoorDataClass } from './dataClass';
 import { MatchRectArea } from '@/utils/matchArea';

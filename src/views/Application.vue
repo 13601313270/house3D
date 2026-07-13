@@ -189,7 +189,7 @@ import * as THREE from 'three'
 import JSZip from 'jszip';
 import request from '@/utils/request'
 import { Point } from '../types'
-import { snapThreshold, World, EnvironmentConfig } from '../utils/world'
+import { snapThreshold, World, EnvironmentConfig } from '../utils/world/entity'
 import Canvas3D from '../components/Canvas3D.vue'
 import { CameraState } from '@/types/camera'
 import { allFileKeys, fileData, editItem } from '@/entities'
@@ -2124,7 +2124,7 @@ button {
   width: 100vw;
   height: 100vh;
   background: #00000094;
-  z-index: 200;
+  z-index: 1000;
 
   .allDemosContentInner {
     margin: 0 auto;

@@ -1,8 +1,8 @@
 import * as THREE from 'three'
-import { Point } from '../types'
+import { Point } from '../../types'
 import { DoorEntity } from '@/entities/door/entity'
-import { drawPoint } from './drawPoint'
-import { calculateAngle } from './calculateAngle'
+import { drawPoint } from '../drawPoint'
+import { calculateAngle } from '../calculateAngle'
 import { allFileKeys, EntityConstructor, fileData, fileDataKeyToClass } from '@/entities/index'
 import { PointEntityClass } from '@/types/pointEntity'
 import { BaseObjDataClass } from '@/entities/objData'
@@ -10,7 +10,7 @@ import { ImportFileType, ImportImgType, ObjOutputFileType } from '@/entities/all
 import { BaseEntityClass } from '@/types/baseEntity'
 import { BaseObjData } from '@/types/map2d'
 import { CameraBase } from '@/types/CameraBase'
-import drawAxes from './drawAxes'
+import drawAxes from '../drawAxes'
 
 export const canvasHeight = 600
 export const snapThreshold = 20
@@ -26,22 +26,6 @@ export class World {
   private allFileMapObjects: {
     [key in string]?: BaseEntityClass<BaseObjData>[]
   } = {}
-
-  getTypeListEntity(key: string): BaseEntityClass<BaseObjData>[] {
-    return this.allFileMapObjects[key] || []
-  }
-
-  getAllObjectTypes() {
-    return Object.keys(this.allFileMapObjects)
-  }
-
-  getAllObjectCount() {
-    let count = 0
-    for (const key of allFileKeys) {
-      count += this.getTypeListEntity(key).length
-    }
-    return count
-  }
 
   // 锁定状态的对象列表
   lockedObjList: BaseEntityClass<BaseObjData>[] = []
@@ -412,5 +396,21 @@ export class World {
   worldObjRemoveBindList: ((obj: BaseEntityClass<BaseObjData>) => void)[] = [];
   onWorldObjRemove(callback: (obj: BaseEntityClass<BaseObjData>) => void) {
     this.worldObjRemoveBindList.push(callback)
+  }
+
+  getTypeListEntity(key: string): BaseEntityClass<BaseObjData>[] {
+    return this.allFileMapObjects[key] || []
+  }
+
+  getAllObjectTypes() {
+    return Object.keys(this.allFileMapObjects)
+  }
+
+  getAllObjectCount() {
+    let count = 0
+    for (const key of allFileKeys) {
+      count += this.getTypeListEntity(key).length
+    }
+    return count
   }
 }

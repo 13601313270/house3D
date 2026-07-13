@@ -1,6 +1,6 @@
 import * as THREE from 'three'
 import { PointObjData, Point, BaseObjData } from './map2d'
-import { World } from '@/utils/world'
+import { World } from '@/utils/world/entity'
 import { BaseEntityClass } from './baseEntity'
 
 export abstract class PointEntityClass<T extends PointObjData> extends BaseEntityClass<T> {

@@ -11,7 +11,7 @@ import message from '@/utils/message'
 import { isPointInRotatedRect } from '@/utils/isPointInRotatedRect'
 import { allSnapFromType } from '@/types/baseEntity'
 import { LineEntityClass } from '@/types/lineEntity'
-import { World } from '@/utils/world'
+import { World } from '@/utils/world/entity'
 
 export class StaircaseEntity extends LineEntityClass<StaircasePoint, StaircaseData> {
   name: string = '楼梯'

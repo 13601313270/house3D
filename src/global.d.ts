@@ -1,4 +1,4 @@
-import { World } from './utils/world'
+import { World } from './utils/world/entity'
 
 declare global {
   interface Window {

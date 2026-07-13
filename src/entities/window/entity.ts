@@ -3,7 +3,7 @@ import { EntityClassInWall } from '@/types/entityInWall'
 import { WindowData } from './index.d'
 import * as THREE from 'three'
 import { Brush, Evaluator, SUBTRACTION } from 'three-bvh-csg';
-import { World } from '@/utils/world';
+import { World } from '@/utils/world/entity';
 import { editItem } from '..';
 import { getMaterialById } from '@/material';
 import { WindowDataClass } from './dataClass';

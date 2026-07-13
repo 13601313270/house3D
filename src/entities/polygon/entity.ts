@@ -9,7 +9,7 @@ import message from '@/utils/message'
 import { isPointInRotatedRect } from '@/utils/isPointInRotatedRect'
 import { allSnapFromType, MatchSnapPoint } from '@/types/baseEntity'
 import { LineEntityClass } from '@/types/lineEntity'
-import { World } from '@/utils/world'
+import { World } from '@/utils/world/entity'
 import { PolygonPoint, PolygonData } from './index.d'
 
 export class PolygonEntity extends LineEntityClass<PolygonPoint, PolygonData> {
