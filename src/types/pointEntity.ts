@@ -161,6 +161,7 @@ export abstract class PointEntityClass<T extends PointObjData> extends BaseEntit
     this.meshList.forEach(v => {
       v.position.set(data.x, data.z, data.y)
     })
+    this.changeBoundingBoxState()
   }
 
   changeBoundingBoxState() {

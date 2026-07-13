@@ -300,9 +300,6 @@ export class Group extends PointEntityClass<GroupData> {
     this.children.forEach(item => {
       item.reCreate3DMeshIfNeed()
       item.change3DMeshState()
-      if (item instanceof PointEntityClass) {
-        item.changeBoundingBoxState()
-      }
     })
   }
 
