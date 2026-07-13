@@ -811,7 +811,7 @@ const handleLoadProgramFileChange = async (e: Event) => {
           mesh: object,
           file,
         }
-        worldApi.allImportFiles.push(customObjItem)
+        window.worldState.allImportFiles.push(customObjItem)
       })
     }
   }
@@ -1633,7 +1633,7 @@ const handleLoadedObject = async (object: THREE.Group | THREE.Mesh, file: File, 
     mesh: object,
     file,
   }
-  worldApi.allImportFiles.push(customObjItem)
+  window.worldState.allImportFiles.push(customObjItem)
   const data: ImportFileData = {
     fileTypeId,
     id: Date.now().toString(),

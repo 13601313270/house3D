@@ -37,7 +37,7 @@ async function saveWorld(
     json
   );
 
-  const allImportFiles = window.worldApi.allImportFiles
+  const allImportFiles = window.worldState.allImportFiles
   console.log('allImportFiles', allImportFiles)
 
   // 保存资源文件
