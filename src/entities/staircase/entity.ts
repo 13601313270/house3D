@@ -69,7 +69,7 @@ export class StaircaseEntity extends LineEntityClass<StaircasePoint, StaircaseDa
     ctx.setLineDash([])
   }
 
-  draw2DByData(
+  draw2DHandleByData(
     ctx: CanvasRenderingContext2D,
     data: StaircaseData,
     panOffset: Point,

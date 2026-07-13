@@ -163,10 +163,20 @@ export class World {
     });
   }
 
+  draw2DPreview(
+    ctx: CanvasRenderingContext2D,
+    panOffset: Point,
+    zoomLevel: number
+  ) {
+    const data = this.getData();
+    this.draw2DPreviewByData2(ctx, data, panOffset, zoomLevel)
+  }
+
   draw2DPreviewByData2(
     ctx: CanvasRenderingContext2D,
-    panOffset: Point = { x: 0, y: 0 },
-    zoomLevel: number = 1,
+    data: GroupData,
+    panOffset: Point,
+    zoomLevel: number,
   ) {
     // 绘制墙体
     const allObj: BaseEntityClass<BaseObjData>[] = [];

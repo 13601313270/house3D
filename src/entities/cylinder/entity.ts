@@ -36,7 +36,7 @@ export class CylinderEntity extends PointEntityClass<CylinderData> {
     ctx.closePath()
   }
 
-  draw2DByData(
+  draw2DHandleByData(
     ctx: CanvasRenderingContext2D,
     data: CylinderData,
     panOffset: Point,

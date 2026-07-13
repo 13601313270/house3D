@@ -56,7 +56,7 @@ export class DoorEntity extends EntityClassInWall<DoorData> {
     ctx.restore()
   }
 
-  draw2DByData(
+  draw2DHandleByData(
     ctx: CanvasRenderingContext2D,
     data: DoorData,
     panOffset: Point,

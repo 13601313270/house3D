@@ -433,7 +433,7 @@ const drawWrapper2D = () => {
     ctx.clearRect(0, 0, canvasSize.value.width, canvasSize.value.height)
     ctx.fillStyle = '#f5f5f5'
     ctx.fillRect(0, 0, canvasSize.value.width, canvasSize.value.height)
-    worldApi.draw2DPreviewByData2(
+    worldApi.draw2DPreview(
       ctx,
       panOffset.value,
       zoom2DLevel.value,

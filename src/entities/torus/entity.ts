@@ -34,7 +34,7 @@ export class TorusEntity extends PointEntityClass<TorusData> {
     ctx.stroke()
   }
 
-  draw2DByData(
+  draw2DHandleByData(
     ctx: CanvasRenderingContext2D,
     data: TorusData,
     panOffset: Point,

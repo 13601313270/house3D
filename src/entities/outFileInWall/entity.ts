@@ -73,7 +73,7 @@ export class OutFileInWallEntity extends EntityClassInWall<OutFileInWallData> {
     ctx.restore(); // 恢复原始状态
   }
 
-  draw2DByData(
+  draw2DHandleByData(
     ctx: CanvasRenderingContext2D,
     data: OutFileInWallData,
     panOffset: Point,

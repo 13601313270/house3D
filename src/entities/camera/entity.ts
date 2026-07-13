@@ -140,7 +140,7 @@ export class CameraEntity extends CameraBase<CameraData> {
     }
   }
 
-  draw2DByData(
+  draw2DHandleByData(
     ctx: CanvasRenderingContext2D,
     data: CameraData,
     panOffset: Point,

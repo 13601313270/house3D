@@ -46,7 +46,7 @@ export class PeopleEntity extends PointEntityClass<PeopleData> {
     ctx.restore(); // 恢复原始状态
   }
 
-  draw2DByData(
+  draw2DHandleByData(
     ctx: CanvasRenderingContext2D,
     data: PeopleData,
     panOffset: Point,

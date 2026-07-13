@@ -64,7 +64,7 @@ export class WindowEntity extends EntityClassInWall<WindowData> {
     ctx.restore()
   }
 
-  draw2DByData(
+  draw2DHandleByData(
     ctx: CanvasRenderingContext2D,
     data: WindowData,
     panOffset: Point,

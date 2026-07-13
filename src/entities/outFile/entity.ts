@@ -66,7 +66,7 @@ export class OutFileEntity extends PointEntityClass<OutFileData> {
     ctx.restore(); // 恢复原始状态
   }
 
-  draw2DByData(
+  draw2DHandleByData(
     ctx: CanvasRenderingContext2D,
     data: OutFileData,
     panOffset: Point,

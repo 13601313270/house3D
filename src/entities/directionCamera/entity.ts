@@ -152,7 +152,7 @@ export class DirectionCameraEntity extends CameraBase<DirectionCameraData> {
     }
   }
 
-  draw2DByData(
+  draw2DHandleByData(
     ctx: CanvasRenderingContext2D,
     data: DirectionCameraData,
     panOffset: Point,

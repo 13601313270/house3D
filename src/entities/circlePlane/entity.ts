@@ -38,7 +38,7 @@ export class CirclePlaneEntity extends PointEntityClass<CirclePlaneData> {
     ctx.closePath()
   }
 
-  draw2DByData(
+  draw2DHandleByData(
     ctx: CanvasRenderingContext2D,
     data: CirclePlaneData,
     panOffset: Point,

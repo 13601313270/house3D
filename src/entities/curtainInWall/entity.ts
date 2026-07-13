@@ -53,7 +53,7 @@ export class CurtainInWallEntity extends EntityClassInWall<CurtainInWallData> {
     ctx.restore(); // 恢复原始状态
   }
 
-  draw2DByData(
+  draw2DHandleByData(
     ctx: CanvasRenderingContext2D,
     data: CurtainInWallData,
     panOffset: Point,

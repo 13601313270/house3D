@@ -56,7 +56,7 @@ export class RegularPolygonEntity extends PointEntityClass<RegularPolygonData> {
     ctx.restore();
   }
 
-  draw2DByData(
+  draw2DHandleByData(
     ctx: CanvasRenderingContext2D,
     data: RegularPolygonData,
     panOffset: Point,

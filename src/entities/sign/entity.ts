@@ -55,7 +55,7 @@ export class SignEntity extends PointEntityClass<SignData> {
     ctx.restore();
   }
 
-  draw2DByData(
+  draw2DHandleByData(
     ctx: CanvasRenderingContext2D,
     data: SignData,
     panOffset: Point,

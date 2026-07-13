@@ -37,7 +37,7 @@ export class SectorEntity extends PointEntityClass<SectorData> {
     ctx.closePath()
   }
 
-  draw2DByData(
+  draw2DHandleByData(
     ctx: CanvasRenderingContext2D,
     data: SectorData,
     panOffset: Point,

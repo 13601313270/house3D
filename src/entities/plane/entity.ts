@@ -38,7 +38,7 @@ export class PlaneEntity extends PointEntityClass<PlaneData> {
     ctx.restore(); // 恢复原始状态
   }
 
-  draw2DByData(
+  draw2DHandleByData(
     ctx: CanvasRenderingContext2D,
     data: PlaneData,
     panOffset: Point,

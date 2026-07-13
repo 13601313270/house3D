@@ -77,7 +77,7 @@ export abstract class BaseEntityClass<T extends BaseObjData> {
   ): void;
 
   // 本对象的2D具柄绘制逻辑（时间晚于draw2DPreview）
-  abstract draw2DByData(
+  abstract draw2DHandleByData(
     ctx: CanvasRenderingContext2D,
     data: T,
     panOffset: Point,
@@ -90,7 +90,7 @@ export abstract class BaseEntityClass<T extends BaseObjData> {
     zoomLevel: number,
   ) {
     const data = this.getData();
-    this.draw2DByData(ctx, data, panOffset, zoomLevel)
+    this.draw2DHandleByData(ctx, data, panOffset, zoomLevel)
   }
 
   abstract editPropConfig(
