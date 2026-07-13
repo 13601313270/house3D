@@ -5,7 +5,6 @@ import { BaseEntityClass } from './baseEntity'
 
 export abstract class PointEntityClass<T extends PointObjData> extends BaseEntityClass<T> {
   boundingBox: THREE.Group
-  protected useMoveZBox: boolean = true;
   moveZBox: THREE.Group
   boundingBoxData: [THREE.Vector3, THREE.Vector3, THREE.Vector3] | null = null // 第一个是尺寸，第二个是位置偏移，第三个是旋转角度
   spriteGroup: THREE.Group | null = null
@@ -34,7 +33,7 @@ export abstract class PointEntityClass<T extends PointObjData> extends BaseEntit
       lineBox.entity = this
       group.visible = false
       this.boundingBox = group;
-      if (this.useMoveZBox && this.parentEntity) {
+      if (this.parentEntity) {
         this.parentEntity.group.add(group)
       }
     })();
@@ -64,8 +63,7 @@ export abstract class PointEntityClass<T extends PointObjData> extends BaseEntit
       // @ts-ignore
       group2.entity = this
       this.moveZBox = group2;
-      console.log('this.useMoveZBox', this, this.useMoveZBox)
-      if (this.useMoveZBox && this.parentEntity) {
+      if (this.parentEntity) {
         this.parentEntity.group.add(group2)
       }
     })();

@@ -122,7 +122,6 @@ export abstract class BaseEntityClass<T extends BaseObjData> {
     if (this.cacheKeyStr === newKeyByData) {
       return;
     }
-    // console.log('reCreate3DMeshIfNeed', this.cacheKeyStr, newKeyByData)
     if (!this.parentEntity) return
     const scene: THREE.Scene | THREE.Group = this.parentEntity.group;
     this.meshList.forEach(mesh => scene.remove(mesh))

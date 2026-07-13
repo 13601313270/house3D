@@ -4,6 +4,7 @@ import { CubeData } from '../cube/index.d'
 import editItem from '@/utils/editItem'
 import { isPointInRotatedRect } from '@/utils/isPointInRotatedRect'
 import { MatchRectArea } from '@/utils/matchArea'
+import { GroupBaseData } from '@/types/groupBase'
 
 export const canvasHeight = 600
 export const snapThreshold = 20
@@ -18,6 +19,26 @@ export interface EnvironmentConfig {
 export class GroupEntity extends GroupBaseEntity {
   private circleRadius = 6
 
+  constructor(parent: GroupBaseEntity | null, data: GroupBaseData) {
+    super(parent, data)
+    this.data = data;
+    if (this.parentEntity) {
+      // this.parentEntity.group.clear()
+      this.parentEntity.group.add(this.group)
+    }
+  }
+
+  change3DMeshState(): void {
+    const data = this.getData();
+    // console.trace('change3DMeshState-1', data.x, data.y, data.z)
+    this.group.position.set(data.x, data.z, data.y)
+    this.group.rotation.set(0, data.angleY, 0)
+
+    this.children.forEach(item => {
+      item.change3DMeshState()
+    })
+  }
+
   editPropConfig(snapPoint: HandelInfo, editShow: (editInfoList: editItem[], callback: (val: any) => void) => void): void {
     const data = this.getData();
     editShow([
@@ -28,8 +49,8 @@ export class GroupEntity extends GroupBaseEntity {
         value: () => {
           const cubeData: CubeData = {
             id: Date.now().toString(),
-            x: 0,
-            y: 0,
+            x: Math.random() * 100 - 50,
+            y: Math.random() * 100 - 50,
             z: 0,
             angleY: data.angleY,
             color: 'red',
@@ -39,6 +60,13 @@ export class GroupEntity extends GroupBaseEntity {
             depth: 30,
           }
           this.add('cube', [cubeData])
+          setTimeout(() => {
+            this.markObjectIsDirty()
+            this.reCreate3DMeshIfNeed()
+          }, 1000)
+          // if (this.parentEntity) {
+          //   this.parentEntity._callObjDataChange(this)
+          // }
           close()
         }
       },

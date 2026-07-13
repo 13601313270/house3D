@@ -15,7 +15,6 @@ class WorldGroup extends GroupBaseEntity {
   groundMesh: THREE.Mesh | null = null
   ambientLight: THREE.AmbientLight | null = null
   directionalLight: THREE.DirectionalLight | null = null
-  useMoveZBox = false;
 
   constructor(parent: null, data: WorldData) {
     super(parent, data)

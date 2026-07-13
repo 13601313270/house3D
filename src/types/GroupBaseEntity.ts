@@ -33,9 +33,15 @@ export abstract class GroupBaseEntity extends BaseEntityClass<GroupBaseData> {
   // 锁定状态的对象列表
   lockedObjList: BaseEntityClass<BaseObjData>[] = []
 
-  constructor(parent: null, data: GroupBaseData) {
+  constructor(parent: GroupBaseEntity | null, data: GroupBaseData) {
     super(parent, data)
     this.data = data;
+
+    // group添加一个方块
+    const geometry = new THREE.BoxGeometry(1, 1, 1)
+    const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 })
+    const cube = new THREE.Mesh(geometry, material)
+    this.group.add(cube);
 
     (async () => {
       const apiList = [];
@@ -106,7 +112,10 @@ export abstract class GroupBaseEntity extends BaseEntityClass<GroupBaseData> {
       }
       return aZ - bZ
     }).forEach((item) => {
-      item.draw2DPreview(ctx, panOffset, zoomLevel)
+      item.draw2DPreview(ctx, {
+        x: screenX,
+        y: screenY,
+      }, zoomLevel)
     })
 
     // 绘制所有ObjFile的中心点
@@ -119,8 +128,13 @@ export abstract class GroupBaseEntity extends BaseEntityClass<GroupBaseData> {
     // 暂无操作句柄
   }
 
-  create3DMesh() {
-    const group = new THREE.Group()
+  create3DMesh(): THREE.Group[] {
+    const group = this.group;// as new THREE.Group()
+    group.clear()
+    this.children.forEach((item) => {
+      item.create3DMesh().forEach(mesh => group.add(mesh))
+    })
+    // @ts-ignore
     return [group]
   }
 
