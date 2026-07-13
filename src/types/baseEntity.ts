@@ -100,7 +100,7 @@ export abstract class BaseEntityClass<T extends BaseObjData> {
   ): void
 
   beforeRemove() {
-    const scene: THREE.Scene = this.world.scene
+    const scene: THREE.Scene = window.worldState.scene
     this.markObjectIsDirty()
     this.meshList.forEach(mesh => scene.remove(mesh))
     if (this.associationEntity.length > 0) {
@@ -120,7 +120,7 @@ export abstract class BaseEntityClass<T extends BaseObjData> {
       return;
     }
     // console.log('reCreate3DMeshIfNeed', this.cacheKeyStr, newKeyByData)
-    const scene: THREE.Scene = this.world.scene
+    const scene: THREE.Scene = window.worldState.scene
     this.meshList.forEach(mesh => scene.remove(mesh))
     this.meshList = this.create3DMesh(scene);
     this.meshList.forEach(mesh => scene.add(mesh))

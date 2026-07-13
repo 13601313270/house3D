@@ -69,7 +69,7 @@ function raycastObjects(list: THREE.Group[], event: MouseEvent): THREE.Object3D 
   mouse.set(x, y)
   raycaster.setFromCamera(mouse, camera)
 
-  const scene = props.world.scene
+  const scene = window.worldState.scene
   if (!scene) return null
 
   const intersects = raycaster.intersectObjects(list, true)
@@ -139,11 +139,6 @@ function updateCameraAngel() {
 const initThree = () => {
   const container = containerRef.value
   if (!container) return
-
-  // const width = container.clientWidth
-  // const height = container.clientHeight
-
-  // const scene = props.world.scene
   const maxCamera1Radius = 20000;
   // if (props.cameraType === 'orthographic' && ('size' in props.cameraState)) {
   //   camera = new THREE.OrthographicCamera(
@@ -436,7 +431,7 @@ const initThree = () => {
 }
 
 const animate = () => {
-  const scene = props.world.scene
+  const scene = window.worldState.scene
   if (renderer && scene && camera) {
     renderer.render(scene, camera)
     requestAnimationFrame(animate)
@@ -450,7 +445,7 @@ const resize = () => {
 }
 
 const updateScene = () => {
-  if (props.world.scene) {
+  if (window.worldState.scene) {
     props.world.draw3D()
     resize();
   }
@@ -537,7 +532,7 @@ onMounted(() => {
 const exportImage = () => {
   if (renderer && renderer.domElement) {
     // 确保渲染器完成当前帧渲染
-    const scene = props.world.scene
+    const scene = window.worldState.scene
     if (scene && camera) {
       renderer.render(scene, camera)
     }
@@ -589,7 +584,7 @@ watch(() => props.aspectRatio, (newVal) => {
 
 const getImageData = (): string | null => {
   if (renderer && renderer.domElement) {
-    const scene = props.world.scene
+    const scene = window.worldState.scene
     if (scene && camera) {
       renderer.render(scene, camera)
     }

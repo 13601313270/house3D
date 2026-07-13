@@ -411,6 +411,9 @@ function getTempPointInsertDataLastAngel() {
   }
 }
 
+const worldState = new WorldState()
+window.worldState = worldState
+
 const worldApi = new World({
   id: 'world',
   x: 0,
@@ -421,8 +424,6 @@ const worldApi = new World({
   angleY: 0,
 })
 window.worldApi = worldApi
-const worldState = new WorldState()
-window.worldState = worldState
 
 allObjCount.value = worldApi.getAllObjectCount()
 const drawWrapper2DAnd3D = () => {

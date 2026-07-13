@@ -6,7 +6,7 @@
           <div class="label title" v-if="item.dataType === 'title'">
             {{ item.label }}
           </div>
-          <div class="label" v-else>
+          <div class="label" v-else-if="'label' in item">
             {{ item.label }}
           </div>
           <div v-if="item.dataType === 'button'" class="edit">
@@ -31,10 +31,9 @@ const environmentValue = ref<{
 }>()
 
 onMounted(() => {
-  const worldApi = (window as any).worldApi
-  const savedSkyType = worldApi?.environmentConfig?.skyType || 1
-  const savedAmbientLightIntensity = worldApi?.environmentConfig?.ambientLightIntensity ?? 1
-  const savedShowGround = worldApi?.environmentConfig?.showGround ?? true
+  const savedSkyType = window.worldState.environmentConfig?.skyType || 1
+  const savedAmbientLightIntensity = window.worldState.environmentConfig?.ambientLightIntensity ?? 1
+  const savedShowGround = window.worldState.environmentConfig?.showGround ?? true
   
   environmentValue.value = {
     skyType: savedSkyType,
@@ -110,7 +109,7 @@ function handleUpdate(key: string, value: number | string | boolean) {
     const worldApi = (window as any).worldApi
     if (worldApi && worldApi.setEnvironMent) {
       const config: EnvironmentConfig = {
-        ...worldApi.environmentConfig,
+        ...window.worldState.environmentConfig,
         [key]: value,
       }
       worldApi.setEnvironMent(config)

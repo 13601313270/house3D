@@ -34,7 +34,7 @@ export abstract class PointEntityClass<T extends PointObjData> extends BaseEntit
       lineBox.entity = this
       group.visible = false
       this.boundingBox = group;
-      this.world.scene.add(group)
+      window.worldState.scene.add(group)
     })();
     (() => {
       const shaftGeometry = new THREE.BoxGeometry(1, 1, 1);
@@ -61,7 +61,7 @@ export abstract class PointEntityClass<T extends PointObjData> extends BaseEntit
       // @ts-ignore
       group2.entity = this
       this.moveZBox = group2;
-      this.world.scene.add(group2)
+      window.worldState.scene.add(group2)
     })();
   }
 
@@ -75,7 +75,7 @@ export abstract class PointEntityClass<T extends PointObjData> extends BaseEntit
     if (oldCacheKey === newKeyByData) {
       return;
     }
-    const scene: THREE.Scene = this.world.scene
+    const scene: THREE.Scene = window.worldState.scene
     if (this.spriteGroup) {
       scene.remove(this.spriteGroup)
       this.spriteGroup = null
@@ -139,7 +139,7 @@ export abstract class PointEntityClass<T extends PointObjData> extends BaseEntit
     // 这里注意防止死循环
     super.markObjectIsDirty()
     if (this.spriteGroup) {
-      this.world.scene.remove(this.spriteGroup)
+      window.worldState.scene.remove(this.spriteGroup)
       this.spriteGroup = null
     }
   }
@@ -184,7 +184,7 @@ export abstract class PointEntityClass<T extends PointObjData> extends BaseEntit
 
   beforeRemove() {
     super.beforeRemove()
-    const scene: THREE.Scene = this.world.scene
+    const scene: THREE.Scene = window.worldState.scene
     if (this.boundingBox) {
       scene.remove(this.boundingBox)
     }

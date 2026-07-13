@@ -33,15 +33,7 @@ export class World {
 
   activeCameraIndex: number = -1
 
-  environmentConfig: EnvironmentConfig = { skyType: 1, ambientLightIntensity: 1, showGround: true }
-
-  ambientLight: THREE.AmbientLight | null = null
-
   directionalLight: THREE.DirectionalLight | null = null
-
-  groundMesh: THREE.Mesh | null = null
-
-  scene: THREE.Scene
 
   isShowBoundingBox: boolean = true
 
@@ -49,17 +41,7 @@ export class World {
   type: string = 'group'
 
   constructor(data: GroupData) {
-    this.data = data
-    this.scene = new THREE.Scene()
-    this.scene.background = new THREE.Color(0xf0f0f0)
-
-    const gridHelper = new THREE.GridHelper(1000, 50, 0xcccccc, 0xeeeeee)
-    gridHelper.layers.set(2)
-    this.scene.add(gridHelper)
-
-    const axesHelper = new THREE.AxesHelper(100)
-    axesHelper.layers.set(2)
-    this.scene.add(axesHelper);
+    this.data = data;
 
     (async () => {
       const apiList = [];
@@ -91,16 +73,16 @@ export class World {
 
   setEnvironMent(config?: EnvironmentConfig) {
     if (config) {
-      this.environmentConfig = config
+      window.worldState.environmentConfig = config
     }
-    const intensity = this.environmentConfig.ambientLightIntensity !== undefined ? this.environmentConfig.ambientLightIntensity : 1.5
-    console.log('intensity', intensity, this.environmentConfig.ambientLightIntensity);
+    const intensity = window.worldState.environmentConfig.ambientLightIntensity !== undefined ? window.worldState.environmentConfig.ambientLightIntensity : 1.5
+    console.log('intensity', intensity, window.worldState.environmentConfig.ambientLightIntensity);
 
-    if (this.ambientLight) {
-      this.ambientLight.intensity = intensity === 0 ? 0.1 : intensity
+    if (window.worldState.ambientLight) {
+      window.worldState.ambientLight.intensity = intensity === 0 ? 0.1 : intensity
     } else {
-      this.ambientLight = new THREE.AmbientLight(0xffffff, intensity)
-      this.scene.add(this.ambientLight)
+      window.worldState.ambientLight = new THREE.AmbientLight(0xffffff, intensity)
+      window.worldState.scene.add(window.worldState.ambientLight)
     }
 
     // if (!this.directionalLight) {
@@ -109,7 +91,7 @@ export class World {
     //   this.scene.add(this.directionalLight)
     // }
 
-    const skyType = this.environmentConfig.skyType || 1;
+    const skyType = window.worldState.environmentConfig.skyType || 1;
     const skyImgMap: Record<number, string> = {
       1: '/skyImg/sky.jpg',
       2: '/skyImg/sky2.jpg',
@@ -125,15 +107,15 @@ export class World {
     loaderSky.load(path, (texture) => {
       texture.mapping = THREE.EquirectangularReflectionMapping;
 
-      this.scene.background = texture;
-      this.scene.environment = texture; // 可选：简单环境光
+      window.worldState.scene.background = texture;
+      window.worldState.scene.environment = texture; // 可选：简单环境光
     });
 
     // 添加地面
-    const showGround = this.environmentConfig.showGround ?? true
+    const showGround = window.worldState.environmentConfig.showGround ?? true
 
-    if (this.groundMesh) {
-      this.groundMesh.visible = showGround
+    if (window.worldState.groundMesh) {
+      window.worldState.groundMesh.visible = showGround
       return
     }
 
@@ -153,10 +135,10 @@ export class World {
         roughness: 0.8,
         metalness: 0.2,
       })
-      this.groundMesh = new THREE.Mesh(groundGeometry, groundMaterial)
-      this.groundMesh.rotation.x = -Math.PI / 2
-      this.groundMesh.position.y = -10
-      this.scene.add(this.groundMesh)
+      window.worldState.groundMesh = new THREE.Mesh(groundGeometry, groundMaterial)
+      window.worldState.groundMesh.rotation.x = -Math.PI / 2
+      window.worldState.groundMesh.position.y = -10
+      window.worldState.scene.add(window.worldState.groundMesh)
     });
   }
 
