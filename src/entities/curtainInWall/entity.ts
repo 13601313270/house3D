@@ -30,10 +30,13 @@ export class CurtainInWallEntity extends EntityClassInWall<CurtainInWallData> {
     const screenY = data.y * zoomLevel + panOffset.y
     const { width, isOuter, angle, wallId } = data;
     const angleY = data.angle || 0;// 历史数据问题
-    const wall: WallEntity = this.world.getTypeListEntity('wall').find((entity) => {
-      return entity.getData().id === wallId;
-    }) as WallEntity
-    const wallThickness = wall ? wall.getData().thickness : 10;
+    let wallThickness = 10;
+    if (this.parentEntity) {
+      const wall: WallEntity = this.parentEntity.getTypeListEntity('wall').find((entity) => {
+        return entity.getData().id === wallId;
+      }) as WallEntity
+      wallThickness = wall ? wall.getData().thickness : 10;
+    }
     const offsetX = Math.cos(angle + (isOuter ? Math.PI / -2 : Math.PI / 2)) * (wallThickness + this.depth) * zoomLevel;
     const offsetY = Math.sin(angle + (isOuter ? Math.PI / -2 : Math.PI / 2)) * (wallThickness + this.depth) * zoomLevel;
 
@@ -60,10 +63,13 @@ export class CurtainInWallEntity extends EntityClassInWall<CurtainInWallData> {
     zoomLevel: number
   ): void {
     const { isOuter, angle, wallId } = data;
-    const wall: WallEntity = this.world.getTypeListEntity('wall').find((entity) => {
-      return entity.getData().id === wallId;
-    }) as WallEntity
-    const wallThickness = wall ? wall.getData().thickness : 10;
+    let wallThickness = 10;
+    if (this.parentEntity) {
+      const wall: WallEntity = this.parentEntity.getTypeListEntity('wall').find((entity) => {
+        return entity.getData().id === wallId;
+      }) as WallEntity
+      wallThickness = wall ? wall.getData().thickness : 10;
+    }
     const screenX = data.x * zoomLevel + panOffset.x
     const screenY = data.y * zoomLevel + panOffset.y
 
@@ -84,10 +90,13 @@ export class CurtainInWallEntity extends EntityClassInWall<CurtainInWallData> {
     const data = this.getData();
     const group = new THREE.Group()
     const { wallId, img, width, height, isOuter } = data
-    const wall: WallEntity = this.world.getTypeListEntity('wall').find((entity) => {
-      return entity.getData().id === wallId;
-    }) as WallEntity
-    const wallThickness = wall ? wall.getData().thickness : 10;
+    let wallThickness = 10;
+    if (this.parentEntity) {
+      const wall: WallEntity = this.parentEntity.getTypeListEntity('wall').find((entity) => {
+        return entity.getData().id === wallId;
+      }) as WallEntity
+      wallThickness = wall ? wall.getData().thickness : 10;
+    }
     // 将方向向量旋转90度
     let material: THREE.MeshStandardMaterial | null = null;
     if (img) {
@@ -171,11 +180,14 @@ export class CurtainInWallEntity extends EntityClassInWall<CurtainInWallData> {
 
   showMatchHandel(x: number, y: number) {
     const data = this.getData();
+    let wallThickness = 10;
     const { isOuter, angle, wallId } = data;
-    const wall: WallEntity = this.world.getTypeListEntity('wall').find((entity) => {
-      return entity.getData().id === wallId;
-    }) as WallEntity
-    const wallThickness = wall ? wall.getData().thickness : 10;
+    if (this.parentEntity) {
+      const wall: WallEntity = this.parentEntity.getTypeListEntity('wall').find((entity) => {
+        return entity.getData().id === wallId;
+      }) as WallEntity
+      wallThickness = wall ? wall.getData().thickness : 10;
+    }
     const offsetX = Math.cos(angle + (isOuter ? Math.PI / -2 : Math.PI / 2)) * (wallThickness + this.depth);
     const offsetY = Math.sin(angle + (isOuter ? Math.PI / -2 : Math.PI / 2)) * (wallThickness + this.depth);
     if (isPointInRotatedRect(x, y, {
@@ -199,10 +211,13 @@ export class CurtainInWallEntity extends EntityClassInWall<CurtainInWallData> {
   matchHandelInfo(x: number, y: number) {
     const data = this.getData();
     const { isOuter, angle, wallId } = data;
-    const wall: WallEntity = this.world.getTypeListEntity('wall').find((entity) => {
-      return entity.getData().id === wallId;
-    }) as WallEntity
-    const wallThickness = wall ? wall.getData().thickness : 10;
+    let wallThickness = 10;
+    if (this.parentEntity) {
+      const wall: WallEntity = this.parentEntity.getTypeListEntity('wall').find((entity) => {
+        return entity.getData().id === wallId;
+      }) as WallEntity
+      wallThickness = wall ? wall.getData().thickness : 10;
+    }
     const offsetX = Math.cos(angle + (isOuter ? Math.PI / -2 : Math.PI / 2)) * (wallThickness + this.depth);
     const offsetY = Math.sin(angle + (isOuter ? Math.PI / -2 : Math.PI / 2)) * (wallThickness + this.depth);
     const dist = Math.hypot(x - (data.x + offsetX / 2), y - (data.y + offsetY / 2))

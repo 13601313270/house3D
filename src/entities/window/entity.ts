@@ -19,8 +19,8 @@ export class WindowEntity extends EntityClassInWall<WindowData> {
 
   constructor(world: World, window: WindowData) {
     super(world, window)
-    if (window && window.wallId) {
-      const wall = this.world.getTypeListEntity('wall').find((entity) => {
+    if (window && window.wallId && this.parentEntity) {
+      const wall = this.parentEntity.getTypeListEntity('wall').find((entity) => {
         return entity.getData().id === window.wallId
       });
       if (wall) {
@@ -31,10 +31,13 @@ export class WindowEntity extends EntityClassInWall<WindowData> {
   }
 
   draw2DPreviewByData(ctx: CanvasRenderingContext2D, data: WindowData, panOffset: Point, zoomLevel: number): void {
-    const findWall: WallEntity = this.world.getTypeListEntity('wall').find((entity) => entity.getData().id === data.wallId) as WallEntity
     let wallThickness = 10;
-    if (findWall) {
-      wallThickness = findWall.getData().thickness;
+    if (this.parentEntity) {
+      const findWall: WallEntity = this.parentEntity.getTypeListEntity('wall').find((entity) => entity.getData().id === data.wallId) as WallEntity
+
+      if (findWall) {
+        wallThickness = findWall.getData().thickness;
+      }
     }
     const screenX = data.x * zoomLevel + panOffset.x
     const screenY = data.y * zoomLevel + panOffset.y
@@ -67,10 +70,13 @@ export class WindowEntity extends EntityClassInWall<WindowData> {
     panOffset: Point,
     zoomLevel: number,
   ): void {
-    const findWall: WallEntity = this.world.getTypeListEntity('wall').find((entity) => entity.getData().id === data.wallId) as WallEntity
     let wallThickness = 10;
-    if (findWall) {
-      wallThickness = findWall.getData().thickness;
+    if (this.parentEntity) {
+      const findWall: WallEntity = this.parentEntity.getTypeListEntity('wall').find((entity) => entity.getData().id === data.wallId) as WallEntity
+
+      if (findWall) {
+        wallThickness = findWall.getData().thickness;
+      }
     }
     const screenX = data.x * zoomLevel + panOffset.x
     const screenY = data.y * zoomLevel + panOffset.y
@@ -111,12 +117,15 @@ export class WindowEntity extends EntityClassInWall<WindowData> {
   }
 
   showMatchHandel(x: number, y: number) {
+    let wallThickness = 10;
     const data = this.getData();
-    const wall: WallEntity = this.world.getTypeListEntity('wall').find((entity) => {
-      return entity.getData().id === data.wallId;
-    }) as WallEntity
-    const wallThickness = wall ? wall.getData().thickness : 10;
-    // const dist = Math.hypot(x - data.x, y - data.y)
+    if (this.parentEntity) {
+      const wall: WallEntity = this.parentEntity.getTypeListEntity('wall').find((entity) => {
+        return entity.getData().id === data.wallId;
+      }) as WallEntity
+      wallThickness = wall ? wall.getData().thickness : 10;
+    }
+
     if (isPointInRotatedRect(x, y, {
       x: data.x,
       y: data.y,
@@ -159,6 +168,7 @@ export class WindowEntity extends EntityClassInWall<WindowData> {
   }
 
   create3DMesh() {
+    let wallThickness = 10;
     const data = this.getData();
     const group = new THREE.Group();
     const {
@@ -167,10 +177,13 @@ export class WindowEntity extends EntityClassInWall<WindowData> {
       ic,
     } = data
     const baseZ = data.height / 2 + (data.bottom || 0);
-    const wall: WallEntity = this.world.getTypeListEntity('wall').find((entity) => {
-      return entity.getData().id === data.wallId;
-    }) as WallEntity
-    const wallThickness = wall ? wall.getData().thickness : 10;
+    let wall: WallEntity | null = null;
+    if (this.parentEntity) {
+      wall = this.parentEntity.getTypeListEntity('wall').find((entity) => {
+        return entity.getData().id === data.wallId;
+      }) as WallEntity
+      wallThickness = wall ? wall.getData().thickness : 10;
+    }
     const geometry = new THREE.BoxGeometry(
       data.width * 1,
       data.height * 1,

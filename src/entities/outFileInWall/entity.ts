@@ -52,10 +52,13 @@ export class OutFileInWallEntity extends EntityClassInWall<OutFileInWallData> {
     const findObjInfo = window.worldState.ObjFileTypes.find(item => item.id === fileTypeId)
     const preImgScale = findObjInfo?.preImgScale || 1
     const { width, height } = this.img;
-    const wall: WallEntity = this.world.getTypeListEntity('wall').find((entity) => {
-      return entity.getData().id === wallId;
-    }) as WallEntity
-    const wallThickness = wall ? wall.getData().thickness : 10;
+    let wallThickness = 10;
+    if (this.parentEntity) {
+      const wall: WallEntity = this.parentEntity.getTypeListEntity('wall').find((entity) => {
+        return entity.getData().id === wallId;
+      }) as WallEntity
+      wallThickness = wall ? wall.getData().thickness : 10;
+    }
     // 沿着angleY角度移动10像素的偏移量
     const offsetX = Math.cos(angle + (isOuter ? Math.PI / -2 : Math.PI / 2)) * wallThickness / 2 * zoomLevel;
     const offsetY = Math.sin(angle + (isOuter ? Math.PI / -2 : Math.PI / 2)) * wallThickness / 2 * zoomLevel;
@@ -102,10 +105,13 @@ export class OutFileInWallEntity extends EntityClassInWall<OutFileInWallData> {
       console.error('未找到对应的文件类型:', fileTypeId)
       return []
     }
-    const wall: WallEntity = this.world.getTypeListEntity('wall').find((entity) => {
-      return entity.getData().id === wallId;
-    }) as WallEntity
-    const wallThickness = wall ? wall.getData().thickness : 10;
+    let wallThickness = 10;
+    if (this.parentEntity) {
+      const wall: WallEntity = this.parentEntity.getTypeListEntity('wall').find((entity) => {
+        return entity.getData().id === wallId;
+      }) as WallEntity
+      wallThickness = wall ? wall.getData().thickness : 10;
+    }
     const { scaleX, scaleY, scaleZ, url, materialUrl, angleY, materialVec, defaultColor, materialId } = findObjInfo
     const materialUseId = (bm === null) ? (materialId || -1) : bm
     // console.log('materialId', color);
@@ -222,12 +228,14 @@ export class OutFileInWallEntity extends EntityClassInWall<OutFileInWallData> {
   }
 
   createBoundingBox(): [THREE.Vector3, THREE.Vector3, THREE.Vector3] {
+    let wallThickness = 10;
     const { wallId, fileTypeId, isOuter, angle } = this.getData()
-    const wall: WallEntity = this.world.getTypeListEntity('wall').find((entity) => {
-      return entity.getData().id === wallId;
-    }) as WallEntity
-    const wallThickness = wall ? wall.getData().thickness : 10;
-
+    if (this.parentEntity) {
+      const wall: WallEntity = this.parentEntity.getTypeListEntity('wall').find((entity) => {
+        return entity.getData().id === wallId;
+      }) as WallEntity
+      wallThickness = wall ? wall.getData().thickness : 10;
+    }
     const findObjInfo = window.worldState.ObjFileTypes.find(item => item.id === fileTypeId)
 
     if (!findObjInfo) {
@@ -287,10 +295,15 @@ export class OutFileInWallEntity extends EntityClassInWall<OutFileInWallData> {
     if (findObjInfo) {
       const { matchAreaType, matchAreaNumber1, matchAreaNumber2 } = findObjInfo
       if (matchAreaType === 1) {
-        const wall: WallEntity = this.world.getTypeListEntity('wall').find((entity) => {
-          return entity.getData().id === wallId;
-        }) as WallEntity
-        const wallThickness = wall ? wall.getData().thickness : 10;
+        let wallThickness = 10
+        let wall: WallEntity | null = null
+        if (this.parentEntity) {
+          wall = this.parentEntity.getTypeListEntity('wall').find((entity) => {
+            return entity.getData().id === wallId;
+          }) as WallEntity
+          wallThickness = wall ? wall.getData().thickness : 10;
+        }
+
         const offsetX = Math.cos(angle + (isOuter ? Math.PI / -2 : Math.PI / 2)) * wallThickness;
         const offsetY = Math.sin(angle + (isOuter ? Math.PI / -2 : Math.PI / 2)) * wallThickness;
         const dataX = data.x + offsetX;

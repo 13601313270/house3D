@@ -21,14 +21,14 @@ export type MatchSnapPoint = OrigionSnapPoint | {
 export abstract class BaseEntityClass<T extends BaseObjData> {
   abstract name: string
   abstract type: string
-  world: World;
+  parentEntity: World | null;
   protected data: T
   meshList: THREE.Group[] = []
   // eslint-disable-next-line
   associationEntity: BaseEntityClass<any>[] = []// 关联对象，就是本对象渲染，需要联动修改的对象。（比如：墙壁上被窗户挖洞，那么墙修改，需要重新挖洞）
 
-  constructor(world: World, data: T) {
-    this.world = world
+  constructor(parentEntity: World | null, data: T) {
+    this.parentEntity = parentEntity
     this.data = data
   }
 
@@ -44,7 +44,9 @@ export abstract class BaseEntityClass<T extends BaseObjData> {
         entity.markObjectIsDirty()
       }
     })
-    this.world._callObjDataChange(this)
+    if (this.parentEntity) {
+      this.parentEntity._callObjDataChange(this)
+    }
   }
 
   getData(): T {

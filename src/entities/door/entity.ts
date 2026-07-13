@@ -21,8 +21,8 @@ export class DoorEntity extends EntityClassInWall<DoorData> {
 
   constructor(world: World, door: DoorData) {
     super(world, door)
-    if (door && door.wallId) {
-      const wall = this.world.getTypeListEntity('wall').find((entity) => entity.getData().id === door.wallId);
+    if (door && door.wallId && this.parentEntity) {
+      const wall = this.parentEntity.getTypeListEntity('wall').find((entity) => entity.getData().id === door.wallId);
       if (wall) {
         this.associationEntity.push(wall)
         wall.associationEntity.push(this)
@@ -31,10 +31,12 @@ export class DoorEntity extends EntityClassInWall<DoorData> {
   }
 
   draw2DPreviewByData(ctx: CanvasRenderingContext2D, data: DoorData, panOffset: Point, zoomLevel: number): void {
-    const findWall: WallEntity = this.world.getTypeListEntity('wall').find((entity) => entity.getData().id === data.wallId) as WallEntity
     let wallThickness = 10;
-    if (findWall) {
-      wallThickness = findWall.getData().thickness;
+    if (this.parentEntity) {
+      const findWall: WallEntity = this.parentEntity.getTypeListEntity('wall').find((entity) => entity.getData().id === data.wallId) as WallEntity
+      if (findWall) {
+        wallThickness = findWall.getData().thickness;
+      }
     }
     // 实现门的2D绘制逻辑
     const screenX = data.x * zoomLevel + panOffset.x
@@ -62,13 +64,15 @@ export class DoorEntity extends EntityClassInWall<DoorData> {
     panOffset: Point,
     zoomLevel: number,
   ): void {
-    const findWall: WallEntity = this.world.getTypeListEntity('wall').find((entity) => entity.getData().id === data.wallId) as WallEntity
+    let wallThickness = 10;
+    if (this.parentEntity) {
+      const findWall: WallEntity = this.parentEntity.getTypeListEntity('wall').find((entity) => entity.getData().id === data.wallId) as WallEntity
+      if (findWall) {
+        wallThickness = findWall.getData().thickness;
+      }
+    }
     const screenX = data.x * zoomLevel + panOffset.x
     const screenY = data.y * zoomLevel + panOffset.y
-    let wallThickness = 10;
-    if (findWall) {
-      wallThickness = findWall.getData().thickness;
-    }
     // 控制点
     ctx.fillStyle = '#fff'
     ctx.strokeStyle = '#e67e22'
@@ -111,10 +115,14 @@ export class DoorEntity extends EntityClassInWall<DoorData> {
   create3DMesh() {
     const data = this.getData();
     const group = new THREE.Group()
-    const wall: WallEntity = this.world.getTypeListEntity('wall').find((entity) => {
-      return entity.getData().id === data.wallId
-    }) as WallEntity
-    const wallThickness = wall ? wall.getData().thickness : 10;
+    let wallThickness = 10;
+    let wall: WallEntity | null = null;
+    if (this.parentEntity) {
+      wall = this.parentEntity.getTypeListEntity('wall').find((entity) => {
+        return entity.getData().id === data.wallId
+      }) as WallEntity
+      wallThickness = wall ? wall.getData().thickness : 10;
+    }
     const changeBLBState = () => {
       if (this.glbObj) {
         this.glbObj.traverse((child: any) => {
@@ -250,10 +258,13 @@ export class DoorEntity extends EntityClassInWall<DoorData> {
 
   showMatchHandel(x: number, y: number) {
     const data = this.getData();
-    const wall: WallEntity = this.world.getTypeListEntity('wall').find((entity) => {
-      return entity.getData().id === data.wallId;
-    }) as WallEntity
-    const wallThickness = wall ? wall.getData().thickness : 10;
+    let wallThickness = 10;
+    if (this.parentEntity) {
+      const wall: WallEntity = this.parentEntity.getTypeListEntity('wall').find((entity) => {
+        return entity.getData().id === data.wallId;
+      }) as WallEntity
+      wallThickness = wall ? wall.getData().thickness : 10;
+    }
     // const dist = Math.hypot(x - data.x, y - data.y)
     // console.log('zoomLevel---2', zoomLevel)
     if (isPointInRotatedRect(x, y, {
