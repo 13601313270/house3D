@@ -42,7 +42,7 @@ onMounted(() => {
 })
 
 const importFile = computed<string | null>(() => {
-  for (const item of window.worldApi.allImportImgs) {
+  for (const item of window.worldState.allImportImgs) {
     if (item.fileTypeId === props.modelValue) {
       return URL.createObjectURL(item.file)
     }
@@ -61,9 +61,9 @@ const emits = defineEmits<{
 function handleFileChange(event: Event) {
   // 去除旧的文件
   if (props.modelValue.startsWith(importImgFileHead)) {
-    const index = window.worldApi.allImportImgs.findIndex(item => item.fileTypeId === props.modelValue)
+    const index = window.worldState.allImportImgs.findIndex(item => item.fileTypeId === props.modelValue)
     if (index > -1) {
-      window.worldApi.allImportImgs.splice(index, 1)
+      window.worldState.allImportImgs.splice(index, 1)
     }
   }
   const input = event.target as HTMLInputElement
@@ -77,7 +77,7 @@ function handleFileChange(event: Event) {
     file,
   }
   // 添加到 allImportImgs
-  window.worldApi.allImportImgs.push(customObjItem)
+  window.worldState.allImportImgs.push(customObjItem)
   emits('update:modelValue', fileTypeId)
 }
 function updateEditPropInputInfo(event: Event) {
@@ -90,9 +90,9 @@ function updateEditPropInputInfo(event: Event) {
 }
 function changeTypeSelect() {
   if (props.modelValue.startsWith(importImgFileHead)) {
-    const index = window.worldApi.allImportImgs.findIndex(item => item.fileTypeId === props.modelValue)
+    const index = window.worldState.allImportImgs.findIndex(item => item.fileTypeId === props.modelValue)
     if (index > -1) {
-      window.worldApi.allImportImgs.splice(index, 1)
+      window.worldState.allImportImgs.splice(index, 1)
     }
   }
   emits('update:modelValue', '')

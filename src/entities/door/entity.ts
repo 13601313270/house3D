@@ -62,9 +62,6 @@ export class DoorEntity extends EntityClassInWall<DoorData> {
     panOffset: Point,
     zoomLevel: number,
   ): void {
-    // if (!this.world.getTypeListData('wall')) {
-    //   this.world.getTypeListData('wall') = []
-    // }
     const findWall: WallEntity = this.world.getTypeListEntity('wall').find((entity) => entity.getData().id === data.wallId) as WallEntity
     const screenX = data.x * zoomLevel + panOffset.x
     const screenY = data.y * zoomLevel + panOffset.y

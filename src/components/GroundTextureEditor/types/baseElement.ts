@@ -10,12 +10,12 @@ export type BaseElementData = {
 
 export abstract class BaseElement<T extends BaseElementData> {
   abstract type: string
-  world: TextureWorld
+  textureWorld: TextureWorld
   data: T
   isInitialized: boolean = false
   // eslint-disable-next-line no-useless-constructor
   constructor(world: TextureWorld, data: T) {
-    this.world = world
+    this.textureWorld = world
     this.data = data
   }
 

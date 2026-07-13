@@ -57,7 +57,7 @@ class RectClass extends SpriteElement<RectElementData> {
       ctx.stroke()
     }
 
-    if (this.world.selectedElementId === this.data.id) {
+    if (this.textureWorld.selectedElementId === this.data.id) {
       ctx.strokeStyle = '#1890ff'
       ctx.lineWidth = 2
       ctx.beginPath()

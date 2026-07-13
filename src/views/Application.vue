@@ -225,6 +225,7 @@ import { getHandleInAreaInfoByXY, getHandleInfoByXY } from '@/utils/getHandleInf
 import AiPic from '@/components/aiPic.vue'
 import ShowPayModal from '@/components/showPayModal.vue'
 import drawAxes from '@/utils/drawAxes';
+import WorldState from '@/utils/worldState';
 
 const canvas2DRef = ref<HTMLCanvasElement | null>(null)
 const canvas2D2Ref = ref<HTMLCanvasElement | null>(null)
@@ -420,6 +421,9 @@ const worldApi = new World({
   angleY: 0,
 })
 window.worldApi = worldApi
+const worldState = new WorldState()
+window.worldState = worldState
+
 allObjCount.value = worldApi.getAllObjectCount()
 const drawWrapper2DAnd3D = () => {
   drawWrapper2D();
@@ -819,7 +823,7 @@ const handleLoadProgramFileChange = async (e: Event) => {
       if (!read) continue
       const blob = await read.async('blob');
       const file = new File([blob], fileTypeId, { type: blob.type || 'application/octet-stream' })
-      worldApi.allImportImgs.push({ fileTypeId, file })
+      window.worldState.allImportImgs.push({ fileTypeId, file })
     }
   }
   try {

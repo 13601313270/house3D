@@ -157,7 +157,7 @@ export class PlaneEntity extends PointEntityClass<PlaneData> {
       let texture = PlaneEntity.textureCache.get(img);
       if (!texture) {
         if (img.startsWith(importImgFileHead)) {
-          const findImportFile = this.world.allImportImgs.find(item => item.fileTypeId === img);
+          const findImportFile = window.worldState.allImportImgs.find(item => item.fileTypeId === img);
           if (findImportFile) {
             const imgFile: File = findImportFile.file as File;
             const objectUrl = URL.createObjectURL(imgFile);

@@ -91,7 +91,7 @@ export abstract class PolygonElement<T extends PolygonElementData> extends BaseE
     }
     ctx.fill()
 
-    if (this.world.selectedElementId === this.data.id) {
+    if (this.textureWorld.selectedElementId === this.data.id) {
       ctx.fillStyle = '#1890ff'
       points.forEach((point) => {
         ctx.beginPath()
@@ -144,7 +144,7 @@ export abstract class PolygonElement<T extends PolygonElementData> extends BaseE
   }
 
   hitTestDragHandle(pos: Point): boolean {
-    if (this.world.selectedElementId !== this.data.id) return false
+    if (this.textureWorld.selectedElementId !== this.data.id) return false
 
     const center = this.getCenter()
     const dist = Math.sqrt(

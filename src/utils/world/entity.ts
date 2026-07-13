@@ -35,8 +35,6 @@ export class World {
 
   allImportFiles: ImportFileType[] = []
 
-  allImportImgs: ImportImgType[] = []
-
   activeCameraIndex: number = -1
 
   environmentConfig: EnvironmentConfig = { skyType: 1, ambientLightIntensity: 1, showGround: true }

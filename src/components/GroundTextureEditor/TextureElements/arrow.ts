@@ -235,7 +235,7 @@ class ArrowClass extends PolylineElement<ArrowElementData> {
       this.drawArrowHead(ctx, lastPoint.x, lastPoint.y, angle, arrowSizeEnd, endArrow)
     }
 
-    if (this.world.selectedElementId === this.data.id) {
+    if (this.textureWorld.selectedElementId === this.data.id) {
       const radius = Math.max(width / 5, 2);
       ctx.fillStyle = '#1890ff'
       points.forEach((point) => {

@@ -20,9 +20,6 @@ export class DoorEntity extends EntityClassInWall<DoorData> {
   constructor(world: World, door: DoorData) {
     super(world, door)
     if (door && door.wallId) {
-      // if (!this.world.getTypeListData('wall')) {
-      //   this.world.getTypeListData('wall') = []
-      // }
       const wall = this.world.getTypeListEntity('wall').find((entity) => entity.getData().id === door.wallId);
       if (wall) {
         this.associationEntity.push(wall)

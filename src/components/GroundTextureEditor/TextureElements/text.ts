@@ -41,7 +41,7 @@ class TextClass extends SpriteElement<TextElementData> {
     ctx.textBaseline = 'middle'
     ctx.fillText(text, 0, 0)
 
-    if (this.world.selectedElementId === this.data.id) {
+    if (this.textureWorld.selectedElementId === this.data.id) {
       ctx.strokeStyle = '#1890ff'
       ctx.lineWidth = 2
       ctx.strokeRect(-width / 2, -height / 2, width, height)

@@ -86,7 +86,7 @@ export abstract class PolylineElement<T extends PolylineElementData> extends Bas
     ctx.stroke()
     const radius = Math.max(width / 2 + 1, 2);
 
-    if (this.world.selectedElementId === this.data.id) {
+    if (this.textureWorld.selectedElementId === this.data.id) {
       ctx.fillStyle = '#1890ff'
       points.forEach((point) => {
         ctx.beginPath()

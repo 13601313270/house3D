@@ -25,7 +25,7 @@ export default class OutFilePlus71 extends OutFilePlusBase {
 
     if (screenImg) {
       if (screenImg.startsWith(importImgFileHead)) {
-        const findImportFile = window.worldApi.allImportImgs.find(item => item.fileTypeId === screenImg);
+        const findImportFile = window.worldState.allImportImgs.find(item => item.fileTypeId === screenImg);
         if (findImportFile) {
           const imgFile: File = findImportFile.file as File;
           const objectUrl = URL.createObjectURL(imgFile);

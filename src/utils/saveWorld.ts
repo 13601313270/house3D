@@ -23,7 +23,7 @@ async function saveWorld(
     zoomLevel: zoom2DLevel,
     cameraState: cameraStateCenter,
     activeCameraIndex,
-    allImportImgs: window.worldApi.allImportImgs.map(v => v.fileTypeId),
+    allImportImgs: window.worldState.allImportImgs.map(v => v.fileTypeId),
     environmentConfig: window.worldApi.environmentConfig,
   }
 
@@ -48,7 +48,7 @@ async function saveWorld(
     }
   }
 
-  const allImportImg = window.worldApi.allImportImgs
+  const allImportImg = window.worldState.allImportImgs
   console.log('allImportImg', allImportImg)
   const imgsFolder = zip.folder('imgs');
   if (imgsFolder) {
