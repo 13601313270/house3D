@@ -7,9 +7,9 @@ export default function (): DefaultItem<GroupData>[] {
       name: '组',
       data: {
         id: Date.now().toString(),
-        x: 0,
-        y: 0,
-        z: 0,
+        // x: 0,
+        // y: 0,
+        // z: 0,
         childrenData: [],
         angleY: 0,
       }

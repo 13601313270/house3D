@@ -8,26 +8,26 @@ type WorldData = GroupData & {
 
 class WorldGroup extends GroupEntity {
   // parentEntity: null;
-  // group: THREE.Scene = new THREE.Scene()
+  group: THREE.Scene = new THREE.Scene()
   environmentConfig: EnvironmentConfig = { skyType: 1, ambientLightIntensity: 1, showGround: true }
   groundMesh: THREE.Mesh | null = null
   ambientLight: THREE.AmbientLight | null = null
   directionalLight: THREE.DirectionalLight | null = null
-  public useMoveZBox = false;
+  useMoveZBox = false;
 
   constructor(parent: null, data: WorldData) {
     super(parent, data)
 
-    window.worldState.scene = new THREE.Scene();
-    window.worldState.scene.background = new THREE.Color(0xf0f0f0)
+    this.group = new THREE.Scene();
+    this.group.background = new THREE.Color(0xf0f0f0)
 
     const gridHelper = new THREE.GridHelper(1000, 50, 0xcccccc, 0xeeeeee)
     gridHelper.layers.set(2)
-    window.worldState.scene.add(gridHelper)
+    this.group.add(gridHelper)
 
     const axesHelper = new THREE.AxesHelper(100)
     axesHelper.layers.set(2)
-    window.worldState.scene.add(axesHelper);
+    this.group.add(axesHelper);
     this.setEnvironMent()
   }
 
@@ -42,7 +42,7 @@ class WorldGroup extends GroupEntity {
       this.ambientLight.intensity = intensity === 0 ? 0.1 : intensity
     } else {
       this.ambientLight = new THREE.AmbientLight(0xffffff, intensity)
-      window.worldState.scene.add(this.ambientLight)
+      this.group.add(this.ambientLight)
     }
 
     // if (!this.directionalLight) {
@@ -67,8 +67,8 @@ class WorldGroup extends GroupEntity {
     loaderSky.load(path, (texture) => {
       texture.mapping = THREE.EquirectangularReflectionMapping;
 
-      window.worldState.scene.background = texture;
-      window.worldState.scene.environment = texture; // 可选：简单环境光
+      this.group.background = texture;
+      this.group.environment = texture; // 可选：简单环境光
     });
 
     // 添加地面
@@ -98,7 +98,7 @@ class WorldGroup extends GroupEntity {
       this.groundMesh = new THREE.Mesh(groundGeometry, groundMaterial)
       this.groundMesh.rotation.x = -Math.PI / 2
       this.groundMesh.position.y = -10
-      window.worldState.scene.add(this.groundMesh)
+      this.group.add(this.groundMesh)
     });
   }
 }

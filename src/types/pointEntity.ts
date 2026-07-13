@@ -5,6 +5,7 @@ import { BaseEntityClass } from './baseEntity'
 
 export abstract class PointEntityClass<T extends PointObjData> extends BaseEntityClass<T> {
   boundingBox: THREE.Group
+  protected useMoveZBox: boolean = true;
   moveZBox: THREE.Group
   boundingBoxData: [THREE.Vector3, THREE.Vector3, THREE.Vector3] | null = null // 第一个是尺寸，第二个是位置偏移，第三个是旋转角度
   spriteGroup: THREE.Group | null = null
@@ -33,7 +34,9 @@ export abstract class PointEntityClass<T extends PointObjData> extends BaseEntit
       lineBox.entity = this
       group.visible = false
       this.boundingBox = group;
-      window.worldState.scene.add(group)
+      if (this.useMoveZBox && window.worldApi) {
+        window.worldApi.group.add(group)
+      }
     })();
     (() => {
       const shaftGeometry = new THREE.BoxGeometry(1, 1, 1);
@@ -61,7 +64,10 @@ export abstract class PointEntityClass<T extends PointObjData> extends BaseEntit
       // @ts-ignore
       group2.entity = this
       this.moveZBox = group2;
-      window.worldState.scene.add(group2)
+      console.log('this.useMoveZBox', this, this.useMoveZBox)
+      if (this.useMoveZBox && window.worldApi) {
+        window.worldApi.group.add(group2)
+      }
     })();
   }
 
@@ -75,7 +81,7 @@ export abstract class PointEntityClass<T extends PointObjData> extends BaseEntit
     if (oldCacheKey === newKeyByData) {
       return;
     }
-    const scene: THREE.Scene = window.worldState.scene
+    const scene: THREE.Scene = window.worldApi.group
     if (this.spriteGroup) {
       scene.remove(this.spriteGroup)
       this.spriteGroup = null
@@ -139,7 +145,7 @@ export abstract class PointEntityClass<T extends PointObjData> extends BaseEntit
     // 这里注意防止死循环
     super.markObjectIsDirty()
     if (this.spriteGroup) {
-      window.worldState.scene.remove(this.spriteGroup)
+      window.worldApi.group.remove(this.spriteGroup)
       this.spriteGroup = null
     }
   }
@@ -226,7 +232,7 @@ export abstract class PointEntityClass<T extends PointObjData> extends BaseEntit
 
   beforeRemove() {
     super.beforeRemove()
-    const scene: THREE.Scene = window.worldState.scene
+    const scene: THREE.Scene = window.worldApi.group
     if (this.boundingBox) {
       scene.remove(this.boundingBox)
     }

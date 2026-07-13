@@ -415,9 +415,6 @@ window.worldState = worldState
 
 const worldApi = new WorldGroup(null, {
   id: 'world',
-  x: 0,
-  y: 0,
-  z: 0,
   childrenData: [
   ],
   angleY: 0,

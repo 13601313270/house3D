@@ -20,7 +20,7 @@ export interface EnvironmentConfig {
   showGround?: boolean
 }
 
-export class GroupEntity extends PointEntityClass<GroupData> {
+export class GroupEntity extends BaseEntityClass<GroupData> {
   name: string = 'group'
   type: string = 'group'
   group: THREE.Object3D = new THREE.Group()
@@ -73,8 +73,8 @@ export class GroupEntity extends PointEntityClass<GroupData> {
     zoomLevel: number,
   ) {
     const [width, height] = this.getSize()
-    const screenX = data.x * zoomLevel + panOffset.x
-    const screenY = data.y * zoomLevel + panOffset.y
+    const screenX = 0 * zoomLevel + panOffset.x;// data.x * zoomLevel + panOffset.x
+    const screenY = 0 * zoomLevel + panOffset.y;// data.y * zoomLevel + panOffset.y
     // console.log('setPrepareState---' + this.getData().id + '---preview', data.x, data.y)
     // 绘制一个方块
     ctx.fillStyle = 'red'
@@ -173,52 +173,52 @@ export class GroupEntity extends PointEntityClass<GroupData> {
   }
 
   showMatchHandel(x: number, y: number) {
-    const [width, height, depth] = this.getSize()
-    const data = this.getData();
-    if (isPointInRotatedRect(x, y, {
-      x: data.x,
-      y: data.y,
-      width: Math.max(width, height),
-      depth: Math.max(width, height),
-      angleY: data.angleY * -1,
-    })) {
-      return new MatchRectArea({
-        x: data.x,
-        y: data.y,
-        width: Math.max(width, height),
-        depth: Math.max(width, height),
-        angleY: data.angleY,
-      })
-    }
+    // const [width, height, depth] = this.getSize()
+    // const data = this.getData();
+    // if (isPointInRotatedRect(x, y, {
+    //   x: 0,// data.x,
+    //   y: 0,// data.y,
+    //   width: Math.max(width, height),
+    //   depth: Math.max(width, height),
+    //   angleY: data.angleY * -1,
+    // })) {
+    //   return new MatchRectArea({
+    //     x: data.x,
+    //     y: data.y,
+    //     width: Math.max(width, height),
+    //     depth: Math.max(width, height),
+    //     angleY: data.angleY,
+    //   })
+    // }
     return null;
   }
 
   matchHandelInfo(x: number, y: number) {
-    const data = this.getData();
-    const dist = Math.hypot(x - data.x, y - data.y)
-    if (dist < this.circleRadius + 3) {
-      return {
-        index: 0,
-        type: this.type,
-        id: data.id,
-        dist,
-      }
-    }
-    const drawAngelLength = 100;// Math.max(this.getData().width / 2, this.circleRadius * 2) * 0.9;// 0.9避免超过方块范围
-    // 控制点向着angleY角度延伸10个单位后的坐标
-    const rotatedXAdd = data.x + Math.cos(data.angleY) * drawAngelLength
-    const rotatedYAdd = data.y - Math.sin(data.angleY) * drawAngelLength
+    // const data = this.getData();
+    // const dist = Math.hypot(x - data.x, y - data.y)
+    // if (dist < this.circleRadius + 3) {
+    //   return {
+    //     index: 0,
+    //     type: this.type,
+    //     id: data.id,
+    //     dist,
+    //   }
+    // }
+    // const drawAngelLength = 100;// Math.max(this.getData().width / 2, this.circleRadius * 2) * 0.9;// 0.9避免超过方块范围
+    // // 控制点向着angleY角度延伸10个单位后的坐标
+    // const rotatedXAdd = data.x + Math.cos(data.angleY) * drawAngelLength
+    // const rotatedYAdd = data.y - Math.sin(data.angleY) * drawAngelLength
 
-    const dist2 = Math.hypot(x - rotatedXAdd, y - rotatedYAdd)
-    // console.log('dist2', dist2)
-    if (dist2 < this.circleRadius + 3) {
-      return {
-        index: 1,
-        type: this.type,
-        id: data.id,
-        dist: dist2,
-      }
-    }
+    // const dist2 = Math.hypot(x - rotatedXAdd, y - rotatedYAdd)
+    // // console.log('dist2', dist2)
+    // if (dist2 < this.circleRadius + 3) {
+    //   return {
+    //     index: 1,
+    //     type: this.type,
+    //     id: data.id,
+    //     dist: dist2,
+    //   }
+    // }
     return null;
   }
 
@@ -260,8 +260,8 @@ export class GroupEntity extends PointEntityClass<GroupData> {
     // console.log('setPrepareState---' + this.getData().id, x, y)
     this.setData({
       ...this.getData(),
-      x,
-      y,
+      // x,
+      // y,
     })
     return [];
   }
@@ -445,15 +445,6 @@ export class GroupEntity extends PointEntityClass<GroupData> {
           close()
         }
       },
-      {
-        id: 'z',
-        label: '距离地面',
-        dataType: 'number',
-        min: -100,
-        max: 100,
-        step: 1,
-        value: data.z,
-      }
     ], (val) => {
       this.setData({
         ...data,

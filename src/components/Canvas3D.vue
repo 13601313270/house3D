@@ -69,7 +69,7 @@ function raycastObjects(list: THREE.Group[], event: MouseEvent): THREE.Object3D 
   mouse.set(x, y)
   raycaster.setFromCamera(mouse, camera)
 
-  const scene = window.worldState.scene
+  const scene = window.worldApi.group
   if (!scene) return null
 
   const intersects = raycaster.intersectObjects(list, true)
@@ -436,7 +436,7 @@ const initThree = () => {
 }
 
 const animate = () => {
-  const scene = window.worldState.scene
+  const scene = window.worldApi.group
   if (renderer && scene && camera) {
     renderer.render(scene, camera)
     requestAnimationFrame(animate)
@@ -450,7 +450,7 @@ const resize = () => {
 }
 
 const updateScene = () => {
-  if (window.worldState.scene) {
+  if (window.worldApi.group) {
     props.world.reCreate3DMeshIfNeed()
     props.world.change3DMeshState()
     props.world.changeBoundingBoxState()
@@ -539,7 +539,7 @@ onMounted(() => {
 const exportImage = () => {
   if (renderer && renderer.domElement) {
     // 确保渲染器完成当前帧渲染
-    const scene = window.worldState.scene
+    const scene = window.worldApi.group
     if (scene && camera) {
       renderer.render(scene, camera)
     }
@@ -591,7 +591,7 @@ watch(() => props.aspectRatio, (newVal) => {
 
 const getImageData = (): string | null => {
   if (renderer && renderer.domElement) {
-    const scene = window.worldState.scene
+    const scene = window.worldApi.group
     if (scene && camera) {
       renderer.render(scene, camera)
     }
