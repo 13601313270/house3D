@@ -60,9 +60,7 @@ export class DirectionCameraEntity extends CameraBase<DirectionCameraData> {
   }
 
   draw2DPreviewByData(ctx: CanvasRenderingContext2D, data: DirectionCameraData, panOffset: Point, zoomLevel: number): void {
-    let index: number = -1;
-    index = this.world.getTypeListEntity('camera').indexOf(this)
-
+    const index: number = this.world.getTypeListEntity('camera').indexOf(this);
     const screenX = data.x * zoomLevel + panOffset.x
     const screenY = data.y * zoomLevel + panOffset.y
     // const targetPosition = this.getTargetPosition();

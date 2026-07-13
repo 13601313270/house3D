@@ -22,6 +22,8 @@ export interface EnvironmentConfig {
 export class World {
   protected data: GroupData
 
+  private children: BaseEntityClass<BaseObjData>[] = []
+
   private allObjectsByGroup: {
     [key in string]?: BaseEntityClass<BaseObjData>[]
   } = {}
@@ -142,24 +144,23 @@ export class World {
     zoomLevel: number = 1,
   ) {
     // 绘制墙体
-    const fileData = this.getAllFileObjects()
-    const allObj: PointEntityClass<any>[] = [];
-    allFileKeys.forEach((key) => {
-      if (fileData[key]) {
-        fileData[key].forEach((item, index) => {
-          // @ts-ignore
-          const itemApi: DoorEntity = this.getTypeListEntity(key)[index];
-          if (itemApi) {
-            allObj.push(itemApi)
-          }
-        })
+    const allObj: BaseEntityClass<BaseObjData>[] = [];
+    this.children.forEach(item => {
+      if (item.type !== 'pointGroup') {
+        allObj.push(item)
       }
     })
     allObj.sort((a, b) => {
-      const aData = a.getData()
-      const bData = b.getData()
-      const aZ = ((aData.z || 0) + (a.boundingBoxData ? a.boundingBoxData[0].y : 0))
-      const bZ = ((bData.z || 0) + (b.boundingBoxData ? b.boundingBoxData[0].y : 0))
+      let aZ = 0;
+      if (a instanceof PointEntityClass) {
+        const aData = a.getData()
+        aZ = aData.z + (a.boundingBoxData ? a.boundingBoxData[0].y : 0)
+      }
+      let bZ = 0;
+      if (b instanceof PointEntityClass) {
+        const bData = b.getData()
+        bZ = bData.z + (b.boundingBoxData ? b.boundingBoxData[0].y : 0)
+      }
       return aZ - bZ
     }).forEach((item) => {
       item.draw2DPreview(ctx, panOffset, zoomLevel)
@@ -203,81 +204,70 @@ export class World {
 
   boundingBoxList(): THREE.Group[] {
     const boundingBoxList: THREE.Group[] = []
-    allFileKeys.forEach((key) => {
-      if (this.getTypeListEntity(key)) {
-        (this.getTypeListEntity(key) as PointEntityClass<any>[]).forEach((item) => {
-          if (item.boundingBox) {
-            boundingBoxList.push(item.boundingBox)
-          }
-        })
+    this.children.forEach((item) => {
+      if (item instanceof PointEntityClass && item.boundingBox) {
+        boundingBoxList.push(item.boundingBox)
       }
-    })
+    });
     return boundingBoxList
   }
 
   moveZBoxList(): THREE.Group[] {
     const boundingBoxList: THREE.Group[] = []
-    allFileKeys.forEach((key) => {
-      if (this.getTypeListEntity(key)) {
-        (this.getTypeListEntity(key) as PointEntityClass<any>[]).forEach((item) => {
-          if (item.moveZBox) {
-            boundingBoxList.push(item.moveZBox)
-          }
-        })
+    this.children.forEach((item) => {
+      if (item instanceof PointEntityClass && item.moveZBox) {
+        boundingBoxList.push(item.moveZBox)
       }
-    })
+    });
+    console.log('boundingBoxList-1', boundingBoxList)
     return boundingBoxList
   }
 
   draw3D() {
-    allFileKeys.forEach((key) => {
-      if (this.getTypeListEntity(key)) {
-        (this.getTypeListEntity(key) as BaseEntityClass<any>[]).forEach((item) => {
-          item.reCreate3DMeshIfNeed()
-          item.change3DMeshState()
-          if (item instanceof PointEntityClass && !(item instanceof CameraBase)) {
-            setTimeout(() => {
-              const boundingBox = item.createBoundingBox();
-              if (boundingBox && this.isShowBoundingBox) {
-                const data = item.getData();
-                // 第一个是尺寸，第二个是位置偏移，第三个是旋转角度
-                const [boxVector3, offsetVector3, rotateVector3] = boundingBox;
-                item.boundingBoxData = [boxVector3, offsetVector3, rotateVector3]
-                item.boundingBox.position.set(data.x, data.z, data.y)
-                item.boundingBox.children[0].rotation.set(rotateVector3.x, rotateVector3.y, rotateVector3.z)
-                item.boundingBox.children[0].scale.set(boxVector3.x, boxVector3.y, boxVector3.z)
-                item.boundingBox.children[0].position.set(offsetVector3.x, offsetVector3.y, offsetVector3.z)
+    this.children.forEach(item => {
+      item.reCreate3DMeshIfNeed()
+      item.change3DMeshState()
+      if (item instanceof PointEntityClass && !(item instanceof CameraBase)) {
+        setTimeout(() => {
+          const boundingBox = item.createBoundingBox();
+          if (boundingBox && this.isShowBoundingBox) {
+            const data = item.getData();
+            // 第一个是尺寸，第二个是位置偏移，第三个是旋转角度
+            const [boxVector3, offsetVector3, rotateVector3] = boundingBox;
+            item.boundingBoxData = [boxVector3, offsetVector3, rotateVector3]
+            item.boundingBox.position.set(data.x, data.z, data.y)
+            item.boundingBox.children[0].rotation.set(rotateVector3.x, rotateVector3.y, rotateVector3.z)
+            item.boundingBox.children[0].scale.set(boxVector3.x, boxVector3.y, boxVector3.z)
+            item.boundingBox.children[0].position.set(offsetVector3.x, offsetVector3.y, offsetVector3.z)
 
-                item.boundingBox.children[1].rotation.set(rotateVector3.x, rotateVector3.y, rotateVector3.z)
-                item.boundingBox.children[1].scale.set(boxVector3.x, boxVector3.y, boxVector3.z)
-                item.boundingBox.children[1].position.set(offsetVector3.x, offsetVector3.y, offsetVector3.z)
+            item.boundingBox.children[1].rotation.set(rotateVector3.x, rotateVector3.y, rotateVector3.z)
+            item.boundingBox.children[1].scale.set(boxVector3.x, boxVector3.y, boxVector3.z)
+            item.boundingBox.children[1].position.set(offsetVector3.x, offsetVector3.y, offsetVector3.z)
 
-                item.boundingBox.visible = this.isShowBoundingBox
-                if (item.spriteGroup) {
-                  item.spriteGroup.position.set(data.x, data.z, data.y)
-                  item.spriteGroup.children[0].position.set(0, boxVector3.y / 2 + offsetVector3.y + 12, 0)
-                }
-                if (item.moveZBox) {
-                  item.moveZBox.position.set(data.x, data.z, data.y)
-                  // const height = Math.max(Math.min(40, boxVector3.y), 20);
-                  const radio = Math.max(Math.min(boxVector3.x / 8, boxVector3.z / 8, 20), 8);
-                  const height = radio * 3;
-                  item.moveZBox.children[0].scale.set(
-                    radio,
-                    height,
-                    radio
-                  )
-                  item.moveZBox.children[0].position.set(offsetVector3.x, boxVector3.y / 2 + height / 2 + offsetVector3.y, offsetVector3.z)
-                  item.moveZBox.visible = false
-                }
-              } else {
-                item.boundingBox.visible = false
-              }
-            })
+            item.boundingBox.visible = this.isShowBoundingBox
+            if (item.spriteGroup) {
+              item.spriteGroup.position.set(data.x, data.z, data.y)
+              item.spriteGroup.children[0].position.set(0, boxVector3.y / 2 + offsetVector3.y + 12, 0)
+            }
+            if (item.moveZBox) {
+              item.moveZBox.position.set(data.x, data.z, data.y)
+              // const height = Math.max(Math.min(40, boxVector3.y), 20);
+              const radio = Math.max(Math.min(boxVector3.x / 8, boxVector3.z / 8, 20), 8);
+              const height = radio * 3;
+              item.moveZBox.children[0].scale.set(
+                radio,
+                height,
+                radio
+              )
+              item.moveZBox.children[0].position.set(offsetVector3.x, boxVector3.y / 2 + height / 2 + offsetVector3.y, offsetVector3.z)
+              item.moveZBox.visible = false
+            }
+          } else {
+            item.boundingBox.visible = false
           }
-        });
+        })
       }
-    });
+    })
   }
 
   getAllFileObjects(): fileData {
@@ -305,7 +295,8 @@ export class World {
       await api.init()
       apiList.push(api);
       this.allObjectsByGroup[type].push(api)
-      this.data.children.push(api)
+      this.data.children.push(api.getData())
+      this.children.push(api);
       this.worldAddBindList.forEach(callback => callback(api))
       if (api.getData().isLocked) {
         this.lockedObjList.push(api)
@@ -321,7 +312,8 @@ export class World {
       this.allObjectsByGroup[type][index].beforeRemove()
       this.allObjectsByGroup[type].splice(index, 1)
 
-      const index2 = this.data.children.indexOf(backup)
+      const index2 = this.children.indexOf(backup)
+      this.children.splice(index2, 1)
       this.data.children.splice(index2, 1)
 
       if (backup.getData().isLocked) {
@@ -417,6 +409,6 @@ export class World {
   }
 
   getAllObjectCount() {
-    return this.data.children.length
+    return this.children.length
   }
 }
