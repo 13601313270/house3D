@@ -1,6 +1,6 @@
 import { BaseElementDefinition, Point } from '../types'
 import { SpriteElement, SpriteElementData } from '../types/spriteElement'
-import { editItem } from '@/entities'
+import { editItem } from '@/utils/editItem'
 
 interface TextElementData extends SpriteElementData {
   text: string

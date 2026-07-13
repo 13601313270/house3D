@@ -1,8 +1,8 @@
 import * as THREE from 'three'
 import { HandelInfo, Point, BaseObjData, PointWithIndex } from './map2d'
 import { Group } from '@/entities/group/entity'
-import { editItem } from '@/entities'
 import { MatchCircleArea, MatchRectArea } from '@/utils/matchArea'
+import { editItem } from '@/utils/editItem'
 
 export type allSnapFromType = 'point' | 'line' | 'axis'
 // 磁吸点
@@ -163,3 +163,5 @@ export abstract class BaseEntityClass<T extends BaseObjData> {
     dragHandelInfo: HandelInfo,
   ): boolean;
 }
+
+export type EntityConstructor = new (world: Group, data: BaseObjData) => BaseEntityClass<any>;

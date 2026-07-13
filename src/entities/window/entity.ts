@@ -4,7 +4,7 @@ import { EntityClassInWall } from '@/types/entityInWall'
 import { WindowData } from './index.d'
 import { Brush, Evaluator, SUBTRACTION } from 'three-bvh-csg';
 import { Group } from '@/entities/group/entity';
-import { editItem } from '..';
+import { editItem } from '@/utils/editItem';
 import { getMaterialById } from '@/material';
 import { MatchRectArea } from '@/utils/matchArea'
 import { isPointInRotatedRect } from '@/utils/isPointInRotatedRect'

@@ -1,5 +1,5 @@
 import * as THREE from 'three'
-import { editItem } from "@/entities";
+import editItem from "@/utils/editItem";
 import { OutFilePlusBase } from './OutFilePlusBase';
 
 const allPlugins: Record<number, () => Promise<{ default: typeof OutFilePlusBase }>> = {

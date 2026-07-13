@@ -2,7 +2,7 @@ import * as THREE from 'three'
 import { HandelInfo, Point } from '@/types/map2d'
 import { PeopleData } from './index.d'
 import { PointEntityClass } from '@/types/pointEntity'
-import { editItem } from '..'
+import { editItem } from '@/utils/editItem'
 // @ts-ignore
 import { FBXLoader } from 'three/addons/loaders/FBXLoader.js';
 import { MatchCircleArea } from '@/utils/matchArea'

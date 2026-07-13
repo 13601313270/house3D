@@ -1,8 +1,9 @@
 import * as THREE from 'three'
 import { Point } from '../../types'
-import { allFileKeys, editItem, EntityConstructor, fileData, fileDataKeyToClass } from '@/entities/index'
+import { fileDataKeyToClass } from '@/entities/index'
+import { editItem } from '@/utils/editItem'
 import { PointEntityClass } from '@/types/pointEntity'
-import { BaseEntityClass } from '@/types/baseEntity'
+import { BaseEntityClass, EntityConstructor } from '@/types/baseEntity'
 import { BaseObjData, HandelInfo } from '@/types/map2d'
 import { GroupData } from '.'
 

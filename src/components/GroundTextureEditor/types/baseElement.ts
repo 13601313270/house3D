@@ -1,4 +1,4 @@
-import { editItem } from '@/entities'
+import { editItem } from '@/utils/editItem'
 import { TextureWorld } from '../textureWorld'
 import type { Point } from './index'
 

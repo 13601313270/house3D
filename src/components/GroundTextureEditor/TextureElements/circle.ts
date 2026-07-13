@@ -1,6 +1,6 @@
 import { BaseElementDefinition, Point } from '../types'
 import { SpriteElement, SpriteElementData } from '../types/spriteElement'
-import { editItem } from '@/entities'
+import { editItem } from '@/utils/editItem'
 
 interface CircleElementData extends SpriteElementData {
   hasBorder: boolean,

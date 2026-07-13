@@ -1,5 +1,5 @@
 import * as THREE from 'three'
-import { editItem } from "@/entities";
+import editItem from "@/utils/editItem";
 
 export abstract class OutFilePlusBase {
   static outFileDataExtension(data: Record<string, any>): editItem[] | Promise<editItem[]> {

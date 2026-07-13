@@ -1,6 +1,6 @@
 import { OutFilePlusBase } from "@/outFilePlus/OutFilePlusBase";
 import * as THREE from 'three'
-import { editItem } from "@/entities";
+import editItem from "@/utils/editItem";
 
 export default class OutFilePlus71 extends OutFilePlusBase {
   static outFileDataExtension(data: Record<string, any>): editItem[] {

@@ -1,7 +1,7 @@
 import type { BaseElementData, Point } from './index'
 import { BaseElement } from './baseElement'
 // import { ElementFactory } from './elementFactory'
-import { editItem } from '@/entities'
+import { editItem } from '@/utils/editItem'
 
 export interface PolygonElementData extends BaseElementData {
   points: Point[],

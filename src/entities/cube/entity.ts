@@ -2,7 +2,7 @@ import * as THREE from 'three'
 import { HandelInfo, Point } from '@/types/map2d'
 import { CubeData } from './index.d'
 import { PointEntityClass } from '@/types/pointEntity'
-import { editItem } from '..';
+import { editItem } from '@/utils/editItem';
 import { getMaterialById } from '@/material';
 import { isPointInRotatedRect } from '@/utils/isPointInRotatedRect'
 import { MatchRectArea } from '@/utils/matchArea';

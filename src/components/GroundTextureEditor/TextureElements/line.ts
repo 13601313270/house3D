@@ -327,7 +327,7 @@ class LineClass extends PolylineElement<ArrowElementData> {
     ctx.restore()
   }
 
-  setEditParams(): Array<import('@/entities').editItem> {
+  setEditParams(): Array<import('@/utils/editItem').editItem> {
     const arrowEnumList: Array<{ id: ArrowEndType, name: string, img: string }> = [
       { id: 'none', name: '无', img: '/lineCap/1.png' },
       { id: 'round', name: '圆头', img: '/lineCap/2.png' },

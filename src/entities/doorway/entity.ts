@@ -3,7 +3,7 @@ import { HandelInfo, Point } from '@/types/map2d'
 import { DoorData } from './index.d'
 import { Brush, Evaluator, SUBTRACTION } from 'three-bvh-csg';
 import { EntityClassInWall } from '@/types/entityInWall'
-import { editItem } from '..';
+import { editItem } from '@/utils/editItem';
 import { Group } from '@/entities/group/entity';
 import { getMaterialById } from '@/material';
 import { MatchRectArea } from '@/utils/matchArea';

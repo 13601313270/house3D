@@ -1,6 +1,6 @@
 import * as THREE from 'three'
 import { Point, HandelInfo } from '@/types/map2d'
-import { editItem } from '..'
+import { editItem } from '@/utils/editItem'
 import { MatchCircleArea, MatchRectArea } from '@/utils/matchArea'
 import { calculateAngle } from '@/utils/calculateAngle'
 import message from '@/utils/message'

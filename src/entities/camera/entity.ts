@@ -1,7 +1,7 @@
 import * as THREE from 'three'
 import { HandelInfo, Point } from '@/types/map2d'
 import { CameraData } from './index.d'
-import { editItem } from '..'
+import { editItem } from '@/utils/editItem'
 // @ts-ignore
 import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
 // @ts-ignore

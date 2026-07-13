@@ -1,6 +1,6 @@
 import type { BaseElementData, Point } from './index'
 import { BaseElement } from './baseElement'
-import { editItem } from '@/entities'
+import { editItem } from '@/utils/editItem'
 import { loadImage, getCachedImage } from '@/utils/imageCache'
 
 export interface SpriteElementData extends BaseElementData {

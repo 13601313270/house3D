@@ -1,6 +1,6 @@
 import { OutFilePlusBase } from "@/outFilePlus/OutFilePlusBase";
 import * as THREE from 'three'
-import { editItem } from "@/entities";
+import { editItem } from "@/utils/editItem";
 import { importImgFileHead } from "@/entities/allObjs";
 
 export default class OutFilePlus71 extends OutFilePlusBase {

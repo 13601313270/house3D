@@ -2,7 +2,7 @@ import * as THREE from 'three'
 import { HandelInfo, Point } from '@/types/map2d'
 import { CylinderData } from './index.d'
 import { PointEntityClass } from '@/types/pointEntity'
-import { editItem } from '..';
+import { editItem } from '@/utils/editItem';
 import { getMaterialById } from '@/material';
 import { MatchCircleArea } from '@/utils/matchArea';
 import { allSnapFromType } from '@/types/baseEntity';
