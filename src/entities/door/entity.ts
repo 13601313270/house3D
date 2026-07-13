@@ -6,7 +6,7 @@ import { DoorData } from './index.d'
 import { Brush, Evaluator, SUBTRACTION } from 'three-bvh-csg';
 import { EntityClassInWall } from '@/types/entityInWall'
 import { editItem } from '..';
-import { Group } from '@/entities/Group/entity';
+import { Group } from '@/entities/group/entity';
 import { getMaterialById } from '@/material';
 import { MatchRectArea } from '@/utils/matchArea';
 import { isPointInRotatedRect } from '@/utils/isPointInRotatedRect';

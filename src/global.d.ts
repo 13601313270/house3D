@@ -1,4 +1,4 @@
-import { Group } from './entities/Group/entity'
+import { Group } from './entities/group/entity'
 import WorldState from './utils/worldState'
 
 declare global {

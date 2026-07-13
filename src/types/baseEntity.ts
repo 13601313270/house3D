@@ -1,6 +1,6 @@
 import * as THREE from 'three'
 import { HandelInfo, Point, BaseObjData, PointWithIndex } from './map2d'
-import { Group } from '@/entities/Group/entity'
+import { Group } from '@/entities/group/entity'
 import { editItem } from '@/entities'
 import { MatchCircleArea, MatchRectArea } from '@/utils/matchArea'
 

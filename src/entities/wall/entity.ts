@@ -10,7 +10,7 @@ import message from '@/utils/message'
 import { isPointInRotatedRect } from '@/utils/isPointInRotatedRect'
 import { allSnapFromType, MatchSnapPoint, OrigionSnapPoint } from '@/types/baseEntity'
 import { LineEntityClass } from '@/types/lineEntity'
-import { Group } from '@/entities/Group/entity'
+import { Group } from '@/entities/group/entity'
 
 export class WallEntity extends LineEntityClass<WallPoint, WallData> {
   name: string = '墙'

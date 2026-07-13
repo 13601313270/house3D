@@ -184,7 +184,7 @@ import * as THREE from 'three'
 import JSZip from 'jszip';
 import request from '@/utils/request'
 import { Point } from '../types'
-import { snapThreshold, Group, EnvironmentConfig } from '../entities/Group/entity'
+import { snapThreshold, Group, EnvironmentConfig } from '../entities/group/entity'
 import Canvas3D from '../components/Canvas3D.vue'
 import { CameraState } from '@/types/camera'
 import { allFileKeys, fileData, editItem } from '@/entities'
