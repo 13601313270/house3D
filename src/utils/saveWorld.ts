@@ -1,7 +1,7 @@
 import { fileData } from "@/entities"
 import { Point } from "@/types"
 import { CameraState } from "@/types/camera"
-import { EnvironmentConfig } from "./world/entity"
+import { EnvironmentConfig } from "../entities/Group/entity"
 import JSZip from "jszip"
 
 async function saveWorld(

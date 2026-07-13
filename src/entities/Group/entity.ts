@@ -7,7 +7,7 @@ import { ImportFileType, ImportImgType, ObjOutputFileType } from '@/entities/all
 import { BaseEntityClass } from '@/types/baseEntity'
 import { BaseObjData, HandelInfo } from '@/types/map2d'
 import { CameraBase } from '@/types/CameraBase'
-import { GroupData } from './index.d'
+import { GroupData } from '.'
 
 export const canvasHeight = 600
 export const snapThreshold = 20

@@ -9,7 +9,7 @@ import kamera from './kamera.png'
 import { MatchCircleArea } from '@/utils/matchArea'
 import { OrigionSnapPoint } from '@/types/baseEntity'
 import { CameraBase } from '@/types/CameraBase'
-import { Group } from '@/utils/world/entity'
+import { Group } from '@/entities/Group/entity'
 
 const img = new Image()
 img.src = kamera || ''

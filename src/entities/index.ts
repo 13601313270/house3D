@@ -1,5 +1,5 @@
 import { BaseEntityClass } from '@/types/baseEntity'
-import { Group } from '@/utils/world/entity'
+import { Group } from '@/entities/Group/entity'
 import { IconDataType } from '@/components/GroundTextureEditor/types/elementDefinition'
 import PluginType from './pluginType'
 import { BaseObjData } from '@/types/map2d'

@@ -1,6 +1,6 @@
 import * as THREE from 'three'
 import { ImportFileType, ImportImgType, ObjOutputFileType } from "@/entities/allObjs"
-import { EnvironmentConfig } from './world/entity'
+import { EnvironmentConfig } from '../entities/Group/entity'
 
 class WorldState {
   scene: THREE.Scene
