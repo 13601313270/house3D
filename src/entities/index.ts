@@ -1,5 +1,5 @@
 import { BaseEntityClass } from '@/types/baseEntity'
-import { World } from '@/utils/world/entity'
+import { Group } from '@/utils/world/entity'
 import { IconDataType } from '@/components/GroundTextureEditor/types/elementDefinition'
 import PluginType from './pluginType'
 import { BaseObjData } from '@/types/map2d'
@@ -31,7 +31,7 @@ import regularPolygonPlugin from './regularPolygon'
 import regularPolygon2Plugin from './regularPolygon2'
 import torusPlugin from './torus'
 
-export type EntityConstructor = new (world: World, data: BaseObjData) => BaseEntityClass<any>;
+export type EntityConstructor = new (world: Group, data: BaseObjData) => BaseEntityClass<any>;
 export type enumItem = {
   id: number | string,
   name: string,

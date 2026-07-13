@@ -6,13 +6,13 @@
 <script lang="ts" setup>
 import { ref, onMounted, onUnmounted, watch, nextTick } from 'vue'
 import * as THREE from 'three'
-import { World } from '@/utils/world/entity'
+import { Group } from '@/utils/world/entity'
 import { CameraState, OrthographicCamera } from '@/types/camera'
 import { PointEntityClass } from '@/types/pointEntity';
 import { BaseEntityClass } from '@/types/baseEntity';
 
 const props = defineProps<{
-  world: World,
+  world: Group,
   cameraState: CameraState,//  | OrthographicCamera,
   camera: THREE.PerspectiveCamera | THREE.OrthographicCamera,
   aspectRatio: number

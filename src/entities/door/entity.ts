@@ -6,7 +6,7 @@ import { DoorData } from './index.d'
 import { Brush, Evaluator, SUBTRACTION } from 'three-bvh-csg';
 import { EntityClassInWall } from '@/types/entityInWall'
 import { editItem } from '..';
-import { World } from '@/utils/world/entity';
+import { Group } from '@/utils/world/entity';
 import { getMaterialById } from '@/material';
 import { MatchRectArea } from '@/utils/matchArea';
 import { isPointInRotatedRect } from '@/utils/isPointInRotatedRect';
@@ -18,7 +18,7 @@ export class DoorEntity extends EntityClassInWall<DoorData> {
   type: string = 'door'
   private circleRadius = 6
 
-  constructor(world: World, door: DoorData) {
+  constructor(world: Group, door: DoorData) {
     super(world, door)
     if (door && door.wallId && this.parentEntity) {
       const wall = this.parentEntity.getTypeListEntity('wall').find((entity) => entity.getData().id === door.wallId);

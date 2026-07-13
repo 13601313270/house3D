@@ -7,10 +7,12 @@ class WorldState {
   allImportImgs: ImportImgType[] = []
   allImportFiles: ImportFileType[] = []
   ObjFileTypes: ObjOutputFileType[] = []
+  activeCameraIndex: number = -1
   environmentConfig: EnvironmentConfig = { skyType: 1, ambientLightIntensity: 1, showGround: true }
 
   groundMesh: THREE.Mesh | null = null
   ambientLight: THREE.AmbientLight | null = null
+  directionalLight: THREE.DirectionalLight | null = null
 
   constructor() {
     this.scene = new THREE.Scene()

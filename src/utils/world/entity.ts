@@ -19,9 +19,9 @@ export interface EnvironmentConfig {
   showGround?: boolean
 }
 
-export class World extends PointEntityClass<GroupData> {
-  protected data: GroupData
-  name: string = 'world'
+export class Group extends PointEntityClass<GroupData> {
+  name: string = 'group'
+  type: string = 'group'
 
   public children: BaseEntityClass<BaseObjData>[] = []
 
@@ -32,14 +32,7 @@ export class World extends PointEntityClass<GroupData> {
   // 锁定状态的对象列表
   lockedObjList: BaseEntityClass<BaseObjData>[] = []
 
-  activeCameraIndex: number = -1
-
-  directionalLight: THREE.DirectionalLight | null = null
-
-  isShowBoundingBox: boolean = true
-
   private circleRadius = 6
-  type: string = 'group'
 
   create3DMesh() {
     const group = new THREE.Group()
@@ -310,7 +303,7 @@ export class World extends PointEntityClass<GroupData> {
       if (item instanceof PointEntityClass && !(item instanceof CameraBase)) {
         setTimeout(() => {
           const boundingBox = item.createBoundingBox();
-          if (boundingBox && this.isShowBoundingBox) {
+          if (boundingBox) {
             const data = item.getData();
             // 第一个是尺寸，第二个是位置偏移，第三个是旋转角度
             const [boxVector3, offsetVector3, rotateVector3] = boundingBox;
@@ -324,7 +317,7 @@ export class World extends PointEntityClass<GroupData> {
             item.boundingBox.children[1].scale.set(boxVector3.x, boxVector3.y, boxVector3.z)
             item.boundingBox.children[1].position.set(offsetVector3.x, offsetVector3.y, offsetVector3.z)
 
-            item.boundingBox.visible = this.isShowBoundingBox
+            item.boundingBox.visible = true
             if (item.spriteGroup) {
               item.spriteGroup.position.set(data.x, data.z, data.y)
               item.spriteGroup.children[0].position.set(0, boxVector3.y / 2 + offsetVector3.y + 12, 0)

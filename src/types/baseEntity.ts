@@ -1,6 +1,6 @@
 import * as THREE from 'three'
 import { HandelInfo, Point, BaseObjData, PointWithIndex } from './map2d'
-import { World } from '@/utils/world/entity'
+import { Group } from '@/utils/world/entity'
 import { editItem } from '@/entities'
 import { MatchCircleArea, MatchRectArea } from '@/utils/matchArea'
 
@@ -21,13 +21,13 @@ export type MatchSnapPoint = OrigionSnapPoint | {
 export abstract class BaseEntityClass<T extends BaseObjData> {
   abstract name: string
   abstract type: string
-  parentEntity: World | null;
+  parentEntity: Group | null;
   protected data: T
   meshList: THREE.Group[] = []
   // eslint-disable-next-line
   associationEntity: BaseEntityClass<any>[] = []// 关联对象，就是本对象渲染，需要联动修改的对象。（比如：墙壁上被窗户挖洞，那么墙修改，需要重新挖洞）
 
-  constructor(parentEntity: World | null, data: T) {
+  constructor(parentEntity: Group | null, data: T) {
     this.parentEntity = parentEntity
     this.data = data
   }

@@ -98,11 +98,6 @@
       <div class="right-panel" :style="{ width: panel2SplitWidthPer * 100 + '%' }">
         <div class="tools">
           <div style="flex-shrink: 0;">全景图</div>
-          <!-- <div style="margin-left: 12px;">
-            <label for="showBoundingBox">显示边界框</label>
-            <input type="checkbox" class="checkBox" id="showBoundingBox" :checked="worldApi.isShowBoundingBox"
-              @change="worldApi.isShowBoundingBox = !worldApi.isShowBoundingBox, worldApi.draw3D()" />
-          </div> -->
         </div>
         <!-- {{ insertTempDoor }} -->
         <div class="center-panel-content">
@@ -189,7 +184,7 @@ import * as THREE from 'three'
 import JSZip from 'jszip';
 import request from '@/utils/request'
 import { Point } from '../types'
-import { snapThreshold, World, EnvironmentConfig } from '../utils/world/entity'
+import { snapThreshold, Group, EnvironmentConfig } from '../utils/world/entity'
 import Canvas3D from '../components/Canvas3D.vue'
 import { CameraState } from '@/types/camera'
 import { allFileKeys, fileData, editItem } from '@/entities'
@@ -414,7 +409,7 @@ function getTempPointInsertDataLastAngel() {
 const worldState = new WorldState()
 window.worldState = worldState
 
-const worldApi = new World(null, {
+const worldApi = new Group(null, {
   id: 'world',
   x: 0,
   y: 0,
@@ -540,7 +535,7 @@ async function changeCamera2State(activeIndex: number = 0) {
     //   }
     // }
     activeCameraIndex.value = activeIndex
-    worldApi.activeCameraIndex = activeIndex
+    worldState.activeCameraIndex = activeIndex
     const allCameraObjList: BaseEntityClass<BaseObjData>[] = [];
     allCameraTypeKey.forEach(typeKey => {
       const typeItemList = worldApi.getTypeListEntity(typeKey);
