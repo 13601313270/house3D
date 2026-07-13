@@ -27,7 +27,7 @@
 </template>
 <script setup lang="ts">
 import { ref } from 'vue';
-import { editItem, enumItem } from '@/entities';
+import { editItem, enumItem } from '@/utils/editItem';
 
 const showAllCornerTypePanel = ref(false)
 

@@ -13,7 +13,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import { editItem } from '@/entities';
+import { editItem } from '@/utils/editItem';
 import { computed } from 'vue';
 const props = defineProps<{
   item: editItem,

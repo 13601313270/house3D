@@ -3,6 +3,7 @@ import { Point } from "@/types"
 import { CameraState } from "@/types/camera"
 import { EnvironmentConfig } from "../entities/group/entity"
 import JSZip from "jszip"
+import { BaseObjData } from "@/types/map2d"
 
 async function saveWorld(
   panOffset: Point,
@@ -11,7 +12,10 @@ async function saveWorld(
   activeCameraIndex: number
 ) {
   const allFileObjectsByGroup: fileData = {};
-  window.worldApi.getData().childrenData.forEach((item) => {
+  window.worldApi.getData().childrenData.forEach((item: {
+    type: string,
+    value: BaseObjData,
+  }) => {
     const key = item.type
     if (!allFileObjectsByGroup[key]) {
       allFileObjectsByGroup[key] = []

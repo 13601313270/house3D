@@ -5,7 +5,7 @@ import { editItem } from '@/utils/editItem'
 import { PointEntityClass } from '@/types/pointEntity'
 import { BaseEntityClass, EntityConstructor } from '@/types/baseEntity'
 import { BaseObjData, HandelInfo } from '@/types/map2d'
-import { GroupData } from '.'
+import { GroupData } from './index.d'
 
 export const canvasHeight = 600
 export const snapThreshold = 20

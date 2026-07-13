@@ -43,7 +43,7 @@
         <div class="panel-content">
           <div class="property-list">
             <div class="property-item" v-for="item in editParams" :key="item.id">
-              <label>{{ item.label }}</label>
+              <label v-if="'label' in item">{{ item.label }}</label>
               <div v-if="item.dataType === 'string'" class="textContainer">
                 <input type="text" class="textInput" v-model="item.value" @input="render" />
               </div>
@@ -119,7 +119,7 @@ import { TextureWorld } from './textureWorld'
 import { CanvasRenderer } from './renderer'
 import type { BaseElement, BaseElementData, BaseElementDefinition } from './types'
 import { SpriteElement, SpriteElementData } from './types/spriteElement'
-import { editItem } from '@/entities'
+import { editItem } from '@/utils/editItem'
 import { PolylineElement, PolylineElementData } from './types/polylineElement'
 import { PolygonElement } from './types/polygonElement'
 import { IconDataType } from './types/elementDefinition'

@@ -27,7 +27,7 @@
 </template>
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
-import { editItem } from '@/entities';
+import { editItem } from '@/utils/editItem';
 import { importImgFileHead, ImportImgType } from '@/entities/allObjs';
 
 const typeSelect = ref(1)

@@ -54,7 +54,8 @@
 </template>
 <script setup lang="ts">
 import { nextTick, onMounted, ref } from 'vue';
-import { editItem, allFileKeysName } from '@/entities/index';
+import { allFileKeysName } from '@/entities/index';
+import { editItem } from '@/utils/editItem';
 import DataTypeEdit from './DataTypeEdit.vue'
 import BoneEdit from './boneEdit.vue'
 import message from '@/utils/message';

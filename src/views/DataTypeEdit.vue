@@ -89,7 +89,7 @@
 </template>
 <script setup lang="ts">
 import { ref } from 'vue'
-import { editItem, enumItem } from '@/entities';
+import { editItem, enumItem } from '@/utils/editItem';
 import { allMaterial } from '@/material';
 import ImgEdit from './ImgEdit.vue'
 import EnumTypeEdit from './enumTypeEdit.vue'

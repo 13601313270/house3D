@@ -24,7 +24,7 @@ import { onMounted, ref } from 'vue'
 import EditPanel from './editPanel.vue'
 import DataTypeEdit from '@/views/DataTypeEdit.vue'
 
-import { editItem } from '@/entities/index.js';
+import { editItem } from '@/utils/editItem';
 import { EnvironmentConfig } from '../entities/group/entity.js'
 const environmentValue = ref<{
   [key in string]: number | string | boolean

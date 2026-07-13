@@ -31,7 +31,8 @@
 </template>
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
-import { allFileKeysName, editItem } from '@/entities';
+import { allFileKeysName } from '@/entities';
+import { editItem } from '@/utils/editItem';
 import { BaseObjData } from '@/types/map2d';
 
 const props = defineProps<{
