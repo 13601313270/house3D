@@ -1,12 +1,9 @@
 import * as THREE from 'three'
 import { Point } from '../../types'
-import { DoorEntity } from '@/entities/door/entity'
 import { allFileKeys, editItem, EntityConstructor, fileData, fileDataKeyToClass } from '@/entities/index'
 import { PointEntityClass } from '@/types/pointEntity'
-import { ImportFileType, ImportImgType, ObjOutputFileType } from '@/entities/allObjs';
 import { BaseEntityClass } from '@/types/baseEntity'
 import { BaseObjData, HandelInfo } from '@/types/map2d'
-import { CameraBase } from '@/types/CameraBase'
 import { GroupData } from '.'
 
 export const canvasHeight = 600
@@ -122,28 +119,6 @@ export class Group extends PointEntityClass<GroupData> {
   draw2DHandleByData() {
     // 暂无操作句柄
   }
-
-  // 绘制操作句柄
-  // draw2DActionHandle(
-  //   canvasActionRef: HTMLCanvasElement,
-  //   fileData: fileData,
-  //   panOffset: Point = { x: 0, y: 0 },
-  //   zoomLevel: number = 1,
-  // ) {
-  //   const ctxAction = canvasActionRef.getContext('2d')!
-  //   ctxAction.clearRect(0, 0, canvasActionRef.width, canvasActionRef.height)
-  //   allFileKeys.forEach((key) => {
-  //     if (fileData[key]) {
-  //       fileData[key].forEach((item, index) => {
-  //         // @ts-ignore
-  //         const itemApi: DoorEntity = this.allFileMapObjects[key][index];
-  //         if (itemApi) {
-  //           itemApi.draw2D(ctxAction, panOffset, zoomLevel)
-  //         }
-  //       })
-  //     }
-  //   })
-  // }
 
   getTypeObjectsData(type: string) {
     const returnData: BaseObjData[] = [];
@@ -273,7 +248,7 @@ export class Group extends PointEntityClass<GroupData> {
     return this.type + JSON.stringify(cacheData)
   }
 
-  // associationEntity: BaseEntityClass<any>[] = []// 关联对象，就是本对象渲染，需要联动修改的对象。（比如：墙壁上被窗户挖洞，那么墙修改，需要重新挖洞）
+  // associationEntity: BaseEntityClass<BaseObjData>[] = []// 关联对象，就是本对象渲染，需要联动修改的对象。（比如：墙壁上被窗户挖洞，那么墙修改，需要重新挖洞）
 
   setData(data: GroupData) {
     // this.data = data
@@ -308,32 +283,21 @@ export class Group extends PointEntityClass<GroupData> {
     })
   }
 
-  getAllFileObjects(): fileData {
-    const returnData: fileData = {};
-    allFileKeys.forEach((key) => {
-      returnData[key] = []
-      if (this.getTypeListEntity(key)) {
-        (this.getTypeListEntity(key) as PointEntityClass<any>[]).forEach((item) => {
-          // @ts-ignore
-          returnData[key].push(item.getData())
-        })
-      }
-    })
-    return returnData
-  }
-
-  async add(type: string, data: BaseObjData[]): Promise<BaseEntityClass<any>[]> {
+  async add(type: string, data: BaseObjData[]): Promise<BaseEntityClass<BaseObjData>[]> {
     const EntityClassItem: EntityConstructor = fileDataKeyToClass[type] as any;
     if (!this.allObjectsByGroup[type]) {
       this.allObjectsByGroup[type] = []
     }
     const apiList = [];
     for (let i = 0; i < data.length; i++) {
-      const api: BaseEntityClass<any> = new EntityClassItem(this, data[i]);
+      const api: BaseEntityClass<BaseObjData> = new EntityClassItem(this, data[i]);
       await api.init()
       apiList.push(api);
       this.allObjectsByGroup[type].push(api)
-      this.data.childrenData.push(api.getData())
+      this.data.childrenData.push({
+        type,
+        value: api.getData(),
+      })
       this.children.push(api);
       this.worldAddBindList.forEach(callback => callback(api))
       if (api.getData().isLocked) {
@@ -365,28 +329,18 @@ export class Group extends PointEntityClass<GroupData> {
   }
 
   clearAll() {
-    const willRemoveList: BaseEntityClass<any>[] = [];
-    allFileKeys.forEach((type) => {
-      if (this.allObjectsByGroup[type]) {
-        (this.allObjectsByGroup[type] as BaseEntityClass<any>[]).forEach((item) => {
-          willRemoveList.push(item);
-        });
+    const willRemoveList: BaseEntityClass<BaseObjData>[] = [];
+    this.children.forEach(item => {
+      if (item instanceof PointEntityClass) {
+        willRemoveList.push(item)
       }
     })
-    allFileKeys.forEach((type) => {
-      if (this.allObjectsByGroup[type]) {
-        (this.allObjectsByGroup[type] as BaseEntityClass<any>[]).forEach((item) => {
-          if (item.getData().isLocked) {
-            const index = this.lockedObjList.indexOf(item)
-            if (index !== -1) {
-              this.lockedObjList.splice(index, 1)
-            }
-          }
-          item.beforeRemove()
-        });
-        this.allObjectsByGroup[type] = []
-      }
+    this.lockedObjList = [];
+    this.children.forEach(item => {
+      item.beforeRemove()
     })
+    this.allObjectsByGroup = {}
+    this.children = []
     this.data.childrenData = []
     this._callAllOnChangeCallback('remove', willRemoveList);
   }

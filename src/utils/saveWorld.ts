@@ -10,6 +10,15 @@ async function saveWorld(
   cameraStateCenter: CameraState,
   activeCameraIndex: number
 ) {
+  const allFileObjectsByGroup: fileData = {};
+  window.worldApi.getData().childrenData.forEach((item) => {
+    const key = item.type
+    if (!allFileObjectsByGroup[key]) {
+      allFileObjectsByGroup[key] = []
+    }
+    allFileObjectsByGroup[key].push(item.value)
+  })
+  console.log('allFileObjectsByGroup', allFileObjectsByGroup)
   const data: fileData & {
     panOffset: Point
     zoomLevel: number
@@ -18,7 +27,7 @@ async function saveWorld(
     allImportImgs: string[]
     environmentConfig: EnvironmentConfig
   } = {
-    ...window.worldApi.getAllFileObjects() as any,
+    ...allFileObjectsByGroup as any,
     panOffset,
     zoomLevel: zoom2DLevel,
     cameraState: cameraStateCenter,
