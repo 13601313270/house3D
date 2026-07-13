@@ -223,6 +223,7 @@ import ShowPayModal from '@/components/showPayModal.vue'
 import drawAxes from '@/utils/drawAxes';
 import WorldState from '@/utils/worldState';
 import { editItem } from '@/utils/editItem';
+import WorldGroup from '@/world/world';
 
 const canvas2DRef = ref<HTMLCanvasElement | null>(null)
 const canvas2D2Ref = ref<HTMLCanvasElement | null>(null)
@@ -412,7 +413,7 @@ function getTempPointInsertDataLastAngel() {
 const worldState = new WorldState()
 window.worldState = worldState
 
-const worldApi = new GroupEntity(null, {
+const worldApi = new WorldGroup(null, {
   id: 'world',
   x: 0,
   y: 0,
@@ -420,6 +421,7 @@ const worldApi = new GroupEntity(null, {
   childrenData: [
   ],
   angleY: 0,
+  temp: false,
 })
 window.worldApi = worldApi
 
