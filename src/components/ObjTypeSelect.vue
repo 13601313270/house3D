@@ -88,12 +88,10 @@
 <script setup lang="ts">
 import { nextTick, onMounted, ref } from 'vue'
 import { ObjOutputFileType } from '@/entities/allObjs';
-import { allFileKeysName, fileDataKeyToClass, allFileKeysGroup, allPluginByKey, allFileWithGroupId } from '@/entities'
+import { fileDataKeyToClass, allFileKeysGroup, allPluginByKey, allFileWithGroupId } from '@/entities'
 import axios from 'axios';
 import { OutFileInWallData } from '@/entities/outFileInWall/index.d'
-import { OutFileInWallDataClass } from '@/entities/outFileInWall/dataClass';
 import { OutFileInWallEntity } from '@/entities/outFileInWall/entity';
-import { OutFileDataClass } from '@/entities/outFile/dataClass';
 import { OutFileEntity } from '@/entities/outFile/entity';
 import { OutFileData } from '@/entities/outFile/index.d'
 import { BaseEntityClass } from '@/types/baseEntity';
@@ -214,8 +212,7 @@ async function changeCurrentToolToOutFile(id: string) {
       isOuter: false,
       canAngelZ: findObjInfo.canAngelZ,
     }
-    const insertTempObjData = new OutFileInWallDataClass(data)
-    const insertTempObj = new OutFileInWallEntity(worldApi, insertTempObjData)
+    const insertTempObj = new OutFileInWallEntity(worldApi, data)
     insertTempObj.init()
     emits('select', 'outFileInWall', insertTempObj)
   } else {
@@ -230,8 +227,7 @@ async function changeCurrentToolToOutFile(id: string) {
       color: findObjInfo.defaultColor,
       canAngelZ: findObjInfo.canAngelZ,
     }
-    const insertTempObjData = new OutFileDataClass(data)
-    const insertTempObj = new OutFileEntity(worldApi, insertTempObjData)
+    const insertTempObj = new OutFileEntity(worldApi, data)
     insertTempObj.init()
     emits('select', 'outFile', insertTempObj)
   }

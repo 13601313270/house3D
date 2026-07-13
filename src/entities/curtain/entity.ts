@@ -1,9 +1,8 @@
-import { HandelInfo, Point } from '@/types/map2d'
 import * as THREE from 'three'
+import { HandelInfo, Point } from '@/types/map2d'
 import { CurtainData } from './index.d'
 import { PointEntityClass } from '@/types/pointEntity'
 import { editItem } from '..';
-import { CurtainDataClass } from './dataClass'
 import { isPointInRotatedRect } from '@/utils/isPointInRotatedRect';
 import { MatchRectArea } from '@/utils/matchArea';
 import { importImgFileHead } from '../allObjs';

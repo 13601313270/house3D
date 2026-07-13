@@ -1,5 +1,5 @@
-import { HandelInfo, PointObjData, Point } from '@/types/map2d'
 import * as THREE from 'three'
+import { HandelInfo, PointObjData, Point } from '@/types/map2d'
 import { OutFileInWallData } from './index.d'
 import { PointEntityClass } from '@/types/pointEntity'
 import { editItem } from '..'
@@ -10,7 +10,6 @@ import { MTLLoader } from 'three/addons/loaders/MTLLoader.js';
 // @ts-ignore
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { getMaterialById } from '@/material'
-import { OutFileInWallDataClass } from './dataClass';
 import { EntityClassInWall } from '@/types/entityInWall'
 import { MatchCircleArea, MatchRectArea } from '@/utils/matchArea'
 import { isPointInRotatedRect } from '@/utils/isPointInRotatedRect'

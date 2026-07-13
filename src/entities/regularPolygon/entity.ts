@@ -3,9 +3,7 @@ import { HandelInfo, Point } from '@/types/map2d'
 import { RegularPolygonData } from "./index.d"
 import { PointEntityClass } from '@/types/pointEntity'
 import { editItem } from '..';
-import { getMaterialById } from '@/material';
-import { isPointInRotatedRect } from '@/utils/isPointInRotatedRect'
-import { MatchRectArea, MatchCircleArea } from '@/utils/matchArea';
+import { MatchCircleArea } from '@/utils/matchArea';
 import { allSnapFromType } from '@/types/baseEntity';
 
 function getAllPointsByN(x: number, y: number, n: number, r: number, angle: number): Point[] {

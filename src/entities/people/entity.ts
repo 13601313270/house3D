@@ -1,11 +1,10 @@
-import { HandelInfo, Point } from '@/types/map2d'
 import * as THREE from 'three'
+import { HandelInfo, Point } from '@/types/map2d'
 import { PeopleData } from './index.d'
 import { PointEntityClass } from '@/types/pointEntity'
 import { editItem } from '..'
 // @ts-ignore
 import { FBXLoader } from 'three/addons/loaders/FBXLoader.js';
-import { PeopleDataClass } from './dataClass'
 import { MatchCircleArea } from '@/utils/matchArea'
 import { OrigionSnapPoint } from '@/types/baseEntity'
 

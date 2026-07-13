@@ -203,7 +203,6 @@ import { WallEntity } from '@/entities/wall/entity'
 import { ImportFileType, ObjOutputFileType } from '@/entities/allObjs'
 import ObjTypeSelect from '@/components/ObjTypeSelect.vue'
 import EnvironmentEditor from '@/components/EnvironmentEditor.vue'
-import { ImportFileDataClass } from '@/entities/importFile/dataClass';
 import { ImportFileData } from '@/entities/importFile/index.d';
 import Login from '@/components/Login.vue'
 import { useStore } from 'vuex';
@@ -214,7 +213,6 @@ import processUploadedFile from '@/utils/processUploadedFile';
 import DataTypeEditPanel from './DataTypeEditPanel.vue'
 import { BaseEntityClass } from '@/types/baseEntity';
 import { LineEntityClass } from '@/types/lineEntity';
-import { BaseObjDataClass, LineObjDataClass } from '@/entities/objData';
 import AllWorldObjSelect from '@/components/AllWorldObjSelect.vue'
 import message from '@/utils/message';
 import getNearestWall from '@/utils/getNearestWall';
@@ -474,7 +472,7 @@ const drawWrapper2D = () => {
 const activeCameraIndex = ref(0)
 async function changeCamera2State(activeIndex: number = 0) {
   const allCameraTypeKey = ['camera', 'directionCamera'];
-  const allTypesCameraList: BaseObjDataClass<any>[] = []
+  const allTypesCameraList: CameraData[] = []
   const allTypesCameraObjList: CameraBase<CameraData>[] = []
   allCameraTypeKey.forEach(typeKey => {
     if (worldApi.getTypeListEntity(typeKey)) {
@@ -485,7 +483,7 @@ async function changeCamera2State(activeIndex: number = 0) {
       })
     }
     console.log('typeKey=======', typeKey, worldApi.getTypeObjectsData(typeKey))
-    allTypesCameraList.push(...worldApi.getTypeObjectsData(typeKey));
+    allTypesCameraList.push(...worldApi.getTypeObjectsData(typeKey) as CameraData[]);
   })
 
   if (allTypesCameraList) {
@@ -1323,7 +1321,7 @@ const handleMouseMove = (e: MouseEvent) => {
       const last = tempPointInsertData.value[tempPointInsertData.value.length - 1]
       // 收集所有点（包括临时折线和已绘制的墙上的点）
       const allPoints = [...tempPointInsertData.value];
-      (worldApi.getTypeObjectsData(currentTool.value) as LineObjDataClass<any, LineObjData<any>>[]).forEach((item: LineObjDataClass<any, LineObjData<any>>) => {
+      (worldApi.getTypeObjectsData(currentTool.value) as LineObjData<any>[]).forEach((item: LineObjData<any>) => {
         item.points.forEach((point: any) => {
           allPoints.push(point)
         })
@@ -1632,7 +1630,7 @@ const handleLoadedObject = async (object: THREE.Group | THREE.Mesh, file: File, 
     angleY: 0,
     scale: scaleFactor,
   }
-  await worldApi.add('importFile', [new ImportFileDataClass(data)])
+  await worldApi.add('importFile', [data])
 
   drawWrapper2DAnd3D()
 }

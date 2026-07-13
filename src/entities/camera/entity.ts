@@ -1,13 +1,11 @@
-import { HandelInfo, Point } from '@/types/map2d'
 import * as THREE from 'three'
+import { HandelInfo, Point } from '@/types/map2d'
 import { CameraData } from './index.d'
-import { PointEntityClass } from '@/types/pointEntity'
 import { editItem } from '..'
 // @ts-ignore
 import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
 // @ts-ignore
 import kamera from './kamera.png'
-import { CameraDataClass } from './dataClass'
 import { MatchCircleArea } from '@/utils/matchArea'
 import { OrigionSnapPoint } from '@/types/baseEntity'
 import { CameraBase } from '@/types/CameraBase'

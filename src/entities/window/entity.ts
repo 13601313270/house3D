@@ -1,12 +1,11 @@
+import * as THREE from 'three'
 import { Point, HandelInfo } from '@/types/map2d'
 import { EntityClassInWall } from '@/types/entityInWall'
 import { WindowData } from './index.d'
-import * as THREE from 'three'
 import { Brush, Evaluator, SUBTRACTION } from 'three-bvh-csg';
 import { World } from '@/utils/world/entity';
 import { editItem } from '..';
 import { getMaterialById } from '@/material';
-import { WindowDataClass } from './dataClass';
 import { MatchRectArea } from '@/utils/matchArea'
 import { isPointInRotatedRect } from '@/utils/isPointInRotatedRect'
 import { allSnapFromType } from '@/types/baseEntity';

@@ -1,12 +1,10 @@
-import { HandelInfo, Point } from '@/types/map2d'
 import * as THREE from 'three'
+import { HandelInfo, Point } from '@/types/map2d'
 import { CirclePlaneData } from './index.d'
 import { PointEntityClass } from '@/types/pointEntity'
 import { editItem } from '..';
 import { getMaterialById } from '@/material';
-import { PlaneDataClass } from './dataClass'
-import { isPointInRotatedRect } from '@/utils/isPointInRotatedRect';
-import { MatchCircleArea, MatchRectArea } from '@/utils/matchArea';
+import { MatchCircleArea } from '@/utils/matchArea';
 import { importImgFileHead } from '../allObjs';
 import { allSnapFromType } from '@/types/baseEntity';
 

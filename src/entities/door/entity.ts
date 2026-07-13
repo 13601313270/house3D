@@ -1,5 +1,5 @@
-import { HandelInfo, Point } from '@/types/map2d'
 import * as THREE from 'three'
+import { HandelInfo, Point } from '@/types/map2d'
 // @ts-ignore
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { DoorData } from './index.d'
@@ -8,7 +8,6 @@ import { EntityClassInWall } from '@/types/entityInWall'
 import { editItem } from '..';
 import { World } from '@/utils/world/entity';
 import { getMaterialById } from '@/material';
-import { DoorDataClass } from './dataClass';
 import { MatchRectArea } from '@/utils/matchArea';
 import { isPointInRotatedRect } from '@/utils/isPointInRotatedRect';
 import { allSnapFromType } from '@/types/baseEntity';

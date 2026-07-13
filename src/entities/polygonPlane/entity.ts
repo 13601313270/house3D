@@ -1,6 +1,5 @@
-import { Point, HandelInfo } from '@/types/map2d'
-import { createAllWallFromPoints } from '@/utils/createAllWallFromPoints'
 import * as THREE from 'three'
+import { Point, HandelInfo } from '@/types/map2d'
 import { editItem } from '..'
 import { getMaterialById } from '@/material'
 import { MatchCircleArea, MatchRectArea } from '@/utils/matchArea'
@@ -9,7 +8,6 @@ import message from '@/utils/message'
 import { isPointInRotatedRect } from '@/utils/isPointInRotatedRect'
 import { allSnapFromType, MatchSnapPoint } from '@/types/baseEntity'
 import { LineEntityClass } from '@/types/lineEntity'
-import { World } from '@/utils/world/entity'
 import { PolygonPlanePoint, PolygonPlaneData } from './index.d'
 
 export class PolygonPlaneEntity extends LineEntityClass<PolygonPlanePoint, PolygonPlaneData> {

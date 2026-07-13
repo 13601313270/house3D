@@ -1,16 +1,12 @@
 import * as THREE from 'three'
 import { Point } from '../../types'
 import { DoorEntity } from '@/entities/door/entity'
-import { drawPoint } from '../drawPoint'
-import { calculateAngle } from '../calculateAngle'
 import { allFileKeys, EntityConstructor, fileData, fileDataKeyToClass } from '@/entities/index'
 import { PointEntityClass } from '@/types/pointEntity'
-import { BaseObjDataClass } from '@/entities/objData'
 import { ImportFileType, ImportImgType, ObjOutputFileType } from '@/entities/allObjs';
 import { BaseEntityClass } from '@/types/baseEntity'
 import { BaseObjData } from '@/types/map2d'
 import { CameraBase } from '@/types/CameraBase'
-import drawAxes from '../drawAxes'
 
 export const canvasHeight = 600
 export const snapThreshold = 20
@@ -194,7 +190,7 @@ export class World {
   // }
 
   getTypeObjectsData(type: string) {
-    const returnData: BaseObjDataClass<any>[] = [];
+    const returnData: BaseObjData[] = [];
     this.getTypeListEntity(type).forEach((item) => {
       returnData.push(item.getData())
     })
@@ -294,7 +290,7 @@ export class World {
     return returnData
   }
 
-  async add(type: string, data: BaseObjDataClass<any>[]): Promise<BaseEntityClass<any>[]> {
+  async add(type: string, data: BaseObjData[]): Promise<BaseEntityClass<any>[]> {
     const EntityClassItem: EntityConstructor = fileDataKeyToClass[type] as any;
     if (!this.allFileMapObjects[type]) {
       this.allFileMapObjects[type] = []

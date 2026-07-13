@@ -1,10 +1,8 @@
-import { HandelInfo, Point } from '@/types/map2d'
 import * as THREE from 'three'
+import { HandelInfo, Point } from '@/types/map2d'
 import { ImportFileData } from './index.d'
 import { PointEntityClass } from '@/types/pointEntity'
 import { editItem } from '..'
-import { getMaterialById } from '@/material'
-import { ImportFileDataClass } from './dataClass';
 import { MatchCircleArea } from '@/utils/matchArea'
 import { OrigionSnapPoint } from '@/types/baseEntity'
 

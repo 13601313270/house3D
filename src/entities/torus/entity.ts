@@ -1,5 +1,5 @@
-import { HandelInfo, Point } from '@/types/map2d'
 import * as THREE from 'three'
+import { HandelInfo, Point } from '@/types/map2d'
 import { TorusData } from './index.d'
 import { PointEntityClass } from '@/types/pointEntity'
 import { editItem } from '..';

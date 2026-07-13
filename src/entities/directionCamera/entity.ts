@@ -1,5 +1,5 @@
-import { HandelInfo, Point } from '@/types/map2d'
 import * as THREE from 'three'
+import { HandelInfo, Point } from '@/types/map2d'
 import { DirectionCameraData } from './index.d'
 import { editItem } from '..'
 // @ts-ignore
