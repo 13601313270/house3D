@@ -10,14 +10,14 @@ import message from '@/utils/message'
 import { isPointInRotatedRect } from '@/utils/isPointInRotatedRect'
 import { allSnapFromType, MatchSnapPoint, OrigionSnapPoint } from '@/types/baseEntity'
 import { LineEntityClass } from '@/types/lineEntity'
-import { GroupEntity } from '@/entities/group/entity'
+import { GroupBaseEntity } from '@/types/GroupBaseEntity'
 
 export class WallEntity extends LineEntityClass<WallPoint, WallData> {
   name: string = '墙'
   type: string = 'wall'
   private circleRadius = 6
 
-  constructor(world: GroupEntity, data: WallData) {
+  constructor(world: GroupBaseEntity, data: WallData) {
     super(world, data);
     if (this.data.cornerType === undefined) {
       this.data.cornerType = 1

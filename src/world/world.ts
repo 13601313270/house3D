@@ -1,12 +1,13 @@
 import * as THREE from 'three'
-import { EnvironmentConfig, GroupEntity } from "@/entities/group/entity";
+import { EnvironmentConfig } from "@/entities/group/entity";
 import { GroupData } from '@/entities/group/index.d';
+import { GroupBaseEntity } from '@/types/GroupBaseEntity';
 
 type WorldData = GroupData & {
   temp: boolean,
 }
 
-class WorldGroup extends GroupEntity {
+class WorldGroup extends GroupBaseEntity {
   // parentEntity: null;
   group: THREE.Scene = new THREE.Scene()
   environmentConfig: EnvironmentConfig = { skyType: 1, ambientLightIntensity: 1, showGround: true }
