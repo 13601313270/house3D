@@ -414,7 +414,7 @@ function getTempPointInsertDataLastAngel() {
 const worldState = new WorldState()
 window.worldState = worldState
 
-const worldApi = new World({
+const worldApi = new World(null, {
   id: 'world',
   x: 0,
   y: 0,

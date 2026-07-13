@@ -1,7 +1,7 @@
 import * as THREE from 'three'
 import { Point } from '../../types'
 import { DoorEntity } from '@/entities/door/entity'
-import { allFileKeys, EntityConstructor, fileData, fileDataKeyToClass } from '@/entities/index'
+import { allFileKeys, editItem, EntityConstructor, fileData, fileDataKeyToClass } from '@/entities/index'
 import { PointEntityClass } from '@/types/pointEntity'
 import { ImportFileType, ImportImgType, ObjOutputFileType } from '@/entities/allObjs';
 import { BaseEntityClass } from '@/types/baseEntity'
@@ -19,8 +19,10 @@ export interface EnvironmentConfig {
   showGround?: boolean
 }
 
-export class World {
+export class World extends PointEntityClass<GroupData> {
   protected data: GroupData
+  name: string = 'world'
+  isPointObj: boolean = true
 
   public children: BaseEntityClass<BaseObjData>[] = []
 
@@ -40,7 +42,17 @@ export class World {
   private circleRadius = 6
   type: string = 'group'
 
-  constructor(data: GroupData) {
+  create3DMesh() {
+    const group = new THREE.Group()
+    return [group]
+  }
+
+  editPropConfig(snapPoint: HandelInfo, editShow: (editInfoList: editItem[], callback: (val: any) => void) => void): void {
+
+  }
+
+  constructor(parent: null, data: GroupData) {
+    super(parent, data)
     this.data = data;
 
     (async () => {
@@ -77,10 +89,10 @@ export class World {
     zoomLevel: number
   ) {
     const data = this.getData();
-    this.draw2DPreviewByData2(ctx, data, panOffset, zoomLevel)
+    this.draw2DPreviewByData(ctx, data, panOffset, zoomLevel)
   }
 
-  draw2DPreviewByData2(
+  draw2DPreviewByData(
     ctx: CanvasRenderingContext2D,
     data: GroupData,
     panOffset: Point,
