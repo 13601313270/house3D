@@ -30,7 +30,6 @@ export abstract class BaseEntityClass<T extends BaseObjData> {
   constructor(world: World, data: T) {
     this.world = world
     this.data = data
-    // console.log(world, data)
   }
 
   init(): Promise<void> {

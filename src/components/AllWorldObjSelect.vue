@@ -64,21 +64,17 @@ onMounted(() => {
 })
 function reloadObjList() {
   allObjList.value = []
-  for (const key of window.worldApi.getAllObjectTypes()) {
-    if (window.worldApi.getTypeListEntity(key)) {
-      allObjList.value.push(...window.worldApi.getTypeListEntity(key).map((item) => {
-        const { id, isLocked, isHidden, tip } = item.getData()
-        return {
-          id,
-          name: item.name,
-          type: item.type,
-          isHidden: isHidden || false,
-          isLocked: isLocked || false,
-          tip,
-        }
-      }))
-    }
-  }
+  window.worldApi.getData().children.forEach(v => {
+    const { id, isLocked, isHidden, tip } = v.getData()
+    allObjList.value.push({
+      id,
+      name: v.name,
+      type: v.type,
+      isHidden: isHidden || false,
+      isLocked: isLocked || false,
+      tip,
+    })
+  })
   allObjCount.value = window.worldApi.getAllObjectCount()
 }
 const position = ref<{ x: number, y: number }>({ x: window.innerWidth / 3, y: 100 })
@@ -152,11 +148,7 @@ function handleEnter(item: {
   type: string,
   isLocked: boolean,
 }) {
-  const thisTypeObjList = window.worldApi.getTypeListEntity(item.type)
-  if (!thisTypeObjList) return
-  const thisObj = thisTypeObjList.find(v => {
-    return v.getData().id === item.id
-  })
+  const thisObj = window.worldApi.getData().children.find(v => v.getData().id === item.id)
   if (thisObj) {
     const canvasAction = document.getElementById('canvas2D2') as HTMLCanvasElement;
     const ctxAction = canvasAction.getContext('2d')!
@@ -168,26 +160,21 @@ function handleEnter(item: {
 //   alert(id)
 // }
 function handleUnLock(item: Item, isLocked: boolean) {
-  const { id, type } = item
-  const group = window.worldApi.getTypeListEntity(type)
-  if (!group) return
-  const api = group.find(v => v.getData().id === id)
-  if (!api) return
-  console.log(api)
-  api.setData({
-    ...api.getData(),
-    isLocked,
-  })
-  item.isLocked = isLocked
-  message.success(isLocked ? '锁定成功' : '解锁成功', { position: 'top-center' })
-  emit('onChange', api)
+  const thisObj = window.worldApi.getData().children.find(v => v.getData().id === item.id)
+  if (thisObj) {
+    thisObj.setData({
+      ...thisObj.getData(),
+      isLocked,
+    })
+    item.isLocked = isLocked
+    message.success(isLocked ? '锁定成功' : '解锁成功', { position: 'top-center' })
+    emit('onChange', thisObj)
+  }
 }
 function handleLocation(item: Item) {
-  const { id, type } = item
-  const group = window.worldApi.getTypeListEntity(type)
-  if (!group) return
-  const api = group.find(v => v.getData().id === id)
+  const api = window.worldApi.getData().children.find(v => v.getData().id === item.id)
   if (!api) return
+
   if (api instanceof PointEntityClass) {
     const { x, y } = api.getData()
     emit('locationPosition', { x, y })

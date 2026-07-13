@@ -57,29 +57,20 @@ type Item = {
 }
 const allChild = ref<Item[]>([])
 onMounted(() => {
-  let newCount = 0;
   allChild.value = []
-  for (const key of window.worldApi.getAllObjectTypes()) {
-    if (window.worldApi.getTypeListEntity(key)) {
-      newCount += window.worldApi.getTypeListEntity(key).length
-      allChild.value.push(...window.worldApi.getTypeListEntity(key)
-        .filter(v => {
-          return v.type !== 'pointGroup'
-        })
-        .map((item) => {
-          const { id, isLocked, isHidden, tip } = item.getData()
-          return {
-            id,
-            name: item.name,
-            type: item.type,
-            isHidden: isHidden || false,
-            isLocked: isLocked || false,
-            tip,
-          }
-        }))
-    }
-  }
-  // allChild.value = props.item.children
+  window.worldApi.getData().children
+    .filter(v => v.type !== 'pointGroup')
+    .forEach(item => {
+      const { id, isLocked, isHidden, tip } = item.getData()
+      allChild.value.push({
+        id,
+        name: item.name,
+        type: item.type,
+        isHidden: isHidden || false,
+        isLocked: isLocked || false,
+        tip,
+      })
+    })
 })
 function joinGroup(item: Item) {
   const newList: Array<{

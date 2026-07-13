@@ -410,7 +410,14 @@ function getTempPointInsertDataLastAngel() {
   }
 }
 
-const worldApi = new World()
+const worldApi = new World({
+  id: 'world',
+  x: 0,
+  y: 0,
+  z: 0,
+  children: [],
+  angleY: 0,
+})
 window.worldApi = worldApi
 const drawWrapper2DAnd3D = () => {
   drawWrapper2D();
@@ -999,7 +1006,7 @@ const deleteContextMenuEntity = () => {
 
   const type = contextMenu.value.type;
   if (contextMenu.value.index !== undefined) {
-    worldApi.splice(type, contextMenu.value.index)
+    worldApi.delete(type, contextMenu.value.index)
   }
   contextMenu.value = null
   drawWrapper2DAnd3D()

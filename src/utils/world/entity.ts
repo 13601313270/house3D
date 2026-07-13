@@ -7,6 +7,7 @@ import { ImportFileType, ImportImgType, ObjOutputFileType } from '@/entities/all
 import { BaseEntityClass } from '@/types/baseEntity'
 import { BaseObjData } from '@/types/map2d'
 import { CameraBase } from '@/types/CameraBase'
+import { GroupData } from './index.d'
 
 export const canvasHeight = 600
 export const snapThreshold = 20
@@ -19,7 +20,9 @@ export interface EnvironmentConfig {
 }
 
 export class World {
-  private allFileMapObjects: {
+  protected data: GroupData
+
+  private allObjectsByGroup: {
     [key in string]?: BaseEntityClass<BaseObjData>[]
   } = {}
 
@@ -46,7 +49,8 @@ export class World {
 
   isShowBoundingBox: boolean = true
 
-  constructor() {
+  constructor(data: GroupData) {
+    this.data = data
     this.scene = new THREE.Scene()
     this.scene.background = new THREE.Color(0xf0f0f0)
 
@@ -292,15 +296,16 @@ export class World {
 
   async add(type: string, data: BaseObjData[]): Promise<BaseEntityClass<any>[]> {
     const EntityClassItem: EntityConstructor = fileDataKeyToClass[type] as any;
-    if (!this.allFileMapObjects[type]) {
-      this.allFileMapObjects[type] = []
+    if (!this.allObjectsByGroup[type]) {
+      this.allObjectsByGroup[type] = []
     }
     const apiList = [];
     for (let i = 0; i < data.length; i++) {
       const api: BaseEntityClass<any> = new EntityClassItem(this, data[i]);
       await api.init()
       apiList.push(api);
-      this.allFileMapObjects[type].push(api)
+      this.allObjectsByGroup[type].push(api)
+      this.data.children.push(api)
       this.worldAddBindList.forEach(callback => callback(api))
       if (api.getData().isLocked) {
         this.lockedObjList.push(api)
@@ -310,11 +315,15 @@ export class World {
     return apiList;
   }
 
-  splice(type: string, index: number, count: number = 1) {
-    if (this.allFileMapObjects[type]) {
-      const backup = this.allFileMapObjects[type][index];
-      this.allFileMapObjects[type][index].beforeRemove()
-      this.allFileMapObjects[type].splice(index, count)
+  delete(type: string, index: number) {
+    if (this.allObjectsByGroup[type]) {
+      const backup = this.allObjectsByGroup[type][index];
+      this.allObjectsByGroup[type][index].beforeRemove()
+      this.allObjectsByGroup[type].splice(index, 1)
+
+      const index2 = this.data.children.indexOf(backup)
+      this.data.children.splice(index2, 1)
+
       if (backup.getData().isLocked) {
         const index = this.lockedObjList.indexOf(backup)
         if (index !== -1) {
@@ -328,15 +337,15 @@ export class World {
   clearAll() {
     const willRemoveList: BaseEntityClass<any>[] = [];
     allFileKeys.forEach((type) => {
-      if (this.allFileMapObjects[type]) {
-        (this.allFileMapObjects[type] as BaseEntityClass<any>[]).forEach((item) => {
+      if (this.allObjectsByGroup[type]) {
+        (this.allObjectsByGroup[type] as BaseEntityClass<any>[]).forEach((item) => {
           willRemoveList.push(item);
         });
       }
     })
     allFileKeys.forEach((type) => {
-      if (this.allFileMapObjects[type]) {
-        (this.allFileMapObjects[type] as BaseEntityClass<any>[]).forEach((item) => {
+      if (this.allObjectsByGroup[type]) {
+        (this.allObjectsByGroup[type] as BaseEntityClass<any>[]).forEach((item) => {
           if (item.getData().isLocked) {
             const index = this.lockedObjList.indexOf(item)
             if (index !== -1) {
@@ -345,9 +354,10 @@ export class World {
           }
           item.beforeRemove()
         });
-        this.allFileMapObjects[type] = []
+        this.allObjectsByGroup[type] = []
       }
     })
+    this.data.children = []
     this._callAllOnChangeCallback('remove', willRemoveList);
   }
 
@@ -394,19 +404,19 @@ export class World {
     this.worldObjRemoveBindList.push(callback)
   }
 
+  getData(): GroupData {
+    return this.data
+  }
+
   getTypeListEntity(key: string): BaseEntityClass<BaseObjData>[] {
-    return this.allFileMapObjects[key] || []
+    return this.allObjectsByGroup[key] || []
   }
 
   getAllObjectTypes() {
-    return Object.keys(this.allFileMapObjects)
+    return Object.keys(this.allObjectsByGroup)
   }
 
   getAllObjectCount() {
-    let count = 0
-    for (const key of allFileKeys) {
-      count += this.getTypeListEntity(key).length
-    }
-    return count
+    return this.data.children.length
   }
 }
