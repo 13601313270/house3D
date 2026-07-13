@@ -106,13 +106,12 @@ function handleUpdate(key: string, value: number | string | boolean) {
   if (environmentValue.value) {
     environmentValue.value[key] = value
     
-    const worldApi = (window as any).worldApi
-    if (worldApi && worldApi.setEnvironMent) {
+    if (window.worldState && window.worldState.setEnvironMent) {
       const config: EnvironmentConfig = {
         ...window.worldState.environmentConfig,
         [key]: value,
       }
-      worldApi.setEnvironMent(config)
+      window.worldState.setEnvironMent(config)
     }
   }
 }

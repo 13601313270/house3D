@@ -892,7 +892,7 @@ async function initWorldByData(data: fileData & {
     await changeCamera2State(data.activeCameraIndex)
   }
   if (data.environmentConfig) {
-    worldApi.setEnvironMent(data.environmentConfig)
+    window.worldState.setEnvironMent(data.environmentConfig)
   }
   drawWrapper2DAnd3D()
 }
