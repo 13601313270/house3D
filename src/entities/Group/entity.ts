@@ -6,6 +6,9 @@ import { PointEntityClass } from '@/types/pointEntity'
 import { BaseEntityClass, EntityConstructor } from '@/types/baseEntity'
 import { BaseObjData, HandelInfo } from '@/types/map2d'
 import { GroupData } from './index.d'
+import { isPointInRotatedRect } from '@/utils/isPointInRotatedRect'
+import { MatchRectArea } from '@/utils/matchArea'
+import { CubeData } from '../cube/index.d'
 
 export const canvasHeight = 600
 export const snapThreshold = 20
@@ -31,15 +34,6 @@ export class Group extends PointEntityClass<GroupData> {
   lockedObjList: BaseEntityClass<BaseObjData>[] = []
 
   private circleRadius = 6
-
-  create3DMesh() {
-    const group = new THREE.Group()
-    return [group]
-  }
-
-  editPropConfig(snapPoint: HandelInfo, editShow: (editInfoList: editItem[], callback: (val: any) => void) => void): void {
-
-  }
 
   constructor(parent: null, data: GroupData) {
     super(parent, data)
@@ -73,22 +67,30 @@ export class Group extends PointEntityClass<GroupData> {
     window.worldState.setEnvironMent()
   }
 
-  draw2DPreview(
-    ctx: CanvasRenderingContext2D,
-    panOffset: Point,
-    zoomLevel: number
-  ) {
-    const data = this.getData();
-    this.draw2DPreviewByData(ctx, data, panOffset, zoomLevel)
-  }
-
   draw2DPreviewByData(
     ctx: CanvasRenderingContext2D,
     data: GroupData,
     panOffset: Point,
     zoomLevel: number,
   ) {
-    // 绘制墙体
+    const [width, height] = this.getSize()
+    const screenX = data.x * zoomLevel + panOffset.x
+    const screenY = data.y * zoomLevel + panOffset.y
+    // console.log('setPrepareState---' + this.getData().id + '---preview', data.x, data.y)
+    // 绘制一个方块
+    ctx.fillStyle = 'red'
+    ctx.save(); // 保存当前状态
+    ctx.translate(screenX, screenY); // 移动原点到目标中心
+    ctx.rotate(data.angleY); // 围绕新原点旋转
+    // 绘制一个方块
+    ctx.strokeRect(
+      width / -2 * zoomLevel,
+      height / -2 * zoomLevel,
+      width * zoomLevel,
+      height * zoomLevel
+    )
+    ctx.restore(); // 恢复原始状态
+
     const allObj: BaseEntityClass<BaseObjData>[] = [];
     this.children.forEach(item => {
       if (item.type !== 'pointGroup') {
@@ -121,6 +123,11 @@ export class Group extends PointEntityClass<GroupData> {
     // 暂无操作句柄
   }
 
+  create3DMesh() {
+    const group = new THREE.Group()
+    return [group]
+  }
+
   getTypeObjectsData(type: string) {
     const returnData: BaseObjData[] = [];
     this.getTypeListEntity(type).forEach((item) => {
@@ -150,18 +157,40 @@ export class Group extends PointEntityClass<GroupData> {
     return boundingBoxList
   }
 
+  getSize(): [number, number, number] {
+    return [100, 100, 100]
+  }
+
   createBoundingBox(): [THREE.Vector3, THREE.Vector3, THREE.Vector3] {
+    const [width, height, depth] = this.getSize()
     // const { width, height, depth, angleY } = this.children[0].getData();
     const { angleY } = this.getData();
     // 第一个是尺寸，第二个是位置偏移，第三个是旋转角度
     return [
-      new THREE.Vector3(0, 0, 0),
+      new THREE.Vector3(width, height, depth),
       new THREE.Vector3(0, 0, 0),
       new THREE.Vector3(0, angleY, 0)
     ]
   }
 
   showMatchHandel(x: number, y: number) {
+    const [width, height, depth] = this.getSize()
+    const data = this.getData();
+    if (isPointInRotatedRect(x, y, {
+      x: data.x,
+      y: data.y,
+      width: Math.max(width, height),
+      depth: Math.max(width, height),
+      angleY: data.angleY * -1,
+    })) {
+      return new MatchRectArea({
+        x: data.x,
+        y: data.y,
+        width: Math.max(width, height),
+        depth: Math.max(width, height),
+        angleY: data.angleY,
+      })
+    }
     return null;
   }
 
@@ -229,6 +258,7 @@ export class Group extends PointEntityClass<GroupData> {
   }
 
   setPrepareState(x: number, y: number): string[] {
+    // console.log('setPrepareState---' + this.getData().id, x, y)
     this.setData({
       ...this.getData(),
       x,
@@ -247,19 +277,6 @@ export class Group extends PointEntityClass<GroupData> {
       angleY: undefined,
     }
     return this.type + JSON.stringify(cacheData)
-  }
-
-  // associationEntity: BaseEntityClass<BaseObjData>[] = []// 关联对象，就是本对象渲染，需要联动修改的对象。（比如：墙壁上被窗户挖洞，那么墙修改，需要重新挖洞）
-
-  setData(data: GroupData) {
-    // this.data = data
-    // // 双向去除原有的关联对象
-    // this.associationEntity.forEach(entity => {
-    //   if (entity.associationEntity.includes(this)) {
-    //     entity.markObjectIsDirty()
-    //   }
-    // })
-    // this.world._callObjDataChange(this)
   }
 
   changeBoundingBoxState() {
@@ -403,5 +420,46 @@ export class Group extends PointEntityClass<GroupData> {
 
   getAllObjectCount() {
     return this.children.length
+  }
+
+  editPropConfig(snapPoint: HandelInfo, editShow: (editInfoList: editItem[], callback: (val: any) => void) => void): void {
+    const data = this.getData();
+    editShow([
+      {
+        id: '增加对象',
+        label: '增加对象',
+        dataType: 'button',
+        value: () => {
+          const cubeData: CubeData = {
+            id: Date.now().toString(),
+            x: data.x,
+            y: data.y,
+            z: data.z,
+            angleY: data.angleY,
+            color: 'red',
+            mt: null,
+            width: 30,
+            height: 30,
+            depth: 30,
+          }
+          this.add('cube', [cubeData])
+          close()
+        }
+      },
+      {
+        id: 'z',
+        label: '距离地面',
+        dataType: 'number',
+        min: -100,
+        max: 100,
+        step: 1,
+        value: data.z,
+      }
+    ], (val) => {
+      this.setData({
+        ...data,
+        ...val,
+      })
+    })
   }
 }
