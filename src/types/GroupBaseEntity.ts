@@ -22,7 +22,7 @@ export interface EnvironmentConfig {
 export abstract class GroupBaseEntity extends BaseEntityClass<GroupBaseData> {
   name: string = 'group'
   type: string = 'group'
-  group: THREE.Object3D = new THREE.Group()
+  group: THREE.Scene | THREE.Group = new THREE.Group()
 
   public children: BaseEntityClass<BaseObjData>[] = []
 

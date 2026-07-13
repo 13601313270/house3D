@@ -34,8 +34,8 @@ export abstract class PointEntityClass<T extends PointObjData> extends BaseEntit
       lineBox.entity = this
       group.visible = false
       this.boundingBox = group;
-      if (this.useMoveZBox && window.worldApi) {
-        window.worldApi.group.add(group)
+      if (this.useMoveZBox && this.parentEntity) {
+        this.parentEntity.group.add(group)
       }
     })();
     (() => {
@@ -65,8 +65,8 @@ export abstract class PointEntityClass<T extends PointObjData> extends BaseEntit
       group2.entity = this
       this.moveZBox = group2;
       console.log('this.useMoveZBox', this, this.useMoveZBox)
-      if (this.useMoveZBox && window.worldApi) {
-        window.worldApi.group.add(group2)
+      if (this.useMoveZBox && this.parentEntity) {
+        this.parentEntity.group.add(group2)
       }
     })();
   }
@@ -81,7 +81,8 @@ export abstract class PointEntityClass<T extends PointObjData> extends BaseEntit
     if (oldCacheKey === newKeyByData) {
       return;
     }
-    const scene: THREE.Scene = window.worldApi.group
+    if (!this.parentEntity) return
+    const scene: THREE.Scene | THREE.Group = this.parentEntity.group;
     if (this.spriteGroup) {
       scene.remove(this.spriteGroup)
       this.spriteGroup = null
@@ -144,8 +145,8 @@ export abstract class PointEntityClass<T extends PointObjData> extends BaseEntit
   public markObjectIsDirty() {
     // 这里注意防止死循环
     super.markObjectIsDirty()
-    if (this.spriteGroup) {
-      window.worldApi.group.remove(this.spriteGroup)
+    if (this.spriteGroup && this.parentEntity) {
+      this.parentEntity.group.remove(this.spriteGroup)
       this.spriteGroup = null
     }
   }
@@ -232,7 +233,8 @@ export abstract class PointEntityClass<T extends PointObjData> extends BaseEntit
 
   beforeRemove() {
     super.beforeRemove()
-    const scene: THREE.Scene = window.worldApi.group
+    if (!this.parentEntity) return
+    const scene: THREE.Scene | THREE.Group = this.parentEntity.group;
     if (this.boundingBox) {
       scene.remove(this.boundingBox)
     }
