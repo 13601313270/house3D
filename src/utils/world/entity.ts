@@ -5,7 +5,7 @@ import { allFileKeys, EntityConstructor, fileData, fileDataKeyToClass } from '@/
 import { PointEntityClass } from '@/types/pointEntity'
 import { ImportFileType, ImportImgType, ObjOutputFileType } from '@/entities/allObjs';
 import { BaseEntityClass } from '@/types/baseEntity'
-import { BaseObjData } from '@/types/map2d'
+import { BaseObjData, HandelInfo } from '@/types/map2d'
 import { CameraBase } from '@/types/CameraBase'
 import { GroupData } from './index.d'
 
@@ -50,6 +50,9 @@ export class World {
   scene: THREE.Scene
 
   isShowBoundingBox: boolean = true
+
+  private circleRadius = 6
+  type: string = 'group'
 
   constructor(data: GroupData) {
     this.data = data
@@ -207,6 +210,10 @@ export class World {
     // })
   }
 
+  draw2DHandleByData() {
+    // 暂无操作句柄
+  }
+
   // 绘制操作句柄
   // draw2DActionHandle(
   //   canvasActionRef: HTMLCanvasElement,
@@ -256,6 +263,128 @@ export class World {
     });
     console.log('boundingBoxList-1', boundingBoxList)
     return boundingBoxList
+  }
+
+  createBoundingBox(): [THREE.Vector3, THREE.Vector3, THREE.Vector3] {
+    // const { width, height, depth, angleY } = this.children[0].getData();
+    const { angleY } = this.getData();
+    // 第一个是尺寸，第二个是位置偏移，第三个是旋转角度
+    return [
+      new THREE.Vector3(0, 0, 0),
+      new THREE.Vector3(0, 0, 0),
+      new THREE.Vector3(0, angleY, 0)
+    ]
+  }
+
+  showMatchHandel(x: number, y: number) {
+    return null;
+  }
+
+  matchHandelInfo(x: number, y: number) {
+    const data = this.getData();
+    const dist = Math.hypot(x - data.x, y - data.y)
+    if (dist < this.circleRadius + 3) {
+      return {
+        index: 0,
+        type: this.type,
+        id: data.id,
+        dist,
+      }
+    }
+    const drawAngelLength = 100;// Math.max(this.getData().width / 2, this.circleRadius * 2) * 0.9;// 0.9避免超过方块范围
+    // 控制点向着angleY角度延伸10个单位后的坐标
+    const rotatedXAdd = data.x + Math.cos(data.angleY) * drawAngelLength
+    const rotatedYAdd = data.y - Math.sin(data.angleY) * drawAngelLength
+
+    const dist2 = Math.hypot(x - rotatedXAdd, y - rotatedYAdd)
+    // console.log('dist2', dist2)
+    if (dist2 < this.circleRadius + 3) {
+      return {
+        index: 1,
+        type: this.type,
+        id: data.id,
+        dist: dist2,
+      }
+    }
+    return null;
+  }
+
+  matchHandelMoveCallback(position: {
+    x: number,
+    y: number,
+  }, matchHandelInfo: HandelInfo) {
+    // const { x, y } = position
+    // if (matchHandelInfo.index === 0) {
+    //   this.changePosition({ x, y })
+    // } else if (matchHandelInfo.index === 1) {
+    //   const data = this.getData();
+    //   // 根据x,y计算angleY
+    //   const angleY = Math.atan2(y - data.y, x - data.x)
+    //   this.setData({
+    //     ...this.getData(),
+    //     angleY: angleY * -1,
+    //   })
+    // }
+  }
+
+  getMineBeSnapPoints() {
+    return []
+  }
+
+  getMineBeSnapLines(): [Point, Point][] {
+    return []
+  }
+
+  inSceneSnapPointArea() {
+    return false
+  }
+
+  inSceneSnapLineArea() {
+    return false
+  }
+
+  setPrepareState(x: number, y: number): string[] {
+    this.setData({
+      ...this.getData(),
+      x,
+      y,
+    })
+    return [];
+  }
+
+  meshNeedChangeKey() {
+    const data = this.getData();
+    const cacheData = {
+      ...data,
+      x: undefined,
+      y: undefined,
+      z: undefined,
+      angleY: undefined,
+    }
+    return this.type + JSON.stringify(cacheData)
+  }
+
+  // 改变3D模型的状态
+  // 例如：改变位置，旋转角度等，模型本身不变
+  change3DMeshState(): void {
+    // const data = this.getData();
+    // this.meshList.forEach(v => {
+    //   v.position.set(data.x, data.z, data.y)
+    //   v.rotation.y = data.angleY
+    // })
+  }
+
+  // associationEntity: BaseEntityClass<any>[] = []// 关联对象，就是本对象渲染，需要联动修改的对象。（比如：墙壁上被窗户挖洞，那么墙修改，需要重新挖洞）
+
+  setData(data: GroupData) {
+    // this.data = data
+    // // 双向去除原有的关联对象
+    // this.associationEntity.forEach(entity => {
+    //   if (entity.associationEntity.includes(this)) {
+    //     entity.markObjectIsDirty()
+    //   }
+    // })
+    // this.world._callObjDataChange(this)
   }
 
   draw3D() {
