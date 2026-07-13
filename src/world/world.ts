@@ -18,6 +18,7 @@ class WorldGroup extends GroupEntity {
   constructor(parent: null, data: WorldData) {
     super(parent, data)
 
+    window.worldState.scene = new THREE.Scene();
     window.worldState.scene.background = new THREE.Color(0xf0f0f0)
 
     const gridHelper = new THREE.GridHelper(1000, 50, 0xcccccc, 0xeeeeee)
