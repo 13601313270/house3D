@@ -18,7 +18,6 @@ import { outFileDataExtension, modify3DMesh } from '@/outFilePlus/index'
 export class OutFileEntity extends PointEntityClass<OutFileData> {
   name: string = '外部文件'
   type: string = 'outFile'
-  isPointObj: boolean = true
   color: string = '#0c7f25'
   color3D: string = '#0c7f25'
   colorOpacity: string = '#14b737a5'

@@ -9,7 +9,6 @@ import { OrigionSnapPoint } from '@/types/baseEntity'
 export class ImportFileEntity extends PointEntityClass<ImportFileData> {
   name: string = '导入文件'
   type: string = 'importFile'
-  isPointObj: boolean = true
   color: string = '#0c7f25'
   color3D: string = '#0c7f25'
   colorOpacity: string = '#14b737a5'

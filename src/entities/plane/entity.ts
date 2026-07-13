@@ -12,7 +12,6 @@ import { allSnapFromType } from '@/types/baseEntity';
 export class PlaneEntity extends PointEntityClass<PlaneData> {
   name: string = '方形平面'
   type: string = 'plane'
-  isPointObj: boolean = true
   private circleRadius = 6
   private static textureLoader = new THREE.TextureLoader();
   private static textureCache = new Map<string | File, THREE.Texture>();

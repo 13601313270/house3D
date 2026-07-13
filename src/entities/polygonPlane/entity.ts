@@ -13,7 +13,6 @@ import { PolygonPlanePoint, PolygonPlaneData } from './index.d'
 export class PolygonPlaneEntity extends LineEntityClass<PolygonPlanePoint, PolygonPlaneData> {
   name: string = '折线平面'
   type: string = 'polygonPlane'
-  isPointObj: boolean = false
   private circleRadius = 6
   private thickness = 10
 

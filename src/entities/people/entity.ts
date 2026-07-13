@@ -14,7 +14,6 @@ img.src = 'people.png'
 export class PeopleEntity extends PointEntityClass<PeopleData> {
   name: string = '人物'
   type: string = 'people'
-  isPointObj: boolean = true
   color: string = '#0c7f25'
   color3D: string = '#0c7f25'
   color3DActive: string = 'red'

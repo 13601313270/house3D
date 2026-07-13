@@ -16,7 +16,6 @@ import { WallEntity } from '../wall/entity';
 export class DoorEntity extends EntityClassInWall<DoorData> {
   name: string = '门'
   type: string = 'door'
-  isPointObj: boolean = true
   private circleRadius = 6
 
   constructor(world: World, door: DoorData) {

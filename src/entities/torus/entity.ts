@@ -10,7 +10,6 @@ import { allSnapFromType } from '@/types/baseEntity';
 export class TorusEntity extends PointEntityClass<TorusData> {
   name: string = '环体'
   type: string = 'torus'
-  isPointObj: boolean = true
   private circleRadius = 6
   public radialSegments = 32
 

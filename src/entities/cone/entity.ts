@@ -10,7 +10,6 @@ import { allSnapFromType } from '@/types/baseEntity';
 export class ConeEntity extends PointEntityClass<ConeData> {
   name: string = '圆锥体'
   type: string = 'cone'
-  isPointObj: boolean = true
   private circleRadius = 6
   public radialSegments = 32
 

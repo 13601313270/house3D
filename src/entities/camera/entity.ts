@@ -17,7 +17,6 @@ img.src = kamera || ''
 export class CameraEntity extends CameraBase<CameraData> {
   name: string = '相机'
   type: string = 'camera'
-  isPointObj: boolean = true
   color: string = '#0c7f25'
   color3D: string = '#0c7f25'
   color3DActive: string = 'red'

@@ -12,7 +12,6 @@ import { PolygonPoint, PolygonData } from './index.d'
 export class PolygonEntity extends LineEntityClass<PolygonPoint, PolygonData> {
   name: string = '折线体'
   type: string = 'polygon'
-  isPointObj: boolean = false
   private circleRadius = 6
   private thickness = 10
 

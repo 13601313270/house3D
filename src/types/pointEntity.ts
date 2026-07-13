@@ -4,7 +4,6 @@ import { World } from '@/utils/world/entity'
 import { BaseEntityClass } from './baseEntity'
 
 export abstract class PointEntityClass<T extends PointObjData> extends BaseEntityClass<T> {
-  abstract isPointObj: boolean // 点状对象，如窗户/门。非点状的如墙
   boundingBox: THREE.Group
   moveZBox: THREE.Group
   boundingBoxData: [THREE.Vector3, THREE.Vector3, THREE.Vector3] | null = null // 第一个是尺寸，第二个是位置偏移，第三个是旋转角度

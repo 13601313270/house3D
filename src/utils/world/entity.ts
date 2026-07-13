@@ -22,7 +22,6 @@ export interface EnvironmentConfig {
 export class World extends PointEntityClass<GroupData> {
   protected data: GroupData
   name: string = 'world'
-  isPointObj: boolean = true
 
   public children: BaseEntityClass<BaseObjData>[] = []
 

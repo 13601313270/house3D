@@ -15,7 +15,6 @@ import { World } from '@/utils/world/entity'
 export class WallEntity extends LineEntityClass<WallPoint, WallData> {
   name: string = '墙'
   type: string = 'wall'
-  isPointObj: boolean = false
   private circleRadius = 6
 
   constructor(world: World, data: WallData) {

@@ -11,7 +11,6 @@ import { allSnapFromType } from '@/types/baseEntity';
 export class CubeEntity extends PointEntityClass<CubeData> {
   name: string = '方块'
   type: string = 'cube'
-  isPointObj: boolean = true
   private circleRadius = 6
 
   draw2DPreviewByData(ctx: CanvasRenderingContext2D, data: CubeData, panOffset: Point, zoomLevel: number): void {

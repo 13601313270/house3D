@@ -11,7 +11,6 @@ import getMatchRectAreaBySector from '@/utils/getMatchRectAreaBySector';
 export class SectorEntity extends PointEntityClass<SectorData> {
   name: string = '扇形体'
   type: string = 'sector'
-  isPointObj: boolean = true
   private circleRadius = 3
 
   draw2DPreviewByData(ctx: CanvasRenderingContext2D, data: SectorData, panOffset: Point, zoomLevel: number): void {

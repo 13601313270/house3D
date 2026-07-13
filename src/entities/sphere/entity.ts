@@ -10,7 +10,6 @@ import { allSnapFromType } from '@/types/baseEntity';
 export class SphereEntity extends PointEntityClass<SphereData> {
   name: string = '球体'
   type: string = 'sphere'
-  isPointObj: boolean = true
   private circleRadius = 6
 
   draw2DPreviewByData(ctx: CanvasRenderingContext2D, data: SphereData, panOffset: Point, zoomLevel: number): void {

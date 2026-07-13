@@ -13,7 +13,6 @@ import { WallEntity } from '../wall/entity'
 export class CurtainInWallEntity extends EntityClassInWall<CurtainInWallData> {
   name: string = '方形幕布(挂在墙上)'
   type: string = 'curtainInWall'
-  isPointObj: boolean = true
   color: string = '#0c7f25'
   color3D: string = '#0c7f25'
   colorOpacity: string = '#14b737a5'

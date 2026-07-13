@@ -25,7 +25,6 @@ function getAllPointsByN(x: number, y: number, n: number, r: number, angle: numb
 export class RegularPolygonEntity extends PointEntityClass<RegularPolygon2Data> {
   name: string = 'N边形锥'
   type: string = 'regularPolygon2';
-  isPointObj: boolean = true
   private circleRadius = 6
 
   draw2DPreviewByData(ctx: CanvasRenderingContext2D, data: RegularPolygon2Data, panOffset: Point, zoomLevel: number): void {

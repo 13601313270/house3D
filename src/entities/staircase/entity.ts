@@ -15,7 +15,6 @@ import { World } from '@/utils/world/entity'
 export class StaircaseEntity extends LineEntityClass<StaircasePoint, StaircaseData> {
   name: string = '楼梯'
   type: string = 'staircase'
-  isPointObj: boolean = false
   private circleRadius = 6
 
   constructor(world: World, data: StaircaseData) {

@@ -20,7 +20,6 @@ import { modify3DMesh, outFileDataExtension } from '@/outFilePlus'
 export class OutFileInWallEntity extends EntityClassInWall<OutFileInWallData> {
   name: string = '外部文件'
   type: string = 'outFileInWall'
-  isPointObj: boolean = true
   color: string = '#0c7f25'
   color3D: string = '#0c7f25'
   colorOpacity: string = '#14b737a5'

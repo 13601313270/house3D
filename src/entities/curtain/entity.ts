@@ -10,7 +10,6 @@ import { importImgFileHead } from '../allObjs';
 export class CurtainEntity extends PointEntityClass<CurtainData> {
   name: string = '垂直方形幕布'
   type: string = 'curtain'
-  isPointObj: boolean = true
   private circleRadius = 6
   private depth = 5
   private static textureLoader = new THREE.TextureLoader();

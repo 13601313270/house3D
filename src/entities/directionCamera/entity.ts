@@ -17,7 +17,6 @@ img.src = kamera || ''
 export class DirectionCameraEntity extends CameraBase<DirectionCameraData> {
   name: string = '相机(相机位置+方向)'
   type: string = 'directionCamera'
-  isPointObj: boolean = true
   color: string = '#0c7f25'
   color3D: string = '#0c7f25'
   color3DActive: string = 'red'

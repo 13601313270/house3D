@@ -12,7 +12,6 @@ import { loadImage as globalLoadImage } from '@/utils/imageCache'
 export class SignEntity extends PointEntityClass<SignData> {
   name: string = '交通标识'
   type: string = 'sign'
-  isPointObj: boolean = true
   private circleRadius = 6
 
   async init() {
