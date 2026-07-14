@@ -80,18 +80,18 @@ export abstract class GroupBaseEntity extends BaseEntityClass<GroupBaseData> {
     const screenY = data.y * zoomLevel + panOffset.y;// data.y * zoomLevel + panOffset.y
     // console.log('setPrepareState---' + this.getData().id + '---preview', data.x, data.y)
     // 绘制一个方块
-    ctx.fillStyle = 'red'
-    ctx.save(); // 保存当前状态
-    ctx.translate(screenX, screenY); // 移动原点到目标中心
-    ctx.rotate(data.angleY); // 围绕新原点旋转
-    // 绘制一个方块
-    ctx.strokeRect(
-      width / -2 * zoomLevel,
-      height / -2 * zoomLevel,
-      width * zoomLevel,
-      height * zoomLevel
-    )
-    ctx.restore(); // 恢复原始状态
+    // ctx.fillStyle = 'red'
+    // ctx.save(); // 保存当前状态
+    // ctx.translate(screenX, screenY); // 移动原点到目标中心
+    // ctx.rotate(data.angleY); // 围绕新原点旋转
+    // // 绘制一个方块
+    // ctx.strokeRect(
+    //   width / -2 * zoomLevel,
+    //   height / -2 * zoomLevel,
+    //   width * zoomLevel,
+    //   height * zoomLevel
+    // )
+    // ctx.restore(); // 恢复原始状态
 
     const allObj: BaseEntityClass<BaseObjData>[] = [];
     this.children.forEach(item => {
@@ -354,6 +354,10 @@ export abstract class GroupBaseEntity extends BaseEntityClass<GroupBaseData> {
     return this.children.length
   }
 
-  editPropConfig(snapPoint: HandelInfo, editShow: (editInfoList: editItem[], callback: (val: any) => void) => void): void {
+  editPropConfig(
+    snapPoint: HandelInfo,
+    editShow: (editInfoList: editItem[], callback: (val: any) => void) => void,
+    close: () => void,
+  ): void {
   }
 }

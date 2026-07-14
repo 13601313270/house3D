@@ -39,7 +39,11 @@ export class GroupEntity extends GroupBaseEntity {
     })
   }
 
-  editPropConfig(snapPoint: HandelInfo, editShow: (editInfoList: editItem[], callback: (val: any) => void) => void): void {
+  editPropConfig(
+    snapPoint: HandelInfo,
+    editShow: (editInfoList: editItem[], callback: (val: any) => void) => void,
+    close: () => void
+  ): void {
     const data = this.getData();
     editShow([
       {
@@ -61,13 +65,14 @@ export class GroupEntity extends GroupBaseEntity {
           }
           this.add('cube', [cubeData])
           setTimeout(() => {
-            this.markObjectIsDirty()
             this.reCreate3DMeshIfNeed()
-          }, 1000)
+            this.change3DMeshState()
+            this.changeBoundingBoxState()
+            close()
+          }, 0)
           // if (this.parentEntity) {
           //   this.parentEntity._callObjDataChange(this)
           // }
-          close()
         }
       },
     ], (val) => {
@@ -151,7 +156,6 @@ export class GroupEntity extends GroupBaseEntity {
   }
 
   setPrepareState(x: number, y: number): string[] {
-    console.log('setPrepareState---' + this.getData().id, x, y)
     this.setData({
       ...this.getData(),
       x,
