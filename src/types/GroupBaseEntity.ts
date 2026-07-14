@@ -149,7 +149,7 @@ export abstract class GroupBaseEntity extends BaseEntityClass<GroupBaseData> {
   boundingBoxList(): THREE.Group[] {
     const boundingBoxList: THREE.Group[] = []
     this.children.forEach((item) => {
-      if (item instanceof PointEntityClass && item.boundingBox) {
+      if (item instanceof PointEntityClass && item.boundingBox && !item.getData().isLocked) {
         boundingBoxList.push(item.boundingBox)
       }
     });
@@ -159,11 +159,10 @@ export abstract class GroupBaseEntity extends BaseEntityClass<GroupBaseData> {
   moveZBoxList(): THREE.Group[] {
     const boundingBoxList: THREE.Group[] = []
     this.children.forEach((item) => {
-      if (item instanceof PointEntityClass && item.moveZBox) {
+      if (item instanceof PointEntityClass && item.moveZBox && !item.getData().isLocked) {
         boundingBoxList.push(item.moveZBox)
       }
     });
-    // console.log('boundingBoxList-1', boundingBoxList)
     return boundingBoxList
   }
 
