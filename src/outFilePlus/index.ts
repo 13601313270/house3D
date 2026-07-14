@@ -7,6 +7,7 @@ const allPlugins: Record<number, () => Promise<{ default: typeof OutFilePlusBase
   68: () => import('./68/index'),
   40: () => import('./40/index'),
   71: () => import('./71/index'),
+  129: () => import('./129/index'),
 }
 // 暂时没有扩展项，原本是考虑根据fileTypeId来扩展项，比如窗帘，控制是否折叠
 export async function outFileDataExtension(fileTypeId: string, data: Record<string, any>): Promise<editItem[]> {

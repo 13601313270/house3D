@@ -79,7 +79,7 @@
           </button>
           <input type="file" id="fileInput" ref="loadProgramFileInputRef" accept=".devt" style="display: none"
             @change="handleLoadProgramFileChange" />
-          <input type="file" id="importFileInput" ref="importFileInputRef" accept=".fbx,.obj" style="display: none"
+          <input type="file" id="importFileInput" ref="importFileInputRef" accept=".fbx,.obj,.glb" style="display: none"
             @change="handleImportFileChange" />
         </div>
         <div class="canvas-container">
@@ -811,7 +811,7 @@ const handleLoadProgramFileChange = async (e: Event) => {
       const file = new File([blob], fileTypeId, { type: blob.type || 'application/octet-stream' })
 
       console.log('blob', blob, url, file, file.name, extension)
-      processUploadedFile(file, (object: THREE.Group, file: File) => {
+      await processUploadedFile(file, (object: THREE.Group, file: File) => {
         const customObjItem: ImportFileType = {
           fileTypeId: v.fileTypeId,
           mesh: object,

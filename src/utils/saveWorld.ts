@@ -15,16 +15,28 @@ async function saveWorld(
   activeCameraIndex: number
 ) {
   const allFileObjectsByGroup: fileData = {};
-  window.worldApi.getData().childrenData.forEach((item: {
-    type: string,
-    value: BaseObjData,
-  }) => {
+  window.worldApi.children.forEach((item) => {
     const key = item.type
     if (!allFileObjectsByGroup[key]) {
       allFileObjectsByGroup[key] = []
     }
-    allFileObjectsByGroup[key].push(item.value)
+    allFileObjectsByGroup[key].push(item.getData())
   })
+
+  // getAllFileObjects(): fileData {
+  //   const returnData: fileData = {};
+  //   allFileKeys.forEach((key) => {
+  //     returnData[key] = []
+  //     if (this.getTypeListEntity(key)) {
+  //       (this.getTypeListEntity(key) as PointEntityClass<any>[]).forEach((item) => {
+  //         // @ts-ignore
+  //         returnData[key].push(item.getData())
+  //       })
+  //     }
+  //   })
+  //   return returnData
+  // }
+
   console.log('allFileObjectsByGroup', allFileObjectsByGroup)
   const data: fileData & {
     panOffset: Point

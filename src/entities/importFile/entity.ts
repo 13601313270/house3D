@@ -133,6 +133,7 @@ export class ImportFileEntity extends PointEntityClass<ImportFileData> {
     const data = this.getData();
     const group = new THREE.Group()
     const { fileTypeId, scale } = data
+    console.log('zoomzoomzoom', scale, window.worldState.allImportFiles)
     const findObjInfo = window.worldState.allImportFiles.find(item => item.fileTypeId === fileTypeId)
 
     if (!findObjInfo) {
@@ -318,6 +319,7 @@ export class ImportFileEntity extends PointEntityClass<ImportFileData> {
       }
     ]
     editShow(configList, (val) => {
+      console.log('save-val', val)
       this.setData({
         ...this.getData(),
         ...val,
