@@ -28,7 +28,7 @@ export class DirectionCameraEntity extends CameraBase<DirectionCameraData> {
 
   constructor(world: GroupBaseEntity, data: DirectionCameraData) {
     super(world, data)
-    this.realyCamera = new THREE.PerspectiveCamera(data.fov, data.aspectW / data.aspectH, 0.1, 1000)
+    this.realyCamera = new THREE.PerspectiveCamera(data.fov, data.aspectW / data.aspectH, 0.1, 10000)
     setTimeout(() => {
       if (this.realyCamera) {
         const targetPosition = this.getTargetPosition();
