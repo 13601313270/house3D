@@ -27,7 +27,7 @@ import polygonPlugin from './polygon'
 import regularPolygonPlugin from './regularPolygon'
 import regularPolygon2Plugin from './regularPolygon2'
 import torusPlugin from './torus'
-import groupPlugin from './group/index'
+import groupPlugin from './group2/index'
 import PluginType from './pluginType'
 
 function loadItem(v: PluginType) {

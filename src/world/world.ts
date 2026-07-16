@@ -1,6 +1,6 @@
 import * as THREE from 'three'
-import { EnvironmentConfig } from "@/entities/group/entity";
-import { GroupData } from '@/entities/group/index.d';
+import { EnvironmentConfig } from "@/entities/group2/entity";
+import { GroupData } from '@/entities/group2/index.d';
 import { GroupBaseEntity } from '@/types/GroupBaseEntity';
 import { HandelInfo } from '@/types/map2d';
 
