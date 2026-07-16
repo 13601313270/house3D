@@ -10,6 +10,7 @@ import { MatchCircleArea } from '@/utils/matchArea'
 import { OrigionSnapPoint } from '@/types/baseEntity'
 import { CameraBase } from '@/types/CameraBase'
 import { GroupBaseEntity } from '@/types/GroupBaseEntity';
+import { GroupBaseData } from '@/types/groupBase';
 
 const img = new Image()
 img.src = kamera || ''
@@ -26,7 +27,7 @@ export class DirectionCameraEntity extends CameraBase<DirectionCameraData> {
   private circleRadius = 6
   private distance = 100;
 
-  constructor(world: GroupBaseEntity, data: DirectionCameraData) {
+  constructor(world: GroupBaseEntity<GroupBaseData>, data: DirectionCameraData) {
     super(world, data)
     this.realyCamera = new THREE.PerspectiveCamera(data.fov, data.aspectW / data.aspectH, 0.1, 10000)
     setTimeout(() => {

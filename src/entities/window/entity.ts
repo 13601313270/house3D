@@ -10,13 +10,14 @@ import { MatchRectArea } from '@/utils/matchArea'
 import { isPointInRotatedRect } from '@/utils/isPointInRotatedRect'
 import { allSnapFromType } from '@/types/baseEntity';
 import { WallEntity } from '../wall/entity';
+import { GroupBaseData } from '@/types/groupBase';
 
 export class WindowEntity extends EntityClassInWall<WindowData> {
   name: string = '窗户'
   type: string = 'window'
   private circleRadius = 6
 
-  constructor(world: GroupBaseEntity, window: WindowData) {
+  constructor(world: GroupBaseEntity<GroupBaseData>, window: WindowData) {
     super(world, window)
     if (window && window.wallId && this.parentEntity) {
       const wall = this.parentEntity.getTypeListEntity('wall').find((entity) => {

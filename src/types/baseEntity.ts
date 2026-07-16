@@ -3,6 +3,7 @@ import { HandelInfo, Point, BaseObjData, PointWithIndex } from './map2d'
 import { MatchCircleArea, MatchRectArea } from '@/utils/matchArea'
 import { editItem } from '@/utils/editItem'
 import { GroupBaseEntity } from './GroupBaseEntity'
+import { GroupBaseData } from './groupBase'
 
 export type allSnapFromType = 'point' | 'line' | 'axis'
 // 磁吸点
@@ -21,13 +22,13 @@ export type MatchSnapPoint = OrigionSnapPoint | {
 export abstract class BaseEntityClass<T extends BaseObjData> {
   abstract name: string
   abstract type: string
-  parentEntity: GroupBaseEntity | null;
+  parentEntity: GroupBaseEntity<GroupBaseData> | null;
   protected data: T
   meshList: THREE.Group[] = []
   // eslint-disable-next-line
   associationEntity: BaseEntityClass<any>[] = []// 关联对象，就是本对象渲染，需要联动修改的对象。（比如：墙壁上被窗户挖洞，那么墙修改，需要重新挖洞）
 
-  constructor(parentEntity: GroupBaseEntity | null, data: T) {
+  constructor(parentEntity: GroupBaseEntity<GroupBaseData> | null, data: T) {
     this.parentEntity = parentEntity
     this.data = data
   }
@@ -165,4 +166,4 @@ export abstract class BaseEntityClass<T extends BaseObjData> {
   ): boolean;
 }
 
-export type EntityConstructor = new (world: GroupBaseEntity, data: BaseObjData) => BaseEntityClass<any>;
+export type EntityConstructor = new (world: GroupBaseEntity<GroupBaseData>, data: BaseObjData) => BaseEntityClass<any>;

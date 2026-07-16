@@ -8,7 +8,7 @@ import { GroupBaseData } from './groupBase'
 
 type WorldChangeType = 'add' | 'remove' | 'change'
 
-export abstract class GroupBaseEntity extends BaseEntityClass<GroupBaseData> {
+export abstract class GroupBaseEntity<T extends GroupBaseData> extends BaseEntityClass<T> {
   name: string = 'group'
   type: string = 'group'
   group: THREE.Scene | THREE.Group = new THREE.Group()
@@ -22,7 +22,7 @@ export abstract class GroupBaseEntity extends BaseEntityClass<GroupBaseData> {
   // 锁定状态的对象列表
   lockedObjList: BaseEntityClass<BaseObjData>[] = []
 
-  constructor(parent: GroupBaseEntity | null, data: GroupBaseData) {
+  constructor(parent: GroupBaseEntity<T> | null, data: T) {
     super(parent, data)
     this.data = data;
 
@@ -113,7 +113,12 @@ export abstract class GroupBaseEntity extends BaseEntityClass<GroupBaseData> {
     // })
   }
 
-  draw2DHandleByData() {
+  draw2DHandleByData(
+    ctx: CanvasRenderingContext2D,
+    data: GroupBaseData,
+    panOffset: Point,
+    zoomLevel: number,
+  ) {
     // 暂无操作句柄
   }
 
@@ -326,7 +331,7 @@ export abstract class GroupBaseEntity extends BaseEntityClass<GroupBaseData> {
     this.worldObjRemoveBindList.push(callback)
   }
 
-  getData(): GroupBaseData {
+  getData(): T {
     return this.data
   }
 

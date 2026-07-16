@@ -11,13 +11,14 @@ import { isPointInRotatedRect } from '@/utils/isPointInRotatedRect'
 import { allSnapFromType } from '@/types/baseEntity'
 import { LineEntityClass } from '@/types/lineEntity'
 import { GroupBaseEntity } from '@/types/GroupBaseEntity'
+import { GroupBaseData } from '@/types/groupBase'
 
 export class StaircaseEntity extends LineEntityClass<StaircasePoint, StaircaseData> {
   name: string = '楼梯'
   type: string = 'staircase'
   private circleRadius = 6
 
-  constructor(world: GroupBaseEntity, data: StaircaseData) {
+  constructor(world: GroupBaseEntity<GroupBaseData>, data: StaircaseData) {
     super(world, data)
     if (this.data) {
       if (this.data.stepType === undefined) {

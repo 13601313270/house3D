@@ -5,12 +5,13 @@ import editItem from '@/utils/editItem'
 import { isPointInRotatedRect } from '@/utils/isPointInRotatedRect'
 import { MatchRectArea } from '@/utils/matchArea'
 import { GroupBaseData } from '@/types/groupBase'
+import { PlaneGroupData } from './index.d'
 
-export class PlaneGroupEntity extends GroupBaseEntity {
+export class PlaneGroupEntity extends GroupBaseEntity<PlaneGroupData> {
   name: string = 'planeGroup'
   private circleRadius = 6
 
-  constructor(parent: GroupBaseEntity | null, data: GroupBaseData) {
+  constructor(parent: GroupBaseEntity<GroupBaseData> | null, data: PlaneGroupData) {
     super(parent, data)
     this.data = data;
     if (this.parentEntity) {
@@ -43,6 +44,112 @@ export class PlaneGroupEntity extends GroupBaseEntity {
     )
     ctx.restore(); // 恢复原始状态
     super.draw2DPreviewByData(ctx, data, panOffset, zoomLevel)
+  }
+
+  draw2DHandleByData(
+    ctx: CanvasRenderingContext2D,
+    data: GroupBaseData,
+    panOffset: Point,
+    zoomLevel: number,
+  ) {
+    const screenX = data.x * zoomLevel + panOffset.x
+    const screenY = data.y * zoomLevel + panOffset.y
+
+    // 控制点
+    ctx.fillStyle = '#fff'
+    ctx.strokeStyle = '#e67e22'
+    ctx.lineWidth = 2
+    ctx.beginPath()
+    ctx.arc(screenX, screenY, this.circleRadius * zoomLevel + 3, 0, Math.PI * 2)
+    ctx.fill()
+    ctx.stroke()
+    const [width, height] = this.getSize()
+
+    const drawAngelLength = 100;// Math.max(this.getData().width / 2, this.circleRadius * 2) * 0.9;// 0.9避免超过方块范围
+    // 控制点向着angleY角度延伸10个单位后的坐标
+    const rotatedXAdd = data.x + Math.cos(data.angleY) * drawAngelLength
+    const rotatedYAdd = data.y - Math.sin(data.angleY) * drawAngelLength
+    const circleX = rotatedXAdd * zoomLevel + panOffset.x
+    const circleY = rotatedYAdd * zoomLevel + panOffset.y
+    const circleRadius = this.circleRadius * zoomLevel + 3
+
+    function ttt(angel: number, drawAngelLength: number) {
+      const tempX = data.x + Math.cos(angel) * drawAngelLength;
+      const tempY = data.y - Math.sin(angel) * drawAngelLength;
+      return [tempX * zoomLevel + panOffset.x, tempY * zoomLevel + panOffset.y]
+    }
+
+    // 绘制双向箭头表示旋转角度
+    ctx.fillStyle = '#fff'
+    ctx.strokeStyle = '#e67e22'
+    ctx.lineWidth = 2 * zoomLevel
+    // 绘制双向箭头的主线（圆弧）
+    ctx.beginPath();
+    ctx.arc(screenX, screenY, drawAngelLength * zoomLevel, data.angleY * -1 - Math.PI / 4, data.angleY * -1 + Math.PI / 4);
+    ctx.stroke();
+
+    // 左侧箭头
+    (() => {
+      ctx.beginPath()
+      const [p1X, p1Y] = ttt(data.angleY + 0.1 + Math.PI / 4, drawAngelLength)
+      const [p2X, p2Y] = ttt(data.angleY + Math.PI / 4, drawAngelLength + 5)
+      const [p3X, p3Y] = ttt(data.angleY + Math.PI / 4, drawAngelLength - 5)
+      ctx.moveTo(
+        p1X,
+        p1Y
+      )
+      ctx.lineTo(p2X, p2Y)
+      ctx.lineTo(p3X, p3Y)
+      ctx.closePath()
+      ctx.fill()
+    })();
+
+    // 右侧箭头
+    (() => {
+      ctx.beginPath()
+      const [p1X, p1Y] = ttt(data.angleY - 0.1 - Math.PI / 4, drawAngelLength)
+      const [p2X, p2Y] = ttt(data.angleY - Math.PI / 4, drawAngelLength + 5)
+      const [p3X, p3Y] = ttt(data.angleY - Math.PI / 4, drawAngelLength - 5)
+      ctx.moveTo(
+        p1X,
+        p1Y
+      )
+      ctx.lineTo(p2X, p2Y)
+      ctx.lineTo(p3X, p3Y)
+      ctx.closePath()
+      ctx.fill()
+    })();
+
+    // 绘制旋转角度控制
+    ctx.beginPath()
+    ctx.arc(circleX, circleY, circleRadius, 0, Math.PI * 2)
+    ctx.fill()
+    ctx.stroke()
+
+    // 绘制 轮廓
+    const matchArea = new MatchRectArea({
+      x: data.x,
+      y: data.y,
+      width,
+      depth: height,
+      angleY: data.angleY,
+    })
+    ctx.lineWidth = 2
+    ctx.strokeStyle = 'red'
+    ctx.save(); // 保存当前状态
+    ctx.translate(
+      matchArea.data.x * zoomLevel + panOffset.x,
+      matchArea.data.y * zoomLevel + panOffset.y
+    ); // 移动原点到目标中心
+    ctx.rotate(matchArea.data.angleY * -1); // 围绕新原点旋转
+    // 绘制一个方块
+    ctx.strokeRect(
+      matchArea.data.width / -2 * zoomLevel,
+      matchArea.data.depth / -2 * zoomLevel,
+      matchArea.data.width * zoomLevel,
+      matchArea.data.depth * zoomLevel,
+    )
+    ctx.restore(); // 恢复原始状态
   }
 
   change3DMeshState(): void {

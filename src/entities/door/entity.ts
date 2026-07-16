@@ -12,13 +12,14 @@ import { isPointInRotatedRect } from '@/utils/isPointInRotatedRect';
 import { allSnapFromType } from '@/types/baseEntity';
 import { WallEntity } from '../wall/entity';
 import { GroupBaseEntity } from '@/types/GroupBaseEntity';
+import { GroupBaseData } from '@/types/groupBase';
 
 export class DoorEntity extends EntityClassInWall<DoorData> {
   name: string = '门'
   type: string = 'door'
   private circleRadius = 6
 
-  constructor(world: GroupBaseEntity, door: DoorData) {
+  constructor(world: GroupBaseEntity<GroupBaseData>, door: DoorData) {
     super(world, door)
     if (door && door.wallId && this.parentEntity) {
       const wall = this.parentEntity.getTypeListEntity('wall').find((entity) => entity.getData().id === door.wallId);
