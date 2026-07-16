@@ -1,5 +1,5 @@
 import { GroupBaseEntity } from '@/types/GroupBaseEntity'
-import { HandelInfo } from '@/types/map2d'
+import { HandelInfo, Point } from '@/types/map2d'
 import { CubeData } from '../cube/index.d'
 import editItem from '@/utils/editItem'
 import { isPointInRotatedRect } from '@/utils/isPointInRotatedRect'
@@ -26,6 +26,32 @@ export class GroupEntity extends GroupBaseEntity {
       // this.parentEntity.group.clear()
       this.parentEntity.group.add(this.group)
     }
+  }
+
+  draw2DPreviewByData(
+    ctx: CanvasRenderingContext2D,
+    data: GroupBaseData,
+    panOffset: Point,
+    zoomLevel: number,
+  ) {
+    const [width, height] = this.getSize()
+    const screenX = data.x * zoomLevel + panOffset.x;// data.x * zoomLevel + panOffset.x
+    const screenY = data.y * zoomLevel + panOffset.y;// data.y * zoomLevel + panOffset.y
+    // console.log('setPrepareState---' + this.getData().id + '---preview', data.x, data.y)
+    // 绘制一个方块
+    ctx.fillStyle = 'red'
+    ctx.save(); // 保存当前状态
+    ctx.translate(screenX, screenY); // 移动原点到目标中心
+    ctx.rotate(data.angleY); // 围绕新原点旋转
+    // 绘制一个方块
+    ctx.strokeRect(
+      width / -2 * zoomLevel,
+      height / -2 * zoomLevel,
+      width * zoomLevel,
+      height * zoomLevel
+    )
+    ctx.restore(); // 恢复原始状态
+    super.draw2DPreviewByData(ctx, data, panOffset, zoomLevel)
   }
 
   change3DMeshState(): void {
