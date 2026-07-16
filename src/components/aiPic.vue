@@ -23,7 +23,7 @@
             <span class="imgIndex">图1</span>
           </div>
         </div>
-        <div class="section-title">额外参考图片（最多4张）</div>
+        <div class="section-title">额外参考图片（最多2张）</div>
         <div class="image-list">
           <div v-for="(image, index) in images" :key="index" class="image-item" :class="{ 'empty': !image }"
             @click="handleImageClick(index)">
@@ -131,7 +131,7 @@ const emit = defineEmits<{
   (e: 'close'): void
 }>()
 
-const images = ref<string[]>(['', '', '', ''])
+const images = ref<string[]>(['', ''])
 const prompt = ref('')
 const generatedImage = ref('')
 const isGenerating = ref(false)
