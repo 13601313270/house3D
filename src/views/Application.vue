@@ -184,7 +184,7 @@ import * as THREE from 'three'
 import JSZip from 'jszip';
 import request from '@/utils/request'
 import { Point } from '../types'
-import { snapThreshold, EnvironmentConfig, GroupEntity } from '../entities/group/entity'
+import { EnvironmentConfig, GroupEntity } from '../entities/group/entity'
 import Canvas3D from '../components/Canvas3D.vue'
 import { CameraState } from '@/types/camera'
 import { allFileKeys } from '@/entities'
@@ -211,7 +211,7 @@ import { BaseEntityClass } from '@/types/baseEntity';
 import { LineEntityClass } from '@/types/lineEntity';
 import AllWorldObjSelect from '@/components/AllWorldObjSelect.vue'
 import message from '@/utils/message';
-import getNearestWall from '@/utils/getNearestWall';
+import getNearestWall, { snapThreshold } from '@/utils/getNearestWall';
 import getSnapPointAndLine from '@/utils/getSnapPoint';
 import importOutObj from '@/utils/importOutObj';
 import { CameraBase } from '@/types/CameraBase';

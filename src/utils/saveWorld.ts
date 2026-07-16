@@ -1,7 +1,7 @@
+import JSZip from "jszip"
 import { Point } from "@/types"
 import { CameraState } from "@/types/camera"
 import { EnvironmentConfig } from "../entities/group/entity"
-import JSZip from "jszip"
 import { BaseObjData } from "@/types/map2d"
 
 export type fileData = {

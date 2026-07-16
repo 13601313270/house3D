@@ -6,10 +6,6 @@ import { isPointInRotatedRect } from '@/utils/isPointInRotatedRect'
 import { MatchRectArea } from '@/utils/matchArea'
 import { GroupBaseData } from '@/types/groupBase'
 
-export const canvasHeight = 600
-export const snapThreshold = 20
-type WorldChangeType = 'add' | 'remove' | 'change'
-
 export interface EnvironmentConfig {
   skyType: number
   ambientLightIntensity?: number

@@ -4,13 +4,8 @@ import { editItem } from '@/utils/editItem'
 import { PointEntityClass } from '@/types/pointEntity'
 import { BaseEntityClass, EntityConstructor } from '@/types/baseEntity'
 import { BaseObjData, HandelInfo, Point } from '@/types/map2d'
-import { isPointInRotatedRect } from '@/utils/isPointInRotatedRect'
-import { MatchRectArea } from '@/utils/matchArea'
-import { CubeData } from '@/entities/cube/index.d'
 import { GroupBaseData } from './groupBase'
 
-export const canvasHeight = 600
-export const snapThreshold = 20
 type WorldChangeType = 'add' | 'remove' | 'change'
 
 export interface EnvironmentConfig {

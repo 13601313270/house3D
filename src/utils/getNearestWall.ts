@@ -3,7 +3,8 @@ import { NearestWallResult } from "@/types/entityInWall"
 import { Point } from "@/types/map2d"
 import pointToLineDistance from '@/utils/pointToLineDistance'
 import { getClosestPointOnLine } from '@/utils/geometry'
-import { snapThreshold } from '../entities/group/entity'
+
+export const snapThreshold = 20
 
 function getNearestWall(point: Point): NearestWallResult | null {
   let nearestWall: WallData | null = null
