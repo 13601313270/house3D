@@ -184,7 +184,7 @@ import * as THREE from 'three'
 import JSZip from 'jszip';
 import request from '@/utils/request'
 import { Point } from '../types'
-import { EnvironmentConfig, GroupEntity } from '../entities/group2/entity'
+import { PlaneGroupEntity } from '../entities/planeGroup/entity'
 import Canvas3D from '../components/Canvas3D.vue'
 import { CameraState } from '@/types/camera'
 import { allFileKeys } from '@/entities'
@@ -223,7 +223,7 @@ import ShowPayModal from '@/components/showPayModal.vue'
 import drawAxes from '@/utils/drawAxes';
 import WorldState from '@/utils/worldState';
 import { editItem } from '@/utils/editItem';
-import WorldGroup from '@/world/world';
+import WorldGroup, { EnvironmentConfig } from '@/world/world';
 
 const canvas2DRef = ref<HTMLCanvasElement | null>(null)
 const canvas2D2Ref = ref<HTMLCanvasElement | null>(null)
@@ -480,7 +480,7 @@ const drawWrapper2D = () => {
       } else if (insertTempObj instanceof PointEntityClass) {
         insertTempObj.draw2DPreview(ctx, panOffset.value, zoom2DLevel.value)
         insertTempObj.draw2DActionHandle(ctx, panOffset.value, zoom2DLevel.value)
-      } else if (insertTempObj instanceof GroupEntity) {
+      } else if (insertTempObj instanceof PlaneGroupEntity) {
         insertTempObj.draw2DPreview(ctx, panOffset.value, zoom2DLevel.value)
         insertTempObj.draw2DActionHandle(ctx, panOffset.value, zoom2DLevel.value)
       }
@@ -1091,7 +1091,7 @@ const handleCanvasClick = async (e: MouseEvent) => {
         currentTool.value = 'drag'
       }
     }
-  } else if (insertTempObj && insertTempObj instanceof GroupEntity) {
+  } else if (insertTempObj && insertTempObj instanceof PlaneGroupEntity) {
     if (insertAdding.value === false) {
       insertAdding.value = true
       await worldApi.add(currentTool.value, [insertTempObj.getData()])
@@ -1435,7 +1435,7 @@ const handleMouseMove = (e: MouseEvent) => {
     } else if (insertTempObj instanceof PointEntityClass) {
       tipTexts = insertTempObj.setPrepareState(x, y)
       drawWrapper2DAnd3D()
-    } else if (insertTempObj instanceof GroupEntity) {
+    } else if (insertTempObj instanceof PlaneGroupEntity) {
       tipTexts = insertTempObj.setPrepareState(x, y)
       drawWrapper2DAnd3D()
     }

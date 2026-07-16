@@ -1,11 +1,16 @@
 import * as THREE from 'three'
-import { EnvironmentConfig } from "@/entities/group2/entity";
-import { GroupData } from '@/entities/group2/index.d';
 import { GroupBaseEntity } from '@/types/GroupBaseEntity';
 import { HandelInfo } from '@/types/map2d';
+import { GroupBaseData } from '@/types/groupBase';
 
-type WorldData = GroupData & {
+type WorldData = GroupBaseData & {
   temp: boolean,
+}
+
+export interface EnvironmentConfig {
+  skyType: number
+  ambientLightIntensity?: number
+  showGround?: boolean
 }
 
 class WorldGroup extends GroupBaseEntity {

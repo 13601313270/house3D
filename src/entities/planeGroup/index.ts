@@ -1,12 +1,12 @@
-import { GroupEntity } from "./entity"
+import { PlaneGroupEntity } from "./entity"
 import PluginType from "../pluginType"
 import defaultValues from "./defaultValues"
 
 const GroupPlugin: PluginType = {
-  name: '组',
-  key: 'group',
+  name: '平面组',
+  key: 'planeGroup',
   type: 'other',
-  entity: GroupEntity,
+  entity: PlaneGroupEntity,
   objType: 'point',
   previewImg: '/toolType/group.png',
   defaultValues,

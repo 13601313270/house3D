@@ -6,13 +6,8 @@ import { isPointInRotatedRect } from '@/utils/isPointInRotatedRect'
 import { MatchRectArea } from '@/utils/matchArea'
 import { GroupBaseData } from '@/types/groupBase'
 
-export interface EnvironmentConfig {
-  skyType: number
-  ambientLightIntensity?: number
-  showGround?: boolean
-}
-
-export class GroupEntity extends GroupBaseEntity {
+export class PlaneGroupEntity extends GroupBaseEntity {
+  name: string = 'planeGroup'
   private circleRadius = 6
 
   constructor(parent: GroupBaseEntity | null, data: GroupBaseData) {

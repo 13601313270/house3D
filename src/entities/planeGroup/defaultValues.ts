@@ -1,8 +1,8 @@
-import { GroupData } from "./index.d";
+import { PlaneGroupData } from "./index.d";
 import { DefaultItem } from "../pluginType";
 
-export default function (): DefaultItem<GroupData>[] {
-  const values: DefaultItem<GroupData>[] = [
+export default function (): DefaultItem<PlaneGroupData>[] {
+  const values: DefaultItem<PlaneGroupData>[] = [
     {
       name: '组',
       data: {

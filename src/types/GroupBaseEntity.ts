@@ -8,12 +8,6 @@ import { GroupBaseData } from './groupBase'
 
 type WorldChangeType = 'add' | 'remove' | 'change'
 
-export interface EnvironmentConfig {
-  skyType: number
-  ambientLightIntensity?: number
-  showGround?: boolean
-}
-
 export abstract class GroupBaseEntity extends BaseEntityClass<GroupBaseData> {
   name: string = 'group'
   type: string = 'group'
