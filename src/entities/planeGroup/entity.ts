@@ -8,7 +8,8 @@ import { GroupBaseData } from '@/types/groupBase'
 import { PlaneGroupData } from './index.d'
 
 export class PlaneGroupEntity extends GroupBaseEntity<PlaneGroupData> {
-  name: string = 'planeGroup'
+  type: string = 'planeGroup'
+  name: string = '平面组'
   private circleRadius = 6
 
   constructor(parent: GroupBaseEntity<GroupBaseData> | null, data: PlaneGroupData) {
@@ -34,7 +35,7 @@ export class PlaneGroupEntity extends GroupBaseEntity<PlaneGroupData> {
     ctx.fillStyle = 'red'
     ctx.save(); // 保存当前状态
     ctx.translate(screenX, screenY); // 移动原点到目标中心
-    ctx.rotate(data.angleY); // 围绕新原点旋转
+    ctx.rotate(data.angleY * -1); // 围绕新原点旋转
     // 绘制一个方块
     ctx.strokeRect(
       width / -2 * zoomLevel,
@@ -156,6 +157,7 @@ export class PlaneGroupEntity extends GroupBaseEntity<PlaneGroupData> {
     const data = this.getData();
     // console.trace('change3DMeshState-1', data.x, data.y, data.z)
     this.group.position.set(data.x, data.z, data.y)
+    // console.trace('change3DMeshState-angleY', data.angleY)
     this.group.rotation.set(0, data.angleY, 0)
 
     this.children.forEach(item => {

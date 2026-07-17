@@ -27,7 +27,7 @@ import polygonPlugin from './polygon'
 import regularPolygonPlugin from './regularPolygon'
 import regularPolygon2Plugin from './regularPolygon2'
 import torusPlugin from './torus'
-import groupPlugin from './planeGroup'
+import planeGroupPlugin from './planeGroup'
 import PluginType from './pluginType'
 
 function loadItem(v: PluginType) {
@@ -85,6 +85,6 @@ export default function () {
   ].forEach(loadItem);
   // 加载group插件，放在最后
   [
-    groupPlugin
+    planeGroupPlugin
   ].forEach(loadItem)
 }

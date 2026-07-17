@@ -9,8 +9,6 @@ import { GroupBaseData } from './groupBase'
 type WorldChangeType = 'add' | 'remove' | 'change'
 
 export abstract class GroupBaseEntity<T extends GroupBaseData> extends BaseEntityClass<T> {
-  name: string = 'group'
-  type: string = 'group'
   group: THREE.Scene | THREE.Group = new THREE.Group()
 
   public children: BaseEntityClass<BaseObjData>[] = []
@@ -64,23 +62,10 @@ export abstract class GroupBaseEntity<T extends GroupBaseData> extends BaseEntit
     panOffset: Point,
     zoomLevel: number,
   ) {
+    const { angleY } = data
     const [width, height] = this.getSize()
-    const screenX = data.x * zoomLevel + panOffset.x;// data.x * zoomLevel + panOffset.x
-    const screenY = data.y * zoomLevel + panOffset.y;// data.y * zoomLevel + panOffset.y
-    // console.log('setPrepareState---' + this.getData().id + '---preview', data.x, data.y)
-    // 绘制一个方块
-    // ctx.fillStyle = 'red'
-    // ctx.save(); // 保存当前状态
-    // ctx.translate(screenX, screenY); // 移动原点到目标中心
-    // ctx.rotate(data.angleY); // 围绕新原点旋转
-    // // 绘制一个方块
-    // ctx.strokeRect(
-    //   width / -2 * zoomLevel,
-    //   height / -2 * zoomLevel,
-    //   width * zoomLevel,
-    //   height * zoomLevel
-    // )
-    // ctx.restore(); // 恢复原始状态
+    const screenX = data.x * zoomLevel + panOffset.x;
+    const screenY = data.y * zoomLevel + panOffset.y;
 
     const allObj: BaseEntityClass<BaseObjData>[] = [];
     this.children.forEach(item => {
@@ -100,12 +85,20 @@ export abstract class GroupBaseEntity<T extends GroupBaseData> extends BaseEntit
         bZ = bData.z + (b.boundingBoxData ? b.boundingBoxData[0].y : 0)
       }
       return aZ - bZ
-    }).forEach((item) => {
+    })
+
+    ctx.save()
+    ctx.translate(screenX, screenY)
+    ctx.rotate(angleY * -1)
+
+    allObj.forEach((item) => {
       item.draw2DPreview(ctx, {
-        x: screenX,
-        y: screenY,
+        x: 0,
+        y: 0,
       }, zoomLevel)
     })
+
+    ctx.restore()
 
     // 绘制所有ObjFile的中心点
     // this.allObjFiles.forEach((item) => {

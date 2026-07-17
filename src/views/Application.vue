@@ -793,13 +793,18 @@ const handleLoadProgramFileChange = async (e: Event) => {
     return
   }
   // 2. 读取 scene.json
-  const sceneJsonText = await t.async('string');
-  const sceneData: {
+  const sceneJsonText: string = await t.async('string');
+  const sceneData: fileData & {
     importFile: ImportFileType[]
     allImportImgs: string[]
+    panOffset: Point
+    zoomLevel: number
+    cameraState: CameraState
+    activeCameraIndex: number
+    environmentConfig?: EnvironmentConfig
   } = JSON.parse(sceneJsonText);
 
-  console.log('sceneData', sceneData)
+  console.log('sceneData-1', sceneData)
   if (sceneData.importFile && sceneData.importFile.length) {
     for (const v of sceneData.importFile) {
       const { fileTypeId } = v
@@ -833,15 +838,8 @@ const handleLoadProgramFileChange = async (e: Event) => {
     }
   }
   try {
-    const data: fileData & {
-      panOffset: Point
-      zoomLevel: number
-      cameraState: CameraState
-      activeCameraIndex: number
-      environmentConfig?: EnvironmentConfig
-    } = JSON.parse(sceneJsonText as string)
     initWorldLoading.value = true
-    await initWorldByData(data)
+    await initWorldByData(sceneData)
     initWorldLoading.value = false
   } catch (error) {
     initWorldLoading.value = false
@@ -880,6 +878,8 @@ async function initWorldByData(data: fileData & {
   res.forEach((v: ObjOutputFileType) => {
     window.worldState.ObjFileTypes.push(v)
   })
+
+  console.log('allFileKeys', data, allFileKeys)
 
   for (let i = 0; i < allFileKeys.length; i++) {
     const key = allFileKeys[i]
