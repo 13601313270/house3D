@@ -11,7 +11,7 @@ import { MatchRectArea } from '@/utils/matchArea';
 import { isPointInRotatedRect } from '@/utils/isPointInRotatedRect';
 import { allSnapFromType } from '@/types/baseEntity';
 import { WallEntity } from '../wall/entity';
-import { GroupBaseEntity } from '@/types/GroupBaseEntity';
+import { GroupBaseEntity } from '@/types/groupBase/entity';
 import { GroupBaseData } from '@/types/groupBase';
 
 export class DoorEntity extends EntityClassInWall<DoorData> {

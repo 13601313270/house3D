@@ -10,7 +10,7 @@ import message from '@/utils/message'
 import { isPointInRotatedRect } from '@/utils/isPointInRotatedRect'
 import { allSnapFromType, MatchSnapPoint, OrigionSnapPoint } from '@/types/baseEntity'
 import { LineEntityClass } from '@/types/lineEntity'
-import { GroupBaseEntity } from '@/types/GroupBaseEntity'
+import { GroupBaseEntity } from '@/types/groupBase/entity'
 import { GroupBaseData } from '@/types/groupBase'
 
 export class WallEntity extends LineEntityClass<WallPoint, WallData> {

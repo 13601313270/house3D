@@ -2,7 +2,7 @@ import * as THREE from 'three'
 import { HandelInfo, Point, BaseObjData, PointWithIndex } from './map2d'
 import { MatchCircleArea, MatchRectArea } from '@/utils/matchArea'
 import { editItem } from '@/utils/editItem'
-import { GroupBaseEntity } from './GroupBaseEntity'
+import { GroupBaseEntity } from './groupBase/entity'
 import { GroupBaseData } from './groupBase'
 
 export type allSnapFromType = 'point' | 'line' | 'axis'

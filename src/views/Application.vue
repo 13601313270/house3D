@@ -220,7 +220,6 @@ import saveWorld, { fileData } from '@/utils/saveWorld';
 import { getHandleInAreaInfoByXY, getHandleInfoByXY } from '@/utils/getHandleInfoByXY';
 import AiPic from '@/components/aiPic.vue'
 import ShowPayModal from '@/components/showPayModal.vue'
-import drawAxes from '@/utils/drawAxes';
 import WorldState from '@/utils/worldState';
 import { editItem } from '@/utils/editItem';
 import WorldGroup, { EnvironmentConfig } from '@/world/world';
@@ -445,8 +444,6 @@ const drawWrapper2D = () => {
       panOffset.value,
       zoom2DLevel.value,
     )
-    // 绘制轴
-    drawAxes(ctx, panOffset.value, zoom2DLevel.value, canvasSize.value.width, canvasSize.value.height)
     // 绘制磁吸点的参考轴
     if (hoverPoint.value) {
       (() => {
@@ -1021,7 +1018,7 @@ const deleteContextMenuEntity = () => {
     worldApi.delete(type, contextMenu.value.index)
   }
   contextMenu.value = null
-  drawWrapper2DAnd3D()
+  // drawWrapper2DAnd3D()
 }
 
 const handleCanvasClick = async (e: MouseEvent) => {

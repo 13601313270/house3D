@@ -9,7 +9,7 @@ import * as THREE from 'three'
 import { CameraState, OrthographicCamera } from '@/types/camera'
 import { PointEntityClass } from '@/types/pointEntity';
 import { BaseEntityClass } from '@/types/baseEntity';
-import { GroupBaseEntity } from '@/types/GroupBaseEntity';
+import { GroupBaseEntity } from '@/types/groupBase/entity';
 
 const props = defineProps<{
   world: GroupBaseEntity,

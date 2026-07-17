@@ -1,6 +1,6 @@
 import * as THREE from 'three'
 import { PointObjData, Point, BaseObjData } from './map2d'
-import { GroupBaseEntity } from '@/types/GroupBaseEntity'
+import { GroupBaseEntity } from '@/types/groupBase/entity'
 import { BaseEntityClass } from './baseEntity'
 import { GroupBaseData } from './groupBase'
 

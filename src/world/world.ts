@@ -1,7 +1,8 @@
 import * as THREE from 'three'
-import { GroupBaseEntity } from '@/types/GroupBaseEntity';
-import { HandelInfo } from '@/types/map2d';
+import { GroupBaseEntity } from '@/types/groupBase/entity';
+import { HandelInfo, Point } from '@/types/map2d';
 import { GroupBaseData } from '@/types/groupBase';
+import drawAxes from '@/utils/drawAxes';
 
 type WorldData = GroupBaseData & {
   temp: boolean,
@@ -37,6 +38,18 @@ class WorldGroup extends GroupBaseEntity<WorldData> {
     axesHelper.layers.set(2)
     this.group.add(axesHelper);
     this.setEnvironMent()
+  }
+
+  draw2DPreviewByData(
+    ctx: CanvasRenderingContext2D,
+    data: GroupBaseData,
+    panOffset: Point,
+    zoomLevel: number,
+  ) {
+    super.draw2DPreviewByData(ctx, data, panOffset, zoomLevel)
+
+    // 绘制轴
+    // drawAxes(ctx, panOffset, zoomLevel, canvasSize.value.width, canvasSize.value.height)
   }
 
   setEnvironMent(config?: EnvironmentConfig) {

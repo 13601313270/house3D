@@ -1,4 +1,4 @@
-import { GroupBaseEntity } from '@/types/GroupBaseEntity'
+import { GroupBaseEntity } from '@/types/groupBase/entity'
 import { HandelInfo, Point } from '@/types/map2d'
 import { CubeData } from '../cube/index.d'
 import editItem from '@/utils/editItem'
