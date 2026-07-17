@@ -247,7 +247,6 @@ const isPanningScreen = ref(false);// 平移屏幕
 const panel1SplitWidthPer = ref(0.35)
 const panel2SplitWidthPer = ref(0.35)
 const isSplitting = ref(false)
-const canvasSize = ref({ width: 0, height: 0 })
 const zoom2DLevel = ref(1)
 
 const showLogin = ref(false)
@@ -332,7 +331,8 @@ const updateCanvasSize = () => {
           ctx.height = height
         }
       })
-      canvasSize.value = { width, height }
+      worldApi.width = width
+      worldApi.height = height
     }
   }
   const leftCanvasContainer = document.querySelector('.canvas-container')
@@ -436,9 +436,6 @@ const drawWrapper2D = () => {
   const canvasAction = canvas2D2Ref.value;
   if (canvas && canvasAction && canvas.getContext('2d')) {
     const ctx = canvas.getContext('2d')!;
-    ctx.clearRect(0, 0, canvasSize.value.width, canvasSize.value.height)
-    ctx.fillStyle = '#f5f5f5'
-    ctx.fillRect(0, 0, canvasSize.value.width, canvasSize.value.height)
     worldApi.draw2DPreview(
       ctx,
       panOffset.value,
@@ -456,7 +453,7 @@ const drawWrapper2D = () => {
           const screenX = yAxisSnappedX.value * zoom2DLevel.value + panOffset.value.x
           ctx.beginPath()
           ctx.moveTo(screenX, 0)
-          ctx.lineTo(screenX, canvasSize.value.height)
+          ctx.lineTo(screenX, worldApi.height)
           ctx.stroke()
         }
 
@@ -465,7 +462,7 @@ const drawWrapper2D = () => {
           const screenY = xAxisSnappedY.value * zoom2DLevel.value + panOffset.value.y
           ctx.beginPath()
           ctx.moveTo(0, screenY)
-          ctx.lineTo(canvasSize.value.width, screenY)
+          ctx.lineTo(worldApi.width, screenY)
           ctx.stroke()
         }
       })();

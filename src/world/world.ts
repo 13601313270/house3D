@@ -23,6 +23,8 @@ class WorldGroup extends GroupBaseEntity<WorldData> {
   groundMesh: THREE.Mesh | null = null
   ambientLight: THREE.AmbientLight | null = null
   directionalLight: THREE.DirectionalLight | null = null
+  width: number = 0;
+  height: number = 0;
 
   constructor(parent: null, data: WorldData) {
     super(parent, data)
@@ -46,10 +48,13 @@ class WorldGroup extends GroupBaseEntity<WorldData> {
     panOffset: Point,
     zoomLevel: number,
   ) {
+    ctx.clearRect(0, 0, this.width, this.height)
+    ctx.fillStyle = '#f5f5f5'
+    ctx.fillRect(0, 0, this.width, this.height)
     super.draw2DPreviewByData(ctx, data, panOffset, zoomLevel)
 
     // 绘制轴
-    // drawAxes(ctx, panOffset, zoomLevel, canvasSize.value.width, canvasSize.value.height)
+    drawAxes(ctx, panOffset, zoomLevel, this.width, this.height)
   }
 
   setEnvironMent(config?: EnvironmentConfig) {
