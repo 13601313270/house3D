@@ -474,16 +474,23 @@ const drawWrapper2D = () => {
       })();
     }
     if (ctx && insertTempObj) {
-      if (insertTempObj instanceof LineEntityClass) {
-        insertTempObj.draw2DPreview(ctx, panOffsetOfWorld.value, zoom2DLevel.value)
-        insertTempObj.draw2DActionHandle(ctx, panOffsetOfWorld.value, zoom2DLevel.value)
-      } else if (insertTempObj instanceof PointEntityClass) {
-        insertTempObj.draw2DPreview(ctx, panOffsetOfWorld.value, zoom2DLevel.value)
-        insertTempObj.draw2DActionHandle(ctx, panOffsetOfWorld.value, zoom2DLevel.value)
-      } else if (insertTempObj instanceof PlaneGroupEntity) {
-        insertTempObj.draw2DPreview(ctx, panOffsetOfWorld.value, zoom2DLevel.value)
-        insertTempObj.draw2DActionHandle(ctx, panOffsetOfWorld.value, zoom2DLevel.value)
-      }
+      (() => {
+        const worldData = worldApi.getData()
+        const { angleY } = worldData;
+        const screenX = worldData.x * zoom2DLevel.value + panOffsetOfWorld.value.x;
+        const screenY = worldData.y * zoom2DLevel.value + panOffsetOfWorld.value.y;
+        ctx.save()
+        ctx.translate(screenX, screenY)
+        ctx.rotate(angleY * -1)
+        if (insertTempObj instanceof LineEntityClass) {
+          insertTempObj.draw2DPreview(ctx, { x: 0, y: 0 }, zoom2DLevel.value)
+        } else if (insertTempObj instanceof PointEntityClass) {
+          insertTempObj.draw2DPreview(ctx, { x: 0, y: 0 }, zoom2DLevel.value)
+        } else if (insertTempObj instanceof PlaneGroupEntity) {
+          insertTempObj.draw2DPreview(ctx, { x: 0, y: 0 }, zoom2DLevel.value)
+        }
+        ctx.restore()
+      })()
     }
   }
 }
@@ -1361,9 +1368,7 @@ const handleMouseMove = (e: MouseEvent) => {
       ctxAction.clearRect(0, 0, canvasAction.width, canvasAction.height)
       const handleInfo = getHandleInAreaInfoByXY(x, y)
       if (handleInfo) {
-        const { classInfo, matchArea } = handleInfo
-        const textPositionX = x;
-        const textPositionY = y - 10;
+        const { classInfo, matchArea } = handleInfo;
         (() => {
           // 暂无操作句柄
           const data = worldApi.getData();
@@ -1393,8 +1398,8 @@ const handleMouseMove = (e: MouseEvent) => {
             )
             ctxAction.restore()
           } else if (matchArea instanceof MatchCircleArea) {
-            ctxAction.lineWidth = 2
-            ctxAction.strokeStyle = 'red'
+            ctxAction.lineWidth = 20
+            ctxAction.strokeStyle = 'yellow'
             // 绘制一个圆
             ctxAction.beginPath()
             ctxAction.arc(
@@ -1414,6 +1419,8 @@ const handleMouseMove = (e: MouseEvent) => {
         })();
 
         if (classInfo instanceof PointEntityClass) {
+          const textPositionX = dx;
+          const textPositionY = dy - 10;
           // 绘制文字（带边框）
           ctxAction.font = `${Math.max(14 * zoom2DLevel.value, 14)}px '微软雅黑'`
           ctxAction.textAlign = 'center'
