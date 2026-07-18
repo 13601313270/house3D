@@ -1345,6 +1345,7 @@ const handleMouseMove = (e: MouseEvent) => {
             matchArea.data.x * zoom2DLevel.value + panOffsetOfWorld.value.x,
             matchArea.data.y * zoom2DLevel.value + panOffsetOfWorld.value.y
           ); // 移动原点到目标中心
+          // ctxAction.rotate(angleY * -1)
           ctxAction.rotate(matchArea.data.angleY * -1); // 围绕新原点旋转
           // 绘制一个方块
           ctxAction.strokeRect(
@@ -1375,8 +1376,8 @@ const handleMouseMove = (e: MouseEvent) => {
           ctxAction.restore(); // 恢复原始状态
         }
         ctxAction.save()
-        ctxAction.translate(screenX, screenY)
-        ctxAction.rotate(angleY * -1)
+        // ctxAction.translate(screenX, screenY)
+        // ctxAction.rotate(angleY * -1)
         classInfo.draw2DActionHandle(ctxAction, panOffsetOfWorld.value, zoom2DLevel.value)
         ctxAction.restore()
 
