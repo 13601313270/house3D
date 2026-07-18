@@ -2,7 +2,6 @@ import * as THREE from 'three'
 import { GroupBaseEntity } from '@/types/groupBase/entity';
 import { HandelInfo, Point } from '@/types/map2d';
 import { GroupBaseData } from '@/types/groupBase';
-import drawAxes from '@/utils/drawAxes';
 
 type WorldData = GroupBaseData & {
   temp: boolean,
@@ -23,8 +22,6 @@ class WorldGroup extends GroupBaseEntity<WorldData> {
   groundMesh: THREE.Mesh | null = null
   ambientLight: THREE.AmbientLight | null = null
   directionalLight: THREE.DirectionalLight | null = null
-  width: number = 0;
-  height: number = 0;
 
   constructor(parent: null, data: WorldData) {
     super(parent, data)
@@ -52,9 +49,6 @@ class WorldGroup extends GroupBaseEntity<WorldData> {
     ctx.fillStyle = '#f5f5f5'
     ctx.fillRect(0, 0, this.width, this.height)
     super.draw2DPreviewByData(ctx, data, panOffset, zoomLevel)
-
-    // 绘制轴
-    drawAxes(ctx, panOffset, zoomLevel, this.width, this.height)
   }
 
   setEnvironMent(config?: EnvironmentConfig) {

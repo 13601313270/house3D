@@ -5,11 +5,15 @@ import { PointEntityClass } from '@/types/pointEntity'
 import { BaseEntityClass, EntityConstructor } from '@/types/baseEntity'
 import { BaseObjData, HandelInfo, Point } from '@/types/map2d'
 import { GroupBaseData } from '.'
+import drawAxes from '@/utils/drawAxes'
 
 type WorldChangeType = 'add' | 'remove' | 'change'
 
 export abstract class GroupBaseEntity<T extends GroupBaseData> extends BaseEntityClass<T> {
   group: THREE.Scene | THREE.Group = new THREE.Group()
+  width: number = 0;
+  height: number = 0;
+  showAxes: boolean = true;
 
   public children: BaseEntityClass<BaseObjData>[] = []
 
@@ -98,7 +102,15 @@ export abstract class GroupBaseEntity<T extends GroupBaseData> extends BaseEntit
       }, zoomLevel)
     })
 
+    // 绘制轴
+    // if (this.showAxes) {
+    //   drawAxes(ctx, {
+    //     x: -screenX,
+    //     y: -screenY,
+    //   }, zoomLevel, 100 | this.width, 100 | this.height)
+    // }
     ctx.restore()
+    drawAxes(ctx, panOffset, zoomLevel, this.width, this.height)
 
     // 绘制所有ObjFile的中心点
     // this.allObjFiles.forEach((item) => {
