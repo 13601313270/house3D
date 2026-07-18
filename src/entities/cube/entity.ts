@@ -13,7 +13,8 @@ export class CubeEntity extends PointEntityClass<CubeData> {
   type: string = 'cube'
   private circleRadius = 6
 
-  draw2DPreviewByData(ctx: CanvasRenderingContext2D, data: CubeData, panOffset: Point, zoomLevel: number): void {
+  draw2DPreview(ctx: CanvasRenderingContext2D, panOffset: Point, zoomLevel: number): void {
+    const data = this.getData();
     const screenX = data.x * zoomLevel + panOffset.x
     const screenY = data.y * zoomLevel + panOffset.y
     const { width, depth, angleY } = data;

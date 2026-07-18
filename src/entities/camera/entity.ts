@@ -47,7 +47,8 @@ export class CameraEntity extends CameraBase<CameraData> {
     }, 100)
   }
 
-  draw2DPreviewByData(ctx: CanvasRenderingContext2D, data: CameraData, panOffset: Point, zoomLevel: number): void {
+  draw2DPreview(ctx: CanvasRenderingContext2D, panOffset: Point, zoomLevel: number): void {
+    const data = this.getData();
     const index: number = this.parentEntity ? this.parentEntity.getTypeListEntity('camera').indexOf(this) : -1;
     const screenX = data.x * zoomLevel + panOffset.x
     const screenY = data.y * zoomLevel + panOffset.y

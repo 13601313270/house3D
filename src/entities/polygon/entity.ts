@@ -22,7 +22,8 @@ export class PolygonEntity extends LineEntityClass<PolygonPoint, PolygonData> {
   //   // }
   // }
 
-  draw2DPreviewByData(ctx: CanvasRenderingContext2D, data: PolygonData, panOffset: Point, zoomLevel: number): void {
+  draw2DPreview(ctx: CanvasRenderingContext2D, panOffset: Point, zoomLevel: number): void {
+    const data = this.getData();
     ctx.strokeStyle = 'black'
     ctx.fillStyle = data.color
     ctx.lineWidth = 2

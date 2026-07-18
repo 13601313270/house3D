@@ -16,7 +16,8 @@ export class SectorPlaneEntity extends PointEntityClass<SectorPlaneData> {
   private static textureLoader = new THREE.TextureLoader();
   private static textureCache = new Map<string | File, THREE.Texture>();
 
-  draw2DPreviewByData(ctx: CanvasRenderingContext2D, data: SectorPlaneData, panOffset: Point, zoomLevel: number): void {
+  draw2DPreview(ctx: CanvasRenderingContext2D, panOffset: Point, zoomLevel: number): void {
+    const data = this.getData();
     const { r, startAngle, endAngle, x, y } = data;
     const screenX = x * zoomLevel + panOffset.x
     const screenY = y * zoomLevel + panOffset.y

@@ -60,12 +60,12 @@ export abstract class GroupBaseEntity<T extends GroupBaseData> extends BaseEntit
     })();
   }
 
-  draw2DPreviewByData(
+  draw2DPreview(
     ctx: CanvasRenderingContext2D,
-    data: GroupBaseData,
     panOffset: Point,
     zoomLevel: number,
   ) {
+    const data = this.getData();
     const { angleY } = data
     const [width, height] = this.getSize()
     const screenX = data.x * zoomLevel + panOffset.x;

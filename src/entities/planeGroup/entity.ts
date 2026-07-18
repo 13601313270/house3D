@@ -21,12 +21,12 @@ export class PlaneGroupEntity extends GroupBaseEntity<PlaneGroupData> {
     }
   }
 
-  draw2DPreviewByData(
+  draw2DPreview(
     ctx: CanvasRenderingContext2D,
-    data: GroupBaseData,
     panOffset: Point,
     zoomLevel: number,
   ) {
+    const data = this.getData();
     const [width, height] = this.getSize()
     const screenX = data.x * zoomLevel + panOffset.x;// data.x * zoomLevel + panOffset.x
     const screenY = data.y * zoomLevel + panOffset.y;// data.y * zoomLevel + panOffset.y
@@ -44,7 +44,7 @@ export class PlaneGroupEntity extends GroupBaseEntity<PlaneGroupData> {
       height * zoomLevel
     )
     ctx.restore(); // 恢复原始状态
-    super.draw2DPreviewByData(ctx, data, panOffset, zoomLevel)
+    super.draw2DPreview(ctx, panOffset, zoomLevel)
   }
 
   draw2DActionHandle(

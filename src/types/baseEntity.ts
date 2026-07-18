@@ -72,9 +72,8 @@ export abstract class BaseEntityClass<T extends BaseObjData> {
   abstract meshNeedChangeKey(): string
 
   // 本对象的2D预览绘制，（时间早于draw2DByData）
-  abstract draw2DPreviewByData(
+  abstract draw2DPreview(
     ctx: CanvasRenderingContext2D,
-    data: T,
     panOffset: Point,
     zoomLevel: number,
   ): void;
@@ -141,15 +140,6 @@ export abstract class BaseEntityClass<T extends BaseObjData> {
   // HandelInfo
   // 本对象可以被其他对象对齐的参考线（注意是被对齐，提供个其他拖动磁吸的参考线）
   abstract getMineBeSnapLines(): Array<[Point, Point]>;
-
-  draw2DPreview(
-    ctx: CanvasRenderingContext2D,
-    panOffset: Point,
-    zoomLevel: number
-  ) {
-    const data = this.getData();
-    this.draw2DPreviewByData(ctx, data, panOffset, zoomLevel)
-  }
 
   abstract change3DMeshState(): void
 

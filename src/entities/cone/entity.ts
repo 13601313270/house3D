@@ -13,7 +13,8 @@ export class ConeEntity extends PointEntityClass<ConeData> {
   private circleRadius = 6
   public radialSegments = 32
 
-  draw2DPreviewByData(ctx: CanvasRenderingContext2D, data: ConeData, panOffset: Point, zoomLevel: number): void {
+  draw2DPreview(ctx: CanvasRenderingContext2D, panOffset: Point, zoomLevel: number): void {
+    const data = this.getData();
     const { r } = data;
     const screenX = data.x * zoomLevel + panOffset.x
     const screenY = data.y * zoomLevel + panOffset.y

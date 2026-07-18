@@ -39,16 +39,15 @@ class WorldGroup extends GroupBaseEntity<WorldData> {
     this.setEnvironMent()
   }
 
-  draw2DPreviewByData(
+  draw2DPreview(
     ctx: CanvasRenderingContext2D,
-    data: GroupBaseData,
     panOffset: Point,
     zoomLevel: number,
   ) {
     ctx.clearRect(0, 0, this.width, this.height)
     ctx.fillStyle = '#f5f5f5'
     ctx.fillRect(0, 0, this.width, this.height)
-    super.draw2DPreviewByData(ctx, data, panOffset, zoomLevel)
+    super.draw2DPreview(ctx, panOffset, zoomLevel)
   }
 
   setEnvironMent(config?: EnvironmentConfig) {

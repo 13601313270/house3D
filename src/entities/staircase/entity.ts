@@ -39,7 +39,8 @@ export class StaircaseEntity extends LineEntityClass<StaircasePoint, StaircaseDa
     ];
   }
 
-  draw2DPreviewByData(ctx: CanvasRenderingContext2D, data: StaircaseData, panOffset: Point, zoomLevel: number): void {
+  draw2DPreview(ctx: CanvasRenderingContext2D, panOffset: Point, zoomLevel: number): void {
+    const data = this.getData();
     const { cornerType } = data;
     const { data: wallBoxList } = createAllWallFromPoints(data.points, data.thickness, cornerType)
     ctx.strokeStyle = 'black'
