@@ -137,7 +137,6 @@ export abstract class BaseEntityClass<T extends BaseObjData> {
   // 本对象可以被其他对象对齐参考点（注意是被对齐，提供给其他拖动磁吸的参考点）
   abstract getMineBeSnapPoints(handle: HandelInfo): Array<OrigionSnapPoint>;
 
-  // HandelInfo
   // 本对象可以被其他对象对齐的参考线（注意是被对齐，提供个其他拖动磁吸的参考线）
   abstract getMineBeSnapLines(): Array<[Point, Point]>;
 

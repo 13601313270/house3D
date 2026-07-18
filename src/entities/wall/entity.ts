@@ -542,6 +542,7 @@ export class WallEntity extends LineEntityClass<WallPoint, WallData> {
     return false;
   }
 
+  // 本对象可以被其他对象对齐参考点（注意是被对齐，提供给其他拖动磁吸的参考点）
   getMineBeSnapPoints(matchedHandelInfo: HandelInfo): Array<OrigionSnapPoint> {
     const key: allSnapFromType = 'point';
     const data = this.getData();
@@ -563,6 +564,7 @@ export class WallEntity extends LineEntityClass<WallPoint, WallData> {
     return allSnapPoints;
   }
 
+  // 本对象可以被其他对象对齐的参考线（注意是被对齐，提供个其他拖动磁吸的参考线）
   getMineBeSnapLines(): Array<[Point, Point]> {
     const lines: Array<[Point, Point]> = []
     for (let i = 0; i < this.getData().points.length - 1; i++) {
