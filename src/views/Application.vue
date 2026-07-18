@@ -244,6 +244,9 @@ const dragOffset = ref<Point | null>(null)
 const dragStartPoint = ref<Point | null>(null)
 const panOffset = ref<Point>({ x: 0, y: 0 })
 const isPanningScreen = ref(false);// 平移屏幕
+const isPaningAngel = ref(false);// 平移角度
+const panStartAngel = ref(0);
+const screenAngel = ref(0);
 const panel1SplitWidthPer = ref(0.35)
 const panel2SplitWidthPer = ref(0.35)
 const isSplitting = ref(false)
@@ -1134,6 +1137,27 @@ const handleMouseMove = (e: MouseEvent) => {
   const screenY = Math.round(e.clientY - rect.top)
   const x = (screenX - panOffset.value.x) / zoom2DLevel.value
   const y = (screenY - panOffset.value.y) / zoom2DLevel.value
+
+  if (isPaningAngel.value) {
+    const dx = screenX - panStartScreenX
+    const dy = screenY - panStartScreenY
+
+    const centerX = canvas.width / 2
+    const centerY = canvas.height / 2
+
+    const startVecX = panStartScreenX - centerX
+    const startVecY = panStartScreenY - centerY
+    const currentVecX = screenX - centerX
+    const currentVecY = screenY - centerY
+
+    const startAngle = Math.atan2(startVecY, startVecX)
+    const currentAngle = Math.atan2(currentVecY, currentVecX)
+    const rotateAngle = currentAngle - startAngle
+    console.log('rotateAngle', rotateAngle)
+    // drawWrapper2D()
+    // // 绘制操作句柄
+    // ctxAction.clearRect(0, 0, canvasAction.width, canvasAction.height)
+  }
   if (beCopyEntity) {
     if (beCopyEntity instanceof PointEntityClass) {
       beCopyEntity.changePosition({ x, y })
@@ -1472,7 +1496,12 @@ const handleMouseDown = (e: MouseEvent) => {
 
   // 只有在拖拽模式下才能拖拽点
   if (currentTool.value === 'drag') {
-    if (e.button !== 0) return
+    if (e.button === 2) {
+      isPaningAngel.value = true
+      panStartScreenX = screenX
+      panStartScreenY = screenY
+      return
+    }
     const handleInfoList = getHandleInfoByXY(x, y)
     if (handleInfoList) {
       const { classInfo, handle, startPoint } = handleInfoList
@@ -1507,6 +1536,9 @@ const handleMouseUp = () => {
     isPanningScreen.value = false
     // 平移过程中，该渲染都渲染过了。鼠标抬起这里不用在重新渲染一下了。2026.6.6
     // drawWrapper2DAnd3D()
+  }
+  if (isPaningAngel.value) {
+    isPaningAngel.value = false
   }
 }
 const handleMouseLeave = () => {

@@ -10,9 +10,10 @@ import { CameraState, OrthographicCamera } from '@/types/camera'
 import { PointEntityClass } from '@/types/pointEntity';
 import { BaseEntityClass } from '@/types/baseEntity';
 import { GroupBaseEntity } from '@/types/groupBase/entity';
+import { GroupBaseData } from '@/types/groupBase';
 
 const props = defineProps<{
-  world: GroupBaseEntity,
+  world: GroupBaseEntity<GroupBaseData>,
   cameraState: CameraState,//  | OrthographicCamera,
   camera: THREE.PerspectiveCamera | THREE.OrthographicCamera,
   aspectRatio: number
