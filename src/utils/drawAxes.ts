@@ -8,7 +8,9 @@ const drawAxes = (
   canvasWidth: number,
   canvasHeight: number
 ) => {
-  const axisColor = '#333'
+  const axisXColor = 'rgba(114, 0, 0, 1)'
+  const axisYColor = 'rgba(0, 92, 0, 1)'
+
   const axisLineWidth = 2
   const tickSize = 5
   const labelPadding = 15
@@ -16,30 +18,23 @@ const drawAxes = (
 
   const originX = panOffset.x
   const originY = panOffset.y
-
-  ctx.strokeStyle = axisColor
   ctx.lineWidth = axisLineWidth
-  ctx.fillStyle = axisColor
+
+  ctx.strokeStyle = axisXColor
+  ctx.fillStyle = axisXColor
   ctx.font = '12px Arial'
 
   ctx.save()
   ctx.translate(originX, originY)
   ctx.rotate(angle)
-
-  const arrowSize = 8
   const maxAxisLength = Math.max(canvasWidth, canvasHeight) * 2
 
+  ctx.strokeStyle = axisXColor
+  ctx.fillStyle = axisXColor
   ctx.beginPath()
   ctx.moveTo(-maxAxisLength, 0)
   ctx.lineTo(maxAxisLength, 0)
   ctx.stroke()
-
-  ctx.beginPath()
-  ctx.moveTo(maxAxisLength, 0)
-  ctx.lineTo(maxAxisLength - arrowSize, -arrowSize / 2)
-  ctx.lineTo(maxAxisLength - arrowSize, arrowSize / 2)
-  ctx.closePath()
-  ctx.fill()
 
   const startX = Math.floor(-maxAxisLength / zoomLevel / scale) * scale
   const endX = Math.ceil(maxAxisLength / zoomLevel / scale) * scale
@@ -64,17 +59,13 @@ const drawAxes = (
     }
   }
 
+  ctx.strokeStyle = axisYColor
+  ctx.fillStyle = axisYColor
+
   ctx.beginPath()
   ctx.moveTo(0, -maxAxisLength)
   ctx.lineTo(0, maxAxisLength)
   ctx.stroke()
-
-  ctx.beginPath()
-  ctx.moveTo(0, -maxAxisLength)
-  ctx.lineTo(-arrowSize / 2, -maxAxisLength + arrowSize)
-  ctx.lineTo(arrowSize / 2, -maxAxisLength + arrowSize)
-  ctx.closePath()
-  ctx.fill()
 
   const startY = Math.floor(-maxAxisLength / zoomLevel / scale) * scale
   const endY = Math.ceil(maxAxisLength / zoomLevel / scale) * scale
