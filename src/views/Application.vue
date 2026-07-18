@@ -1052,10 +1052,6 @@ const handleCanvasClick = async (e: MouseEvent) => {
   if (!canvas) return
 
   const rect = canvas.getBoundingClientRect()
-  const screenX = Math.round(e.clientX - rect.left)
-  const screenY = Math.round(e.clientY - rect.top)
-  const x = (screenX - panOffsetOfWorld.value.x) / zoom2DLevel.value
-  const y = (screenY - panOffsetOfWorld.value.y) / zoom2DLevel.value
 
   // 点击空白处隐藏 context menu
   if (contextMenu.value) {
@@ -1071,6 +1067,16 @@ const handleCanvasClick = async (e: MouseEvent) => {
         y: Math.round(hoverPoint.value.y)
       })
     } else {
+      const mouseXInCanvas = Math.round(e.clientX - rect.left)
+      const mouseYInCanvas = Math.round(e.clientY - rect.top)
+      const dx = mouseXInCanvas - panOffsetOfWorld.value.x
+      const dy = mouseYInCanvas - panOffsetOfWorld.value.y
+      const worldData = worldApi.getData();
+      const { angleY } = worldData;
+      const cos = Math.cos(angleY * -1)
+      const sin = Math.sin(angleY * -1)
+      const x = (dx * cos + dy * sin) / zoom2DLevel.value
+      const y = (-dx * sin + dy * cos) / zoom2DLevel.value
       tempPointInsertData.value.push({
         x: Math.round(x),
         y: Math.round(y)
