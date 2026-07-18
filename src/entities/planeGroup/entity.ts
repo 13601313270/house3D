@@ -47,7 +47,7 @@ export class PlaneGroupEntity extends GroupBaseEntity<PlaneGroupData> {
     super.draw2DPreviewByData(ctx, data, panOffset, zoomLevel)
   }
 
-  draw2DHandleByData(
+  draw2DActionHandle(
     ctx: CanvasRenderingContext2D,
     panOffset: Point,
     zoomLevel: number,

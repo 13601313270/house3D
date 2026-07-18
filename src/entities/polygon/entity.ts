@@ -47,7 +47,7 @@ export class PolygonEntity extends LineEntityClass<PolygonPoint, PolygonData> {
     ctx.fill()
   }
 
-  draw2DHandleByData(
+  draw2DActionHandle(
     ctx: CanvasRenderingContext2D,
     panOffset: Point,
     zoomLevel: number,

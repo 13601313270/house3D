@@ -100,7 +100,7 @@ export class WallEntity extends LineEntityClass<WallPoint, WallData> {
     ctx.setLineDash([])
   }
 
-  draw2DHandleByData(
+  draw2DActionHandle(
     ctx: CanvasRenderingContext2D,
     panOffset: Point,
     zoomLevel: number,

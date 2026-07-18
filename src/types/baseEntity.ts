@@ -79,20 +79,12 @@ export abstract class BaseEntityClass<T extends BaseObjData> {
     zoomLevel: number,
   ): void;
 
-  // 本对象的2D具柄绘制逻辑（时间晚于draw2DPreview）
-  abstract draw2DHandleByData(
+  // 本对象的2D具柄绘制逻辑（时间晚于draw2DPreview）draw2DActionHandle
+  abstract draw2DActionHandle(
     ctx: CanvasRenderingContext2D,
     panOffset: Point,
     zoomLevel: number,
   ): void;
-
-  draw2DActionHandle(
-    ctx: CanvasRenderingContext2D,
-    panOffset: Point,
-    zoomLevel: number,
-  ) {
-    this.draw2DHandleByData(ctx, panOffset, zoomLevel)
-  }
 
   abstract editPropConfig(
     snapPoint: HandelInfo,

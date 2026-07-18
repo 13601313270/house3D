@@ -33,7 +33,7 @@ export class TorusEntity extends PointEntityClass<TorusData> {
     ctx.stroke()
   }
 
-  draw2DHandleByData(
+  draw2DActionHandle(
     ctx: CanvasRenderingContext2D,
     panOffset: Point,
     zoomLevel: number,

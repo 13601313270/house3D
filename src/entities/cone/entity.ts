@@ -35,7 +35,7 @@ export class ConeEntity extends PointEntityClass<ConeData> {
     ctx.closePath()
   }
 
-  draw2DHandleByData(
+  draw2DActionHandle(
     ctx: CanvasRenderingContext2D,
     panOffset: Point,
     zoomLevel: number,

@@ -34,7 +34,7 @@ export class SphereEntity extends PointEntityClass<SphereData> {
     ctx.closePath()
   }
 
-  draw2DHandleByData(
+  draw2DActionHandle(
     ctx: CanvasRenderingContext2D,
     panOffset: Point,
     zoomLevel: number,
