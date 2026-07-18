@@ -1139,10 +1139,9 @@ const handleMouseMove = (e: MouseEvent) => {
   if (!canvas) return
 
   const rect = canvas.getBoundingClientRect()
-  const screenX = Math.round(e.clientX - rect.left)
-  const screenY = Math.round(e.clientY - rect.top)
+  const mouseXInCanvas = Math.round(e.clientX - rect.left)
+  const mouseYInCanvas = Math.round(e.clientY - rect.top)
 
-  console.log('isMenuing.value-4', 1)
   if (isPaningAngel.value) {
     isMenuing.value = false
     isPanningScreen.value = false
@@ -1151,8 +1150,8 @@ const handleMouseMove = (e: MouseEvent) => {
 
     const startVecX = mouseStartScreenX - centerX
     const startVecY = mouseStartScreenY - centerY
-    const currentVecX = screenX - centerX
-    const currentVecY = screenY - centerY
+    const currentVecX = mouseXInCanvas - centerX
+    const currentVecY = mouseYInCanvas - centerY
 
     const startAngle = Math.atan2(startVecY, startVecX)
     const currentAngle = Math.atan2(currentVecY, currentVecX)
@@ -1183,9 +1182,10 @@ const handleMouseMove = (e: MouseEvent) => {
     drawWrapper2D()
     return;
   }
-  const { angleY } = worldApi.getData();
-  const dx = screenX - panOffsetOfWorld.value.x
-  const dy = screenY - panOffsetOfWorld.value.y
+  const worldData = worldApi.getData();
+  const { angleY } = worldData;
+  const dx = mouseXInCanvas - panOffsetOfWorld.value.x
+  const dy = mouseYInCanvas - panOffsetOfWorld.value.y
   const cos = Math.cos(angleY * -1)
   const sin = Math.sin(angleY * -1)
   const x = (dx * cos + dy * sin) / zoom2DLevel.value
@@ -1323,8 +1323,8 @@ const handleMouseMove = (e: MouseEvent) => {
       isMenuing.value = false
       isPaningAngel.value = false
       isMenuing.value = false
-      const dx = screenX - mouseStartScreenX
-      const dy = screenY - mouseStartScreenY
+      const dx = mouseXInCanvas - mouseStartScreenX
+      const dy = mouseYInCanvas - mouseStartScreenY
 
       panOffsetOfWorld.value.x = panStartOffsetOfWorld.x + dx
       panOffsetOfWorld.value.y = panStartOffsetOfWorld.y + dy
@@ -1341,49 +1341,47 @@ const handleMouseMove = (e: MouseEvent) => {
         const { classInfo, matchArea } = handleInfo
         const textPositionX = x;
         const textPositionY = y - 10;
-        if (matchArea instanceof MatchRectArea) {
-          ctxAction.lineWidth = 2
-          ctxAction.strokeStyle = 'red'
-          ctxAction.save(); // 保存当前状态
-          ctxAction.translate(
-            matchArea.data.x * zoom2DLevel.value + panOffsetOfWorld.value.x,
-            matchArea.data.y * zoom2DLevel.value + panOffsetOfWorld.value.y
-          ); // 移动原点到目标中心
-          // ctxAction.rotate(angleY * -1)
-          ctxAction.rotate(matchArea.data.angleY * -1); // 围绕新原点旋转
-          // 绘制一个方块
-          ctxAction.strokeRect(
-            matchArea.data.width / -2 * zoom2DLevel.value,
-            matchArea.data.depth / -2 * zoom2DLevel.value,
-            matchArea.data.width * zoom2DLevel.value,
-            matchArea.data.depth * zoom2DLevel.value,
-          )
-          ctxAction.restore(); // 恢复原始状态
-        } else if (matchArea instanceof MatchCircleArea) {
-          ctxAction.lineWidth = 2
-          ctxAction.strokeStyle = 'red'
-          ctxAction.save(); // 保存当前状态
-          ctxAction.translate(
-            matchArea.data.x * zoom2DLevel.value + panOffsetOfWorld.value.x,
-            matchArea.data.y * zoom2DLevel.value + panOffsetOfWorld.value.y
-          );
-          // 绘制一个圆
-          ctxAction.beginPath()
-          ctxAction.arc(
-            0,
-            0,
-            matchArea.data.r * zoom2DLevel.value,
-            0,
-            Math.PI * 2,
-          )
-          ctxAction.stroke()
-          ctxAction.restore(); // 恢复原始状态
-        }
-        ctxAction.save()
-        // ctxAction.translate(screenX, screenY)
-        // ctxAction.rotate(angleY * -1)
-        classInfo.draw2DActionHandle(ctxAction, panOffsetOfWorld.value, zoom2DLevel.value)
-        ctxAction.restore()
+        (() => {
+          // 暂无操作句柄
+          const data = worldApi.getData();
+          const { angleY } = data
+          const screenX = data.x * zoom2DLevel.value + panOffsetOfWorld.value.x;
+          const screenY = data.y * zoom2DLevel.value + panOffsetOfWorld.value.y;
+          ctxAction.save()
+          ctxAction.translate(screenX, screenY)
+          ctxAction.rotate(angleY * -1)
+          const { x, y } = classInfo.getData()
+
+          if (matchArea instanceof MatchRectArea) {
+            ctxAction.lineWidth = 2
+            ctxAction.strokeStyle = 'yellow'
+            // 绘制一个方块
+            ctxAction.strokeRect(
+              x + matchArea.data.width / -2 * zoom2DLevel.value,
+              y + matchArea.data.depth / -2 * zoom2DLevel.value,
+              matchArea.data.width * zoom2DLevel.value,
+              matchArea.data.depth * zoom2DLevel.value,
+            )
+          } else if (matchArea instanceof MatchCircleArea) {
+            ctxAction.lineWidth = 2
+            ctxAction.strokeStyle = 'red'
+            // 绘制一个圆
+            ctxAction.beginPath()
+            ctxAction.arc(
+              x,
+              y,
+              matchArea.data.r * zoom2DLevel.value,
+              0,
+              Math.PI * 2,
+            )
+            ctxAction.stroke()
+          };
+          classInfo.draw2DActionHandle(ctxAction, {
+            x: 0,
+            y: 0,
+          }, zoom2DLevel.value)
+          ctxAction.restore()
+        })();
 
         if (classInfo instanceof PointEntityClass) {
           // 绘制文字（带边框）
