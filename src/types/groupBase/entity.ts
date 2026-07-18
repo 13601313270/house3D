@@ -110,7 +110,7 @@ export abstract class GroupBaseEntity<T extends GroupBaseData> extends BaseEntit
     //   }, zoomLevel, 100 | this.width, 100 | this.height)
     // }
     ctx.restore()
-    drawAxes(ctx, panOffset, zoomLevel, this.width, this.height)
+    drawAxes(ctx, panOffset, angleY * -1, zoomLevel, this.width, this.height)
 
     // 绘制所有ObjFile的中心点
     // this.allObjFiles.forEach((item) => {

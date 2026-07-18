@@ -3,6 +3,7 @@ import { Point } from "@/types"
 const drawAxes = (
   ctx: CanvasRenderingContext2D,
   panOffset: Point,
+  angle: number,
   zoomLevel: number,
   canvasWidth: number,
   canvasHeight: number
@@ -20,93 +21,94 @@ const drawAxes = (
   ctx.lineWidth = axisLineWidth
   ctx.fillStyle = axisColor
   ctx.font = '12px Arial'
-  ctx.textAlign = 'center'
-  ctx.textBaseline = 'middle'
 
-  // 绘制x轴
+  ctx.save()
+  ctx.translate(originX, originY)
+  ctx.rotate(angle)
+
+  const arrowSize = 8
+  const maxAxisLength = Math.max(canvasWidth, canvasHeight) * 2
+
   ctx.beginPath()
-  ctx.moveTo(0, originY)
-  ctx.lineTo(canvasWidth, originY)
+  ctx.moveTo(-maxAxisLength, 0)
+  ctx.lineTo(maxAxisLength, 0)
   ctx.stroke()
 
-  // 绘制x轴箭头
-  const arrowSize = 8
   ctx.beginPath()
-  ctx.moveTo(canvasWidth, originY)
-  ctx.lineTo(canvasWidth - arrowSize, originY - arrowSize / 2)
-  ctx.lineTo(canvasWidth - arrowSize, originY + arrowSize / 2)
+  ctx.moveTo(maxAxisLength, 0)
+  ctx.lineTo(maxAxisLength - arrowSize, -arrowSize / 2)
+  ctx.lineTo(maxAxisLength - arrowSize, arrowSize / 2)
   ctx.closePath()
   ctx.fill()
 
-  // x轴刻度和标签
-  const startX = Math.floor((0 - panOffset.x) / scale) * scale
-  const endX = Math.ceil((canvasWidth - panOffset.x) / scale) * scale
+  const startX = Math.floor(-maxAxisLength / zoomLevel / scale) * scale
+  const endX = Math.ceil(maxAxisLength / zoomLevel / scale) * scale
 
   for (let x = startX; x <= endX; x += scale) {
-    const screenX = x * zoomLevel + panOffset.x
-    if (screenX >= 0 && screenX <= canvasWidth) {
-      ctx.beginPath()
-      ctx.moveTo(screenX, originY - tickSize)
-      ctx.lineTo(screenX, originY + tickSize)
-      ctx.stroke()
+    const screenX = x * zoomLevel
+    ctx.beginPath()
+    ctx.moveTo(screenX, -tickSize)
+    ctx.lineTo(screenX, tickSize)
+    ctx.stroke()
 
-      const label = x !== 0 ? `${x}px` : 'O'
-      ctx.fillStyle = axisColor
+    const label = x !== 0 ? `${x}px` : ''
+    if (label) {
+      ctx.save()
+      ctx.translate(screenX, tickSize + labelPadding)
+      ctx.rotate(-angle)
       ctx.font = '10px Arial'
       ctx.textAlign = 'center'
       ctx.textBaseline = 'top'
-      ctx.fillText(label, screenX, originY + labelPadding)
+      ctx.fillText(label, 0, 0)
+      ctx.restore()
     }
   }
 
-  // 绘制y轴
-  ctx.strokeStyle = axisColor
-  ctx.lineWidth = axisLineWidth
-  ctx.fillStyle = axisColor
-  ctx.font = '12px Arial'
-  ctx.textAlign = 'center'
-  ctx.textBaseline = 'middle'
-
   ctx.beginPath()
-  ctx.moveTo(originX, 0)
-  ctx.lineTo(originX, canvasHeight)
+  ctx.moveTo(0, -maxAxisLength)
+  ctx.lineTo(0, maxAxisLength)
   ctx.stroke()
 
-  // 绘制y轴箭头
   ctx.beginPath()
-  ctx.moveTo(originX, 0)
-  ctx.lineTo(originX - arrowSize / 2, arrowSize)
-  ctx.lineTo(originX + arrowSize / 2, arrowSize)
+  ctx.moveTo(0, -maxAxisLength)
+  ctx.lineTo(-arrowSize / 2, -maxAxisLength + arrowSize)
+  ctx.lineTo(arrowSize / 2, -maxAxisLength + arrowSize)
   ctx.closePath()
   ctx.fill()
 
-  // y轴刻度和标签
-  const startY = Math.floor((0 - panOffset.y) / scale) * scale
-  const endY = Math.ceil((canvasHeight - panOffset.y) / scale) * scale
+  const startY = Math.floor(-maxAxisLength / zoomLevel / scale) * scale
+  const endY = Math.ceil(maxAxisLength / zoomLevel / scale) * scale
 
   for (let y = startY; y <= endY; y += scale) {
-    const screenY = y * zoomLevel + panOffset.y
-    if (screenY >= 0 && screenY <= canvasHeight) {
-      ctx.beginPath()
-      ctx.moveTo(originX - tickSize, screenY)
-      ctx.lineTo(originX + tickSize, screenY)
-      ctx.stroke()
+    const screenY = y * zoomLevel
+    ctx.beginPath()
+    ctx.moveTo(-tickSize, screenY)
+    ctx.lineTo(tickSize, screenY)
+    ctx.stroke()
 
-      const label = y !== 0 ? `${y}px` : 'O'
-      ctx.fillStyle = axisColor
+    const label = y !== 0 ? `${y}px` : ''
+    if (label) {
+      ctx.save()
+      ctx.translate(-labelPadding, screenY)
+      ctx.rotate(-angle)
       ctx.font = '10px Arial'
       ctx.textAlign = 'right'
       ctx.textBaseline = 'middle'
-      ctx.fillText(label, originX - labelPadding, screenY)
+      ctx.fillText(label, 0, 0)
+      ctx.restore()
     }
   }
 
-  // 绘制原点标签
-  ctx.fillStyle = axisColor
+  ctx.restore()
+
+  ctx.save()
+  ctx.translate(originX - labelPadding, originY + labelPadding)
+  ctx.rotate(angle)
   ctx.font = '10px Arial'
   ctx.textAlign = 'right'
   ctx.textBaseline = 'top'
-  ctx.fillText('O', originX - labelPadding, originY + labelPadding)
+  ctx.fillText('O', 0, 0)
+  ctx.restore()
 }
 
 export default drawAxes

@@ -313,6 +313,7 @@ initAllPlugin();
 
 let panStartScreenX = 0
 let panStartScreenY = 0
+let startPanOffset = { x: 0, y: 0 }
 
 const updateCanvasSize = () => {
   const container = document.querySelector('.map2d-container')
@@ -1150,14 +1151,35 @@ const handleMouseMove = (e: MouseEvent) => {
     const startAngle = Math.atan2(startVecY, startVecX)
     const currentAngle = Math.atan2(currentVecY, currentVecX)
     const rotateAngle = currentAngle - startAngle
-    console.log('rotateAngle', rotateAngle)
+    const newAngleY = panStartAngel.value + rotateAngle * -1
+
+    const worldData = worldApi.getData()
+    const pivotX = worldData.x
+    const pivotY = worldData.y
+
+    const worldCenterX = (centerX - startPanOffset.x) / zoom2DLevel.value
+    const worldCenterY = (centerY - startPanOffset.y) / zoom2DLevel.value
+
+    const dx = worldCenterX - pivotX
+    const dy = worldCenterY - pivotY
+    const cos = Math.cos(rotateAngle)
+    const sin = Math.sin(rotateAngle)
+    // const newWorldCenterX = pivotX + dx * cos - dy * sin
+    // const newWorldCenterY = pivotY + dx * sin + dy * cos
+    // const newPanOffsetX = centerX - newWorldCenterX * zoom2DLevel.value
+    // const newPanOffsetY = centerY - newWorldCenterY * zoom2DLevel.value
+
+    // console.log('worldCenterX', worldCenterX, newWorldCenterX)
+
+    // panOffset.value.x = startPanOffset.x + newPanOffsetX
+    // panOffset.value.y = startPanOffset.y + newPanOffsetY
+
     worldApi.setData({
-      ...worldApi.getData(),
-      angleY: rotateAngle * -1,
+      ...worldData,
+      angleY: newAngleY,
     });
     drawWrapper2D()
-    // // 绘制操作句柄
-    // ctxAction.clearRect(0, 0, canvasAction.width, canvasAction.height)
+    return;
   }
   if (beCopyEntity) {
     if (beCopyEntity instanceof PointEntityClass) {
@@ -1501,6 +1523,11 @@ const handleMouseDown = (e: MouseEvent) => {
       isPaningAngel.value = true
       panStartScreenX = screenX
       panStartScreenY = screenY
+      startPanOffset = {
+        x: panOffset.value.x,
+        y: panOffset.value.y
+      }
+      panStartAngel.value = worldApi.getData().angleY
       return
     }
     const handleInfoList = getHandleInfoByXY(x, y)
