@@ -804,7 +804,6 @@ const handleLoadProgramFileChange = async (e: Event) => {
     environmentConfig?: EnvironmentConfig
   } = JSON.parse(sceneJsonText);
 
-  console.log('sceneData-1', sceneData)
   if (sceneData.importFile && sceneData.importFile.length) {
     for (const v of sceneData.importFile) {
       const { fileTypeId } = v
@@ -815,7 +814,6 @@ const handleLoadProgramFileChange = async (e: Event) => {
       const url = URL.createObjectURL(blob);
       const file = new File([blob], fileTypeId, { type: blob.type || 'application/octet-stream' })
 
-      console.log('blob', blob, url, file, file.name, extension)
       await processUploadedFile(file, (object: THREE.Group, file: File) => {
         const customObjItem: ImportFileType = {
           fileTypeId: v.fileTypeId,
@@ -1144,8 +1142,10 @@ const handleMouseMove = (e: MouseEvent) => {
   const screenX = Math.round(e.clientX - rect.left)
   const screenY = Math.round(e.clientY - rect.top)
 
+  console.log('isMenuing.value-4', 1)
   if (isPaningAngel.value) {
     isMenuing.value = false
+    isPanningScreen.value = false
     const centerX = canvas.width / 2
     const centerY = canvas.height / 2
 
@@ -1209,7 +1209,8 @@ const handleMouseMove = (e: MouseEvent) => {
     const ctxAction = canvasAction.getContext('2d')!
     // 如果正在拖拽，处理拖拽逻辑（即使当前工具不是 drag）
     if (matchHandelObj && matchedHandelInfo) {
-      // console.log('MatchSnapPoint-3-2')
+      isMenuing.value = false
+      isPaningAngel.value = false
       function temp(wall: WallEntity): boolean {
         // if (wall === matchHandelObj) {
         //   return false;
@@ -1319,6 +1320,9 @@ const handleMouseMove = (e: MouseEvent) => {
       return;
     }
     if (isPanningScreen.value) {
+      isMenuing.value = false
+      isPaningAngel.value = false
+      isMenuing.value = false
       const dx = screenX - mouseStartScreenX
       const dy = screenY - mouseStartScreenY
 
