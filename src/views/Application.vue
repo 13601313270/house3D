@@ -87,8 +87,8 @@
             :aspectRatio="aspectRatio1" :showCamera="true" cameraType="orthographic" /> -->
           <canvas ref="canvas2DRef" class="drawing-canvas" :style="{ display: isSplitting ? 'none' : 'block' }" />
           <canvas id="canvas2D2" ref="canvas2D2Ref" @click="handleCanvasClick" @mousedown="handleMouseDown"
-            @mousemove="handleMouseMove" @mouseleave="handleMouseLeave" @mouseup="handleMouseUp"
-            @contextmenu="handleContextMenu" @wheel="handleWheel" class="drawing-canvas"
+            @contextmenu.prevent.stop @mousemove="handleMouseMove" @mouseleave="handleMouseLeave"
+            @mouseup="handleMouseUp" @wheel="handleWheel" class="drawing-canvas"
             :style="{ display: isSplitting ? 'none' : 'block' }" />
         </div>
       </div>
@@ -245,6 +245,7 @@ const dragStartPoint = ref<Point | null>(null)
 const panOffsetOfWorld = ref<Point>({ x: 0, y: 0 })
 const isPanningScreen = ref(false);// 平移屏幕
 const isPaningAngel = ref(false);// 平移角度
+const isMenuing = ref(false);// 选中对象的柄
 const panStartAngel = ref(0);
 const screenAngel = ref(0);
 const panel1SplitWidthPer = ref(0.75)
@@ -910,8 +911,13 @@ const handleContextMenu = (e: MouseEvent) => {
   const rect = canvas.getBoundingClientRect()
   const screenX = Math.round(e.clientX - rect.left)
   const screenY = Math.round(e.clientY - rect.top)
-  const x = (screenX - panOffsetOfWorld.value.x) / zoom2DLevel.value
-  const y = (screenY - panOffsetOfWorld.value.y) / zoom2DLevel.value
+  const { angleY } = worldApi.getData();
+  const dx = screenX - panOffsetOfWorld.value.x
+  const dy = screenY - panOffsetOfWorld.value.y
+  const cos = Math.cos(angleY * -1)
+  const sin = Math.sin(angleY * -1)
+  const x = (dx * cos + dy * sin) / zoom2DLevel.value
+  const y = (-dx * sin + dy * cos) / zoom2DLevel.value
 
   editPropConfigInfo.value = []
   editPropInputInfo.value = {}
@@ -1139,6 +1145,7 @@ const handleMouseMove = (e: MouseEvent) => {
   const screenY = Math.round(e.clientY - rect.top)
 
   if (isPaningAngel.value) {
+    isMenuing.value = false
     const centerX = canvas.width / 2
     const centerY = canvas.height / 2
 
@@ -1176,8 +1183,13 @@ const handleMouseMove = (e: MouseEvent) => {
     drawWrapper2D()
     return;
   }
-  const x = (screenX - panOffsetOfWorld.value.x) / zoom2DLevel.value
-  const y = (screenY - panOffsetOfWorld.value.y) / zoom2DLevel.value
+  const { angleY } = worldApi.getData();
+  const dx = screenX - panOffsetOfWorld.value.x
+  const dy = screenY - panOffsetOfWorld.value.y
+  const cos = Math.cos(angleY * -1)
+  const sin = Math.sin(angleY * -1)
+  const x = (dx * cos + dy * sin) / zoom2DLevel.value
+  const y = (-dx * sin + dy * cos) / zoom2DLevel.value
   if (beCopyEntity) {
     if (beCopyEntity instanceof PointEntityClass) {
       beCopyEntity.changePosition({ x, y })
@@ -1362,7 +1374,11 @@ const handleMouseMove = (e: MouseEvent) => {
           ctxAction.stroke()
           ctxAction.restore(); // 恢复原始状态
         }
+        ctxAction.save()
+        ctxAction.translate(screenX, screenY)
+        ctxAction.rotate(angleY * -1)
         classInfo.draw2DActionHandle(ctxAction, panOffsetOfWorld.value, zoom2DLevel.value)
+        ctxAction.restore()
 
         if (classInfo instanceof PointEntityClass) {
           // 绘制文字（带边框）
@@ -1504,6 +1520,7 @@ let matchHandelObj: BaseEntityClass<any> | null = null;
 let matchedHandelInfo: HandelInfo | null = null;
 let matchHandelStartPoint: Point | null = null;
 const handleMouseDown = (e: MouseEvent) => {
+  e.preventDefault()
   contextMenu.value = null;
 
   const canvas = canvas2DRef.value
@@ -1518,6 +1535,7 @@ const handleMouseDown = (e: MouseEvent) => {
   // 只有在拖拽模式下才能拖拽点
   if (currentTool.value === 'drag') {
     if (e.button === 2) {
+      isMenuing.value = true
       isPaningAngel.value = true
       mouseStartScreenX = screenX
       mouseStartScreenY = screenY
@@ -1563,7 +1581,13 @@ const handleMouseDown = (e: MouseEvent) => {
   }
 }
 
-const handleMouseUp = () => {
+const handleMouseUp = (e: MouseEvent) => {
+  if (isMenuing.value) {
+    handleContextMenu(e)
+    isPaningAngel.value = false
+    isPanningScreen.value = false
+    return;
+  }
   matchHandelObj = null
   matchedHandelInfo = null
   if (isPanningScreen.value) {
