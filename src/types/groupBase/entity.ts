@@ -120,7 +120,6 @@ export abstract class GroupBaseEntity<T extends GroupBaseData> extends BaseEntit
 
   draw2DHandleByData(
     ctx: CanvasRenderingContext2D,
-    data: GroupBaseData,
     panOffset: Point,
     zoomLevel: number,
   ) {

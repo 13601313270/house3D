@@ -57,10 +57,10 @@ export class RegularPolygonEntity extends PointEntityClass<RegularPolygonData> {
 
   draw2DHandleByData(
     ctx: CanvasRenderingContext2D,
-    data: RegularPolygonData,
     panOffset: Point,
     zoomLevel: number,
   ): void {
+    const data = this.getData();
     const screenX = data.x * zoomLevel + panOffset.x
     const screenY = data.y * zoomLevel + panOffset.y
     const { n, r, angleY } = data

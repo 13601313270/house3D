@@ -39,10 +39,10 @@ export class PlaneEntity extends PointEntityClass<PlaneData> {
 
   draw2DHandleByData(
     ctx: CanvasRenderingContext2D,
-    data: PlaneData,
     panOffset: Point,
     zoomLevel: number,
   ): void {
+    const data = this.getData();
     const screenX = data.x * zoomLevel + panOffset.x
     const screenY = data.y * zoomLevel + panOffset.y
     const angleY = data.angleY || 0;// 历史数据问题，有的数据不存在angleY，所以用了一个【|| 0】给予默认值

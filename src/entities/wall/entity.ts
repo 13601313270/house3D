@@ -102,10 +102,10 @@ export class WallEntity extends LineEntityClass<WallPoint, WallData> {
 
   draw2DHandleByData(
     ctx: CanvasRenderingContext2D,
-    data: WallData,
     panOffset: Point,
     zoomLevel: number,
   ): void {
+    const data = this.getData();
     const { points, thickness, cornerType, color } = data;
     // 用红色绘制墙
     const { data: wallBoxList, countPerPoint: countPerPointPerPoint } = createAllWallFromPoints(points, thickness + 1, cornerType)

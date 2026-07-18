@@ -77,10 +77,10 @@ export class OutFileInWallEntity extends EntityClassInWall<OutFileInWallData> {
 
   draw2DHandleByData(
     ctx: CanvasRenderingContext2D,
-    data: OutFileInWallData,
     panOffset: Point,
     zoomLevel: number
   ): void {
+    const data = this.getData();
     const screenX = data.x * zoomLevel + panOffset.x
     const screenY = data.y * zoomLevel + panOffset.y
 

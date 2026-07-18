@@ -57,10 +57,10 @@ export class CurtainInWallEntity extends EntityClassInWall<CurtainInWallData> {
 
   draw2DHandleByData(
     ctx: CanvasRenderingContext2D,
-    data: CurtainInWallData,
     panOffset: Point,
     zoomLevel: number
   ): void {
+    const data: CurtainInWallData = this.getData();
     const { isOuter, angle, wallId } = data;
     let wallThickness = 10;
     if (this.parentEntity) {

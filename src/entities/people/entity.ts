@@ -47,10 +47,10 @@ export class PeopleEntity extends PointEntityClass<PeopleData> {
 
   draw2DHandleByData(
     ctx: CanvasRenderingContext2D,
-    data: PeopleData,
     panOffset: Point,
     zoomLevel: number
   ): void {
+    const data = this.getData();
     const { angle: angleY } = data
     const angle = angleY * -1
     const screenX = data.x * zoomLevel + panOffset.x

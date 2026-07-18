@@ -49,10 +49,10 @@ export class PlaneGroupEntity extends GroupBaseEntity<PlaneGroupData> {
 
   draw2DHandleByData(
     ctx: CanvasRenderingContext2D,
-    data: GroupBaseData,
     panOffset: Point,
     zoomLevel: number,
   ) {
+    const data = this.getData();
     const screenX = data.x * zoomLevel + panOffset.x
     const screenY = data.y * zoomLevel + panOffset.y
 

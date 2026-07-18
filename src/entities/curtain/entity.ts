@@ -38,10 +38,10 @@ export class CurtainEntity extends PointEntityClass<CurtainData> {
 
   draw2DHandleByData(
     ctx: CanvasRenderingContext2D,
-    data: CurtainData,
     panOffset: Point,
     zoomLevel: number,
   ): void {
+    const data = this.getData();
     const angleY = data.angleY || 0;
     // 绘制轮廓
     const matchArea = new MatchRectArea({

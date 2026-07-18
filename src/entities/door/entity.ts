@@ -60,10 +60,10 @@ export class DoorEntity extends EntityClassInWall<DoorData> {
 
   draw2DHandleByData(
     ctx: CanvasRenderingContext2D,
-    data: DoorData,
     panOffset: Point,
     zoomLevel: number,
   ): void {
+    const data = this.getData();
     let wallThickness = 10;
     if (this.parentEntity) {
       const findWall: WallEntity = this.parentEntity.getTypeListEntity('wall').find((entity) => entity.getData().id === data.wallId) as WallEntity

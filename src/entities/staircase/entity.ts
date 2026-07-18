@@ -71,10 +71,10 @@ export class StaircaseEntity extends LineEntityClass<StaircasePoint, StaircaseDa
 
   draw2DHandleByData(
     ctx: CanvasRenderingContext2D,
-    data: StaircaseData,
     panOffset: Point,
     zoomLevel: number,
   ): void {
+    const data = this.getData();
     const { cornerType, points, thickness } = data;
     // 用红色绘制墙
     const { data: wallBoxList } = createAllWallFromPoints(points, thickness + 1, cornerType)

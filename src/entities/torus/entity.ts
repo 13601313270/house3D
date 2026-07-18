@@ -35,10 +35,10 @@ export class TorusEntity extends PointEntityClass<TorusData> {
 
   draw2DHandleByData(
     ctx: CanvasRenderingContext2D,
-    data: TorusData,
     panOffset: Point,
     zoomLevel: number,
   ): void {
+    const data = this.getData();
     const screenX = data.x * zoomLevel + panOffset.x
     const screenY = data.y * zoomLevel + panOffset.y
     const { r, t } = data;

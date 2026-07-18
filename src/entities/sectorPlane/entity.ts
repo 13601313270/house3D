@@ -41,10 +41,10 @@ export class SectorPlaneEntity extends PointEntityClass<SectorPlaneData> {
 
   draw2DHandleByData(
     ctx: CanvasRenderingContext2D,
-    data: SectorPlaneData,
     panOffset: Point,
     zoomLevel: number,
   ): void {
+    const data = this.getData();
     let { r, startAngle, endAngle, x, y } = data;
     startAngle = startAngle % (Math.PI * 2)
     endAngle = endAngle % (Math.PI * 2)

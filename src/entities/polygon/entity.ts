@@ -49,10 +49,10 @@ export class PolygonEntity extends LineEntityClass<PolygonPoint, PolygonData> {
 
   draw2DHandleByData(
     ctx: CanvasRenderingContext2D,
-    data: PolygonData,
     panOffset: Point,
     zoomLevel: number,
   ): void {
+    const data = this.getData();
     if (data.points && data.points.length > 2) {
       // 绘制墙上的点
       ctx.lineWidth = 3

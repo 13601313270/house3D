@@ -50,10 +50,10 @@ export class PolygonPlaneEntity extends LineEntityClass<PolygonPlanePoint, Polyg
 
   draw2DHandleByData(
     ctx: CanvasRenderingContext2D,
-    data: PolygonPlaneData,
     panOffset: Point,
     zoomLevel: number,
   ): void {
+    const data = this.getData();
     if (data.points && data.points.length > 2) {
       // 绘制墙上的点
       ctx.lineWidth = 3
