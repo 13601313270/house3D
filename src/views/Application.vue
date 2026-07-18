@@ -1139,9 +1139,6 @@ const handleMouseMove = (e: MouseEvent) => {
   const y = (screenY - panOffset.value.y) / zoom2DLevel.value
 
   if (isPaningAngel.value) {
-    const dx = screenX - panStartScreenX
-    const dy = screenY - panStartScreenY
-
     const centerX = canvas.width / 2
     const centerY = canvas.height / 2
 
@@ -1154,7 +1151,11 @@ const handleMouseMove = (e: MouseEvent) => {
     const currentAngle = Math.atan2(currentVecY, currentVecX)
     const rotateAngle = currentAngle - startAngle
     console.log('rotateAngle', rotateAngle)
-    // drawWrapper2D()
+    worldApi.setData({
+      ...worldApi.getData(),
+      angleY: rotateAngle * -1,
+    });
+    drawWrapper2D()
     // // 绘制操作句柄
     // ctxAction.clearRect(0, 0, canvasAction.width, canvasAction.height)
   }

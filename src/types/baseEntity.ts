@@ -152,7 +152,11 @@ export abstract class BaseEntityClass<T extends BaseObjData> {
   // 本对象可以被其他对象对齐的参考线（注意是被对齐，提供个其他拖动磁吸的参考线）
   abstract getMineBeSnapLines(): Array<[Point, Point]>;
 
-  draw2DPreview(ctx: CanvasRenderingContext2D, panOffset: Point, zoomLevel: number) {
+  draw2DPreview(
+    ctx: CanvasRenderingContext2D,
+    panOffset: Point,
+    zoomLevel: number
+  ) {
     const data = this.getData();
     this.draw2DPreviewByData(ctx, data, panOffset, zoomLevel)
   }
