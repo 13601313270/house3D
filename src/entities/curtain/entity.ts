@@ -274,7 +274,8 @@ export class CurtainEntity extends PointEntityClass<CurtainData> {
     const { x, y } = position
     if (matchHandelInfo.index === 0) {
       const { centerOffset } = this.beforeMatchHandleSaveData!
-      this.changePosition({
+      this.setData({
+        ...this.getData(),
         x: x - centerOffset.x,
         y: y - centerOffset.y,
       })

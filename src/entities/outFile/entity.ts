@@ -518,7 +518,11 @@ export class OutFileEntity extends PointEntityClass<OutFileData> {
   }, matchHandelInfo: HandelInfo) {
     const { x, y } = position
     if (matchHandelInfo.index === 0) {
-      this.changePosition({ x, y })
+      this.setData({
+        ...this.getData(),
+        x,
+        y,
+      })
     } else if (matchHandelInfo.index === 1) {
       const data = this.getData();
       // 根据x,y计算angleY

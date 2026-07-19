@@ -239,7 +239,11 @@ export class CurtainInWallEntity extends EntityClassInWall<CurtainInWallData> {
   }, matchHandelInfo: HandelInfo) {
     const { x, y } = position
     if (matchHandelInfo.index === 0) {
-      this.changePosition({ x, y })
+      this.setData({
+        ...this.getData(),
+        x,
+        y,
+      })
     }
   }
 

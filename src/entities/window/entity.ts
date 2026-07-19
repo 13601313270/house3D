@@ -165,7 +165,11 @@ export class WindowEntity extends EntityClassInWall<WindowData> {
     y: number,
   }) {
     const { x, y } = position
-    this.changePosition({ x, y })
+    this.setData({
+      ...this.getData(),
+      x,
+      y,
+    })
   }
 
   create3DMesh() {

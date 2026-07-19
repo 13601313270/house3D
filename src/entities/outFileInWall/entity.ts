@@ -362,7 +362,11 @@ export class OutFileInWallEntity extends EntityClassInWall<OutFileInWallData> {
   }, matchHandelInfo: HandelInfo) {
     const { x, y } = position
     if (matchHandelInfo.index === 0) {
-      this.changePosition({ x, y })
+      this.setData({
+        ...this.getData(),
+        x,
+        y,
+      })
     }
   }
 

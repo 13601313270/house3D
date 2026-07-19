@@ -134,7 +134,11 @@ export class SphereEntity extends PointEntityClass<SphereData> {
     y: number,
   }) {
     const { x, y } = position
-    this.changePosition({ x, y })
+    this.setData({
+      ...this.getData(),
+      x,
+      y,
+    })
   }
 
   getMineBeSnapPoints() {

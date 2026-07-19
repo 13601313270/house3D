@@ -25,6 +25,7 @@ export abstract class BaseEntityClass<T extends BaseObjData> {
   parentEntity: GroupBaseEntity<GroupBaseData> | null;
   protected data: T
   meshList: THREE.Group[] = []
+  boundingBoxData: [THREE.Vector3, THREE.Vector3, THREE.Vector3] | null = null // 第一个是尺寸，第二个是位置偏移，第三个是旋转角度
   // eslint-disable-next-line
   associationEntity: BaseEntityClass<any>[] = []// 关联对象，就是本对象渲染，需要联动修改的对象。（比如：墙壁上被窗户挖洞，那么墙修改，需要重新挖洞）
 
@@ -36,6 +37,9 @@ export abstract class BaseEntityClass<T extends BaseObjData> {
   init(): Promise<void> {
     return Promise.resolve()
   }
+
+  // 获取包裹立方体的数据
+  abstract getBoundingBoxData(): [THREE.Vector3, THREE.Vector3, THREE.Vector3] | null // 第一个是尺寸，第二个是位置偏移，第三个是旋转角度
 
   setData(data: T) {
     this.data = data
@@ -109,6 +113,7 @@ export abstract class BaseEntityClass<T extends BaseObjData> {
   reCreate3DMeshIfNeed(): void {
     const newKeyByData = this.meshNeedChangeKey();
     if (this.cacheKeyStr === newKeyByData) {
+      this.boundingBoxData = this.getBoundingBoxData()
       return;
     }
     if (!this.parentEntity) return
@@ -117,6 +122,7 @@ export abstract class BaseEntityClass<T extends BaseObjData> {
     this.meshList = this.create3DMesh();
     this.meshList.forEach(mesh => scene.add(mesh))
     this.cacheKeyStr = newKeyByData;
+    this.boundingBoxData = this.getBoundingBoxData()
   }
 
   // 显示可拖拽具柄

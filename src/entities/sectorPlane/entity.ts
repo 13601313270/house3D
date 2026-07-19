@@ -312,7 +312,11 @@ export class SectorPlaneEntity extends PointEntityClass<SectorPlaneData> {
     const { index } = matchHandelInfo;
     const { x, y } = position
     if (index === 0) {
-      this.changePosition({ x, y })
+      this.setData({
+        ...data,
+        x,
+        y,
+      })
     } else if (index === 1) {
       // 计算(x,y)到(data.x,data.y)的角度
       const angle = Math.atan2(y - data.y, x - data.x)

@@ -7,7 +7,6 @@ import { GroupBaseData } from './groupBase'
 export abstract class PointEntityClass<T extends PointObjData> extends BaseEntityClass<T> {
   boundingBox: THREE.Group
   moveZBox: THREE.Group
-  boundingBoxData: [THREE.Vector3, THREE.Vector3, THREE.Vector3] | null = null // 第一个是尺寸，第二个是位置偏移，第三个是旋转角度
   spriteGroup: THREE.Group | null = null
 
   constructor(world: GroupBaseEntity<GroupBaseData> | null, data: T) {
@@ -88,47 +87,40 @@ export abstract class PointEntityClass<T extends PointObjData> extends BaseEntit
     }
     // 容器包裹立方体
     (() => {
-      const boundingBoxData = this.getBoundingBoxData();
-      this.boundingBoxData = boundingBoxData
-      if (!boundingBoxData) {
-        return;
+      if (this.boundingBoxData && this.data.tip) {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d')!;
+
+        // 设置canvas尺寸
+        const fontSize = this.data.tipFontSize || 96;
+        ctx.font = `bold ${fontSize}px Arial`;
+        const textWidth = ctx.measureText(this.data.tip).width;
+        const heightPadding = 5;
+        canvas.width = textWidth + 20;  // 文字宽度 + 边距
+        canvas.height = fontSize + heightPadding * 2;  // 字体高度 + 边距
+
+        // 绘制背景和文字
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = '#000000ff';
+        ctx.font = `bold ${fontSize}px Arial`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(this.data.tip, canvas.width / 2, canvas.height / 2 + heightPadding);
+
+        const texture = new THREE.CanvasTexture(canvas);
+        const spriteMaterial = new THREE.SpriteMaterial({ map: texture });
+        const sprite = new THREE.Sprite(spriteMaterial);
+
+        const height = fontSize / 4;
+        const width = height / (canvas.height / canvas.width)
+
+        sprite.scale.set(width, height, 1);
+        const group = new THREE.Group()
+        group.add(sprite)
+        this.spriteGroup = group
+        scene.add(group)
       }
-      (() => {
-        if (this.data.tip) { // data.tip
-          const canvas = document.createElement('canvas');
-          const ctx = canvas.getContext('2d')!;
-
-          // 设置canvas尺寸
-          const fontSize = this.data.tipFontSize || 96;
-          ctx.font = `bold ${fontSize}px Arial`;
-          const textWidth = ctx.measureText(this.data.tip).width;
-          const heightPadding = 5;
-          canvas.width = textWidth + 20;  // 文字宽度 + 边距
-          canvas.height = fontSize + heightPadding * 2;  // 字体高度 + 边距
-
-          // 绘制背景和文字
-          ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
-          ctx.fillRect(0, 0, canvas.width, canvas.height);
-          ctx.fillStyle = '#000000ff';
-          ctx.font = `bold ${fontSize}px Arial`;
-          ctx.textAlign = 'center';
-          ctx.textBaseline = 'middle';
-          ctx.fillText(this.data.tip, canvas.width / 2, canvas.height / 2 + heightPadding);
-
-          const texture = new THREE.CanvasTexture(canvas);
-          const spriteMaterial = new THREE.SpriteMaterial({ map: texture });
-          const sprite = new THREE.Sprite(spriteMaterial);
-
-          const height = fontSize / 4;
-          const width = height / (canvas.height / canvas.width)
-
-          sprite.scale.set(width, height, 1);
-          const group = new THREE.Group()
-          group.add(sprite)
-          this.spriteGroup = group
-          scene.add(group)
-        }
-      })();
     })();
   }
 
@@ -161,13 +153,16 @@ export abstract class PointEntityClass<T extends PointObjData> extends BaseEntit
     })
   }
 
+  setData(data: T) {
+    super.setData(data)
+  }
+
   changeBoundingBoxState() {
-    const boundingBox = this.getBoundingBoxData();
-    if (boundingBox) {
+    const boxData = this.boundingBoxData;
+    if (boxData) {
       const data = this.getData();
       // 第一个是尺寸，第二个是位置偏移，第三个是旋转角度
-      const [boxVector3, offsetVector3, rotateVector3] = boundingBox;
-      this.boundingBoxData = [boxVector3, offsetVector3, rotateVector3]
+      const [boxVector3, offsetVector3, rotateVector3] = boxData;
       this.boundingBox.position.set(data.x, data.z, data.y)
       this.boundingBox.children[0].rotation.set(rotateVector3.x, rotateVector3.y, rotateVector3.z)
       this.boundingBox.children[0].scale.set(boxVector3.x, boxVector3.y, boxVector3.z)
@@ -209,14 +204,6 @@ export abstract class PointEntityClass<T extends PointObjData> extends BaseEntit
 
   // 当前对象不在任何一根吸附线的区域
   notInSceneSnapLineArea(): void { }
-
-  changePosition(newPosition: { x: number, y: number }) {
-    this.data.x = newPosition.x
-    this.data.y = newPosition.y
-    if (this.parentEntity) {
-      this.parentEntity._callObjDataChange(this)
-    }
-  }
 
   // 待添加状态（鼠标新增悬浮的时候）
   abstract setPrepareState(x: number, y: number): string[]

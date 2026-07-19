@@ -139,7 +139,11 @@ export class TorusEntity extends PointEntityClass<TorusData> {
     y: number,
   }) {
     const { x, y } = position
-    this.changePosition({ x, y })
+    this.setData({
+      ...this.getData(),
+      x,
+      y,
+    })
   }
 
   getMineBeSnapPoints() {

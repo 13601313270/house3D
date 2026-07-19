@@ -136,7 +136,11 @@ export class ConeEntity extends PointEntityClass<ConeData> {
     y: number,
   }) {
     const { x, y } = position
-    this.changePosition({ x, y })
+    this.setData({
+      ...this.getData(),
+      x,
+      y,
+    })
   }
 
   getMineBeSnapPoints() {

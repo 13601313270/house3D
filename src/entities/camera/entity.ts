@@ -498,7 +498,11 @@ export class CameraEntity extends CameraBase<CameraData> {
         targetPositionY: y,
       })
     } else {
-      this.changePosition({ x, y })
+      this.setData({
+        ...data,
+        x,
+        y,
+      })
     }
   }
 

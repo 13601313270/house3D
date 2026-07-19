@@ -1,3 +1,4 @@
+import * as THREE from 'three'
 import { LineObjData, Point } from './map2d'
 import { BaseEntityClass } from './baseEntity'
 
@@ -50,5 +51,9 @@ export abstract class LineEntityClass<V, T extends LineObjData<V>> extends BaseE
       point.y += this.offset.y
     })
     this.offset = { x: 0, y: 0 }
+  }
+
+  getBoundingBoxData(): [THREE.Vector3, THREE.Vector3, THREE.Vector3] | null {
+    return null
   }
 }

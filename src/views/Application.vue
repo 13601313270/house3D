@@ -1221,7 +1221,11 @@ const handleMouseMove = (e: MouseEvent) => {
   const y = (-dx * sin + dy * cos) / zoom2DLevel.value
   if (beCopyEntity) {
     if (beCopyEntity instanceof PointEntityClass) {
-      beCopyEntity.changePosition({ x, y })
+      beCopyEntity.setData({
+        ...beCopyEntity.getData(),
+        x,
+        y,
+      })
       drawWrapper2DAnd3D()
     } else if (beCopyEntity instanceof LineEntityClass) {
       if (beCopyEntityHandelInfo) {

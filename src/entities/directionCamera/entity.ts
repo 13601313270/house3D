@@ -519,7 +519,11 @@ export class DirectionCameraEntity extends CameraBase<DirectionCameraData> {
         // targetPositionY: y,
       })
     } else {
-      this.changePosition({ x, y })
+      this.setData({
+        ...data,
+        x,
+        y,
+      })
     }
   }
 
