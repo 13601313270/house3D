@@ -152,16 +152,42 @@ export abstract class GroupBaseEntity<T extends GroupBaseData> extends PointEnti
     return [100, 100, 100]
   }
 
-  getBoundingBoxData(): [THREE.Vector3, THREE.Vector3, THREE.Vector3] {
-    const [width, height, depth] = this.getSize()
-    // const { width, height, depth, angleY } = this.children[0].getData();
-    const { angleY } = this.getData();
-    // 第一个是尺寸，第二个是位置偏移，第三个是旋转角度
-    return [
-      new THREE.Vector3(width, height, depth),
-      new THREE.Vector3(0, height / 2, 0),
-      new THREE.Vector3(0, angleY, 0)
-    ]
+  getBoundingBoxData(): [THREE.Vector3, THREE.Vector3, THREE.Vector3] | null {
+    if (this.children) {
+      let minX = Infinity
+      let minY = Infinity
+      let maxX = -Infinity
+      let maxY = -Infinity
+      let minZ = Infinity
+      let maxZ = -Infinity
+      this.children.forEach(item => {
+        if (item instanceof PointEntityClass && item.boundingBoxData) {
+          const { x, y, z } = item.getData()
+          // 第一个是尺寸，第二个是位置偏移，第三个是旋转角度
+          const boxData = item.boundingBoxData;
+          if (boxData) {
+            minX = Math.min(minX, x - boxData[0].x / 2)
+            maxX = Math.max(maxX, x + boxData[0].x / 2)
+            minY = Math.min(minY, y - boxData[0].y / 2)
+            maxY = Math.max(maxY, y + boxData[0].y / 2)
+            minZ = Math.min(minZ, z - boxData[0].y / 2)
+            maxZ = Math.max(maxZ, z + boxData[0].y / 2)
+          }
+        }
+      })
+      const width = maxX - minX
+      const depth = maxY - minY
+      const height = maxZ - minZ
+      const { angleY } = this.getData();
+      // 第一个是尺寸，第二个是位置偏移，第三个是旋转角度
+      return [
+        new THREE.Vector3(width, height, depth),
+        new THREE.Vector3(minX + width / 2, height / 2, minY + depth / 2),
+        new THREE.Vector3(0, angleY, 0)
+      ]
+    } else {
+      return null;
+    }
   }
 
   getMineBeSnapPoints() {

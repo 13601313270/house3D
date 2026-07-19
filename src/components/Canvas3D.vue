@@ -339,7 +339,7 @@ const initThree = () => {
             // @ts-ignore
             const entity = canvas1HoveredObject.entity as BaseEntityClass<any>
             if (entity instanceof PointEntityClass) {
-              console.log('entity.getData().z', deltaY * -1)
+              // console.log('entity.getData().z', deltaY * -1)
               // entity.getData().z = camera1MouseMoveStartZ + (deltaY * -1)
               entity.setData({
                 ...entity.getData(),
