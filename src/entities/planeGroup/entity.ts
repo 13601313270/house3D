@@ -154,9 +154,7 @@ export class PlaneGroupEntity extends GroupBaseEntity<PlaneGroupData> {
 
   change3DMeshState(): void {
     const data = this.getData();
-    // console.trace('change3DMeshState-1', data.x, data.y, data.z)
     this.group.position.set(data.x, data.z, data.y)
-    // console.trace('change3DMeshState-angleY', data.angleY)
     this.group.rotation.set(0, data.angleY, 0)
 
     this.children.forEach(item => {

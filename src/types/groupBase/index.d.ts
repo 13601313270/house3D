@@ -2,7 +2,7 @@ import { PointObjData } from '@/types/map2d'
 import { BaseObjData } from "@/types/map2d"
 import { BaseEntityClass } from '@/types/baseEntity'
 
-export type GroupBaseData = BaseObjData & {
+export type GroupBaseData = PointObjData & {
   childrenData: Array<{
     type: string,
     value: BaseObjData,

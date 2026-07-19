@@ -9,7 +9,7 @@ import drawAxes from '@/utils/drawAxes'
 
 type WorldChangeType = 'add' | 'remove' | 'change'
 
-export abstract class GroupBaseEntity<T extends GroupBaseData> extends BaseEntityClass<T> {
+export abstract class GroupBaseEntity<T extends GroupBaseData> extends PointEntityClass<T> {
   group: THREE.Scene | THREE.Group = new THREE.Group()
   width: number = 0;
   height: number = 0;

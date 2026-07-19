@@ -130,5 +130,9 @@ class WorldGroup extends GroupBaseEntity<WorldData> {
   matchHandelInfo(x: number, y: number) {
     return null;
   }
+
+  setPrepareState(x: number, y: number): string[] {
+    return [];
+  }
 }
 export default WorldGroup

@@ -93,12 +93,7 @@ export abstract class PointEntityClass<T extends PointObjData> extends BaseEntit
       if (!boundingBoxData) {
         return;
       }
-      // const [boxVector3, offsetVector3, rotateVector3] = boundingBox;
-      // this.boxSize.set(boxVector3.x, boxVector3.y, boxVector3.z)
-      // this.boxOffset.set(offsetVector3.x, offsetVector3.y, offsetVector3.z)
-      // this.boxRotate.set(rotateVector3.x, rotateVector3.y, rotateVector3.z);
       (() => {
-        // this.data.tip = '哈哈哈'
         if (this.data.tip) { // data.tip
           const canvas = document.createElement('canvas');
           const ctx = canvas.getContext('2d')!;
@@ -123,15 +118,11 @@ export abstract class PointEntityClass<T extends PointObjData> extends BaseEntit
           const texture = new THREE.CanvasTexture(canvas);
           const spriteMaterial = new THREE.SpriteMaterial({ map: texture });
           const sprite = new THREE.Sprite(spriteMaterial);
-          // const width = Math.max(boxVector3.x, boxVector3.y);
 
           const height = fontSize / 4;
           const width = height / (canvas.height / canvas.width)
 
-          // console.log('ccc-4', boxVector3, width, height);
           sprite.scale.set(width, height, 1);
-          // sprite.position.set(0, boxVector3.y + height / 2, 0);
-          // this.meshList[0].add(sprite);
           const group = new THREE.Group()
           group.add(sprite)
           this.spriteGroup = group
