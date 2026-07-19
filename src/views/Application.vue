@@ -454,7 +454,6 @@ const drawWrapper2D = () => {
     ctx.fillStyle = '#f5f5f5'
     ctx.fillRect(0, 0, worldApi.width, worldApi.height)
     const worldData = worldApi.getData()
-    const { angleY } = worldData;
     const screenX = worldData.x * zoom2DLevel.value + panOffsetOfWorld.value.x;
     const screenY = worldData.y * zoom2DLevel.value + panOffsetOfWorld.value.y;
     ctx.save()
@@ -491,6 +490,7 @@ const drawWrapper2D = () => {
     }
     if (ctx && insertTempObj) {
       (() => {
+        const { angleY } = worldData;
         ctx.rotate(angleY * -1)
         if (insertTempObj instanceof LineEntityClass) {
           insertTempObj.draw2DPreview(ctx, zoom2DLevel.value)
@@ -693,8 +693,8 @@ onMounted(async () => {
   drawWrapper2DAnd3D()
   window.addEventListener('resize', () => updateCanvasSize())
   updateCanvasSize()
-  function bindSave(event: any) {
-    console.log('event', event)
+
+  const handleKeyDown = async (event: KeyboardEvent) => {
     // 检测 Ctrl+S (Windows/Linux) 或 Command+S (Mac)
     if ((event.ctrlKey || event.metaKey)) {
       if (event.key === 's') {
@@ -719,13 +719,7 @@ onMounted(async () => {
           }
         }
       }
-    }
-  }
-  // 劫持Ctrl+S保存事件
-  window.addEventListener('keydown', bindSave);
-
-  const handleKeyDown = async (e: KeyboardEvent) => {
-    if (e.key === 'Escape') {
+    } else if (event.key === 'Escape') {
       if (insertTempObj && currentTool.value !== 'drag') {
         if (insertTempObj instanceof LineEntityClass) {
           insertAdding.value = true
@@ -750,10 +744,10 @@ onMounted(async () => {
     }
   }
 
+  // 劫持Ctrl+S保存事件
   window.addEventListener('keydown', handleKeyDown)
   return () => {
     window.removeEventListener('keydown', handleKeyDown)
-    window.removeEventListener('keydown', bindSave);
   }
 })
 
