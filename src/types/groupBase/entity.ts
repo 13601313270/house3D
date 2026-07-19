@@ -159,7 +159,7 @@ export abstract class GroupBaseEntity<T extends GroupBaseData> extends PointEnti
     // 第一个是尺寸，第二个是位置偏移，第三个是旋转角度
     return [
       new THREE.Vector3(width, height, depth),
-      new THREE.Vector3(0, 0, 0),
+      new THREE.Vector3(0, height / 2, 0),
       new THREE.Vector3(0, angleY, 0)
     ]
   }
@@ -193,6 +193,8 @@ export abstract class GroupBaseEntity<T extends GroupBaseData> extends PointEnti
   }
 
   changeBoundingBoxState() {
+    console.log('changeBoundingBoxState')
+    super.changeBoundingBoxState();
     this.children.forEach(item => {
       if (item instanceof PointEntityClass) {
         item.changeBoundingBoxState()

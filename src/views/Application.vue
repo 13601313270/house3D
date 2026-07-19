@@ -1547,9 +1547,6 @@ const handleMouseMove = (e: MouseEvent) => {
     if (insertTempObj instanceof PointEntityClass) {
       tipTexts = insertTempObj.setPrepareState(x, y)
       drawWrapper2DAnd3D()
-    } else if (insertTempObj instanceof PlaneGroupEntity) {
-      tipTexts = insertTempObj.setPrepareState(x, y)
-      drawWrapper2DAnd3D()
     }
     if (tipTexts.length > 0) {
       const canvasAction = canvas2DRef.value!;
