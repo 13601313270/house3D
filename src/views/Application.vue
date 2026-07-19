@@ -1595,14 +1595,28 @@ const handleMouseDown = (e: MouseEvent) => {
     }
     panStartAngel.value = worldApi.getData().angleY
     console.log('panStartAngel.value', canvas.height / 2, mouseYInCanvas)
+    let xTemp = 0;
     let yTemp = 0;
-    if (mouseYInCanvas < canvas.height / 2 && canvas.height / 2 - mouseYInCanvas < 100) {
-      yTemp = 100 - (canvas.height / 2 - mouseYInCanvas);
-    } else if (mouseYInCanvas > canvas.height / 2 && mouseYInCanvas - canvas.height / 2 < 100) {
-      yTemp = -100 + (mouseYInCanvas - canvas.height / 2);
+    let yDiff = canvas.height / 2 - mouseYInCanvas;
+    let xDiff = canvas.width / 2 - mouseXInCanvas;
+    if (Math.abs(yDiff) < 100 && Math.abs(xDiff) < 100) {
+      if (Math.abs(yDiff) > Math.abs(xDiff)) {
+        if (mouseYInCanvas < canvas.height / 2 && yDiff < 100) {
+          yTemp = 100 - yDiff;
+        } else if (mouseYInCanvas > canvas.height / 2 && -yDiff < 100) {
+          yTemp = -100 - yDiff;
+        }
+      } else {
+        if (mouseXInCanvas < canvas.width / 2 && xDiff < 100) {
+          xTemp = 100 - xDiff;
+        } else if (mouseXInCanvas > canvas.width / 2 && -xDiff < 100) {
+          xTemp = -100 - xDiff;
+        }
+      }
     }
+
     panningScreenCenter.value = {
-      x: canvas.width / 2,
+      x: canvas.width / 2 + xTemp,
       y: canvas.height / 2 + yTemp,
     }
   } else {
