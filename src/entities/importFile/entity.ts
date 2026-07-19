@@ -159,6 +159,7 @@ export class ImportFileEntity extends PointEntityClass<ImportFileData> {
       this.boxData[0].y = size.y * scale
       this.boxData[0].x = size.x * scale
       this.boxData[0].z = size.z * scale
+      this.boxData[1].y = size.y * scale / 2
       return [group]
     }
 
@@ -170,7 +171,7 @@ export class ImportFileEntity extends PointEntityClass<ImportFileData> {
   // 第一个是尺寸，第二个是位置偏移，第三个是旋转角度
   boxData: [THREE.Vector3, THREE.Vector3, THREE.Vector3] = [
     new THREE.Vector3(10, 10, 10),
-    new THREE.Vector3(0, 0, 0),
+    new THREE.Vector3(0, 5, 0),
     new THREE.Vector3(0, 0, 0)
   ]
 

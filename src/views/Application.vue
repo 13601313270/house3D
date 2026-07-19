@@ -1407,7 +1407,6 @@ const handleMouseMove = (e: MouseEvent) => {
           ctxAction.save()
           ctxAction.translate(screenX, screenY)
           ctxAction.rotate(angleY * -1)
-          const { x, y } = classInfo.getData()
 
           if (matchArea instanceof MatchRectArea) {
             ctxAction.lineWidth = 2
@@ -1427,13 +1426,13 @@ const handleMouseMove = (e: MouseEvent) => {
             )
             ctxAction.restore()
           } else if (matchArea instanceof MatchCircleArea) {
-            ctxAction.lineWidth = 20
+            ctxAction.lineWidth = 2
             ctxAction.strokeStyle = 'yellow'
             // 绘制一个圆
             ctxAction.beginPath()
             ctxAction.arc(
-              x,
-              y,
+              matchArea.data.x * zoom2DLevel.value,
+              matchArea.data.y * zoom2DLevel.value,
               matchArea.data.r * zoom2DLevel.value,
               0,
               Math.PI * 2,

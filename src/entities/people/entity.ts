@@ -165,8 +165,6 @@ export class PeopleEntity extends PointEntityClass<PeopleData> {
   }
 
   create3DMesh(): THREE.Group[] {
-    console.log('create3DMesh', 1)
-
     const data = this.getData();
     const group = new THREE.Group()
     const { color } = data
