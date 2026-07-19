@@ -228,7 +228,6 @@ import WorldGroup, { EnvironmentConfig } from '@/world/world';
 
 const canvas2DRef = ref<HTMLCanvasElement | null>(null)
 const canvas2D2Ref = ref<HTMLCanvasElement | null>(null)
-const canvas3DRef1 = ref<typeof Canvas3D | null>(null)
 const canvas3DRefCenter = ref<typeof Canvas3D | null>(null)
 const canvas3DRef2 = ref<typeof Canvas3D | null>(null)
 const activeToolsIndex = ref(-1)
@@ -1090,18 +1089,18 @@ const handleCanvasClick = async (e: MouseEvent) => {
     insertTempObj.setData(data)
     drawWrapper2D();
   } else if (insertTempObj && insertTempObj instanceof PointEntityClass) {
-    if (insertTempObj instanceof EntityClassInWall) {
-      if (hoverPoint.value && insertAdding.value === false) {
-        insertAdding.value = true
-        await worldApi.add(currentTool.value, [insertTempObj.getData()])
-        insertTempObj = null;
-        setTimeout(() => {
-          insertAdding.value = false
-        }, 300)// 至少停留300毫秒，防止出现那种闪现的效果。
-        currentTool.value = 'drag'
-      }
-    } else {
-      if (insertAdding.value === false) {
+    if (insertAdding.value === false) {
+      if (insertTempObj instanceof EntityClassInWall) {
+        if (hoverPoint.value) {
+          insertAdding.value = true
+          await worldApi.add(currentTool.value, [insertTempObj.getData()])
+          insertTempObj = null;
+          setTimeout(() => {
+            insertAdding.value = false
+          }, 300)// 至少停留300毫秒，防止出现那种闪现的效果。
+          currentTool.value = 'drag'
+        }
+      } else {
         insertAdding.value = true
         await worldApi.add(currentTool.value, [insertTempObj.getData()])
         insertTempObj = null;
@@ -1469,7 +1468,6 @@ const handleMouseMove = (e: MouseEvent) => {
     }
   } else if (insertTempObj instanceof LineEntityClass) {
     if (tempPointInsertData.value && tempPointInsertData.value.length > 0) {
-      const insertTempObjId = insertTempObj.getData().id;
       const last = tempPointInsertData.value[tempPointInsertData.value.length - 1]
       // 收集所有点（包括临时折线和已绘制的墙上的点）
       const allPoints = [...tempPointInsertData.value];
