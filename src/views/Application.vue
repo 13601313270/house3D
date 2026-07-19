@@ -491,6 +491,7 @@ const drawWrapper2D = () => {
     }
     if (ctx && insertTempObj) {
       (() => {
+        ctx.rotate(angleY * -1)
         if (insertTempObj instanceof LineEntityClass) {
           insertTempObj.draw2DPreview(ctx, zoom2DLevel.value)
         } else if (insertTempObj instanceof PointEntityClass) {

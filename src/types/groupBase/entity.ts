@@ -98,19 +98,8 @@ export abstract class GroupBaseEntity<T extends GroupBaseData> extends BaseEntit
     })
 
     // 绘制轴
-    // if (this.showAxes) {
-    //   drawAxes(ctx, {
-    //     x: -screenX,
-    //     y: -screenY,
-    //   }, zoomLevel, 100 | this.width, 100 | this.height)
-    // }
     ctx.restore()
     drawAxes(ctx, angleY * -1, zoomLevel, this.width, this.height)
-
-    // 绘制所有ObjFile的中心点
-    // this.allObjFiles.forEach((item) => {
-    //   drawPoint(ctx, item.x * zoomLevel + panOffset.x, item.y * zoomLevel + panOffset.y, '#42b983')
-    // })
   }
 
   draw2DActionHandle(
