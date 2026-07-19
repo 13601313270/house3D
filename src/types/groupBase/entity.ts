@@ -192,16 +192,6 @@ export abstract class GroupBaseEntity<T extends GroupBaseData> extends PointEnti
     return this.type + JSON.stringify(cacheData)
   }
 
-  changeBoundingBoxState() {
-    console.log('changeBoundingBoxState')
-    super.changeBoundingBoxState();
-    this.children.forEach(item => {
-      if (item instanceof PointEntityClass) {
-        item.changeBoundingBoxState()
-      }
-    })
-  }
-
   // 改变3D模型的状态
   // 例如：改变位置，旋转角度等，模型本身不变
   change3DMeshState(): void {

@@ -347,7 +347,6 @@ const initThree = () => {
               })
               window.worldApi.reCreate3DMeshIfNeed()
               window.worldApi.change3DMeshState()
-              entity.changeBoundingBoxState()
               entity.moveZBox.visible = true
               entity.boundingBox.visible = true
               entity.boundingBox.children[1].visible = true
@@ -454,7 +453,6 @@ const updateScene = () => {
   if (window.worldApi.group) {
     props.world.reCreate3DMeshIfNeed()
     props.world.change3DMeshState()
-    props.world.changeBoundingBoxState()
     resize();
   }
 }

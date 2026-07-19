@@ -32,6 +32,7 @@ export abstract class BaseEntityClass<T extends BaseObjData> {
   constructor(parentEntity: GroupBaseEntity<GroupBaseData> | null, data: T) {
     this.parentEntity = parentEntity
     this.data = data
+    this.boundingBoxData = this.getBoundingBoxData()
   }
 
   init(): Promise<void> {
@@ -43,6 +44,7 @@ export abstract class BaseEntityClass<T extends BaseObjData> {
 
   setData(data: T) {
     this.data = data
+    this.boundingBoxData = this.getBoundingBoxData()
     // 双向去除原有的关联对象
     this.associationEntity.forEach(entity => {
       if (entity.associationEntity.includes(this)) {
@@ -113,7 +115,6 @@ export abstract class BaseEntityClass<T extends BaseObjData> {
   reCreate3DMeshIfNeed(): void {
     const newKeyByData = this.meshNeedChangeKey();
     if (this.cacheKeyStr === newKeyByData) {
-      this.boundingBoxData = this.getBoundingBoxData()
       return;
     }
     if (!this.parentEntity) return
@@ -122,7 +123,6 @@ export abstract class BaseEntityClass<T extends BaseObjData> {
     this.meshList = this.create3DMesh();
     this.meshList.forEach(mesh => scene.add(mesh))
     this.cacheKeyStr = newKeyByData;
-    this.boundingBoxData = this.getBoundingBoxData()
   }
 
   // 显示可拖拽具柄

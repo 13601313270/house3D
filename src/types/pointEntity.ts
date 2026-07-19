@@ -36,6 +36,7 @@ export abstract class PointEntityClass<T extends PointObjData> extends BaseEntit
       if (this.parentEntity) {
         this.parentEntity.group.add(group)
       }
+      this.updateBoundingBoxState();
     })();
     (() => {
       const shaftGeometry = new THREE.BoxGeometry(1, 1, 1);
@@ -153,11 +154,7 @@ export abstract class PointEntityClass<T extends PointObjData> extends BaseEntit
     })
   }
 
-  setData(data: T) {
-    super.setData(data)
-  }
-
-  changeBoundingBoxState() {
+  private updateBoundingBoxState() {
     const boxData = this.boundingBoxData;
     if (boxData) {
       const data = this.getData();
@@ -193,6 +190,11 @@ export abstract class PointEntityClass<T extends PointObjData> extends BaseEntit
     } else {
       // this.boundingBox.visible = false
     }
+  }
+
+  setData(data: T) {
+    super.setData(data)
+    this.updateBoundingBoxState();
   }
 
   // 当前对象进入到一根吸附线的区域

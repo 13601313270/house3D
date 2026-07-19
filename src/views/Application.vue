@@ -442,7 +442,6 @@ const drawWrapper2DAnd3D = () => {
   drawWrapper2D();
   worldApi.reCreate3DMeshIfNeed()
   worldApi.change3DMeshState()
-  worldApi.changeBoundingBoxState()
 }
 const drawWrapper2D = () => {
   const canvas = canvas2DRef.value
@@ -1352,7 +1351,6 @@ const handleMouseMove = (e: MouseEvent) => {
 
       worldApi.reCreate3DMeshIfNeed()
       worldApi.change3DMeshState()
-      worldApi.changeBoundingBoxState()
 
       if (tipTexts && tipTexts.length > 0) {
         const canvasAction = canvas2DRef.value!;
