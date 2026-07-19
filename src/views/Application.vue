@@ -90,7 +90,7 @@
             @contextmenu.prevent.stop @mousemove="handleMouseMove" @mouseleave="handleMouseLeave"
             @mouseup="handleMouseUp" @wheel="handleWheel" class="drawing-canvas"
             :style="{ display: isSplitting ? 'none' : 'block' }" />
-          <img v-if="isPaningAngel" class="protractor" src="protractor.png"
+          <img v-if="isPaningAngel && isPaningAngelMoved" class="protractor" src="protractor.png"
             :style="{ left: panningScreenCenter.x + 'px', top: panningScreenCenter.y + 'px' }" />
         </div>
       </div>
@@ -247,6 +247,7 @@ const dragStartPoint = ref<Point | null>(null)
 const panOffsetOfWorld = ref<Point>({ x: 0, y: 0 })
 const isPanningScreen = ref(false);// 平移屏幕
 const isPaningAngel = ref(false);// 平移角度
+const isPaningAngelMoved = ref(false);// 平移角度时候，是否移动了
 // 平移角度时候，围绕的中心点
 const panningScreenCenter = ref<{
   x: number
@@ -1165,6 +1166,7 @@ const handleMouseMove = (e: MouseEvent) => {
   if (isPaningAngel.value) {
     isMenuing.value = false
     isPanningScreen.value = false
+    isPaningAngelMoved.value = true;
     const centerX = panningScreenCenter.value.x
     const centerY = panningScreenCenter.value.y
 
@@ -1601,6 +1603,7 @@ const handleMouseDown = (e: MouseEvent) => {
   if (e.button === 2) {
     isMenuing.value = true
     isPaningAngel.value = true
+    isPaningAngelMoved.value = false;
     startWorldAngelCenterOfWorld = {
       x: (rect.width / 2 - panOffsetOfWorld.value.x) / zoom2DLevel.value,
       y: (rect.height / 2 - panOffsetOfWorld.value.y) / zoom2DLevel.value,
