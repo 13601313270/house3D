@@ -1091,15 +1091,13 @@ const handleCanvasClick = async (e: MouseEvent) => {
   } else if (insertTempObj && insertTempObj instanceof PointEntityClass) {
     if (insertAdding.value === false) {
       if (insertTempObj instanceof EntityClassInWall) {
-        if (hoverPoint.value) {
-          insertAdding.value = true
-          await worldApi.add(currentTool.value, [insertTempObj.getData()])
-          insertTempObj = null;
-          setTimeout(() => {
-            insertAdding.value = false
-          }, 300)// 至少停留300毫秒，防止出现那种闪现的效果。
-          currentTool.value = 'drag'
-        }
+        insertAdding.value = true
+        await worldApi.add(currentTool.value, [insertTempObj.getData()])
+        insertTempObj = null;
+        setTimeout(() => {
+          insertAdding.value = false
+        }, 300)// 至少停留300毫秒，防止出现那种闪现的效果。
+        currentTool.value = 'drag'
       } else {
         insertAdding.value = true
         await worldApi.add(currentTool.value, [insertTempObj.getData()])
@@ -1546,10 +1544,7 @@ const handleMouseMove = (e: MouseEvent) => {
       hoverPoint.value = null
     }
     let tipTexts: string[] = []
-    if (insertTempObj instanceof EntityClassInWall) {
-      tipTexts = insertTempObj.setPrepareState(x, y, nearest || undefined)
-      drawWrapper2DAnd3D()
-    } else if (insertTempObj instanceof PointEntityClass) {
+    if (insertTempObj instanceof PointEntityClass) {
       tipTexts = insertTempObj.setPrepareState(x, y)
       drawWrapper2DAnd3D()
     } else if (insertTempObj instanceof PlaneGroupEntity) {

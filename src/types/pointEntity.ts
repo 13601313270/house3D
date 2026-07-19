@@ -228,7 +228,7 @@ export abstract class PointEntityClass<T extends PointObjData> extends BaseEntit
   }
 
   // 待添加状态（鼠标新增悬浮的时候）
-  abstract setPrepareState(x: number, y: number, ...args: any[]): string[]
+  abstract setPrepareState(x: number, y: number): string[]
 
   beforeRemove() {
     super.beforeRemove()

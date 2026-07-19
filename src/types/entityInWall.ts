@@ -2,6 +2,7 @@ import { WallData } from "@/entities/wall/index.d";
 import { PointEntityClass } from "./pointEntity";
 import { PointObjData, ObjInWallData, Point } from "./map2d";
 import { MatchSnapPoint } from "./baseEntity";
+import getNearestWall from "@/utils/getNearestWall";
 
 export interface NearestWallResult {
   wall: WallData
@@ -12,7 +13,8 @@ export interface NearestWallResult {
 
 export abstract class EntityClassInWall<T extends ObjInWallData> extends PointEntityClass<T> {
   // 待添加状态（鼠标新增悬浮的时候）
-  setPrepareState(x: number, y: number, nearest?: NearestWallResult): string[] {
+  setPrepareState(x: number, y: number): string[] {
+    const nearest = getNearestWall({ x, y })
     if (nearest) {
       const { pointOnWall, angle } = nearest
       const wallScreenX = pointOnWall.x

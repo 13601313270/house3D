@@ -29,7 +29,7 @@ export class PlaneGroupEntity extends GroupBaseEntity<PlaneGroupData> {
     const [width, height] = this.getSize()
     const screenX = data.x * zoomLevel;
     const screenY = data.y * zoomLevel;
-    // console.log('setPrepareState---' + this.getData().id + '---preview', data.x, data.y)
+    // console.log('setPrepare-State---' + this.getData().id + '---preview', data.x, data.y)
     // 绘制一个方块
     ctx.fillStyle = 'red'
     ctx.save(); // 保存当前状态
