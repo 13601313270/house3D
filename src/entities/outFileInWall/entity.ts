@@ -227,7 +227,7 @@ export class OutFileInWallEntity extends EntityClassInWall<OutFileInWallData> {
     ]
   }
 
-  createBoundingBox(): [THREE.Vector3, THREE.Vector3, THREE.Vector3] {
+  getBoundingBoxData(): [THREE.Vector3, THREE.Vector3, THREE.Vector3] {
     let wallThickness = 10;
     const { wallId, fileTypeId, isOuter, angle } = this.getData()
     if (this.parentEntity) {

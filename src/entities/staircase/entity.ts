@@ -290,10 +290,6 @@ export class StaircaseEntity extends LineEntityClass<StaircasePoint, StaircaseDa
     return meshList
   }
 
-  createBoundingBox() {
-    return null
-  }
-
   showMatchHandel(x: number, y: number) {
     const { points, thickness } = this.getData();
     for (let i = 0; i < points.length; i++) {

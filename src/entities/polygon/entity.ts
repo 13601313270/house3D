@@ -184,17 +184,6 @@ export class PolygonEntity extends LineEntityClass<PolygonPoint, PolygonData> {
     return meshList
   }
 
-  // createBoundingBox() {
-  //   // 第一个是尺寸，第二个是位置偏移，第三个是旋转角度
-  //   // const { r, h } = this.getData();
-  //   // 第一个是尺寸，第二个是位置偏移，第三个是旋转角度
-  //   return [
-  //     new THREE.Vector3(100, 200, 100),
-  //     new THREE.Vector3(0, 200 / 2, 0),
-  //     new THREE.Vector3(0, 0, 0)
-  //   ]
-  // }
-
   showMatchHandel(x: number, y: number) {
     const data = this.getData();
     const { points } = data;

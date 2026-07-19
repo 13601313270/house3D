@@ -154,7 +154,7 @@ export class SectorEntity extends PointEntityClass<SectorData> {
     ]
   }
 
-  createBoundingBox(): [THREE.Vector3, THREE.Vector3, THREE.Vector3] {
+  getBoundingBoxData(): [THREE.Vector3, THREE.Vector3, THREE.Vector3] {
     const data = this.getData();
     const { r, startAngle, endAngle, x, y, h } = data;
     const { minX, maxX, minY, maxY } = getMatchRectAreaBySector(data.x, data.y, r, startAngle, endAngle)

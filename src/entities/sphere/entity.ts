@@ -97,7 +97,7 @@ export class SphereEntity extends PointEntityClass<SphereData> {
     ]
   }
 
-  createBoundingBox(): [THREE.Vector3, THREE.Vector3, THREE.Vector3] {
+  getBoundingBoxData(): [THREE.Vector3, THREE.Vector3, THREE.Vector3] {
     const { r } = this.getData();
     return [
       new THREE.Vector3(r * 2, r * 2, r * 2),

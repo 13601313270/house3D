@@ -70,8 +70,8 @@ export abstract class PointEntityClass<T extends PointObjData> extends BaseEntit
     })();
   }
 
-  // 创建包裹立方体
-  abstract createBoundingBox(): [THREE.Vector3, THREE.Vector3, THREE.Vector3] | null // 第一个是尺寸，第二个是位置偏移，第三个是旋转角度
+  // 获取包裹立方体的数据
+  abstract getBoundingBoxData(): [THREE.Vector3, THREE.Vector3, THREE.Vector3] | null // 第一个是尺寸，第二个是位置偏移，第三个是旋转角度
 
   reCreate3DMeshIfNeed(): void {
     const oldCacheKey = this.cacheKeyStr;
@@ -88,7 +88,7 @@ export abstract class PointEntityClass<T extends PointObjData> extends BaseEntit
     }
     // 容器包裹立方体
     (() => {
-      const boundingBoxData = this.createBoundingBox();
+      const boundingBoxData = this.getBoundingBoxData();
       this.boundingBoxData = boundingBoxData
       if (!boundingBoxData) {
         return;
@@ -162,7 +162,7 @@ export abstract class PointEntityClass<T extends PointObjData> extends BaseEntit
   }
 
   changeBoundingBoxState() {
-    const boundingBox = this.createBoundingBox();
+    const boundingBox = this.getBoundingBoxData();
     if (boundingBox) {
       const data = this.getData();
       // 第一个是尺寸，第二个是位置偏移，第三个是旋转角度

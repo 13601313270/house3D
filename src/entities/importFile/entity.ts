@@ -175,7 +175,7 @@ export class ImportFileEntity extends PointEntityClass<ImportFileData> {
     new THREE.Vector3(0, 0, 0)
   ]
 
-  createBoundingBox(): [THREE.Vector3, THREE.Vector3, THREE.Vector3] {
+  getBoundingBoxData(): [THREE.Vector3, THREE.Vector3, THREE.Vector3] {
     return this.boxData
   }
 

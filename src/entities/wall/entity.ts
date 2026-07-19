@@ -354,10 +354,6 @@ export class WallEntity extends LineEntityClass<WallPoint, WallData> {
     return meshList
   }
 
-  createBoundingBox() {
-    return null
-  }
-
   showMatchHandel(x: number, y: number) {
     const data = this.getData();
     const { points } = data;

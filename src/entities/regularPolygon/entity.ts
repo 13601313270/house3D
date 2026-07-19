@@ -194,7 +194,7 @@ export class RegularPolygonEntity extends PointEntityClass<RegularPolygonData> {
     ]
   }
 
-  createBoundingBox(): [THREE.Vector3, THREE.Vector3, THREE.Vector3] {
+  getBoundingBoxData(): [THREE.Vector3, THREE.Vector3, THREE.Vector3] {
     const { r, h } = this.getData();
     // 第一个是尺寸，第二个是位置偏移，第三个是旋转角度
     return [

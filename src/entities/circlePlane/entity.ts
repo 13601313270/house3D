@@ -194,7 +194,7 @@ export class CirclePlaneEntity extends PointEntityClass<CirclePlaneData> {
     ]
   }
 
-  createBoundingBox(): [THREE.Vector3, THREE.Vector3, THREE.Vector3] {
+  getBoundingBoxData(): [THREE.Vector3, THREE.Vector3, THREE.Vector3] {
     const { r } = this.getData();
     return [
       new THREE.Vector3(r * 2, 0, r * 2),

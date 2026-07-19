@@ -184,10 +184,6 @@ export class PolygonPlaneEntity extends LineEntityClass<PolygonPlanePoint, Polyg
     return meshList
   }
 
-  createBoundingBox() {
-    return null
-  }
-
   showMatchHandel(x: number, y: number) {
     const data = this.getData();
     const { points } = data;

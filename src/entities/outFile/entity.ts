@@ -350,7 +350,7 @@ export class OutFileEntity extends PointEntityClass<OutFileData> {
     ]
   }
 
-  createBoundingBox(): [THREE.Vector3, THREE.Vector3, THREE.Vector3] | null {
+  getBoundingBoxData(): [THREE.Vector3, THREE.Vector3, THREE.Vector3] | null {
     const data = this.getData();
 
     const { fileTypeId, angleY } = data

@@ -195,7 +195,7 @@ export class PlaneEntity extends PointEntityClass<PlaneData> {
     ]
   }
 
-  createBoundingBox(): [THREE.Vector3, THREE.Vector3, THREE.Vector3] {
+  getBoundingBoxData(): [THREE.Vector3, THREE.Vector3, THREE.Vector3] {
     const { width, length, angleY } = this.getData();
     return [
       new THREE.Vector3(width, 1, length),

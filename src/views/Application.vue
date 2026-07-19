@@ -1034,7 +1034,7 @@ const deleteContextMenuEntity = () => {
     worldApi.delete(type, contextMenu.value.index)
   }
   contextMenu.value = null
-  // drawWrapper2DAnd3D()
+  drawWrapper2DAnd3D()
 }
 
 const handleCanvasClick = async (e: MouseEvent) => {

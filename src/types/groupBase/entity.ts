@@ -152,7 +152,7 @@ export abstract class GroupBaseEntity<T extends GroupBaseData> extends PointEnti
     return [100, 100, 100]
   }
 
-  createBoundingBox(): [THREE.Vector3, THREE.Vector3, THREE.Vector3] {
+  getBoundingBoxData(): [THREE.Vector3, THREE.Vector3, THREE.Vector3] {
     const [width, height, depth] = this.getSize()
     // const { width, height, depth, angleY } = this.children[0].getData();
     const { angleY } = this.getData();

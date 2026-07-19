@@ -99,7 +99,7 @@ export class TorusEntity extends PointEntityClass<TorusData> {
     ]
   }
 
-  createBoundingBox(): [THREE.Vector3, THREE.Vector3, THREE.Vector3] {
+  getBoundingBoxData(): [THREE.Vector3, THREE.Vector3, THREE.Vector3] {
     const { r, t } = this.getData();
     // 第一个是尺寸，第二个是位置偏移，第三个是旋转角度
     const w = r * 2 + t * 2;

@@ -158,7 +158,7 @@ export class CurtainEntity extends PointEntityClass<CurtainData> {
     ]
   }
 
-  createBoundingBox(): [THREE.Vector3, THREE.Vector3, THREE.Vector3] {
+  getBoundingBoxData(): [THREE.Vector3, THREE.Vector3, THREE.Vector3] {
     const { width, height, angleY } = this.getData();
     return [
       new THREE.Vector3(width, height, this.depth),

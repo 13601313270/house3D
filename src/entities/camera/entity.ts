@@ -295,7 +295,7 @@ export class CameraEntity extends CameraBase<CameraData> {
     ]
   }
 
-  createBoundingBox(): [THREE.Vector3, THREE.Vector3, THREE.Vector3] {
+  getBoundingBoxData(): [THREE.Vector3, THREE.Vector3, THREE.Vector3] {
     // const { width, height, bottom, z } = this.getData();
     return [
       new THREE.Vector3(60, 60, 60),

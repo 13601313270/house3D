@@ -185,7 +185,7 @@ export class CubeEntity extends PointEntityClass<CubeData> {
     ]
   }
 
-  createBoundingBox(): [THREE.Vector3, THREE.Vector3, THREE.Vector3] {
+  getBoundingBoxData(): [THREE.Vector3, THREE.Vector3, THREE.Vector3] {
     const { width, height, depth, angleY } = this.getData();
     return [
       new THREE.Vector3(width, height, depth),

@@ -378,7 +378,7 @@ export class SignEntity extends PointEntityClass<SignData> {
     ]
   }
 
-  createBoundingBox(): [THREE.Vector3, THREE.Vector3, THREE.Vector3] {
+  getBoundingBoxData(): [THREE.Vector3, THREE.Vector3, THREE.Vector3] {
     const { angleY, width } = this.getData();
     const length = 10 + 4;
 
