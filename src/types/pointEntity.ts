@@ -36,7 +36,6 @@ export abstract class PointEntityClass<T extends PointObjData> extends BaseEntit
       if (this.parentEntity) {
         this.parentEntity.group.add(group)
       }
-      this.updateBoundingBoxState();
     })();
     (() => {
       const shaftGeometry = new THREE.BoxGeometry(1, 1, 1);
@@ -68,6 +67,7 @@ export abstract class PointEntityClass<T extends PointObjData> extends BaseEntit
         this.parentEntity.group.add(group2)
       }
     })();
+    this.updateBoundingBoxState();
   }
 
   // 获取包裹立方体的数据
