@@ -47,11 +47,11 @@ export class CameraEntity extends CameraBase<CameraData> {
     }, 100)
   }
 
-  draw2DPreview(ctx: CanvasRenderingContext2D, panOffset: Point, zoomLevel: number): void {
+  draw2DPreview(ctx: CanvasRenderingContext2D, zoomLevel: number): void {
     const data = this.getData();
     const index: number = this.parentEntity ? this.parentEntity.getTypeListEntity('camera').indexOf(this) : -1;
-    const screenX = data.x * zoomLevel + panOffset.x
-    const screenY = data.y * zoomLevel + panOffset.y
+    const screenX = data.x * zoomLevel;
+    const screenY = data.y * zoomLevel;
     const angleY = Math.atan2(data.targetPositionY - data.y, data.targetPositionX - data.x);
     const preImgScale = 0.2
     ctx.save(); // 保存当前状态
@@ -67,8 +67,8 @@ export class CameraEntity extends CameraBase<CameraData> {
     ); // 以新原点为中心绘制
     ctx.restore(); // 恢复原始状态
 
-    const targetX = data.targetPositionX * zoomLevel + panOffset.x
-    const targetY = data.targetPositionY * zoomLevel + panOffset.y
+    const targetX = data.targetPositionX * zoomLevel;
+    const targetY = data.targetPositionY * zoomLevel;
     const distance = Math.hypot(targetX - screenX, targetY - screenY)
     const radius = distance
 
@@ -115,8 +115,8 @@ export class CameraEntity extends CameraBase<CameraData> {
     ctx.lineWidth = 1
     ctx.beginPath()
     ctx.arc(
-      data.targetPositionX * zoomLevel + panOffset.x,
-      data.targetPositionY * zoomLevel + panOffset.y,
+      data.targetPositionX * zoomLevel,
+      data.targetPositionY * zoomLevel,
       this.circleRadius * zoomLevel + 3, 0, Math.PI * 2)
     // ctx.fill()
     ctx.stroke()

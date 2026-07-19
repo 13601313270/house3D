@@ -23,7 +23,7 @@ export class PolygonPlaneEntity extends LineEntityClass<PolygonPlanePoint, Polyg
   //   // }
   // }
 
-  draw2DPreview(ctx: CanvasRenderingContext2D, panOffset: Point, zoomLevel: number): void {
+  draw2DPreview(ctx: CanvasRenderingContext2D, zoomLevel: number): void {
     const data = this.getData();
     ctx.strokeStyle = 'black'
     ctx.fillStyle = data.color
@@ -31,8 +31,8 @@ export class PolygonPlaneEntity extends LineEntityClass<PolygonPlanePoint, Polyg
     ctx.beginPath()
     for (let i = 0; i < data.points.length; i++) {
       const point = data.points[i]
-      const screenX = (point.x + this.offset.x) * zoomLevel + panOffset.x;
-      const screenY = (point.y + this.offset.y) * zoomLevel + panOffset.y;
+      const screenX = (point.x + this.offset.x) * zoomLevel;
+      const screenY = (point.y + this.offset.y) * zoomLevel;
       if (i === 0) {
         ctx.moveTo(screenX, screenY)
       } else {
@@ -41,8 +41,8 @@ export class PolygonPlaneEntity extends LineEntityClass<PolygonPlanePoint, Polyg
     }
     if (data.points.length >= 2) {
       ctx.lineTo(
-        (data.points[0].x + this.offset.x) * zoomLevel + panOffset.x,
-        (data.points[0].y + this.offset.y) * zoomLevel + panOffset.y
+        (data.points[0].x + this.offset.x) * zoomLevel,
+        (data.points[0].y + this.offset.y) * zoomLevel
       )
     }
     ctx.stroke()

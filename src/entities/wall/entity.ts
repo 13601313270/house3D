@@ -25,7 +25,7 @@ export class WallEntity extends LineEntityClass<WallPoint, WallData> {
     }
   }
 
-  draw2DPreview(ctx: CanvasRenderingContext2D, panOffset: Point, zoomLevel: number): void {
+  draw2DPreview(ctx: CanvasRenderingContext2D, zoomLevel: number): void {
     const data = this.getData();
     const { points, thickness, cornerType, hb, bc, color } = data;
     if (hb) {
@@ -36,8 +36,8 @@ export class WallEntity extends LineEntityClass<WallPoint, WallData> {
       ctx.beginPath()
       for (let i = 0; i < points.length; i++) {
         const point = points[i]
-        const screenX = (point.x + this.offset.x) * zoomLevel + panOffset.x;
-        const screenY = (point.y + this.offset.y) * zoomLevel + panOffset.y;
+        const screenX = (point.x + this.offset.x) * zoomLevel;
+        const screenY = (point.y + this.offset.y) * zoomLevel;
         if (i === 0) {
           ctx.moveTo(screenX, screenY)
         } else {
@@ -86,8 +86,8 @@ export class WallEntity extends LineEntityClass<WallPoint, WallData> {
 
       ctx.beginPath()
       for (let j = 0; j < box.length; j++) {
-        const screenX = (box[j].x + this.offset.x) * zoomLevel + panOffset.x
-        const screenY = (box[j].y + this.offset.y) * zoomLevel + panOffset.y
+        const screenX = (box[j].x + this.offset.x) * zoomLevel
+        const screenY = (box[j].y + this.offset.y) * zoomLevel
         if (j === 0) {
           ctx.moveTo(screenX, screenY)
         } else {

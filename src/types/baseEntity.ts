@@ -74,7 +74,6 @@ export abstract class BaseEntityClass<T extends BaseObjData> {
   // 本对象的2D预览绘制，（时间早于draw2DByData）
   abstract draw2DPreview(
     ctx: CanvasRenderingContext2D,
-    panOffset: Point,
     zoomLevel: number,
   ): void;
 

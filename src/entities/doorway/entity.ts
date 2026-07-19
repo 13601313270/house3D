@@ -28,7 +28,7 @@ export class DoorEntity extends EntityClassInWall<DoorData> {
     }
   }
 
-  draw2DPreview(ctx: CanvasRenderingContext2D, panOffset: Point, zoomLevel: number): void {
+  draw2DPreview(ctx: CanvasRenderingContext2D, zoomLevel: number): void {
     const data = this.getData();
     let wallThickness = 10;
     if (this.parentEntity) {
@@ -37,8 +37,8 @@ export class DoorEntity extends EntityClassInWall<DoorData> {
         wallThickness = findWall.getData().thickness;
       }
     }
-    const screenX = data.x * zoomLevel + panOffset.x
-    const screenY = data.y * zoomLevel + panOffset.y
+    const screenX = data.x * zoomLevel;
+    const screenY = data.y * zoomLevel;
     // const wallThickness = 10; // walls.find((wall) => wall.id === this.wallId)?.thickness || 0;
     const color = data.color
     const width = data.width * zoomLevel;

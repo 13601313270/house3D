@@ -62,14 +62,12 @@ export abstract class GroupBaseEntity<T extends GroupBaseData> extends BaseEntit
 
   draw2DPreview(
     ctx: CanvasRenderingContext2D,
-    panOffset: Point,
     zoomLevel: number,
   ) {
     const data = this.getData();
     const { angleY } = data
-    const [width, height] = this.getSize()
-    const screenX = data.x * zoomLevel + panOffset.x;
-    const screenY = data.y * zoomLevel + panOffset.y;
+    const screenX = data.x * zoomLevel;
+    const screenY = data.y * zoomLevel;
 
     const allObj: BaseEntityClass<BaseObjData>[] = [];
     this.children.forEach(item => {
@@ -96,10 +94,7 @@ export abstract class GroupBaseEntity<T extends GroupBaseData> extends BaseEntit
     ctx.rotate(angleY * -1)
 
     allObj.forEach((item) => {
-      item.draw2DPreview(ctx, {
-        x: 0,
-        y: 0,
-      }, zoomLevel)
+      item.draw2DPreview(ctx, zoomLevel)
     })
 
     // 绘制轴
@@ -110,7 +105,7 @@ export abstract class GroupBaseEntity<T extends GroupBaseData> extends BaseEntit
     //   }, zoomLevel, 100 | this.width, 100 | this.height)
     // }
     ctx.restore()
-    drawAxes(ctx, panOffset, angleY * -1, zoomLevel, this.width, this.height)
+    drawAxes(ctx, angleY * -1, zoomLevel, this.width, this.height)
 
     // 绘制所有ObjFile的中心点
     // this.allObjFiles.forEach((item) => {

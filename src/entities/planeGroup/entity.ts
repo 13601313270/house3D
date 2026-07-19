@@ -23,13 +23,12 @@ export class PlaneGroupEntity extends GroupBaseEntity<PlaneGroupData> {
 
   draw2DPreview(
     ctx: CanvasRenderingContext2D,
-    panOffset: Point,
     zoomLevel: number,
   ) {
     const data = this.getData();
     const [width, height] = this.getSize()
-    const screenX = data.x * zoomLevel + panOffset.x;// data.x * zoomLevel + panOffset.x
-    const screenY = data.y * zoomLevel + panOffset.y;// data.y * zoomLevel + panOffset.y
+    const screenX = data.x * zoomLevel;
+    const screenY = data.y * zoomLevel;
     // console.log('setPrepareState---' + this.getData().id + '---preview', data.x, data.y)
     // 绘制一个方块
     ctx.fillStyle = 'red'
@@ -44,7 +43,7 @@ export class PlaneGroupEntity extends GroupBaseEntity<PlaneGroupData> {
       height * zoomLevel
     )
     ctx.restore(); // 恢复原始状态
-    super.draw2DPreview(ctx, panOffset, zoomLevel)
+    super.draw2DPreview(ctx, zoomLevel)
   }
 
   draw2DActionHandle(

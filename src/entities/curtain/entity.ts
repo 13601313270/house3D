@@ -15,10 +15,10 @@ export class CurtainEntity extends PointEntityClass<CurtainData> {
   private static textureLoader = new THREE.TextureLoader();
   private static textureCache = new Map<string | File, THREE.Texture>();
 
-  draw2DPreview(ctx: CanvasRenderingContext2D, panOffset: Point, zoomLevel: number): void {
+  draw2DPreview(ctx: CanvasRenderingContext2D, zoomLevel: number): void {
     const data = this.getData();
-    const screenX = data.x * zoomLevel + panOffset.x
-    const screenY = data.y * zoomLevel + panOffset.y
+    const screenX = data.x * zoomLevel;
+    const screenY = data.y * zoomLevel;
     const { width } = data;
     const angleY = data.angleY || 0;// 历史数据问题
 

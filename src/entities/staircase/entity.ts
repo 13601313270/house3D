@@ -39,7 +39,7 @@ export class StaircaseEntity extends LineEntityClass<StaircasePoint, StaircaseDa
     ];
   }
 
-  draw2DPreview(ctx: CanvasRenderingContext2D, panOffset: Point, zoomLevel: number): void {
+  draw2DPreview(ctx: CanvasRenderingContext2D, zoomLevel: number): void {
     const data = this.getData();
     const { cornerType } = data;
     const { data: wallBoxList } = createAllWallFromPoints(data.points, data.thickness, cornerType)
@@ -55,8 +55,8 @@ export class StaircaseEntity extends LineEntityClass<StaircasePoint, StaircaseDa
 
       ctx.beginPath()
       for (let j = 0; j < box.length; j++) {
-        const screenX = (box[j].x + this.offset.x) * zoomLevel + panOffset.x
-        const screenY = (box[j].y + this.offset.y) * zoomLevel + panOffset.y
+        const screenX = (box[j].x + this.offset.x) * zoomLevel
+        const screenY = (box[j].y + this.offset.y) * zoomLevel
         if (j === 0) {
           ctx.moveTo(screenX, screenY)
         } else {

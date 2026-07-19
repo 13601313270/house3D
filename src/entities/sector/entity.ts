@@ -13,11 +13,11 @@ export class SectorEntity extends PointEntityClass<SectorData> {
   type: string = 'sector'
   private circleRadius = 3
 
-  draw2DPreview(ctx: CanvasRenderingContext2D, panOffset: Point, zoomLevel: number): void {
+  draw2DPreview(ctx: CanvasRenderingContext2D, zoomLevel: number): void {
     const data = this.getData();
     const { r, startAngle, endAngle, x, y } = data;
-    const screenX = x * zoomLevel + panOffset.x
-    const screenY = y * zoomLevel + panOffset.y
+    const screenX = x * zoomLevel
+    const screenY = y * zoomLevel
 
     // 绘制一个圆形
     ctx.fillStyle = data.color

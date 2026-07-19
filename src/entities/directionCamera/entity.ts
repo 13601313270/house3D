@@ -59,13 +59,12 @@ export class DirectionCameraEntity extends CameraBase<DirectionCameraData> {
     }
   }
 
-  draw2DPreview(ctx: CanvasRenderingContext2D, panOffset: Point, zoomLevel: number): void {
+  draw2DPreview(ctx: CanvasRenderingContext2D, zoomLevel: number): void {
     const data = this.getData();
     const index: number = this.parentEntity ? this.parentEntity.getTypeListEntity('camera').indexOf(this) : -1;
-    const screenX = data.x * zoomLevel + panOffset.x
-    const screenY = data.y * zoomLevel + panOffset.y
-    // const targetPosition = this.getTargetPosition();
-    const angleY = this.data.angleY;// Math.atan2(data.targetPositionY - data.y, data.targetPositionX - data.x);
+    const screenX = data.x * zoomLevel;
+    const screenY = data.y * zoomLevel;
+    const angleY = this.data.angleY;
     const preImgScale = 0.2
     ctx.save(); // 保存当前状态
     const { width, height } = img;
@@ -81,8 +80,8 @@ export class DirectionCameraEntity extends CameraBase<DirectionCameraData> {
     ctx.restore(); // 恢复原始状态
 
     const targetPosition = this.getTargetPosition();
-    const targetX = targetPosition.x * zoomLevel + panOffset.x
-    const targetY = targetPosition.y * zoomLevel + panOffset.y
+    const targetX = targetPosition.x * zoomLevel;
+    const targetY = targetPosition.y * zoomLevel;
     const distance = Math.hypot(targetX - screenX, targetY - screenY)
     const radius = distance
 
@@ -129,8 +128,8 @@ export class DirectionCameraEntity extends CameraBase<DirectionCameraData> {
     ctx.lineWidth = 1
     ctx.beginPath()
     ctx.arc(
-      targetPosition.x * zoomLevel + panOffset.x,
-      targetPosition.y * zoomLevel + panOffset.y,
+      targetPosition.x * zoomLevel,
+      targetPosition.y * zoomLevel,
       this.circleRadius * zoomLevel + 3, 0, Math.PI * 2)
     // ctx.fill()
     ctx.stroke()

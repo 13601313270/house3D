@@ -2,7 +2,7 @@ import { Point } from "@/types"
 
 const drawAxes = (
   ctx: CanvasRenderingContext2D,
-  panOffset: Point,
+  // panOffset: Point,
   angle: number,
   zoomLevel: number,
   canvasWidth: number,
@@ -16,8 +16,8 @@ const drawAxes = (
   const labelPadding = 15
   const scale = 100
 
-  const originX = panOffset.x
-  const originY = panOffset.y
+  const originX = 0; // panOffset.x
+  const originY = 0; // panOffset.y
   ctx.lineWidth = axisLineWidth
 
   ctx.strokeStyle = axisXColor

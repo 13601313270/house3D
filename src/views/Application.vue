@@ -450,9 +450,17 @@ const drawWrapper2D = () => {
   const canvasAction = canvas2D2Ref.value;
   if (canvas && canvasAction && canvas.getContext('2d')) {
     const ctx = canvas.getContext('2d')!;
+    ctx.clearRect(0, 0, worldApi.width, worldApi.height)
+    ctx.fillStyle = '#f5f5f5'
+    ctx.fillRect(0, 0, worldApi.width, worldApi.height)
+    const worldData = worldApi.getData()
+    const { angleY } = worldData;
+    const screenX = worldData.x * zoom2DLevel.value + panOffsetOfWorld.value.x;
+    const screenY = worldData.y * zoom2DLevel.value + panOffsetOfWorld.value.y;
+    ctx.save()
+    ctx.translate(screenX, screenY)
     worldApi.draw2DPreview(
       ctx,
-      panOffsetOfWorld.value,
       zoom2DLevel.value,
     )
     // 绘制磁吸点的参考轴
@@ -483,23 +491,16 @@ const drawWrapper2D = () => {
     }
     if (ctx && insertTempObj) {
       (() => {
-        const worldData = worldApi.getData()
-        const { angleY } = worldData;
-        const screenX = worldData.x * zoom2DLevel.value + panOffsetOfWorld.value.x;
-        const screenY = worldData.y * zoom2DLevel.value + panOffsetOfWorld.value.y;
-        ctx.save()
-        ctx.translate(screenX, screenY)
-        ctx.rotate(angleY * -1)
         if (insertTempObj instanceof LineEntityClass) {
-          insertTempObj.draw2DPreview(ctx, { x: 0, y: 0 }, zoom2DLevel.value)
+          insertTempObj.draw2DPreview(ctx, zoom2DLevel.value)
         } else if (insertTempObj instanceof PointEntityClass) {
-          insertTempObj.draw2DPreview(ctx, { x: 0, y: 0 }, zoom2DLevel.value)
+          insertTempObj.draw2DPreview(ctx, zoom2DLevel.value)
         } else if (insertTempObj instanceof PlaneGroupEntity) {
-          insertTempObj.draw2DPreview(ctx, { x: 0, y: 0 }, zoom2DLevel.value)
+          insertTempObj.draw2DPreview(ctx, zoom2DLevel.value)
         }
-        ctx.restore()
       })()
     }
+    ctx.restore()
   }
 }
 

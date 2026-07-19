@@ -44,11 +44,11 @@ export class OutFileInWallEntity extends EntityClassInWall<OutFileInWallData> {
     })
   }
 
-  draw2DPreview(ctx: CanvasRenderingContext2D, panOffset: Point, zoomLevel: number): void {
+  draw2DPreview(ctx: CanvasRenderingContext2D, zoomLevel: number): void {
     const data = this.getData();
     const { x, y, isOuter, angle, wallId, fileTypeId } = data
-    const screenX = x * zoomLevel + panOffset.x
-    const screenY = y * zoomLevel + panOffset.y
+    const screenX = x * zoomLevel;
+    const screenY = y * zoomLevel;
     const findObjInfo = window.worldState.ObjFileTypes.find(item => item.id === fileTypeId)
     const preImgScale = findObjInfo?.preImgScale || 1
     const { width, height } = this.img;
