@@ -1175,10 +1175,22 @@ const handleMouseMove = (e: MouseEvent) => {
 
     const startAngle = Math.atan2(startVecY, startVecX)
     const currentAngle = Math.atan2(currentVecY, currentVecX)
-    const rotateAngle = currentAngle - startAngle
-    console.log('rotateAngle---a', rotateAngle)
+    let rotateAngle = currentAngle - startAngle;
+    (() => {
+      // newAngleY每30度增加一个磁吸，接近这个度数上下5度，会吸附过去
+      let targetAngel = panStartAngel.value + rotateAngle * -1;
+      const snapAngle = 30 * (Math.PI / 180); // 30度转换为弧度
+      const snapThresholdAngle = 5 * (Math.PI / 180); // 5度转换为弧度
+      const nearestSnapAngle = Math.round(targetAngel / snapAngle) * snapAngle;
+      const diff = Math.abs(targetAngel - nearestSnapAngle);
+      if (diff < snapThresholdAngle) {
+        targetAngel = nearestSnapAngle;
+      }
+      rotateAngle = panStartAngel.value - targetAngel;
+    })()
 
     const newAngleY = panStartAngel.value + rotateAngle * -1
+
     const worldData = worldApi.getData();
     (() => {
       // 0, 370
@@ -1597,8 +1609,8 @@ const handleMouseDown = (e: MouseEvent) => {
     console.log('panStartAngel.value', canvas.height / 2, mouseYInCanvas)
     let xTemp = 0;
     let yTemp = 0;
-    let yDiff = canvas.height / 2 - mouseYInCanvas;
-    let xDiff = canvas.width / 2 - mouseXInCanvas;
+    const yDiff = canvas.height / 2 - mouseYInCanvas;
+    const xDiff = canvas.width / 2 - mouseXInCanvas;
     if (Math.abs(yDiff) < 100 && Math.abs(xDiff) < 100) {
       if (Math.abs(yDiff) > Math.abs(xDiff)) {
         if (mouseYInCanvas < canvas.height / 2 && yDiff < 100) {
