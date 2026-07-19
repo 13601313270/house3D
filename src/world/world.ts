@@ -37,6 +37,11 @@ class WorldGroup extends GroupBaseEntity<WorldData> {
 
     const axesHelper = new THREE.AxesHelper(100)
     axesHelper.layers.set(2)
+    axesHelper.setColors(
+      new THREE.Color(0xff0000),
+      new THREE.Color(0x0000ff),
+      new THREE.Color(0x00ff00)
+    )
     this.group.add(axesHelper);
     this.setEnvironMent()
   }
