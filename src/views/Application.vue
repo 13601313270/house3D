@@ -5,7 +5,7 @@
         <img class="icon" src="/favicon.ico" />
         <div class="toolbar-item" @mouseleave="activeToolsIndex = -1">
           <button type="button" @mouseenter="activeToolsIndex = 0">
-            文件{{ panOffsetOfWorld }}
+            文件
           </button>
           <div class="list" v-show="activeToolsIndex === 0">
             <div @click="saveDrawing" class="childItem">
@@ -90,6 +90,8 @@
             @contextmenu.prevent.stop @mousemove="handleMouseMove" @mouseleave="handleMouseLeave"
             @mouseup="handleMouseUp" @wheel="handleWheel" class="drawing-canvas"
             :style="{ display: isSplitting ? 'none' : 'block' }" />
+          <img v-if="isPaningAngel" class="protractor" src="protractor.png"
+            :style="{ left: panningScreenCenter.x + 'px', top: panningScreenCenter.y + 'px' }" />
         </div>
       </div>
 
@@ -245,11 +247,16 @@ const dragStartPoint = ref<Point | null>(null)
 const panOffsetOfWorld = ref<Point>({ x: 0, y: 0 })
 const isPanningScreen = ref(false);// 平移屏幕
 const isPaningAngel = ref(false);// 平移角度
+// 平移角度时候，围绕的中心点
+const panningScreenCenter = ref<{
+  x: number
+  y: number
+}>({ x: 0, y: 0 })
 const isMenuing = ref(false);// 选中对象的柄
 const panStartAngel = ref(0);
 const screenAngel = ref(0);
-const panel1SplitWidthPer = ref(0.75)
-const panel2SplitWidthPer = ref(0.1)
+const panel1SplitWidthPer = ref(0.35)
+const panel2SplitWidthPer = ref(0.35)
 const isSplitting = ref(false)
 const zoom2DLevel = ref(1)
 
@@ -1158,8 +1165,8 @@ const handleMouseMove = (e: MouseEvent) => {
   if (isPaningAngel.value) {
     isMenuing.value = false
     isPanningScreen.value = false
-    const centerX = canvas.width / 2
-    const centerY = canvas.height / 2
+    const centerX = panningScreenCenter.value.x
+    const centerY = panningScreenCenter.value.y
 
     const startVecX = mouseStartScreenX - centerX
     const startVecY = mouseStartScreenY - centerY
@@ -1169,13 +1176,11 @@ const handleMouseMove = (e: MouseEvent) => {
     const startAngle = Math.atan2(startVecY, startVecX)
     const currentAngle = Math.atan2(currentVecY, currentVecX)
     const rotateAngle = currentAngle - startAngle
+    console.log('rotateAngle---a', rotateAngle)
 
     const newAngleY = panStartAngel.value + rotateAngle * -1
     const worldData = worldApi.getData();
     (() => {
-      // 389 370
-      const centerX = rect.width / 2
-      const centerY = rect.height / 2
       // 0, 370
       const { x: positionX, y: positionY } = panStartOffsetOfWorld;
       const dx = positionX - centerX
@@ -1193,6 +1198,10 @@ const handleMouseMove = (e: MouseEvent) => {
       angleY: newAngleY,
     });
     drawWrapper2D()
+    const canvasAction = canvas2D2Ref.value!;
+    const ctxAction = canvasAction.getContext('2d')!
+    // 绘制操作句柄
+    ctxAction.clearRect(0, 0, canvasAction.width, canvasAction.height)
     return;
   }
   const worldData = worldApi.getData();
@@ -1585,6 +1594,17 @@ const handleMouseDown = (e: MouseEvent) => {
       y: (rect.height / 2 - panOffsetOfWorld.value.y) / zoom2DLevel.value,
     }
     panStartAngel.value = worldApi.getData().angleY
+    console.log('panStartAngel.value', canvas.height / 2, mouseYInCanvas)
+    let yTemp = 0;
+    if (mouseYInCanvas < canvas.height / 2 && canvas.height / 2 - mouseYInCanvas < 100) {
+      yTemp = 100 - (canvas.height / 2 - mouseYInCanvas);
+    } else if (mouseYInCanvas > canvas.height / 2 && mouseYInCanvas - canvas.height / 2 < 100) {
+      yTemp = -100 + (mouseYInCanvas - canvas.height / 2);
+    }
+    panningScreenCenter.value = {
+      x: canvas.width / 2,
+      y: canvas.height / 2 + yTemp,
+    }
   } else {
     const worldData = worldApi.getData();
     const { angleY } = worldData;
@@ -2155,6 +2175,14 @@ button {
   box-sizing: border-box;
   overflow: hidden;
   position: relative;
+
+  .protractor {
+    position: absolute;
+    pointer-events: none;
+    width: 50%;
+    z-index: 1000;
+    transform: translate(-50%, -50%);
+  }
 }
 
 .drawing-canvas {
