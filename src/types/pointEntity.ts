@@ -156,7 +156,7 @@ export abstract class PointEntityClass<T extends PointObjData> extends BaseEntit
 
   private updateBoundingBoxState() {
     const boxData = this.boundingBoxData;
-    if (boxData) {
+    if (boxData && this.boundingBox) {
       const data = this.getData();
       // 第一个是尺寸，第二个是位置偏移，第三个是旋转角度
       const [boxVector3, offsetVector3, rotateVector3] = boxData;
@@ -190,6 +190,11 @@ export abstract class PointEntityClass<T extends PointObjData> extends BaseEntit
     } else {
       // this.boundingBox.visible = false
     }
+  }
+
+  reBuildBoundingBoxData() {
+    super.reBuildBoundingBoxData()
+    this.updateBoundingBoxState()
   }
 
   setData(data: T) {

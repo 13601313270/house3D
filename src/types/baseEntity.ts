@@ -32,7 +32,7 @@ export abstract class BaseEntityClass<T extends BaseObjData> {
   constructor(parentEntity: GroupBaseEntity<GroupBaseData> | null, data: T) {
     this.parentEntity = parentEntity
     this.data = data
-    this.boundingBoxData = this.getBoundingBoxData()
+    this.reBuildBoundingBoxData()
   }
 
   init(): Promise<void> {
@@ -42,9 +42,18 @@ export abstract class BaseEntityClass<T extends BaseObjData> {
   // 获取包裹立方体的数据
   abstract getBoundingBoxData(): [THREE.Vector3, THREE.Vector3, THREE.Vector3] | null // 第一个是尺寸，第二个是位置偏移，第三个是旋转角度
 
+  reBuildBoundingBoxData() {
+    this.boundingBoxData = this.getBoundingBoxData()
+    setTimeout(() => {
+      if (this.parentEntity) {
+        this.parentEntity.reBuildBoundingBoxData()
+      }
+    })
+  }
+
   setData(data: T) {
     this.data = data
-    this.boundingBoxData = this.getBoundingBoxData()
+    this.reBuildBoundingBoxData();
     // 双向去除原有的关联对象
     this.associationEntity.forEach(entity => {
       if (entity.associationEntity.includes(this)) {

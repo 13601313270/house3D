@@ -70,9 +70,6 @@ function raycastObjects(list: THREE.Group[], event: MouseEvent): THREE.Object3D 
   mouse.set(x, y)
   raycaster.setFromCamera(mouse, camera)
 
-  const scene = window.worldApi.group
-  if (!scene) return null
-
   const intersects = raycaster.intersectObjects(list, true)
 
   if (intersects.length > 0) {
