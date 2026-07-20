@@ -443,6 +443,38 @@ const drawWrapper2DAnd3D = () => {
   worldApi.reCreate3DMeshIfNeed()
   worldApi.change3DMeshState()
 }
+function setHoverPoint(point: Point | null) {
+  hoverPoint.value = point
+  const canvasAction = canvas2DActionRef.value;
+  if (!canvasAction) return
+
+  // 绘制磁吸点的参考轴
+  if (hoverPoint.value) {
+    const ctxAction = canvasAction.getContext('2d')!;
+    ctxAction.clearRect(0, 0, worldApi.width, worldApi.height)
+    if (!ctxAction) return
+    ctxAction.strokeStyle = '#999'
+    ctxAction.lineWidth = 1
+
+    // 垂直线（y轴对齐）
+    if (yAxisSnappedX.value !== null) {
+      const screenX = yAxisSnappedX.value * zoom2DLevel.value + panOffsetOfWorld.value.x
+      ctxAction.beginPath()
+      ctxAction.moveTo(screenX, 0)
+      ctxAction.lineTo(screenX, worldApi.height)
+      ctxAction.stroke()
+    }
+
+    // 水平线（x轴对齐）
+    if (xAxisSnappedY.value !== null) {
+      const screenY = xAxisSnappedY.value * zoom2DLevel.value + panOffsetOfWorld.value.y
+      ctxAction.beginPath()
+      ctxAction.moveTo(0, screenY)
+      ctxAction.lineTo(worldApi.width, screenY)
+      ctxAction.stroke()
+    }
+  }
+}
 const drawWrapper2D = () => {
   // console.trace('drawWrapper2D')
   const canvas = canvas2DRef.value
@@ -461,32 +493,6 @@ const drawWrapper2D = () => {
       ctx,
       zoom2DLevel.value,
     )
-    // 绘制磁吸点的参考轴
-    if (hoverPoint.value) {
-      (() => {
-        if (!ctx) return
-        ctx.strokeStyle = '#999'
-        ctx.lineWidth = 1
-
-        // 垂直线（y轴对齐）
-        if (yAxisSnappedX.value !== null) {
-          const screenX = yAxisSnappedX.value * zoom2DLevel.value + panOffsetOfWorld.value.x
-          ctx.beginPath()
-          ctx.moveTo(screenX, 0)
-          ctx.lineTo(screenX, worldApi.height)
-          ctx.stroke()
-        }
-
-        // 水平线（x轴对齐）
-        if (xAxisSnappedY.value !== null) {
-          const screenY = xAxisSnappedY.value * zoom2DLevel.value + panOffsetOfWorld.value.y
-          ctx.beginPath()
-          ctx.moveTo(0, screenY)
-          ctx.lineTo(worldApi.width, screenY)
-          ctx.stroke()
-        }
-      })();
-    }
     if (ctx && insertTempObj) {
       (() => {
         const { angleY } = worldData;
@@ -707,7 +713,7 @@ onMounted(async () => {
             insertTempObj = null;
             tempPointInsertData.value = []
             lastPoint.value = null
-            hoverPoint.value = null
+            setHoverPoint(null)
             message.info('退出绘制')
           } else {
             // tempPointInsertData去掉最后一项
@@ -730,7 +736,7 @@ onMounted(async () => {
           insertTempObj = null;
           tempPointInsertData.value = []
           lastPoint.value = null
-          hoverPoint.value = null
+          setHoverPoint(null)
           setTimeout(() => {
             insertAdding.value = false
           }, 300)// 至少停留300毫秒，防止出现那种闪现的效果。
@@ -1506,13 +1512,13 @@ const handleMouseMove = (e: MouseEvent) => {
         // console.log('match point 99999', snappedPoint44.point.x, last.x, snappedPoint44.point.y, last.y)
       }
       const tipTexts = insertTempObj.setPreparePoint(points)
-      hoverPoint.value = {
+      setHoverPoint({
         x: snappedPoint44.point.x,
         y: snappedPoint44.point.y,
-      }
+      })
       drawWrapper2DAnd3D()
-      const hoverScreenX = hoverPoint.value.x * zoom2DLevel.value + panOffsetOfWorld.value.x
-      const hoverScreenY = hoverPoint.value.y * zoom2DLevel.value + panOffsetOfWorld.value.y
+      const hoverScreenX = hoverPoint.value!.x * zoom2DLevel.value + panOffsetOfWorld.value.x
+      const hoverScreenY = hoverPoint.value!.y * zoom2DLevel.value + panOffsetOfWorld.value.y
       const canvasAction = canvas2DRef.value!;
       const ctxAction = canvasAction.getContext('2d')!
       const startY = snappedPoint44.point.y > last.y ? hoverScreenY + 14 : hoverScreenY - 15 * tipTexts.length - 22;
@@ -1533,9 +1539,9 @@ const handleMouseMove = (e: MouseEvent) => {
   } else {
     const nearest = getNearestWall({ x, y })
     if (nearest) {
-      hoverPoint.value = nearest.pointOnWall
+      setHoverPoint(nearest.pointOnWall)
     } else {
-      hoverPoint.value = null
+      setHoverPoint(null)
     }
     let tipTexts: string[] = []
     if (insertTempObj instanceof PointEntityClass) {
