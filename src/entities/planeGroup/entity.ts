@@ -26,28 +26,29 @@ export class PlaneGroupEntity extends GroupBaseEntity<PlaneGroupData> {
     ctx: CanvasRenderingContext2D,
     zoomLevel: number,
   ) {
-    const data = this.getData();
-    const screenX = data.x * zoomLevel;
-    const screenY = data.y * zoomLevel;
-    // console.log('setPrepare-State---' + this.getData().id + '---preview', data.x, data.y)
-    // 绘制一个方块
-    ctx.fillStyle = 'red'
-    ctx.save(); // 保存当前状态
-    console.log('boundingBoxData=====', this.boundingBoxData)
+    // console.log('boundingBoxData=====', this.boundingBoxData)
     if (!this.boundingBoxData) return
-    ctx.translate(screenX, screenY); // 移动原点到目标中心
-    ctx.rotate(data.angleY * -1); // 围绕新原点旋转
-    // 绘制一个范围方块
+    const data = this.getData();
     (() => {
-      const [size, offset] = this.boundingBoxData
-      ctx.strokeRect(
-        (offset.x - size.x / 2) * zoomLevel,
-        (offset.z - size.z / 2) * zoomLevel,
-        size.x * zoomLevel,
-        size.z * zoomLevel
-      )
+      const screenX = data.x * zoomLevel;
+      const screenY = data.y * zoomLevel;
+      ctx.fillStyle = 'red'
+      ctx.save(); // 保存当前状态
+      ctx.translate(screenX, screenY); // 移动原点到目标中心
+      ctx.rotate(data.angleY * -1); // 围绕新原点旋转
+      // 绘制一个范围方块
+      (() => {
+        const [size, offset] = this.boundingBoxData
+        ctx.strokeRect(
+          (offset.x - size.x / 2) * zoomLevel,
+          (offset.z - size.z / 2) * zoomLevel,
+          size.x * zoomLevel,
+          size.z * zoomLevel
+        )
+      })();
+      ctx.restore(); // 恢复原始状态
     })();
-    ctx.restore(); // 恢复原始状态
+
     super.draw2DPreview(ctx, zoomLevel)
   }
 
@@ -56,7 +57,29 @@ export class PlaneGroupEntity extends GroupBaseEntity<PlaneGroupData> {
     panOffset: Point,
     zoomLevel: number,
   ) {
+    ctx.lineWidth = 2
+    if (!this.boundingBoxData) return
     const data = this.getData();
+    (() => {
+      const screenX = data.x * zoomLevel + panOffset.x;
+      const screenY = data.y * zoomLevel + panOffset.y;
+      ctx.strokeStyle = 'red';
+      ctx.save(); // 保存当前状态
+      ctx.translate(screenX, screenY); // 移动原点到目标中心
+      ctx.rotate(data.angleY * -1); // 围绕新原点旋转
+      // 绘制一个方块
+      (() => {
+        const [size, offset] = this.boundingBoxData
+        ctx.strokeRect(
+          (offset.x - size.x / 2) * zoomLevel,
+          (offset.z - size.z / 2) * zoomLevel,
+          size.x * zoomLevel,
+          size.z * zoomLevel
+        )
+      })();
+      ctx.restore(); // 恢复原始状态
+    })();
+
     const screenX = data.x * zoomLevel + panOffset.x
     const screenY = data.y * zoomLevel + panOffset.y
 
@@ -131,35 +154,6 @@ export class PlaneGroupEntity extends GroupBaseEntity<PlaneGroupData> {
     ctx.arc(circleX, circleY, circleRadius, 0, Math.PI * 2)
     ctx.fill()
     ctx.stroke()
-
-    // 绘制 轮廓
-    const matchArea = new MatchRectArea({
-      x: data.x,
-      y: data.y,
-      width,
-      depth: height,
-      angleY: data.angleY,
-    })
-    ctx.lineWidth = 2
-    ctx.strokeStyle = 'red'
-    ctx.save(); // 保存当前状态
-    ctx.translate(
-      matchArea.data.x * zoomLevel + panOffset.x,
-      matchArea.data.y * zoomLevel + panOffset.y
-    ); // 移动原点到目标中心
-    ctx.rotate(matchArea.data.angleY * -1); // 围绕新原点旋转
-    // 绘制一个方块
-    (() => {
-      if (!this.boundingBoxData) return
-      const [size, offset] = this.boundingBoxData
-      ctx.strokeRect(
-        (offset.x - size.x / 2) * zoomLevel,
-        (offset.z - size.z / 2) * zoomLevel,
-        size.x * zoomLevel,
-        size.z * zoomLevel
-      )
-    })();
-    ctx.restore(); // 恢复原始状态
   }
 
   change3DMeshState(): void {
@@ -200,7 +194,8 @@ export class PlaneGroupEntity extends GroupBaseEntity<PlaneGroupData> {
           setTimeout(() => {
             this.reCreate3DMeshIfNeed()
             this.change3DMeshState()
-            close()
+            this.reBuildBoundingBoxData();
+            // close()
           }, 0)
           // if (this.parentEntity) {
           //   this.parentEntity._callObjDataChange(this)
