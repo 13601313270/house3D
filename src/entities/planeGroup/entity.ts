@@ -33,19 +33,17 @@ export class PlaneGroupEntity extends GroupBaseEntity<PlaneGroupData> {
       const screenX = data.x * zoomLevel;
       const screenY = data.y * zoomLevel;
       ctx.fillStyle = 'red'
+      const [size, offset] = this.boundingBoxData
       ctx.save(); // 保存当前状态
-      ctx.translate(screenX, screenY); // 移动原点到目标中心
+      ctx.translate(screenX + offset.x, screenY + offset.z); // 移动原点到目标中心
       ctx.rotate(data.angleY * -1); // 围绕新原点旋转
       // 绘制一个范围方块
-      (() => {
-        const [size, offset] = this.boundingBoxData
-        ctx.strokeRect(
-          (offset.x - size.x / 2) * zoomLevel,
-          (offset.z - size.z / 2) * zoomLevel,
-          size.x * zoomLevel,
-          size.z * zoomLevel
-        )
-      })();
+      ctx.strokeRect(
+        (size.x / -2) * zoomLevel,
+        (size.z / -2) * zoomLevel,
+        size.x * zoomLevel,
+        size.z * zoomLevel
+      )
       ctx.restore(); // 恢复原始状态
     })();
 
@@ -63,19 +61,17 @@ export class PlaneGroupEntity extends GroupBaseEntity<PlaneGroupData> {
       const screenX = data.x * zoomLevel;
       const screenY = data.y * zoomLevel;
       ctx.strokeStyle = 'red';
+      const [size, offset, angle] = this.boundingBoxData
       ctx.save(); // 保存当前状态
-      ctx.translate(screenX, screenY); // 移动原点到目标中心
-      ctx.rotate(data.angleY * -1); // 围绕新原点旋转
+      ctx.translate(screenX + offset.x, screenY + offset.z); // 移动原点到目标中心
+      ctx.rotate(angle.y * -1); // 围绕新原点旋转
       // 绘制一个方块
-      (() => {
-        const [size, offset] = this.boundingBoxData
-        ctx.strokeRect(
-          (offset.x - size.x / 2) * zoomLevel,
-          (offset.z - size.z / 2) * zoomLevel,
-          size.x * zoomLevel,
-          size.z * zoomLevel
-        )
-      })();
+      ctx.strokeRect(
+        (size.x / -2) * zoomLevel,
+        (size.z / -2) * zoomLevel,
+        size.x * zoomLevel,
+        size.z * zoomLevel
+      )
       ctx.restore(); // 恢复原始状态
     })();
 
@@ -214,16 +210,18 @@ export class PlaneGroupEntity extends GroupBaseEntity<PlaneGroupData> {
     const [size, offset] = this.boundingBoxData
     const { x: width, z: height } = size
     const data = this.getData();
+    const xx = data.x + offset.x;// * Math.cos(data.angleY) + offset.z * Math.sin(data.angleY);
+    const yy = data.y + offset.z;// * Math.cos(data.angleY) - offset.x * Math.sin(data.angleY);
     if (isPointInRotatedRect(x, y, {
-      x: data.x + offset.x,
-      y: data.y + offset.z,
+      x: xx,
+      y: yy,
       width,
       depth: height,
       angleY: data.angleY * -1,
     })) {
       return new MatchRectArea({
-        x: data.x + offset.x,
-        y: data.y + offset.z,
+        x: xx,
+        y: yy,
         width,
         depth: height,
         angleY: data.angleY,

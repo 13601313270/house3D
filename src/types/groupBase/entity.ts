@@ -193,10 +193,19 @@ export abstract class GroupBaseEntity<T extends GroupBaseData> extends PointEnti
     const depth = maxY - minY
     const height = maxZ - minZ
     const { angleY } = this.getData();
+    const offsetX = minX + width / 2
+    const offsetZ = minY + depth / 2
+    // 计算偏移位置（考虑旋转）
+    const finalOffsetX = offsetX * Math.cos(angleY) + offsetZ * Math.sin(angleY);
+    const finalOffsetZ = -offsetX * Math.sin(angleY) + offsetZ * Math.cos(angleY);
     // 第一个是尺寸，第二个是位置偏移，第三个是旋转角度
     return [
       new THREE.Vector3(width, height, depth),
-      new THREE.Vector3(minX + width / 2, height / 2, minY + depth / 2),
+      new THREE.Vector3(
+        finalOffsetX,
+        height / 2,
+        finalOffsetZ
+      ),
       new THREE.Vector3(0, angleY, 0)
     ]
   }
