@@ -433,7 +433,7 @@ const initThree = () => {
 }
 
 const animate = () => {
-  const scene = window.worldApi.group
+  const scene = window.worldApi.scene
   if (renderer && scene && camera) {
     renderer.render(scene, camera)
     requestAnimationFrame(animate)
@@ -447,7 +447,7 @@ const resize = () => {
 }
 
 const updateScene = () => {
-  if (window.worldApi.group) {
+  if (window.worldApi.scene) {
     props.world.reCreate3DMeshIfNeed()
     props.world.change3DMeshState()
     resize();
@@ -535,7 +535,7 @@ onMounted(() => {
 const exportImage = () => {
   if (renderer && renderer.domElement) {
     // 确保渲染器完成当前帧渲染
-    const scene = window.worldApi.group
+    const scene = window.worldApi.scene
     if (scene && camera) {
       renderer.render(scene, camera)
     }
@@ -587,7 +587,7 @@ watch(() => props.aspectRatio, (newVal) => {
 
 const getImageData = (): string | null => {
   if (renderer && renderer.domElement) {
-    const scene = window.worldApi.group
+    const scene = window.worldApi.scene
     if (scene && camera) {
       renderer.render(scene, camera)
     }

@@ -19,7 +19,7 @@ class WorldGroup extends GroupBaseEntity<WorldData> {
   name: string = 'world'
   type: string = 'world'
   // parentEntity: null;
-  group: THREE.Scene = new THREE.Scene()
+  scene: THREE.Scene = new THREE.Scene()
   environmentConfig: EnvironmentConfig = { skyType: 1, ambientLightIntensity: 1, showGround: true }
   groundMesh: THREE.Mesh | null = null
   ambientLight: THREE.AmbientLight | null = null
@@ -27,23 +27,12 @@ class WorldGroup extends GroupBaseEntity<WorldData> {
 
   constructor(parent: null, data: WorldData) {
     super(parent, data)
-
-    this.group = new THREE.Scene();
-    this.group.background = new THREE.Color(0xf0f0f0)
-
-    const gridHelper = new THREE.GridHelper(1000, 50, 0xcccccc, 0xeeeeee)
-    gridHelper.layers.set(2)
-    this.group.add(gridHelper)
-
-    const axesHelper = new THREE.AxesHelper(100)
-    axesHelper.layers.set(2)
-    axesHelper.setColors(
-      new THREE.Color(0xff0000),
-      new THREE.Color(0x0000ff),
-      new THREE.Color(0x00ff00)
-    )
-    this.group.add(axesHelper);
+    this.scene = new THREE.Scene();
+    this.scene.background = new THREE.Color(0xf0f0f0)
     this.setEnvironMent()
+    this.scene.add(this.group)
+    this.showGridHelper()
+    this.showAxesHelper()
   }
 
   setEnvironMent(config?: EnvironmentConfig) {
@@ -82,8 +71,8 @@ class WorldGroup extends GroupBaseEntity<WorldData> {
     loaderSky.load(path, (texture) => {
       texture.mapping = THREE.EquirectangularReflectionMapping;
 
-      this.group.background = texture;
-      this.group.environment = texture; // 可选：简单环境光
+      this.scene.background = texture;
+      this.scene.environment = texture; // 可选：简单环境光
     });
 
     // 添加地面

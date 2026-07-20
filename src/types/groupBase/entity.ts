@@ -10,10 +10,12 @@ import drawAxes from '@/utils/drawAxes'
 type WorldChangeType = 'add' | 'remove' | 'change'
 
 export abstract class GroupBaseEntity<T extends GroupBaseData> extends PointEntityClass<T> {
-  group: THREE.Scene | THREE.Group = new THREE.Group()
+  group: THREE.Group = new THREE.Group()
   width: number = 0;
   height: number = 0;
   showAxes: boolean = true;
+  private gridHelper: THREE.GridHelper
+  private axesHelper: THREE.AxesHelper
 
   public children: BaseEntityClass<BaseObjData>[] = []
 
@@ -28,11 +30,20 @@ export abstract class GroupBaseEntity<T extends GroupBaseData> extends PointEnti
     super(parent, data)
     this.data = data;
 
-    // group添加一个方块
-    const geometry = new THREE.BoxGeometry(1, 1, 1)
-    const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 })
-    const cube = new THREE.Mesh(geometry, material)
-    this.group.add(cube);
+    this.gridHelper = new THREE.GridHelper(1000, 50, 0xcccccc, 0xeeeeee)
+    this.gridHelper.layers.set(2)
+    this.gridHelper.visible = false;
+    this.group.add(this.gridHelper)
+
+    this.axesHelper = new THREE.AxesHelper(100)
+    this.axesHelper.layers.set(2)
+    this.axesHelper.visible = false;
+    this.axesHelper.setColors(
+      new THREE.Color(0xff0000),
+      new THREE.Color(0x0000ff),
+      new THREE.Color(0x00ff00)
+    )
+    this.group.add(this.axesHelper);
 
     (async () => {
       const apiList = [];
@@ -154,12 +165,12 @@ export abstract class GroupBaseEntity<T extends GroupBaseData> extends PointEnti
 
   getBoundingBoxData(): [THREE.Vector3, THREE.Vector3, THREE.Vector3] | null {
     if (this.children) {
-      let minX = Infinity
-      let minY = Infinity
-      let maxX = -Infinity
-      let maxY = -Infinity
-      let minZ = Infinity
-      let maxZ = -Infinity
+      let minX = 0
+      let maxX = 0
+      let minY = 0
+      let maxY = 0
+      let minZ = 0
+      let maxZ = 0
       this.children.forEach(item => {
         if (item instanceof PointEntityClass && item.boundingBoxData) {
           const { x, y, z } = item.getData()
@@ -175,6 +186,13 @@ export abstract class GroupBaseEntity<T extends GroupBaseData> extends PointEnti
           }
         }
       })
+      // 预留padding
+      minX -= 10;
+      maxX += 10;
+      minY -= 10;
+      maxY += 10;
+      minZ -= 10;
+      maxZ += 10;
       const width = maxX - minX
       const depth = maxY - minY
       const height = maxZ - minZ
@@ -358,5 +376,13 @@ export abstract class GroupBaseEntity<T extends GroupBaseData> extends PointEnti
     editShow: (editInfoList: editItem[], callback: (val: any) => void) => void,
     close: () => void,
   ): void {
+  }
+
+  showGridHelper() {
+    this.gridHelper.visible = true;
+  }
+
+  showAxesHelper() {
+    this.axesHelper.visible = true;
   }
 }
