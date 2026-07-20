@@ -78,12 +78,11 @@ export class OutFileInWallEntity extends EntityClassInWall<OutFileInWallData> {
 
   draw2DActionHandle(
     ctx: CanvasRenderingContext2D,
-    panOffset: Point,
     zoomLevel: number
   ): void {
     const data = this.getData();
-    const screenX = data.x * zoomLevel + panOffset.x
-    const screenY = data.y * zoomLevel + panOffset.y
+    const screenX = data.x * zoomLevel
+    const screenY = data.y * zoomLevel
 
     // 控制点
     ctx.fillStyle = '#fff'

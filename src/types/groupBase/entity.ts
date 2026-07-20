@@ -115,7 +115,6 @@ export abstract class GroupBaseEntity<T extends GroupBaseData> extends PointEnti
 
   draw2DActionHandle(
     ctx: CanvasRenderingContext2D,
-    panOffset: Point,
     zoomLevel: number,
   ) {
     // 暂无操作句柄

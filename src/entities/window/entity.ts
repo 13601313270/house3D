@@ -67,7 +67,6 @@ export class WindowEntity extends EntityClassInWall<WindowData> {
 
   draw2DActionHandle(
     ctx: CanvasRenderingContext2D,
-    panOffset: Point,
     zoomLevel: number,
   ): void {
     const data = this.getData();
@@ -79,8 +78,8 @@ export class WindowEntity extends EntityClassInWall<WindowData> {
         wallThickness = findWall.getData().thickness;
       }
     }
-    const screenX = data.x * zoomLevel + panOffset.x
-    const screenY = data.y * zoomLevel + panOffset.y
+    const screenX = data.x * zoomLevel
+    const screenY = data.y * zoomLevel
     ctx.beginPath()
     // 控制点
     ctx.fillStyle = '#fff'
@@ -103,8 +102,8 @@ export class WindowEntity extends EntityClassInWall<WindowData> {
     ctx.strokeStyle = 'red'
     ctx.save(); // 保存当前状态
     ctx.translate(
-      matchArea.data.x * zoomLevel + panOffset.x,
-      matchArea.data.y * zoomLevel + panOffset.y
+      matchArea.data.x * zoomLevel,
+      matchArea.data.y * zoomLevel
     ); // 移动原点到目标中心
     ctx.rotate(matchArea.data.angleY * -1); // 围绕新原点旋转
     // 绘制一个方块

@@ -36,12 +36,11 @@ export class CubeEntity extends PointEntityClass<CubeData> {
 
   draw2DActionHandle(
     ctx: CanvasRenderingContext2D,
-    panOffset: Point,
     zoomLevel: number,
   ): void {
     const data = this.getData();
-    const screenX = data.x * zoomLevel + panOffset.x
-    const screenY = data.y * zoomLevel + panOffset.y
+    const screenX = data.x * zoomLevel
+    const screenY = data.y * zoomLevel
 
     // 控制点
     ctx.fillStyle = '#fff'
@@ -56,14 +55,14 @@ export class CubeEntity extends PointEntityClass<CubeData> {
     // 控制点向着angleY角度延伸10个单位后的坐标
     const rotatedXAdd = data.x + Math.cos(data.angleY) * drawAngelLength
     const rotatedYAdd = data.y - Math.sin(data.angleY) * drawAngelLength
-    const circleX = rotatedXAdd * zoomLevel + panOffset.x
-    const circleY = rotatedYAdd * zoomLevel + panOffset.y
+    const circleX = rotatedXAdd * zoomLevel
+    const circleY = rotatedYAdd * zoomLevel
     const circleRadius = this.circleRadius * zoomLevel + 3
 
     function ttt(angel: number, drawAngelLength: number) {
       const tempX = data.x + Math.cos(angel) * drawAngelLength;
       const tempY = data.y - Math.sin(angel) * drawAngelLength;
-      return [tempX * zoomLevel + panOffset.x, tempY * zoomLevel + panOffset.y]
+      return [tempX * zoomLevel, tempY * zoomLevel]
     }
 
     // 绘制双向箭头表示旋转角度
@@ -125,8 +124,8 @@ export class CubeEntity extends PointEntityClass<CubeData> {
     ctx.strokeStyle = 'red'
     ctx.save(); // 保存当前状态
     ctx.translate(
-      matchArea.data.x * zoomLevel + panOffset.x,
-      matchArea.data.y * zoomLevel + panOffset.y
+      matchArea.data.x * zoomLevel,
+      matchArea.data.y * zoomLevel
     ); // 移动原点到目标中心
     ctx.rotate(matchArea.data.angleY * -1); // 围绕新原点旋转
     // 绘制一个方块

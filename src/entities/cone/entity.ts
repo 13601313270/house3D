@@ -38,12 +38,11 @@ export class ConeEntity extends PointEntityClass<ConeData> {
 
   draw2DActionHandle(
     ctx: CanvasRenderingContext2D,
-    panOffset: Point,
     zoomLevel: number,
   ): void {
     const data = this.getData();
-    const screenX = data.x * zoomLevel + panOffset.x
-    const screenY = data.y * zoomLevel + panOffset.y
+    const screenX = data.x * zoomLevel
+    const screenY = data.y * zoomLevel
 
     // 控制点
     ctx.fillStyle = '#fff'
@@ -60,8 +59,8 @@ export class ConeEntity extends PointEntityClass<ConeData> {
     ctx.strokeStyle = 'red'
     ctx.save(); // 保存当前状态
     ctx.translate(
-      circleArea.data.x * zoomLevel + panOffset.x,
-      circleArea.data.y * zoomLevel + panOffset.y
+      circleArea.data.x * zoomLevel,
+      circleArea.data.y * zoomLevel
     );
     ctx.beginPath()
     ctx.arc(

@@ -61,7 +61,6 @@ export class DoorEntity extends EntityClassInWall<DoorData> {
 
   draw2DActionHandle(
     ctx: CanvasRenderingContext2D,
-    panOffset: Point,
     zoomLevel: number,
   ): void {
     const data = this.getData();
@@ -72,8 +71,8 @@ export class DoorEntity extends EntityClassInWall<DoorData> {
         wallThickness = findWall.getData().thickness;
       }
     }
-    const screenX = data.x * zoomLevel + panOffset.x
-    const screenY = data.y * zoomLevel + panOffset.y
+    const screenX = data.x * zoomLevel
+    const screenY = data.y * zoomLevel
     // 控制点
     ctx.fillStyle = '#fff'
     ctx.strokeStyle = '#e67e22'
@@ -97,8 +96,8 @@ export class DoorEntity extends EntityClassInWall<DoorData> {
     ctx.strokeStyle = 'red'
     ctx.save(); // 保存当前状态
     ctx.translate(
-      matchArea.data.x * zoomLevel + panOffset.x,
-      matchArea.data.y * zoomLevel + panOffset.y
+      matchArea.data.x * zoomLevel,
+      matchArea.data.y * zoomLevel
     ); // 移动原点到目标中心
     ctx.rotate(matchArea.data.angleY * -1); // 围绕新原点旋转
     // 绘制一个方块

@@ -58,7 +58,6 @@ export class CurtainInWallEntity extends EntityClassInWall<CurtainInWallData> {
 
   draw2DActionHandle(
     ctx: CanvasRenderingContext2D,
-    panOffset: Point,
     zoomLevel: number
   ): void {
     const data: CurtainInWallData = this.getData();
@@ -70,8 +69,8 @@ export class CurtainInWallEntity extends EntityClassInWall<CurtainInWallData> {
       }) as WallEntity
       wallThickness = wall ? wall.getData().thickness : 10;
     }
-    const screenX = data.x * zoomLevel + panOffset.x
-    const screenY = data.y * zoomLevel + panOffset.y
+    const screenX = data.x * zoomLevel
+    const screenY = data.y * zoomLevel
 
     const offsetX = Math.cos(angle + (isOuter ? Math.PI / -2 : Math.PI / 2)) * (wallThickness + this.depth) * zoomLevel;
     const offsetY = Math.sin(angle + (isOuter ? Math.PI / -2 : Math.PI / 2)) * (wallThickness + this.depth) * zoomLevel;

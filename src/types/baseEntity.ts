@@ -43,6 +43,7 @@ export abstract class BaseEntityClass<T extends BaseObjData> {
   abstract getBoundingBoxData(): [THREE.Vector3, THREE.Vector3, THREE.Vector3] | null // 第一个是尺寸，第二个是位置偏移，第三个是旋转角度
 
   reBuildBoundingBoxData() {
+    console.log('reBuildBoundingBoxData')
     this.boundingBoxData = this.getBoundingBoxData()
     setTimeout(() => {
       if (this.parentEntity) {
@@ -95,7 +96,6 @@ export abstract class BaseEntityClass<T extends BaseObjData> {
   // 本对象的2D具柄绘制逻辑（时间晚于draw2DPreview）draw2DActionHandle
   abstract draw2DActionHandle(
     ctx: CanvasRenderingContext2D,
-    panOffset: Point,
     zoomLevel: number,
   ): void;
 

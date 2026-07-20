@@ -1313,10 +1313,7 @@ const handleMouseMove = (e: MouseEvent) => {
               ctxAction.translate(screenX, screenY)
               ctxAction.rotate(angleY * -1)
               // 绘制操作句柄
-              matchHandelObj.draw2DActionHandle(ctxAction, {
-                x: 0,
-                y: 0,
-              }, zoom2DLevel.value)
+              matchHandelObj.draw2DActionHandle(ctxAction, zoom2DLevel.value)
               ctxAction.restore()
             })();
             return;
@@ -1342,10 +1339,7 @@ const handleMouseMove = (e: MouseEvent) => {
         ctxAction.save()
         ctxAction.translate(screenX, screenY)
         ctxAction.rotate(angleY * -1)
-        matchHandelObj.draw2DActionHandle(ctxAction, {
-          x: 0,
-          y: 0,
-        }, zoom2DLevel.value)
+        matchHandelObj.draw2DActionHandle(ctxAction, zoom2DLevel.value)
         ctxAction.restore()
       })();
 
@@ -1434,10 +1428,7 @@ const handleMouseMove = (e: MouseEvent) => {
             )
             ctxAction.stroke()
           }
-          classInfo.draw2DActionHandle(ctxAction, {
-            x: 0,
-            y: 0,
-          }, zoom2DLevel.value)
+          classInfo.draw2DActionHandle(ctxAction, zoom2DLevel.value)
           ctxAction.restore()
         })();
 
@@ -1645,9 +1636,15 @@ const handleMouseDown = (e: MouseEvent) => {
           y: startPoint.y
         }
         const canvasAction = canvas2D2Ref.value!;
+        const screenX = worldData.x * zoom2DLevel.value + panOffsetOfWorld.value.x;
+        const screenY = worldData.y * zoom2DLevel.value + panOffsetOfWorld.value.y;
         const ctxAction = canvasAction.getContext('2d')!
         ctxAction.clearRect(0, 0, canvasAction.width, canvasAction.height)
-        matchHandelObj.draw2DActionHandle(ctxAction, panOffsetOfWorld.value, zoom2DLevel.value)
+        ctxAction.save()
+        ctxAction.translate(screenX, screenY)
+        ctxAction.rotate(worldData.angleY * -1)
+        matchHandelObj.draw2DActionHandle(ctxAction, zoom2DLevel.value)
+        ctxAction.restore()
         return
       }
     }

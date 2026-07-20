@@ -42,7 +42,6 @@ export class SectorPlaneEntity extends PointEntityClass<SectorPlaneData> {
 
   draw2DActionHandle(
     ctx: CanvasRenderingContext2D,
-    panOffset: Point,
     zoomLevel: number,
   ): void {
     const data = this.getData();
@@ -52,8 +51,8 @@ export class SectorPlaneEntity extends PointEntityClass<SectorPlaneData> {
     if (endAngle < startAngle) {
       endAngle += Math.PI * 2;
     }
-    const screenX = x * zoomLevel + panOffset.x
-    const screenY = y * zoomLevel + panOffset.y
+    const screenX = x * zoomLevel
+    const screenY = y * zoomLevel
 
     // 绘制轮廓
     const circleArea = new MatchCircleArea({ x, y, r })
@@ -61,8 +60,8 @@ export class SectorPlaneEntity extends PointEntityClass<SectorPlaneData> {
     ctx.strokeStyle = 'blue'
     ctx.save(); // 保存当前状态
     ctx.translate(
-      circleArea.data.x * zoomLevel + panOffset.x,
-      circleArea.data.y * zoomLevel + panOffset.y
+      circleArea.data.x * zoomLevel,
+      circleArea.data.y * zoomLevel
     );
     ctx.beginPath()
     ctx.moveTo(0, 0)

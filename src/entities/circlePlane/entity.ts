@@ -40,12 +40,11 @@ export class CirclePlaneEntity extends PointEntityClass<CirclePlaneData> {
 
   draw2DActionHandle(
     ctx: CanvasRenderingContext2D,
-    panOffset: Point,
     zoomLevel: number,
   ): void {
     const data = this.getData();
-    const screenX = data.x * zoomLevel + panOffset.x
-    const screenY = data.y * zoomLevel + panOffset.y
+    const screenX = data.x * zoomLevel
+    const screenY = data.y * zoomLevel
 
     // 控制点
     ctx.fillStyle = '#fff'
@@ -62,8 +61,8 @@ export class CirclePlaneEntity extends PointEntityClass<CirclePlaneData> {
     ctx.strokeStyle = 'red'
     ctx.save(); // 保存当前状态
     ctx.translate(
-      circleArea.data.x * zoomLevel + panOffset.x,
-      circleArea.data.y * zoomLevel + panOffset.y
+      circleArea.data.x * zoomLevel,
+      circleArea.data.y * zoomLevel
     );
     ctx.beginPath()
     ctx.arc(
@@ -81,14 +80,14 @@ export class CirclePlaneEntity extends PointEntityClass<CirclePlaneData> {
     const angleY = data.angleY
     const rotatedXAdd = data.x + Math.cos(angleY) * drawAngelLength
     const rotatedYAdd = data.y - Math.sin(angleY) * drawAngelLength
-    const circleX = rotatedXAdd * zoomLevel + panOffset.x
-    const circleY = rotatedYAdd * zoomLevel + panOffset.y
+    const circleX = rotatedXAdd * zoomLevel
+    const circleY = rotatedYAdd * zoomLevel
     const circleRadius = this.circleRadius * zoomLevel + 3
 
     function ttt(angel: number, drawAngelLength: number) {
       const tempX = data.x + Math.cos(angel) * drawAngelLength;
       const tempY = data.y - Math.sin(angel) * drawAngelLength;
-      return [tempX * zoomLevel + panOffset.x, tempY * zoomLevel + panOffset.y]
+      return [tempX * zoomLevel, tempY * zoomLevel]
     }
 
     // 绘制双向箭头表示旋转角度

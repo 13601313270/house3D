@@ -39,7 +39,6 @@ export class CurtainEntity extends PointEntityClass<CurtainData> {
 
   draw2DActionHandle(
     ctx: CanvasRenderingContext2D,
-    panOffset: Point,
     zoomLevel: number,
   ): void {
     const data = this.getData();
@@ -56,8 +55,8 @@ export class CurtainEntity extends PointEntityClass<CurtainData> {
     ctx.strokeStyle = 'red'
     ctx.save(); // 保存当前状态
     ctx.translate(
-      matchArea.data.x * zoomLevel + panOffset.x,
-      matchArea.data.y * zoomLevel + panOffset.y
+      matchArea.data.x * zoomLevel,
+      matchArea.data.y * zoomLevel
     ); // 移动原点到目标中心
     ctx.rotate(matchArea.data.angleY * -1); // 围绕新原点旋转
     // 绘制一个方块
@@ -75,8 +74,8 @@ export class CurtainEntity extends PointEntityClass<CurtainData> {
     ctx.lineWidth = 2
     const drawAngelLength = Math.max(this.getData().width / 2, this.circleRadius * 2);
 
-    const basicX = data.x * zoomLevel + panOffset.x
-    const basicY = data.y * zoomLevel + panOffset.y
+    const basicX = data.x * zoomLevel
+    const basicY = data.y * zoomLevel
 
     ctx.font = `${Math.max(14 * zoomLevel, 14)}px '微软雅黑'`
     ctx.textBaseline = 'middle'

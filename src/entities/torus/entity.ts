@@ -36,12 +36,11 @@ export class TorusEntity extends PointEntityClass<TorusData> {
 
   draw2DActionHandle(
     ctx: CanvasRenderingContext2D,
-    panOffset: Point,
     zoomLevel: number,
   ): void {
     const data = this.getData();
-    const screenX = data.x * zoomLevel + panOffset.x
-    const screenY = data.y * zoomLevel + panOffset.y
+    const screenX = data.x * zoomLevel
+    const screenY = data.y * zoomLevel
     const { r, t } = data;
 
     // 控制点
@@ -59,8 +58,8 @@ export class TorusEntity extends PointEntityClass<TorusData> {
     ctx.strokeStyle = 'red'
     ctx.save(); // 保存当前状态
     ctx.translate(
-      circleArea.data.x * zoomLevel + panOffset.x,
-      circleArea.data.y * zoomLevel + panOffset.y
+      circleArea.data.x * zoomLevel,
+      circleArea.data.y * zoomLevel
     );
     ctx.beginPath()
     ctx.arc(

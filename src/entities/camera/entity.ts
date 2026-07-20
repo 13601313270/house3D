@@ -141,12 +141,11 @@ export class CameraEntity extends CameraBase<CameraData> {
 
   draw2DActionHandle(
     ctx: CanvasRenderingContext2D,
-    panOffset: Point,
     zoomLevel: number
   ): void {
     const data = this.getData();
-    const screenX = data.x * zoomLevel + panOffset.x
-    const screenY = data.y * zoomLevel + panOffset.y
+    const screenX = data.x * zoomLevel
+    const screenY = data.y * zoomLevel
 
     // 控制点
     ctx.fillStyle = '#fff'
@@ -163,8 +162,8 @@ export class CameraEntity extends CameraBase<CameraData> {
     ctx.lineWidth = 2
     ctx.beginPath()
     ctx.arc(
-      data.targetPositionX * zoomLevel + panOffset.x,
-      data.targetPositionY * zoomLevel + panOffset.y,
+      data.targetPositionX * zoomLevel,
+      data.targetPositionY * zoomLevel,
       this.circleRadius * zoomLevel + 3, 0, Math.PI * 2)
     ctx.fill()
     ctx.stroke()
@@ -179,8 +178,8 @@ export class CameraEntity extends CameraBase<CameraData> {
     ctx.strokeStyle = 'red'
     ctx.save(); // 保存当前状态
     ctx.translate(
-      circleArea.data.x * zoomLevel + panOffset.x,
-      circleArea.data.y * zoomLevel + panOffset.y
+      circleArea.data.x * zoomLevel,
+      circleArea.data.y * zoomLevel
     );
     ctx.beginPath()
     ctx.arc(

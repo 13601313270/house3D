@@ -150,10 +150,17 @@ function handleEnter(item: {
 }) {
   const thisObj = window.worldApi.children.find(v => v.getData().id === item.id)
   if (thisObj) {
+    const worldData = window.worldApi.getData();
     const canvasAction = document.getElementById('canvas2D2') as HTMLCanvasElement;
     const ctxAction = canvasAction.getContext('2d')!
+    const screenX = worldData.x * props.zoom2DLevel + props.panOffset.x;
+    const screenY = worldData.y * props.zoom2DLevel + props.panOffset.y;
     ctxAction.clearRect(0, 0, canvasAction.width, canvasAction.height)
-    thisObj.draw2DActionHandle(ctxAction, props.panOffset, props.zoom2DLevel)
+    ctxAction.save()
+    ctxAction.translate(screenX, screenY)
+    ctxAction.rotate(worldData.angleY * -1)
+    thisObj.draw2DActionHandle(ctxAction, props.zoom2DLevel)
+    ctxAction.restore()
   }
 }
 // function openEditPanel(id: string) {

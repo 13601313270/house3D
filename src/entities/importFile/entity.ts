@@ -50,12 +50,11 @@ export class ImportFileEntity extends PointEntityClass<ImportFileData> {
 
   draw2DActionHandle(
     ctx: CanvasRenderingContext2D,
-    panOffset: Point,
     zoomLevel: number
   ): void {
     const data = this.getData();
-    const screenX = data.x * zoomLevel + panOffset.x
-    const screenY = data.y * zoomLevel + panOffset.y
+    const screenX = data.x * zoomLevel
+    const screenY = data.y * zoomLevel
 
     // 控制点
     ctx.fillStyle = '#fff'
@@ -75,7 +74,7 @@ export class ImportFileEntity extends PointEntityClass<ImportFileData> {
     function ttt(angel: number, drawAngelLength: number) {
       const tempX = data.x + Math.cos(angel) * drawAngelLength;
       const tempY = data.y - Math.sin(angel) * drawAngelLength;
-      return [tempX * zoomLevel + panOffset.x, tempY * zoomLevel + panOffset.y]
+      return [tempX * zoomLevel, tempY * zoomLevel]
     }
 
     // 绘制双向箭头表示旋转角度
@@ -118,8 +117,8 @@ export class ImportFileEntity extends PointEntityClass<ImportFileData> {
     ctx.fill()
 
     // 在(rotatedXAdd, rotatedYAdd)位置绘制一个圆圈
-    const circleX = rotatedXAdd * zoomLevel + panOffset.x
-    const circleY = rotatedYAdd * zoomLevel + panOffset.y
+    const circleX = rotatedXAdd * zoomLevel
+    const circleY = rotatedYAdd * zoomLevel
     const circleRadius = this.circleRadius * zoomLevel + 3
     ctx.fillStyle = '#fff'
     ctx.strokeStyle = '#e67e22'

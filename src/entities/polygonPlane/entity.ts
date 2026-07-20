@@ -51,7 +51,6 @@ export class PolygonPlaneEntity extends LineEntityClass<PolygonPlanePoint, Polyg
 
   draw2DActionHandle(
     ctx: CanvasRenderingContext2D,
-    panOffset: Point,
     zoomLevel: number,
   ): void {
     const data = this.getData();
@@ -61,8 +60,8 @@ export class PolygonPlaneEntity extends LineEntityClass<PolygonPlanePoint, Polyg
       data.points.forEach((point: Point, index: number) => {
         ctx.strokeStyle = 'red'
         ctx.fillStyle = 'white'
-        const screenX = point.x * zoomLevel + panOffset.x
-        const screenY = point.y * zoomLevel + panOffset.y
+        const screenX = point.x * zoomLevel
+        const screenY = point.y * zoomLevel
         ctx.beginPath()
         ctx.arc(screenX, screenY, this.circleRadius * zoomLevel + 3, 0, Math.PI * 2)
         ctx.stroke()
@@ -123,8 +122,8 @@ export class PolygonPlaneEntity extends LineEntityClass<PolygonPlanePoint, Polyg
         const p2 = i === data.points.length - 1 ? data.points[0] : data.points[i + 1]
         const midX = (p1.x + p2.x) / 2
         const midY = (p1.y + p2.y) / 2
-        const screenX = midX * zoomLevel + panOffset.x
-        const screenY = midY * zoomLevel + panOffset.y
+        const screenX = midX * zoomLevel
+        const screenY = midY * zoomLevel
         ctx.strokeStyle = 'red'
         ctx.fillStyle = 'white'
         ctx.lineWidth = 2
