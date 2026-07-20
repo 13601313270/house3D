@@ -310,7 +310,6 @@ let menuEntity: BaseEntityClass<any> | null = null
 let menuEntiryHandelInfo: HandelInfo | null = null;// 选中的对象的柄信息
 let beCopyEntity: BaseEntityClass<any> | null = null;// 被复制移动中的对象
 let beCopyEntityHandelInfo: HandelInfo & Point | null = null;// 被复制移动中的对象的柄信息(非引用，是拷贝)
-let insertTempObj: BaseEntityClass<any> | null = null
 const insertAdding = ref(false)
 
 const centerPanelCamera = ref(new THREE.PerspectiveCamera(55, aspectRatio2.value, 0.1, 20000));
@@ -476,10 +475,8 @@ function setHoverPoint(point: Point | null) {
   }
 }
 const drawWrapper2D = () => {
-  // console.trace('drawWrapper2D')
   const canvas = canvas2DRef.value
-  const canvasAction = canvas2DActionRef.value;
-  if (canvas && canvasAction && canvas.getContext('2d')) {
+  if (canvas && canvas.getContext('2d')) {
     const ctx = canvas.getContext('2d')!;
     ctx.clearRect(0, 0, worldApi.width, worldApi.height)
     ctx.fillStyle = '#f5f5f5'
@@ -493,19 +490,6 @@ const drawWrapper2D = () => {
       ctx,
       zoom2DLevel.value,
     )
-    if (ctx && insertTempObj) {
-      (() => {
-        const { angleY } = worldData;
-        ctx.rotate(angleY * -1)
-        if (insertTempObj instanceof LineEntityClass) {
-          insertTempObj.draw2DPreview(ctx, zoom2DLevel.value)
-        } else if (insertTempObj instanceof PointEntityClass) {
-          insertTempObj.draw2DPreview(ctx, zoom2DLevel.value)
-        } else if (insertTempObj instanceof PlaneGroupEntity) {
-          insertTempObj.draw2DPreview(ctx, zoom2DLevel.value)
-        }
-      })()
-    }
     ctx.restore()
   }
 }
@@ -707,10 +691,10 @@ onMounted(async () => {
         saveDrawing();
       } else if (event.key === 'z') {
         console.log('撤销一步')
-        if (insertTempObj && insertTempObj instanceof LineEntityClass) {
-          const data = insertTempObj.getData()
+        if (worldApi.insertTempObj && worldApi.insertTempObj instanceof LineEntityClass) {
+          const data = worldApi.insertTempObj.getData()
           if (tempPointInsertData.value.length === 1) {
-            insertTempObj = null;
+            worldApi.insertTempObj = null;
             tempPointInsertData.value = []
             lastPoint.value = null
             setHoverPoint(null)
@@ -719,21 +703,21 @@ onMounted(async () => {
             // tempPointInsertData去掉最后一项
             tempPointInsertData.value.pop()
             data.points = tempPointInsertData.value;
-            insertTempObj.setData(data)
+            worldApi.insertTempObj.setData(data)
             drawWrapper2D();
           }
         }
       }
     } else if (event.key === 'Escape') {
-      if (insertTempObj && currentTool.value !== 'drag') {
-        if (insertTempObj instanceof LineEntityClass) {
+      if (worldApi.insertTempObj && currentTool.value !== 'drag') {
+        if (worldApi.insertTempObj instanceof LineEntityClass) {
           insertAdding.value = true
-          insertTempObj.setPreparePoint(tempPointInsertData.value)
-          const insertData = insertTempObj.getData()
+          worldApi.insertTempObj.setPreparePoint(tempPointInsertData.value)
+          const insertData = worldApi.insertTempObj.getData()
           if (tempPointInsertData.value.length >= 2) {
             await worldApi.add(currentTool.value, [insertData])
           }
-          insertTempObj = null;
+          worldApi.insertTempObj = null;
           tempPointInsertData.value = []
           lastPoint.value = null
           setHoverPoint(null)
@@ -741,7 +725,7 @@ onMounted(async () => {
             insertAdding.value = false
           }, 300)// 至少停留300毫秒，防止出现那种闪现的效果。
         } else {
-          insertTempObj = null;
+          worldApi.insertTempObj = null;
         }
       }
       drawWrapper2DAnd3D()
@@ -1068,8 +1052,8 @@ const handleCanvasClick = async (e: MouseEvent) => {
     return
   }
 
-  if (insertTempObj && insertTempObj instanceof LineEntityClass) {
-    const data = insertTempObj.getData()
+  if (worldApi.insertTempObj && worldApi.insertTempObj instanceof LineEntityClass) {
+    const data = worldApi.insertTempObj.getData()
     if (hoverPoint.value) {
       tempPointInsertData.value.push({
         x: Math.round(hoverPoint.value.x),
@@ -1092,33 +1076,33 @@ const handleCanvasClick = async (e: MouseEvent) => {
       })
     }
     data.points = tempPointInsertData.value;
-    insertTempObj.setData(data)
+    worldApi.insertTempObj.setData(data)
     drawWrapper2D();
-  } else if (insertTempObj && insertTempObj instanceof PointEntityClass) {
+  } else if (worldApi.insertTempObj && worldApi.insertTempObj instanceof PointEntityClass) {
     if (insertAdding.value === false) {
-      if (insertTempObj instanceof EntityClassInWall) {
+      if (worldApi.insertTempObj instanceof EntityClassInWall) {
         insertAdding.value = true
-        await worldApi.add(currentTool.value, [insertTempObj.getData()])
-        insertTempObj = null;
+        await worldApi.add(currentTool.value, [worldApi.insertTempObj.getData()])
+        worldApi.insertTempObj = null;
         setTimeout(() => {
           insertAdding.value = false
         }, 300)// 至少停留300毫秒，防止出现那种闪现的效果。
         currentTool.value = 'drag'
       } else {
         insertAdding.value = true
-        await worldApi.add(currentTool.value, [insertTempObj.getData()])
-        insertTempObj = null;
+        await worldApi.add(currentTool.value, [worldApi.insertTempObj.getData()])
+        worldApi.insertTempObj = null;
         setTimeout(() => {
           insertAdding.value = false
         }, 300)// 至少停留300毫秒，防止出现那种闪现的效果。
         currentTool.value = 'drag'
       }
     }
-  } else if (insertTempObj && insertTempObj instanceof PlaneGroupEntity) {
+  } else if (worldApi.insertTempObj && worldApi.insertTempObj instanceof PlaneGroupEntity) {
     if (insertAdding.value === false) {
       insertAdding.value = true
-      await worldApi.add(currentTool.value, [insertTempObj.getData()])
-      insertTempObj = null;
+      await worldApi.add(currentTool.value, [worldApi.insertTempObj.getData()])
+      worldApi.insertTempObj = null;
       setTimeout(() => {
         insertAdding.value = false
       }, 300)// 至少停留300毫秒，防止出现那种闪现的效果。
@@ -1464,7 +1448,7 @@ const handleMouseMove = (e: MouseEvent) => {
         }
       }
     }
-  } else if (insertTempObj instanceof LineEntityClass) {
+  } else if (worldApi.insertTempObj instanceof LineEntityClass) {
     if (tempPointInsertData.value && tempPointInsertData.value.length > 0) {
       const last = tempPointInsertData.value[tempPointInsertData.value.length - 1]
       // 收集所有点（包括临时折线和已绘制的墙上的点）
@@ -1511,7 +1495,7 @@ const handleMouseMove = (e: MouseEvent) => {
       } else {
         // console.log('match point 99999', snappedPoint44.point.x, last.x, snappedPoint44.point.y, last.y)
       }
-      const tipTexts = insertTempObj.setPreparePoint(points)
+      const tipTexts = worldApi.insertTempObj.setPreparePoint(points)
       setHoverPoint({
         x: snappedPoint44.point.x,
         y: snappedPoint44.point.y,
@@ -1544,8 +1528,8 @@ const handleMouseMove = (e: MouseEvent) => {
       setHoverPoint(null)
     }
     let tipTexts: string[] = []
-    if (insertTempObj instanceof PointEntityClass) {
-      tipTexts = insertTempObj.setPrepareState(x, y)
+    if (worldApi.insertTempObj instanceof PointEntityClass) {
+      tipTexts = worldApi.insertTempObj.setPrepareState(x, y)
       drawWrapper2DAnd3D()
     }
     if (tipTexts.length > 0) {
@@ -1855,10 +1839,10 @@ function handleObjectClick(object: THREE.Object3D | null) {
 }
 function changeObjTypeSelect(type: string, baseObj: BaseEntityClass<any>) {
   activeToolsIndex.value = -1
-  insertTempObj = null
+  worldApi.insertTempObj = null
 
   if (allFileKeys.includes(type as any)) {
-    insertTempObj = baseObj
+    worldApi.insertTempObj = baseObj
     currentTool.value = type
   }
 }

@@ -16,6 +16,7 @@ export abstract class GroupBaseEntity<T extends GroupBaseData> extends PointEnti
   showAxes: boolean = true;
   private gridHelper: THREE.GridHelper
   private axesHelper: THREE.AxesHelper
+  insertTempObj: BaseEntityClass<any> | null = null;// 待添加的对象（还没有鼠标按下完成添加）
 
   public children: BaseEntityClass<BaseObjData>[] = []
 
@@ -86,6 +87,9 @@ export abstract class GroupBaseEntity<T extends GroupBaseData> extends PointEnti
         allObj.push(item)
       }
     })
+    if (this.insertTempObj) {
+      allObj.push(this.insertTempObj)
+    }
     allObj.sort((a, b) => {
       let aZ = 0;
       if (a instanceof PointEntityClass) {
