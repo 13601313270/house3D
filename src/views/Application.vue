@@ -444,6 +444,7 @@ const drawWrapper2DAnd3D = () => {
   worldApi.change3DMeshState()
 }
 const drawWrapper2D = () => {
+  // console.trace('drawWrapper2D')
   const canvas = canvas2DRef.value
   const canvasAction = canvas2D2Ref.value;
   if (canvas && canvasAction && canvas.getContext('2d')) {

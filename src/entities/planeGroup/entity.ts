@@ -190,7 +190,7 @@ export class PlaneGroupEntity extends GroupBaseEntity<PlaneGroupData> {
             this.reCreate3DMeshIfNeed()
             this.change3DMeshState()
             this.reBuildBoundingBoxData();
-            // close()
+            close()
           }, 0)
           // if (this.parentEntity) {
           //   this.parentEntity._callObjDataChange(this)
