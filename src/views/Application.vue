@@ -86,7 +86,7 @@
           <!-- <Canvas3D ref="canvas3DRef1" :world="worldApi" v-model:cameraState="cameraStateLeft"
             :aspectRatio="aspectRatio1" :showCamera="true" cameraType="orthographic" /> -->
           <canvas ref="canvas2DRef" class="drawing-canvas" :style="{ display: isSplitting ? 'none' : 'block' }" />
-          <canvas id="canvas2D2" ref="canvas2D2Ref" @click="handleCanvasClick" @mousedown="handleMouseDown"
+          <canvas id="canvas2DAction" ref="canvas2DActionRef" @click="handleCanvasClick" @mousedown="handleMouseDown"
             @contextmenu.prevent.stop @mousemove="handleMouseMove" @mouseleave="handleMouseLeave"
             @mouseup="handleMouseUp" @wheel="handleWheel" class="drawing-canvas"
             :style="{ display: isSplitting ? 'none' : 'block' }" />
@@ -227,7 +227,7 @@ import { editItem } from '@/utils/editItem';
 import WorldGroup, { EnvironmentConfig } from '@/world/world';
 
 const canvas2DRef = ref<HTMLCanvasElement | null>(null)
-const canvas2D2Ref = ref<HTMLCanvasElement | null>(null)
+const canvas2DActionRef = ref<HTMLCanvasElement | null>(null)
 const canvas3DRefCenter = ref<typeof Canvas3D | null>(null)
 const canvas3DRef2 = ref<typeof Canvas3D | null>(null)
 const activeToolsIndex = ref(-1)
@@ -329,7 +329,7 @@ const updateCanvasSize = () => {
   if (!container) return
   const ctxList = [
     canvas2DRef.value!,
-    canvas2D2Ref.value!
+    canvas2DActionRef.value!
   ];
   const canvasContainer = document.querySelector('.canvas-container')
   if (canvasContainer) {
@@ -446,7 +446,7 @@ const drawWrapper2DAnd3D = () => {
 const drawWrapper2D = () => {
   // console.trace('drawWrapper2D')
   const canvas = canvas2DRef.value
-  const canvasAction = canvas2D2Ref.value;
+  const canvasAction = canvas2DActionRef.value;
   if (canvas && canvasAction && canvas.getContext('2d')) {
     const ctx = canvas.getContext('2d')!;
     ctx.clearRect(0, 0, worldApi.width, worldApi.height)
@@ -1205,7 +1205,7 @@ const handleMouseMove = (e: MouseEvent) => {
       angleY: newAngleY,
     });
     drawWrapper2D()
-    const canvasAction = canvas2D2Ref.value!;
+    const canvasAction = canvas2DActionRef.value!;
     const ctxAction = canvasAction.getContext('2d')!
     // 绘制操作句柄
     ctxAction.clearRect(0, 0, canvasAction.width, canvasAction.height)
@@ -1237,7 +1237,7 @@ const handleMouseMove = (e: MouseEvent) => {
     }
   }
   if (currentTool.value === 'drag') { // drag代表拖拽和鼠标移动
-    const canvasAction = canvas2D2Ref.value!;
+    const canvasAction = canvas2DActionRef.value!;
     // 绘制操作句柄
     const ctxAction = canvasAction.getContext('2d')!
     // 如果正在拖拽，处理拖拽逻辑（即使当前工具不是 drag）
@@ -1636,7 +1636,7 @@ const handleMouseDown = (e: MouseEvent) => {
           x: startPoint.x,
           y: startPoint.y
         }
-        const canvasAction = canvas2D2Ref.value!;
+        const canvasAction = canvas2DActionRef.value!;
         const screenX = worldData.x * zoom2DLevel.value + panOffsetOfWorld.value.x;
         const screenY = worldData.y * zoom2DLevel.value + panOffsetOfWorld.value.y;
         const ctxAction = canvasAction.getContext('2d')!
@@ -1679,7 +1679,7 @@ const handleMouseUp = (e: MouseEvent) => {
   }
 }
 const handleMouseLeave = () => {
-  const canvasAction = canvas2D2Ref.value!;
+  const canvasAction = canvas2DActionRef.value!;
   const ctxAction = canvasAction.getContext('2d')!
   ctxAction.clearRect(0, 0, canvasAction.width, canvasAction.height)
 }
@@ -1735,7 +1735,7 @@ const handleWheel = (e: WheelEvent) => {
   if (!canvas) return
 
   // 绘制操作句柄
-  const canvasAction = canvas2D2Ref.value!;
+  const canvasAction = canvas2DActionRef.value!;
   const ctxAction = canvasAction.getContext('2d')!
   ctxAction.clearRect(0, 0, canvasAction.width, canvasAction.height)
 

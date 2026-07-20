@@ -151,7 +151,7 @@ function handleEnter(item: {
   const thisObj = window.worldApi.children.find(v => v.getData().id === item.id)
   if (thisObj) {
     const worldData = window.worldApi.getData();
-    const canvasAction = document.getElementById('canvas2D2') as HTMLCanvasElement;
+    const canvasAction = document.getElementById('canvas2DAction') as HTMLCanvasElement;
     const ctxAction = canvasAction.getContext('2d')!
     const screenX = worldData.x * props.zoom2DLevel + props.panOffset.x;
     const screenY = worldData.y * props.zoom2DLevel + props.panOffset.y;
