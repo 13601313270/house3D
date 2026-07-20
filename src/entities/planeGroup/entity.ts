@@ -6,6 +6,7 @@ import { isPointInRotatedRect } from '@/utils/isPointInRotatedRect'
 import { MatchRectArea } from '@/utils/matchArea'
 import { GroupBaseData } from '@/types/groupBase'
 import { PlaneGroupData } from './index.d'
+import { PointEntityClass } from '@/types/pointEntity'
 
 export class PlaneGroupEntity extends GroupBaseEntity<PlaneGroupData> {
   type: string = 'planeGroup'
@@ -26,22 +27,26 @@ export class PlaneGroupEntity extends GroupBaseEntity<PlaneGroupData> {
     zoomLevel: number,
   ) {
     const data = this.getData();
-    const [width, height] = this.getSize()
     const screenX = data.x * zoomLevel;
     const screenY = data.y * zoomLevel;
     // console.log('setPrepare-State---' + this.getData().id + '---preview', data.x, data.y)
     // 绘制一个方块
     ctx.fillStyle = 'red'
     ctx.save(); // 保存当前状态
+    console.log('boundingBoxData=====', this.boundingBoxData)
+    if (!this.boundingBoxData) return
     ctx.translate(screenX, screenY); // 移动原点到目标中心
     ctx.rotate(data.angleY * -1); // 围绕新原点旋转
-    // 绘制一个方块
-    ctx.strokeRect(
-      width / -2 * zoomLevel,
-      height / -2 * zoomLevel,
-      width * zoomLevel,
-      height * zoomLevel
-    )
+    // 绘制一个范围方块
+    (() => {
+      const [size, offset] = this.boundingBoxData
+      ctx.strokeRect(
+        (offset.x - size.x / 2) * zoomLevel,
+        (offset.z - size.z / 2) * zoomLevel,
+        size.x * zoomLevel,
+        size.z * zoomLevel
+      )
+    })();
     ctx.restore(); // 恢复原始状态
     super.draw2DPreview(ctx, zoomLevel)
   }
@@ -63,8 +68,9 @@ export class PlaneGroupEntity extends GroupBaseEntity<PlaneGroupData> {
     ctx.arc(screenX, screenY, this.circleRadius * zoomLevel + 3, 0, Math.PI * 2)
     ctx.fill()
     ctx.stroke()
-    const [width, height] = this.getSize()
-
+    if (!this.boundingBoxData) return
+    const [size] = this.boundingBoxData
+    const { x: width, z: height } = size
     const drawAngelLength = 100;// Math.max(this.getData().width / 2, this.circleRadius * 2) * 0.9;// 0.9避免超过方块范围
     // 控制点向着angleY角度延伸10个单位后的坐标
     const rotatedXAdd = data.x + Math.cos(data.angleY) * drawAngelLength
@@ -143,12 +149,16 @@ export class PlaneGroupEntity extends GroupBaseEntity<PlaneGroupData> {
     ); // 移动原点到目标中心
     ctx.rotate(matchArea.data.angleY * -1); // 围绕新原点旋转
     // 绘制一个方块
-    ctx.strokeRect(
-      matchArea.data.width / -2 * zoomLevel,
-      matchArea.data.depth / -2 * zoomLevel,
-      matchArea.data.width * zoomLevel,
-      matchArea.data.depth * zoomLevel,
-    )
+    (() => {
+      if (!this.boundingBoxData) return
+      const [size, offset] = this.boundingBoxData
+      ctx.strokeRect(
+        (offset.x - size.x / 2) * zoomLevel,
+        (offset.z - size.z / 2) * zoomLevel,
+        size.x * zoomLevel,
+        size.z * zoomLevel
+      )
+    })();
     ctx.restore(); // 恢复原始状态
   }
 
@@ -176,8 +186,8 @@ export class PlaneGroupEntity extends GroupBaseEntity<PlaneGroupData> {
         value: () => {
           const cubeData: CubeData = {
             id: Date.now().toString(),
-            x: Math.random() * 100 - 50,
-            y: Math.random() * 100 - 50,
+            x: Math.random() * 300 - 150,
+            y: Math.random() * 600 - 300,
             z: 0,
             angleY: data.angleY,
             color: 'red',
@@ -206,20 +216,22 @@ export class PlaneGroupEntity extends GroupBaseEntity<PlaneGroupData> {
   }
 
   showMatchHandel(x: number, y: number) {
-    const [width, height, depth] = this.getSize()
+    if (!this.boundingBoxData) return null
+    const [size, offset] = this.boundingBoxData
+    const { x: width, z: height } = size
     const data = this.getData();
     if (isPointInRotatedRect(x, y, {
-      x: data.x,
-      y: data.y,
-      width: Math.max(width, height),
-      depth: Math.max(width, height),
+      x: data.x + offset.x,
+      y: data.y + offset.z,
+      width,
+      depth: height,
       angleY: data.angleY * -1,
     })) {
       return new MatchRectArea({
-        x: data.x,
-        y: data.y,
-        width: Math.max(width, height),
-        depth: Math.max(width, height),
+        x: data.x + offset.x,
+        y: data.y + offset.z,
+        width,
+        depth: height,
         angleY: data.angleY,
       })
     }
