@@ -415,7 +415,7 @@ export class DirectionCameraEntity extends CameraBase<DirectionCameraData> {
     }
   }
 
-  meshNeedChangeKey() {
+  needChangeKey() {
     const cacheData = {
       tip: this.getData().tip,
       tipFontSize: this.getData().tipFontSize,

@@ -361,7 +361,7 @@ export class CubeEntity extends PointEntityClass<CubeData> {
     return [];
   }
 
-  meshNeedChangeKey() {
+  needChangeKey() {
     const data = this.getData();
     const cacheData = {
       ...data,

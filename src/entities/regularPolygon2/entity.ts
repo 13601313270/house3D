@@ -434,7 +434,7 @@ export class RegularPolygonEntity extends PointEntityClass<RegularPolygon2Data> 
     return [];
   }
 
-  meshNeedChangeKey() {
+  needChangeKey() {
     const data = this.getData();
     const cacheData = {
       ...data,

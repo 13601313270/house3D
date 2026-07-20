@@ -76,7 +76,7 @@ export abstract class PointEntityClass<T extends PointObjData> extends BaseEntit
   reCreate3DMeshIfNeed(): void {
     const oldCacheKey = this.cacheKeyStr;
     super.reCreate3DMeshIfNeed();
-    const newKeyByData = this.meshNeedChangeKey();
+    const newKeyByData = this.needChangeKey();
     if (oldCacheKey === newKeyByData) {
       return;
     }
@@ -135,7 +135,7 @@ export abstract class PointEntityClass<T extends PointObjData> extends BaseEntit
   }
 
   // 当前对象是否需要重新生成3D模型状态
-  meshNeedChangeKey(): string {
+  needChangeKey(): string {
     const cacheData = {
       ...this.data,
       x: undefined,

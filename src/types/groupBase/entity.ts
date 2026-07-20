@@ -230,7 +230,7 @@ export abstract class GroupBaseEntity<T extends GroupBaseData> extends PointEnti
     return false
   }
 
-  meshNeedChangeKey() {
+  needChangeKey() {
     const data = this.getData();
     const cacheData = {
       ...data,

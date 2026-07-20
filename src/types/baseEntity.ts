@@ -28,10 +28,15 @@ export abstract class BaseEntityClass<T extends BaseObjData> {
   boundingBoxData: [THREE.Vector3, THREE.Vector3, THREE.Vector3] | null = null // 第一个是尺寸，第二个是位置偏移，第三个是旋转角度
   // eslint-disable-next-line
   associationEntity: BaseEntityClass<any>[] = []// 关联对象，就是本对象渲染，需要联动修改的对象。（比如：墙壁上被窗户挖洞，那么墙修改，需要重新挖洞）
+  private cacheCtx?: CanvasRenderingContext2D
 
   constructor(parentEntity: GroupBaseEntity<GroupBaseData> | null, data: T) {
     this.parentEntity = parentEntity
     this.data = data
+    const canvas = document.createElement("canvas")
+    canvas.width = 100
+    canvas.height = 100
+    this.cacheCtx = canvas.getContext("2d")!
     this.reBuildBoundingBoxData()
   }
 
@@ -43,6 +48,10 @@ export abstract class BaseEntityClass<T extends BaseObjData> {
   abstract getBoundingBoxData(): [THREE.Vector3, THREE.Vector3, THREE.Vector3] | null // 第一个是尺寸，第二个是位置偏移，第三个是旋转角度
 
   reBuildBoundingBoxData() {
+    const newKeyByData = this.needChangeKey();
+    if (this.cacheKeyStr === newKeyByData) {
+      return;
+    }
     console.log('reBuildBoundingBoxData')
     this.boundingBoxData = this.getBoundingBoxData()
     setTimeout(() => {
@@ -85,7 +94,8 @@ export abstract class BaseEntityClass<T extends BaseObjData> {
     }
   }
 
-  abstract meshNeedChangeKey(): string
+  // 当前对象是否需要重新生成3D模型状态
+  abstract needChangeKey(): string
 
   // 本对象的2D预览绘制，（时间早于draw2DByData）
   abstract draw2DPreview(
@@ -122,7 +132,7 @@ export abstract class BaseEntityClass<T extends BaseObjData> {
   }
 
   reCreate3DMeshIfNeed(): void {
-    const newKeyByData = this.meshNeedChangeKey();
+    const newKeyByData = this.needChangeKey();
     if (this.cacheKeyStr === newKeyByData) {
       return;
     }

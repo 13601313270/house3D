@@ -399,7 +399,7 @@ export class CameraEntity extends CameraBase<CameraData> {
     }
   }
 
-  meshNeedChangeKey() {
+  needChangeKey() {
     const cacheData = {
       tip: this.getData().tip,
       tipFontSize: this.getData().tipFontSize,

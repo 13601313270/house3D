@@ -373,7 +373,7 @@ export class CurtainEntity extends PointEntityClass<CurtainData> {
   }
 
   // 当前对象是否需要重新生成3D模型状态
-  meshNeedChangeKey(): string {
+  needChangeKey(): string {
     const cacheData = {
       ...this.getData(),
       x: undefined,
