@@ -3,7 +3,7 @@ import PluginType from "../pluginType"
 import defaultValues from "./defaultValues"
 
 const DoorwayPlugin: PluginType = {
-  name: '门洞',
+  name: '洞',
   key: 'doorway',
   type: 'house',
   entity: DoorEntity,

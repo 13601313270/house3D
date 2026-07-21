@@ -3,7 +3,7 @@ import { DoorData } from "./index.d"
 
 export default function (): DefaultItem<DoorData>[] {
   const values: DefaultItem<DoorData>[] = [{
-    name: '门洞',
+    name: '洞',
     data: {
       id: Date.now().toString(),
       wallPointId: -1,
