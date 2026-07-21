@@ -225,7 +225,9 @@ import ShowPayModal from '@/components/showPayModal.vue'
 import WorldState from '@/utils/worldState';
 import { editItem } from '@/utils/editItem';
 import WorldGroup, { EnvironmentConfig } from '@/world/world';
+import Canvas2DScene from '@/utils/canvas2DScene'
 
+const canvas2DScene = new Canvas2DScene();
 const canvas2DRef = ref<HTMLCanvasElement | null>(null)
 const canvas2DActionRef = ref<HTMLCanvasElement | null>(null)
 const canvas3DRefCenter = ref<typeof Canvas3D | null>(null)
@@ -455,7 +457,7 @@ function setHoverPoint(point: Point | null) {
 
     // 垂直线（y轴对齐）
     if (yAxisSnappedX.value !== null) {
-      const screenX = yAxisSnappedX.value * zoom2DLevel.value + panOffsetOfWorld.value.x
+      const screenX = yAxisSnappedX.value * canvas2DScene.list[0].level + panOffsetOfWorld.value.x
       ctxAction.beginPath()
       ctxAction.moveTo(screenX, 0)
       ctxAction.lineTo(screenX, worldApi.height)
@@ -464,7 +466,7 @@ function setHoverPoint(point: Point | null) {
 
     // 水平线（x轴对齐）
     if (xAxisSnappedY.value !== null) {
-      const screenY = xAxisSnappedY.value * zoom2DLevel.value + panOffsetOfWorld.value.y
+      const screenY = xAxisSnappedY.value * canvas2DScene.list[0].level + panOffsetOfWorld.value.y
       ctxAction.beginPath()
       ctxAction.moveTo(0, screenY)
       ctxAction.lineTo(worldApi.width, screenY)
@@ -480,13 +482,13 @@ const drawWrapper2D = () => {
     ctx.fillStyle = '#f5f5f5'
     ctx.fillRect(0, 0, worldApi.width, worldApi.height)
     const worldData = worldApi.getData()
-    const screenX = worldData.x * zoom2DLevel.value + panOffsetOfWorld.value.x;
-    const screenY = worldData.y * zoom2DLevel.value + panOffsetOfWorld.value.y;
+    const screenX = worldData.x * canvas2DScene.list[0].level + panOffsetOfWorld.value.x;
+    const screenY = worldData.y * canvas2DScene.list[0].level + panOffsetOfWorld.value.y;
     ctx.save()
     ctx.translate(screenX, screenY)
     worldApi.draw2DPreview(
       ctx,
-      zoom2DLevel.value,
+      canvas2DScene.list[0].level,
     )
     ctx.restore()
   }
@@ -570,6 +572,18 @@ async function changeCamera2(activeIndex: number = 0) {
 }
 
 onMounted(async () => {
+  console.log('canvas2DRef.value', canvas2DRef.value, canvas2DActionRef.value!)
+  canvas2DScene.list.push({
+    canvasList: [
+      canvas2DRef.value!,
+      canvas2DActionRef.value!,
+    ],
+    level: 1,
+    panOffset: {
+      x: panOffsetOfWorld.value.x,
+      y: panOffsetOfWorld.value.y,
+    }
+  })
   const res = await axios.get('https://api.studying1v1.com/video/objectFileType')
   const data = res.data as Array<{
     id: number,
@@ -709,6 +723,10 @@ onMounted(async () => {
     }
   }
 
+  initUserInfo();
+  window.addEventListener('mousemove', handleMouseMoveSplit)
+  window.addEventListener('mouseup', handleMouseUpSplit)
+
   // 劫持Ctrl+S保存事件
   window.addEventListener('keydown', handleKeyDown)
   return () => {
@@ -740,7 +758,7 @@ const saveDrawing = async () => {
   activeToolsIndex.value = -1
   await saveWorld(
     panOffsetOfWorld.value,
-    zoom2DLevel.value,
+    canvas2DScene.list[0].level,
     cameraStateCenter.value,
     activeCameraIndex.value
   )
@@ -863,7 +881,7 @@ async function initWorldByData(data: fileData & {
   }
 
   panOffsetOfWorld.value = data.panOffset || { x: 0, y: 0 }
-  zoom2DLevel.value = data.zoomLevel || 1
+  canvas2DScene.list[0].level = data.zoomLevel || 1
   if (data.cameraState) {
     cameraStateCenter.value = data.cameraState
   }
@@ -889,8 +907,8 @@ const handleContextMenu = (e: MouseEvent) => {
   const dy = screenY - panOffsetOfWorld.value.y
   const cos = Math.cos(angleY * -1)
   const sin = Math.sin(angleY * -1)
-  const x = (dx * cos + dy * sin) / zoom2DLevel.value
-  const y = (-dx * sin + dy * cos) / zoom2DLevel.value
+  const x = (dx * cos + dy * sin) / canvas2DScene.list[0].level
+  const y = (-dx * sin + dy * cos) / canvas2DScene.list[0].level
 
   editPropConfigInfo.value = []
   editPropInputInfo.value = {}
@@ -1045,8 +1063,8 @@ const handleCanvasClick = async (e: MouseEvent) => {
       const { angleY } = worldData;
       const cos = Math.cos(angleY * -1)
       const sin = Math.sin(angleY * -1)
-      const x = (dx * cos + dy * sin) / zoom2DLevel.value
-      const y = (-dx * sin + dy * cos) / zoom2DLevel.value
+      const x = (dx * cos + dy * sin) / canvas2DScene.list[0].level
+      const y = (-dx * sin + dy * cos) / canvas2DScene.list[0].level
       tempPointInsertData.value.push({
         x: Math.round(x),
         y: Math.round(y)
@@ -1184,8 +1202,8 @@ const handleMouseMove = (e: MouseEvent) => {
   const dy = mouseYInCanvas - panOffsetOfWorld.value.y
   const cos = Math.cos(angleY * -1)
   const sin = Math.sin(angleY * -1)
-  const x = (dx * cos + dy * sin) / zoom2DLevel.value
-  const y = (-dx * sin + dy * cos) / zoom2DLevel.value
+  const x = (dx * cos + dy * sin) / canvas2DScene.list[0].level
+  const y = (-dx * sin + dy * cos) / canvas2DScene.list[0].level
   if (beCopyEntity) {
     if (beCopyEntity instanceof PointEntityClass) {
       beCopyEntity.setData({
@@ -1274,14 +1292,14 @@ const handleMouseMove = (e: MouseEvent) => {
           // 类型“WallEntity”的参数不能赋给类型“BaseEntityClass<PointObjData>”的参数。
           if (temp(api)) {
             (() => {
-              const screenX = worldData.x * zoom2DLevel.value + panOffsetOfWorld.value.x;
-              const screenY = worldData.y * zoom2DLevel.value + panOffsetOfWorld.value.y;
+              const screenX = worldData.x * canvas2DScene.list[0].level + panOffsetOfWorld.value.x;
+              const screenY = worldData.y * canvas2DScene.list[0].level + panOffsetOfWorld.value.y;
               ctxAction.clearRect(0, 0, canvasAction.width, canvasAction.height)
               ctxAction.save()
               ctxAction.translate(screenX, screenY)
               ctxAction.rotate(angleY * -1)
               // 绘制操作句柄
-              matchHandelObj.draw2DActionHandle(ctxAction, zoom2DLevel.value)
+              matchHandelObj.draw2DActionHandle(ctxAction, canvas2DScene.list[0].level)
               ctxAction.restore()
             })();
             return;
@@ -1302,12 +1320,12 @@ const handleMouseMove = (e: MouseEvent) => {
       ctxAction.clearRect(0, 0, canvasAction.width, canvasAction.height);
 
       (() => {
-        const screenX = worldData.x * zoom2DLevel.value + panOffsetOfWorld.value.x;
-        const screenY = worldData.y * zoom2DLevel.value + panOffsetOfWorld.value.y;
+        const screenX = worldData.x * canvas2DScene.list[0].level + panOffsetOfWorld.value.x;
+        const screenY = worldData.y * canvas2DScene.list[0].level + panOffsetOfWorld.value.y;
         ctxAction.save()
         ctxAction.translate(screenX, screenY)
         ctxAction.rotate(angleY * -1)
-        matchHandelObj.draw2DActionHandle(ctxAction, zoom2DLevel.value)
+        matchHandelObj.draw2DActionHandle(ctxAction, canvas2DScene.list[0].level)
         ctxAction.restore()
       })();
 
@@ -1318,8 +1336,8 @@ const handleMouseMove = (e: MouseEvent) => {
         const canvasAction = canvas2DRef.value!;
         const ctxAction = canvasAction.getContext('2d')!
 
-        const hoverScreenX = x * zoom2DLevel.value + panOffsetOfWorld.value.x
-        const hoverScreenY = y * zoom2DLevel.value + panOffsetOfWorld.value.y
+        const hoverScreenX = x * canvas2DScene.list[0].level + panOffsetOfWorld.value.x
+        const hoverScreenY = y * canvas2DScene.list[0].level + panOffsetOfWorld.value.y
         const startY = hoverScreenY + 14;
         // 绘制一个背景矩形
         ctxAction.fillStyle = 'rgba(0, 0, 0, 0.5)'
@@ -1359,8 +1377,8 @@ const handleMouseMove = (e: MouseEvent) => {
           // 暂无操作句柄
           const data = worldApi.getData();
           const { angleY } = data
-          const screenX = data.x * zoom2DLevel.value + panOffsetOfWorld.value.x;
-          const screenY = data.y * zoom2DLevel.value + panOffsetOfWorld.value.y;
+          const screenX = data.x * canvas2DScene.list[0].level + panOffsetOfWorld.value.x;
+          const screenY = data.y * canvas2DScene.list[0].level + panOffsetOfWorld.value.y;
           ctxAction.save()
           ctxAction.translate(screenX, screenY)
           ctxAction.rotate(angleY * -1)
@@ -1370,16 +1388,16 @@ const handleMouseMove = (e: MouseEvent) => {
             ctxAction.strokeStyle = 'yellow'
             ctxAction.save()
             ctxAction.translate(
-              matchArea.data.x * zoom2DLevel.value,
-              matchArea.data.y * zoom2DLevel.value
+              matchArea.data.x * canvas2DScene.list[0].level,
+              matchArea.data.y * canvas2DScene.list[0].level
             ); // 移动原点到目标中心
             ctxAction.rotate(matchArea.data.angleY * -1);
             // 绘制一个方块
             ctxAction.strokeRect(
-              matchArea.data.width / -2 * zoom2DLevel.value,
-              matchArea.data.depth / -2 * zoom2DLevel.value,
-              matchArea.data.width * zoom2DLevel.value,
-              matchArea.data.depth * zoom2DLevel.value,
+              matchArea.data.width / -2 * canvas2DScene.list[0].level,
+              matchArea.data.depth / -2 * canvas2DScene.list[0].level,
+              matchArea.data.width * canvas2DScene.list[0].level,
+              matchArea.data.depth * canvas2DScene.list[0].level,
             )
             ctxAction.restore()
           } else if (matchArea instanceof MatchCircleArea) {
@@ -1388,15 +1406,15 @@ const handleMouseMove = (e: MouseEvent) => {
             // 绘制一个圆
             ctxAction.beginPath()
             ctxAction.arc(
-              matchArea.data.x * zoom2DLevel.value,
-              matchArea.data.y * zoom2DLevel.value,
-              matchArea.data.r * zoom2DLevel.value,
+              matchArea.data.x * canvas2DScene.list[0].level,
+              matchArea.data.y * canvas2DScene.list[0].level,
+              matchArea.data.r * canvas2DScene.list[0].level,
               0,
               Math.PI * 2,
             )
             ctxAction.stroke()
           }
-          classInfo.draw2DActionHandle(ctxAction, zoom2DLevel.value)
+          classInfo.draw2DActionHandle(ctxAction, canvas2DScene.list[0].level)
           ctxAction.restore()
         })();
 
@@ -1404,7 +1422,7 @@ const handleMouseMove = (e: MouseEvent) => {
           const textPositionX = dx;
           const textPositionY = dy - 10;
           // 绘制文字（带边框）
-          ctxAction.font = `${Math.max(14 * zoom2DLevel.value, 14)}px '微软雅黑'`
+          ctxAction.font = `${Math.max(14 * canvas2DScene.list[0].level, 14)}px '微软雅黑'`
           ctxAction.textAlign = 'center'
           // 设置边框样式
           ctxAction.strokeStyle = 'white'
@@ -1412,15 +1430,15 @@ const handleMouseMove = (e: MouseEvent) => {
           const text = classInfo.inAreaHoverText()
           ctxAction.strokeText(
             text,
-            textPositionX * zoom2DLevel.value + panOffsetOfWorld.value.x,
-            textPositionY * zoom2DLevel.value + panOffsetOfWorld.value.y
+            textPositionX * canvas2DScene.list[0].level + panOffsetOfWorld.value.x,
+            textPositionY * canvas2DScene.list[0].level + panOffsetOfWorld.value.y
           )
           // 设置填充样式
           ctxAction.fillStyle = 'black'
           ctxAction.fillText(
             `${text}`,
-            textPositionX * zoom2DLevel.value + panOffsetOfWorld.value.x,
-            textPositionY * zoom2DLevel.value + panOffsetOfWorld.value.y
+            textPositionX * canvas2DScene.list[0].level + panOffsetOfWorld.value.x,
+            textPositionY * canvas2DScene.list[0].level + panOffsetOfWorld.value.y
           )
         }
       }
@@ -1478,8 +1496,8 @@ const handleMouseMove = (e: MouseEvent) => {
         y: snappedPoint44.point.y,
       })
       drawWrapper2DAnd3D()
-      const hoverScreenX = hoverPoint.value!.x * zoom2DLevel.value + panOffsetOfWorld.value.x
-      const hoverScreenY = hoverPoint.value!.y * zoom2DLevel.value + panOffsetOfWorld.value.y
+      const hoverScreenX = hoverPoint.value!.x * canvas2DScene.list[0].level + panOffsetOfWorld.value.x
+      const hoverScreenY = hoverPoint.value!.y * canvas2DScene.list[0].level + panOffsetOfWorld.value.y
       const canvasAction = canvas2DRef.value!;
       const ctxAction = canvasAction.getContext('2d')!
       const startY = snappedPoint44.point.y > last.y ? hoverScreenY + 14 : hoverScreenY - 15 * tipTexts.length - 22;
@@ -1513,8 +1531,8 @@ const handleMouseMove = (e: MouseEvent) => {
       const canvasAction = canvas2DRef.value!;
       const ctxAction = canvasAction.getContext('2d')!
 
-      const hoverScreenX = x * zoom2DLevel.value + panOffsetOfWorld.value.x
-      const hoverScreenY = y * zoom2DLevel.value + panOffsetOfWorld.value.y
+      const hoverScreenX = x * canvas2DScene.list[0].level + panOffsetOfWorld.value.x
+      const hoverScreenY = y * canvas2DScene.list[0].level + panOffsetOfWorld.value.y
       const startY = hoverScreenY + 14;
       // 绘制一个背景矩形
       ctxAction.fillStyle = 'rgba(0, 0, 0, 0.5)'
@@ -1551,8 +1569,8 @@ const handleMouseDown = (e: MouseEvent) => {
     isPaningAngel.value = true
     isPaningAngelMoved.value = false;
     startWorldAngelCenterOfWorld = {
-      x: (rect.width / 2 - panOffsetOfWorld.value.x) / zoom2DLevel.value,
-      y: (rect.height / 2 - panOffsetOfWorld.value.y) / zoom2DLevel.value,
+      x: (rect.width / 2 - panOffsetOfWorld.value.x) / canvas2DScene.list[0].level,
+      y: (rect.height / 2 - panOffsetOfWorld.value.y) / canvas2DScene.list[0].level,
     }
     panStartAngel.value = worldApi.getData().angleY
     console.log('panStartAngel.value', canvas.height / 2, mouseYInCanvas)
@@ -1587,10 +1605,8 @@ const handleMouseDown = (e: MouseEvent) => {
     const dy = mouseYInCanvas - panOffsetOfWorld.value.y
     const cos = Math.cos(angleY * -1)
     const sin = Math.sin(angleY * -1)
-    // const xxxx = dx / zoom2DLevel.value
-    // const yyyy = dy / zoom2DLevel.value
-    const x = (dx * cos + dy * sin) / zoom2DLevel.value
-    const y = (-dx * sin + dy * cos) / zoom2DLevel.value
+    const x = (dx * cos + dy * sin) / canvas2DScene.list[0].level
+    const y = (-dx * sin + dy * cos) / canvas2DScene.list[0].level
     const handleInfoList = getHandleInfoByXY(x, y)
     if (handleInfoList) {
       const { classInfo, handle, startPoint } = handleInfoList
@@ -1604,14 +1620,14 @@ const handleMouseDown = (e: MouseEvent) => {
           y: startPoint.y
         }
         const canvasAction = canvas2DActionRef.value!;
-        const screenX = worldData.x * zoom2DLevel.value + panOffsetOfWorld.value.x;
-        const screenY = worldData.y * zoom2DLevel.value + panOffsetOfWorld.value.y;
+        const screenX = worldData.x * canvas2DScene.list[0].level + panOffsetOfWorld.value.x;
+        const screenY = worldData.y * canvas2DScene.list[0].level + panOffsetOfWorld.value.y;
         const ctxAction = canvasAction.getContext('2d')!
         ctxAction.clearRect(0, 0, canvasAction.width, canvasAction.height)
         ctxAction.save()
         ctxAction.translate(screenX, screenY)
         ctxAction.rotate(worldData.angleY * -1)
-        matchHandelObj.draw2DActionHandle(ctxAction, zoom2DLevel.value)
+        matchHandelObj.draw2DActionHandle(ctxAction, canvas2DScene.list[0].level)
         ctxAction.restore()
         return
       }
@@ -1684,12 +1700,6 @@ const handleMouseUpSplit = () => {
   }
 }
 
-onMounted(() => {
-  initUserInfo();
-  window.addEventListener('mousemove', handleMouseMoveSplit)
-  window.addEventListener('mouseup', handleMouseUpSplit)
-})
-
 onUnmounted(() => {
   window.removeEventListener('mousemove', handleMouseMoveSplit)
   window.removeEventListener('mouseup', handleMouseUpSplit)
@@ -1711,13 +1721,13 @@ const handleWheel = (e: WheelEvent) => {
   const screenY = Math.round(e.clientY - rect.top)
 
   const zoomFactor = e.deltaY < 0 ? 1.1 : 0.9
-  const newZoomLevel = Math.max(0.01, Math.min(5, zoom2DLevel.value * zoomFactor))
+  const newZoomLevel = Math.max(0.01, Math.min(5, canvas2DScene.list[0].level * zoomFactor))
 
-  const zoomRatio = newZoomLevel / zoom2DLevel.value
+  const zoomRatio = newZoomLevel / canvas2DScene.list[0].level
   const newPanX = screenX - (screenX - panOffsetOfWorld.value.x) * zoomRatio
   const newPanY = screenY - (screenY - panOffsetOfWorld.value.y) * zoomRatio
 
-  zoom2DLevel.value = newZoomLevel
+  canvas2DScene.list[0].level = newZoomLevel
   panOffsetOfWorld.value = { x: newPanX, y: newPanY }
 
   drawWrapper2DAnd3D()
@@ -1768,6 +1778,7 @@ async function importOutObj2(file: File) {
     handleLoadedObject(object, file, type, scaleFactor, position)
   })
 }
+
 const onDrop = async (e: DragEvent) => {
   isDragOver.value = false
 
@@ -1831,8 +1842,8 @@ function handleLocationPosition(position: { x: number, y: number }) {
   const dx = canvasRect.width / 2
   const dy = canvasRect.height / 2
   panOffsetOfWorld.value = {
-    x: dx - (position.x * zoom2DLevel.value),
-    y: dy - (position.y * zoom2DLevel.value),
+    x: dx - (position.x * canvas2DScene.list[0].level),
+    y: dy - (position.y * canvas2DScene.list[0].level),
   }
   drawWrapper2D()
 }
