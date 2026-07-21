@@ -256,6 +256,9 @@ export abstract class GroupBaseEntity<T extends GroupBaseData> extends PointEnti
     })
   }
 
+  /**
+   * @protected
+   */
   async add(type: string, data: BaseObjData[]): Promise<BaseEntityClass<BaseObjData>[]> {
     const EntityClassItem: EntityConstructor = fileDataKeyToClass[type] as any;
     if (!this.allObjectsByGroup[type]) {
@@ -276,6 +279,33 @@ export abstract class GroupBaseEntity<T extends GroupBaseData> extends PointEnti
       if (api.getData().isLocked) {
         this.lockedObjList.push(api)
       }
+    }
+    this._callAllOnChangeCallback('add', apiList)
+    return apiList;
+  }
+
+  async add2(type: string, data: BaseObjData[]): Promise<BaseEntityClass<BaseObjData>[]> {
+    const EntityClassItem: EntityConstructor = fileDataKeyToClass[type] as any;
+    if (!this.allObjectsByGroup[type]) {
+      this.allObjectsByGroup[type] = []
+    }
+    const apiList = [];
+    for (let i = 0; i < data.length; i++) {
+      const api: BaseEntityClass<BaseObjData> = new EntityClassItem(this, data[i]);
+      await api.init()
+      apiList.push(api);
+      this.allObjectsByGroup[type].push(api)
+      this.data.childrenData.push({
+        type,
+        value: api.getData(),
+      })
+      this.children.push(api);
+      this.worldAddBindList.forEach(callback => callback(api))
+      if (api.getData().isLocked) {
+        this.lockedObjList.push(api)
+      }
+      api.reCreate3DMeshIfNeed();
+      api.change3DMeshState()
     }
     this._callAllOnChangeCallback('add', apiList)
     return apiList;

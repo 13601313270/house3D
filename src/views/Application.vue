@@ -692,7 +692,7 @@ onMounted(async () => {
           worldApi.insertTempObj.setPreparePoint(tempPointInsertData.value)
           const insertData = worldApi.insertTempObj.getData()
           if (tempPointInsertData.value.length >= 2) {
-            await worldApi.add(currentTool.value, [insertData])
+            await worldApi.add2(currentTool.value, [insertData])
           }
           worldApi.insertTempObj = null;
           tempPointInsertData.value = []
@@ -705,7 +705,6 @@ onMounted(async () => {
           worldApi.insertTempObj = null;
         }
       }
-      drawWrapper2DAnd3D()
       currentTool.value = 'drag'
     }
   }
@@ -859,7 +858,7 @@ async function initWorldByData(data: fileData & {
   for (let i = 0; i < allFileKeys.length; i++) {
     const key = allFileKeys[i]
     if (data[key] && data[key].length > 0) {
-      await worldApi.add(key, data[key])
+      await worldApi.add2(key, data[key])
     }
   }
 
@@ -874,7 +873,6 @@ async function initWorldByData(data: fileData & {
   if (data.environmentConfig) {
     window.worldApi.setEnvironMent(data.environmentConfig)
   }
-  drawWrapper2DAnd3D()
 }
 
 const handleContextMenu = (e: MouseEvent) => {
@@ -966,7 +964,9 @@ const handleContextMenu = (e: MouseEvent) => {
               }
               editPropConfigEditCallback = (val: any) => {
                 callback(val)
-                drawWrapper2DAnd3D()
+                drawWrapper2D();
+                worldApi.reCreate3DMeshIfNeed()
+                worldApi.change3DMeshState()
               }
               nextTick(() => {
                 const height = document.querySelector('.context-menu')?.clientHeight

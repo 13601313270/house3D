@@ -28,15 +28,15 @@ export abstract class BaseEntityClass<T extends BaseObjData> {
   boundingBoxData: [THREE.Vector3, THREE.Vector3, THREE.Vector3] | null = null // 第一个是尺寸，第二个是位置偏移，第三个是旋转角度
   // eslint-disable-next-line
   associationEntity: BaseEntityClass<any>[] = []// 关联对象，就是本对象渲染，需要联动修改的对象。（比如：墙壁上被窗户挖洞，那么墙修改，需要重新挖洞）
-  private cacheCtx?: CanvasRenderingContext2D
+  // private cacheCtx?: CanvasRenderingContext2D
 
   constructor(parentEntity: GroupBaseEntity<GroupBaseData> | null, data: T) {
     this.parentEntity = parentEntity
     this.data = data
-    const canvas = document.createElement("canvas")
-    canvas.width = 100
-    canvas.height = 100
-    this.cacheCtx = canvas.getContext("2d")!
+    // const canvas = document.createElement("canvas")
+    // canvas.width = 100
+    // canvas.height = 100
+    // this.cacheCtx = canvas.getContext("2d")!
     this.reBuildBoundingBoxData()
   }
 
