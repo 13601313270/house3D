@@ -114,7 +114,7 @@
         <div class="tools">
           <div style="flex-shrink: 0;">摄像机：</div>
           <div class="cameraList">
-            <div v-for="(item, index) in allCamera" @click="changeCamera2State(index)"
+            <div v-for="(item, index) in allCamera" @click="changeCamera2(index)"
               :class="{ active: activeCameraIndex === index }" class="cameraItem">{{ index + 1 }}
             </div>
           </div>
@@ -377,9 +377,7 @@ const updateCanvasSize = () => {
   if (canvas3DPanel2) {
     canvas3DPanel2.resize();
   }
-  setTimeout(() => {
-    drawWrapper2DAnd3D()
-  }, 30)
+  drawWrapper2D();
 }
 
 const contextMenu = ref<{
@@ -495,7 +493,7 @@ const drawWrapper2D = () => {
 }
 
 const activeCameraIndex = ref(0)
-async function changeCamera2State(activeIndex: number = 0) {
+async function changeCamera2(activeIndex: number = 0) {
   const allCameraTypeKey = ['camera', 'directionCamera'];
   const allTypesCameraList: CameraData[] = []
   const allTypesCameraObjList: CameraBase<CameraData>[] = []
@@ -530,26 +528,6 @@ async function changeCamera2State(activeIndex: number = 0) {
     })
     allCamera.value = allCameraList
     cameraRightState.value = allCameraList[activeIndex]
-    // if (allCameraList[activeIndex]) {
-    //   if (!cameraRightPanel.value) {
-    //     cameraRightPanel.value = new THREE.PerspectiveCamera(55, cameraRightState.value.aspectW / cameraRightState.value.aspectH, 0.1, 20000);
-    //     await sleep(10);
-    //   }
-    //   if ('fov' in allCameraList[activeIndex]) {
-    //     console.log('xxxxx-1')
-    //     cameraRightPanel.value.position.set(
-    //       allCameraList[activeIndex].positionX,
-    //       allCameraList[activeIndex].positionZ,
-    //       allCameraList[activeIndex].positionY,
-    //     )
-    //     cameraRightPanel.value.lookAt(
-    //       allCameraList[activeIndex].targetPositionX,
-    //       allCameraList[activeIndex].targetPositionZ,
-    //       allCameraList[activeIndex].targetPositionY
-    //     );
-    //     cameraRightPanel.value.updateProjectionMatrix()
-    //   }
-    // }
     activeCameraIndex.value = activeIndex
     worldState.activeCameraIndex = activeIndex
     const allCameraObjList: BaseEntityClass<BaseObjData>[] = [];
@@ -577,7 +555,7 @@ async function changeCamera2State(activeIndex: number = 0) {
           }
         }
       })
-      drawWrapper2DAnd3D()
+      drawWrapper2D();
     }
     // console.trace('ddddddd')
     // console.log('cameraRightPanel---1', cameraRightPanel.value)
@@ -652,7 +630,7 @@ onMounted(async () => {
         activeCameraIndex.value = 0;
       }
       // console.log('allCamera-d', allCamera.value.length, activeCameraIndex.value)
-      changeCamera2State(activeCameraIndex.value)
+      changeCamera2(activeCameraIndex.value)
     }
   })
   nextTick(() => {
@@ -666,7 +644,7 @@ onMounted(async () => {
       panOffsetOfWorld.value.y += dy
       mouseStartScreenX = screenX
       mouseStartScreenY = screenY
-      drawWrapper2DAnd3D()
+      drawWrapper2D();
     }
     const match = location.href.match(/initId=(\d+)/);
     if (match) {
@@ -679,7 +657,6 @@ onMounted(async () => {
       })
     }
   })
-  drawWrapper2DAnd3D()
   window.addEventListener('resize', () => updateCanvasSize())
   updateCanvasSize()
 
@@ -892,7 +869,7 @@ async function initWorldByData(data: fileData & {
     cameraStateCenter.value = data.cameraState
   }
   if (data.activeCameraIndex !== undefined) {
-    await changeCamera2State(data.activeCameraIndex)
+    await changeCamera2(data.activeCameraIndex)
   }
   if (data.environmentConfig) {
     window.worldApi.setEnvironMent(data.environmentConfig)

@@ -446,14 +446,6 @@ const resize = () => {
   updateContainerHeight(renderer)
 }
 
-const updateScene = () => {
-  if (window.worldApi.scene) {
-    props.world.reCreate3DMeshIfNeed()
-    props.world.change3DMeshState()
-    resize();
-  }
-}
-
 const updateContainerHeight = (renderer: THREE.WebGLRenderer) => {
   if (!containerRef.value || !renderer || !camera) return
   if (!containerRef.value || !props.aspectRatio) return
@@ -526,7 +518,7 @@ onMounted(() => {
       cameraStateZ.value = { ...props.cameraState }
       updateCameraAngel()
     }
-    updateScene()
+    resize();
     animate()
   })
   window.addEventListener('resize', resize)
@@ -579,7 +571,7 @@ watch(() => props.camera, (newVal) => {
 watch(() => props.aspectRatio, (newVal) => {
   if (newVal) {
     updateCameraAngel()
-    updateScene()
+    resize();
   }
 }, {
   immediate: true
