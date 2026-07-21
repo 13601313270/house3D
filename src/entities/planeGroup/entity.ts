@@ -7,6 +7,7 @@ import { MatchRectArea } from '@/utils/matchArea'
 import { GroupBaseData } from '@/types/groupBase'
 import { PlaneGroupData } from './index.d'
 import { PointEntityClass } from '@/types/pointEntity'
+import canvas2DSceneManage from '@/utils/canvas2DSceneManage'
 
 export class PlaneGroupEntity extends GroupBaseEntity<PlaneGroupData> {
   type: string = 'planeGroup'
@@ -187,11 +188,12 @@ export class PlaneGroupEntity extends GroupBaseEntity<PlaneGroupData> {
           }
           this.add('cube', [cubeData])
           setTimeout(() => {
+            canvas2DSceneManage.renderPreview()
             this.reCreate3DMeshIfNeed()
             this.change3DMeshState()
             this.reBuildBoundingBoxData();
             close()
-          }, 0)
+          }, 100)
           // if (this.parentEntity) {
           //   this.parentEntity._callObjDataChange(this)
           // }
@@ -210,8 +212,8 @@ export class PlaneGroupEntity extends GroupBaseEntity<PlaneGroupData> {
     const [size, offset] = this.boundingBoxData
     const { x: width, z: height } = size
     const data = this.getData();
-    const xx = data.x + offset.x;// * Math.cos(data.angleY) + offset.z * Math.sin(data.angleY);
-    const yy = data.y + offset.z;// * Math.cos(data.angleY) - offset.x * Math.sin(data.angleY);
+    const xx = data.x + offset.x;
+    const yy = data.y + offset.z;
     if (isPointInRotatedRect(x, y, {
       x: xx,
       y: yy,

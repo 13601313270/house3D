@@ -49,12 +49,11 @@ export abstract class BaseEntityClass<T extends BaseObjData> {
   abstract getBoundingBoxData(): [THREE.Vector3, THREE.Vector3, THREE.Vector3] | null // 第一个是尺寸，第二个是位置偏移，第三个是旋转角度
 
   reBuildBoundingBoxData() {
+    this.boundingBoxData = this.getBoundingBoxData()
     const newKeyByData = this.needChangeKey();
     if (this.cacheKeyStr === newKeyByData) {
       return;
     }
-    console.log('reBuildBoundingBoxData')
-    this.boundingBoxData = this.getBoundingBoxData()
     setTimeout(() => {
       if (this.parentEntity) {
         this.parentEntity.reBuildBoundingBoxData()
@@ -64,8 +63,6 @@ export abstract class BaseEntityClass<T extends BaseObjData> {
 
   setData(data: T) {
     this.data = data
-    // @ts-ignore
-    window.ssss = canvas2DSceneManage;
     canvas2DSceneManage.renderPreview()
     this.reCreate3DMeshIfNeed()
     this.change3DMeshState()

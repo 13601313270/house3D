@@ -652,7 +652,7 @@ onMounted(async () => {
           worldApi.insertTempObj.setPreparePoint(tempPointInsertData.value)
           const insertData = worldApi.insertTempObj.getData()
           if (tempPointInsertData.value.length >= 2) {
-            await worldApi.add2(currentTool.value, [insertData])
+            await worldApi.add(currentTool.value, [insertData])
           }
           worldApi.insertTempObj.beforeRemove()
           worldApi.insertTempObj = null;
@@ -826,7 +826,7 @@ async function initWorldByData(data: fileData & {
   for (let i = 0; i < allFileKeys.length; i++) {
     const key = allFileKeys[i]
     if (data[key] && data[key].length > 0) {
-      await worldApi.add2(key, data[key])
+      await worldApi.add(key, data[key])
     }
   }
 
@@ -1061,7 +1061,7 @@ const handleCanvasClick = async (point: {
     }
   }
 
-  drawWrapper2DAnd3D()
+  // drawWrapper2DAnd3D()
 }
 
 const clearDrawing = () => {
@@ -1766,7 +1766,7 @@ const handleLoadedObject = async (object: THREE.Group | THREE.Mesh, file: File, 
   }
   await worldApi.add('importFile', [data])
 
-  drawWrapper2DAnd3D()
+  // drawWrapper2DAnd3D()
 }
 function logout() {
   if (confirm('确定要退出登录吗？')) {
@@ -1843,7 +1843,7 @@ async function copyEntity() {
     }
     contextMenu.value = null
     currentTool.value = 'drag'
-    drawWrapper2DAnd3D()
+    // drawWrapper2DAnd3D()
   }
 }
 function showAiPic() {
