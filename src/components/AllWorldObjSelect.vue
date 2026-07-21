@@ -45,7 +45,7 @@ import { PointEntityClass } from '@/types/pointEntity'
 import { LineEntityClass } from '@/types/lineEntity'
 import { BaseEntityClass } from '@/types/baseEntity'
 import { BaseObjData } from '@/types/map2d'
-import canvas2DScene from '@/utils/canvas2DScene'
+import canvas2DScene from '@/utils/canvas2DSceneManage'
 const allObjCount = ref(0)
 type Item = {
   id: string,
