@@ -135,8 +135,8 @@
         :editPropConfigInfo="editPropConfigInfo" v-model="editPropInputInfo"
         :initPosition="{ x: contextMenu.x, y: contextMenu.y }" @deleteContextMenuEntity="deleteContextMenuEntity"
         @close="contextMenu = null" @copyEntity="copyEntity" />
-      <AllWorldObjSelect v-if="showAllObjSelect" :panOffset="panOffsetOfWorld"
-        @close="showAllObjSelect = false" @locationPosition="handleLocationPosition" @onChange="handleObjChange" />
+      <AllWorldObjSelect v-if="showAllObjSelect" @close="showAllObjSelect = false"
+        @locationPosition="handleLocationPosition" @onChange="handleObjChange" />
       <EnvironmentEditor v-if="showEnvironmentEditor" @close="showEnvironmentEditor = false" />
     </div>
   </div>
@@ -244,7 +244,6 @@ const xAxisSnappedY = ref<number | null>(null)
 const yAxisSnappedX = ref<number | null>(null)
 const dragOffset = ref<Point | null>(null)
 const dragStartPoint = ref<Point | null>(null)
-const panOffsetOfWorld = ref<Point>({ x: 0, y: 0 })
 const isPanningScreen = ref(false);// 平移屏幕
 const isPaningAngel = ref(false);// 平移角度
 const isPaningAngelMoved = ref(false);// 平移角度时候，是否移动了
@@ -453,7 +452,7 @@ function setHoverPoint(point: Point | null) {
 
     // 垂直线（y轴对齐）
     if (yAxisSnappedX.value !== null) {
-      const screenX = yAxisSnappedX.value * canvas2DScene.list[0].level + panOffsetOfWorld.value.x
+      const screenX = yAxisSnappedX.value * canvas2DScene.list[0].level + canvas2DScene.list[0].panOffset.x
       ctxAction.beginPath()
       ctxAction.moveTo(screenX, 0)
       ctxAction.lineTo(screenX, worldApi.height)
@@ -462,7 +461,7 @@ function setHoverPoint(point: Point | null) {
 
     // 水平线（x轴对齐）
     if (xAxisSnappedY.value !== null) {
-      const screenY = xAxisSnappedY.value * canvas2DScene.list[0].level + panOffsetOfWorld.value.y
+      const screenY = xAxisSnappedY.value * canvas2DScene.list[0].level + canvas2DScene.list[0].panOffset.y
       ctxAction.beginPath()
       ctxAction.moveTo(0, screenY)
       ctxAction.lineTo(worldApi.width, screenY)
@@ -478,8 +477,8 @@ const drawWrapper2D = () => {
     ctx.fillStyle = '#f5f5f5'
     ctx.fillRect(0, 0, worldApi.width, worldApi.height)
     const worldData = worldApi.getData()
-    const screenX = worldData.x * canvas2DScene.list[0].level + panOffsetOfWorld.value.x;
-    const screenY = worldData.y * canvas2DScene.list[0].level + panOffsetOfWorld.value.y;
+    const screenX = worldData.x * canvas2DScene.list[0].level + canvas2DScene.list[0].panOffset.x;
+    const screenY = worldData.y * canvas2DScene.list[0].level + canvas2DScene.list[0].panOffset.y;
     ctx.save()
     ctx.translate(screenX, screenY)
     worldApi.draw2DPreview(
@@ -576,8 +575,8 @@ onMounted(async () => {
     ],
     level: 1,
     panOffset: {
-      x: panOffsetOfWorld.value.x,
-      y: panOffsetOfWorld.value.y,
+      x: 0,
+      y: 0,
     }
   })
   const res = await axios.get('https://api.studying1v1.com/video/objectFileType')
@@ -650,8 +649,8 @@ onMounted(async () => {
       const canvasRect = canvasContainer.getBoundingClientRect()
       const dx = canvasRect.width / 2
       const dy = canvasRect.height / 2
-      panOffsetOfWorld.value.x += dx
-      panOffsetOfWorld.value.y += dy
+      canvas2DScene.list[0].panOffset.x += dx
+      canvas2DScene.list[0].panOffset.y += dy
       mouseStartScreenX = screenX
       mouseStartScreenY = screenY
       drawWrapper2D();
@@ -753,7 +752,7 @@ const saveDrawing = async () => {
   }
   activeToolsIndex.value = -1
   await saveWorld(
-    panOffsetOfWorld.value,
+    canvas2DScene.list[0].panOffset,
     canvas2DScene.list[0].level,
     cameraStateCenter.value,
     activeCameraIndex.value
@@ -876,7 +875,10 @@ async function initWorldByData(data: fileData & {
     }
   }
 
-  panOffsetOfWorld.value = data.panOffset || { x: 0, y: 0 }
+  canvas2DScene.list[0].panOffset = {
+    x: data.panOffset.x || 0,
+    y: data.panOffset.y || 0,
+  }
   canvas2DScene.list[0].level = data.zoomLevel || 1
   if (data.cameraState) {
     cameraStateCenter.value = data.cameraState
@@ -899,8 +901,8 @@ const handleContextMenu = (e: MouseEvent) => {
   const screenX = Math.round(e.clientX - rect.left)
   const screenY = Math.round(e.clientY - rect.top)
   const { angleY } = worldApi.getData();
-  const dx = screenX - panOffsetOfWorld.value.x
-  const dy = screenY - panOffsetOfWorld.value.y
+  const dx = screenX - canvas2DScene.list[0].panOffset.x
+  const dy = screenY - canvas2DScene.list[0].panOffset.y
   const cos = Math.cos(angleY * -1)
   const sin = Math.sin(angleY * -1)
   const x = (dx * cos + dy * sin) / canvas2DScene.list[0].level
@@ -1053,8 +1055,8 @@ const handleCanvasClick = async (e: MouseEvent) => {
     } else {
       const mouseXInCanvas = Math.round(e.clientX - rect.left)
       const mouseYInCanvas = Math.round(e.clientY - rect.top)
-      const dx = mouseXInCanvas - panOffsetOfWorld.value.x
-      const dy = mouseYInCanvas - panOffsetOfWorld.value.y
+      const dx = mouseXInCanvas - canvas2DScene.list[0].panOffset.x
+      const dy = mouseYInCanvas - canvas2DScene.list[0].panOffset.y
       const worldData = worldApi.getData();
       const { angleY } = worldData;
       const cos = Math.cos(angleY * -1)
@@ -1177,8 +1179,10 @@ const handleMouseMove = (e: MouseEvent) => {
       const sin = Math.sin(rotateAngle)
       const newPositionX = centerX + dx * cos - dy * sin
       const newPositionY = centerY + dx * sin + dy * cos
-      panOffsetOfWorld.value.x = newPositionX
-      panOffsetOfWorld.value.y = newPositionY
+      canvas2DScene.list[0].panOffset = {
+        x: newPositionX,
+        y: newPositionY,
+      }
     })();
 
     worldApi.setData({
@@ -1194,8 +1198,8 @@ const handleMouseMove = (e: MouseEvent) => {
   }
   const worldData = worldApi.getData();
   const { angleY } = worldData;
-  const dx = mouseXInCanvas - panOffsetOfWorld.value.x
-  const dy = mouseYInCanvas - panOffsetOfWorld.value.y
+  const dx = mouseXInCanvas - canvas2DScene.list[0].panOffset.x
+  const dy = mouseYInCanvas - canvas2DScene.list[0].panOffset.y
   const cos = Math.cos(angleY * -1)
   const sin = Math.sin(angleY * -1)
   const x = (dx * cos + dy * sin) / canvas2DScene.list[0].level
@@ -1288,8 +1292,8 @@ const handleMouseMove = (e: MouseEvent) => {
           // 类型“WallEntity”的参数不能赋给类型“BaseEntityClass<PointObjData>”的参数。
           if (temp(api)) {
             (() => {
-              const screenX = worldData.x * canvas2DScene.list[0].level + panOffsetOfWorld.value.x;
-              const screenY = worldData.y * canvas2DScene.list[0].level + panOffsetOfWorld.value.y;
+              const screenX = worldData.x * canvas2DScene.list[0].level + canvas2DScene.list[0].panOffset.x;
+              const screenY = worldData.y * canvas2DScene.list[0].level + canvas2DScene.list[0].panOffset.y;
               ctxAction.clearRect(0, 0, canvasAction.width, canvasAction.height)
               ctxAction.save()
               ctxAction.translate(screenX, screenY)
@@ -1316,8 +1320,8 @@ const handleMouseMove = (e: MouseEvent) => {
       ctxAction.clearRect(0, 0, canvasAction.width, canvasAction.height);
 
       (() => {
-        const screenX = worldData.x * canvas2DScene.list[0].level + panOffsetOfWorld.value.x;
-        const screenY = worldData.y * canvas2DScene.list[0].level + panOffsetOfWorld.value.y;
+        const screenX = worldData.x * canvas2DScene.list[0].level + canvas2DScene.list[0].panOffset.x;
+        const screenY = worldData.y * canvas2DScene.list[0].level + canvas2DScene.list[0].panOffset.y;
         ctxAction.save()
         ctxAction.translate(screenX, screenY)
         ctxAction.rotate(angleY * -1)
@@ -1332,8 +1336,8 @@ const handleMouseMove = (e: MouseEvent) => {
         const canvasAction = canvas2DRef.value!;
         const ctxAction = canvasAction.getContext('2d')!
 
-        const hoverScreenX = x * canvas2DScene.list[0].level + panOffsetOfWorld.value.x
-        const hoverScreenY = y * canvas2DScene.list[0].level + panOffsetOfWorld.value.y
+        const hoverScreenX = x * canvas2DScene.list[0].level + canvas2DScene.list[0].panOffset.x
+        const hoverScreenY = y * canvas2DScene.list[0].level + canvas2DScene.list[0].panOffset.y
         const startY = hoverScreenY + 14;
         // 绘制一个背景矩形
         ctxAction.fillStyle = 'rgba(0, 0, 0, 0.5)'
@@ -1356,10 +1360,10 @@ const handleMouseMove = (e: MouseEvent) => {
       const dx = mouseXInCanvas - mouseStartScreenX
       const dy = mouseYInCanvas - mouseStartScreenY
 
-      panOffsetOfWorld.value.x = panStartOffsetOfWorld.x + dx
-      panOffsetOfWorld.value.y = panStartOffsetOfWorld.y + dy
-      // panStartScreenX = screenX
-      // panStartScreenY = screenY
+      canvas2DScene.list[0].panOffset = {
+        x: panStartOffsetOfWorld.x + dx,
+        y: panStartOffsetOfWorld.y + dy,
+      }
       drawWrapper2D()
       // 绘制操作句柄
       ctxAction.clearRect(0, 0, canvasAction.width, canvasAction.height)
@@ -1373,8 +1377,8 @@ const handleMouseMove = (e: MouseEvent) => {
           // 暂无操作句柄
           const data = worldApi.getData();
           const { angleY } = data
-          const screenX = data.x * canvas2DScene.list[0].level + panOffsetOfWorld.value.x;
-          const screenY = data.y * canvas2DScene.list[0].level + panOffsetOfWorld.value.y;
+          const screenX = data.x * canvas2DScene.list[0].level + canvas2DScene.list[0].panOffset.x;
+          const screenY = data.y * canvas2DScene.list[0].level + canvas2DScene.list[0].panOffset.y;
           ctxAction.save()
           ctxAction.translate(screenX, screenY)
           ctxAction.rotate(angleY * -1)
@@ -1426,15 +1430,15 @@ const handleMouseMove = (e: MouseEvent) => {
           const text = classInfo.inAreaHoverText()
           ctxAction.strokeText(
             text,
-            textPositionX * canvas2DScene.list[0].level + panOffsetOfWorld.value.x,
-            textPositionY * canvas2DScene.list[0].level + panOffsetOfWorld.value.y
+            textPositionX * canvas2DScene.list[0].level + canvas2DScene.list[0].panOffset.x,
+            textPositionY * canvas2DScene.list[0].level + canvas2DScene.list[0].panOffset.y
           )
           // 设置填充样式
           ctxAction.fillStyle = 'black'
           ctxAction.fillText(
             `${text}`,
-            textPositionX * canvas2DScene.list[0].level + panOffsetOfWorld.value.x,
-            textPositionY * canvas2DScene.list[0].level + panOffsetOfWorld.value.y
+            textPositionX * canvas2DScene.list[0].level + canvas2DScene.list[0].panOffset.x,
+            textPositionY * canvas2DScene.list[0].level + canvas2DScene.list[0].panOffset.y
           )
         }
       }
@@ -1492,8 +1496,8 @@ const handleMouseMove = (e: MouseEvent) => {
         y: snappedPoint44.point.y,
       })
       drawWrapper2DAnd3D()
-      const hoverScreenX = hoverPoint.value!.x * canvas2DScene.list[0].level + panOffsetOfWorld.value.x
-      const hoverScreenY = hoverPoint.value!.y * canvas2DScene.list[0].level + panOffsetOfWorld.value.y
+      const hoverScreenX = hoverPoint.value!.x * canvas2DScene.list[0].level + canvas2DScene.list[0].panOffset.x
+      const hoverScreenY = hoverPoint.value!.y * canvas2DScene.list[0].level + canvas2DScene.list[0].panOffset.y
       const canvasAction = canvas2DRef.value!;
       const ctxAction = canvasAction.getContext('2d')!
       const startY = snappedPoint44.point.y > last.y ? hoverScreenY + 14 : hoverScreenY - 15 * tipTexts.length - 22;
@@ -1527,8 +1531,8 @@ const handleMouseMove = (e: MouseEvent) => {
       const canvasAction = canvas2DRef.value!;
       const ctxAction = canvasAction.getContext('2d')!
 
-      const hoverScreenX = x * canvas2DScene.list[0].level + panOffsetOfWorld.value.x
-      const hoverScreenY = y * canvas2DScene.list[0].level + panOffsetOfWorld.value.y
+      const hoverScreenX = x * canvas2DScene.list[0].level + canvas2DScene.list[0].panOffset.x
+      const hoverScreenY = y * canvas2DScene.list[0].level + canvas2DScene.list[0].panOffset.y
       const startY = hoverScreenY + 14;
       // 绘制一个背景矩形
       ctxAction.fillStyle = 'rgba(0, 0, 0, 0.5)'
@@ -1565,8 +1569,8 @@ const handleMouseDown = (e: MouseEvent) => {
     isPaningAngel.value = true
     isPaningAngelMoved.value = false;
     startWorldAngelCenterOfWorld = {
-      x: (rect.width / 2 - panOffsetOfWorld.value.x) / canvas2DScene.list[0].level,
-      y: (rect.height / 2 - panOffsetOfWorld.value.y) / canvas2DScene.list[0].level,
+      x: (rect.width / 2 - canvas2DScene.list[0].panOffset.x) / canvas2DScene.list[0].level,
+      y: (rect.height / 2 - canvas2DScene.list[0].panOffset.y) / canvas2DScene.list[0].level,
     }
     panStartAngel.value = worldApi.getData().angleY
     console.log('panStartAngel.value', canvas.height / 2, mouseYInCanvas)
@@ -1597,8 +1601,8 @@ const handleMouseDown = (e: MouseEvent) => {
   } else {
     const worldData = worldApi.getData();
     const { angleY } = worldData;
-    const dx = mouseXInCanvas - panOffsetOfWorld.value.x
-    const dy = mouseYInCanvas - panOffsetOfWorld.value.y
+    const dx = mouseXInCanvas - canvas2DScene.list[0].panOffset.x
+    const dy = mouseYInCanvas - canvas2DScene.list[0].panOffset.y
     const cos = Math.cos(angleY * -1)
     const sin = Math.sin(angleY * -1)
     const x = (dx * cos + dy * sin) / canvas2DScene.list[0].level
@@ -1616,8 +1620,8 @@ const handleMouseDown = (e: MouseEvent) => {
           y: startPoint.y
         }
         const canvasAction = canvas2DActionRef.value!;
-        const screenX = worldData.x * canvas2DScene.list[0].level + panOffsetOfWorld.value.x;
-        const screenY = worldData.y * canvas2DScene.list[0].level + panOffsetOfWorld.value.y;
+        const screenX = worldData.x * canvas2DScene.list[0].level + canvas2DScene.list[0].panOffset.x;
+        const screenY = worldData.y * canvas2DScene.list[0].level + canvas2DScene.list[0].panOffset.y;
         const ctxAction = canvasAction.getContext('2d')!
         ctxAction.clearRect(0, 0, canvasAction.width, canvasAction.height)
         ctxAction.save()
@@ -1634,8 +1638,8 @@ const handleMouseDown = (e: MouseEvent) => {
   mouseStartScreenX = mouseXInCanvas
   mouseStartScreenY = mouseYInCanvas
   panStartOffsetOfWorld = {
-    x: panOffsetOfWorld.value.x,
-    y: panOffsetOfWorld.value.y,
+    x: canvas2DScene.list[0].panOffset.x,
+    y: canvas2DScene.list[0].panOffset.y,
   }
 }
 
@@ -1720,12 +1724,14 @@ const handleWheel = (e: WheelEvent) => {
   const newZoomLevel = Math.max(0.01, Math.min(5, canvas2DScene.list[0].level * zoomFactor))
 
   const zoomRatio = newZoomLevel / canvas2DScene.list[0].level
-  const newPanX = screenX - (screenX - panOffsetOfWorld.value.x) * zoomRatio
-  const newPanY = screenY - (screenY - panOffsetOfWorld.value.y) * zoomRatio
+  const newPanX = screenX - (screenX - canvas2DScene.list[0].panOffset.x) * zoomRatio
+  const newPanY = screenY - (screenY - canvas2DScene.list[0].panOffset.y) * zoomRatio
 
   canvas2DScene.list[0].level = newZoomLevel
-  panOffsetOfWorld.value = { x: newPanX, y: newPanY }
-
+  canvas2DScene.list[0].panOffset = {
+    x: newPanX,
+    y: newPanY,
+  }
   drawWrapper2DAnd3D()
 }
 
@@ -1837,7 +1843,7 @@ function handleLocationPosition(position: { x: number, y: number }) {
   const canvasRect = canvas.getBoundingClientRect()
   const dx = canvasRect.width / 2
   const dy = canvasRect.height / 2
-  panOffsetOfWorld.value = {
+  canvas2DScene.list[0].panOffset = {
     x: dx - (position.x * canvas2DScene.list[0].level),
     y: dy - (position.y * canvas2DScene.list[0].level),
   }

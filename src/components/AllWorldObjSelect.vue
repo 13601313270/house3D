@@ -56,9 +56,6 @@ type Item = {
   tip?: string,
 }
 const allObjList = ref<Array<Item>>([])
-const props = defineProps<{
-  panOffset: { x: number, y: number },
-}>()
 onMounted(() => {
   reloadObjList();
 })
@@ -154,8 +151,8 @@ function handleEnter(item: {
     const worldData = window.worldApi.getData();
     const canvasAction = document.getElementById('canvas2DAction') as HTMLCanvasElement;
     const ctxAction = canvasAction.getContext('2d')!
-    const screenX = worldData.x * zoom2DLevel + props.panOffset.x;
-    const screenY = worldData.y * zoom2DLevel + props.panOffset.y;
+    const screenX = worldData.x * zoom2DLevel + canvas2DScene.list[0].panOffset.x;
+    const screenY = worldData.y * zoom2DLevel + canvas2DScene.list[0].panOffset.y;
     ctxAction.clearRect(0, 0, canvasAction.width, canvasAction.height)
     ctxAction.save()
     ctxAction.translate(screenX, screenY)
