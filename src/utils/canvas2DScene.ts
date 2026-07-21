@@ -8,4 +8,5 @@ class Canvas2DScene {
     }
   }> = [];
 }
-export default Canvas2DScene
+const api = new Canvas2DScene()
+export default api;

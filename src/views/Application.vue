@@ -135,7 +135,7 @@
         :editPropConfigInfo="editPropConfigInfo" v-model="editPropInputInfo"
         :initPosition="{ x: contextMenu.x, y: contextMenu.y }" @deleteContextMenuEntity="deleteContextMenuEntity"
         @close="contextMenu = null" @copyEntity="copyEntity" />
-      <AllWorldObjSelect v-if="showAllObjSelect" :zoom2DLevel="zoom2DLevel" :panOffset="panOffsetOfWorld"
+      <AllWorldObjSelect v-if="showAllObjSelect" :panOffset="panOffsetOfWorld"
         @close="showAllObjSelect = false" @locationPosition="handleLocationPosition" @onChange="handleObjChange" />
       <EnvironmentEditor v-if="showEnvironmentEditor" @close="showEnvironmentEditor = false" />
     </div>
@@ -225,9 +225,8 @@ import ShowPayModal from '@/components/showPayModal.vue'
 import WorldState from '@/utils/worldState';
 import { editItem } from '@/utils/editItem';
 import WorldGroup, { EnvironmentConfig } from '@/world/world';
-import Canvas2DScene from '@/utils/canvas2DScene'
+import canvas2DScene from '@/utils/canvas2DScene'
 
-const canvas2DScene = new Canvas2DScene();
 const canvas2DRef = ref<HTMLCanvasElement | null>(null)
 const canvas2DActionRef = ref<HTMLCanvasElement | null>(null)
 const canvas3DRefCenter = ref<typeof Canvas3D | null>(null)
@@ -256,12 +255,9 @@ const panningScreenCenter = ref<{
 }>({ x: 0, y: 0 })
 const isMenuing = ref(false);// 选中对象的柄
 const panStartAngel = ref(0);
-const screenAngel = ref(0);
 const panel1SplitWidthPer = ref(0.35)
 const panel2SplitWidthPer = ref(0.35)
 const isSplitting = ref(false)
-const zoom2DLevel = ref(1)
-
 const showLogin = ref(false)
 const showDemos = ref(false)
 const onlyDemos = ref(false)

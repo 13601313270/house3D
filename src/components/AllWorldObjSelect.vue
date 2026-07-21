@@ -45,6 +45,7 @@ import { PointEntityClass } from '@/types/pointEntity'
 import { LineEntityClass } from '@/types/lineEntity'
 import { BaseEntityClass } from '@/types/baseEntity'
 import { BaseObjData } from '@/types/map2d'
+import canvas2DScene from '@/utils/canvas2DScene'
 const allObjCount = ref(0)
 type Item = {
   id: string,
@@ -56,7 +57,6 @@ type Item = {
 }
 const allObjList = ref<Array<Item>>([])
 const props = defineProps<{
-  zoom2DLevel: number,
   panOffset: { x: number, y: number },
 }>()
 onMounted(() => {
@@ -150,16 +150,17 @@ function handleEnter(item: {
 }) {
   const thisObj = window.worldApi.children.find(v => v.getData().id === item.id)
   if (thisObj) {
+    const zoom2DLevel = canvas2DScene.list[0].level;
     const worldData = window.worldApi.getData();
     const canvasAction = document.getElementById('canvas2DAction') as HTMLCanvasElement;
     const ctxAction = canvasAction.getContext('2d')!
-    const screenX = worldData.x * props.zoom2DLevel + props.panOffset.x;
-    const screenY = worldData.y * props.zoom2DLevel + props.panOffset.y;
+    const screenX = worldData.x * zoom2DLevel + props.panOffset.x;
+    const screenY = worldData.y * zoom2DLevel + props.panOffset.y;
     ctxAction.clearRect(0, 0, canvasAction.width, canvasAction.height)
     ctxAction.save()
     ctxAction.translate(screenX, screenY)
     ctxAction.rotate(worldData.angleY * -1)
-    thisObj.draw2DActionHandle(ctxAction, props.zoom2DLevel)
+    thisObj.draw2DActionHandle(ctxAction, zoom2DLevel)
     ctxAction.restore()
   }
 }
