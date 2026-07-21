@@ -3,17 +3,21 @@ import { NearestWallResult } from "@/types/entityInWall"
 import { Point } from "@/types/map2d"
 import pointToLineDistance from '@/utils/pointToLineDistance'
 import { getClosestPointOnLine } from '@/utils/geometry'
+import { WallEntity } from '@/entities/wall/entity'
 
 export const snapThreshold = 20
 
 function getNearestWall(point: Point): NearestWallResult | null {
   let nearestWall: WallData | null = null
+  let nearestWallEntity: WallEntity | null = null
   let nearestPoint: Point | null = null
   let minDistance = Infinity
   let nearestAngle = 0
   let lineIndex: number = -1;
 
-  (window.worldApi.getTypeObjectsData('wall') as WallData[]).forEach((wall: WallData) => {
+  for (let i = 0; i < window.worldApi.getTypeObjectsData('wall').length; i++) {
+    const wall = window.worldApi.getTypeObjectsData('wall')[i] as WallData
+    const api: WallEntity = window.worldApi.getTypeListEntity('wall')[i] as WallEntity;
     for (let i = 0; i < wall.points.length - 1; i++) {
       const p1 = wall.points[i]
       const p2 = wall.points[i + 1]
@@ -23,15 +27,17 @@ function getNearestWall(point: Point): NearestWallResult | null {
       if (distance < minDistance) {
         minDistance = distance
         nearestWall = wall
+        nearestWallEntity = api
         lineIndex = i;
         nearestPoint = getClosestPointOnLine(point, p1, p2)
         nearestAngle = Math.atan2(p2.y - p1.y, p2.x - p1.x)
       }
     }
-  })
+  }
 
-  if (nearestPoint && lineIndex > -1 && minDistance < snapThreshold && nearestWall) {
+  if (nearestPoint && lineIndex > -1 && minDistance < snapThreshold && nearestWall && nearestWallEntity) {
     return {
+      wallEntity: nearestWallEntity,
       lineIndex,
       wall: nearestWall,
       pointOnWall: nearestPoint,

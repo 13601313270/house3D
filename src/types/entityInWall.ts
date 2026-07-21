@@ -5,6 +5,7 @@ import { BaseEntityClass, MatchSnapPoint } from "./baseEntity";
 import getNearestWall from "@/utils/getNearestWall";
 
 export interface NearestWallResult {
+  wallEntity: BaseEntityClass<WallData>
   wall: WallData
   lineIndex: number,
   pointOnWall: Point
@@ -29,6 +30,24 @@ export abstract class EntityClassInWall<T extends ObjInWallData> extends PointEn
         angle,
       };
       this.setData(newData)
+
+      // 双向去除原有的关联对象
+      this.associationEntity.forEach(entity => {
+        if (entity.associationEntity.includes(this)) {
+          entity.associationEntity.splice(entity.associationEntity.indexOf(this), 1)
+          entity.markObjectIsDirty()
+        }
+      })
+      this.associationEntity = []
+      // 双向添加新的关联对象
+      if (!this.associationEntity.includes(nearest.wallEntity)) {
+        this.associationEntity.push(nearest.wallEntity)
+      }
+      if (!nearest.wallEntity.associationEntity.includes(this)) {
+        nearest.wallEntity.associationEntity.push(this)
+      }
+      this.markObjectIsDirty()
+      
       return [];
     } else {
       const newData: T = {

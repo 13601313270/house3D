@@ -396,11 +396,7 @@ const worldApi = new WorldGroup(null, {
 window.worldApi = worldApi
 
 allObjCount.value = worldApi.getAllObjectCount()
-const drawWrapper2DAnd3D = () => {
-  canvas2DSceneManage.renderPreview()
-  worldApi.reCreate3DMeshIfNeed()
-  worldApi.change3DMeshState()
-}
+
 function setHoverPoint(point: Point | null) {
   hoverPoint.value = point
   const canvasAction = canvas2DSceneManage.list[0].canvasList[1]!;
@@ -941,9 +937,6 @@ const handleContextMenu = (point: {
               }
               editPropConfigEditCallback = (val: any) => {
                 callback(val)
-                canvas2DSceneManage.renderPreview()
-                worldApi.reCreate3DMeshIfNeed()
-                worldApi.change3DMeshState()
               }
               nextTick(() => {
                 const height = document.querySelector('.context-menu')?.clientHeight
@@ -1205,7 +1198,6 @@ const handleMouseMove = (point: {
                 matchedHandelInfo,
               )
               if (result) {
-                drawWrapper2DAnd3D()
                 return true;
               }
             }
@@ -1227,7 +1219,9 @@ const handleMouseMove = (point: {
             if (nearestPoint && minDistance < snapThreshold && matchLine) {
               const result2 = matchHandelObj.inSceneSnapLineArea(wall, matchLine, nearestPoint)
               if (result2) {
-                drawWrapper2DAnd3D()
+                canvas2DSceneManage.renderPreview()
+                worldApi.reCreate3DMeshIfNeed()
+                worldApi.change3DMeshState()
                 return true;
               }
             }
@@ -1236,8 +1230,8 @@ const handleMouseMove = (point: {
         return false;
       }
       if (worldApi.getTypeListEntity('wall')) {
-        for (let i = 0; i < worldApi.getTypeObjectsData('wall').length; i++) {
-          const api: WallEntity = worldApi.getTypeListEntity('wall')[i] as WallEntity;
+        for (let i = 0; i < window.worldApi.getTypeObjectsData('wall').length; i++) {
+          const api: WallEntity = window.worldApi.getTypeListEntity('wall')[i] as WallEntity;
           // 类型“WallEntity”的参数不能赋给类型“BaseEntityClass<PointObjData>”的参数。
           if (temp(api)) {
             (() => {
@@ -1441,7 +1435,7 @@ const handleMouseMove = (point: {
         x: snappedPoint44.point.x,
         y: snappedPoint44.point.y,
       })
-      drawWrapper2DAnd3D()
+      canvas2DSceneManage.renderPreview()
       const hoverScreenX = hoverPoint.value!.x * canvas2DSceneManage.list[0].level + canvas2DSceneManage.list[0].panOffset.x
       const hoverScreenY = hoverPoint.value!.y * canvas2DSceneManage.list[0].level + canvas2DSceneManage.list[0].panOffset.y
       const canvasAction = canvas2DSceneManage.list[0].canvasList[0]!;
@@ -1471,8 +1465,9 @@ const handleMouseMove = (point: {
     let tipTexts: string[] = []
     if (worldApi.insertTempObj instanceof PointEntityClass) {
       tipTexts = worldApi.insertTempObj.setPrepareState(x, y)
-      // worldApi.insertTempObj.inSceneSnapLineArea(worldApi.insertTempObj, [x, y], { x, y })
-      drawWrapper2DAnd3D()
+      canvas2DSceneManage.renderPreview()
+      worldApi.reCreate3DMeshIfNeed()
+      worldApi.change3DMeshState()
     }
     if (tipTexts.length > 0) {
       const canvasAction = canvas2DSceneManage.list[0].canvasList[0]!;
@@ -1608,8 +1603,6 @@ const handleMouseUp = (point: {
   matchedHandelInfo = null
   if (isPanningScreen.value) {
     isPanningScreen.value = false
-    // 平移过程中，该渲染都渲染过了。鼠标抬起这里不用在重新渲染一下了。2026.6.6
-    // drawWrapper2DAnd3D()
   }
   if (isPaningAngel.value) {
     isPaningAngel.value = false
@@ -1759,8 +1752,6 @@ const handleLoadedObject = async (object: THREE.Group | THREE.Mesh, file: File, 
     scale: scaleFactor,
   }
   await worldApi.add('importFile', [data])
-
-  // drawWrapper2DAnd3D()
 }
 function logout() {
   if (confirm('确定要退出登录吗？')) {
@@ -1800,7 +1791,9 @@ function handleLocationPosition(position: { x: number, y: number }) {
 function handleObjChange(baseObj: BaseEntityClass<BaseObjData>) {
   console.log('baseObj', baseObj)
   // 刷新2D和3D场景
-  drawWrapper2DAnd3D()
+  // canvas2DSceneManage.renderPreview()
+  // worldApi.reCreate3DMeshIfNeed()
+  // worldApi.change3DMeshState()
 }
 async function copyEntity() {
   if (menuEntity) {
@@ -1837,7 +1830,6 @@ async function copyEntity() {
     }
     contextMenu.value = null
     currentTool.value = 'drag'
-    // drawWrapper2DAnd3D()
   }
 }
 function showAiPic() {
