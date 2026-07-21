@@ -79,8 +79,6 @@
           </button>
           <input type="file" id="fileInput" ref="loadProgramFileInputRef" accept=".devt" style="display: none"
             @change="handleLoadProgramFileChange" />
-          <input type="file" id="importFileInput" ref="importFileInputRef" accept=".fbx,.obj,.glb" style="display: none"
-            @change="handleImportFileChange" />
         </div>
         <div class="canvas-container" :style="{ opacity: isSplitting ? 0 : 1 }">
           <canvas ref="canvas2DRef" class="drawing-canvas" />
@@ -685,18 +683,25 @@ onMounted(async () => {
 })
 
 const loadProgramFileInputRef = ref<HTMLInputElement | null>(null)
-const importFileInputRef = ref<HTMLInputElement | null>(null)
 
 const triggerImportFile = () => {
-  importFileInputRef.value?.click()
-}
-
-const handleImportFileChange = async (e: Event) => {
-  const input = e.target as HTMLInputElement
-  const file = input.files?.[0]
-  if (!file) return
-
-  await importOutObj2(file)
+  const inputDom = document.createElement('input')
+  inputDom.type = 'file'
+  inputDom.accept = '.fbx,.obj,.glb'
+  inputDom.style.display = 'none'
+  document.body.appendChild(inputDom)
+  function change(e: Event) {
+    const input = e.target as HTMLInputElement
+    const file = input.files?.[0]
+    if (file) {
+      importOutObj2(file)
+    }
+    // 销毁 input 元素
+    inputDom.remove()
+    inputDom.removeEventListener('change', change)
+  }
+  inputDom.addEventListener('change', change)
+  inputDom.click()
 }
 
 const saveDrawing = async () => {
@@ -951,7 +956,6 @@ const handleContextMenu = (point: {
             })
           }, () => {
             contextMenu.value = null
-            // drawWrapper2DAnd3D()
           })
           return;
         }
@@ -973,7 +977,6 @@ const deleteContextMenuEntity = () => {
     worldApi.delete(type, contextMenu.value.index)
   }
   contextMenu.value = null
-  drawWrapper2DAnd3D()
 }
 
 const handleCanvasClick = async (point: {
@@ -986,7 +989,7 @@ const handleCanvasClick = async (point: {
     }
     beCopyEntity = null
     beCopyEntityHandelInfo = null
-    drawWrapper2DAnd3D()
+    contextMenu.value = null
     return
   }
   // 如果当前是拖拽模式，不执行任何操作
@@ -1060,14 +1063,11 @@ const handleCanvasClick = async (point: {
       currentTool.value = 'drag'
     }
   }
-
-  // drawWrapper2DAnd3D()
 }
 
 const clearDrawing = () => {
   if (confirm('确定要清空所有绘制内容吗？')) {
     worldApi.clearAll();
-    drawWrapper2DAnd3D()
     activeToolsIndex.value = -1
   }
 }
@@ -1167,13 +1167,11 @@ const handleMouseMove = (point: {
         x,
         y,
       })
-      drawWrapper2DAnd3D()
     } else if (beCopyEntity instanceof LineEntityClass) {
       if (beCopyEntityHandelInfo) {
         console.log('beCopyEntityHandelInfo', x - beCopyEntityHandelInfo.x)
         beCopyEntity.offset.x = x - beCopyEntityHandelInfo.x
         beCopyEntity.offset.y = y - beCopyEntityHandelInfo.y
-        drawWrapper2DAnd3D()
       }
     }
   }
@@ -1186,9 +1184,6 @@ const handleMouseMove = (point: {
       isMenuing.value = false
       isPaningAngel.value = false
       function temp(wall: WallEntity): boolean {
-        // if (wall === matchHandelObj) {
-        //   return false;
-        // }
         if (matchHandelObj && matchedHandelInfo) {
           const beMatchPoints = wall.getMineBeSnapPoints(matchedHandelInfo)
           if (beMatchPoints.length > 0) {
@@ -1229,13 +1224,11 @@ const handleMouseMove = (point: {
                 nearestPoint = getClosestPointOnLine({ x, y }, line[0], line[1])
               }
             }
-            if (nearestPoint && minDistance < snapThreshold) {
-              if (matchLine) {
-                const result2 = matchHandelObj.inSceneSnapLineArea(wall, matchLine, nearestPoint)
-                if (result2) {
-                  drawWrapper2DAnd3D()
-                  return true;
-                }
+            if (nearestPoint && minDistance < snapThreshold && matchLine) {
+              const result2 = matchHandelObj.inSceneSnapLineArea(wall, matchLine, nearestPoint)
+              if (result2) {
+                drawWrapper2DAnd3D()
+                return true;
               }
             }
           }
@@ -1478,6 +1471,7 @@ const handleMouseMove = (point: {
     let tipTexts: string[] = []
     if (worldApi.insertTempObj instanceof PointEntityClass) {
       tipTexts = worldApi.insertTempObj.setPrepareState(x, y)
+      // worldApi.insertTempObj.inSceneSnapLineArea(worldApi.insertTempObj, [x, y], { x, y })
       drawWrapper2DAnd3D()
     }
     if (tipTexts.length > 0) {

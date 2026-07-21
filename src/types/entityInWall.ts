@@ -1,7 +1,7 @@
 import { WallData } from "@/entities/wall/index.d";
 import { PointEntityClass } from "./pointEntity";
-import { PointObjData, ObjInWallData, Point } from "./map2d";
-import { MatchSnapPoint } from "./baseEntity";
+import { ObjInWallData, Point, BaseObjData } from "./map2d";
+import { BaseEntityClass, MatchSnapPoint } from "./baseEntity";
 import getNearestWall from "@/utils/getNearestWall";
 
 export interface NearestWallResult {
@@ -51,7 +51,7 @@ export abstract class EntityClassInWall<T extends ObjInWallData> extends PointEn
     return false
   }
 
-  inSceneSnapLineArea(obj: PointEntityClass<PointObjData>, line: [Point, Point], point: Point) {
+  inSceneSnapLineArea(obj: BaseEntityClass<BaseObjData>, line: [Point, Point], point: Point) {
     if (obj.type === 'wall') {
       const p1 = line[0]
       const p2 = line[1]

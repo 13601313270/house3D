@@ -6,6 +6,7 @@ import { BaseEntityClass, EntityConstructor } from '@/types/baseEntity'
 import { BaseObjData, HandelInfo, Point } from '@/types/map2d'
 import { GroupBaseData } from '.'
 import drawAxes from '@/utils/drawAxes'
+import canvas2DSceneManage from '@/utils/canvas2DSceneManage'
 
 type WorldChangeType = 'add' | 'remove' | 'change'
 
@@ -276,6 +277,7 @@ export abstract class GroupBaseEntity<T extends GroupBaseData> extends PointEnti
       if (api.getData().isLocked) {
         this.lockedObjList.push(api)
       }
+      canvas2DSceneManage.renderPreview()
       api.reCreate3DMeshIfNeed();
       api.change3DMeshState()
     }
@@ -299,6 +301,9 @@ export abstract class GroupBaseEntity<T extends GroupBaseData> extends PointEnti
           this.lockedObjList.splice(index, 1)
         }
       }
+      canvas2DSceneManage.renderPreview()
+      this.reCreate3DMeshIfNeed()
+      this.change3DMeshState()
       this._callAllOnChangeCallback('remove', [backup])
     }
   }
@@ -317,6 +322,9 @@ export abstract class GroupBaseEntity<T extends GroupBaseData> extends PointEnti
     this.allObjectsByGroup = {}
     this.children = []
     this.data.childrenData = []
+    canvas2DSceneManage.renderPreview()
+    this.reCreate3DMeshIfNeed()
+    this.change3DMeshState()
     this._callAllOnChangeCallback('remove', willRemoveList);
   }
 
