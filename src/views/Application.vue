@@ -374,7 +374,7 @@ const updateCanvasSize = () => {
   if (canvas3DPanel2) {
     canvas3DPanel2.resize();
   }
-  drawWrapper2D();
+  canvas2DScene.draw2DPreview()
 }
 
 const contextMenu = ref<{
@@ -433,7 +433,7 @@ window.worldApi = worldApi
 
 allObjCount.value = worldApi.getAllObjectCount()
 const drawWrapper2DAnd3D = () => {
-  drawWrapper2D();
+  canvas2DScene.draw2DPreview()
   worldApi.reCreate3DMeshIfNeed()
   worldApi.change3DMeshState()
 }
@@ -467,25 +467,6 @@ function setHoverPoint(point: Point | null) {
       ctxAction.lineTo(worldApi.width, screenY)
       ctxAction.stroke()
     }
-  }
-}
-const drawWrapper2D = () => {
-  const canvas = canvas2DScene.list[0].canvasList[0]
-  if (canvas && canvas.getContext('2d')) {
-    const ctx = canvas.getContext('2d')!;
-    ctx.clearRect(0, 0, worldApi.width, worldApi.height)
-    ctx.fillStyle = '#f5f5f5'
-    ctx.fillRect(0, 0, worldApi.width, worldApi.height)
-    const worldData = worldApi.getData()
-    const screenX = worldData.x * canvas2DScene.list[0].level + canvas2DScene.list[0].panOffset.x;
-    const screenY = worldData.y * canvas2DScene.list[0].level + canvas2DScene.list[0].panOffset.y;
-    ctx.save()
-    ctx.translate(screenX, screenY)
-    worldApi.draw2DPreview(
-      ctx,
-      canvas2DScene.list[0].level,
-    )
-    ctx.restore()
   }
 }
 
@@ -552,7 +533,7 @@ async function changeCamera2(activeIndex: number = 0) {
           }
         }
       })
-      drawWrapper2D();
+      canvas2DScene.draw2DPreview()
     }
     // console.trace('ddddddd')
     // console.log('cameraRightPanel---1', cameraRightPanel.value)
@@ -652,7 +633,7 @@ onMounted(async () => {
       canvas2DScene.list[0].panOffset.y += dy
       mouseStartScreenX = screenX
       mouseStartScreenY = screenY
-      drawWrapper2D();
+      canvas2DScene.draw2DPreview()
     }
     const match = location.href.match(/initId=(\d+)/);
     if (match) {
@@ -689,7 +670,7 @@ onMounted(async () => {
             tempPointInsertData.value.pop()
             data.points = tempPointInsertData.value;
             worldApi.insertTempObj.setData(data)
-            drawWrapper2D();
+            canvas2DScene.draw2DPreview()
           }
         }
       }
@@ -978,7 +959,7 @@ const handleContextMenu = (e: MouseEvent) => {
               }
               editPropConfigEditCallback = (val: any) => {
                 callback(val)
-                drawWrapper2D();
+                canvas2DScene.draw2DPreview()
                 worldApi.reCreate3DMeshIfNeed()
                 worldApi.change3DMeshState()
               }
@@ -1068,7 +1049,7 @@ const handleCanvasClick = async (e: MouseEvent) => {
     }
     data.points = tempPointInsertData.value;
     worldApi.insertTempObj.setData(data)
-    drawWrapper2D();
+    canvas2DScene.draw2DPreview()
   } else if (worldApi.insertTempObj && worldApi.insertTempObj instanceof PointEntityClass) {
     if (insertAdding.value === false) {
       if (worldApi.insertTempObj instanceof EntityClassInWall) {
@@ -1187,7 +1168,7 @@ const handleMouseMove = (e: MouseEvent) => {
       ...worldData,
       angleY: newAngleY,
     });
-    drawWrapper2D()
+    canvas2DScene.draw2DPreview()
     const canvasAction = canvas2DScene.list[0].canvasList[1]!;
     const ctxAction = canvasAction.getContext('2d')!
     // 绘制操作句柄
@@ -1313,7 +1294,7 @@ const handleMouseMove = (e: MouseEvent) => {
         startX: matchHandelStartPoint ? matchHandelStartPoint.x : undefined,
         startY: matchHandelStartPoint ? matchHandelStartPoint.y : undefined,
       }, matchedHandelInfo)
-      drawWrapper2D();
+      canvas2DScene.draw2DPreview()
       // 绘制操作句柄
       ctxAction.clearRect(0, 0, canvasAction.width, canvasAction.height);
 
@@ -1362,7 +1343,7 @@ const handleMouseMove = (e: MouseEvent) => {
         x: panStartOffsetOfWorld.x + dx,
         y: panStartOffsetOfWorld.y + dy,
       }
-      drawWrapper2D()
+      canvas2DScene.draw2DPreview()
       // 绘制操作句柄
       ctxAction.clearRect(0, 0, canvasAction.width, canvasAction.height)
     } else {
@@ -1845,7 +1826,7 @@ function handleLocationPosition(position: { x: number, y: number }) {
     x: dx - (position.x * canvas2DScene.list[0].level),
     y: dy - (position.y * canvas2DScene.list[0].level),
   }
-  drawWrapper2D()
+  canvas2DScene.draw2DPreview()
 }
 function handleObjChange(baseObj: BaseEntityClass<BaseObjData>) {
   console.log('baseObj', baseObj)
