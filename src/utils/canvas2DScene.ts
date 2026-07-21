@@ -1,6 +1,9 @@
 class Canvas2DScene {
   list: Array<{
-    canvasList: HTMLCanvasElement[],
+    canvasList: [
+      HTMLCanvasElement,
+      HTMLCanvasElement
+    ],
     level: number,
     panOffset: {
       x: number,

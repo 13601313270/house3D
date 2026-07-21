@@ -324,8 +324,8 @@ const updateCanvasSize = () => {
   const container = document.querySelector('.map2d-container')
   if (!container) return
   const ctxList = [
-    canvas2DRef.value!,
-    canvas2DActionRef.value!
+    canvas2DScene.list[0].canvasList[0]!,
+    canvas2DScene.list[0].canvasList[1]!
   ];
   const canvasContainer = document.querySelector('.canvas-container')
   if (canvasContainer) {
@@ -439,7 +439,7 @@ const drawWrapper2DAnd3D = () => {
 }
 function setHoverPoint(point: Point | null) {
   hoverPoint.value = point
-  const canvasAction = canvas2DActionRef.value;
+  const canvasAction = canvas2DScene.list[0].canvasList[1]!;
   if (!canvasAction) return
 
   // 绘制磁吸点的参考轴
@@ -470,7 +470,7 @@ function setHoverPoint(point: Point | null) {
   }
 }
 const drawWrapper2D = () => {
-  const canvas = canvas2DRef.value
+  const canvas = canvas2DScene.list[0].canvasList[0]
   if (canvas && canvas.getContext('2d')) {
     const ctx = canvas.getContext('2d')!;
     ctx.clearRect(0, 0, worldApi.width, worldApi.height)
@@ -567,7 +567,6 @@ async function changeCamera2(activeIndex: number = 0) {
 }
 
 onMounted(async () => {
-  console.log('canvas2DRef.value', canvas2DRef.value, canvas2DActionRef.value!)
   canvas2DScene.list.push({
     canvasList: [
       canvas2DRef.value!,
@@ -893,8 +892,7 @@ async function initWorldByData(data: fileData & {
 
 const handleContextMenu = (e: MouseEvent) => {
   e.preventDefault()
-
-  const canvas = canvas2DRef.value
+  const canvas = canvas2DScene.list[0].canvasList[0]
   if (!canvas) return
 
   const rect = canvas.getBoundingClientRect()
@@ -1034,7 +1032,7 @@ const handleCanvasClick = async (e: MouseEvent) => {
   if (currentTool.value === 'drag') {
     return
   }
-  const canvas = canvas2DRef.value
+  const canvas = canvas2DScene.list[0].canvasList[0]
   if (!canvas) return
 
   const rect = canvas.getBoundingClientRect()
@@ -1132,7 +1130,7 @@ const initUserInfo = () => {
 }
 
 const handleMouseMove = (e: MouseEvent) => {
-  const canvas = canvas2DRef.value
+  const canvas = canvas2DScene.list[0].canvasList[0]
   if (!canvas) return
 
   const rect = canvas.getBoundingClientRect()
@@ -1190,7 +1188,7 @@ const handleMouseMove = (e: MouseEvent) => {
       angleY: newAngleY,
     });
     drawWrapper2D()
-    const canvasAction = canvas2DActionRef.value!;
+    const canvasAction = canvas2DScene.list[0].canvasList[1]!;
     const ctxAction = canvasAction.getContext('2d')!
     // 绘制操作句柄
     ctxAction.clearRect(0, 0, canvasAction.width, canvasAction.height)
@@ -1222,7 +1220,7 @@ const handleMouseMove = (e: MouseEvent) => {
     }
   }
   if (currentTool.value === 'drag') { // drag代表拖拽和鼠标移动
-    const canvasAction = canvas2DActionRef.value!;
+    const canvasAction = canvas2DScene.list[0].canvasList[1]!;
     // 绘制操作句柄
     const ctxAction = canvasAction.getContext('2d')!
     // 如果正在拖拽，处理拖拽逻辑（即使当前工具不是 drag）
@@ -1333,7 +1331,7 @@ const handleMouseMove = (e: MouseEvent) => {
       worldApi.change3DMeshState()
 
       if (tipTexts && tipTexts.length > 0) {
-        const canvasAction = canvas2DRef.value!;
+        const canvasAction = canvas2DScene.list[0].canvasList[0]!;
         const ctxAction = canvasAction.getContext('2d')!
 
         const hoverScreenX = x * canvas2DScene.list[0].level + canvas2DScene.list[0].panOffset.x
@@ -1498,7 +1496,7 @@ const handleMouseMove = (e: MouseEvent) => {
       drawWrapper2DAnd3D()
       const hoverScreenX = hoverPoint.value!.x * canvas2DScene.list[0].level + canvas2DScene.list[0].panOffset.x
       const hoverScreenY = hoverPoint.value!.y * canvas2DScene.list[0].level + canvas2DScene.list[0].panOffset.y
-      const canvasAction = canvas2DRef.value!;
+      const canvasAction = canvas2DScene.list[0].canvasList[0]!;
       const ctxAction = canvasAction.getContext('2d')!
       const startY = snappedPoint44.point.y > last.y ? hoverScreenY + 14 : hoverScreenY - 15 * tipTexts.length - 22;
       if (tipTexts.length > 0) {
@@ -1528,7 +1526,7 @@ const handleMouseMove = (e: MouseEvent) => {
       drawWrapper2DAnd3D()
     }
     if (tipTexts.length > 0) {
-      const canvasAction = canvas2DRef.value!;
+      const canvasAction = canvas2DScene.list[0].canvasList[0]!;
       const ctxAction = canvasAction.getContext('2d')!
 
       const hoverScreenX = x * canvas2DScene.list[0].level + canvas2DScene.list[0].panOffset.x
@@ -1556,7 +1554,7 @@ const handleMouseDown = (e: MouseEvent) => {
   e.preventDefault()
   contextMenu.value = null;
 
-  const canvas = canvas2DRef.value
+  const canvas = canvas2DScene.list[0].canvasList[0]
   if (!canvas) return
   if (currentTool.value !== 'drag') return;
 
@@ -1619,7 +1617,7 @@ const handleMouseDown = (e: MouseEvent) => {
           x: startPoint.x,
           y: startPoint.y
         }
-        const canvasAction = canvas2DActionRef.value!;
+        const canvasAction = canvas2DScene.list[0].canvasList[1]!;
         const screenX = worldData.x * canvas2DScene.list[0].level + canvas2DScene.list[0].panOffset.x;
         const screenY = worldData.y * canvas2DScene.list[0].level + canvas2DScene.list[0].panOffset.y;
         const ctxAction = canvasAction.getContext('2d')!
@@ -1662,7 +1660,7 @@ const handleMouseUp = (e: MouseEvent) => {
   }
 }
 const handleMouseLeave = () => {
-  const canvasAction = canvas2DActionRef.value!;
+  const canvasAction = canvas2DScene.list[0].canvasList[1]!;
   const ctxAction = canvasAction.getContext('2d')!
   ctxAction.clearRect(0, 0, canvasAction.width, canvasAction.height)
 }
@@ -1708,11 +1706,11 @@ onUnmounted(() => {
 const handleWheel = (e: WheelEvent) => {
   e.preventDefault()
 
-  const canvas = canvas2DRef.value
+  const canvas = canvas2DScene.list[0].canvasList[0]
   if (!canvas) return
 
   // 绘制操作句柄
-  const canvasAction = canvas2DActionRef.value!;
+  const canvasAction = canvas2DScene.list[0].canvasList[1]!;
   const ctxAction = canvasAction.getContext('2d')!
   ctxAction.clearRect(0, 0, canvasAction.width, canvasAction.height)
 
@@ -1838,7 +1836,7 @@ function changeObjTypeSelect(type: string, baseObj: BaseEntityClass<any>) {
 }
 function handleLocationPosition(position: { x: number, y: number }) {
   console.log('position', position)
-  const canvas = canvas2DRef.value
+  const canvas = canvas2DScene.list[0].canvasList[0]
   if (!canvas) return
   const canvasRect = canvas.getBoundingClientRect()
   const dx = canvasRect.width / 2
