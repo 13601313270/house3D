@@ -82,14 +82,9 @@
           <input type="file" id="importFileInput" ref="importFileInputRef" accept=".fbx,.obj,.glb" style="display: none"
             @change="handleImportFileChange" />
         </div>
-        <div class="canvas-container">
-          <!-- <Canvas3D ref="canvas3DRef1" :world="worldApi" v-model:cameraState="cameraStateLeft"
-            :aspectRatio="aspectRatio1" :showCamera="true" cameraType="orthographic" /> -->
-          <canvas ref="canvas2DRef" class="drawing-canvas" :style="{ display: isSplitting ? 'none' : 'block' }" />
-          <canvas id="canvas2DAction" ref="canvas2DActionRef" @click="handleCanvasClick" @mousedown="handleMouseDown"
-            @contextmenu.prevent.stop @mousemove="handleMouseMove" @mouseleave="handleMouseLeave"
-            @mouseup="handleMouseUp" @wheel="handleWheel" class="drawing-canvas"
-            :style="{ display: isSplitting ? 'none' : 'block' }" />
+        <div class="canvas-container" :style="{ opacity: isSplitting ? 0 : 1 }">
+          <canvas ref="canvas2DRef" class="drawing-canvas" />
+          <canvas ref="canvas2DActionRef" class="drawing-canvas" />
           <img v-if="isPaningAngel && isPaningAngelMoved" class="protractor" src="protractor.png"
             :style="{ left: panningScreenCenter.x + 'px', top: panningScreenCenter.y + 'px' }" />
         </div>
@@ -270,7 +265,6 @@ const demoIniting = ref(false)
 const isDragOver = ref(false)
 
 const store = useStore<Store>()
-const aspectRatio1 = ref(1)
 const aspectRatio2 = ref(1)
 
 const cameraStateCenter = ref<CameraState>({
@@ -323,36 +317,8 @@ let startWorldAngelCenterOfWorld = { x: 0, y: 0 }
 const updateCanvasSize = () => {
   const container = document.querySelector('.map2d-container')
   if (!container) return
-  const ctxList = [
-    canvas2DSceneManage.list[0].canvasList[0]!,
-    canvas2DSceneManage.list[0].canvasList[1]!
-  ];
-  const canvasContainer = document.querySelector('.canvas-container')
-  if (canvasContainer) {
-    const canvasRect = canvasContainer.getBoundingClientRect()
-    const width = Math.floor(canvasRect.width)
-    const height = Math.floor(canvasRect.height)
+  canvas2DSceneManage.resize()
 
-    if (width > 0 && height > 0) {
-      ctxList.forEach(ctx => {
-        if (ctx) {
-          ctx.width = width
-          ctx.height = height
-        }
-      })
-      worldApi.width = width
-      worldApi.height = height
-    }
-  }
-  const leftCanvasContainer = document.querySelector('.canvas-container')
-  if (leftCanvasContainer) {
-    const canvasRect = leftCanvasContainer.getBoundingClientRect()
-    const width = Math.floor(canvasRect.width)
-    const height = Math.floor(canvasRect.height)
-    if (width > 0 && height > 0) {
-      aspectRatio1.value = width / height
-    }
-  }
   if (canvas3DRefCenter.value) {
     const centerPanelContainer = document.querySelector('.center-panel-content')
     if (centerPanelContainer) {
@@ -374,7 +340,7 @@ const updateCanvasSize = () => {
   if (canvas3DPanel2) {
     canvas3DPanel2.resize();
   }
-  canvas2DSceneManage.draw2DPreview()
+  canvas2DSceneManage.renderPreview()
 }
 
 const contextMenu = ref<{
@@ -433,7 +399,7 @@ window.worldApi = worldApi
 
 allObjCount.value = worldApi.getAllObjectCount()
 const drawWrapper2DAnd3D = () => {
-  canvas2DSceneManage.draw2DPreview()
+  canvas2DSceneManage.renderPreview()
   worldApi.reCreate3DMeshIfNeed()
   worldApi.change3DMeshState()
 }
@@ -533,7 +499,7 @@ async function changeCamera2(activeIndex: number = 0) {
           }
         }
       })
-      canvas2DSceneManage.draw2DPreview()
+      canvas2DSceneManage.renderPreview()
     }
     // console.trace('ddddddd')
     // console.log('cameraRightPanel---1', cameraRightPanel.value)
@@ -548,17 +514,6 @@ async function changeCamera2(activeIndex: number = 0) {
 }
 
 onMounted(async () => {
-  canvas2DSceneManage.addScene(
-    [
-      canvas2DRef.value!,
-      canvas2DActionRef.value!,
-    ],
-    1,
-    {
-      x: 0,
-      y: 0,
-    }
-  );
   const res = await axios.get('https://api.studying1v1.com/video/objectFileType')
   const data = res.data as Array<{
     id: number,
@@ -622,19 +577,34 @@ onMounted(async () => {
       changeCamera2(activeCameraIndex.value)
     }
   })
-  nextTick(() => {
-    // (0,0)位移到中央
-    const canvasContainer = document.querySelector('.canvas-container')
-    if (canvasContainer) {
-      const canvasRect = canvasContainer.getBoundingClientRect()
-      const dx = canvasRect.width / 2
-      const dy = canvasRect.height / 2
-      canvas2DSceneManage.list[0].panOffset.x += dx
-      canvas2DSceneManage.list[0].panOffset.y += dy
-      mouseStartScreenX = screenX
-      mouseStartScreenY = screenY
-      canvas2DSceneManage.draw2DPreview()
+  const canvasContainer = document.querySelector('.canvas-container')!
+  // (0,0)位移到中央
+  const canvasRect = canvasContainer.getBoundingClientRect()
+  const dx = canvasRect.width / 2
+  const dy = canvasRect.height / 2
+  const scene2D = canvas2DSceneManage.addScene(
+    [
+      canvas2DRef.value!,
+      canvas2DActionRef.value!,
+    ],
+    canvasRect.width,
+    canvasRect.height,
+    1,
+    {
+      x: dx,
+      y: dy,
     }
+  );
+  scene2D.onClick(handleCanvasClick)
+  scene2D.onMouseDown(handleMouseDown)
+  scene2D.onMouseMove(handleMouseMove)
+  scene2D.onMouseUp(handleMouseUp)
+  scene2D.onWheel(handleWheel)
+
+  mouseStartScreenX = screenX
+  mouseStartScreenY = screenY
+  canvas2DSceneManage.renderPreview()
+  nextTick(() => {
     const match = location.href.match(/initId=(\d+)/);
     if (match) {
       import('@/utils/initByObjId').then(({ default: initByObjId }) => {
@@ -660,6 +630,7 @@ onMounted(async () => {
         if (worldApi.insertTempObj && worldApi.insertTempObj instanceof LineEntityClass) {
           const data = worldApi.insertTempObj.getData()
           if (tempPointInsertData.value.length === 1) {
+            worldApi.insertTempObj.beforeRemove()
             worldApi.insertTempObj = null;
             tempPointInsertData.value = []
             lastPoint.value = null
@@ -670,7 +641,7 @@ onMounted(async () => {
             tempPointInsertData.value.pop()
             data.points = tempPointInsertData.value;
             worldApi.insertTempObj.setData(data)
-            canvas2DSceneManage.draw2DPreview()
+            canvas2DSceneManage.renderPreview()
           }
         }
       }
@@ -683,7 +654,9 @@ onMounted(async () => {
           if (tempPointInsertData.value.length >= 2) {
             await worldApi.add2(currentTool.value, [insertData])
           }
+          worldApi.insertTempObj.beforeRemove()
           worldApi.insertTempObj = null;
+          canvas2DSceneManage.renderPreview()
           tempPointInsertData.value = []
           lastPoint.value = null
           setHoverPoint(null)
@@ -691,7 +664,9 @@ onMounted(async () => {
             insertAdding.value = false
           }, 300)// 至少停留300毫秒，防止出现那种闪现的效果。
         } else {
+          worldApi.insertTempObj.beforeRemove()
           worldApi.insertTempObj = null;
+          canvas2DSceneManage.renderPreview()
         }
       }
       currentTool.value = 'drag'
@@ -855,11 +830,11 @@ async function initWorldByData(data: fileData & {
     }
   }
 
-  canvas2DSceneManage.list[0].panOffset = {
+  canvas2DSceneManage.list[0].setPanOffset({
     x: data.panOffset.x || 0,
     y: data.panOffset.y || 0,
-  }
-  canvas2DSceneManage.list[0].level = data.zoomLevel || 1
+  })
+  canvas2DSceneManage.list[0].setLevel(data.zoomLevel || 1)
   if (data.cameraState) {
     cameraStateCenter.value = data.cameraState
   }
@@ -871,14 +846,16 @@ async function initWorldByData(data: fileData & {
   }
 }
 
-const handleContextMenu = (e: MouseEvent) => {
-  e.preventDefault()
+const handleContextMenu = (point: {
+  e: MouseEvent,
+  x: number,
+  y: number,
+}) => {
   const canvas = canvas2DSceneManage.list[0].canvasList[0]
   if (!canvas) return
 
-  const rect = canvas.getBoundingClientRect()
-  const screenX = Math.round(e.clientX - rect.left)
-  const screenY = Math.round(e.clientY - rect.top)
+  const screenX = point.x
+  const screenY = point.y
   const { angleY } = worldApi.getData();
   const dx = screenX - canvas2DSceneManage.list[0].panOffset.x
   const dy = screenY - canvas2DSceneManage.list[0].panOffset.y
@@ -910,8 +887,8 @@ const handleContextMenu = (e: MouseEvent) => {
           }
           api.editPropConfig(snapPoint, (propConfig, callback) => {
             console.log('dist', propConfig)
-            const contextMenuX = e.clientX
-            const contextMenuY = e.clientY
+            const contextMenuX = point.e.clientX
+            const contextMenuY = point.e.clientY
             editSnapPoint.value = snapPoint
             editPropTypeKey.value = type
             editPropTypeIndex.value = j
@@ -959,14 +936,14 @@ const handleContextMenu = (e: MouseEvent) => {
               }
               editPropConfigEditCallback = (val: any) => {
                 callback(val)
-                canvas2DSceneManage.draw2DPreview()
+                canvas2DSceneManage.renderPreview()
                 worldApi.reCreate3DMeshIfNeed()
                 worldApi.change3DMeshState()
               }
               nextTick(() => {
                 const height = document.querySelector('.context-menu')?.clientHeight
                 if (height && contextMenu.value) {
-                  if (e.clientY + height > window.outerHeight) {
+                  if (point.e.clientY + height > window.outerHeight) {
                     contextMenu.value.y = window.outerHeight - height - 5
                   }
                 }
@@ -974,7 +951,7 @@ const handleContextMenu = (e: MouseEvent) => {
             })
           }, () => {
             contextMenu.value = null
-            drawWrapper2DAnd3D()
+            // drawWrapper2DAnd3D()
           })
           return;
         }
@@ -999,7 +976,10 @@ const deleteContextMenuEntity = () => {
   drawWrapper2DAnd3D()
 }
 
-const handleCanvasClick = async (e: MouseEvent) => {
+const handleCanvasClick = async (point: {
+  x: number,
+  y: number,
+}) => {
   if (beCopyEntity) {
     if (beCopyEntity instanceof LineEntityClass) {
       beCopyEntity.applyOffsetToData()
@@ -1018,6 +998,8 @@ const handleCanvasClick = async (e: MouseEvent) => {
 
   const rect = canvas.getBoundingClientRect()
 
+  console.log('ddddd11111', rect.left, rect.top)
+
   // 点击空白处隐藏 context menu
   if (contextMenu.value) {
     contextMenu.value = null
@@ -1032,8 +1014,8 @@ const handleCanvasClick = async (e: MouseEvent) => {
         y: Math.round(hoverPoint.value.y)
       })
     } else {
-      const mouseXInCanvas = Math.round(e.clientX - rect.left)
-      const mouseYInCanvas = Math.round(e.clientY - rect.top)
+      const mouseXInCanvas = point.x
+      const mouseYInCanvas = point.y
       const dx = mouseXInCanvas - canvas2DSceneManage.list[0].panOffset.x
       const dy = mouseYInCanvas - canvas2DSceneManage.list[0].panOffset.y
       const worldData = worldApi.getData();
@@ -1049,31 +1031,28 @@ const handleCanvasClick = async (e: MouseEvent) => {
     }
     data.points = tempPointInsertData.value;
     worldApi.insertTempObj.setData(data)
-    canvas2DSceneManage.draw2DPreview()
+    canvas2DSceneManage.renderPreview()
   } else if (worldApi.insertTempObj && worldApi.insertTempObj instanceof PointEntityClass) {
     if (insertAdding.value === false) {
       if (worldApi.insertTempObj instanceof EntityClassInWall) {
         insertAdding.value = true
         await worldApi.add(currentTool.value, [worldApi.insertTempObj.getData()])
-        worldApi.insertTempObj = null;
-        setTimeout(() => {
-          insertAdding.value = false
-        }, 300)// 至少停留300毫秒，防止出现那种闪现的效果。
-        currentTool.value = 'drag'
       } else {
         insertAdding.value = true
         await worldApi.add(currentTool.value, [worldApi.insertTempObj.getData()])
-        worldApi.insertTempObj = null;
-        setTimeout(() => {
-          insertAdding.value = false
-        }, 300)// 至少停留300毫秒，防止出现那种闪现的效果。
-        currentTool.value = 'drag'
       }
+      worldApi.insertTempObj.beforeRemove()
+      worldApi.insertTempObj = null;
+      setTimeout(() => {
+        insertAdding.value = false
+      }, 300)// 至少停留300毫秒，防止出现那种闪现的效果。
+      currentTool.value = 'drag'
     }
   } else if (worldApi.insertTempObj && worldApi.insertTempObj instanceof PlaneGroupEntity) {
     if (insertAdding.value === false) {
       insertAdding.value = true
       await worldApi.add(currentTool.value, [worldApi.insertTempObj.getData()])
+      worldApi.insertTempObj.beforeRemove()
       worldApi.insertTempObj = null;
       setTimeout(() => {
         insertAdding.value = false
@@ -1110,13 +1089,12 @@ const initUserInfo = () => {
   })
 }
 
-const handleMouseMove = (e: MouseEvent) => {
-  const canvas = canvas2DSceneManage.list[0].canvasList[0]
-  if (!canvas) return
-
-  const rect = canvas.getBoundingClientRect()
-  const mouseXInCanvas = Math.round(e.clientX - rect.left)
-  const mouseYInCanvas = Math.round(e.clientY - rect.top)
+const handleMouseMove = (point: {
+  x: number,
+  y: number,
+}) => {
+  const mouseXInCanvas = point.x
+  const mouseYInCanvas = point.y
 
   if (isPaningAngel.value) {
     isMenuing.value = false
@@ -1158,17 +1136,16 @@ const handleMouseMove = (e: MouseEvent) => {
       const sin = Math.sin(rotateAngle)
       const newPositionX = centerX + dx * cos - dy * sin
       const newPositionY = centerY + dx * sin + dy * cos
-      canvas2DSceneManage.list[0].panOffset = {
+      canvas2DSceneManage.list[0].setPanOffset({
         x: newPositionX,
         y: newPositionY,
-      }
+      })
     })();
 
     worldApi.setData({
       ...worldData,
       angleY: newAngleY,
     });
-    canvas2DSceneManage.draw2DPreview()
     const canvasAction = canvas2DSceneManage.list[0].canvasList[1]!;
     const ctxAction = canvasAction.getContext('2d')!
     // 绘制操作句柄
@@ -1294,7 +1271,6 @@ const handleMouseMove = (e: MouseEvent) => {
         startX: matchHandelStartPoint ? matchHandelStartPoint.x : undefined,
         startY: matchHandelStartPoint ? matchHandelStartPoint.y : undefined,
       }, matchedHandelInfo)
-      canvas2DSceneManage.draw2DPreview()
       // 绘制操作句柄
       ctxAction.clearRect(0, 0, canvasAction.width, canvasAction.height);
 
@@ -1308,6 +1284,7 @@ const handleMouseMove = (e: MouseEvent) => {
         ctxAction.restore()
       })();
 
+      canvas2DSceneManage.renderPreview()
       worldApi.reCreate3DMeshIfNeed()
       worldApi.change3DMeshState()
 
@@ -1339,13 +1316,10 @@ const handleMouseMove = (e: MouseEvent) => {
       const dx = mouseXInCanvas - mouseStartScreenX
       const dy = mouseYInCanvas - mouseStartScreenY
 
-      canvas2DSceneManage.list[0].panOffset = {
+      canvas2DSceneManage.list[0].setPanOffset({
         x: panStartOffsetOfWorld.x + dx,
         y: panStartOffsetOfWorld.y + dy,
-      }
-      canvas2DSceneManage.draw2DPreview()
-      // 绘制操作句柄
-      ctxAction.clearRect(0, 0, canvasAction.width, canvasAction.height)
+      })
     } else {
       // 鼠标浮动而过
       ctxAction.clearRect(0, 0, canvasAction.width, canvasAction.height)
@@ -1531,8 +1505,11 @@ const handleMouseMove = (e: MouseEvent) => {
 let matchHandelObj: BaseEntityClass<any> | null = null;
 let matchedHandelInfo: HandelInfo | null = null;
 let matchHandelStartPoint: Point | null = null;
-const handleMouseDown = (e: MouseEvent) => {
-  e.preventDefault()
+const handleMouseDown = (point: {
+  button: number,
+  x: number,
+  y: number,
+}) => {
   contextMenu.value = null;
 
   const canvas = canvas2DSceneManage.list[0].canvasList[0]
@@ -1541,9 +1518,9 @@ const handleMouseDown = (e: MouseEvent) => {
 
   // 只有在拖拽模式下才能拖拽点
   const rect = canvas.getBoundingClientRect()
-  const mouseXInCanvas = Math.round(e.clientX - rect.left)
-  const mouseYInCanvas = Math.round(e.clientY - rect.top)
-  if (e.button === 2) {
+  const mouseXInCanvas = point.x
+  const mouseYInCanvas = point.y
+  if (point.button === 2) {
     isMenuing.value = true
     isPaningAngel.value = true
     isPaningAngelMoved.value = false;
@@ -1622,9 +1599,13 @@ const handleMouseDown = (e: MouseEvent) => {
   }
 }
 
-const handleMouseUp = (e: MouseEvent) => {
+const handleMouseUp = (point: {
+  e: MouseEvent,
+  x: number,
+  y: number,
+}) => {
   if (isMenuing.value) {
-    handleContextMenu(e)
+    handleContextMenu(point)
     isPaningAngel.value = false
     isPanningScreen.value = false
     return;
@@ -1639,11 +1620,6 @@ const handleMouseUp = (e: MouseEvent) => {
   if (isPaningAngel.value) {
     isPaningAngel.value = false
   }
-}
-const handleMouseLeave = () => {
-  const canvasAction = canvas2DSceneManage.list[0].canvasList[1]!;
-  const ctxAction = canvasAction.getContext('2d')!
-  ctxAction.clearRect(0, 0, canvasAction.width, canvasAction.height)
 }
 
 const dragSplitIndex = ref(0)
@@ -1684,9 +1660,11 @@ onUnmounted(() => {
   window.removeEventListener('mouseup', handleMouseUpSplit)
 })
 
-const handleWheel = (e: WheelEvent) => {
-  e.preventDefault()
-
+const handleWheel = (point: {
+  deltaY: number,
+  x: number,
+  y: number,
+}) => {
   const canvas = canvas2DSceneManage.list[0].canvasList[0]
   if (!canvas) return
 
@@ -1695,23 +1673,21 @@ const handleWheel = (e: WheelEvent) => {
   const ctxAction = canvasAction.getContext('2d')!
   ctxAction.clearRect(0, 0, canvasAction.width, canvasAction.height)
 
-  const rect = canvas.getBoundingClientRect()
-  const screenX = Math.round(e.clientX - rect.left)
-  const screenY = Math.round(e.clientY - rect.top)
+  const screenX = point.x
+  const screenY = point.y
 
-  const zoomFactor = e.deltaY < 0 ? 1.1 : 0.9
+  const zoomFactor = point.deltaY < 0 ? 1.1 : 0.9
   const newZoomLevel = Math.max(0.01, Math.min(5, canvas2DSceneManage.list[0].level * zoomFactor))
 
   const zoomRatio = newZoomLevel / canvas2DSceneManage.list[0].level
   const newPanX = screenX - (screenX - canvas2DSceneManage.list[0].panOffset.x) * zoomRatio
   const newPanY = screenY - (screenY - canvas2DSceneManage.list[0].panOffset.y) * zoomRatio
 
-  canvas2DSceneManage.list[0].level = newZoomLevel
-  canvas2DSceneManage.list[0].panOffset = {
+  canvas2DSceneManage.list[0].setLevel(newZoomLevel)
+  canvas2DSceneManage.list[0].setPanOffset({
     x: newPanX,
     y: newPanY,
-  }
-  drawWrapper2DAnd3D()
+  })
 }
 
 watch(() => editPropInputInfo.value, () => {
@@ -1822,11 +1798,10 @@ function handleLocationPosition(position: { x: number, y: number }) {
   const canvasRect = canvas.getBoundingClientRect()
   const dx = canvasRect.width / 2
   const dy = canvasRect.height / 2
-  canvas2DSceneManage.list[0].panOffset = {
+  canvas2DSceneManage.list[0].setPanOffset({
     x: dx - (position.x * canvas2DSceneManage.list[0].level),
     y: dy - (position.y * canvas2DSceneManage.list[0].level),
-  }
-  canvas2DSceneManage.draw2DPreview()
+  })
 }
 function handleObjChange(baseObj: BaseEntityClass<BaseObjData>) {
   console.log('baseObj', baseObj)

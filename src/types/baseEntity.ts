@@ -4,6 +4,7 @@ import { MatchCircleArea, MatchRectArea } from '@/utils/matchArea'
 import { editItem } from '@/utils/editItem'
 import { GroupBaseEntity } from './groupBase/entity'
 import { GroupBaseData } from './groupBase'
+import canvas2DSceneManage from '@/utils/canvas2DSceneManage'
 
 export type allSnapFromType = 'point' | 'line' | 'axis'
 // 磁吸点
@@ -63,6 +64,11 @@ export abstract class BaseEntityClass<T extends BaseObjData> {
 
   setData(data: T) {
     this.data = data
+    // @ts-ignore
+    window.ssss = canvas2DSceneManage;
+    canvas2DSceneManage.renderPreview()
+    this.reCreate3DMeshIfNeed()
+    this.change3DMeshState()
     this.reBuildBoundingBoxData();
     // 双向去除原有的关联对象
     this.associationEntity.forEach(entity => {

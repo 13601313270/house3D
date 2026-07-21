@@ -45,7 +45,8 @@ import { PointEntityClass } from '@/types/pointEntity'
 import { LineEntityClass } from '@/types/lineEntity'
 import { BaseEntityClass } from '@/types/baseEntity'
 import { BaseObjData } from '@/types/map2d'
-import canvas2DScene from '@/utils/canvas2DSceneManage'
+import canvas2DSceneManage from '@/utils/canvas2DSceneManage'
+
 const allObjCount = ref(0)
 type Item = {
   id: string,
@@ -147,12 +148,12 @@ function handleEnter(item: {
 }) {
   const thisObj = window.worldApi.children.find(v => v.getData().id === item.id)
   if (thisObj) {
-    const zoom2DLevel = canvas2DScene.list[0].level;
+    const zoom2DLevel = canvas2DSceneManage.list[0].level;
     const worldData = window.worldApi.getData();
-    const canvasAction = document.getElementById('canvas2DAction') as HTMLCanvasElement;
+    const canvasAction = canvas2DSceneManage.list[0].canvasList[1];
     const ctxAction = canvasAction.getContext('2d')!
-    const screenX = worldData.x * zoom2DLevel + canvas2DScene.list[0].panOffset.x;
-    const screenY = worldData.y * zoom2DLevel + canvas2DScene.list[0].panOffset.y;
+    const screenX = worldData.x * zoom2DLevel + canvas2DSceneManage.list[0].panOffset.x;
+    const screenY = worldData.y * zoom2DLevel + canvas2DSceneManage.list[0].panOffset.y;
     ctxAction.clearRect(0, 0, canvasAction.width, canvasAction.height)
     ctxAction.save()
     ctxAction.translate(screenX, screenY)
