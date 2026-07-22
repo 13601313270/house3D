@@ -1349,31 +1349,25 @@ const handleMouseMove = (point: {
           }
           classInfo.draw2DActionHandle(ctxAction, canvas2DSceneManage.list[0].level)
           ctxAction.restore()
+          if (classInfo instanceof PointEntityClass) {
+            ctxAction.font = `${Math.max(14 * canvas2DSceneManage.list[0].level, 14)}px '微软雅黑'`
+            ctxAction.textAlign = 'center'
+            ctxAction.strokeStyle = 'white'
+            ctxAction.lineWidth = 2
+            const text = classInfo.inAreaHoverText()
+            ctxAction.strokeText(
+              text,
+              mouseXInCanvas,
+              mouseYInCanvas - 10,
+            )
+            ctxAction.fillStyle = 'black'
+            ctxAction.fillText(
+              `${text}`,
+              mouseXInCanvas,
+              mouseYInCanvas - 10,
+            )
+          }
         })();
-
-        if (classInfo instanceof PointEntityClass) {
-          const textPositionX = dx;
-          const textPositionY = dy - 10;
-          // 绘制文字（带边框）
-          ctxAction.font = `${Math.max(14 * canvas2DSceneManage.list[0].level, 14)}px '微软雅黑'`
-          ctxAction.textAlign = 'center'
-          // 设置边框样式
-          ctxAction.strokeStyle = 'white'
-          ctxAction.lineWidth = 2
-          const text = classInfo.inAreaHoverText()
-          ctxAction.strokeText(
-            text,
-            textPositionX * canvas2DSceneManage.list[0].level + canvas2DSceneManage.list[0].panOffset.x,
-            textPositionY * canvas2DSceneManage.list[0].level + canvas2DSceneManage.list[0].panOffset.y
-          )
-          // 设置填充样式
-          ctxAction.fillStyle = 'black'
-          ctxAction.fillText(
-            `${text}`,
-            textPositionX * canvas2DSceneManage.list[0].level + canvas2DSceneManage.list[0].panOffset.x,
-            textPositionY * canvas2DSceneManage.list[0].level + canvas2DSceneManage.list[0].panOffset.y
-          )
-        }
       }
     }
   } else if (worldApi.insertTempObj instanceof LineEntityClass) {
