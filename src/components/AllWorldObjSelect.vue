@@ -80,7 +80,7 @@ const position = ref<{ x: number, y: number }>({ x: window.innerWidth / 3, y: 10
 const emit = defineEmits<{
   (e: 'close'): void,
   (e: 'locationPosition', value: { x: number, y: number }): void,
-  (e: 'onChange', value: BaseEntityClass<BaseObjData>): void,
+  // (e: 'onChange', value: BaseEntityClass<BaseObjData>): void,
 }>()
 
 let isDragging = false
@@ -174,7 +174,7 @@ function handleUnLock(item: Item, isLocked: boolean) {
     })
     item.isLocked = isLocked
     message.success(isLocked ? '锁定成功' : '解锁成功', { position: 'top-center' })
-    emit('onChange', thisObj)
+    // emit('onChange', thisObj)
   }
 }
 function handleLocation(item: Item) {

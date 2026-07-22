@@ -129,7 +129,7 @@
         :initPosition="{ x: contextMenu.x, y: contextMenu.y }" @deleteContextMenuEntity="deleteContextMenuEntity"
         @close="contextMenu = null" @copyEntity="copyEntity" />
       <AllWorldObjSelect v-if="showAllObjSelect" @close="showAllObjSelect = false"
-        @locationPosition="handleLocationPosition" @onChange="handleObjChange" />
+        @locationPosition="handleLocationPosition" />
       <EnvironmentEditor v-if="showEnvironmentEditor" @close="showEnvironmentEditor = false" />
     </div>
   </div>
@@ -1219,9 +1219,6 @@ const handleMouseMove = (point: {
             if (nearestPoint && minDistance < snapThreshold && matchLine) {
               const result2 = matchHandelObj.inSceneSnapLineArea(wall, matchLine, nearestPoint)
               if (result2) {
-                // canvas2DSceneManage.renderPreview()
-                // worldApi.reCreate3DMeshIfNeed()
-                // worldApi.change3DMeshState()
                 return true;
               }
             }
@@ -1270,10 +1267,6 @@ const handleMouseMove = (point: {
         matchHandelObj.draw2DActionHandle(ctxAction, canvas2DSceneManage.list[0].level)
         ctxAction.restore()
       })();
-
-      canvas2DSceneManage.renderPreview()
-      worldApi.reCreate3DMeshIfNeed()
-      worldApi.change3DMeshState()
 
       if (tipTexts && tipTexts.length > 0) {
         const canvasAction = canvas2DSceneManage.list[0].canvasList[0]!;
@@ -1465,11 +1458,6 @@ const handleMouseMove = (point: {
     let tipTexts: string[] = []
     if (worldApi.insertTempObj instanceof PointEntityClass) {
       tipTexts = worldApi.insertTempObj.setPrepareState(x, y)
-      canvas2DSceneManage.renderPreview()
-      worldApi.reCreate3DMeshIfNeed()
-      worldApi.change3DMeshState()
-    }
-    if (tipTexts.length > 0) {
       const canvasAction = canvas2DSceneManage.list[0].canvasList[0]!;
       const ctxAction = canvasAction.getContext('2d')!
 
@@ -1788,13 +1776,7 @@ function handleLocationPosition(position: { x: number, y: number }) {
     y: dy - (position.y * canvas2DSceneManage.list[0].level),
   })
 }
-function handleObjChange(baseObj: BaseEntityClass<BaseObjData>) {
-  console.log('baseObj', baseObj)
-  // 刷新2D和3D场景
-  // canvas2DSceneManage.renderPreview()
-  // worldApi.reCreate3DMeshIfNeed()
-  // worldApi.change3DMeshState()
-}
+
 async function copyEntity() {
   if (menuEntity) {
     const type = menuEntity.type

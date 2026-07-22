@@ -105,15 +105,18 @@ export abstract class EntityClassInWall<T extends ObjInWallData> extends PointEn
         obj.associationEntity.push(this)
       }
       this.markObjectIsDirty()
-      // this.associationEntity.forEach(entity => {
-      //   if (entity.associationEntity.includes(this)) {
-      //     entity.reCreate3DMeshIfNeed()
-      //     entity.change3DMeshState()
-      //   }
-      // })
-      // this.reCreate3DMeshIfNeed()
-      window.worldApi.reCreate3DMeshIfNeed()
-      window.worldApi.change3DMeshState()
+      this.associationEntity.forEach(entity => {
+        if (entity.associationEntity.includes(this)) {
+          entity.reCreate3DMeshIfNeed()
+        }
+      });
+      this.reCreate3DMeshIfNeed();
+      this.associationEntity.forEach(entity => {
+        if (entity.associationEntity.includes(this)) {
+          entity.change3DMeshState()
+        }
+      });
+      this.change3DMeshState()
       return true;
     }
     return false;
