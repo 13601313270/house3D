@@ -18,7 +18,6 @@ export class ImportFileEntity extends PointEntityClass<ImportFileData> {
   imgBeCreateByScale: number = 1; // 这个图片是以哪个缩放比例创建的
 
   init(): Promise<void> {
-    this.img.src = 'favicon.ico'
     const { fileTypeId } = this.getData();
     const findObjInfo = window.worldState.allImportFiles.find(item => item.fileTypeId === fileTypeId)
     if (!findObjInfo) { return Promise.resolve() }
@@ -38,7 +37,7 @@ export class ImportFileEntity extends PointEntityClass<ImportFileData> {
 
     const camera = new THREE.OrthographicCamera(-cameraSize / 2, cameraSize / 2, cameraSize / 2, -cameraSize / 2)
     scene.background = null
-    const ambientLight = new THREE.AmbientLight(0xffffff, 1.5)
+    const ambientLight = new THREE.AmbientLight(0xffffff, 15)
     scene.add(ambientLight)
 
     camera.position.set(0, 2000, 0)
@@ -57,7 +56,6 @@ export class ImportFileEntity extends PointEntityClass<ImportFileData> {
 
     scene.add(mesh)
     renderer.render(scene, camera)
-    this.img.src = renderer.domElement.toDataURL()
 
     return new Promise((resolve, reject) => {
       this.img.onload = () => {
@@ -66,6 +64,7 @@ export class ImportFileEntity extends PointEntityClass<ImportFileData> {
       this.img.onerror = () => {
         reject(new Error('图片加载失败'))
       }
+      this.img.src = renderer.domElement.toDataURL()
     })
   }
 

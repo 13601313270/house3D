@@ -481,11 +481,17 @@ export class WallEntity extends LineEntityClass<WallPoint, WallData> {
             }
           }
         }
-        this.getData().points[index] = {
+        
+        const oldPoints = [...this.getData().points]
+        oldPoints[index] = {
           x: Math.round(x),
           y: Math.round(y),
           snw: this.getData().points[index].snw
         }
+        this.setData({
+          ...this.getData(),
+          points: oldPoints,
+        })
       } else {
         // 拖拽线开启后，墙上的窗户移动的时候，无法被触发，所以关闭掉。
         // if (startX !== undefined && startY !== undefined) {
