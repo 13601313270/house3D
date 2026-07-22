@@ -342,8 +342,8 @@ const initThree = () => {
                 ...entity.getData(),
                 z: camera1MouseMoveStartZ + (deltaY * -1)
               })
-              window.worldApi.reCreate3DMeshIfNeed()
-              window.worldApi.change3DMeshState()
+              // window.worldApi.reCreate3DMeshIfNeed()
+              // window.worldApi.change3DMeshState()
               entity.moveZBox.visible = true
               entity.boundingBox.visible = true
               entity.boundingBox.children[1].visible = true

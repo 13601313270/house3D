@@ -25,7 +25,7 @@
         </div>
       </div>
       <div class="childItem"
-        v-for="value in (allFileKeysGroup.find(item => item.id === 'other') || { child: [] }).child.filter(item => !['outFile', 'outFileInWall', 'importFile', 'planeGroup'].includes(item))"
+        v-for="value in (allFileKeysGroup.find(item => item.id === 'other') || { child: [] }).child.filter(item => !['outFile', 'outFileInWall', 'importFile'].includes(item))"
         :key="value" :class="{ active: currentTool === value }"
         @click="changeCurrentTool(value), isMouseInCate1 = false" @mouseenter="mouseenterOtherGroup(value)">
         {{ allPluginByKey[value]?.name }}

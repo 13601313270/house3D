@@ -200,7 +200,6 @@ export abstract class PointEntityClass<T extends PointObjData> extends BaseEntit
 
   setData(data: T) {
     super.setData(data)
-    canvas2DSceneManage.renderPreview()
     this.updateBoundingBoxState();
   }
 

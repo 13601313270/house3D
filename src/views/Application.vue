@@ -1219,9 +1219,9 @@ const handleMouseMove = (point: {
             if (nearestPoint && minDistance < snapThreshold && matchLine) {
               const result2 = matchHandelObj.inSceneSnapLineArea(wall, matchLine, nearestPoint)
               if (result2) {
-                canvas2DSceneManage.renderPreview()
-                worldApi.reCreate3DMeshIfNeed()
-                worldApi.change3DMeshState()
+                // canvas2DSceneManage.renderPreview()
+                // worldApi.reCreate3DMeshIfNeed()
+                // worldApi.change3DMeshState()
                 return true;
               }
             }

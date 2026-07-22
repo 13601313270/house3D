@@ -47,7 +47,7 @@ export abstract class EntityClassInWall<T extends ObjInWallData> extends PointEn
         nearest.wallEntity.associationEntity.push(this)
       }
       this.markObjectIsDirty()
-      
+
       return [];
     } else {
       const newData: T = {
@@ -89,7 +89,6 @@ export abstract class EntityClassInWall<T extends ObjInWallData> extends PointEn
         wallId: objData.id,
         wallPointId: index,
       })
-
       // 双向去除原有的关联对象
       this.associationEntity.forEach(entity => {
         if (entity.associationEntity.includes(this)) {
@@ -106,6 +105,15 @@ export abstract class EntityClassInWall<T extends ObjInWallData> extends PointEn
         obj.associationEntity.push(this)
       }
       this.markObjectIsDirty()
+      // this.associationEntity.forEach(entity => {
+      //   if (entity.associationEntity.includes(this)) {
+      //     entity.reCreate3DMeshIfNeed()
+      //     entity.change3DMeshState()
+      //   }
+      // })
+      // this.reCreate3DMeshIfNeed()
+      window.worldApi.reCreate3DMeshIfNeed()
+      window.worldApi.change3DMeshState()
       return true;
     }
     return false;

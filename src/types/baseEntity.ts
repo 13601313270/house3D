@@ -73,9 +73,17 @@ export abstract class BaseEntityClass<T extends BaseObjData> {
         entity.markObjectIsDirty()
       }
     })
+    this.associationEntity.forEach(entity => {
+      if (entity.associationEntity.includes(this)) {
+        entity.reCreate3DMeshIfNeed()
+        entity.change3DMeshState()
+      }
+    })
     if (this.parentEntity) {
       this.parentEntity._callObjDataChange(this)
     }
+    this.reCreate3DMeshIfNeed() // 第二次reCreate3DMeshIfNeed，我也不知道为什么必须加，但是不加上，挂在墙上的门，拖动y轴的时候，墙不会刷新渲染
+    window.worldApi.change3DMeshState()
   }
 
   getData(): T {
