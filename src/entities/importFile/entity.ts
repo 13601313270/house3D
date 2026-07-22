@@ -15,9 +15,50 @@ export class ImportFileEntity extends PointEntityClass<ImportFileData> {
   private circleRadius = 6
   private baseDrawAngelLength = 40;
   img: HTMLImageElement = new Image()
+  imgBeCreateByScale: number = 1; // 这个图片是以哪个缩放比例创建的
 
   init(): Promise<void> {
     this.img.src = 'favicon.ico'
+    const { fileTypeId } = this.getData();
+    const findObjInfo = window.worldState.allImportFiles.find(item => item.fileTypeId === fileTypeId)
+    if (!findObjInfo) { return Promise.resolve() }
+    const mesh = findObjInfo.mesh.clone()
+    const renderer = new THREE.WebGLRenderer({ antialias: true })
+    const scene = new THREE.Scene()
+    const cameraSize = 600;
+
+    const box = new THREE.Box3().setFromObject(mesh)
+    const center = box.getCenter(new THREE.Vector3())
+    const size = box.getSize(new THREE.Vector3())
+    const objZoomWidth = cameraSize / (size.x + Math.abs(center.x) * 2)
+    const objZoomHeight = cameraSize / (size.z + Math.abs(center.z) * 2)
+    const objZoom = Math.min(objZoomWidth, objZoomHeight)
+    this.imgBeCreateByScale = objZoom
+    mesh.scale.set(objZoom, 1, objZoom)
+
+    const camera = new THREE.OrthographicCamera(-cameraSize / 2, cameraSize / 2, cameraSize / 2, -cameraSize / 2)
+    scene.background = new THREE.Color(0xf0f0f0)
+    const ambientLight = new THREE.AmbientLight(0xffffff, 1.5)
+    scene.add(ambientLight)
+
+    camera.position.set(0, 2000, 0)
+    camera.lookAt(0, 0, 0)
+
+    renderer.setPixelRatio(1)
+    renderer.shadowMap.enabled = true
+
+    const container = document.createElement('div')
+    const allPanelHeight = cameraSize;
+    container.style.width = `${allPanelHeight}px`
+    container.style.height = `${allPanelHeight}px`
+    renderer.setSize(allPanelHeight, allPanelHeight)
+
+    container.appendChild(renderer.domElement)
+
+    scene.add(mesh)
+    renderer.render(scene, camera)
+    this.img.src = renderer.domElement.toDataURL()
+
     return new Promise((resolve, reject) => {
       this.img.onload = () => {
         resolve()
@@ -30,10 +71,12 @@ export class ImportFileEntity extends PointEntityClass<ImportFileData> {
 
   draw2DPreview(ctx: CanvasRenderingContext2D, zoomLevel: number): void {
     const data = this.getData();
-    const screenX = data.x * zoomLevel;
-    const screenY = data.y * zoomLevel;
+    const { x, y, scale } = data;
+    const screenX = x * zoomLevel;
+    const screenY = y * zoomLevel;
     const angleY = data.angleY;// * -1 + Math.PI / 2
-    const preImgScale = 1
+    const preImgScale = scale / this.imgBeCreateByScale
+
     const { width, height } = this.img;
     ctx.save(); // 保存当前状态
     ctx.translate(screenX, screenY); // 移动原点到目标中心
@@ -149,7 +192,6 @@ export class ImportFileEntity extends PointEntityClass<ImportFileData> {
     // 如果有预加载的本地模型对象，直接使用
     if (threeObject) {
       const clonedObject = threeObject.clone()
-      // clonedObject.scale.set(scale, scale, scale)
       group.add(clonedObject)
 
       // 获取模型的尺寸
