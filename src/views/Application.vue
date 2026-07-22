@@ -96,9 +96,9 @@
         </div>
         <!-- {{ insertTempDoor }} -->
         <div class="center-panel-content">
-          <Canvas3D ref="canvas3DRefCenter" :world="worldApi" v-model:cameraState="cameraStateCenter"
-            :camera="centerPanelCamera" :aspectRatio="aspectRatio2" :showCamera="true" cameraType="perspective"
-            @objectHover="handleObjectHover" @objectClick="handleObjectClick" />
+          <Canvas3D ref="canvas3DRefCenter" v-model:cameraState="cameraStateCenter" :camera="centerPanelCamera"
+            :aspectRatio="aspectRatio2" :showCamera="true" cameraType="perspective" @objectHover="handleObjectHover"
+            @objectClick="handleObjectClick" />
         </div>
       </div>
 
@@ -117,7 +117,7 @@
           </div>
         </div>
         <div class="right-panel-content">
-          <Canvas3D v-if="allCamera.length && cameraRightState && rightPanelCamera" ref="canvas3DRef2" :world="worldApi"
+          <Canvas3D v-if="allCamera.length && cameraRightState && rightPanelCamera" ref="canvas3DRef2"
             :camera="rightPanelCamera" :cameraState="cameraRightState"
             :aspectRatio="cameraRightState.aspectW / cameraRightState.aspectH" :showCamera="false"
             cameraType="perspective" />
@@ -127,9 +127,8 @@
       <DataTypeEditPanel v-if="contextMenu?.visible && editPropTypeKey" :typeKey="editPropTypeKey"
         :editPropConfigInfo="editPropConfigInfo" v-model="editPropInputInfo"
         :initPosition="{ x: contextMenu.x, y: contextMenu.y }" @deleteContextMenuEntity="deleteContextMenuEntity"
-        @close="contextMenu = null" @copyEntity="copyEntity" />
-      <AllWorldObjSelect v-if="showAllObjSelect" @close="showAllObjSelect = false"
-        @locationPosition="handleLocationPosition" />
+        @close="contextMenu = null" @copyEntity="copyEntity" @moveToGroup="moveToGroup" />
+      <AllWorldObjSelect v-if="showAllObjSelect" @close="showAllObjSelect = false" />
       <EnvironmentEditor v-if="showEnvironmentEditor" @close="showEnvironmentEditor = false" />
     </div>
   </div>
@@ -391,6 +390,7 @@ const worldApi = new WorldGroup(null, {
   y: 0,
   z: 0,
   angleY: 0,
+  name: '世界',
   temp: false,
 })
 window.worldApi = worldApi
@@ -1760,18 +1760,6 @@ function changeObjTypeSelect(type: string, baseObj: BaseEntityClass<any>) {
     currentTool.value = type
   }
 }
-function handleLocationPosition(position: { x: number, y: number }) {
-  console.log('position', position)
-  const canvas = canvas2DSceneManage.list[0].canvasList[0]
-  if (!canvas) return
-  const canvasRect = canvas.getBoundingClientRect()
-  const dx = canvasRect.width / 2
-  const dy = canvasRect.height / 2
-  canvas2DSceneManage.list[0].setPanOffset({
-    x: dx - (position.x * canvas2DSceneManage.list[0].level),
-    y: dy - (position.y * canvas2DSceneManage.list[0].level),
-  })
-}
 
 async function copyEntity() {
   if (menuEntity) {
@@ -1809,6 +1797,20 @@ async function copyEntity() {
     contextMenu.value = null
     currentTool.value = 'drag'
   }
+}
+async function moveToGroup(id: string) {
+  if (!contextMenu.value) return
+  if (!menuEntity) return
+  console.log('88888', id)
+  const group: PlaneGroupEntity = window.worldApi.getTypeListEntity('planeGroup').find((entity) => entity.getData().id === id) as PlaneGroupEntity;
+  console.log('group', group)
+
+  const type = menuEntity.type
+  const values = JSON.parse(JSON.stringify(menuEntity.getData()));
+  values.id = Date.now().toString()
+  await group.add(type, [values])
+  menuEntity.beforeRemove()
+  worldApi.delete(type, contextMenu.value.index)
 }
 function showAiPic() {
   if (canvas3DRef2.value) {

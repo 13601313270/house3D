@@ -12,6 +12,18 @@
       </div>
       <BoneEdit v-if="boneEditIsShow" :modelValue="modelValue.bone" @update:modelValue="handleUpdateBone" />
     </div>
+    <div class="configContainer" v-else-if="showGroupSelect">
+      <div class="head" @mousedown="startDrag">
+        <div class="moveIcon">
+          <img src="../assets/move2.svg" alt="move" @mousedown.prevent />
+        </div>
+        <div class="title">移动到组</div>
+        <div class="closeIcon" @mousedown.stop @click="showGroupSelect = false">
+          <img @mousedown.stop.prevent src="../assets/closeWhite.svg" alt="close" />
+        </div>
+      </div>
+      <GroupSelect @select="handleSelectGroup" />
+    </div>
     <div class="configContainer" v-else>
       <div class="head" @mousedown="startDrag">
         <div class="moveIcon">
@@ -44,13 +56,14 @@
           <button v-if="typeKey === 'people'" @click="showBoneEdit">姿态编辑</button>
           <button @click="LockObj(!modelValue.isLocked)">{{ modelValue.isLocked ? '解锁' : '锁定' }}</button>
           <button @click="copyEntity">复制</button>
+          <button @click="moveToGroup">移动到组</button>
         </div>
         <div style="flex-grow: 1;"></div>
         <button class="deleteButton" @click="deleteContextMenuEntity">删除</button>
       </div>
     </div>
-    <!-- <button @click="deleteContextMenuEntity">删除</button> -->
   </div>
+
 </template>
 <script setup lang="ts">
 import { nextTick, onMounted, ref } from 'vue';
@@ -59,6 +72,7 @@ import { editItem } from '@/utils/editItem';
 import DataTypeEdit from './DataTypeEdit.vue'
 import BoneEdit from './boneEdit.vue'
 import message from '@/utils/message';
+import GroupSelect from './groupSelect.vue';
 
 const props = defineProps<{
   typeKey: string
@@ -70,8 +84,8 @@ const props = defineProps<{
   }
 }>()
 const boneEditIsShow = ref(false)
-
 const position = ref(props.initPosition)
+const showGroupSelect = ref(false)
 const EDGE_PADDING = 6
 
 function showBoneEdit() {
@@ -102,6 +116,7 @@ const emit = defineEmits<{
   (e: 'deleteContextMenuEntity'): void
   (e: 'close'): void
   (e: 'copyEntity'): void
+  (e: 'moveToGroup', id: string): void
 }>()
 
 function handleUpdate(id: string, value: any) {
@@ -231,6 +246,12 @@ function LockObj(value: boolean) {
 }
 function copyEntity() {
   emit('copyEntity')
+}
+function moveToGroup() {
+  showGroupSelect.value = true
+}
+function handleSelectGroup(id: string) {
+  emit('moveToGroup', id)
 }
 </script>
 <style scoped lang="less">

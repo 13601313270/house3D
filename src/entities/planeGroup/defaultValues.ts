@@ -12,7 +12,9 @@ export default function (): DefaultItem<PlaneGroupData>[] {
         z: 0,
         childrenData: [],
         angleY: 0,
-      }
+        name: '平面组' + Date.now(),
+        temp: false,
+      } as PlaneGroupData
     }
   ]
   return values

@@ -13,7 +13,6 @@ import { GroupBaseEntity } from '@/types/groupBase/entity';
 import { GroupBaseData } from '@/types/groupBase';
 
 const props = defineProps<{
-  world: GroupBaseEntity<GroupBaseData>,
   cameraState: CameraState,//  | OrthographicCamera,
   camera: THREE.PerspectiveCamera | THREE.OrthographicCamera,
   aspectRatio: number
@@ -262,7 +261,7 @@ const initThree = () => {
           canvas1LastMouseY = e.clientY;
           e.preventDefault();
         } else if (e.button === 0) {
-          const hoveredObject = raycastObjects(props.world.moveZBoxList(), e)
+          const hoveredObject = raycastObjects(window.worldApi.moveZBoxList(), e)
           if (hoveredObject) {
             // 移动对象
             // @ts-ignore
@@ -329,7 +328,7 @@ const initThree = () => {
           // 移动对象
           // @ts-ignore
           if (canvas1HoveredObject && canvas1HoveredObject?.entity) {
-            const allBoundingBox = props.world.boundingBoxList()
+            const allBoundingBox = window.worldApi.boundingBoxList()
             allBoundingBox.forEach((item) => {
               item.visible = false
             })
@@ -348,12 +347,12 @@ const initThree = () => {
             }
           }
         } else {
-          const allBoundingBox = props.world.boundingBoxList()
+          const allBoundingBox = window.worldApi.boundingBoxList()
           allBoundingBox.forEach((item) => {
             item.visible = false
           })
 
-          const allMoveZBox = props.world.moveZBoxList()
+          const allMoveZBox = window.worldApi.moveZBoxList()
           const allLastTextBox: any[] = [];
           allMoveZBox.forEach((item) => {
             // @ts-ignore

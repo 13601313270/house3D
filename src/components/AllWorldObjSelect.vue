@@ -43,9 +43,8 @@ import { nextTick, onMounted, ref } from 'vue'
 import message from '@/utils/message'
 import { PointEntityClass } from '@/types/pointEntity'
 import { LineEntityClass } from '@/types/lineEntity'
-import { BaseEntityClass } from '@/types/baseEntity'
-import { BaseObjData } from '@/types/map2d'
 import canvas2DSceneManage from '@/utils/canvas2DSceneManage'
+import { GroupBaseEntity } from '@/types/groupBase/entity'
 
 const allObjCount = ref(0)
 type Item = {
@@ -64,9 +63,13 @@ function reloadObjList() {
   allObjList.value = []
   window.worldApi.children.forEach(v => {
     const { id, isLocked, isHidden, tip } = v.getData()
+    let name = v.name
+    if (v instanceof GroupBaseEntity) {
+      name = v.getData().name
+    }
     allObjList.value.push({
       id,
-      name: v.name,
+      name,
       type: v.type,
       isHidden: isHidden || false,
       isLocked: isLocked || false,
@@ -79,7 +82,6 @@ const position = ref<{ x: number, y: number }>({ x: window.innerWidth / 3, y: 10
 
 const emit = defineEmits<{
   (e: 'close'): void,
-  (e: 'locationPosition', value: { x: number, y: number }): void,
   // (e: 'onChange', value: BaseEntityClass<BaseObjData>): void,
 }>()
 
@@ -177,13 +179,25 @@ function handleUnLock(item: Item, isLocked: boolean) {
     // emit('onChange', thisObj)
   }
 }
+function handleLocationPosition(position: { x: number, y: number }) {
+  console.log('position', position)
+  const canvas = canvas2DSceneManage.list[0].canvasList[0]
+  if (!canvas) return
+  const canvasRect = canvas.getBoundingClientRect()
+  const dx = canvasRect.width / 2
+  const dy = canvasRect.height / 2
+  canvas2DSceneManage.list[0].setPanOffset({
+    x: dx - (position.x * canvas2DSceneManage.list[0].level),
+    y: dy - (position.y * canvas2DSceneManage.list[0].level),
+  })
+}
 function handleLocation(item: Item) {
   const api = window.worldApi.children.find(v => v.getData().id === item.id)
   if (!api) return
 
   if (api instanceof PointEntityClass) {
     const { x, y } = api.getData()
-    emit('locationPosition', { x, y })
+    handleLocationPosition({ x, y })
     nextTick(() => {
       handleEnter(item)
     })
@@ -191,7 +205,7 @@ function handleLocation(item: Item) {
     const points: Array<{ x: number, y: number }> = api.getData().points
     const centerX = points.reduce((acc, cur) => acc + cur.x, 0) / points.length
     const centerY = points.reduce((acc, cur) => acc + cur.y, 0) / points.length
-    emit('locationPosition', { x: centerX, y: centerY })
+    handleLocationPosition({ x: centerX, y: centerY })
     nextTick(() => {
       handleEnter(item)
     })

@@ -7,6 +7,7 @@ export type GroupBaseData = PointObjData & {
     type: string,
     value: BaseObjData,
   }>,
+  name: string,
   x: number
   y: number
   z: number,

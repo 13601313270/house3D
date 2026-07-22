@@ -1,20 +1,17 @@
 import { GroupBaseEntity } from '@/types/groupBase/entity'
-import { HandelInfo, Point } from '@/types/map2d'
+import { HandelInfo } from '@/types/map2d'
 import { CubeData } from '../cube/index.d'
 import editItem from '@/utils/editItem'
 import { isPointInRotatedRect } from '@/utils/isPointInRotatedRect'
 import { MatchRectArea } from '@/utils/matchArea'
-import { GroupBaseData } from '@/types/groupBase'
 import { PlaneGroupData } from './index.d'
-import { PointEntityClass } from '@/types/pointEntity'
-import canvas2DSceneManage from '@/utils/canvas2DSceneManage'
 
 export class PlaneGroupEntity extends GroupBaseEntity<PlaneGroupData> {
   type: string = 'planeGroup'
   name: string = '平面组'
   private circleRadius = 6
 
-  constructor(parent: GroupBaseEntity<GroupBaseData> | null, data: PlaneGroupData) {
+  constructor(parent: GroupBaseEntity<PlaneGroupData> | null, data: PlaneGroupData) {
     super(parent, data)
     this.data = data;
     if (this.parentEntity) {
@@ -169,6 +166,12 @@ export class PlaneGroupEntity extends GroupBaseEntity<PlaneGroupData> {
   ): void {
     const data = this.getData();
     editShow([
+      {
+        id: 'name',
+        label: '组名称',
+        dataType: 'string',
+        value: data.name,
+      },
       {
         id: '增加对象',
         label: '增加对象',
