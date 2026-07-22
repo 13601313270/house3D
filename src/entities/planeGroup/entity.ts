@@ -33,7 +33,7 @@ export class PlaneGroupEntity extends GroupBaseEntity<PlaneGroupData> {
     (() => {
       const screenX = data.x * zoomLevel;
       const screenY = data.y * zoomLevel;
-      ctx.fillStyle = 'red'
+      ctx.strokeStyle = '#333'
       const [size, offset] = this.boundingBoxData
       ctx.save(); // 保存当前状态
       ctx.translate(screenX + offset.x, screenY + offset.z); // 移动原点到目标中心
@@ -187,16 +187,7 @@ export class PlaneGroupEntity extends GroupBaseEntity<PlaneGroupData> {
             depth: 30,
           }
           this.add('cube', [cubeData])
-          setTimeout(() => {
-            canvas2DSceneManage.renderPreview()
-            this.reCreate3DMeshIfNeed()
-            this.change3DMeshState()
-            this.reBuildBoundingBoxData();
-            close()
-          }, 100)
-          // if (this.parentEntity) {
-          //   this.parentEntity._callObjDataChange(this)
-          // }
+          close()
         }
       },
     ], (val) => {

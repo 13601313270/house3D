@@ -276,12 +276,17 @@ export abstract class GroupBaseEntity<T extends GroupBaseData> extends PointEnti
       this.worldAddBindList.forEach(callback => callback(api))
       if (api.getData().isLocked) {
         this.lockedObjList.push(api)
+        api.reCreate3DMeshIfNeed();
+        api.change3DMeshState()
       }
-      canvas2DSceneManage.renderPreview()
-      api.reCreate3DMeshIfNeed();
-      api.change3DMeshState()
     }
     this._callAllOnChangeCallback('add', apiList)
+    setTimeout(() => {
+      canvas2DSceneManage.renderPreview()
+      this.reCreate3DMeshIfNeed()
+      this.change3DMeshState()
+      this.reBuildBoundingBoxData();
+    }, 0)
     return apiList;
   }
 
