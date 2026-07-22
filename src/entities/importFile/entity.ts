@@ -23,7 +23,7 @@ export class ImportFileEntity extends PointEntityClass<ImportFileData> {
     const findObjInfo = window.worldState.allImportFiles.find(item => item.fileTypeId === fileTypeId)
     if (!findObjInfo) { return Promise.resolve() }
     const mesh = findObjInfo.mesh.clone()
-    const renderer = new THREE.WebGLRenderer({ antialias: true })
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true })
     const scene = new THREE.Scene()
     const cameraSize = 600;
 
@@ -37,7 +37,7 @@ export class ImportFileEntity extends PointEntityClass<ImportFileData> {
     mesh.scale.set(objZoom, 1, objZoom)
 
     const camera = new THREE.OrthographicCamera(-cameraSize / 2, cameraSize / 2, cameraSize / 2, -cameraSize / 2)
-    scene.background = new THREE.Color(0xf0f0f0)
+    scene.background = null
     const ambientLight = new THREE.AmbientLight(0xffffff, 1.5)
     scene.add(ambientLight)
 
