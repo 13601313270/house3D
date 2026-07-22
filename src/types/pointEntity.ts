@@ -74,9 +74,9 @@ export abstract class PointEntityClass<T extends PointObjData> extends BaseEntit
   // 获取包裹立方体的数据
   abstract getBoundingBoxData(): [THREE.Vector3, THREE.Vector3, THREE.Vector3] | null // 第一个是尺寸，第二个是位置偏移，第三个是旋转角度
 
-  reCreate3DMeshIfNeed(): void {
+  reCreate3DMeshAnd2DPreviewIfNeed(): void {
     const oldCacheKey = this.cacheKeyStr;
-    super.reCreate3DMeshIfNeed();
+    super.reCreate3DMeshAnd2DPreviewIfNeed();
     const newKeyByData = this.needChangeKey();
     if (oldCacheKey === newKeyByData) {
       return;

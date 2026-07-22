@@ -29,15 +29,17 @@ export abstract class BaseEntityClass<T extends BaseObjData> {
   boundingBoxData: [THREE.Vector3, THREE.Vector3, THREE.Vector3] | null = null // 第一个是尺寸，第二个是位置偏移，第三个是旋转角度
   // eslint-disable-next-line
   associationEntity: BaseEntityClass<any>[] = []// 关联对象，就是本对象渲染，需要联动修改的对象。（比如：墙壁上被窗户挖洞，那么墙修改，需要重新挖洞）
-  // private cacheCtx?: CanvasRenderingContext2D
+
+  protected cacheCanvas: HTMLCanvasElement
+  protected cacheCtx: CanvasRenderingContext2D
 
   constructor(parentEntity: GroupBaseEntity<GroupBaseData> | null, data: T) {
     this.parentEntity = parentEntity
     this.data = data
-    // const canvas = document.createElement("canvas")
-    // canvas.width = 100
-    // canvas.height = 100
-    // this.cacheCtx = canvas.getContext("2d")!
+    this.cacheCanvas = document.createElement("canvas")
+    this.cacheCanvas.width = 100
+    this.cacheCanvas.height = 100
+    this.cacheCtx = this.cacheCanvas.getContext("2d")!
     this.reBuildBoundingBoxData()
   }
 
@@ -64,7 +66,7 @@ export abstract class BaseEntityClass<T extends BaseObjData> {
   setData(data: T) {
     this.data = data
     canvas2DSceneManage.renderPreview()
-    this.reCreate3DMeshIfNeed()
+    this.reCreate3DMeshAnd2DPreviewIfNeed()
     this.change3DMeshState()
     this.reBuildBoundingBoxData();
     // 双向去除原有的关联对象
@@ -75,14 +77,14 @@ export abstract class BaseEntityClass<T extends BaseObjData> {
     })
     this.associationEntity.forEach(entity => {
       if (entity.associationEntity.includes(this)) {
-        entity.reCreate3DMeshIfNeed()
+        entity.reCreate3DMeshAnd2DPreviewIfNeed()
         entity.change3DMeshState()
       }
     })
     if (this.parentEntity) {
       this.parentEntity._callObjDataChange(this)
     }
-    this.reCreate3DMeshIfNeed() // 第二次reCreate3DMeshIfNeed，我也不知道为什么必须加，但是不加上，挂在墙上的门，拖动y轴的时候，墙不会刷新渲染
+    this.reCreate3DMeshAnd2DPreviewIfNeed() // 第二次reCreate3DMeshIfNeed，我也不知道为什么必须加，但是不加上，挂在墙上的门，拖动y轴的时候，墙不会刷新渲染
     window.worldApi.change3DMeshState()
   }
 
@@ -107,6 +109,11 @@ export abstract class BaseEntityClass<T extends BaseObjData> {
 
   // 当前对象是否需要重新生成3D模型状态
   abstract needChangeKey(): string
+
+  changeKeyHasChange(): boolean {
+    const newKeyByData = this.needChangeKey();
+    return this.cacheKeyStr !== newKeyByData
+  }
 
   // 本对象的2D预览绘制，（时间早于draw2DByData）
   abstract draw2DPreview(
@@ -142,7 +149,7 @@ export abstract class BaseEntityClass<T extends BaseObjData> {
     this.associationEntity = []
   }
 
-  reCreate3DMeshIfNeed(): void {
+  reCreate3DMeshAnd2DPreviewIfNeed(): void {
     const newKeyByData = this.needChangeKey();
     if (this.cacheKeyStr === newKeyByData) {
       return;

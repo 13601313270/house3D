@@ -107,10 +107,10 @@ export abstract class EntityClassInWall<T extends ObjInWallData> extends PointEn
       this.markObjectIsDirty()
       this.associationEntity.forEach(entity => {
         if (entity.associationEntity.includes(this)) {
-          entity.reCreate3DMeshIfNeed()
+          entity.reCreate3DMeshAnd2DPreviewIfNeed()
         }
       });
-      this.reCreate3DMeshIfNeed();
+      this.reCreate3DMeshAnd2DPreviewIfNeed();
       this.associationEntity.forEach(entity => {
         if (entity.associationEntity.includes(this)) {
           entity.change3DMeshState()

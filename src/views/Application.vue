@@ -1458,23 +1458,25 @@ const handleMouseMove = (point: {
     let tipTexts: string[] = []
     if (worldApi.insertTempObj instanceof PointEntityClass) {
       tipTexts = worldApi.insertTempObj.setPrepareState(x, y)
-      const canvasAction = canvas2DSceneManage.list[0].canvasList[0]!;
-      const ctxAction = canvasAction.getContext('2d')!
+      if (tipTexts && tipTexts.length > 0) {
+        const canvasAction = canvas2DSceneManage.list[0].canvasList[0]!;
+        const ctxAction = canvasAction.getContext('2d')!
 
-      const hoverScreenX = x * canvas2DSceneManage.list[0].level + canvas2DSceneManage.list[0].panOffset.x
-      const hoverScreenY = y * canvas2DSceneManage.list[0].level + canvas2DSceneManage.list[0].panOffset.y
-      const startY = hoverScreenY + 14;
-      // 绘制一个背景矩形
-      ctxAction.fillStyle = 'rgba(0, 0, 0, 0.5)'
-      ctxAction.fillRect(hoverScreenX - 50, startY, 100, 8 + 15 * tipTexts.length);
-      ctxAction.font = '14px Arial'
-      ctxAction.textBaseline = 'middle'
-      ctxAction.strokeStyle = 'white'
-      ctxAction.fillStyle = 'white'
-      ctxAction.textAlign = 'center'
-      tipTexts.forEach((v, index) => {
-        ctxAction.fillText(v, hoverScreenX, startY + 15 * index + 13)
-      })
+        const hoverScreenX = x * canvas2DSceneManage.list[0].level + canvas2DSceneManage.list[0].panOffset.x
+        const hoverScreenY = y * canvas2DSceneManage.list[0].level + canvas2DSceneManage.list[0].panOffset.y
+        const startY = hoverScreenY + 14;
+        // 绘制一个背景矩形
+        ctxAction.fillStyle = 'rgba(0, 0, 0, 0.5)'
+        ctxAction.fillRect(hoverScreenX - 50, startY, 100, 8 + 15 * tipTexts.length);
+        ctxAction.font = '14px Arial'
+        ctxAction.textBaseline = 'middle'
+        ctxAction.strokeStyle = 'white'
+        ctxAction.fillStyle = 'white'
+        ctxAction.textAlign = 'center'
+        tipTexts.forEach((v, index) => {
+          ctxAction.fillText(v, hoverScreenX, startY + 15 * index + 13)
+        })
+      }
     }
   }
 }

@@ -251,9 +251,9 @@ export abstract class GroupBaseEntity<T extends GroupBaseData> extends PointEnti
     })
   }
 
-  reCreate3DMeshIfNeed() {
+  reCreate3DMeshAnd2DPreviewIfNeed() {
     this.children.forEach(item => {
-      item.reCreate3DMeshIfNeed()
+      item.reCreate3DMeshAnd2DPreviewIfNeed()
     })
   }
 
@@ -276,14 +276,14 @@ export abstract class GroupBaseEntity<T extends GroupBaseData> extends PointEnti
       this.worldAddBindList.forEach(callback => callback(api))
       if (api.getData().isLocked) {
         this.lockedObjList.push(api)
-        api.reCreate3DMeshIfNeed();
+        api.reCreate3DMeshAnd2DPreviewIfNeed();
         api.change3DMeshState()
       }
     }
     this._callAllOnChangeCallback('add', apiList)
     setTimeout(() => {
       canvas2DSceneManage.renderPreview()
-      this.reCreate3DMeshIfNeed()
+      this.reCreate3DMeshAnd2DPreviewIfNeed()
       this.change3DMeshState()
       this.reBuildBoundingBoxData();
     }, 0)
@@ -307,7 +307,7 @@ export abstract class GroupBaseEntity<T extends GroupBaseData> extends PointEnti
         }
       }
       canvas2DSceneManage.renderPreview()
-      this.reCreate3DMeshIfNeed()
+      this.reCreate3DMeshAnd2DPreviewIfNeed()
       this.change3DMeshState()
       this._callAllOnChangeCallback('remove', [backup])
     }
@@ -328,7 +328,7 @@ export abstract class GroupBaseEntity<T extends GroupBaseData> extends PointEnti
     this.children = []
     this.data.childrenData = []
     canvas2DSceneManage.renderPreview()
-    this.reCreate3DMeshIfNeed()
+    this.reCreate3DMeshAnd2DPreviewIfNeed()
     this.change3DMeshState()
     this._callAllOnChangeCallback('remove', willRemoveList);
   }
