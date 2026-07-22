@@ -36,7 +36,7 @@ export class PlaneGroupEntity extends GroupBaseEntity<PlaneGroupData> {
       ctx.strokeStyle = '#333'
       const [size, offset] = this.boundingBoxData
       ctx.save(); // 保存当前状态
-      ctx.translate(screenX + offset.x, screenY + offset.z); // 移动原点到目标中心
+      ctx.translate(screenX + offset.x * zoomLevel, screenY + offset.z * zoomLevel); // 移动原点到目标中心
       ctx.rotate(data.angleY * -1); // 围绕新原点旋转
       // 绘制一个范围方块
       ctx.strokeRect(
@@ -64,7 +64,7 @@ export class PlaneGroupEntity extends GroupBaseEntity<PlaneGroupData> {
       ctx.strokeStyle = 'red';
       const [size, offset, angle] = this.boundingBoxData
       ctx.save(); // 保存当前状态
-      ctx.translate(screenX + offset.x, screenY + offset.z); // 移动原点到目标中心
+      ctx.translate(screenX + offset.x * zoomLevel, screenY + offset.z * zoomLevel); // 移动原点到目标中心
       ctx.rotate(angle.y * -1); // 围绕新原点旋转
       // 绘制一个方块
       ctx.strokeRect(
