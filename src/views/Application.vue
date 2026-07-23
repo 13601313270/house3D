@@ -218,6 +218,7 @@ import WorldState from '@/utils/worldState';
 import { editItem } from '@/utils/editItem';
 import WorldGroup, { EnvironmentConfig } from '@/world/world';
 import canvas2DSceneManage from '@/utils/canvas2DSceneManage'
+import { PlaneGroupData } from '@/entities/planeGroup/index.d';
 
 const canvas2DRef = ref<HTMLCanvasElement | null>(null)
 const canvas2DActionRef = ref<HTMLCanvasElement | null>(null)
@@ -803,6 +804,19 @@ async function initWorldByData(data: fileData & {
     data.outFile.forEach(v => {
       // @ts-ignore
       allFileTypeId.add(v.fileTypeId)
+    })
+  }
+  if (data.planeGroup) {
+    (data.planeGroup as PlaneGroupData[]).forEach((planeGroupItem: PlaneGroupData) => {
+      if (planeGroupItem.childrenData) {
+        console.log('planeGroupItem.childrenData', planeGroupItem.childrenData)
+        planeGroupItem.childrenData.forEach(child => {
+          if (child.type === 'outFile') {
+            // @ts-ignore
+            allFileTypeId.add(child.value.fileTypeId)
+          }
+        })
+      }
     })
   }
   if (data.outFileInWall) {
@@ -1754,8 +1768,10 @@ function handleObjectClick(object: THREE.Object3D | null) {
 }
 function changeObjTypeSelect(type: string, baseObj: BaseEntityClass<any>) {
   activeToolsIndex.value = -1
-  worldApi.insertTempObj = null
-
+  if (worldApi.insertTempObj) {
+    worldApi.insertTempObj.beforeRemove()
+    worldApi.insertTempObj = null
+  }
   if (allFileKeys.includes(type as any)) {
     worldApi.insertTempObj = baseObj
     currentTool.value = type
