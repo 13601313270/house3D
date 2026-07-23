@@ -3,7 +3,7 @@ import PluginType from "../pluginType"
 import defaultValues from "./defaultValues"
 
 const GroupPlugin: PluginType = {
-  name: '平面组',
+  name: '组',
   key: 'planeGroup',
   type: 'other',
   entity: PlaneGroupEntity,

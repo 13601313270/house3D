@@ -8,7 +8,7 @@
         <div class="toolItem" @click="handleLocation(item)">
           <img class="img" src="@/assets/location.svg" alt="location" />
         </div>
-        <div class="toolItem" @click="handleSelect(item)">
+        <div class="button" @click="handleSelect(item)">
           选择
         </div>
       </div>
@@ -173,6 +173,18 @@ window.worldApi.onWorldChange(() => {
             margin-top: -2px;
           }
         }
+      }
+
+      .button {
+        padding: 4px 8px;
+        margin-left: 8px;
+        border: none;
+        border-radius: 4px;
+        background: #e4e6eb;
+        cursor: pointer;
+        font-size: 16px;
+        transition: all 0.3s;
+        flex-shrink: 0;
       }
     }
   }

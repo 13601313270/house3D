@@ -8,7 +8,7 @@ import { PlaneGroupData } from './index.d'
 
 export class PlaneGroupEntity extends GroupBaseEntity<PlaneGroupData> {
   type: string = 'planeGroup'
-  name: string = '平面组'
+  name: string = '组'
   private circleRadius = 6
 
   constructor(parent: GroupBaseEntity<PlaneGroupData> | null, data: PlaneGroupData) {
@@ -55,6 +55,8 @@ export class PlaneGroupEntity extends GroupBaseEntity<PlaneGroupData> {
     ctx.lineWidth = 2
     if (!this.boundingBoxData) return
     const data = this.getData();
+    const screenX = data.x * zoomLevel
+    const screenY = data.y * zoomLevel;
     (() => {
       const screenX = data.x * zoomLevel;
       const screenY = data.y * zoomLevel;
@@ -69,12 +71,21 @@ export class PlaneGroupEntity extends GroupBaseEntity<PlaneGroupData> {
         (size.z / -2) * zoomLevel,
         size.x * zoomLevel,
         size.z * zoomLevel
-      )
+      );
+      // 绘制一个坐标轴
+      (() => {
+        ctx.beginPath()
+        ctx.moveTo(-offset.x * zoomLevel, -offset.z)
+        ctx.lineTo(-offset.x * zoomLevel + 100, -offset.z)
+        ctx.closePath()
+        ctx.stroke()
+        ctx.beginPath()
+        ctx.moveTo(-offset.x * zoomLevel, -offset.z)
+        ctx.lineTo(-offset.x * zoomLevel, -offset.z + 100)
+        ctx.stroke()
+      })();
       ctx.restore(); // 恢复原始状态
     })();
-
-    const screenX = data.x * zoomLevel
-    const screenY = data.y * zoomLevel
 
     // 控制点
     ctx.fillStyle = '#fff'
@@ -172,27 +183,27 @@ export class PlaneGroupEntity extends GroupBaseEntity<PlaneGroupData> {
         dataType: 'string',
         value: data.name,
       },
-      {
-        id: '增加对象',
-        label: '增加对象',
-        dataType: 'button',
-        value: () => {
-          const cubeData: CubeData = {
-            id: Date.now().toString(),
-            x: Math.random() * 300 - 150,
-            y: Math.random() * 600 - 300,
-            z: 0,
-            angleY: data.angleY,
-            color: 'red',
-            mt: null,
-            width: 30,
-            height: 30,
-            depth: 30,
-          }
-          this.add('cube', [cubeData])
-          close()
-        }
-      },
+      // {
+      //   id: '增加对象',
+      //   label: '增加对象',
+      //   dataType: 'button',
+      //   value: () => {
+      //     const cubeData: CubeData = {
+      //       id: Date.now().toString(),
+      //       x: Math.random() * 300 - 150,
+      //       y: Math.random() * 600 - 300,
+      //       z: 0,
+      //       angleY: data.angleY,
+      //       color: 'red',
+      //       mt: null,
+      //       width: 30,
+      //       height: 30,
+      //       depth: 30,
+      //     }
+      //     this.add('cube', [cubeData])
+      //     close()
+      //   }
+      // },
     ], (val) => {
       this.setData({
         ...data,

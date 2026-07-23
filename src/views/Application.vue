@@ -1811,6 +1811,7 @@ async function moveToGroup(id: string) {
   await group.add(type, [values])
   menuEntity.beforeRemove()
   worldApi.delete(type, contextMenu.value.index)
+  contextMenu.value = null
 }
 function showAiPic() {
   if (canvas3DRef2.value) {
