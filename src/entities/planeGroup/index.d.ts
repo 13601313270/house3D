@@ -4,5 +4,6 @@ import { BaseEntityClass } from '@/types/baseEntity'
 import { GroupBaseData } from '@/types/groupBase'
 
 export type PlaneGroupData = GroupBaseData & {
-  temp: boolean,
+  width: number
+  height: number
 }

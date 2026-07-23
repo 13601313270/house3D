@@ -1,3 +1,4 @@
+import * as THREE from 'three'
 import { GroupBaseEntity } from '@/types/groupBase/entity'
 import { HandelInfo } from '@/types/map2d'
 import { CubeData } from '../cube/index.d'
@@ -5,6 +6,7 @@ import editItem from '@/utils/editItem'
 import { isPointInRotatedRect } from '@/utils/isPointInRotatedRect'
 import { MatchRectArea } from '@/utils/matchArea'
 import { PlaneGroupData } from './index.d'
+import { PointEntityClass } from '@/types/pointEntity'
 
 export class PlaneGroupEntity extends GroupBaseEntity<PlaneGroupData> {
   type: string = 'planeGroup'
@@ -86,35 +88,33 @@ export class PlaneGroupEntity extends GroupBaseEntity<PlaneGroupData> {
 
     // 绘制一个坐标轴
     (() => {
-      const tarXLength = 100;
+      const tarXLength = data.width / 2;
       const rotatedXAdd = Math.cos(data.angleY) * tarXLength * zoomLevel
       const rotatedYAdd = -Math.sin(data.angleY) * tarXLength * zoomLevel
       ctx.strokeStyle = 'rgba(152, 0, 0, 1)'
       ctx.beginPath()
-      ctx.moveTo(screenX, screenY)
+      ctx.moveTo(screenX - rotatedXAdd, screenY - rotatedYAdd)
       ctx.lineTo(screenX + rotatedXAdd, screenY + rotatedYAdd)
       ctx.closePath()
       ctx.stroke()
 
-      const rotatedX2Add = Math.cos(data.angleY - Math.PI / 2) * tarXLength * zoomLevel
-      const rotatedY2Add = -Math.sin(data.angleY - Math.PI / 2) * tarXLength * zoomLevel
+      const tarYLength = data.height / 2;
+      const rotatedX2Add = Math.cos(data.angleY - Math.PI / 2) * tarYLength * zoomLevel
+      const rotatedY2Add = -Math.sin(data.angleY - Math.PI / 2) * tarYLength * zoomLevel
       ctx.strokeStyle = 'rgba(0, 92, 0, 1)'
       ctx.beginPath()
-      ctx.moveTo(screenX, screenY)
+      ctx.moveTo(screenX - rotatedX2Add, screenY - rotatedY2Add)
       ctx.lineTo(screenX + rotatedX2Add, screenY + rotatedY2Add)
       ctx.stroke()
     })();
 
     if (!this.boundingBoxData) return
-    const [size] = this.boundingBoxData
-    const { x: width, z: height } = size
-    const drawAngelLength = 100;// Math.max(this.getData().width / 2, this.circleRadius * 2) * 0.9;// 0.9避免超过方块范围
+    const drawAngelLength = data.width / 2 - this.circleRadius;
     // 控制点向着angleY角度延伸10个单位后的坐标
     const rotatedXAdd = data.x + Math.cos(data.angleY) * drawAngelLength
     const rotatedYAdd = data.y - Math.sin(data.angleY) * drawAngelLength
     const circleX = rotatedXAdd * zoomLevel
     const circleY = rotatedYAdd * zoomLevel
-    const circleRadius = this.circleRadius * zoomLevel + 3
 
     function ttt(angel: number, drawAngelLength: number) {
       const tempX = data.x + Math.cos(angel) * drawAngelLength;
@@ -165,7 +165,7 @@ export class PlaneGroupEntity extends GroupBaseEntity<PlaneGroupData> {
 
     // 绘制旋转角度控制
     ctx.beginPath()
-    ctx.arc(circleX, circleY, circleRadius, 0, Math.PI * 2)
+    ctx.arc(circleX, circleY, this.circleRadius * zoomLevel + 3, 0, Math.PI * 2)
     ctx.fill()
     ctx.stroke()
   }
@@ -180,6 +180,36 @@ export class PlaneGroupEntity extends GroupBaseEntity<PlaneGroupData> {
     })
   }
 
+  getBoundingBoxData(): [THREE.Vector3, THREE.Vector3, THREE.Vector3] | null {
+    const { width, height, angleY } = this.getData()
+
+    let minZ = 0
+    let maxZ = 0
+    if (this.children) {
+      this.children.forEach(item => {
+        if (item instanceof PointEntityClass && item.boundingBoxData) {
+          const { z } = item.getData()
+          // 第一个是尺寸，第二个是位置偏移，第三个是旋转角度
+          const boxData = item.boundingBoxData;
+          if (boxData) {
+            minZ = Math.min(minZ, z - boxData[0].y / 2)
+            maxZ = Math.max(maxZ, z + boxData[0].y / 2)
+          }
+        }
+      })
+    }
+    // 第一个是尺寸，第二个是位置偏移，第三个是旋转角度
+    return [
+      new THREE.Vector3(width, maxZ - minZ, height),
+      new THREE.Vector3(
+        0,
+        (maxZ - minZ) / 2,
+        0
+      ),
+      new THREE.Vector3(0, angleY, 0)
+    ]
+  }
+
   editPropConfig(
     snapPoint: HandelInfo,
     editShow: (editInfoList: editItem[], callback: (val: any) => void) => void,
@@ -192,6 +222,24 @@ export class PlaneGroupEntity extends GroupBaseEntity<PlaneGroupData> {
         label: '组名称',
         dataType: 'string',
         value: data.name,
+      },
+      {
+        id: 'width',
+        label: '宽度',
+        dataType: 'number',
+        value: data.width,
+        min: 1,
+        max: 1000,
+        step: 1,
+      },
+      {
+        id: 'height',
+        label: '高度',
+        dataType: 'number',
+        value: data.height,
+        min: 1,
+        max: 1000,
+        step: 1,
       },
       // {
       //   id: '增加对象',
@@ -258,7 +306,7 @@ export class PlaneGroupEntity extends GroupBaseEntity<PlaneGroupData> {
         dist,
       }
     }
-    const drawAngelLength = 100;// Math.max(this.getData().width / 2, this.circleRadius * 2) * 0.9;// 0.9避免超过方块范围
+    const drawAngelLength = data.width / 2 - this.circleRadius;
     // 控制点向着angleY角度延伸10个单位后的坐标
     const rotatedXAdd = data.x + Math.cos(data.angleY) * drawAngelLength
     const rotatedYAdd = data.y - Math.sin(data.angleY) * drawAngelLength
