@@ -1802,13 +1802,29 @@ async function copyEntity() {
 async function moveToGroup(id: string) {
   if (!contextMenu.value) return
   if (!menuEntity) return
-  console.log('88888', id)
   const group: PlaneGroupEntity = window.worldApi.getTypeListEntity('planeGroup').find((entity) => entity.getData().id === id) as PlaneGroupEntity;
   console.log('group', group)
 
   const type = menuEntity.type
   const values = JSON.parse(JSON.stringify(menuEntity.getData()));
+  const boundingBoxData = menuEntity.boundingBoxData
+  const groupData = group.getData()
   values.id = Date.now().toString()
+  values.x = values.x - groupData.x
+  values.y = values.y - groupData.y
+  values.z = values.z - groupData.z
+  if (boundingBoxData) {
+    if (values.x - boundingBoxData[0].x / 2 < groupData.width / -2) {
+      values.x = groupData.width / -2 + boundingBoxData[0].x / 2
+    } else if (values.x + boundingBoxData[0].x / 2 > groupData.width / 2) {
+      values.x = groupData.width / 2 - boundingBoxData[0].x / 2
+    }
+    if (values.y - boundingBoxData[0].z / 2 < groupData.height / -2) {
+      values.y = groupData.height / -2 + boundingBoxData[0].z / 2;
+    } else if (values.y + boundingBoxData[0].z / 2 > groupData.height / 2) {
+      values.y = groupData.height / 2 - boundingBoxData[0].z / 2
+    }
+  }
   await group.add(type, [values])
   menuEntity.beforeRemove()
   worldApi.delete(type, contextMenu.value.index)

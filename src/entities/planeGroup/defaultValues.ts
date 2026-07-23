@@ -13,8 +13,8 @@ export default function (): DefaultItem<PlaneGroupData>[] {
         childrenData: [],
         angleY: 0,
         name: '组' + Date.now(),
-        width: 100,
-        height: 100,
+        width: 200,
+        height: 200,
       } as PlaneGroupData
     }
   ]
