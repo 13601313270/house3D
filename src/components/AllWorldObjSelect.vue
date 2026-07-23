@@ -12,26 +12,33 @@
       </div>
       <div class="configItemList">
         <div class="configItem" v-for="item in allObjList" :key="item.id" @mouseenter="handleEnter(item)">
-          <div class="nameInfo">
-            <span>{{ item.name }}</span><span class="tip" v-if="item.tip">({{ item.tip }})</span>
-          </div>
-          <div class="tools">
-            <div v-if="item.isLocked" class="toolItem" @click="handleUnLock(item, false)">
-              <img class="img lock" src="@/assets/lock.svg" alt="lock" />
+          <div class="info">
+            <div class="nameInfo">
+              <span>{{ item.name }}</span><span class="tip" v-if="item.tip">({{ item.tip }})</span>
             </div>
-            <div v-else class="toolItem" @click="handleUnLock(item, true)">
-              <img class="img" src="@/assets/unLock.svg" alt="unLock" />
-            </div>
-            <div class="toolItem" @click="handleLocation(item)">
-              <img class="img" src="@/assets/location.svg" alt="location" />
-            </div>
-            <!-- <div class="toolItem" @click="openEditPanel(item.id)">
+            <div class="tools">
+              <div v-if="item.isLocked" class="toolItem" @click="handleUnLock(item, false)">
+                <img class="img lock" src="@/assets/lock.svg" alt="lock" />
+              </div>
+              <div v-else class="toolItem" @click="handleUnLock(item, true)">
+                <img class="img" src="@/assets/unLock.svg" alt="unLock" />
+              </div>
+              <div class="toolItem" @click="handleLocation(item)">
+                <img class="img" src="@/assets/location.svg" alt="location" />
+              </div>
+              <!-- <div class="toolItem" @click="openEditPanel(item.id)">
               <img class="img" src="@/assets/edit.svg" alt="edit" />
             </div> -->
-            <!-- <div class="toolItem">
+              <!-- <div class="toolItem">
               <img v-if="item.isHidden" class="img" src="@/assets/notVisible.svg" alt="notVisible" />
               <img v-else class="img" src="@/assets/visible.svg" alt="visible" />
             </div> -->
+            </div>
+          </div>
+          <div v-if="item.children" class="children">
+            <div v-for="child in item.children" :key="child.id" class="childItem">
+              {{ child.name }}
+            </div>
           </div>
         </div>
       </div>
@@ -54,6 +61,7 @@ type Item = {
   isHidden: boolean,
   isLocked: boolean,
   tip?: string,
+  children?: Array<Item>,
 }
 const allObjList = ref<Array<Item>>([])
 onMounted(() => {
@@ -63,18 +71,31 @@ function reloadObjList() {
   allObjList.value = []
   window.worldApi.children.forEach(v => {
     const { id, isLocked, isHidden, tip } = v.getData()
-    let name = v.name
-    if (v instanceof GroupBaseEntity) {
-      name = v.getData().name
-    }
-    allObjList.value.push({
+    const item: Item = {
       id,
-      name,
+      name: v.name,
       type: v.type,
       isHidden: isHidden || false,
       isLocked: isLocked || false,
       tip,
-    })
+      children: undefined,
+    }
+    if (v instanceof GroupBaseEntity) {
+      item.name = v.getData().name
+      item.children = v.children.map(child => {
+        const { id, isLocked, isHidden, tip } = child.getData()
+        return {
+          id,
+          name: child.name,
+          type: child.type,
+          isHidden: isHidden || false,
+          isLocked: isLocked || false,
+          tip,
+          children: undefined,
+        }
+      })
+    }
+    allObjList.value.push(item)
   })
   allObjCount.value = window.worldApi.getAllObjectCount()
 }
@@ -284,49 +305,61 @@ window.worldApi.onWorldChange(() => {
       flex-grow: 1;
 
       .configItem {
-        display: flex;
-        align-items: center;
-        border-bottom: solid 1px #e9e9e9;
+        border-top: solid 1px #e9e9e9;
         padding: 4px 0;
 
-        &:last-child {
-          border-bottom: none;
+        &:first-child {
+          border-top: none;
         }
 
-        .nameInfo {
-          flex-grow: 1;
-
-          .tip {
-            color: #8a8a8a;
-          }
-        }
-
-        .tools {
+        .info {
           display: flex;
           align-items: center;
 
-          .toolItem {
-            // border: 1px solid #8a8a8a;
-            // border-radius: 4px;
-            padding: 1px;
-            // margin-left: 2px;
+          .nameInfo {
+            flex-grow: 1;
+
+            .tip {
+              color: #8a8a8a;
+            }
+          }
+
+          .tools {
             display: flex;
             align-items: center;
-            justify-content: center;
-            width: 30px;
-            height: 30px;
-            box-sizing: border-box;
 
-            .img {
-              width: 24px;
-              height: 24px;
+            .toolItem {
+              // border: 1px solid #8a8a8a;
+              // border-radius: 4px;
+              padding: 1px;
+              // margin-left: 2px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              width: 30px;
+              height: 30px;
+              box-sizing: border-box;
 
-              &.lock {
-                width: 20px;
-                height: 20px;
-                margin-top: -2px;
+              .img {
+                width: 24px;
+                height: 24px;
+
+                &.lock {
+                  width: 20px;
+                  height: 20px;
+                  margin-top: -2px;
+                }
               }
             }
+          }
+        }
+
+        .children {
+          padding-left: 24px;
+
+          .childItem {
+            border-top: solid 1px #e9e9e9;
+            padding: 4px 0;
           }
         }
       }
