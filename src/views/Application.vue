@@ -1300,6 +1300,7 @@ const handleMouseMove = (point: {
         x: panStartOffsetOfWorld.x + dx,
         y: panStartOffsetOfWorld.y + dy,
       })
+      canvas2DSceneManage.list[0].canvasList[1]!.getContext('2d')!.clearRect(0, 0, canvas2DSceneManage.list[0].canvasList[1]!.width, canvas2DSceneManage.list[0].canvasList[1]!.height)
     } else {
       // 鼠标浮动而过
       ctxAction.clearRect(0, 0, canvasAction.width, canvasAction.height)

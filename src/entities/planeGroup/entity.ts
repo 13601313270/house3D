@@ -72,18 +72,6 @@ export class PlaneGroupEntity extends GroupBaseEntity<PlaneGroupData> {
         size.x * zoomLevel,
         size.z * zoomLevel
       );
-      // 绘制一个坐标轴
-      (() => {
-        ctx.beginPath()
-        ctx.moveTo(-offset.x * zoomLevel, -offset.z)
-        ctx.lineTo(-offset.x * zoomLevel + 100, -offset.z)
-        ctx.closePath()
-        ctx.stroke()
-        ctx.beginPath()
-        ctx.moveTo(-offset.x * zoomLevel, -offset.z)
-        ctx.lineTo(-offset.x * zoomLevel, -offset.z + 100)
-        ctx.stroke()
-      })();
       ctx.restore(); // 恢复原始状态
     })();
 
@@ -94,7 +82,29 @@ export class PlaneGroupEntity extends GroupBaseEntity<PlaneGroupData> {
     ctx.beginPath()
     ctx.arc(screenX, screenY, this.circleRadius * zoomLevel + 3, 0, Math.PI * 2)
     ctx.fill()
-    ctx.stroke()
+    ctx.stroke();
+
+    // 绘制一个坐标轴
+    (() => {
+      const tarXLength = 100;
+      const rotatedXAdd = Math.cos(data.angleY) * tarXLength * zoomLevel
+      const rotatedYAdd = -Math.sin(data.angleY) * tarXLength * zoomLevel
+      ctx.strokeStyle = 'rgba(152, 0, 0, 1)'
+      ctx.beginPath()
+      ctx.moveTo(screenX, screenY)
+      ctx.lineTo(screenX + rotatedXAdd, screenY + rotatedYAdd)
+      ctx.closePath()
+      ctx.stroke()
+
+      const rotatedX2Add = Math.cos(data.angleY - Math.PI / 2) * tarXLength * zoomLevel
+      const rotatedY2Add = -Math.sin(data.angleY - Math.PI / 2) * tarXLength * zoomLevel
+      ctx.strokeStyle = 'rgba(0, 92, 0, 1)'
+      ctx.beginPath()
+      ctx.moveTo(screenX, screenY)
+      ctx.lineTo(screenX + rotatedX2Add, screenY + rotatedY2Add)
+      ctx.stroke()
+    })();
+
     if (!this.boundingBoxData) return
     const [size] = this.boundingBoxData
     const { x: width, z: height } = size

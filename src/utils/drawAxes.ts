@@ -8,7 +8,7 @@ const drawAxes = (
   canvasWidth: number,
   canvasHeight: number
 ) => {
-  const axisXColor = 'rgba(114, 0, 0, 1)'
+  const axisXColor = 'rgba(152, 0, 0, 1)'
   const axisYColor = 'rgba(0, 92, 0, 1)'
 
   const axisLineWidth = 2
