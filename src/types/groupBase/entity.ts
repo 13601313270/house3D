@@ -46,31 +46,31 @@ export abstract class GroupBaseEntity<T extends GroupBaseData> extends PointEnti
       new THREE.Color(0x00ff00)
     )
     this.group.add(this.axesHelper);
+  }
 
-    (async () => {
-      const apiList = [];
-      for (const item of data.childrenData) {
-        const type = item.type
-        const EntityClassItem: EntityConstructor = fileDataKeyToClass[type];
-        if (EntityClassItem) {
-          const api = new EntityClassItem(this, item.value);
-          await api.init()
-          apiList.push(api)
-          if (!this.allObjectsByGroup[type]) {
-            this.allObjectsByGroup[type] = []
-          }
-          this.allObjectsByGroup[type].push(api)
-          this.children.push(api)
-          this.worldAddBindList.forEach(callback => callback(api))
-          if (api.getData().isLocked) {
-            this.lockedObjList.push(api)
-          }
+  async init() {
+    const apiList = [];
+    for (const item of this.data.childrenData) {
+      const type = item.type
+      const EntityClassItem: EntityConstructor = fileDataKeyToClass[type];
+      if (EntityClassItem) {
+        const api = new EntityClassItem(this, item.value);
+        await api.init()
+        apiList.push(api)
+        if (!this.allObjectsByGroup[type]) {
+          this.allObjectsByGroup[type] = []
+        }
+        this.allObjectsByGroup[type].push(api)
+        this.children.push(api)
+        this.worldAddBindList.forEach(callback => callback(api))
+        if (api.getData().isLocked) {
+          this.lockedObjList.push(api)
         }
       }
-      if (apiList.length > 0) {
-        this._callAllOnChangeCallback('add', apiList)
-      }
-    })();
+    }
+    if (apiList.length > 0) {
+      this._callAllOnChangeCallback('add', apiList)
+    }
   }
 
   draw2DPreview(
