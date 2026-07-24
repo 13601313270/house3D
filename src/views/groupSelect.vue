@@ -52,12 +52,10 @@ function reloadObjList() {
   })
   allObjCount.value = window.worldApi.getAllObjectCount()
 }
-const position = ref<{ x: number, y: number }>({ x: window.innerWidth / 3, y: 100 })
 
 const emit = defineEmits<{
   (e: 'close'): void,
   (e: 'select', id: string): void,
-  // (e: 'onChange', value: BaseEntityClass<BaseObjData>): void,
 }>()
 
 function handleEnter(item: {
