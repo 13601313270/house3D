@@ -198,8 +198,8 @@ export class CubeEntity extends PointEntityClass<CubeData> {
     if (isPointInRotatedRect(x, y, {
       x: data.x,
       y: data.y,
-      width: Math.max(data.width, data.depth),
-      depth: Math.max(data.width, data.depth),
+      width: data.width,
+      depth: data.depth,
       angleY: data.angleY * -1,
     })) {
       return new MatchRectArea(data)
