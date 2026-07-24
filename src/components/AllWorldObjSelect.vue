@@ -89,9 +89,9 @@ onMounted(() => {
 })
 function reloadObjList() {
   allObjList.value = []
-  window.worldApi.children.forEach(v => {
+  map.clear()
+  worldGroup.children.forEach(v => {
     const { id, isLocked, isHidden, tip } = v.getData()
-    map.clear()
     const item: Item = {
       id,
       name: v.name,
@@ -120,7 +120,7 @@ function reloadObjList() {
     }
     allObjList.value.push(item)
   })
-  allObjCount.value = window.worldApi.getAllObjectCount()
+  allObjCount.value = worldGroup.getAllObjectCount()
 }
 const position = ref<{ x: number, y: number }>({ x: window.innerWidth / 3, y: 100 })
 

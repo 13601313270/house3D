@@ -372,8 +372,6 @@ export class CameraEntity extends CameraBase<CameraData> {
     oldLine.geometry = edges
     oldLine.position.set(-data.x, -data.z, -data.y)
 
-    // console.log('children', this.meshList[0].children)
-
     // @ts-ignore
     const object: THREE.Group | undefined = this.meshList[0].children.find(v => v.isCameraObj)
 

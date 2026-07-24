@@ -57,8 +57,6 @@
       <div v-else class="empty">无纹理</div>
       <button class="editBtn" @click="groundTextureEditorShow = true, groundTextureEditorPropId = item.id">编辑纹理</button>
     </div>
-    <ChildrenEdit v-else-if="item.dataType === 'children'" :modelValue="modelValue"
-      @update:modelValue="updateEditPropInputInfoArray" :item="item" />
     <div class="allMaterialPanel" v-if="allMaterialShow && allMaterialShowPropId"
       @click.self="allMaterialShow = false, allMaterialShowPropId = undefined">
       <div class="allMaterialPanelInner">
@@ -170,9 +168,6 @@ function updateEditPropInputInfoString(value: string) {
   emit('update:modelValue', value)
 }
 function updateEditPropInputInfoNumber(value: number | null) {
-  emit('update:modelValue', value)
-}
-function updateEditPropInputInfoArray(value: any[]) {
   emit('update:modelValue', value)
 }
 async function updateEditPropByDataTexture(value: {
