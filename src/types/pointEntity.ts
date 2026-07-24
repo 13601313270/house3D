@@ -3,7 +3,6 @@ import { PointObjData, Point, BaseObjData } from './map2d'
 import { GroupBaseEntity } from '@/types/groupBase/entity'
 import { BaseEntityClass } from './baseEntity'
 import { GroupBaseData } from './groupBase'
-import canvas2DSceneManage from '@/utils/canvas2DSceneManage'
 
 export abstract class PointEntityClass<T extends PointObjData> extends BaseEntityClass<T> {
   boundingBox: THREE.Group

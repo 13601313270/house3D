@@ -10,6 +10,7 @@ export interface PointWithIndex extends Point {
 export interface HandelInfo {
   id: string // 对象ID
   type: string
+  icon?: 'move' | 'angel',//  图标
   index: number,// 对象内具柄index
   info?: any
   dist: number,

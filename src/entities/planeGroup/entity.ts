@@ -8,10 +8,15 @@ import { MatchRectArea } from '@/utils/matchArea'
 import { PlaneGroupData } from './index.d'
 import { PointEntityClass } from '@/types/pointEntity'
 
+const angelIcon = new Image();
+angelIcon.src = '/icons/angel.png';
+const moveIcon = new Image();
+moveIcon.src = '/icons/move.png';
+
 export class PlaneGroupEntity extends GroupBaseEntity<PlaneGroupData> {
   type: string = 'planeGroup'
   name: string = '组'
-  private circleRadius = 6
+  private circleRadius = 12
 
   constructor(parent: GroupBaseEntity<PlaneGroupData> | null, data: PlaneGroupData) {
     super(parent, data)
@@ -59,12 +64,13 @@ export class PlaneGroupEntity extends GroupBaseEntity<PlaneGroupData> {
     const data = this.getData();
     const screenX = data.x * zoomLevel
     const screenY = data.y * zoomLevel;
+    const iconWidth = this.circleRadius * 2 * zoomLevel * 0.8;
+    const [size, offset, angle] = this.boundingBoxData;
     (() => {
       const screenX = data.x * zoomLevel;
       const screenY = data.y * zoomLevel;
       ctx.strokeStyle = 'red';
-      const [size, offset, angle] = this.boundingBoxData
-      ctx.save(); // 保存当前状态
+      ctx.save();
       ctx.translate(screenX + offset.x * zoomLevel, screenY + offset.z * zoomLevel); // 移动原点到目标中心
       ctx.rotate(angle.y * -1); // 围绕新原点旋转
       // 绘制一个方块
@@ -74,17 +80,8 @@ export class PlaneGroupEntity extends GroupBaseEntity<PlaneGroupData> {
         size.x * zoomLevel,
         size.z * zoomLevel
       );
-      ctx.restore(); // 恢复原始状态
+      ctx.restore();
     })();
-
-    // 控制点
-    ctx.fillStyle = '#fff'
-    ctx.strokeStyle = '#e67e22'
-    ctx.lineWidth = 2
-    ctx.beginPath()
-    ctx.arc(screenX, screenY, this.circleRadius * zoomLevel + 3, 0, Math.PI * 2)
-    ctx.fill()
-    ctx.stroke();
 
     // 绘制一个坐标轴
     (() => {
@@ -108,66 +105,41 @@ export class PlaneGroupEntity extends GroupBaseEntity<PlaneGroupData> {
       ctx.stroke()
     })();
 
+    // 控制点
+    (() => {
+      ctx.fillStyle = '#fff'
+      ctx.strokeStyle = 'black'
+      ctx.lineWidth = 2
+      ctx.beginPath()
+      ctx.arc(screenX, screenY, this.circleRadius * zoomLevel + 3, 0, Math.PI * 2)
+      ctx.fill()
+      ctx.stroke();
+      ctx.drawImage(moveIcon, screenX - iconWidth / 2, screenY - iconWidth / 2, iconWidth, iconWidth);
+    })();
+
     if (!this.boundingBoxData) return
     const drawAngelLength = data.width / 2 - this.circleRadius;
     // 控制点向着angleY角度延伸10个单位后的坐标
-    const rotatedXAdd = data.x + Math.cos(data.angleY) * drawAngelLength
-    const rotatedYAdd = data.y - Math.sin(data.angleY) * drawAngelLength
-    const circleX = rotatedXAdd * zoomLevel
-    const circleY = rotatedYAdd * zoomLevel
-
-    function ttt(angel: number, drawAngelLength: number) {
-      const tempX = data.x + Math.cos(angel) * drawAngelLength;
-      const tempY = data.y - Math.sin(angel) * drawAngelLength;
-      return [tempX * zoomLevel, tempY * zoomLevel]
-    }
-
-    // 绘制双向箭头表示旋转角度
-    ctx.fillStyle = '#fff'
-    ctx.strokeStyle = '#e67e22'
-    ctx.lineWidth = 2 * zoomLevel
-    // 绘制双向箭头的主线（圆弧）
-    ctx.beginPath();
-    ctx.arc(screenX, screenY, drawAngelLength * zoomLevel, data.angleY * -1 - Math.PI / 4, data.angleY * -1 + Math.PI / 4);
-    ctx.stroke();
-
-    // 左侧箭头
-    (() => {
-      ctx.beginPath()
-      const [p1X, p1Y] = ttt(data.angleY + 0.1 + Math.PI / 4, drawAngelLength)
-      const [p2X, p2Y] = ttt(data.angleY + Math.PI / 4, drawAngelLength + 5)
-      const [p3X, p3Y] = ttt(data.angleY + Math.PI / 4, drawAngelLength - 5)
-      ctx.moveTo(
-        p1X,
-        p1Y
-      )
-      ctx.lineTo(p2X, p2Y)
-      ctx.lineTo(p3X, p3Y)
-      ctx.closePath()
-      ctx.fill()
-    })();
-
-    // 右侧箭头
-    (() => {
-      ctx.beginPath()
-      const [p1X, p1Y] = ttt(data.angleY - 0.1 - Math.PI / 4, drawAngelLength)
-      const [p2X, p2Y] = ttt(data.angleY - Math.PI / 4, drawAngelLength + 5)
-      const [p3X, p3Y] = ttt(data.angleY - Math.PI / 4, drawAngelLength - 5)
-      ctx.moveTo(
-        p1X,
-        p1Y
-      )
-      ctx.lineTo(p2X, p2Y)
-      ctx.lineTo(p3X, p3Y)
-      ctx.closePath()
-      ctx.fill()
-    })();
 
     // 绘制旋转角度控制
-    ctx.beginPath()
-    ctx.arc(circleX, circleY, this.circleRadius * zoomLevel + 3, 0, Math.PI * 2)
-    ctx.fill()
-    ctx.stroke()
+    if (zoomLevel > 0.5) {
+      const rotatedXAdd = data.x + Math.cos(data.angleY) * drawAngelLength
+      const rotatedYAdd = data.y - Math.sin(data.angleY) * drawAngelLength
+      const circleX = rotatedXAdd * zoomLevel
+      const circleY = rotatedYAdd * zoomLevel
+      ctx.fillStyle = '#fff'
+      ctx.lineWidth = 2
+      ctx.strokeStyle = 'black'
+      ctx.save();
+      ctx.translate(circleX, circleY); // 移动原点到目标中心
+      ctx.rotate(angle.y * -1); // 围绕新原点旋转
+      ctx.beginPath()
+      ctx.arc(0, 0, this.circleRadius * zoomLevel + 3, 0, Math.PI * 2)
+      ctx.fill()
+      ctx.stroke()
+      ctx.drawImage(angelIcon, -iconWidth / 2, -iconWidth / 2, iconWidth, iconWidth);
+      ctx.restore();
+    }
   }
 
   change3DMeshState(): void {
@@ -198,12 +170,13 @@ export class PlaneGroupEntity extends GroupBaseEntity<PlaneGroupData> {
         }
       })
     }
+    const depth = Math.max(maxZ - minZ, 10);
     // 第一个是尺寸，第二个是位置偏移，第三个是旋转角度
     return [
-      new THREE.Vector3(width, maxZ - minZ, height),
+      new THREE.Vector3(width, depth, height),
       new THREE.Vector3(
         0,
-        (maxZ - minZ) / 2,
+        depth / 2,
         0
       ),
       new THREE.Vector3(0, angleY, 0)
@@ -312,7 +285,6 @@ export class PlaneGroupEntity extends GroupBaseEntity<PlaneGroupData> {
     const rotatedYAdd = data.y - Math.sin(data.angleY) * drawAngelLength
 
     const dist2 = Math.hypot(x - rotatedXAdd, y - rotatedYAdd)
-    // console.log('dist2', dist2)
     if (dist2 < this.circleRadius + 3) {
       return {
         index: 1,

@@ -11,19 +11,19 @@
         </div>
       </div>
       <div class="configItemList">
-        <div class="configItem" v-for="item in allObjList" :key="item.id" @mouseenter="handleEnter(item)">
-          <div class="info">
+        <div class="configItem" v-for="item in allObjList" :key="item.id">
+          <div class="objInfo" @mouseenter="handleEnter(worldGroup, item)">
             <div class="nameInfo">
               <span>{{ item.name }}</span><span class="tip" v-if="item.tip">({{ item.tip }})</span>
             </div>
             <div class="tools">
-              <div v-if="item.isLocked" class="toolItem" @click="handleUnLock(item, false)">
+              <div v-if="item.isLocked" class="toolItem" @click="handleUnLock(worldGroup, item, false)">
                 <img class="img lock" src="@/assets/lock.svg" alt="lock" />
               </div>
-              <div v-else class="toolItem" @click="handleUnLock(item, true)">
+              <div v-else class="toolItem" @click="handleUnLock(worldGroup, item, true)">
                 <img class="img" src="@/assets/unLock.svg" alt="unLock" />
               </div>
-              <div class="toolItem" @click="handleLocation(item)">
+              <div class="toolItem" @click="handleLocation(worldGroup, item)">
                 <img class="img" src="@/assets/location.svg" alt="location" />
               </div>
               <!-- <div class="toolItem" @click="openEditPanel(item.id)">
@@ -36,8 +36,23 @@
             </div>
           </div>
           <div v-if="item.children" class="children">
-            <div v-for="child in item.children" :key="child.id" class="childItem">
-              {{ child.name }}
+            <div v-for="child in item.children" :key="child.id" class="childItem objInfo"
+              @mouseenter="handleEnter(map.get(item.id), child)">
+              <div class="nameInfo">
+                <span>{{ child.name }}</span>
+                <span class="tip" v-if="child.tip">({{ child.tip }})</span>
+              </div>
+              <div class="tools">
+                <!-- <div v-if="item.isLocked" class="toolItem" @click="handleUnLock(worldGroup, item, false)">
+                  <img class="img lock" src="@/assets/lock.svg" alt="lock" />
+                </div>
+                <div v-else class="toolItem" @click="handleUnLock(worldGroup, item, true)">
+                  <img class="img" src="@/assets/unLock.svg" alt="unLock" />
+                </div> -->
+                <div class="toolItem" @click="handleLocation(map.get(item.id), child)">
+                  <img class="img" src="@/assets/location.svg" alt="location" />
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -52,6 +67,9 @@ import { PointEntityClass } from '@/types/pointEntity'
 import { LineEntityClass } from '@/types/lineEntity'
 import canvas2DSceneManage from '@/utils/canvas2DSceneManage'
 import { GroupBaseEntity } from '@/types/groupBase/entity'
+import { GroupBaseData } from '@/types/groupBase'
+import { BaseEntityClass } from '@/types/baseEntity'
+import { BaseObjData } from '@/types/map2d'
 
 const allObjCount = ref(0)
 type Item = {
@@ -63,7 +81,9 @@ type Item = {
   tip?: string,
   children?: Array<Item>,
 }
+const map = new Map<string, GroupBaseEntity<GroupBaseData>>()
 const allObjList = ref<Array<Item>>([])
+const worldGroup = window.worldApi
 onMounted(() => {
   reloadObjList();
 })
@@ -71,6 +91,7 @@ function reloadObjList() {
   allObjList.value = []
   window.worldApi.children.forEach(v => {
     const { id, isLocked, isHidden, tip } = v.getData()
+    map.clear()
     const item: Item = {
       id,
       name: v.name,
@@ -81,6 +102,7 @@ function reloadObjList() {
       children: undefined,
     }
     if (v instanceof GroupBaseEntity) {
+      map.set(id, v)
       item.name = v.getData().name
       item.children = v.children.map(child => {
         const { id, isLocked, isHidden, tip } = child.getData()
@@ -92,6 +114,7 @@ function reloadObjList() {
           isLocked: isLocked || false,
           tip,
           children: undefined,
+          entity: child,
         }
       })
     }
@@ -163,16 +186,20 @@ function onMouseUp() {
   document.removeEventListener('mouseup', onMouseUp)
 }
 
-function handleEnter(item: {
-  id: string,
-  name: string,
-  type: string,
-  isLocked: boolean,
-}) {
-  const thisObj = window.worldApi.children.find(v => v.getData().id === item.id)
+function handleEnter(
+  group: GroupBaseEntity<GroupBaseData> | undefined,
+  item: {
+    id: string,
+    name: string,
+    type: string,
+    isLocked: boolean,
+  }
+) {
+  if (!group) return
+  const thisObj = group.children.find(v => v.getData().id === item.id)
   if (thisObj) {
     const zoom2DLevel = canvas2DSceneManage.list[0].level;
-    const worldData = window.worldApi.getData();
+    const worldData = group.getData();
     const canvasAction = canvas2DSceneManage.list[0].canvasList[1];
     const ctxAction = canvasAction.getContext('2d')!
     const screenX = worldData.x * zoom2DLevel + canvas2DSceneManage.list[0].panOffset.x;
@@ -188,8 +215,8 @@ function handleEnter(item: {
 // function openEditPanel(id: string) {
 //   alert(id)
 // }
-function handleUnLock(item: Item, isLocked: boolean) {
-  const thisObj = window.worldApi.children.find(v => v.getData().id === item.id)
+function handleUnLock(group: GroupBaseEntity<GroupBaseData>, item: Item, isLocked: boolean) {
+  const thisObj = group.children.find(v => v.getData().id === item.id)
   if (thisObj) {
     thisObj.setData({
       ...thisObj.getData(),
@@ -212,15 +239,18 @@ function handleLocationPosition(position: { x: number, y: number }) {
     y: dy - (position.y * canvas2DSceneManage.list[0].level),
   })
 }
-function handleLocation(item: Item) {
-  const api = window.worldApi.children.find(v => v.getData().id === item.id)
+function handleLocation(group: GroupBaseEntity<GroupBaseData> | undefined, item: Item) {
+  if (!group) return
+  const api = group.children.find(v => v.getData().id === item.id)
   if (!api) return
-
   if (api instanceof PointEntityClass) {
     const { x, y } = api.getData()
-    handleLocationPosition({ x, y })
+    handleLocationPosition({
+      x: x + group.getData().x,
+      y: y + group.getData().y,
+    })
     nextTick(() => {
-      handleEnter(item)
+      handleEnter(group, item)
     })
   } else if (api instanceof LineEntityClass) {
     const points: Array<{ x: number, y: number }> = api.getData().points
@@ -228,7 +258,7 @@ function handleLocation(item: Item) {
     const centerY = points.reduce((acc, cur) => acc + cur.y, 0) / points.length
     handleLocationPosition({ x: centerX, y: centerY })
     nextTick(() => {
-      handleEnter(item)
+      handleEnter(group, item)
     })
   }
 }
@@ -312,54 +342,54 @@ window.worldApi.onWorldChange(() => {
           border-top: none;
         }
 
-        .info {
-          display: flex;
-          align-items: center;
-
-          .nameInfo {
-            flex-grow: 1;
-
-            .tip {
-              color: #8a8a8a;
-            }
-          }
-
-          .tools {
-            display: flex;
-            align-items: center;
-
-            .toolItem {
-              // border: 1px solid #8a8a8a;
-              // border-radius: 4px;
-              padding: 1px;
-              // margin-left: 2px;
-              display: flex;
-              align-items: center;
-              justify-content: center;
-              width: 30px;
-              height: 30px;
-              box-sizing: border-box;
-
-              .img {
-                width: 24px;
-                height: 24px;
-
-                &.lock {
-                  width: 20px;
-                  height: 20px;
-                  margin-top: -2px;
-                }
-              }
-            }
-          }
-        }
-
         .children {
           padding-left: 24px;
 
           .childItem {
             border-top: solid 1px #e9e9e9;
             padding: 4px 0;
+          }
+        }
+      }
+
+      .objInfo {
+        display: flex;
+        align-items: center;
+
+        .nameInfo {
+          flex-grow: 1;
+
+          .tip {
+            color: #8a8a8a;
+          }
+        }
+
+        .tools {
+          display: flex;
+          align-items: center;
+
+          .toolItem {
+            // border: 1px solid #8a8a8a;
+            // border-radius: 4px;
+            padding: 1px;
+            // margin-left: 2px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 30px;
+            height: 30px;
+            box-sizing: border-box;
+
+            .img {
+              width: 24px;
+              height: 24px;
+
+              &.lock {
+                width: 20px;
+                height: 20px;
+                margin-top: -2px;
+              }
+            }
           }
         }
       }
