@@ -71,7 +71,7 @@ function handleFileChange(event: Event) {
   if (!file) return
   const type = file?.type.split('/')[1]
   const fileTypeId = `${importImgFileHead}${Date.now()}.${type}`
-  // 创建自定义的 ObjItem 用于 worldApi
+  // 创建自定义的 ObjItem 用于
   const customObjItem: ImportImgType = {
     fileTypeId,
     file,

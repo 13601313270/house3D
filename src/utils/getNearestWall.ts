@@ -4,10 +4,15 @@ import { Point } from "@/types/map2d"
 import pointToLineDistance from '@/utils/pointToLineDistance'
 import { getClosestPointOnLine } from '@/utils/geometry'
 import { WallEntity } from '@/entities/wall/entity'
+import { GroupBaseEntity } from '@/types/groupBase/entity'
+import { GroupBaseData } from '@/types/groupBase'
 
 export const snapThreshold = 20
 
-function getNearestWall(point: Point): NearestWallResult | null {
+function getNearestWall(
+  group: GroupBaseEntity<GroupBaseData>,
+  point: Point
+): NearestWallResult | null {
   let nearestWall: WallData | null = null
   let nearestWallEntity: WallEntity | null = null
   let nearestPoint: Point | null = null
@@ -15,9 +20,9 @@ function getNearestWall(point: Point): NearestWallResult | null {
   let nearestAngle = 0
   let lineIndex: number = -1;
 
-  for (let i = 0; i < window.worldApi.getTypeObjectsData('wall').length; i++) {
-    const wall = window.worldApi.getTypeObjectsData('wall')[i] as WallData
-    const api: WallEntity = window.worldApi.getTypeListEntity('wall')[i] as WallEntity;
+  for (let i = 0; i < group.getTypeObjectsData('wall').length; i++) {
+    const wall = group.getTypeObjectsData('wall')[i] as WallData
+    const api: WallEntity = group.getTypeListEntity('wall')[i] as WallEntity;
     for (let i = 0; i < wall.points.length - 1; i++) {
       const p1 = wall.points[i]
       const p2 = wall.points[i + 1]

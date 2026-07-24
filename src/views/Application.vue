@@ -1318,7 +1318,7 @@ const handleMouseMove = (point: {
     } else {
       // 鼠标浮动而过
       ctxAction.clearRect(0, 0, canvasAction.width, canvasAction.height)
-      const handleInfo = getHandleInAreaInfoByXY(x, y)
+      const handleInfo = getHandleInAreaInfoByXY(worldApi, x, y)
       if (handleInfo) {
         const { classInfo, matchArea } = handleInfo;
         (() => {
@@ -1458,7 +1458,7 @@ const handleMouseMove = (point: {
       }
     }
   } else {
-    const nearest = getNearestWall({ x, y })
+    const nearest = getNearestWall(worldApi, { x, y })
     if (nearest) {
       setHoverPoint(nearest.pointOnWall)
     } else {
@@ -1551,7 +1551,7 @@ const handleMouseDown = (point: {
     const sin = Math.sin(angleY * -1)
     const x = (dx * cos + dy * sin) / canvas2DSceneManage.list[0].level
     const y = (-dx * sin + dy * cos) / canvas2DSceneManage.list[0].level
-    const handleInfoList = getHandleInfoByXY(x, y)
+    const handleInfoList = getHandleInfoByXY(worldApi, x, y)
     if (handleInfoList) {
       const { classInfo, handle, startPoint } = handleInfoList
       if (!classInfo.getData().isLocked) {

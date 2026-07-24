@@ -481,7 +481,7 @@ export class WallEntity extends LineEntityClass<WallPoint, WallData> {
             }
           }
         }
-        
+
         const oldPoints = [...this.getData().points]
         oldPoints[index] = {
           x: Math.round(x),
@@ -701,6 +701,10 @@ export class WallEntity extends LineEntityClass<WallPoint, WallData> {
           label: '从此顶点断成两截',
           dataType: 'button',
           value: async () => {
+            if (!this.parentEntity) {
+              message.error('请先添加到场景中')
+              return;
+            }
             if (data.points.length > 2) {
               const index = snapPoint.index / 2;
               if (index === 0) {
@@ -717,7 +721,7 @@ export class WallEntity extends LineEntityClass<WallPoint, WallData> {
               const type = this.type;
               const values = JSON.parse(JSON.stringify(this.getData()));
               values.id = Date.now().toString()
-              const apiList = await window.worldApi.add(type, [values])
+              const apiList = await this.parentEntity.add(type, [values])
               const beCopyEntity = apiList[0]
               beCopyEntity.setData({
                 ...values,
