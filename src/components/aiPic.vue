@@ -93,11 +93,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref } from 'vue'
 import { useStore } from 'vuex';
 import { Store } from '@/store';
 import message from '@/utils/message';
 import request from '@/utils/request';
+import { startLoading, stopLoading } from '@/utils/loadingIcon';
 
 type qwenImageEditRes = {
   output: {
@@ -149,23 +150,43 @@ const promptTemplates = ref<PromptTemplate[]>([
   {
     name: '超真实',
     prompt: '图1为布局草图，生成图片。超写实摄影风格，真实照片质感，电影级画面，高质量摄影作品，8K超高清，细节丰富，真实皮肤纹理，真实毛发细节，真实服装材质，真实光影，PBR材质表现，全局光照，柔和自然光，体积光，景深效果，高动态范围（HDR），专业摄影，电影级调色，高级色彩，空气透视，环境光遮蔽，画面干净通透，真实阴影，真实反射，镜头虚化，照片级真实感，层次丰富，自然不过度锐化，高品质，高细节，大师级作品。',
-    image: 'https://s1.aigei.com/src/img/jpg/ca/caf1560fc18149db99ecd27d7103ad60.jpg?imageMogr2/auto-orient/thumbnail/!282x282r/gravity/Center/crop/282x282/quality/85/%7CimageView2/2/w/282&e=2051020800&token=P7S2Xpzfz11vAkASLTkfHN7Fw-oOZBecqeJaxypL:o8myqx_-syBWhtRuCGy6ESfTzsA='
+    image: './aiStyle/1.jpg'
   },
-  // {
-  //   name: '北欧风格',
-  //   prompt: 'Scandinavian style interior, cozy, warm lighting, wooden furniture, plants, bright and airy, 3D render, high quality',
-  //   image: 'https://s1.aigei.com/src/img/jpg/ca/caf1560fc18149db99ecd27d7103ad60.jpg?imageMogr2/auto-orient/thumbnail/!282x282r/gravity/Center/crop/282x282/quality/85/%7CimageView2/2/w/282&e=2051020800&token=P7S2Xpzfz11vAkASLTkfHN7Fw-oOZBecqeJaxypL:o8myqx_-syBWhtRuCGy6ESfTzsA='
-  // },
-  // {
-  //   name: '中式古典',
-  //   prompt: 'Chinese classical interior design, traditional furniture, red lanterns, wooden beams, elegant, cultural, 3D render',
-  //   image: 'https://s1.aigei.com/src/img/jpg/ca/caf1560fc18149db99ecd27d7103ad60.jpg?imageMogr2/auto-orient/thumbnail/!282x282r/gravity/Center/crop/282x282/quality/85/%7CimageView2/2/w/282&e=2051020800&token=P7S2Xpzfz11vAkASLTkfHN7Fw-oOZBecqeJaxypL:o8myqx_-syBWhtRuCGy6ESfTzsA='
-  // },
-  // {
-  //   name: '工业风',
-  //   prompt: 'industrial style interior, exposed brick walls, metal pipes, loft design, vintage lighting, concrete floor, 3D render',
-  //   image: 'https://s1.aigei.com/src/img/jpg/ca/caf1560fc18149db99ecd27d7103ad60.jpg?imageMogr2/auto-orient/thumbnail/!282x282r/gravity/Center/crop/282x282/quality/85/%7CimageView2/2/w/282&e=2051020800&token=P7S2Xpzfz11vAkASLTkfHN7Fw-oOZBecqeJaxypL:o8myqx_-syBWhtRuCGy6ESfTzsA='
-  // }
+  {
+    name: '吉卜力风',
+    prompt: 'Studio Ghibli inspired, soft watercolor, warm sunlight, hand painted background, whimsical atmosphere',
+    image: './aiStyle/2.jpg'
+  },
+  {
+    name: '动漫',
+    prompt: 'anime style, clean lineart, vibrant colors, cel shading, high quality anime illustration',
+    image: './aiStyle/3.jpg'
+  },
+  {
+    name: 'Pixar 3D',
+    prompt: 'stylized 3D render, Pixar inspired, soft global illumination, detailed materials, cute proportions',
+    image: './aiStyle/4.jpg'
+  },
+  {
+    name: '游戏CG',
+    prompt: 'AAA game art, Unreal Engine, high quality rendering, realistic materials, dynamic lighting, cinematic composition',
+    image: './aiStyle/5.jpg'
+  },
+  {
+    name: '油画',
+    prompt: 'oil painting, visible brush strokes, canvas texture, classical art, rich colors',
+    image: './aiStyle/6.jpg'
+  },
+  {
+    name: '国风',
+    prompt: 'Chinese ink painting, traditional Chinese aesthetics, elegant composition, ink wash, soft brushwork',
+    image: './aiStyle/7.jpg'
+  },
+  {
+    name: '儿童绘本',
+    prompt: 'children\'s book illustration, watercolor texture, soft pastel colors, hand painted, friendly, storybook illustration',
+    image: './aiStyle/8.jpg'
+  }
 ])
 
 const applyTemplate = (template: PromptTemplate) => {
@@ -216,6 +237,9 @@ const handleGenerate = async () => {
   generatedImage.value = ''
 
   try {
+    // @ts-ignore
+    // document.getElementById("favicon").href = "/faviconLoading.ico";
+    startLoading()
     const response: {
       data: qwenImageEditRes,
       status: number,
@@ -227,6 +251,8 @@ const handleGenerate = async () => {
       ],
       prompt: prompt.value,
       size: `${props.imageSize.width}*${props.imageSize.height}`,
+    }).finally(() => {
+      stopLoading()
     })
     console.log('response:', response)
     if (response.status === 200) {
@@ -263,18 +289,6 @@ const handleGenerate = async () => {
   } finally {
     isGenerating.value = false
   }
-}
-
-const dataURLtoBlob = (dataURL: string) => {
-  const arr = dataURL.split(',')
-  const mime = arr[0].match(/:(.*?);/)?.[1] || 'image/png'
-  const bstr = atob(arr[1])
-  let n = bstr.length
-  const u8arr = new Uint8Array(n)
-  while (n--) {
-    u8arr[n] = bstr.charCodeAt(n)
-  }
-  return new Blob([u8arr], { type: mime })
 }
 
 const handleDownload = () => {
@@ -527,6 +541,7 @@ const handleDownload = () => {
 
       .templates-list {
         display: flex;
+        flex-wrap: wrap;
         gap: 12px;
         margin-top: 12px;
 
@@ -547,8 +562,7 @@ const handleDownload = () => {
           }
 
           .template-image {
-            width: 100px;
-            height: 60px;
+            width: 175px;
             object-fit: cover;
             border-radius: 4px;
             flex-shrink: 0;

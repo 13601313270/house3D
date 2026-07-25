@@ -251,7 +251,7 @@ const panningScreenCenter = ref<{
 }>({ x: 0, y: 0 })
 const isMenuing = ref(false);// 选中对象的柄
 const panStartAngel = ref(0);
-const panel1SplitWidthPer = ref(0.55)
+const panel1SplitWidthPer = ref(0.35)
 const panel2SplitWidthPer = ref(0.35)
 const isSplitting = ref(false)
 const showLogin = ref(false)
