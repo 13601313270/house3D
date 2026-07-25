@@ -261,7 +261,7 @@ const initThree = () => {
           canvas1LastMouseY = e.clientY;
           e.preventDefault();
         } else if (e.button === 0) {
-          const hoveredObject = raycastObjects(window.worldApi.moveZBoxList(), e)
+          const hoveredObject = raycastObjects(window.globalEditGroup.moveZBoxList(), e)
           if (hoveredObject) {
             // 移动对象
             // @ts-ignore
@@ -328,7 +328,7 @@ const initThree = () => {
           // 移动对象
           // @ts-ignore
           if (canvas1HoveredObject && canvas1HoveredObject?.entity) {
-            const allBoundingBox = window.worldApi.boundingBoxList()
+            const allBoundingBox = window.globalEditGroup.boundingBoxList()
             allBoundingBox.forEach((item) => {
               item.visible = false
             })
@@ -347,12 +347,12 @@ const initThree = () => {
             }
           }
         } else {
-          const allBoundingBox = window.worldApi.boundingBoxList()
+          const allBoundingBox = window.globalEditGroup.boundingBoxList()
           allBoundingBox.forEach((item) => {
             item.visible = false
           })
 
-          const allMoveZBox = window.worldApi.moveZBoxList()
+          const allMoveZBox = window.globalEditGroup.moveZBoxList()
           const allLastTextBox: any[] = [];
           allMoveZBox.forEach((item) => {
             // @ts-ignore
