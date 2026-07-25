@@ -19,6 +19,7 @@ export abstract class EntityClassInWall<T extends ObjInWallData> extends PointEn
       return []
     }
     const nearest = getNearestWall(this.parentEntity, { x, y })
+    console.log('nearest', this.parentEntity, nearest)
     if (nearest) {
       const { pointOnWall, angle } = nearest
       const wallScreenX = pointOnWall.x

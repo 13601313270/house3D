@@ -130,8 +130,6 @@ const activeObjChildList = ref<Array<{
   previewImg?: string
 }>>([])
 
-const worldApi = window.worldApi
-
 const showDefaultValueModal = ref(false)
 const currentDefaultValues = ref<DefaultItem<any>[]>([])
 const currentToolType = ref('')
@@ -160,7 +158,7 @@ async function changeCurrentTool(type: string) {
 function createObjWithDefaultValue(type: string, defaultItem: DefaultItem<any>) {
   const ClassName = fileDataKeyToClass[type]
   if (ClassName) {
-    const insertTempObj = new ClassName(worldApi, defaultItem.data)
+    const insertTempObj = new ClassName(window.globalEditGroup, defaultItem.data)
     if (insertTempObj) {
       insertTempObj.init()
     }
@@ -212,7 +210,7 @@ async function changeCurrentToolToOutFile(id: string) {
       isOuter: false,
       canAngelZ: findObjInfo.canAngelZ,
     }
-    const insertTempObj = new OutFileInWallEntity(worldApi, data)
+    const insertTempObj = new OutFileInWallEntity(window.globalEditGroup, data)
     insertTempObj.init()
     emits('select', 'outFileInWall', insertTempObj)
   } else {
@@ -227,7 +225,7 @@ async function changeCurrentToolToOutFile(id: string) {
       color: findObjInfo.defaultColor,
       canAngelZ: findObjInfo.canAngelZ,
     }
-    const insertTempObj = new OutFileEntity(worldApi, data)
+    const insertTempObj = new OutFileEntity(window.globalEditGroup, data)
     insertTempObj.init()
     emits('select', 'outFile', insertTempObj)
   }

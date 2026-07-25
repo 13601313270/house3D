@@ -57,7 +57,7 @@
           <button @click="LockObj(!modelValue.isLocked)">{{ modelValue.isLocked ? '解锁' : '锁定' }}</button>
           <button @click="copyEntity">复制</button>
           <button @click="moveToGroup" v-if="!['planeGroup'].includes(typeKey)">移动到组</button>
-          <button @click="moveToGroup" v-else-if="['planeGroup'].includes(typeKey)">编辑组</button>
+          <button @click="changeGlobalEditGroup" v-else-if="['planeGroup'].includes(typeKey)">编辑组</button>
         </div>
         <div style="flex-grow: 1;"></div>
         <button class="deleteButton" @click="deleteContextMenuEntity">删除</button>
@@ -118,6 +118,7 @@ const emit = defineEmits<{
   (e: 'close'): void
   (e: 'copyEntity'): void
   (e: 'moveToGroup', id: string): void
+  (e: 'changeGlobalEditGroup'): void
 }>()
 
 function handleUpdate(id: string, value: any) {
@@ -254,6 +255,9 @@ function moveToGroup() {
 function handleSelectGroup(id: string) {
   emit('moveToGroup', id)
   showGroupSelect.value = false
+}
+function changeGlobalEditGroup() {
+  emit('changeGlobalEditGroup')
 }
 </script>
 <style scoped lang="less">

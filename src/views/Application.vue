@@ -127,7 +127,8 @@
       <DataTypeEditPanel v-if="contextMenu?.visible && editPropTypeKey" :typeKey="editPropTypeKey"
         :editPropConfigInfo="editPropConfigInfo" v-model="editPropInputInfo"
         :initPosition="{ x: contextMenu.x, y: contextMenu.y }" @deleteContextMenuEntity="deleteContextMenuEntity"
-        @close="contextMenu = null" @copyEntity="copyEntity" @moveToGroup="moveToGroup" />
+        @close="contextMenu = null" @copyEntity="copyEntity" @moveToGroup="moveToGroup"
+        @changeGlobalEditGroup="changeGlobalEditGroup" />
       <AllWorldObjSelect v-if="showAllObjSelect" @close="showAllObjSelect = false" />
       <EnvironmentEditor v-if="showEnvironmentEditor" @close="showEnvironmentEditor = false" />
     </div>
@@ -247,7 +248,7 @@ const panningScreenCenter = ref<{
 }>({ x: 0, y: 0 })
 const isMenuing = ref(false);// 选中对象的柄
 const panStartAngel = ref(0);
-const panel1SplitWidthPer = ref(0.35)
+const panel1SplitWidthPer = ref(0.55)
 const panel2SplitWidthPer = ref(0.35)
 const isSplitting = ref(false)
 const showLogin = ref(false)
@@ -423,7 +424,13 @@ function setHoverPoint(point: Point | null) {
 
     // 水平线（x轴对齐）
     if (xAxisSnappedY.value !== null) {
-      const screenY = xAxisSnappedY.value * canvas2DSceneManage.list[0].level + canvas2DSceneManage.list[0].panOffset.y
+      let xInGroup = xAxisSnappedY.value;
+      if (window.globalEditGroup !== worldApi) {
+        const { x: groupX, y: groupY, angleY: groupAngle } = window.globalEditGroup.getData()
+        xInGroup = xInGroup - groupX
+      }
+
+      const screenY = xInGroup * canvas2DSceneManage.list[0].level + canvas2DSceneManage.list[0].panOffset.y
       ctxAction.beginPath()
       ctxAction.moveTo(0, screenY)
       ctxAction.lineTo(canvasAction.width, screenY)
@@ -623,11 +630,11 @@ onMounted(async () => {
         saveDrawing();
       } else if (event.key === 'z') {
         console.log('撤销一步')
-        if (worldApi.insertTempObj && worldApi.insertTempObj instanceof LineEntityClass) {
-          const data = worldApi.insertTempObj.getData()
+        if (window.globalEditGroup.insertTempObj && window.globalEditGroup.insertTempObj instanceof LineEntityClass) {
+          const data = window.globalEditGroup.insertTempObj.getData()
           if (tempPointInsertData.value.length === 1) {
-            worldApi.insertTempObj.beforeRemove()
-            worldApi.insertTempObj = null;
+            window.globalEditGroup.insertTempObj.beforeRemove()
+            window.globalEditGroup.insertTempObj = null;
             tempPointInsertData.value = []
             lastPoint.value = null
             setHoverPoint(null)
@@ -636,22 +643,22 @@ onMounted(async () => {
             // tempPointInsertData去掉最后一项
             tempPointInsertData.value.pop()
             data.points = tempPointInsertData.value;
-            worldApi.insertTempObj.setData(data)
+            window.globalEditGroup.insertTempObj.setData(data)
             canvas2DSceneManage.renderPreview()
           }
         }
       }
     } else if (event.key === 'Escape') {
-      if (worldApi.insertTempObj && currentTool.value !== 'drag') {
-        if (worldApi.insertTempObj instanceof LineEntityClass) {
+      if (window.globalEditGroup.insertTempObj && currentTool.value !== 'drag') {
+        if (window.globalEditGroup.insertTempObj instanceof LineEntityClass) {
           insertAdding.value = true
-          worldApi.insertTempObj.setPreparePoint(tempPointInsertData.value)
-          const insertData = worldApi.insertTempObj.getData()
+          window.globalEditGroup.insertTempObj.setPreparePoint(tempPointInsertData.value)
+          const insertData = window.globalEditGroup.insertTempObj.getData()
           if (tempPointInsertData.value.length >= 2) {
-            await worldApi.add(currentTool.value, [insertData])
+            await window.globalEditGroup.add(currentTool.value, [insertData])
           }
-          worldApi.insertTempObj.beforeRemove()
-          worldApi.insertTempObj = null;
+          window.globalEditGroup.insertTempObj.beforeRemove()
+          window.globalEditGroup.insertTempObj = null;
           canvas2DSceneManage.renderPreview()
           tempPointInsertData.value = []
           lastPoint.value = null
@@ -660,9 +667,15 @@ onMounted(async () => {
             insertAdding.value = false
           }, 300)// 至少停留300毫秒，防止出现那种闪现的效果。
         } else {
-          worldApi.insertTempObj.beforeRemove()
-          worldApi.insertTempObj = null;
+          window.globalEditGroup.insertTempObj.beforeRemove()
+          window.globalEditGroup.insertTempObj = null;
           canvas2DSceneManage.renderPreview()
+        }
+      } else if (window.globalEditGroup !== worldApi) {
+        window.globalEditGroup = worldApi
+        if (window.globalEditGroup.insertTempObj) {
+          window.globalEditGroup.insertTempObj.beforeRemove()
+          window.globalEditGroup.insertTempObj = null
         }
       }
       currentTool.value = 'drag'
@@ -829,13 +842,14 @@ async function initWorldByData(data: fileData & {
 
   const fileTypes = Array.from(allFileTypeId)
 
-  const { data: res } = await axios.post('https://api.studying1v1.com/video/objectFileByIds', {
-    ids: fileTypes
-  })
-
-  res.forEach((v: ObjOutputFileType) => {
-    window.worldState.ObjFileTypes.push(v)
-  })
+  if (fileTypes.length > 0) {
+    const { data: res } = await axios.post('https://api.studying1v1.com/video/objectFileByIds', {
+      ids: fileTypes
+    })
+    res.forEach((v: ObjOutputFileType) => {
+      window.worldState.ObjFileTypes.push(v)
+    })
+  }
 
   console.log('allFileKeys', data, allFileKeys)
 
@@ -877,8 +891,20 @@ const handleContextMenu = (point: {
   const dy = screenY - canvas2DSceneManage.list[0].panOffset.y
   const cos = Math.cos(angleY * -1)
   const sin = Math.sin(angleY * -1)
-  const x = (dx * cos + dy * sin) / canvas2DSceneManage.list[0].level
-  const y = (-dx * sin + dy * cos) / canvas2DSceneManage.list[0].level
+  const xInWorld = (dx * cos + dy * sin) / canvas2DSceneManage.list[0].level
+  const yInWorld = (-dx * sin + dy * cos) / canvas2DSceneManage.list[0].level
+  let xInGroup = xInWorld;
+  let yInGroup = yInWorld;
+  // 先平移，再旋转，再缩放
+  if (window.globalEditGroup !== worldApi) {
+    const { x: groupX, y: groupY, angleY: groupAngle } = window.globalEditGroup.getData()
+    const dx2 = xInWorld - groupX
+    const dy2 = yInWorld - groupY
+    const cosGroup = Math.cos(groupAngle * -1)
+    const sinGroup = Math.sin(groupAngle * -1)
+    xInGroup = dx2 * cosGroup + dy2 * sinGroup
+    yInGroup = -dx2 * sinGroup + dy2 * cosGroup
+  }
 
   editPropConfigInfo.value = []
   editPropInputInfo.value = {}
@@ -888,12 +914,12 @@ const handleContextMenu = (point: {
   for (let i = 0; i < sortAllFileKeys.length; i++) {
     const type = sortAllFileKeys[i]
     if (sortAllFileKeys.includes(type)) {
-      if (!worldApi.getTypeListEntity(type)) {
+      if (!window.globalEditGroup.getTypeListEntity(type)) {
         continue
       }
-      for (let j = 0; j < worldApi.getTypeObjectsData(type).length; j++) {
-        const api: BaseEntityClass<any> = worldApi.getTypeListEntity(type)[j]
-        const snapPoint = api.matchHandelInfo(x, y)
+      for (let j = 0; j < window.globalEditGroup.getTypeObjectsData(type).length; j++) {
+        const api: BaseEntityClass<any> = window.globalEditGroup.getTypeListEntity(type)[j]
+        const snapPoint = api.matchHandelInfo(xInGroup, yInGroup)
         if (snapPoint) {
           menuEntity = api
           menuEntiryHandelInfo = snapPoint;
@@ -982,7 +1008,7 @@ const deleteContextMenuEntity = () => {
 
   const type = contextMenu.value.type;
   if (contextMenu.value.index !== undefined) {
-    worldApi.delete(type, contextMenu.value.index)
+    window.globalEditGroup.delete(type, contextMenu.value.index)
   }
   contextMenu.value = null
 }
@@ -1017,58 +1043,73 @@ const handleCanvasClick = async (point: {
     return
   }
 
-  if (worldApi.insertTempObj && worldApi.insertTempObj instanceof LineEntityClass) {
-    const data = worldApi.insertTempObj.getData()
-    if (hoverPoint.value) {
-      tempPointInsertData.value.push({
-        x: Math.round(hoverPoint.value.x),
-        y: Math.round(hoverPoint.value.y)
-      })
-    } else {
-      const mouseXInCanvas = point.x
-      const mouseYInCanvas = point.y
-      const dx = mouseXInCanvas - canvas2DSceneManage.list[0].panOffset.x
-      const dy = mouseYInCanvas - canvas2DSceneManage.list[0].panOffset.y
-      const worldData = worldApi.getData();
-      const { angleY } = worldData;
-      const cos = Math.cos(angleY * -1)
-      const sin = Math.sin(angleY * -1)
-      const x = (dx * cos + dy * sin) / canvas2DSceneManage.list[0].level
-      const y = (-dx * sin + dy * cos) / canvas2DSceneManage.list[0].level
-      tempPointInsertData.value.push({
-        x: Math.round(x),
-        y: Math.round(y)
-      })
-    }
-    data.points = tempPointInsertData.value;
-    worldApi.insertTempObj.setData(data)
-    canvas2DSceneManage.renderPreview()
-  } else if (worldApi.insertTempObj && worldApi.insertTempObj instanceof PointEntityClass) {
-    if (insertAdding.value === false) {
-      if (worldApi.insertTempObj instanceof EntityClassInWall) {
-        insertAdding.value = true
-        await worldApi.add(currentTool.value, [worldApi.insertTempObj.getData()])
+  if (window.globalEditGroup.insertTempObj) {
+    if (window.globalEditGroup.insertTempObj instanceof LineEntityClass) {
+      const data = window.globalEditGroup.insertTempObj.getData()
+      if (hoverPoint.value) {
+        tempPointInsertData.value.push({
+          x: Math.round(hoverPoint.value.x),
+          y: Math.round(hoverPoint.value.y)
+        })
       } else {
-        insertAdding.value = true
-        await worldApi.add(currentTool.value, [worldApi.insertTempObj.getData()])
+        const mouseXInCanvas = point.x
+        const mouseYInCanvas = point.y
+        const dx = mouseXInCanvas - canvas2DSceneManage.list[0].panOffset.x
+        const dy = mouseYInCanvas - canvas2DSceneManage.list[0].panOffset.y
+        const worldData = worldApi.getData();
+        const { angleY } = worldData;
+        const cos = Math.cos(angleY * -1)
+        const sin = Math.sin(angleY * -1)
+        const xInWorld = (dx * cos + dy * sin) / canvas2DSceneManage.list[0].level
+        const yInWorld = (-dx * sin + dy * cos) / canvas2DSceneManage.list[0].level
+        let xInGroup = xInWorld;
+        let yInGroup = yInWorld;
+        // 先平移，再旋转，再缩放
+        if (window.globalEditGroup !== worldApi) {
+          const { x: groupX, y: groupY, angleY: groupAngle } = window.globalEditGroup.getData()
+          const dx2 = xInWorld - groupX
+          const dy2 = yInWorld - groupY
+          const cosGroup = Math.cos(groupAngle * -1)
+          const sinGroup = Math.sin(groupAngle * -1)
+          xInGroup = dx2 * cosGroup + dy2 * sinGroup
+          yInGroup = -dx2 * sinGroup + dy2 * cosGroup
+        }
+        console.log('点击位置', xInWorld, yInWorld, xInGroup, yInGroup)
+        tempPointInsertData.value.push({
+          x: Math.round(xInGroup),
+          y: Math.round(yInGroup)
+        })
       }
-      worldApi.insertTempObj.beforeRemove()
-      worldApi.insertTempObj = null;
-      setTimeout(() => {
-        insertAdding.value = false
-      }, 300)// 至少停留300毫秒，防止出现那种闪现的效果。
-      currentTool.value = 'drag'
-    }
-  } else if (worldApi.insertTempObj && worldApi.insertTempObj instanceof PlaneGroupEntity) {
-    if (insertAdding.value === false) {
-      insertAdding.value = true
-      await worldApi.add(currentTool.value, [worldApi.insertTempObj.getData()])
-      worldApi.insertTempObj.beforeRemove()
-      worldApi.insertTempObj = null;
-      setTimeout(() => {
-        insertAdding.value = false
-      }, 300)// 至少停留300毫秒，防止出现那种闪现的效果。
-      currentTool.value = 'drag'
+      data.points = tempPointInsertData.value;
+      window.globalEditGroup.insertTempObj.setData(data)
+      canvas2DSceneManage.renderPreview()
+    } else if (window.globalEditGroup.insertTempObj instanceof PointEntityClass) {
+      if (insertAdding.value === false) {
+        if (window.globalEditGroup.insertTempObj instanceof EntityClassInWall) {
+          insertAdding.value = true
+          await window.globalEditGroup.add(currentTool.value, [window.globalEditGroup.insertTempObj.getData()])
+        } else {
+          insertAdding.value = true
+          await window.globalEditGroup.add(currentTool.value, [window.globalEditGroup.insertTempObj.getData()])
+        }
+        window.globalEditGroup.insertTempObj.beforeRemove()
+        window.globalEditGroup.insertTempObj = null;
+        setTimeout(() => {
+          insertAdding.value = false
+        }, 300)// 至少停留300毫秒，防止出现那种闪现的效果。
+        currentTool.value = 'drag'
+      }
+    } else if (window.globalEditGroup.insertTempObj instanceof PlaneGroupEntity) {
+      if (insertAdding.value === false) {
+        insertAdding.value = true
+        await window.globalEditGroup.add(currentTool.value, [window.globalEditGroup.insertTempObj.getData()])
+        window.globalEditGroup.insertTempObj.beforeRemove()
+        window.globalEditGroup.insertTempObj = null;
+        setTimeout(() => {
+          insertAdding.value = false
+        }, 300)// 至少停留300毫秒，防止出现那种闪现的效果。
+        currentTool.value = 'drag'
+      }
     }
   }
 }
@@ -1160,26 +1201,42 @@ const handleMouseMove = (point: {
     ctxAction.clearRect(0, 0, canvasAction.width, canvasAction.height)
     return;
   }
+
   const worldData = worldApi.getData();
-  const { angleY } = worldData;
+  const angleY = worldData.angleY;// + groupAngle;
+  // 先平移，再旋转，再缩放
   const dx = mouseXInCanvas - canvas2DSceneManage.list[0].panOffset.x
   const dy = mouseYInCanvas - canvas2DSceneManage.list[0].panOffset.y
   const cos = Math.cos(angleY * -1)
   const sin = Math.sin(angleY * -1)
-  const x = (dx * cos + dy * sin) / canvas2DSceneManage.list[0].level
-  const y = (-dx * sin + dy * cos) / canvas2DSceneManage.list[0].level
+  const xInWorld___ = (dx * cos + dy * sin) / canvas2DSceneManage.list[0].level;// - groupX
+  const yInWorld___ = (-dx * sin + dy * cos) / canvas2DSceneManage.list[0].level;// - groupY
+
+  let xInGroup = xInWorld___;
+  let yInGroup = yInWorld___;
+  // 先平移，再旋转，再缩放
+  if (window.globalEditGroup !== worldApi) {
+    const { x: groupX, y: groupY, angleY: groupAngle } = window.globalEditGroup.getData()
+    const dx2 = xInWorld___ - groupX
+    const dy2 = yInWorld___ - groupY
+    const cosGroup = Math.cos(groupAngle * -1)
+    const sinGroup = Math.sin(groupAngle * -1)
+    xInGroup = dx2 * cosGroup + dy2 * sinGroup
+    yInGroup = -dx2 * sinGroup + dy2 * cosGroup
+    // console.log('ddddddddd', Math.ceil(dx2), Math.ceil(dy2), "|", cosGroup, sinGroup, '|', xInGroup, yInGroup)
+  }
+
   if (beCopyEntity) {
     if (beCopyEntity instanceof PointEntityClass) {
       beCopyEntity.setData({
         ...beCopyEntity.getData(),
-        x,
-        y,
+        x: xInGroup,
+        y: yInGroup,
       })
     } else if (beCopyEntity instanceof LineEntityClass) {
       if (beCopyEntityHandelInfo) {
-        console.log('beCopyEntityHandelInfo', x - beCopyEntityHandelInfo.x)
-        beCopyEntity.offset.x = x - beCopyEntityHandelInfo.x
-        beCopyEntity.offset.y = y - beCopyEntityHandelInfo.y
+        beCopyEntity.offset.x = xInGroup - beCopyEntityHandelInfo.x
+        beCopyEntity.offset.y = yInGroup - beCopyEntityHandelInfo.y
       }
     }
   }
@@ -1191,12 +1248,12 @@ const handleMouseMove = (point: {
     if (matchHandelObj && matchedHandelInfo) {
       isMenuing.value = false
       isPaningAngel.value = false
-      function temp(wall: WallEntity): boolean {
+      function matchWall(wall: WallEntity): boolean {
         if (matchHandelObj && matchedHandelInfo) {
           const beMatchPoints = wall.getMineBeSnapPoints(matchedHandelInfo)
           if (beMatchPoints.length > 0) {
             const snapped33 = getSnapPointAndLine(
-              { x, y },
+              { x: xInWorld___, y: yInWorld___ },
               [],
               [],
               beMatchPoints,
@@ -1224,11 +1281,11 @@ const handleMouseMove = (point: {
             let matchLine = null;
             for (let j = 0; j < beMatchLines.length; j++) {
               const line = beMatchLines[j]
-              const distance = pointToLineDistance({ x, y }, line[0], line[1])
+              const distance = pointToLineDistance({ x: xInWorld___, y: yInWorld___ }, line[0], line[1])
               if (distance < minDistance) {
                 matchLine = line
                 minDistance = distance
-                nearestPoint = getClosestPointOnLine({ x, y }, line[0], line[1])
+                nearestPoint = getClosestPointOnLine({ x: xInWorld___, y: yInWorld___ }, line[0], line[1])
               }
             }
             if (nearestPoint && minDistance < snapThreshold && matchLine) {
@@ -1241,11 +1298,11 @@ const handleMouseMove = (point: {
         }
         return false;
       }
-      if (worldApi.getTypeListEntity('wall')) {
-        for (let i = 0; i < window.worldApi.getTypeObjectsData('wall').length; i++) {
-          const api: WallEntity = window.worldApi.getTypeListEntity('wall')[i] as WallEntity;
+      if (window.globalEditGroup.getTypeListEntity('wall')) {
+        for (let i = 0; i < window.globalEditGroup.getTypeObjectsData('wall').length; i++) {
+          const api: WallEntity = window.globalEditGroup.getTypeListEntity('wall')[i] as WallEntity;
           // 类型“WallEntity”的参数不能赋给类型“BaseEntityClass<PointObjData>”的参数。
-          if (temp(api)) {
+          if (matchWall(api)) {
             (() => {
               const screenX = worldData.x * canvas2DSceneManage.list[0].level + canvas2DSceneManage.list[0].panOffset.x;
               const screenY = worldData.y * canvas2DSceneManage.list[0].level + canvas2DSceneManage.list[0].panOffset.y;
@@ -1265,8 +1322,8 @@ const handleMouseMove = (point: {
         matchHandelObj.notInSceneSnapLineArea()
       }
       const tipTexts = matchHandelObj.matchHandelMoveCallback({
-        x,
-        y,
+        x: xInGroup,
+        y: yInGroup,
         startX: matchHandelStartPoint ? matchHandelStartPoint.x : undefined,
         startY: matchHandelStartPoint ? matchHandelStartPoint.y : undefined,
       }, matchedHandelInfo)
@@ -1287,8 +1344,8 @@ const handleMouseMove = (point: {
         const canvasAction = canvas2DSceneManage.list[0].canvasList[0]!;
         const ctxAction = canvasAction.getContext('2d')!
 
-        const hoverScreenX = x * canvas2DSceneManage.list[0].level + canvas2DSceneManage.list[0].panOffset.x
-        const hoverScreenY = y * canvas2DSceneManage.list[0].level + canvas2DSceneManage.list[0].panOffset.y
+        const hoverScreenX = xInWorld___ * canvas2DSceneManage.list[0].level + canvas2DSceneManage.list[0].panOffset.x
+        const hoverScreenY = yInWorld___ * canvas2DSceneManage.list[0].level + canvas2DSceneManage.list[0].panOffset.y
         const startY = hoverScreenY + 14;
         // 绘制一个背景矩形
         ctxAction.fillStyle = 'rgba(0, 0, 0, 0.5)'
@@ -1319,12 +1376,13 @@ const handleMouseMove = (point: {
     } else {
       // 鼠标浮动而过
       ctxAction.clearRect(0, 0, canvasAction.width, canvasAction.height)
-      const handleInfo = getHandleInAreaInfoByXY(worldApi, x, y)
+      const handleInfo = getHandleInAreaInfoByXY(window.globalEditGroup, xInGroup, yInGroup)
       if (handleInfo) {
+        console.log('handleInfo---list', handleInfo)
         const { classInfo, matchArea } = handleInfo;
         (() => {
           // 暂无操作句柄
-          const data = worldApi.getData();
+          const data = window.globalEditGroup.getData();
           const { angleY } = data
           const screenX = data.x * canvas2DSceneManage.list[0].level + canvas2DSceneManage.list[0].panOffset.x;
           const screenY = data.y * canvas2DSceneManage.list[0].level + canvas2DSceneManage.list[0].panOffset.y;
@@ -1386,12 +1444,12 @@ const handleMouseMove = (point: {
         })();
       }
     }
-  } else if (worldApi.insertTempObj instanceof LineEntityClass) {
+  } else if (window.globalEditGroup.insertTempObj instanceof LineEntityClass) {
     if (tempPointInsertData.value && tempPointInsertData.value.length > 0) {
       const last = tempPointInsertData.value[tempPointInsertData.value.length - 1]
       // 收集所有点（包括临时折线和已绘制的墙上的点）
       const allPoints = [...tempPointInsertData.value];
-      (worldApi.getTypeObjectsData(currentTool.value) as LineObjData<any>[]).forEach((item: LineObjData<any>) => {
+      (window.globalEditGroup.getTypeObjectsData(currentTool.value) as LineObjData<any>[]).forEach((item: LineObjData<any>) => {
         item.points.forEach((point: any) => {
           allPoints.push(point)
         })
@@ -1399,7 +1457,7 @@ const handleMouseMove = (point: {
       const snapAngles = [0, 45, 90, 135, 180, -135, -90, -45]
       snapAngles.push(...getTempPointInsertDataLastAngel())
       let snappedPoint44 = getSnapPointAndLine(
-        { x, y },
+        { x: xInGroup, y: yInGroup },
         [{
           objType: currentTool.value,
           snapFromType: 'point',
@@ -1417,9 +1475,9 @@ const handleMouseMove = (point: {
         snappedPoint44 = {
           objType: currentTool.value,
           snapFromType: 'point',
-          point: { x, y },
-          xAxisSnappedY: y,
-          yAxisSnappedX: x,
+          point: { x: xInGroup, y: yInGroup },
+          xAxisSnappedY: yInGroup,
+          yAxisSnappedX: xInGroup,
         }
         xAxisSnappedY.value = null
         yAxisSnappedX.value = null
@@ -1433,7 +1491,7 @@ const handleMouseMove = (point: {
       } else {
         // console.log('match point 99999', snappedPoint44.point.x, last.x, snappedPoint44.point.y, last.y)
       }
-      const tipTexts = worldApi.insertTempObj.setPreparePoint(points)
+      const tipTexts = window.globalEditGroup.insertTempObj.setPreparePoint(points)
       setHoverPoint({
         x: snappedPoint44.point.x,
         y: snappedPoint44.point.y,
@@ -1459,21 +1517,22 @@ const handleMouseMove = (point: {
       }
     }
   } else {
-    const nearest = getNearestWall(worldApi, { x, y })
+    const nearest = getNearestWall(window.globalEditGroup, { x: xInGroup, y: yInGroup })
     if (nearest) {
+      // console.log('nearest', nearest)
       setHoverPoint(nearest.pointOnWall)
     } else {
       setHoverPoint(null)
     }
     let tipTexts: string[] = []
-    if (worldApi.insertTempObj instanceof PointEntityClass) {
-      tipTexts = worldApi.insertTempObj.setPrepareState(x, y)
+    if (window.globalEditGroup.insertTempObj instanceof PointEntityClass) {
+      tipTexts = window.globalEditGroup.insertTempObj.setPrepareState(xInGroup, yInGroup)
       if (tipTexts && tipTexts.length > 0) {
         const canvasAction = canvas2DSceneManage.list[0].canvasList[0]!;
         const ctxAction = canvasAction.getContext('2d')!
 
-        const hoverScreenX = x * canvas2DSceneManage.list[0].level + canvas2DSceneManage.list[0].panOffset.x
-        const hoverScreenY = y * canvas2DSceneManage.list[0].level + canvas2DSceneManage.list[0].panOffset.y
+        const hoverScreenX = xInWorld___ * canvas2DSceneManage.list[0].level + canvas2DSceneManage.list[0].panOffset.x
+        const hoverScreenY = yInWorld___ * canvas2DSceneManage.list[0].level + canvas2DSceneManage.list[0].panOffset.y
         const startY = hoverScreenY + 14;
         // 绘制一个背景矩形
         ctxAction.fillStyle = 'rgba(0, 0, 0, 0.5)'
@@ -1550,15 +1609,29 @@ const handleMouseDown = (point: {
     const dy = mouseYInCanvas - canvas2DSceneManage.list[0].panOffset.y
     const cos = Math.cos(angleY * -1)
     const sin = Math.sin(angleY * -1)
-    const x = (dx * cos + dy * sin) / canvas2DSceneManage.list[0].level
-    const y = (-dx * sin + dy * cos) / canvas2DSceneManage.list[0].level
-    const handleInfoList = getHandleInfoByXY(worldApi, x, y)
+    const xInWorld = (dx * cos + dy * sin) / canvas2DSceneManage.list[0].level
+    const yInWorld = (-dx * sin + dy * cos) / canvas2DSceneManage.list[0].level
+
+    let xInGroup = xInWorld;
+    let yInGroup = yInWorld;
+    // 先平移，再旋转，再缩放
+    if (window.globalEditGroup !== worldApi) {
+      const { x: groupX, y: groupY, angleY: groupAngle } = window.globalEditGroup.getData()
+      const dx2 = xInWorld - groupX
+      const dy2 = yInWorld - groupY
+      const cosGroup = Math.cos(groupAngle * -1)
+      const sinGroup = Math.sin(groupAngle * -1)
+      xInGroup = dx2 * cosGroup + dy2 * sinGroup
+      yInGroup = -dx2 * sinGroup + dy2 * cosGroup
+      // console.log('ddddddddd', Math.ceil(dx2), Math.ceil(dy2), "|", cosGroup, sinGroup, '|', xInGroup, yInGroup)
+    }
+    const handleInfoList = getHandleInfoByXY(window.globalEditGroup, xInGroup, yInGroup)
     if (handleInfoList) {
       const { classInfo, handle, startPoint } = handleInfoList
       if (!classInfo.getData().isLocked) {
         matchHandelObj = classInfo
         matchedHandelInfo = handle
-        matchHandelStartPoint = { x, y }
+        matchHandelStartPoint = { x: xInGroup, y: yInGroup }
         dragOffset.value = { x: 0, y: 0 }
         dragStartPoint.value = {
           x: startPoint.x,
@@ -1751,7 +1824,7 @@ const handleLoadedObject = async (object: THREE.Group | THREE.Mesh, file: File, 
     angleY: 0,
     scale: scaleFactor,
   }
-  await worldApi.add('importFile', [data])
+  await window.globalEditGroup.add('importFile', [data])
 }
 function logout() {
   if (confirm('确定要退出登录吗？')) {
@@ -1769,12 +1842,12 @@ function handleObjectClick(object: THREE.Object3D | null) {
 }
 function changeObjTypeSelect(type: string, baseObj: BaseEntityClass<any>) {
   activeToolsIndex.value = -1
-  if (worldApi.insertTempObj) {
-    worldApi.insertTempObj.beforeRemove()
-    worldApi.insertTempObj = null
+  if (window.globalEditGroup.insertTempObj) {
+    window.globalEditGroup.insertTempObj.beforeRemove()
+    window.globalEditGroup.insertTempObj = null
   }
   if (allFileKeys.includes(type as any)) {
-    worldApi.insertTempObj = baseObj
+    window.globalEditGroup.insertTempObj = baseObj
     currentTool.value = type
   }
 }
@@ -1784,7 +1857,7 @@ async function copyEntity() {
     const type = menuEntity.type
     const values = JSON.parse(JSON.stringify(menuEntity.getData()));
     values.id = Date.now().toString()
-    const apiList = await worldApi.add(type, [values])
+    const apiList = await window.globalEditGroup.add(type, [values])
     beCopyEntity = apiList[0]
     if (menuEntity && menuEntiryHandelInfo) {
       if (menuEntity instanceof LineEntityClass) {
@@ -1844,7 +1917,13 @@ async function moveToGroup(id: string) {
   }
   await group.add(type, [values])
   menuEntity.beforeRemove()
-  worldApi.delete(type, contextMenu.value.index)
+  window.globalEditGroup.delete(type, contextMenu.value.index)
+  contextMenu.value = null
+}
+function changeGlobalEditGroup() {
+  if (menuEntity instanceof PlaneGroupEntity) {
+    window.globalEditGroup = menuEntity
+  }
   contextMenu.value = null
 }
 function showAiPic() {
