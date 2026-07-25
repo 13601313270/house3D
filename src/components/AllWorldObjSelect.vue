@@ -43,12 +43,12 @@
                 <span class="tip" v-if="child.tip">({{ child.tip }})</span>
               </div>
               <div class="tools">
-                <!-- <div v-if="item.isLocked" class="toolItem" @click="handleUnLock(worldGroup, item, false)">
+                <div v-if="child.isLocked" class="toolItem" @click="handleUnLock(map.get(item.id), child, false)">
                   <img class="img lock" src="@/assets/lock.svg" alt="lock" />
                 </div>
-                <div v-else class="toolItem" @click="handleUnLock(worldGroup, item, true)">
+                <div v-else class="toolItem" @click="handleUnLock(map.get(item.id), child, true)">
                   <img class="img" src="@/assets/unLock.svg" alt="unLock" />
-                </div> -->
+                </div>
                 <div class="toolItem" @click="handleLocation(map.get(item.id), child)">
                   <img class="img" src="@/assets/location.svg" alt="location" />
                 </div>
@@ -215,7 +215,8 @@ function handleEnter(
 // function openEditPanel(id: string) {
 //   alert(id)
 // }
-function handleUnLock(group: GroupBaseEntity<GroupBaseData>, item: Item, isLocked: boolean) {
+function handleUnLock(group: GroupBaseEntity<GroupBaseData> | undefined, item: Item, isLocked: boolean) {
+  if (!group) return
   const thisObj = group.children.find(v => v.getData().id === item.id)
   if (thisObj) {
     thisObj.setData({
