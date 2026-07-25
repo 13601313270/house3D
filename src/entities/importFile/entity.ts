@@ -195,11 +195,16 @@ export class ImportFileEntity extends PointEntityClass<ImportFileData> {
 
       // 获取模型的尺寸
       const box = new THREE.Box3().setFromObject(clonedObject)
+      const center = box.getCenter(new THREE.Vector3())
       const size = box.getSize(new THREE.Vector3())
-      this.boxData[0].y = size.y * scale
+      // 第一个是尺寸，第二个是位置偏移，第三个是旋转角度
       this.boxData[0].x = size.x * scale
+      this.boxData[0].y = size.y * scale
       this.boxData[0].z = size.z * scale
-      this.boxData[1].y = size.y * scale / 2
+      this.boxData[1].x = center.x * scale
+      this.boxData[1].y = center.y * scale
+      this.boxData[1].z = center.z * scale
+      this.reBuildBoundingBoxData()
       return [group]
     }
 
