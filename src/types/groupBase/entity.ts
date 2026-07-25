@@ -212,10 +212,10 @@ export abstract class GroupBaseEntity<T extends GroupBaseData> extends PointEnti
           if (boxData) {
             minX = Math.min(minX, x - boxData[0].x / 2)
             maxX = Math.max(maxX, x + boxData[0].x / 2)
-            minY = Math.min(minY, y - boxData[0].y / 2)
-            maxY = Math.max(maxY, y + boxData[0].y / 2)
-            minZ = Math.min(minZ, z - boxData[0].y / 2)
-            maxZ = Math.max(maxZ, z + boxData[0].y / 2)
+            minY = Math.min(minY, y - boxData[0].z / 2)
+            maxY = Math.max(maxY, y + boxData[0].z / 2)
+            minZ = Math.min(minZ, z)
+            maxZ = Math.max(maxZ, z + boxData[0].y)
           }
         }
       })
@@ -410,7 +410,22 @@ export abstract class GroupBaseEntity<T extends GroupBaseData> extends PointEnti
   }
 
   getData(): T {
-    return this.data
+    const childrenData: Array<{
+      type: string,
+      value: BaseObjData,
+    }> = []
+    if (this.children && this.children.length) {
+      this.children.forEach(v => {
+        childrenData.push({
+          type: v.type,
+          value: v.getData(),
+        })
+      })
+    }
+    return {
+      ...this.data,
+      childrenData,
+    }
   }
 
   getTypeListEntity(key: string): BaseEntityClass<BaseObjData>[] {

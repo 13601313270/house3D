@@ -166,19 +166,20 @@ export class PlaneGroupEntity extends GroupBaseEntity<PlaneGroupData> {
           // 第一个是尺寸，第二个是位置偏移，第三个是旋转角度
           const boxData = item.boundingBoxData;
           if (boxData) {
-            minZ = Math.min(minZ, z - boxData[0].y / 2)
-            maxZ = Math.max(maxZ, z + boxData[0].y / 2)
+            minZ = Math.min(minZ, z)
+            maxZ = Math.max(maxZ, z + boxData[0].y)
           }
         }
       })
     }
     const depth = Math.max(maxZ - minZ, 10);
+    // console.log('boxbox', minZ, maxZ, depth)
     // 第一个是尺寸，第二个是位置偏移，第三个是旋转角度
     return [
       new THREE.Vector3(width, depth, height),
       new THREE.Vector3(
         0,
-        depth / 2,
+        minZ + depth / 2,
         0
       ),
       new THREE.Vector3(0, angleY, 0)
