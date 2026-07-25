@@ -283,6 +283,16 @@ const allDemoList = ref<Array<{
     name: '单膝跪',
     img: 'https://d99n9xvb9513w.cloudfront.net/thumbnails/motions/135940901/animated.gif',
     file: 'kneelingDown.fbx',
+  },
+  {
+    name: '单膝跪',
+    img: 'https://d99n9xvb9513w.cloudfront.net/thumbnails/motions/120580901/animated.gif',
+    file: 'Salute.fbx',
+  },
+  {
+    name: '抱着盒子',
+    img: 'https://d99n9xvb9513w.cloudfront.net/thumbnails/motions/111220901/animated.gif',
+    file: 'joggingWithBox.fbx',
   }
 ])
 
