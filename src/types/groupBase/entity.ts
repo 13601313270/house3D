@@ -12,8 +12,8 @@ type WorldChangeType = 'add' | 'remove' | 'change'
 
 export abstract class GroupBaseEntity<T extends GroupBaseData> extends PointEntityClass<T> {
   group: THREE.Group = new THREE.Group()
-  width: number = 0;
-  height: number = 0;
+  // width: number = 0;
+  // height: number = 0;
   showAxes: boolean = true;
   private gridHelper: THREE.GridHelper
   private axesHelper: THREE.AxesHelper
@@ -115,7 +115,7 @@ export abstract class GroupBaseEntity<T extends GroupBaseData> extends PointEnti
 
     // 绘制轴
     ctx.restore()
-    drawAxes(ctx, angleY * -1, zoomLevel, this.width, this.height)
+    // drawAxes(ctx, angleY * -1, zoomLevel, this.width, this.height)
   }
 
   draw2DActionHandle(

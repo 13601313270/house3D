@@ -4,6 +4,7 @@ import { BaseObjData, HandelInfo, Point } from '@/types/map2d';
 import { GroupBaseData } from '@/types/groupBase';
 import { BaseEntityClass } from '@/types/baseEntity';
 import { PointEntityClass } from '@/types/pointEntity';
+import drawAxes from '@/utils/drawAxes';
 
 type WorldData = GroupBaseData & {
   temp: boolean,
@@ -33,6 +34,15 @@ class WorldGroup extends GroupBaseEntity<WorldData> {
     this.scene.add(this.group)
     this.showGridHelper()
     this.showAxesHelper()
+  }
+
+  draw2DPreview(ctx: CanvasRenderingContext2D, zoomLevel: number) {
+    super.draw2DPreview(ctx, zoomLevel)
+    const angleY = this.getData().angleY;
+    const canvasRect = ctx.canvas.getBoundingClientRect()
+    const width = Math.floor(canvasRect.width)
+    const height = Math.floor(canvasRect.height)
+    drawAxes(ctx, angleY * -1, zoomLevel, width, height)
   }
 
   setEnvironMent(config?: EnvironmentConfig) {

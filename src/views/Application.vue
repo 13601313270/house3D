@@ -407,7 +407,7 @@ function setHoverPoint(point: Point | null) {
   // 绘制磁吸点的参考轴
   if (hoverPoint.value) {
     const ctxAction = canvasAction.getContext('2d')!;
-    ctxAction.clearRect(0, 0, worldApi.width, worldApi.height)
+    ctxAction.clearRect(0, 0, canvasAction.width, canvasAction.height)
     if (!ctxAction) return
     ctxAction.strokeStyle = '#999'
     ctxAction.lineWidth = 1
@@ -417,7 +417,7 @@ function setHoverPoint(point: Point | null) {
       const screenX = yAxisSnappedX.value * canvas2DSceneManage.list[0].level + canvas2DSceneManage.list[0].panOffset.x
       ctxAction.beginPath()
       ctxAction.moveTo(screenX, 0)
-      ctxAction.lineTo(screenX, worldApi.height)
+      ctxAction.lineTo(screenX, canvasAction.height)
       ctxAction.stroke()
     }
 
@@ -426,7 +426,7 @@ function setHoverPoint(point: Point | null) {
       const screenY = xAxisSnappedY.value * canvas2DSceneManage.list[0].level + canvas2DSceneManage.list[0].panOffset.y
       ctxAction.beginPath()
       ctxAction.moveTo(0, screenY)
-      ctxAction.lineTo(worldApi.width, screenY)
+      ctxAction.lineTo(canvasAction.width, screenY)
       ctxAction.stroke()
     }
   }

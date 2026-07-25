@@ -221,8 +221,6 @@ class Canvas2DSceneManage {
             ctx.height = height
           }
         })
-        window.worldApi.width = width
-        window.worldApi.height = height
       }
       canvas2DSceneItem.draw2DPreview()
     })
