@@ -1200,7 +1200,7 @@ function showModelPanel() {
 .modal-body {
   padding: 16px;
   overflow-y: auto;
-  max-height: calc(70vh - 60px);
+  max-height: calc(70vh - 89px);
   display: flex;
   flex-direction: row;
   align-items: center;

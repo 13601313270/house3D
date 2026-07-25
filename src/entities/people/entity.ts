@@ -487,6 +487,15 @@ export class PeopleEntity extends PointEntityClass<PeopleData> {
         value: data.z,
       },
       {
+        id: 'boneEditButton',
+        label: '姿态编辑',
+        dataType: 'button',
+        value: () => {
+          // @ts-ignore
+          window.showBoneEditIsShow();
+        },
+      },
+      {
         id: 'bone',
         label: '骨骼',
         dataType: 'hidden',

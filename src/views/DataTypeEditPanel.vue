@@ -37,7 +37,8 @@
       <!-- {{ modelValue }} -->
       <div class="configItemList">
         <div v-for="item in editPropConfigInfo" :key="item.id" class="configItem"
-          :class="{ 'title': item.dataType === 'title' }">
+          :class="{ 'title': item.dataType === 'title' }"
+          :style="{ display: item.dataType === 'hidden' ? 'none' : 'flex' }">
           <div class="label title" v-if="item.dataType === 'title'">
             {{ item.label }}
           </div>
@@ -53,7 +54,6 @@
       </div>
       <div class="buttonGroup">
         <div class="leftGroup">
-          <button v-if="typeKey === 'people'" @click="showBoneEdit">姿态编辑</button>
           <button @click="LockObj(!modelValue.isLocked)">{{ modelValue.isLocked ? '解锁' : '锁定' }}</button>
           <button @click="copyEntity">复制</button>
           <button @click="moveToGroup" v-if="!['planeGroup'].includes(typeKey)">移动到组</button>
@@ -89,7 +89,8 @@ const position = ref(props.initPosition)
 const showGroupSelect = ref(false)
 const EDGE_PADDING = 6
 
-function showBoneEdit() {
+// @ts-ignore
+window.showBoneEditIsShow = () => {
   position.value = { x: 0, y: 0 }
   boneEditIsShow.value = true
 

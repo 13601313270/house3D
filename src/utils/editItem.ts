@@ -21,7 +21,6 @@ export type editItem = {
   'material' |
   'hidden' |
   'img' |
-  'button' | /* 按钮 */
   string[]/* 枚举 */
   value: any
 } | {
@@ -66,5 +65,10 @@ export type editItem = {
   min: number,
   max: number,
   value: number
+} | {
+  id: string,
+  label: string,
+  dataType: 'button',
+  value: () => void
 }
 export default editItem
