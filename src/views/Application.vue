@@ -85,6 +85,9 @@
           <canvas ref="canvas2DActionRef" class="drawing-canvas" />
           <img v-if="isPaningAngel && isPaningAngelMoved" class="protractor" src="protractor.png"
             :style="{ left: panningScreenCenter.x + 'px', top: panningScreenCenter.y + 'px' }" />
+          <div class="showGroupExit" v-if="showGroupExit">
+            <div class="showGroupExitButton" @click="groupExit">退出组编辑</div>
+          </div>
         </div>
       </div>
 
@@ -396,6 +399,7 @@ const worldApi = new WorldGroup(null, {
   temp: false,
 })
 window.worldApi = worldApi
+const showGroupExit = ref<boolean>(false)
 window.globalEditGroup = worldApi
 
 allObjCount.value = worldApi.getAllObjectCount()
@@ -666,15 +670,7 @@ onMounted(async () => {
           canvas2DSceneManage.renderPreview()
         }
       } else if (window.globalEditGroup !== worldApi) {
-        if (window.globalEditGroup instanceof PlaneGroupEntity) {
-          window.globalEditGroup.isSetGlobalEditingGroup = false
-        }
-        window.globalEditGroup = worldApi
-        canvas2DSceneManage.renderPreview()
-        if (window.globalEditGroup.insertTempObj) {
-          window.globalEditGroup.insertTempObj.beforeRemove()
-          window.globalEditGroup.insertTempObj = null
-        }
+        groupExit()
       }
       currentTool.value = 'drag'
     }
@@ -1948,6 +1944,7 @@ async function moveToGroup(id: string) {
 function changeGlobalEditGroup() {
   if (menuEntity instanceof PlaneGroupEntity) {
     window.globalEditGroup = menuEntity
+    showGroupExit.value = true;
     if (window.globalEditGroup instanceof PlaneGroupEntity) {
       window.globalEditGroup.isSetGlobalEditingGroup = true
       canvas2DSceneManage.renderPreview()
@@ -1974,6 +1971,19 @@ function showAiPic() {
 function handlePaySuccess() {
   showPayModal.value = false
   initUserInfo()
+}
+
+function groupExit() {
+  if (window.globalEditGroup instanceof PlaneGroupEntity) {
+    window.globalEditGroup.isSetGlobalEditingGroup = false
+  }
+  window.globalEditGroup = worldApi
+  showGroupExit.value = false;
+  canvas2DSceneManage.renderPreview()
+  if (window.globalEditGroup.insertTempObj) {
+    window.globalEditGroup.insertTempObj.beforeRemove()
+    window.globalEditGroup.insertTempObj = null
+  }
 }
 </script>
 
@@ -2239,6 +2249,29 @@ button {
     width: 50%;
     z-index: 1000;
     transform: translate(-50%, -50%);
+  }
+
+  .showGroupExit {
+    position: absolute;
+    top: 0;
+    right: 0;
+    padding: 8px;
+    background-color: white;
+
+    .showGroupExitButton {
+      padding: 4px 8px;
+      border: none;
+      border-radius: 4px;
+      background: #e4e6eb;
+      cursor: pointer;
+      font-size: 16px;
+      transition: all 0.3s;
+      flex-shrink: 0;
+
+      &:hover {
+        background: #d9d9d9;
+      }
+    }
   }
 }
 

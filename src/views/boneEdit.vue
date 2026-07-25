@@ -34,7 +34,15 @@
           <div @click="togglePlay" class="controlBtn">
             {{ isPlaying ? '⏸ 暂停' : '▶ 播放' }}
           </div>
-          <div class="controlBtn" @click="save">应用本帧</div>
+          <div class="controlBtn" @click="save()">应用本帧</div>
+          <div class="dropdown-wrapper" @mouseenter="handleDropdownEnter" @mouseleave="handleDropdownLeave">
+            <div class="controlBtn dropdown-btn">...</div>
+            <div :class="{ 'dropdown-menu': true, 'dropdown-menu-hidden': !showDropdown }"
+              @mouseenter="handleDropdownEnter" @mouseleave="handleDropdownLeave">
+              <div class="dropdown-item" @click.stop="saveUpperBody">仅应用上半身</div>
+              <div class="dropdown-item" @click.stop="saveLowerBody">仅应用下半身</div>
+            </div>
+          </div>
         </div>
       </div>
       <div v-if="loading" class="loading">
@@ -119,6 +127,8 @@ let rootBone: THREE.Object3D | null = null
 const originalPosition = new THREE.Vector3()
 
 const showModal = ref(false)
+const showDropdown = ref(false)
+let dropdownHideTimer: ReturnType<typeof setTimeout> | null = null
 
 const props = defineProps<{
   modelValue: Array<{
@@ -656,35 +666,28 @@ function initThree() {
           console.log(`🦴 骨骼: ${child.name}`, child.rotation)
         }
         const findProp = allBones.value.find((item) => item.name === child.name)
-        if (![
-          'spine004', 'breastL',
-          'breastR', 'pelvisL', 'pelvisR',
-          'toeL', 'toeR', 'heel02L',
-          'heel02R', 'spine002', 'spine003',
-          'spine006'
-        ].includes(child.name)) {
-          allBonesData.push({
-            name: child.name,
-            basicValue: {
-              x: findProp ? findProp.basicValue.x : child.rotation.x,
-              y: findProp ? findProp.basicValue.y : child.rotation.y,
-              z: findProp ? findProp.basicValue.z : child.rotation.z,
-              px: findProp ? findProp.basicValue.px : child.position.x,
-              py: findProp ? findProp.basicValue.py : child.position.y,
-              pz: findProp ? findProp.basicValue.pz : child.position.z,
-            },
-            value: {
-              x: findProp ? findProp.value.x : child.rotation.x,
-              y: findProp ? findProp.value.y : child.rotation.y,
-              z: findProp ? findProp.value.z : child.rotation.z,
-              px: findProp ? findProp.value.px : child.position.x,
-              py: findProp ? findProp.value.py : child.position.y,
-              pz: findProp ? findProp.value.pz : child.position.z,
-            },
-          })
-        }
+        allBonesData.push({
+          name: child.name,
+          basicValue: {
+            x: findProp ? findProp.basicValue.x : child.rotation.x,
+            y: findProp ? findProp.basicValue.y : child.rotation.y,
+            z: findProp ? findProp.basicValue.z : child.rotation.z,
+            px: findProp ? findProp.basicValue.px : child.position.x,
+            py: findProp ? findProp.basicValue.py : child.position.y,
+            pz: findProp ? findProp.basicValue.pz : child.position.z,
+          },
+          value: {
+            x: findProp ? findProp.value.x : child.rotation.x,
+            y: findProp ? findProp.value.y : child.rotation.y,
+            z: findProp ? findProp.value.z : child.rotation.z,
+            px: findProp ? findProp.value.px : child.position.x,
+            py: findProp ? findProp.value.py : child.position.y,
+            pz: findProp ? findProp.value.pz : child.position.z,
+          },
+        })
       }
     })
+    console.log('所有骨骼:', allBonesData)
     allBones.value = allBonesData;
 
     const box = new THREE.Box3().setFromObject(fbxModel)
@@ -773,18 +776,16 @@ onUnmounted(() => {
 //   const bondMesh = scene.getObjectByName(item.name) as THREE.Mesh
 //   bondMesh.rotation[editRotation] = item.value[editRotation]
 // }
-function save() {
+function save(boneFilter?: (name: string) => boolean) {
   if (currentAction && isPlaying.value) {
     currentAction.paused = true
     isPlaying.value = false
   }
 
   allBones.value.forEach(bone => {
+    if (boneFilter && !boneFilter(bone.name)) return
     const boneObject = scene.getObjectByName(bone.name)
     if (boneObject) {
-      // if (bone.name === 'mixamorigHips') {
-      //   console.log('boneObject', boneObject.position.y)
-      // }
       bone.value.x = boneObject.rotation.x
       bone.value.y = boneObject.rotation.y
       bone.value.z = boneObject.rotation.z
@@ -800,8 +801,103 @@ function save() {
       value: v.value,
     }
   })
-  // console.log('保存数据', JSON.stringify(saveVal))
   emit('update:modelValue', saveVal)
+}
+
+const upperBodyBones = [
+  'mixamorigSpine',
+  'mixamorigSpine1',
+  'mixamorigSpine2',
+  'mixamorigNeck',
+  'mixamorigHead',
+  'mixamorigHeadTop_End',
+  'mixamorigHeadTop_End_end',
+  'mixamorigHeadTop_End_end_end',
+  'mixamorigRightShoulder',
+  'mixamorigRightArm',
+  'mixamorigRightForeArm',
+  'mixamorigRightHand',
+  'mixamorigRightHandThumb1',
+  'mixamorigRightHandThumb2',
+  'mixamorigRightHandThumb3',
+  'mixamorigRightHandThumb4',
+  'mixamorigRightHandIndex1',
+  'mixamorigRightHandIndex2',
+  'mixamorigRightHandIndex3',
+  'mixamorigRightHandIndex4',
+  'mixamorigRightHandMiddle1',
+  'mixamorigRightHandMiddle2',
+  'mixamorigRightHandMiddle3',
+  'mixamorigRightHandMiddle4',
+  'mixamorigRightHandRing1',
+  'mixamorigRightHandRing2',
+  'mixamorigRightHandRing3',
+  'mixamorigRightHandRing4',
+  'mixamorigRightHandPinky1',
+  'mixamorigRightHandPinky2',
+  'mixamorigRightHandPinky3',
+  'mixamorigRightHandPinky4',
+  'mixamorigLeftShoulder',
+  'mixamorigLeftArm',
+  'mixamorigLeftForeArm',
+  'mixamorigLeftHand',
+  'mixamorigLeftHandThumb1',
+  'mixamorigLeftHandThumb2',
+  'mixamorigLeftHandThumb3',
+  'mixamorigLeftHandThumb4',
+  'mixamorigLeftHandPinky1',
+  'mixamorigLeftHandPinky2',
+  'mixamorigLeftHandPinky3',
+  'mixamorigLeftHandPinky4',
+  'mixamorigLeftHandMiddle1',
+  'mixamorigLeftHandMiddle2',
+  'mixamorigLeftHandMiddle3',
+  'mixamorigLeftHandMiddle4',
+  'mixamorigLeftHandRing1',
+  'mixamorigLeftHandRing2',
+  'mixamorigLeftHandRing3',
+  'mixamorigLeftHandRing4',
+  'mixamorigLeftHandPinky1',
+  'mixamorigLeftHandPinky2',
+  'mixamorigLeftHandPinky3',
+  'mixamorigLeftHandPinky4',
+]
+const lowerBodyBones = [
+  'mixamorigRightUpLeg',
+  'mixamorigRightLeg',
+  'mixamorigRightFoot',
+  'mixamorigRightToeBase',
+  'mixamorigRightToe_End',
+  'mixamorigLeftUpLeg',
+  'mixamorigLeftLeg',
+  'mixamorigLeftFoot',
+  'mixamorigLeftToeBase',
+  'mixamorigLeftToe_End',
+]
+
+function saveUpperBody() {
+  showDropdown.value = false
+  save(name => upperBodyBones.includes(name))
+}
+
+function saveLowerBody() {
+  showDropdown.value = false
+  save(name => lowerBodyBones.includes(name))
+}
+
+function handleDropdownEnter() {
+  if (dropdownHideTimer) {
+    clearTimeout(dropdownHideTimer)
+    dropdownHideTimer = null
+  }
+  showDropdown.value = true
+}
+
+function handleDropdownLeave() {
+  dropdownHideTimer = setTimeout(() => {
+    showDropdown.value = false
+    dropdownHideTimer = null
+  }, 200)
 }
 const loading = ref(false)
 function playAnimation(file: string) {
@@ -1153,6 +1249,48 @@ function showModelPanel() {
 
       &:active {
         transform: scale(0.98);
+      }
+    }
+
+    .dropdown-wrapper {
+      position: relative;
+
+      .dropdown-btn {
+        padding: 8px 16px;
+        font-size: 14px;
+        height: 20px;
+      }
+
+      .dropdown-menu {
+        position: absolute;
+        bottom: calc(100% + 4px);
+        right: 0;
+        background: white;
+        border-radius: 4px;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+        padding: 4px 0;
+        min-width: 140px;
+        z-index: 100;
+        opacity: 1;
+        pointer-events: auto;
+        transition: opacity 0.2s;
+
+        &.dropdown-menu-hidden {
+          opacity: 0;
+          pointer-events: none;
+        }
+
+        .dropdown-item {
+          padding: 8px 16px;
+          font-size: 14px;
+          color: #333;
+          cursor: pointer;
+          transition: background 0.2s;
+
+          &:hover {
+            background: #f5f5f5;
+          }
+        }
       }
     }
   }
