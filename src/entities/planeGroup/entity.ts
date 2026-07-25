@@ -19,6 +19,7 @@ export class PlaneGroupEntity extends GroupBaseEntity<PlaneGroupData> {
   // width: number = 0;
   // height: number = 0;
   private circleRadius = 12
+  public isSetGlobalEditingGroup = false
 
   constructor(parent: GroupBaseEntity<PlaneGroupData> | null, data: PlaneGroupData) {
     super(parent, data)
@@ -55,6 +56,29 @@ export class PlaneGroupEntity extends GroupBaseEntity<PlaneGroupData> {
     })();
 
     super.draw2DPreview(ctx, zoomLevel)
+
+    if (this.isSetGlobalEditingGroup) {
+      // 绘制一个边界
+      ctx.lineWidth = 2
+      if (!this.boundingBoxData) return
+      const [size, offset, angle] = this.boundingBoxData;
+      (() => {
+        const screenX = data.x * zoomLevel;
+        const screenY = data.y * zoomLevel;
+        ctx.strokeStyle = 'red';
+        ctx.save();
+        ctx.translate(screenX + offset.x * zoomLevel, screenY + offset.z * zoomLevel); // 移动原点到目标中心
+        ctx.rotate(angle.y * -1); // 围绕新原点旋转
+        // 绘制一个方块
+        ctx.strokeRect(
+          (size.x / -2) * zoomLevel,
+          (size.z / -2) * zoomLevel,
+          size.x * zoomLevel,
+          size.z * zoomLevel
+        );
+        ctx.restore();
+      })();
+    }
   }
 
   draw2DActionHandle(

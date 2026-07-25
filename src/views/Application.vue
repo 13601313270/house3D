@@ -1944,6 +1944,10 @@ async function moveToGroup(id: string) {
 function changeGlobalEditGroup() {
   if (menuEntity instanceof PlaneGroupEntity) {
     window.globalEditGroup = menuEntity
+    if (window.globalEditGroup instanceof PlaneGroupEntity) {
+      window.globalEditGroup.isSetGlobalEditingGroup = true
+      canvas2DSceneManage.renderPreview()
+    }
   }
   contextMenu.value = null
 }
