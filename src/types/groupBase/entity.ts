@@ -4,7 +4,7 @@ import { editItem } from '@/utils/editItem'
 import { PointEntityClass } from '@/types/pointEntity'
 import { BaseEntityClass, EntityConstructor } from '@/types/baseEntity'
 import { BaseObjData, HandelInfo, Point } from '@/types/map2d'
-import { GroupBaseData } from '.'
+import { GroupBaseData } from './index.d'
 import drawAxes from '@/utils/drawAxes'
 import canvas2DSceneManage from '@/utils/canvas2DSceneManage'
 

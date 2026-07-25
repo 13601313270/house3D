@@ -395,6 +395,7 @@ const worldApi = new WorldGroup(null, {
   temp: false,
 })
 window.worldApi = worldApi
+window.globalEditGroup = worldApi
 
 allObjCount.value = worldApi.getAllObjectCount()
 
