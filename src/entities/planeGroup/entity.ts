@@ -34,9 +34,49 @@ export class PlaneGroupEntity extends GroupBaseEntity<PlaneGroupData> {
     ctx: CanvasRenderingContext2D,
     zoomLevel: number,
   ) {
-    // console.log('boundingBoxData=====', this.boundingBoxData)
     if (!this.boundingBoxData) return
     const data = this.getData();
+    if (this.isSetGlobalEditingGroup) {
+      // 绘制一个全屏黑色
+      // ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+      // ctx.fillRect(-ctx.canvas.width, -ctx.canvas.height, ctx.canvas.width * 2, ctx.canvas.height * 2);
+      // 绘制一个边界
+      if (!this.boundingBoxData) return
+      const [size, offset, angle] = this.boundingBoxData;
+      (() => {
+        const screenX = data.x * zoomLevel;
+        const screenY = data.y * zoomLevel;
+        ctx.strokeStyle = 'red';
+        ctx.lineWidth = 2;
+        ctx.fillStyle = 'white';
+        ctx.save();
+        ctx.translate(screenX + offset.x * zoomLevel, screenY + offset.z * zoomLevel); // 移动原点到目标中心
+        ctx.rotate(angle.y * -1); // 围绕新原点旋转
+
+        (() => {
+          // 绘制背景
+          ctx.beginPath();
+          ctx.rect(-10000, -10000, 20000, 20000);
+          ctx.moveTo((size.x / -2) * zoomLevel + size.x * zoomLevel, (size.z / -2) * zoomLevel); // 从右上角开始
+          ctx.lineTo((size.x / -2) * zoomLevel, (size.z / -2) * zoomLevel);              // 到左上
+          ctx.lineTo((size.x / -2) * zoomLevel, (size.z / -2) * zoomLevel + size.z * zoomLevel); // 到左下
+          ctx.lineTo((size.x / -2) * zoomLevel + size.x * zoomLevel, (size.z / -2) * zoomLevel + size.z * zoomLevel); // 到右下
+          ctx.closePath(); // 回到右上角（逆时针）
+          ctx.clip('evenodd');
+          ctx.fillStyle = 'rgba(0, 0, 0, 0.61)'; // 半透明红色
+          ctx.fillRect(-10000, -10000, 20000, 20000);
+        })();
+        ctx.lineWidth = 2;
+        ctx.strokeRect(
+          (size.x / -2) * zoomLevel,
+          (size.z / -2) * zoomLevel,
+          size.x * zoomLevel,
+          size.z * zoomLevel
+        );
+        ctx.restore();
+      })();
+    }
+    // console.log('boundingBoxData=====', this.boundingBoxData)
     (() => {
       const screenX = data.x * zoomLevel;
       const screenY = data.y * zoomLevel;
@@ -56,29 +96,6 @@ export class PlaneGroupEntity extends GroupBaseEntity<PlaneGroupData> {
     })();
 
     super.draw2DPreview(ctx, zoomLevel)
-
-    if (this.isSetGlobalEditingGroup) {
-      // 绘制一个边界
-      ctx.lineWidth = 2
-      if (!this.boundingBoxData) return
-      const [size, offset, angle] = this.boundingBoxData;
-      (() => {
-        const screenX = data.x * zoomLevel;
-        const screenY = data.y * zoomLevel;
-        ctx.strokeStyle = 'red';
-        ctx.save();
-        ctx.translate(screenX + offset.x * zoomLevel, screenY + offset.z * zoomLevel); // 移动原点到目标中心
-        ctx.rotate(angle.y * -1); // 围绕新原点旋转
-        // 绘制一个方块
-        ctx.strokeRect(
-          (size.x / -2) * zoomLevel,
-          (size.z / -2) * zoomLevel,
-          size.x * zoomLevel,
-          size.z * zoomLevel
-        );
-        ctx.restore();
-      })();
-    }
   }
 
   draw2DActionHandle(

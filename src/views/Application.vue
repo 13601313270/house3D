@@ -666,7 +666,11 @@ onMounted(async () => {
           canvas2DSceneManage.renderPreview()
         }
       } else if (window.globalEditGroup !== worldApi) {
+        if (window.globalEditGroup instanceof PlaneGroupEntity) {
+          window.globalEditGroup.isSetGlobalEditingGroup = false
+        }
         window.globalEditGroup = worldApi
+        canvas2DSceneManage.renderPreview()
         if (window.globalEditGroup.insertTempObj) {
           window.globalEditGroup.insertTempObj.beforeRemove()
           window.globalEditGroup.insertTempObj = null
@@ -2239,7 +2243,6 @@ button {
 }
 
 .drawing-canvas {
-  border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   cursor: crosshair;
   width: 100%;
