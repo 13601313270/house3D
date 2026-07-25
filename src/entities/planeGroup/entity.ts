@@ -80,7 +80,7 @@ export class PlaneGroupEntity extends GroupBaseEntity<PlaneGroupData> {
     (() => {
       const screenX = data.x * zoomLevel;
       const screenY = data.y * zoomLevel;
-      ctx.strokeStyle = '#333'
+      ctx.strokeStyle = '#929292ff'
       const [size, offset] = this.boundingBoxData
       ctx.save(); // 保存当前状态
       ctx.translate(screenX + offset.x * zoomLevel, screenY + offset.z * zoomLevel); // 移动原点到目标中心

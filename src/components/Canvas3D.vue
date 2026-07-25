@@ -1,5 +1,5 @@
 <template>
-  <div class="canvas-3d-container" ref="containerRef">
+  <div class="canvas-3d-container" ref="containerRef" @mouseleave="mouseLeave">
   </div>
 </template>
 
@@ -9,8 +9,6 @@ import * as THREE from 'three'
 import { CameraState, OrthographicCamera } from '@/types/camera'
 import { PointEntityClass } from '@/types/pointEntity';
 import { BaseEntityClass } from '@/types/baseEntity';
-import { GroupBaseEntity } from '@/types/groupBase/entity';
-import { GroupBaseData } from '@/types/groupBase';
 
 const props = defineProps<{
   cameraState: CameraState,//  | OrthographicCamera,
@@ -503,6 +501,21 @@ const updateContainerHeight = (renderer: THREE.WebGLRenderer) => {
     camera.updateProjectionMatrix()
     renderer.setSize(renderWidth, renderHeight)
   }
+}
+function mouseLeave() {
+  console.log('mouseLeave')
+  const allBoundingBox = window.globalEditGroup.boundingBoxList()
+  allBoundingBox.forEach((item) => {
+    item.visible = false
+  })
+  const allMoveZBox = window.globalEditGroup.moveZBoxList()
+  allMoveZBox.forEach((item) => {
+    // @ts-ignore
+    const entity = item.children[0].entity as BaseEntityClass<any>
+    if (entity instanceof PointEntityClass) {
+      entity.moveZBox.visible = false
+    }
+  })
 }
 
 onMounted(() => {

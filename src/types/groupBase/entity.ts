@@ -7,6 +7,7 @@ import { BaseObjData, HandelInfo, Point } from '@/types/map2d'
 import { GroupBaseData } from './index.d'
 import drawAxes from '@/utils/drawAxes'
 import canvas2DSceneManage from '@/utils/canvas2DSceneManage'
+import { PlaneGroupEntity } from '@/entities/planeGroup/entity'
 
 type WorldChangeType = 'add' | 'remove' | 'change'
 
@@ -91,6 +92,7 @@ export abstract class GroupBaseEntity<T extends GroupBaseData> extends PointEnti
     if (this.insertTempObj) {
       allObj.push(this.insertTempObj)
     }
+    let activeEditGroup: PlaneGroupEntity | null = null;
     allObj.sort((a, b) => {
       let aZ = 0;
       if (a instanceof PointEntityClass) {
@@ -102,6 +104,12 @@ export abstract class GroupBaseEntity<T extends GroupBaseData> extends PointEnti
         const bData = b.getData()
         bZ = bData.z + (b.boundingBoxData ? b.boundingBoxData[0].y : 0)
       }
+      if (a instanceof PlaneGroupEntity && a.isSetGlobalEditingGroup) {
+        activeEditGroup = a;
+      }
+      if (b instanceof PlaneGroupEntity && b.isSetGlobalEditingGroup) {
+        activeEditGroup = b;
+      }
       return aZ - bZ
     })
 
@@ -110,10 +118,15 @@ export abstract class GroupBaseEntity<T extends GroupBaseData> extends PointEnti
     ctx.rotate(angleY * -1)
 
     allObj.forEach((item) => {
-      item.draw2DPreview(ctx, zoomLevel)
+      if (item !== activeEditGroup) {
+        item.draw2DPreview(ctx, zoomLevel)
+      }
     })
+    if (activeEditGroup) {
+      // @ts-ignore
+      activeEditGroup.draw2DPreview(ctx, zoomLevel)
+    }
     ctx.restore()
-    // drawAxes(ctx, angleY * -1, zoomLevel, this.width, this.height)
   }
 
   drawAxis(ctx: CanvasRenderingContext2D, zoomLevel: number, xAxisSnappedY: number | null, yAxisSnappedX: number | null) {
