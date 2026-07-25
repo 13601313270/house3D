@@ -112,10 +112,43 @@ export abstract class GroupBaseEntity<T extends GroupBaseData> extends PointEnti
     allObj.forEach((item) => {
       item.draw2DPreview(ctx, zoomLevel)
     })
-
-    // 绘制轴
     ctx.restore()
     // drawAxes(ctx, angleY * -1, zoomLevel, this.width, this.height)
+  }
+
+  drawAxis(ctx: CanvasRenderingContext2D, zoomLevel: number, xAxisSnappedY: number | null, yAxisSnappedX: number | null) {
+    const data = this.getData();
+    const { angleY } = data
+    const screenX = data.x * zoomLevel;
+    const screenY = data.y * zoomLevel;
+    const width = 10000;
+    const height = 10000;
+    ctx.clearRect(0, 0, width, height)
+    ctx.save()
+    ctx.translate(screenX, screenY)
+    ctx.rotate(angleY * -1)
+    ctx.strokeStyle = '#999'
+    ctx.lineWidth = 1
+
+    // 垂直线（y轴平行）
+    if (yAxisSnappedX !== null) {
+      const screenX = yAxisSnappedX
+      ctx.beginPath()
+      ctx.moveTo(screenX, -height)
+      ctx.lineTo(screenX, height)
+      ctx.stroke()
+    }
+
+    // 水平线（x轴平行）
+    if (xAxisSnappedY !== null) {
+      const screenY = xAxisSnappedY;
+      console.log('xAxisSnappedY', xAxisSnappedY, screenY)
+      ctx.beginPath()
+      ctx.moveTo(-width, screenY)
+      ctx.lineTo(width, screenY)
+      ctx.stroke()
+    }
+    ctx.restore()
   }
 
   draw2DActionHandle(

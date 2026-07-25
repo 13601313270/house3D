@@ -72,7 +72,6 @@ export function getHandleInAreaInfoByXY(
       if (api.getData().isLocked) continue
       const matchInfo = api.showMatchHandel(x, y)
       if (matchInfo) {
-        console.log('handleInfo---1', api)
         const data = api.getData();
         let dist: number;
         if (api instanceof LineEntityClass) {

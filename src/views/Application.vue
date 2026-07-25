@@ -404,38 +404,35 @@ function setHoverPoint(point: Point | null) {
   hoverPoint.value = point
   const canvasAction = canvas2DSceneManage.list[0].canvasList[1]!;
   if (!canvasAction) return
-
   // 绘制磁吸点的参考轴
-  if (hoverPoint.value) {
-    const ctxAction = canvasAction.getContext('2d')!;
-    ctxAction.clearRect(0, 0, canvasAction.width, canvasAction.height)
-    if (!ctxAction) return
-    ctxAction.strokeStyle = '#999'
-    ctxAction.lineWidth = 1
-
-    // 垂直线（y轴对齐）
-    if (yAxisSnappedX.value !== null) {
-      const screenX = yAxisSnappedX.value * canvas2DSceneManage.list[0].level + canvas2DSceneManage.list[0].panOffset.x
-      ctxAction.beginPath()
-      ctxAction.moveTo(screenX, 0)
-      ctxAction.lineTo(screenX, canvasAction.height)
-      ctxAction.stroke()
+  const level = canvas2DSceneManage.list[0].level
+  const ctx = canvasAction.getContext('2d')!
+  ctx.clearRect(0, 0, 100000, 100000)
+  function drawTemp() {
+    if (hoverPoint.value) {
+      window.globalEditGroup.drawAxis(ctx, level, xAxisSnappedY.value, yAxisSnappedX.value);
+    } else {
+      window.globalEditGroup.drawAxis(ctx, level, null, null);
     }
-
-    // 水平线（x轴对齐）
-    if (xAxisSnappedY.value !== null) {
-      let xInGroup = xAxisSnappedY.value;
-      if (window.globalEditGroup !== worldApi) {
-        const { x: groupX, y: groupY, angleY: groupAngle } = window.globalEditGroup.getData()
-        xInGroup = xInGroup - groupX
-      }
-
-      const screenY = xInGroup * canvas2DSceneManage.list[0].level + canvas2DSceneManage.list[0].panOffset.y
-      ctxAction.beginPath()
-      ctxAction.moveTo(0, screenY)
-      ctxAction.lineTo(canvasAction.width, screenY)
-      ctxAction.stroke()
-    }
+  }
+  if (window.globalEditGroup !== worldApi) {
+    const worldData = worldApi.getData();
+    ctx.save()
+    ctx.translate(
+      worldData.x + canvas2DSceneManage.list[0].panOffset.x,
+      worldData.y + canvas2DSceneManage.list[0].panOffset.y
+    )
+    ctx.rotate(worldData.angleY * -1)
+    drawTemp()
+    ctx.restore()
+  } else {
+    ctx.save()
+    ctx.translate(
+      canvas2DSceneManage.list[0].panOffset.x,
+      canvas2DSceneManage.list[0].panOffset.y
+    )
+    drawTemp()
+    ctx.restore()
   }
 }
 
@@ -1378,7 +1375,6 @@ const handleMouseMove = (point: {
       ctxAction.clearRect(0, 0, canvasAction.width, canvasAction.height)
       const handleInfo = getHandleInAreaInfoByXY(window.globalEditGroup, xInGroup, yInGroup)
       if (handleInfo) {
-        console.log('handleInfo---list', handleInfo)
         const { classInfo, matchArea } = handleInfo;
         (() => {
           // 暂无操作句柄
