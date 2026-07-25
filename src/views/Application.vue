@@ -415,25 +415,22 @@ function setHoverPoint(point: Point | null) {
       window.globalEditGroup.drawAxis(ctx, level, null, null);
     }
   }
+  ctx.save()
   if (window.globalEditGroup !== worldApi) {
     const worldData = worldApi.getData();
-    ctx.save()
     ctx.translate(
       worldData.x + canvas2DSceneManage.list[0].panOffset.x,
       worldData.y + canvas2DSceneManage.list[0].panOffset.y
     )
     ctx.rotate(worldData.angleY * -1)
-    drawTemp()
-    ctx.restore()
   } else {
-    ctx.save()
     ctx.translate(
       canvas2DSceneManage.list[0].panOffset.x,
       canvas2DSceneManage.list[0].panOffset.y
     )
-    drawTemp()
-    ctx.restore()
   }
+  drawTemp()
+  ctx.restore()
 }
 
 const activeCameraIndex = ref(0)
@@ -544,7 +541,7 @@ onMounted(async () => {
         const index: number = contextMenu.value.index
         const find = objList.find((v) => {
           if (v.type === type) {
-            const typeList = window.worldApi.getTypeListEntity(type)
+            const typeList = worldApi.getTypeListEntity(type)
             if (typeList) {
               const obj = typeList[index]
               if (obj === v) {
@@ -869,7 +866,7 @@ async function initWorldByData(data: fileData & {
     await changeCamera2(data.activeCameraIndex)
   }
   if (data.environmentConfig) {
-    window.worldApi.setEnvironMent(data.environmentConfig)
+    worldApi.setEnvironMent(data.environmentConfig)
   }
 }
 
@@ -1020,7 +1017,9 @@ const handleCanvasClick = async (point: {
     }
     beCopyEntity = null
     beCopyEntityHandelInfo = null
+    matchHandelObj = null
     contextMenu.value = null
+    canvas2DSceneManage.renderPreview()
     return
   }
   // 如果当前是拖拽模式，不执行任何操作
@@ -1250,7 +1249,7 @@ const handleMouseMove = (point: {
           const beMatchPoints = wall.getMineBeSnapPoints(matchedHandelInfo)
           if (beMatchPoints.length > 0) {
             const snapped33 = getSnapPointAndLine(
-              { x: xInWorld___, y: yInWorld___ },
+              { x: xInGroup, y: yInGroup },
               [],
               [],
               beMatchPoints,
@@ -1278,11 +1277,11 @@ const handleMouseMove = (point: {
             let matchLine = null;
             for (let j = 0; j < beMatchLines.length; j++) {
               const line = beMatchLines[j]
-              const distance = pointToLineDistance({ x: xInWorld___, y: yInWorld___ }, line[0], line[1])
+              const distance = pointToLineDistance({ x: xInGroup, y: yInGroup }, line[0], line[1])
               if (distance < minDistance) {
                 matchLine = line
                 minDistance = distance
-                nearestPoint = getClosestPointOnLine({ x: xInWorld___, y: yInWorld___ }, line[0], line[1])
+                nearestPoint = getClosestPointOnLine({ x: xInGroup, y: yInGroup }, line[0], line[1])
               }
             }
             if (nearestPoint && minDistance < snapThreshold && matchLine) {
@@ -1333,6 +1332,16 @@ const handleMouseMove = (point: {
         ctxAction.save()
         ctxAction.translate(screenX, screenY)
         ctxAction.rotate(angleY * -1)
+        if (window.globalEditGroup !== worldApi) {
+          const groupData = window.globalEditGroup.getData()
+          ctxAction.translate(
+            groupData.x * canvas2DSceneManage.list[0].level,
+            groupData.y * canvas2DSceneManage.list[0].level,
+          )
+          ctxAction.rotate(
+            groupData.angleY * -1,
+          )
+        }
         matchHandelObj.draw2DActionHandle(ctxAction, canvas2DSceneManage.list[0].level)
         ctxAction.restore()
       })();
@@ -1378,46 +1387,62 @@ const handleMouseMove = (point: {
         const { classInfo, matchArea } = handleInfo;
         (() => {
           // 暂无操作句柄
-          const data = window.globalEditGroup.getData();
-          const { angleY } = data
-          const screenX = data.x * canvas2DSceneManage.list[0].level + canvas2DSceneManage.list[0].panOffset.x;
-          const screenY = data.y * canvas2DSceneManage.list[0].level + canvas2DSceneManage.list[0].panOffset.y;
+          // 先平移，再旋转，再缩放
+          const worldData__ = worldApi.getData(); // window.globalEditGroup
           ctxAction.save()
-          ctxAction.translate(screenX, screenY)
-          ctxAction.rotate(angleY * -1)
-
-          if (matchArea instanceof MatchRectArea) {
-            ctxAction.lineWidth = 2
-            ctxAction.strokeStyle = 'yellow'
-            ctxAction.save()
+          ctxAction.translate(
+            worldData__.x + canvas2DSceneManage.list[0].panOffset.x,
+            worldData__.y + canvas2DSceneManage.list[0].panOffset.y
+          )
+          ctxAction.rotate(worldData__.angleY * -1)
+          // ctxAction.scale(canvas2DSceneManage.list[0].level, canvas2DSceneManage.list[0].level)
+          if (window.globalEditGroup !== worldApi) {
+            const groupData = window.globalEditGroup.getData()
             ctxAction.translate(
-              matchArea.data.x * canvas2DSceneManage.list[0].level,
-              matchArea.data.y * canvas2DSceneManage.list[0].level
-            ); // 移动原点到目标中心
-            ctxAction.rotate(matchArea.data.angleY * -1);
-            // 绘制一个方块
-            ctxAction.strokeRect(
-              matchArea.data.width / -2 * canvas2DSceneManage.list[0].level,
-              matchArea.data.depth / -2 * canvas2DSceneManage.list[0].level,
-              matchArea.data.width * canvas2DSceneManage.list[0].level,
-              matchArea.data.depth * canvas2DSceneManage.list[0].level,
+              groupData.x * canvas2DSceneManage.list[0].level,
+              groupData.y * canvas2DSceneManage.list[0].level,
             )
-            ctxAction.restore()
-          } else if (matchArea instanceof MatchCircleArea) {
-            ctxAction.lineWidth = 2
-            ctxAction.strokeStyle = 'yellow'
-            // 绘制一个圆
-            ctxAction.beginPath()
-            ctxAction.arc(
-              matchArea.data.x * canvas2DSceneManage.list[0].level,
-              matchArea.data.y * canvas2DSceneManage.list[0].level,
-              matchArea.data.r * canvas2DSceneManage.list[0].level,
-              0,
-              Math.PI * 2,
+            ctxAction.rotate(
+              groupData.angleY * -1,
             )
-            ctxAction.stroke()
+            drawFUnc()
+          } else {
+            drawFUnc()
           }
-          classInfo.draw2DActionHandle(ctxAction, canvas2DSceneManage.list[0].level)
+          function drawFUnc() {
+            if (matchArea instanceof MatchRectArea) {
+              ctxAction.lineWidth = 2
+              ctxAction.strokeStyle = 'yellow'
+              ctxAction.save()
+              ctxAction.translate(
+                matchArea.data.x * canvas2DSceneManage.list[0].level,
+                matchArea.data.y * canvas2DSceneManage.list[0].level
+              ); // 移动原点到目标中心
+              ctxAction.rotate(matchArea.data.angleY * -1);
+              // 绘制一个方块
+              ctxAction.strokeRect(
+                matchArea.data.width / -2 * canvas2DSceneManage.list[0].level,
+                matchArea.data.depth / -2 * canvas2DSceneManage.list[0].level,
+                matchArea.data.width * canvas2DSceneManage.list[0].level,
+                matchArea.data.depth * canvas2DSceneManage.list[0].level,
+              )
+              ctxAction.restore()
+            } else if (matchArea instanceof MatchCircleArea) {
+              ctxAction.lineWidth = 2
+              ctxAction.strokeStyle = 'yellow'
+              // 绘制一个圆
+              ctxAction.beginPath()
+              ctxAction.arc(
+                matchArea.data.x * canvas2DSceneManage.list[0].level,
+                matchArea.data.y * canvas2DSceneManage.list[0].level,
+                matchArea.data.r * canvas2DSceneManage.list[0].level,
+                0,
+                Math.PI * 2,
+              )
+              ctxAction.stroke()
+            }
+            classInfo.draw2DActionHandle(ctxAction, canvas2DSceneManage.list[0].level)
+          }
           ctxAction.restore()
           if (classInfo instanceof PointEntityClass) {
             ctxAction.font = `${Math.max(14 * canvas2DSceneManage.list[0].level, 14)}px '微软雅黑'`
@@ -1888,7 +1913,7 @@ async function copyEntity() {
 async function moveToGroup(id: string) {
   if (!contextMenu.value) return
   if (!menuEntity) return
-  const group: PlaneGroupEntity = window.worldApi.getTypeListEntity('planeGroup').find((entity) => entity.getData().id === id) as PlaneGroupEntity;
+  const group: PlaneGroupEntity = worldApi.getTypeListEntity('planeGroup').find((entity) => entity.getData().id === id) as PlaneGroupEntity;
   console.log('group', group)
 
   const type = menuEntity.type
