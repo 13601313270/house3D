@@ -1,5 +1,3 @@
-import { Point } from "@/types"
-
 const drawAxes = (
   ctx: CanvasRenderingContext2D,
   // panOffset: Point,
@@ -14,7 +12,35 @@ const drawAxes = (
   const axisLineWidth = 2
   const tickSize = 5
   const labelPadding = 15
-  const scale = 100
+  let scale = 50
+  if (zoomLevel > 5) {
+    scale = 10;
+  }
+  else if (zoomLevel > 2) {
+    scale = 20;
+  }
+  else if (zoomLevel < 0.01) {
+    scale = 10000;
+  }
+  else if (zoomLevel < 0.02) {
+    scale = 5000;
+  }
+  else if (zoomLevel < 0.03) {
+    scale = 2000;
+  }
+  else if (zoomLevel < 0.08) {
+    scale = 1000;
+  }
+  else if (zoomLevel < 0.15) {
+    scale = 500;
+  }
+  else if (zoomLevel < 0.35) {
+    scale = 200;
+  }
+  else if (zoomLevel < 0.6) {
+    scale = 100;
+  }
+  console.log('zoomLevel', zoomLevel, scale)
 
   const originX = 0; // panOffset.x
   const originY = 0; // panOffset.y
@@ -45,8 +71,11 @@ const drawAxes = (
     ctx.moveTo(screenX, -tickSize)
     ctx.lineTo(screenX, tickSize)
     ctx.stroke()
+    if (x === 0) {
+      continue;
+    }
 
-    const label = x !== 0 ? `${x}px` : ''
+    const label = `${x}cm`
     if (label) {
       ctx.save()
       ctx.translate(screenX, tickSize + labelPadding)
@@ -76,8 +105,11 @@ const drawAxes = (
     ctx.moveTo(-tickSize, screenY)
     ctx.lineTo(tickSize, screenY)
     ctx.stroke()
+    if (y === 0) {
+      continue;
+    }
 
-    const label = y !== 0 ? `${y}px` : ''
+    const label = `${y}cm`
     if (label) {
       ctx.save()
       ctx.translate(-labelPadding, screenY)
@@ -98,7 +130,6 @@ const drawAxes = (
   ctx.font = '10px Arial'
   ctx.textAlign = 'right'
   ctx.textBaseline = 'top'
-  ctx.fillText('O', 0, 0)
   ctx.restore()
 }
 
