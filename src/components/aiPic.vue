@@ -12,7 +12,8 @@
 
     <div class="content">
       <div class="image-section">
-        <div class="basic-image-list">
+        <div class="section-title">参考图片（最多3张）</div>
+        <div class="image-list">
           <div class="image-item">
             <img v-if="initialImage" :src="initialImage" alt="" class="preview-img" />
             <div v-else class="upload-hint">
@@ -22,9 +23,6 @@
             </div>
             <span class="imgIndex">图1</span>
           </div>
-        </div>
-        <div class="section-title">额外参考图片（最多2张）</div>
-        <div class="image-list">
           <div v-for="(image, index) in images" :key="index" class="image-item" :class="{ 'empty': !image }"
             @click="handleImageClick(index)">
             <div v-if="image" style="height: 100%;">
@@ -380,91 +378,32 @@ const handleDownload = () => {
 
     .image-section {
       width: 100%;
-      max-width: 800px;
-
-      .basic-image-list {
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 12px;
-
-        .image-item {
-          position: relative;
-          border: 2px dashed #d9d9d9;
-          border-radius: 8px;
-          overflow: hidden;
-          cursor: pointer;
-          transition: all 0.2s;
-          background: #fafafa;
-
-          .preview-img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-          }
-
-          .upload-hint {
-            width: 100%;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            color: #999;
-            gap: 8px;
-
-            .plus-icon {
-              width: 24px;
-              height: 24px;
-            }
-          }
-
-          .delete-btn {
-            position: absolute;
-            top: 4px;
-            right: 4px;
-            width: 24px;
-            height: 24px;
-            border: none;
-            background: rgba(0, 0, 0, 0.5);
-            border-radius: 50%;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: background 0.2s;
-
-            &:hover {
-              background: rgba(255, 77, 79, 0.8);
-            }
-
-            img {
-              width: 12px;
-              height: 12px;
-            }
-          }
-        }
-      }
+      max-width: 1000px;
 
       .image-list {
         display: flex;
         gap: 12px;
         margin-top: 12px;
+        overflow-x: scroll;
 
         .image-item {
           position: relative;
-          height: 200px;
+          height: 400px;
           border: 2px dashed #d9d9d9;
           border-radius: 8px;
           overflow: hidden;
           cursor: pointer;
           transition: all 0.2s;
           background: #fafafa;
+          flex-shrink: 0;
 
           &.empty {
             width: 130px;
           }
 
           &:hover {
+            // transform: scale(1.2);
+            z-index: 1;
             border-color: #1890ff;
             background: #f0f5ff;
           }
@@ -537,7 +476,7 @@ const handleDownload = () => {
 
     .templates-section {
       width: 100%;
-      max-width: 800px;
+      max-width: 1000px;
 
       .templates-list {
         display: flex;
@@ -557,12 +496,12 @@ const handleDownload = () => {
           &:hover {
             border-color: #1890ff;
             background: #f0f5ff;
-            transform: translateY(-2px);
+            transform: translateY(-2px) scale(1.4);
             box-shadow: 0 2px 8px rgba(24, 144, 255, 0.15);
           }
 
           .template-image {
-            width: 175px;
+            width: 226px;
             object-fit: cover;
             border-radius: 4px;
             flex-shrink: 0;
@@ -597,7 +536,7 @@ const handleDownload = () => {
 
     .prompt-section {
       width: 100%;
-      max-width: 800px;
+      max-width: 1000px;
 
       .prompt-input {
         width: 100%;
@@ -623,7 +562,7 @@ const handleDownload = () => {
 
     .action-section {
       width: 100%;
-      max-width: 800px;
+      max-width: 1000px;
       display: flex;
       justify-content: center;
       margin-top: 12px;
@@ -674,7 +613,7 @@ const handleDownload = () => {
 
     .result-section {
       width: 100%;
-      max-width: 800px;
+      max-width: 1000px;
       margin-top: 16px;
 
       .result-container {

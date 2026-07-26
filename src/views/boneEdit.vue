@@ -41,6 +41,9 @@
               @mouseenter="handleDropdownEnter" @mouseleave="handleDropdownLeave">
               <div class="dropdown-item" @click.stop="saveUpperBody">仅应用上半身</div>
               <div class="dropdown-item" @click.stop="saveLowerBody">仅应用下半身</div>
+              <div class="dropdown-item" @click.stop="saveHead">仅应用头</div>
+              <div class="dropdown-item" @click.stop="saveLeftArm">仅应用左臂</div>
+              <div class="dropdown-item" @click.stop="saveRightArm">仅应用右臂</div>
             </div>
           </div>
         </div>
@@ -804,39 +807,15 @@ function save(boneFilter?: (name: string) => boolean) {
   emit('update:modelValue', saveVal)
 }
 
-const upperBodyBones = [
-  'mixamorigSpine',
-  'mixamorigSpine1',
-  'mixamorigSpine2',
+const headBones: string[] = [
   'mixamorigNeck',
   'mixamorigHead',
   'mixamorigHeadTop_End',
   'mixamorigHeadTop_End_end',
   'mixamorigHeadTop_End_end_end',
-  'mixamorigRightShoulder',
-  'mixamorigRightArm',
-  'mixamorigRightForeArm',
-  'mixamorigRightHand',
-  'mixamorigRightHandThumb1',
-  'mixamorigRightHandThumb2',
-  'mixamorigRightHandThumb3',
-  'mixamorigRightHandThumb4',
-  'mixamorigRightHandIndex1',
-  'mixamorigRightHandIndex2',
-  'mixamorigRightHandIndex3',
-  'mixamorigRightHandIndex4',
-  'mixamorigRightHandMiddle1',
-  'mixamorigRightHandMiddle2',
-  'mixamorigRightHandMiddle3',
-  'mixamorigRightHandMiddle4',
-  'mixamorigRightHandRing1',
-  'mixamorigRightHandRing2',
-  'mixamorigRightHandRing3',
-  'mixamorigRightHandRing4',
-  'mixamorigRightHandPinky1',
-  'mixamorigRightHandPinky2',
-  'mixamorigRightHandPinky3',
-  'mixamorigRightHandPinky4',
+];
+
+const leftArmBones: string[] = [
   'mixamorigLeftShoulder',
   'mixamorigLeftArm',
   'mixamorigLeftForeArm',
@@ -862,6 +841,42 @@ const upperBodyBones = [
   'mixamorigLeftHandPinky3',
   'mixamorigLeftHandPinky4',
 ]
+
+const rightArmBones = [
+  'mixamorigRightShoulder',
+  'mixamorigRightArm',
+  'mixamorigRightForeArm',
+  'mixamorigRightHand',
+  'mixamorigRightHandThumb1',
+  'mixamorigRightHandThumb2',
+  'mixamorigRightHandThumb3',
+  'mixamorigRightHandThumb4',
+  'mixamorigRightHandIndex1',
+  'mixamorigRightHandIndex2',
+  'mixamorigRightHandIndex3',
+  'mixamorigRightHandIndex4',
+  'mixamorigRightHandMiddle1',
+  'mixamorigRightHandMiddle2',
+  'mixamorigRightHandMiddle3',
+  'mixamorigRightHandMiddle4',
+  'mixamorigRightHandRing1',
+  'mixamorigRightHandRing2',
+  'mixamorigRightHandRing3',
+  'mixamorigRightHandRing4',
+  'mixamorigRightHandPinky1',
+  'mixamorigRightHandPinky2',
+  'mixamorigRightHandPinky3',
+  'mixamorigRightHandPinky4',
+];
+
+const upperBodyBones = [
+  'mixamorigSpine',
+  'mixamorigSpine1',
+  'mixamorigSpine2',
+  ...headBones,
+  ...leftArmBones,
+  ...rightArmBones,
+]
 const lowerBodyBones = [
   'mixamorigRightUpLeg',
   'mixamorigRightLeg',
@@ -883,6 +898,18 @@ function saveUpperBody() {
 function saveLowerBody() {
   showDropdown.value = false
   save(name => lowerBodyBones.includes(name))
+}
+function saveHead() {
+  showDropdown.value = false
+  save(name => headBones.includes(name))
+}
+function saveLeftArm() {
+  showDropdown.value = false
+  save(name => leftArmBones.includes(name))
+}
+function saveRightArm() {
+  showDropdown.value = false
+  save(name => rightArmBones.includes(name))
 }
 
 function handleDropdownEnter() {
