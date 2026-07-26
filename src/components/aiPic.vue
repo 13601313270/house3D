@@ -3,7 +3,7 @@
     <div class="header">
       <div class="title">AI渲染</div>
       <div style="flex: 1;"></div>
-      <div class="userInfo">
+      <div class="userInfo" v-if="store.state.main.userInfo">
         <img src="money.png" />
         <span>{{ store.state.main.userInfo.money }}金币</span>
       </div>
