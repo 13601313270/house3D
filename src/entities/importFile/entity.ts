@@ -37,7 +37,7 @@ export class ImportFileEntity extends PointEntityClass<ImportFileData> {
 
     const camera = new THREE.OrthographicCamera(-cameraSize / 2, cameraSize / 2, cameraSize / 2, -cameraSize / 2)
     scene.background = null
-    const ambientLight = new THREE.AmbientLight(0xffffff, 15)
+    const ambientLight = new THREE.AmbientLight(0xffffff, 5)
     scene.add(ambientLight)
 
     camera.position.set(0, 2000, 0)

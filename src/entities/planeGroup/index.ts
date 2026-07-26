@@ -8,7 +8,7 @@ const GroupPlugin: PluginType = {
   type: 'other',
   entity: PlaneGroupEntity,
   objType: 'point',
-  previewImg: '/toolType/group.png',
+  previewImg: '/toolType/group.jpg',
   defaultValues,
 }
 export default GroupPlugin

@@ -13,8 +13,10 @@
       <div class="configItemList">
         <div class="configItem" v-for="item in allObjList" :key="item.id">
           <div class="objInfo" @mouseenter="handleEnter(worldGroup, item)">
+            <img class="icon" :src="item.icon" alt="previewImg" />
             <div class="nameInfo">
-              <span>{{ item.name }}</span><span class="tip" v-if="item.tip">({{ item.tip }})</span>
+              <span>{{ item.name }}</span>
+              <span class="tip" v-if="item.tip">({{ item.tip }})</span>
             </div>
             <div class="tools">
               <div v-if="item.isLocked" class="toolItem" @click="handleUnLock(worldGroup, item, false)">
@@ -40,6 +42,7 @@
           <div v-if="item.children" class="children">
             <div v-for="child in item.children" :key="child.id" class="childItem objInfo"
               @mouseenter="handleEnter(map.get(item.id), child)">
+              <img class="icon" :src="child.icon" alt="previewImg" />
               <div class="nameInfo">
                 <span>{{ child.name }}</span>
                 <span class="tip" v-if="child.tip">({{ child.tip }})</span>
@@ -56,7 +59,7 @@
                 </div>
 
                 <div class="toolItem">
-                  <img v-if="item.isHidden" class="img" src="@/assets/notVisible.svg" alt="notVisible"
+                  <img v-if="item.isHidden || child.isHidden" class="img" src="@/assets/notVisible.svg" alt="notVisible"
                     @click="show3DMesh(map.get(item.id), child.id, false)" />
                   <img v-else class="img" src="@/assets/visible.svg" alt="visible"
                     @click="show3DMesh(map.get(item.id), child.id, true)" />
@@ -80,6 +83,9 @@ import { GroupBaseEntity } from '@/types/groupBase/entity'
 import { GroupBaseData } from '@/types/groupBase'
 import { BaseEntityClass } from '@/types/baseEntity'
 import { BaseObjData } from '@/types/map2d'
+import { allPluginByKey } from '@/entities'
+import { ImportFileEntity } from '@/entities/importFile/entity'
+import { OutFileEntity } from '@/entities/outFile/entity'
 
 const allObjCount = ref(0)
 type Item = {
@@ -88,6 +94,7 @@ type Item = {
   type: string,
   isHidden: boolean,
   isLocked: boolean,
+  icon: string,
   tip?: string,
   children?: Array<Item>,
 }
@@ -102,12 +109,17 @@ function reloadObjList() {
   map.clear()
   worldGroup.children.forEach(v => {
     const { id, isLocked, isHidden, tip } = v.getData()
+    let icon = allPluginByKey[v.type].previewImg || '';
+    if (v instanceof ImportFileEntity || v instanceof OutFileEntity) {
+      icon = v.img.src;
+    }
     const item: Item = {
       id,
       name: v.name,
       type: v.type,
       isHidden: isHidden || false,
       isLocked: isLocked || false,
+      icon,
       tip,
       children: undefined,
     }
@@ -116,12 +128,17 @@ function reloadObjList() {
       item.name = v.getData().name
       item.children = v.children.map(child => {
         const { id, isLocked, isHidden, tip } = child.getData()
+        let icon = allPluginByKey[child.type].previewImg || '';
+        if (child instanceof ImportFileEntity || child instanceof OutFileEntity) {
+          icon = child.img.src;
+        }
         return {
           id,
           name: child.name,
           type: child.type,
           isHidden: isHidden || false,
           isLocked: isLocked || false,
+          icon,
           tip,
           children: undefined,
           entity: child,
@@ -284,7 +301,7 @@ function show3DMesh(group: GroupBaseEntity<GroupBaseData> | undefined, id: strin
     })
     setTimeout(() => {
       reloadObjList()
-    }, 1000)
+    }, 0)
   }
 }
 
@@ -380,6 +397,12 @@ window.worldApi.onWorldChange(() => {
       .objInfo {
         display: flex;
         align-items: center;
+
+        .icon {
+          width: 24px;
+          height: 24px;
+          margin-right: 4px;
+        }
 
         .nameInfo {
           flex-grow: 1;

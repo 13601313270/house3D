@@ -758,25 +758,41 @@ const handleLoadProgramFileChange = async (e: Event) => {
     environmentConfig?: EnvironmentConfig
   } = JSON.parse(sceneJsonText);
 
+  const allFileTypeId: Set<string> = new Set();
+
   if (sceneData.importFile && sceneData.importFile.length) {
     for (const v of sceneData.importFile) {
-      const { fileTypeId } = v
-      const read = await zip.file(`assets/${fileTypeId}`);
-      const extension = fileTypeId.split('.').pop()?.toLowerCase();
-      if (!read) continue
-      const blob = await read.async('blob');
-      const url = URL.createObjectURL(blob);
-      const file = new File([blob], fileTypeId, { type: blob.type || 'application/octet-stream' })
-
-      await processUploadedFile(file, (object: THREE.Group, file: File) => {
-        const customObjItem: ImportFileType = {
-          fileTypeId: v.fileTypeId,
-          mesh: object,
-          file,
-        }
-        window.worldState.allImportFiles.push(customObjItem)
-      })
+      allFileTypeId.add(v.fileTypeId);
     }
+  }
+  if (sceneData.planeGroup && sceneData.planeGroup.length) {
+    (sceneData.planeGroup as PlaneGroupData[]).forEach((planeGroupItem: PlaneGroupData) => {
+      if (planeGroupItem.childrenData) {
+        planeGroupItem.childrenData.forEach((childItem) => {
+          if (childItem.type === 'importFile') {
+            // @ts-ignore
+            allFileTypeId.add(childItem.value.fileTypeId);
+          }
+        })
+      }
+    })
+  }
+  const fileTypes = Array.from(allFileTypeId)
+  for (let i = 0; i < fileTypes.length; i++) {
+    const fileTypeId = fileTypes[i]
+    const read = await zip.file(`assets/${fileTypeId}`);
+    if (!read) continue
+    const blob = await read.async('blob');
+    const file = new File([blob], fileTypeId, { type: blob.type || 'application/octet-stream' })
+
+    await processUploadedFile(file, (object: THREE.Group, file: File) => {
+      const customObjItem: ImportFileType = {
+        fileTypeId,
+        mesh: object,
+        file,
+      }
+      window.worldState.allImportFiles.push(customObjItem)
+    })
   }
 
   if (sceneData.allImportImgs && sceneData.allImportImgs.length) {
@@ -1981,6 +1997,19 @@ function handlePaySuccess() {
 }
 
 function groupExit() {
+  // 关闭悬浮的箭头
+  const allBoundingBox = window.globalEditGroup.boundingBoxList()
+  allBoundingBox.forEach((item) => {
+    item.visible = false
+  })
+  const allMoveZBox = window.globalEditGroup.moveZBoxList()
+  allMoveZBox.forEach((item) => {
+    // @ts-ignore
+    const entity = item.children[0].entity as BaseEntityClass<any>
+    if (entity instanceof PointEntityClass) {
+      entity.moveZBox.visible = false
+    }
+  })
   if (window.globalEditGroup instanceof PlaneGroupEntity) {
     window.globalEditGroup.isSetGlobalEditingGroup = false
   }
