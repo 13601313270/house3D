@@ -917,7 +917,8 @@ const handleContextMenu = (point: {
         if (snapPoint) {
           menuEntity = api
           menuEntiryHandelInfo = snapPoint;
-          if (api.getData().isLocked) {
+          const data = api.getData()
+          if (data.isLocked) {
             message.warning('锁定对象不能编辑，请去[对象列表]解锁', { position: 'top-center' })
             continue
           }
@@ -929,6 +930,12 @@ const handleContextMenu = (point: {
             editPropTypeKey.value = type
             editPropTypeIndex.value = j
             const modifyConfig: editItem[] = [...propConfig];
+            modifyConfig.push({
+              id: 'isHidden',
+              label: '是否暂时隐藏3D模型',
+              dataType: 'boolean',
+              value: data.isHidden || false,
+            })
             if (api instanceof PointEntityClass) {
               modifyConfig.push({
                 id: 'tipGroup',
@@ -939,7 +946,7 @@ const handleContextMenu = (point: {
                 id: 'tip',
                 label: '提示信息',
                 dataType: 'string',
-                value: api.getData().tip || '',
+                value: data.tip || '',
               })
               modifyConfig.push({
                 id: 'tipFontSize',
@@ -948,7 +955,7 @@ const handleContextMenu = (point: {
                 min: 1,
                 max: 120,
                 step: 1,
-                value: api.getData().tipFontSize || 96,
+                value: data.tipFontSize || 96,
               })
             }
             editPropConfigInfo.value = modifyConfig
@@ -2009,9 +2016,10 @@ function groupExit() {
     width: auto;
 
     .icon {
-      width: 40px;
-      height: 40px;
+      width: 30px;
+      height: 30px;
       margin-right: 8px;
+      margin-left: 8px;
     }
 
     .toolbar-item {

@@ -27,12 +27,14 @@
                 <img class="img" src="@/assets/location.svg" alt="location" />
               </div>
               <!-- <div class="toolItem" @click="openEditPanel(item.id)">
-              <img class="img" src="@/assets/edit.svg" alt="edit" />
-            </div> -->
-              <!-- <div class="toolItem">
-              <img v-if="item.isHidden" class="img" src="@/assets/notVisible.svg" alt="notVisible" />
-              <img v-else class="img" src="@/assets/visible.svg" alt="visible" />
-            </div> -->
+                <img class="img" src="@/assets/edit.svg" alt="edit" />
+              </div> -->
+              <div class="toolItem">
+                <img v-if="item.isHidden" class="img" src="@/assets/notVisible.svg" alt="notVisible"
+                  @click="show3DMesh(worldGroup, item.id, false)" />
+                <img v-else class="img" src="@/assets/visible.svg" alt="visible"
+                  @click="show3DMesh(worldGroup, item.id, true)" />
+              </div>
             </div>
           </div>
           <div v-if="item.children" class="children">
@@ -52,6 +54,14 @@
                 <div class="toolItem" @click="handleLocation(map.get(item.id), child)">
                   <img class="img" src="@/assets/location.svg" alt="location" />
                 </div>
+
+                <div class="toolItem">
+                  <img v-if="item.isHidden" class="img" src="@/assets/notVisible.svg" alt="notVisible"
+                    @click="show3DMesh(map.get(item.id), child.id, false)" />
+                  <img v-else class="img" src="@/assets/visible.svg" alt="visible"
+                    @click="show3DMesh(map.get(item.id), child.id, true)" />
+                </div>
+
               </div>
             </div>
           </div>
@@ -261,6 +271,20 @@ function handleLocation(group: GroupBaseEntity<GroupBaseData> | undefined, item:
     nextTick(() => {
       handleEnter(group, item)
     })
+  }
+}
+
+function show3DMesh(group: GroupBaseEntity<GroupBaseData> | undefined, id: string, isHidden: boolean) {
+  if (!group) return
+  const api = group.children.find(v => v.getData().id === id)
+  if (api) {
+    api.setData({
+      ...api.getData(),
+      isHidden,
+    })
+    setTimeout(() => {
+      reloadObjList()
+    }, 1000)
   }
 }
 

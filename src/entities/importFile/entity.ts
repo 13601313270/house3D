@@ -174,13 +174,9 @@ export class ImportFileEntity extends PointEntityClass<ImportFileData> {
   create3DMesh(): THREE.Group[] {
     const data = this.getData();
     const group = new THREE.Group()
-    const { fileTypeId, scale, isHidden } = data
+    const { fileTypeId, scale } = data
     // console.log('zoomzoomzoom', isHidden)
     const findObjInfo = window.worldState.allImportFiles.find(item => item.fileTypeId === fileTypeId)
-
-    if (isHidden) {
-      return [];
-    }
     if (!findObjInfo) {
       console.error('未找到对应的文件类型:', fileTypeId)
       return []
@@ -371,12 +367,6 @@ export class ImportFileEntity extends PointEntityClass<ImportFileData> {
         step: 0.1,
         value: data.scale,
       },
-      {
-        id: 'isHidden',
-        label: '是否隐藏',
-        dataType: 'boolean',
-        value: data.isHidden,
-      }
     ]
     editShow(configList, (val) => {
       console.log('save-val', val)

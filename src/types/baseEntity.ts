@@ -155,9 +155,14 @@ export abstract class BaseEntityClass<T extends BaseObjData> {
       return;
     }
     if (!this.parentEntity) return
+    const { isHidden } = this.getData()
     const scene: THREE.Scene | THREE.Group = this.parentEntity.group;
     this.meshList.forEach(mesh => scene.remove(mesh))
-    this.meshList = this.create3DMesh();
+    if (isHidden) {
+      this.meshList = [];
+    } else {
+      this.meshList = this.create3DMesh();
+    }
     this.meshList.forEach(mesh => scene.add(mesh))
     this.cacheKeyStr = newKeyByData;
   }

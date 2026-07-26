@@ -167,7 +167,7 @@ const initThree = () => {
   }
 
   renderer = new THREE.WebGLRenderer({ antialias: true })
-  renderer.setPixelRatio(window.devicePixelRatio)
+  renderer.setPixelRatio(3)
   renderer.shadowMap.enabled = true
 
   if (container) {
