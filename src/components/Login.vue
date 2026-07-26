@@ -250,28 +250,35 @@ const sendResetPasswordCaptcha = async () => {
 }
 
 const handleRegister = async () => {
+  console.log('email.value', 0)
   if (!email.value.trim()) {
+    console.log('email.value', 1)
     errorMsg.value = '请输入邮箱'
     return
   }
   if (!validateEmail(email.value)) {
+    console.log('email.value', 2)
     errorMsg.value = '请输入有效的邮箱地址'
     return
   }
   if (!password.value) {
+    console.log('email.value', 3)
     errorMsg.value = '请输入密码'
     return
   }
   if (password.value.length < 6) {
+    console.log('email.value', 4)
     errorMsg.value = '密码长度至少为6位'
     return
   }
   if (!validateConfirmPassword()) return
   if (!validateCaptcha(6)) return
+  console.log('email.value', 5)
   errorMsg.value = ''
 
+  console.log('email.value', 5.1)
   const { default: md5 } = await import('md5')
-
+  console.log('email.value', 6)
   const result = await axios.post('https://api.studying1v1.com/video/register/register', {
     email: email.value,
     password: md5(password.value),
