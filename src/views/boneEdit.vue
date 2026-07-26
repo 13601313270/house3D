@@ -306,6 +306,11 @@ const allDemoList = ref<Array<{
     name: '抱着盒子',
     img: 'https://d99n9xvb9513w.cloudfront.net/thumbnails/motions/111220901/animated.gif',
     file: 'joggingWithBox.fbx',
+  },
+  {
+    name: '挥手',
+    img: 'https://d99n9xvb9513w.cloudfront.net/thumbnails/motions/136290901/animated.gif',
+    file: 'waving.fbx'
   }
 ])
 
@@ -1340,7 +1345,7 @@ function showModelPanel() {
   background: #fff;
   border-radius: 8px;
   width: 80%;
-  max-width: 700px;
+  max-width: 760px;
   max-height: 70vh;
   overflow: hidden;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
@@ -1406,8 +1411,8 @@ function showModelPanel() {
   }
 
   img {
-    width: 68px;
-    height: 68px;
+    width: 78px;
+    height: 78px;
     display: block;
   }
 }
