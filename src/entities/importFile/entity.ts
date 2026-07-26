@@ -175,7 +175,6 @@ export class ImportFileEntity extends PointEntityClass<ImportFileData> {
     const data = this.getData();
     const group = new THREE.Group()
     const { fileTypeId, scale } = data
-    // console.log('zoomzoomzoom', isHidden)
     const findObjInfo = window.worldState.allImportFiles.find(item => item.fileTypeId === fileTypeId)
     if (!findObjInfo) {
       console.error('未找到对应的文件类型:', fileTypeId)

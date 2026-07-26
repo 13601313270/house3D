@@ -192,7 +192,7 @@ export abstract class GroupBaseEntity<T extends GroupBaseData> extends PointEnti
   boundingBoxList(): THREE.Group[] {
     const boundingBoxList: THREE.Group[] = []
     this.children.forEach((item) => {
-      if (item instanceof PointEntityClass && item.boundingBox && !item.getData().isLocked) {
+      if (item instanceof PointEntityClass && item.boundingBox && !item.getData().isLocked && !item.getData().isHidden) {
         boundingBoxList.push(item.boundingBox)
       }
     });
@@ -202,7 +202,7 @@ export abstract class GroupBaseEntity<T extends GroupBaseData> extends PointEnti
   moveZBoxList(): THREE.Group[] {
     const boundingBoxList: THREE.Group[] = []
     this.children.forEach((item) => {
-      if (item instanceof PointEntityClass && item.moveZBox && !item.getData().isLocked) {
+      if (item instanceof PointEntityClass && item.moveZBox && !item.getData().isLocked && !item.getData().isHidden) {
         boundingBoxList.push(item.moveZBox)
       }
     });
@@ -298,9 +298,15 @@ export abstract class GroupBaseEntity<T extends GroupBaseData> extends PointEnti
   }
 
   reCreate3DMeshAnd2DPreviewIfNeed() {
+    const { isHidden } = this.getData()
     this.children.forEach(item => {
       item.reCreate3DMeshAnd2DPreviewIfNeed()
     })
+    if (isHidden) {
+      this.group.visible = false
+    } else {
+      this.group.visible = true
+    }
   }
 
   async add(type: string, data: BaseObjData[]): Promise<BaseEntityClass<BaseObjData>[]> {
