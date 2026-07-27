@@ -255,7 +255,7 @@ export class ImportFileEntity extends PointEntityClass<ImportFileData> {
     const circleRadius = drawAngelLength / 10 + 3;
 
     // console.log('dist', dist)
-    if (dist < this.circleRadius + 3) {
+    if (dist < circleRadius) {
       return {
         index: 0,
         type: this.type,
