@@ -78,7 +78,7 @@ export abstract class PointEntityClass<T extends PointObjData> extends BaseEntit
   reCreate3DMeshAnd2DPreviewIfNeed(): void {
     const oldCacheKey = this.cacheKeyStr;
     super.reCreate3DMeshAnd2DPreviewIfNeed();
-    const newKeyByData = this.create3DUnionKeyByData();
+    const newKeyByData = this.create3DUnionKey();
     if (oldCacheKey === newKeyByData) {
       return;
     }
@@ -137,7 +137,7 @@ export abstract class PointEntityClass<T extends PointObjData> extends BaseEntit
   }
 
   // 当前对象是否需要重新生成3D模型状态
-  create3DUnionKeyByData(): string {
+  create3DUnionKey(): string {
     const cacheData = {
       ...this.data,
       x: undefined,

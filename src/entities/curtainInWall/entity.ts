@@ -153,7 +153,7 @@ export class CurtainInWallEntity extends EntityClassInWall<CurtainInWallData> {
   }
 
   // 当前对象是否需要重新生成3D模型状态
-  create3DUnionKeyByData(): string {
+  create3DUnionKey(): string {
     const cacheData = {
       ...this.getData(),
       x: undefined,

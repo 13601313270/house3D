@@ -361,7 +361,7 @@ export class CubeEntity extends PointEntityClass<CubeData> {
     return [];
   }
 
-  create3DUnionKeyByData() {
+  create3DUnionKey() {
     const data = this.getData();
     const cacheData = {
       ...data,

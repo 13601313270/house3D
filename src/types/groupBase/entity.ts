@@ -277,7 +277,7 @@ export abstract class GroupBaseEntity<T extends GroupBaseData> extends PointEnti
     return false
   }
 
-  create3DUnionKeyByData() {
+  create3DUnionKey() {
     const data = this.getData();
     const cacheData = {
       ...data,
