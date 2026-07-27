@@ -15,7 +15,6 @@ export class SignEntity extends PointEntityClass<SignData> {
   private circleRadius = 6
 
   async init() {
-    await super.init()
     const { img } = this.getData();
     const { viewImg } = img;
     if (viewImg) {

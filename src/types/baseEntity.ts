@@ -40,7 +40,6 @@ export abstract class BaseEntityClass<T extends BaseObjData> {
     this.cacheCanvas.width = 100
     this.cacheCanvas.height = 100
     this.cacheCtx = this.cacheCanvas.getContext("2d")!
-    this.reBuildBoundingBoxData()
   }
 
   init(): Promise<void> {
@@ -109,11 +108,6 @@ export abstract class BaseEntityClass<T extends BaseObjData> {
 
   // 生成当前对象唯一的3D模型key，用于判断当前3D对象是否需要重新生成3D模型状态，
   abstract create3DUnionKey(): string
-
-  changeKeyHasChange(): boolean {
-    const newKeyByData = this.create3DUnionKey();
-    return this.cacheKeyStr !== newKeyByData
-  }
 
   // 本对象的2D预览绘制，（时间早于draw2DByData）
   abstract draw2DPreview(

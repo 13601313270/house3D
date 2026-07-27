@@ -161,6 +161,7 @@ function createObjWithDefaultValue(type: string, defaultItem: DefaultItem<any>) 
     const insertTempObj = new ClassName(window.globalEditGroup, defaultItem.data)
     if (insertTempObj) {
       insertTempObj.init()
+      insertTempObj.reBuildBoundingBoxData()
     }
     emits('select', type, insertTempObj)
   }
@@ -212,6 +213,7 @@ async function changeCurrentToolToOutFile(id: string) {
     }
     const insertTempObj = new OutFileInWallEntity(window.globalEditGroup, data)
     insertTempObj.init()
+    insertTempObj.reBuildBoundingBoxData()
     emits('select', 'outFileInWall', insertTempObj)
   } else {
     const data: OutFileData = {
@@ -227,6 +229,7 @@ async function changeCurrentToolToOutFile(id: string) {
     }
     const insertTempObj = new OutFileEntity(window.globalEditGroup, data)
     insertTempObj.init()
+    insertTempObj.reBuildBoundingBoxData()
     emits('select', 'outFile', insertTempObj)
   }
 }

@@ -35,6 +35,14 @@ export class ImportFileEntity extends PointEntityClass<ImportFileData> {
     this.imgBeCreateByScale = objZoom
     mesh.scale.set(objZoom, 1, objZoom)
 
+    // 第一个是尺寸，第二个是位置偏移，第三个是旋转角度
+    this.basicBoxData_[0].x = size.x
+    this.basicBoxData_[0].y = size.y
+    this.basicBoxData_[0].z = size.z
+    this.basicBoxData_[1].x = center.x
+    this.basicBoxData_[1].y = center.y
+    this.basicBoxData_[1].z = center.z
+
     const camera = new THREE.OrthographicCamera(-cameraSize / 2, cameraSize / 2, cameraSize / 2, -cameraSize / 2)
     scene.background = null
     const ambientLight = new THREE.AmbientLight(0xffffff, 5)
@@ -175,6 +183,7 @@ export class ImportFileEntity extends PointEntityClass<ImportFileData> {
     const data = this.getData();
     const group = new THREE.Group()
     const { fileTypeId, scale } = data
+    console.log('rrrrrrrr')
     const findObjInfo = window.worldState.allImportFiles.find(item => item.fileTypeId === fileTypeId)
     if (!findObjInfo) {
       console.error('未找到对应的文件类型:', fileTypeId)
@@ -187,18 +196,6 @@ export class ImportFileEntity extends PointEntityClass<ImportFileData> {
     if (threeObject) {
       const clonedObject = threeObject.clone()
       group.add(clonedObject)
-
-      // 获取模型的尺寸
-      const box = new THREE.Box3().setFromObject(clonedObject)
-      const center = box.getCenter(new THREE.Vector3())
-      const size = box.getSize(new THREE.Vector3())
-      // 第一个是尺寸，第二个是位置偏移，第三个是旋转角度
-      this.boxData[0].x = size.x * scale
-      this.boxData[0].y = size.y * scale
-      this.boxData[0].z = size.z * scale
-      this.boxData[1].x = center.x * scale
-      this.boxData[1].y = center.y * scale
-      this.boxData[1].z = center.z * scale
       this.reBuildBoundingBoxData()
       return [group]
     }
@@ -209,14 +206,27 @@ export class ImportFileEntity extends PointEntityClass<ImportFileData> {
   }
 
   // 第一个是尺寸，第二个是位置偏移，第三个是旋转角度
-  boxData: [THREE.Vector3, THREE.Vector3, THREE.Vector3] = [
+  basicBoxData_: [THREE.Vector3, THREE.Vector3, THREE.Vector3] = [
     new THREE.Vector3(10, 10, 10),
     new THREE.Vector3(0, 5, 0),
     new THREE.Vector3(0, 0, 0)
   ]
 
+  // 第一个是尺寸，第二个是位置偏移，第三个是旋转角度
   getBoundingBoxData(): [THREE.Vector3, THREE.Vector3, THREE.Vector3] {
-    return this.boxData
+    const { scale, angleY } = this.getData()
+    const size = this.basicBoxData_[0].clone();
+    size.set(size.x * scale, size.y * scale, size.z * scale)
+    const center = this.basicBoxData_[1].clone();
+    center.set(center.x * scale, center.y * scale, center.z * scale)
+    const angel = this.basicBoxData_[2].clone();
+    angel.setY(angleY * -1)
+    console.log('size', size)
+    return [
+      size,
+      center,
+      angel
+    ]
   }
 
   // 当前对象是否需要重新生成3D模型状态

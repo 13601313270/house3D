@@ -57,6 +57,7 @@ export abstract class GroupBaseEntity<T extends GroupBaseData> extends PointEnti
       if (EntityClassItem) {
         const api = new EntityClassItem(this, item.value);
         await api.init()
+        api.reBuildBoundingBoxData()
         apiList.push(api)
         if (!this.allObjectsByGroup[type]) {
           this.allObjectsByGroup[type] = []
@@ -318,6 +319,7 @@ export abstract class GroupBaseEntity<T extends GroupBaseData> extends PointEnti
     for (let i = 0; i < data.length; i++) {
       const api: BaseEntityClass<BaseObjData> = new EntityClassItem(this, data[i]);
       await api.init()
+      api.reBuildBoundingBoxData()
       apiList.push(api);
       this.allObjectsByGroup[type].push(api)
       this.data.childrenData.push({
