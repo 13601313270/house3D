@@ -413,7 +413,7 @@ export class DirectionCameraEntity extends CameraBase<DirectionCameraData> {
     }
   }
 
-  needChangeKey() {
+  create3DUnionKeyByData() {
     const cacheData = {
       tip: this.getData().tip,
       tipFontSize: this.getData().tipFontSize,

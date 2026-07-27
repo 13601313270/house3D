@@ -402,7 +402,7 @@ export class OutFileEntity extends PointEntityClass<OutFileData> {
   }
 
   // 当前对象是否需要重新生成3D模型状态
-  needChangeKey(): string {
+  create3DUnionKeyByData(): string {
     const cacheData = {
       ...this.getData(),
       x: undefined,

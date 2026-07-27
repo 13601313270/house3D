@@ -52,7 +52,7 @@ export abstract class BaseEntityClass<T extends BaseObjData> {
 
   reBuildBoundingBoxData() {
     this.boundingBoxData = this.getBoundingBoxData()
-    const newKeyByData = this.needChangeKey();
+    const newKeyByData = this.create3DUnionKeyByData();
     if (this.cacheKeyStr === newKeyByData) {
       return;
     }
@@ -107,11 +107,11 @@ export abstract class BaseEntityClass<T extends BaseObjData> {
     }
   }
 
-  // 当前对象是否需要重新生成3D模型状态
-  abstract needChangeKey(): string
+  // 根据data，生成一个唯一的3D模型key，用于判断当前3D对象是否需要重新生成3D模型状态，
+  abstract create3DUnionKeyByData(): string
 
   changeKeyHasChange(): boolean {
-    const newKeyByData = this.needChangeKey();
+    const newKeyByData = this.create3DUnionKeyByData();
     return this.cacheKeyStr !== newKeyByData
   }
 
@@ -150,7 +150,7 @@ export abstract class BaseEntityClass<T extends BaseObjData> {
   }
 
   reCreate3DMeshAnd2DPreviewIfNeed(): void {
-    const newKeyByData = this.needChangeKey();
+    const newKeyByData = this.create3DUnionKeyByData();
     if (this.cacheKeyStr === newKeyByData) {
       return;
     }

@@ -434,7 +434,7 @@ export class RegularPolygonEntity extends PointEntityClass<RegularPolygon2Data> 
     return [];
   }
 
-  needChangeKey() {
+  create3DUnionKeyByData() {
     const data = this.getData();
     const cacheData = {
       ...data,

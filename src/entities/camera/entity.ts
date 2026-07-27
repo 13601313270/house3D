@@ -397,7 +397,7 @@ export class CameraEntity extends CameraBase<CameraData> {
     }
   }
 
-  needChangeKey() {
+  create3DUnionKeyByData() {
     const cacheData = {
       tip: this.getData().tip,
       tipFontSize: this.getData().tipFontSize,
