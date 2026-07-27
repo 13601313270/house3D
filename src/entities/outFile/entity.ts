@@ -410,8 +410,7 @@ export class OutFileEntity extends PointEntityClass<OutFileData> {
       z: undefined,
       angleY: undefined,
     }
-    // console.log('dddd', this.type + JSON.stringify(cacheData))
-    return this.type + JSON.stringify(cacheData)
+    return JSON.stringify(cacheData)
   }
 
   // 改变3D模型的状态

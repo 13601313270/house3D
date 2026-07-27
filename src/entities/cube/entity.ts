@@ -370,7 +370,7 @@ export class CubeEntity extends PointEntityClass<CubeData> {
       z: undefined,
       angleY: undefined,
     }
-    return this.type + JSON.stringify(cacheData)
+    return JSON.stringify(cacheData)
   }
 
   // 改变3D模型的状态

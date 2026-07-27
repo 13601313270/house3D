@@ -357,7 +357,7 @@ export class PeopleEntity extends PointEntityClass<PeopleData> {
       angle: undefined,
       bone: undefined,
     }
-    return this.type + JSON.stringify(cacheData)
+    return JSON.stringify(cacheData)
   }
 
   showMatchHandel(x: number, y: number) {

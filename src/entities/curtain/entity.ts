@@ -381,8 +381,7 @@ export class CurtainEntity extends PointEntityClass<CurtainData> {
       z: undefined,
       angleY: undefined,
     }
-    console.log('cacheData', JSON.stringify(cacheData))
-    return this.type + JSON.stringify(cacheData)
+    return JSON.stringify(cacheData)
   }
 
   inAreaHoverText() {

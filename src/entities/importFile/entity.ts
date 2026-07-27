@@ -230,7 +230,7 @@ export class ImportFileEntity extends PointEntityClass<ImportFileData> {
       scale: undefined,
     }
     // console.log('dddd', this.type + JSON.stringify(cacheData))
-    return this.type + JSON.stringify(cacheData)
+    return JSON.stringify(cacheData)
   }
 
   // 改变3D模型的状态

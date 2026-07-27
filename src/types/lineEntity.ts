@@ -13,7 +13,7 @@ export abstract class LineEntityClass<V, T extends LineObjData<V>> extends BaseE
     const cacheData = {
       ...this.data,
     }
-    return this.type + JSON.stringify(cacheData)
+    return JSON.stringify(cacheData)
   }
 
   // 改变3D模型的状态

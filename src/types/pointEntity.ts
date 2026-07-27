@@ -144,7 +144,7 @@ export abstract class PointEntityClass<T extends PointObjData> extends BaseEntit
       y: undefined,
       z: undefined,
     }
-    return this.type + JSON.stringify(cacheData)
+    return JSON.stringify(cacheData)
   }
 
   // 改变3D模型的状态

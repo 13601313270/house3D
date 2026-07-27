@@ -402,7 +402,7 @@ export class CameraEntity extends CameraBase<CameraData> {
       tip: this.getData().tip,
       tipFontSize: this.getData().tipFontSize,
     }
-    return this.type + JSON.stringify(cacheData)
+    return JSON.stringify(cacheData)
   }
 
   showMatchHandel(x: number, y: number) {
