@@ -3,8 +3,10 @@ import { HandelInfo, Point } from '@/types/map2d'
 import { ImportFileData } from './index.d'
 import { PointEntityClass } from '@/types/pointEntity'
 import { editItem } from '@/utils/editItem'
-import { MatchCircleArea } from '@/utils/matchArea'
+import { MatchRectArea } from '@/utils/matchArea'
 import { OrigionSnapPoint } from '@/types/baseEntity'
+import { isPointInRotatedRect } from '@/utils/isPointInRotatedRect'
+import { angelIcon, moveIcon } from '@/utils/handleImgs'
 
 export class ImportFileEntity extends PointEntityClass<ImportFileData> {
   name: string = '导入文件'
@@ -105,85 +107,48 @@ export class ImportFileEntity extends PointEntityClass<ImportFileData> {
     const data = this.getData();
     const screenX = data.x * zoomLevel
     const screenY = data.y * zoomLevel
-
+    const iconWidth = this.circleRadius * 2 * zoomLevel * 0.8;
+    // 计算中心点到上下左右哪个边最远
+    const [size, offset] = this.basicBoxData_!
+    const renderBox = this.boundingBoxData;
+    const drawAngelLength = renderBox ? (renderBox[0].x / 2 + offset.x) : this.baseDrawAngelLength;
+    const circleRadius = drawAngelLength / 10 * zoomLevel + 3;
     // 控制点
-    ctx.fillStyle = '#fff'
-    ctx.strokeStyle = '#e67e22'
-    ctx.lineWidth = 2
-    ctx.beginPath()
-    ctx.arc(screenX, screenY, this.circleRadius * zoomLevel + 3, 0, Math.PI * 2)
-    ctx.fill()
-    ctx.stroke()
-
-    const drawAngelLength = this.baseDrawAngelLength
-
-    // 控制点向着angleY角度延伸10个单位后的坐标
-    const rotatedXAdd = data.x + Math.cos(data.angleY) * drawAngelLength
-    const rotatedYAdd = data.y - Math.sin(data.angleY) * drawAngelLength
-
-    function ttt(angel: number, drawAngelLength: number) {
-      const tempX = data.x + Math.cos(angel) * drawAngelLength;
-      const tempY = data.y - Math.sin(angel) * drawAngelLength;
-      return [tempX * zoomLevel, tempY * zoomLevel]
-    }
-
-    // 绘制双向箭头表示旋转角度
-    ctx.strokeStyle = '#e67e22'
-    ctx.fillStyle = '#e67e22'
-    ctx.lineWidth = 2 * zoomLevel
-    // 绘制双向箭头的主线（圆弧）
-    ctx.beginPath();
-    ctx.arc(screenX, screenY, drawAngelLength * zoomLevel, data.angleY * -1 - Math.PI / 4, data.angleY * -1 + Math.PI / 4);
-    ctx.stroke();
-
-    // 左侧箭头
     (() => {
+      ctx.fillStyle = '#fff'
+      ctx.strokeStyle = 'black'
+      ctx.lineWidth = 2
       ctx.beginPath()
-      const [p1X, p1Y] = ttt(data.angleY + 0.1 + Math.PI / 4, drawAngelLength)
-      const [p2X, p2Y] = ttt(data.angleY + Math.PI / 4, drawAngelLength + 5)
-      const [p3X, p3Y] = ttt(data.angleY + Math.PI / 4, drawAngelLength - 5)
-      ctx.moveTo(
-        p1X,
-        p1Y
-      )
-      ctx.lineTo(p2X, p2Y)
-      ctx.lineTo(p3X, p3Y)
-      ctx.closePath()
+      ctx.arc(screenX, screenY, circleRadius, 0, Math.PI * 2)
       ctx.fill()
+      ctx.stroke();
+      ctx.drawImage(moveIcon, screenX - circleRadius / 2, screenY - circleRadius / 2, circleRadius, circleRadius);
     })();
 
-    // 右侧箭头
-    ctx.beginPath()
-    const [p1X, p1Y] = ttt(data.angleY - 0.1 - Math.PI / 4, drawAngelLength)
-    const [p2X, p2Y] = ttt(data.angleY - Math.PI / 4, drawAngelLength + 5)
-    const [p3X, p3Y] = ttt(data.angleY - Math.PI / 4, drawAngelLength - 5)
-    ctx.moveTo(
-      p1X,
-      p1Y
-    )
-    ctx.lineTo(p2X, p2Y)
-    ctx.lineTo(p3X, p3Y)
-    ctx.closePath()
-    ctx.fill()
-
-    // 在(rotatedXAdd, rotatedYAdd)位置绘制一个圆圈
+    const imgAngel = offset.x > 0 ? data.angleY : data.angleY + Math.PI;
+    // 绘制旋转角度控制
+    const rotatedXAdd = data.x + Math.cos(imgAngel) * drawAngelLength
+    const rotatedYAdd = data.y - Math.sin(imgAngel) * drawAngelLength
     const circleX = rotatedXAdd * zoomLevel
     const circleY = rotatedYAdd * zoomLevel
-    const circleRadius = this.circleRadius * zoomLevel + 3
     ctx.fillStyle = '#fff'
-    ctx.strokeStyle = '#e67e22'
-    ctx.lineWidth = 2 * zoomLevel
+    ctx.lineWidth = 2
+    ctx.strokeStyle = 'black'
+    ctx.save();
+    ctx.translate(circleX, circleY); // 移动原点到目标中心
+    ctx.rotate(imgAngel * -1); // 围绕新原点旋转
     ctx.beginPath()
-    ctx.arc(circleX, circleY, circleRadius, 0, Math.PI * 2)
+    ctx.arc(0, 0, circleRadius, 0, Math.PI * 2)
     ctx.fill()
     ctx.stroke()
+    ctx.drawImage(angelIcon, -circleRadius / 2, -circleRadius / 2, circleRadius, circleRadius);
+    ctx.restore();
   }
 
   create3DMesh(): THREE.Group[] {
     const data = this.getData();
     const group = new THREE.Group()
-    const { fileTypeId, scale } = data
-    console.log('rrrrrrrr')
+    const { fileTypeId } = data
     const findObjInfo = window.worldState.allImportFiles.find(item => item.fileTypeId === fileTypeId)
     if (!findObjInfo) {
       console.error('未找到对应的文件类型:', fileTypeId)
@@ -218,9 +183,15 @@ export class ImportFileEntity extends PointEntityClass<ImportFileData> {
     const size = this.basicBoxData_[0].clone();
     size.set(size.x * scale, size.y * scale, size.z * scale)
     const center = this.basicBoxData_[1].clone();
-    center.set(center.x * scale, center.y * scale, center.z * scale)
+    const offsetX = center.x;
+    const offsetY = center.y;
+    const offsetZ = center.z;
+    // 计算偏移位置（考虑旋转）
+    const finalOffsetX = offsetX * Math.cos(angleY) + offsetZ * Math.sin(angleY);
+    const finalOffsetZ = -offsetX * Math.sin(angleY) + offsetZ * Math.cos(angleY);
+    center.set(finalOffsetX * scale, offsetY * scale, finalOffsetZ * scale)
     const angel = this.basicBoxData_[2].clone();
-    angel.setY(angleY * -1)
+    angel.setY(angleY)
     console.log('size', size)
     return [
       size,
@@ -256,10 +227,21 @@ export class ImportFileEntity extends PointEntityClass<ImportFileData> {
 
   showMatchHandel(x: number, y: number) {
     const data = this.getData();
-    const dist = Math.hypot(x - data.x, y - data.y)
-    // console.log('dist', dist)
-    if (dist < this.baseDrawAngelLength + this.circleRadius) {
-      return new MatchCircleArea({ x: data.x, y: data.y, r: this.baseDrawAngelLength + this.circleRadius })
+    const [box, center, angel] = this.getBoundingBoxData()
+    if (isPointInRotatedRect(x, y, {
+      x: data.x + center.x,
+      y: data.y + center.z,
+      width: box.x,
+      depth: box.z,
+      angleY: angel.y * -1,
+    })) {
+      return new MatchRectArea({
+        x: data.x + center.x,
+        y: data.y + center.z,
+        width: box.x,
+        depth: box.z,
+        angleY: angel.y,
+      })
     }
     return null;
   }
@@ -267,6 +249,11 @@ export class ImportFileEntity extends PointEntityClass<ImportFileData> {
   matchHandelInfo(x: number, y: number) {
     const data = this.getData();
     const dist = Math.hypot(x - data.x, y - data.y)
+    const [size, offset] = this.basicBoxData_!
+    const renderBox = this.boundingBoxData;
+    const drawAngelLength = renderBox ? (renderBox[0].x / 2 + offset.x) : this.baseDrawAngelLength;
+    const circleRadius = drawAngelLength / 10 + 3;
+
     // console.log('dist', dist)
     if (dist < this.circleRadius + 3) {
       return {
@@ -276,14 +263,14 @@ export class ImportFileEntity extends PointEntityClass<ImportFileData> {
         dist,
       }
     }
-    const drawAngelLength = this.baseDrawAngelLength
+    const imgAngel = offset.x > 0 ? data.angleY : data.angleY + Math.PI;
     // 控制点向着angleY角度延伸10个单位后的坐标
-    const rotatedXAdd = data.x + Math.cos(data.angleY) * drawAngelLength
-    const rotatedYAdd = data.y - Math.sin(data.angleY) * drawAngelLength
+    const rotatedXAdd = data.x + Math.cos(imgAngel) * drawAngelLength
+    const rotatedYAdd = data.y - Math.sin(imgAngel) * drawAngelLength
 
     const dist2 = Math.hypot(x - rotatedXAdd, y - rotatedYAdd)
     // console.log('dist2', dist2)
-    if (dist2 < this.circleRadius + 3) {
+    if (dist2 < circleRadius) {
       return {
         index: 1,
         type: this.type,
@@ -306,13 +293,14 @@ export class ImportFileEntity extends PointEntityClass<ImportFileData> {
         y,
       })
     } else if (matchHandelInfo.index === 1) {
+      const [size, offset] = this.basicBoxData_!
       const data = this.getData();
       // 根据x,y计算angleY
       const angleY = Math.atan2(y - data.y, x - data.x)
       console.log(angleY)
       this.setData({
         ...this.getData(),
-        angleY: angleY * -1,
+        angleY: (angleY * -1) + (offset.x > 0 ? 0 : Math.PI),
       })
     }
   }

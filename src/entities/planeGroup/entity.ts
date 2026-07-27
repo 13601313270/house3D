@@ -7,11 +7,7 @@ import { isPointInRotatedRect } from '@/utils/isPointInRotatedRect'
 import { MatchRectArea } from '@/utils/matchArea'
 import { PlaneGroupData } from './index.d'
 import { PointEntityClass } from '@/types/pointEntity'
-
-const angelIcon = new Image();
-angelIcon.src = '/icons/angel.png';
-const moveIcon = new Image();
-moveIcon.src = '/icons/move.png';
+import { angelIcon, moveIcon } from '@/utils/handleImgs'
 
 export class PlaneGroupEntity extends GroupBaseEntity<PlaneGroupData> {
   type: string = 'planeGroup'
