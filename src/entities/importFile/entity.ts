@@ -366,6 +366,26 @@ export class ImportFileEntity extends PointEntityClass<ImportFileData> {
         step: 0.1,
         value: data.scale,
       },
+      {
+        id: 'downLoadFile',
+        label: '下载文件',
+        dataType: 'button',
+        value: () => {
+          const { fileTypeId } = this.getData();
+          const findObjInfo = window.worldState.allImportFiles.find(item => item.fileTypeId === fileTypeId)
+          if (findObjInfo) {
+            const file: File = findObjInfo.file
+            const url = URL.createObjectURL(file)
+            const a = document.createElement('a')
+            a.href = url
+            a.download = file.name
+            document.body.appendChild(a)
+            a.click()
+            document.body.removeChild(a)
+            URL.revokeObjectURL(url)
+          }
+        }
+      },
     ]
     editShow(configList, (val) => {
       console.log('save-val', val)
