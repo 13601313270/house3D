@@ -199,6 +199,35 @@ class Canvas2DSceneManage {
   ): Canvas2DScene {
     const api = new Canvas2DScene(canvasList, width, height, level, panOffset);
     this.list_.push(api)
+    api.onWheel((point: {
+      deltaY: number,
+      x: number,
+      y: number,
+    }) => {
+      const canvas = api.canvasList[0]
+      if (!canvas) return
+
+      // 绘制操作句柄
+      const canvasAction = api.canvasList[1]!;
+      const ctxAction = canvasAction.getContext('2d')!
+      ctxAction.clearRect(0, 0, canvasAction.width, canvasAction.height)
+
+      const screenX = point.x
+      const screenY = point.y
+
+      const zoomFactor = point.deltaY < 0 ? 1.1 : 0.9
+      const newZoomLevel = Math.max(0.01, Math.min(5, api.level * zoomFactor))
+
+      const zoomRatio = newZoomLevel / api.level
+      const newPanX = screenX - (screenX - api.panOffset.x) * zoomRatio
+      const newPanY = screenY - (screenY - api.panOffset.y) * zoomRatio
+
+      api.setLevel(newZoomLevel)
+      api.setPanOffset({
+        x: newPanX,
+        y: newPanY,
+      })
+    })
     return api;
   }
 

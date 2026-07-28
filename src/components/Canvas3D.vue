@@ -235,7 +235,7 @@ const initThree = () => {
     const container = containerRef.value
     if (!container) return
 
-    renderer.domElement.addEventListener('mousedown', (e) => {
+    function mouseDown(e: MouseEvent) {
       // if (props.cameraType === 'orthographic') {
       //   if (e.button === 2) {
       //   } else if (e.button === 0) {
@@ -285,8 +285,8 @@ const initThree = () => {
           }
         }
       }
-    })
-    renderer.domElement.addEventListener('mousemove', (e) => {
+    }
+    function mouseMove(e: MouseEvent) {
       // if (props.cameraType === 'orthographic') {
       //   if (canvas1IsMouseAngel) {
 
@@ -344,38 +344,10 @@ const initThree = () => {
               entity.boundingBox.children[1].visible = true
             }
           }
-        } else {
-          const allBoundingBox = window.globalEditGroup.boundingBoxList()
-          allBoundingBox.forEach((item) => {
-            item.visible = false
-          })
-
-          const allMoveZBox = window.globalEditGroup.moveZBoxList()
-          const allLastTextBox: any[] = [];
-          allMoveZBox.forEach((item) => {
-            // @ts-ignore
-            const entity = item.children[0].entity as BaseEntityClass<any>
-            if (entity instanceof PointEntityClass) {
-              entity.moveZBox.visible = false
-            }
-            allLastTextBox.push(item.children[0]);
-          })
-          // @ts-ignore
-          const hoveredObject = raycastObjects([...allBoundingBox, ...allLastTextBox], e)
-          if (hoveredObject) {
-            // 移动对象
-            // @ts-ignore
-            const entity = hoveredObject.entity as BaseEntityClass<any>
-            if (entity instanceof PointEntityClass) {
-              entity.moveZBox.visible = true
-              entity.boundingBox.visible = true
-              entity.boundingBox.children[1].visible = true
-            }
-          }
         }
       }
-    })
-    container.addEventListener('mouseup', (e) => {
+    }
+    function mouseUp(e: MouseEvent) {
       // if (props.cameraType === 'orthographic') {
       //   canvas1IsMouseMove = false
       //   emitCameraState()
@@ -389,7 +361,51 @@ const initThree = () => {
         emitCameraState()
       }
       // }
-    });
+    }
+    renderer.domElement.addEventListener('mousedown', (e) => {
+      mouseDown(e)
+      document.addEventListener('mousemove', mouseMove)
+      document.addEventListener('mouseup', (e) => {
+        mouseUp(e)
+        document.removeEventListener('mousemove', mouseMove)
+        document.removeEventListener('mouseup', mouseUp)
+      });
+    })
+
+    renderer.domElement.addEventListener('mousemove', (e) => {
+      if ('radius' in cameraStateZ.value) {
+        if (canvas1IsMouseAngel || canvas1IsMouseMove || canvas1IsMouseMoveObj) {
+          return
+        }
+        const allBoundingBox = window.globalEditGroup.boundingBoxList()
+        allBoundingBox.forEach((item) => {
+          item.visible = false
+        })
+
+        const allMoveZBox = window.globalEditGroup.moveZBoxList()
+        const allLastTextBox: any[] = [];
+        allMoveZBox.forEach((item) => {
+          // @ts-ignore
+          const entity = item.children[0].entity as BaseEntityClass<any>
+          if (entity instanceof PointEntityClass) {
+            entity.moveZBox.visible = false
+          }
+          allLastTextBox.push(item.children[0]);
+        })
+        // @ts-ignore
+        const hoveredObject = raycastObjects([...allBoundingBox, ...allLastTextBox], e)
+        if (hoveredObject) {
+          // 移动对象
+          // @ts-ignore
+          const entity = hoveredObject.entity as BaseEntityClass<any>
+          if (entity instanceof PointEntityClass) {
+            entity.moveZBox.visible = true
+            entity.boundingBox.visible = true
+            entity.boundingBox.children[1].visible = true
+          }
+        }
+      }
+    })
 
     container.addEventListener('wheel', (e) => {
       e.preventDefault();

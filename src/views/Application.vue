@@ -600,7 +600,6 @@ onMounted(async () => {
   scene2D.onMouseDown(handleMouseDown)
   scene2D.onMouseMove(handleMouseMove)
   scene2D.onMouseUp(handleMouseUp)
-  scene2D.onWheel(handleWheel)
 
   mouseStartScreenX = screenX
   mouseStartScreenY = screenY
@@ -1763,36 +1762,6 @@ onUnmounted(() => {
   window.removeEventListener('mousemove', handleMouseMoveSplit)
   window.removeEventListener('mouseup', handleMouseUpSplit)
 })
-
-const handleWheel = (point: {
-  deltaY: number,
-  x: number,
-  y: number,
-}) => {
-  const canvas = canvas2DSceneManage.list[0].canvasList[0]
-  if (!canvas) return
-
-  // 绘制操作句柄
-  const canvasAction = canvas2DSceneManage.list[0].canvasList[1]!;
-  const ctxAction = canvasAction.getContext('2d')!
-  ctxAction.clearRect(0, 0, canvasAction.width, canvasAction.height)
-
-  const screenX = point.x
-  const screenY = point.y
-
-  const zoomFactor = point.deltaY < 0 ? 1.1 : 0.9
-  const newZoomLevel = Math.max(0.01, Math.min(5, canvas2DSceneManage.list[0].level * zoomFactor))
-
-  const zoomRatio = newZoomLevel / canvas2DSceneManage.list[0].level
-  const newPanX = screenX - (screenX - canvas2DSceneManage.list[0].panOffset.x) * zoomRatio
-  const newPanY = screenY - (screenY - canvas2DSceneManage.list[0].panOffset.y) * zoomRatio
-
-  canvas2DSceneManage.list[0].setLevel(newZoomLevel)
-  canvas2DSceneManage.list[0].setPanOffset({
-    x: newPanX,
-    y: newPanY,
-  })
-}
 
 watch(() => editPropInputInfo.value, () => {
   if (contextMenu.value?.visible) {
