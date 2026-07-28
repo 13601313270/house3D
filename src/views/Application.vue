@@ -1148,58 +1148,6 @@ const handleMouseMove = (point: {
   const mouseYInCanvas = point.y
   if (canvas2DSceneManage.list[0].isPaningAngel) {
     isMenuing.value = false
-    canvas2DSceneManage.list[0].isPanningScreen = false
-    canvas2DSceneManage.list[0].isPaningAngelMoved = true;
-    const centerX = canvas2DSceneManage.list[0].panningScreenCenter.x
-    const centerY = canvas2DSceneManage.list[0].panningScreenCenter.y
-
-    const startVecX = canvas2DSceneManage.list[0].mouseStartScreenX - centerX
-    const startVecY = canvas2DSceneManage.list[0].mouseStartScreenY - centerY
-    const currentVecX = mouseXInCanvas - centerX
-    const currentVecY = mouseYInCanvas - centerY
-
-    const startAngle = Math.atan2(startVecY, startVecX)
-    const currentAngle = Math.atan2(currentVecY, currentVecX)
-    let rotateAngle = currentAngle - startAngle;
-    (() => {
-      // newAngleY每30度增加一个磁吸，接近这个度数上下5度，会吸附过去
-      let targetAngel = canvas2DSceneManage.list[0].panStartAngel + rotateAngle * -1;
-      const snapAngle = 30 * (Math.PI / 180); // 30度转换为弧度
-      const snapThresholdAngle = 5 * (Math.PI / 180); // 5度转换为弧度
-      const nearestSnapAngle = Math.round(targetAngel / snapAngle) * snapAngle;
-      const diff = Math.abs(targetAngel - nearestSnapAngle);
-      if (diff < snapThresholdAngle) {
-        targetAngel = nearestSnapAngle;
-      }
-      rotateAngle = canvas2DSceneManage.list[0].panStartAngel - targetAngel;
-    })()
-
-    const newAngleY = canvas2DSceneManage.list[0].panStartAngel + rotateAngle * -1
-
-    const worldData = worldApi.getData();
-    (() => {
-      // 0, 370
-      const { x: positionX, y: positionY } = canvas2DSceneManage.list[0].panStartOffsetOfWorld;
-      const dx = positionX - centerX
-      const dy = positionY - centerY
-      const cos = Math.cos(rotateAngle)
-      const sin = Math.sin(rotateAngle)
-      const newPositionX = centerX + dx * cos - dy * sin
-      const newPositionY = centerY + dx * sin + dy * cos
-      canvas2DSceneManage.list[0].setPanOffset({
-        x: newPositionX,
-        y: newPositionY,
-      })
-    })();
-
-    worldApi.setData({
-      ...worldData,
-      angleY: newAngleY,
-    });
-    const canvasAction = canvas2DSceneManage.list[0].canvasList[1]!;
-    const ctxAction = canvasAction.getContext('2d')!
-    // 绘制操作句柄
-    ctxAction.clearRect(0, 0, canvasAction.width, canvasAction.height)
     return;
   }
 
@@ -1585,44 +1533,12 @@ const handleMouseDown = (point: {
   y: number,
 }) => {
   contextMenu.value = null;
-
-  const canvas = canvas2DSceneManage.list[0].canvasList[0]
-  if (!canvas) return
   if (currentTool.value !== 'drag') return;
-
   // 只有在拖拽模式下才能拖拽点
   const mouseXInCanvas = point.x
   const mouseYInCanvas = point.y
   if (point.button === 2) {
     isMenuing.value = true
-    canvas2DSceneManage.list[0].isPaningAngel = true
-    canvas2DSceneManage.list[0].isPaningAngelMoved = false;
-    canvas2DSceneManage.list[0].panStartAngel = worldApi.getData().angleY
-    console.log('panStartAngel', canvas.height / 2, mouseYInCanvas)
-    let xTemp = 0;
-    let yTemp = 0;
-    const yDiff = canvas.height / 2 - mouseYInCanvas;
-    const xDiff = canvas.width / 2 - mouseXInCanvas;
-    if (Math.abs(yDiff) < 100 && Math.abs(xDiff) < 100) {
-      if (Math.abs(yDiff) > Math.abs(xDiff)) {
-        if (mouseYInCanvas < canvas.height / 2 && yDiff < 100) {
-          yTemp = 100 - yDiff;
-        } else if (mouseYInCanvas > canvas.height / 2 && -yDiff < 100) {
-          yTemp = -100 - yDiff;
-        }
-      } else {
-        if (mouseXInCanvas < canvas.width / 2 && xDiff < 100) {
-          xTemp = 100 - xDiff;
-        } else if (mouseXInCanvas > canvas.width / 2 && -xDiff < 100) {
-          xTemp = -100 - xDiff;
-        }
-      }
-    }
-
-    canvas2DSceneManage.list[0].panningScreenCenter = {
-      x: canvas.width / 2 + xTemp,
-      y: canvas.height / 2 + yTemp,
-    }
   } else {
     const worldData = worldApi.getData();
     const { angleY } = worldData;
@@ -1673,12 +1589,12 @@ const handleMouseDown = (point: {
     }
     // 如果没有拖拽到任何点，开始平移
     canvas2DSceneManage.list[0].isPanningScreen = true
-  }
-  canvas2DSceneManage.list[0].mouseStartScreenX = mouseXInCanvas
-  canvas2DSceneManage.list[0].mouseStartScreenY = mouseYInCanvas
-  canvas2DSceneManage.list[0].panStartOffsetOfWorld = {
-    x: canvas2DSceneManage.list[0].panOffset.x,
-    y: canvas2DSceneManage.list[0].panOffset.y,
+    canvas2DSceneManage.list[0].mouseStartScreenX = mouseXInCanvas
+    canvas2DSceneManage.list[0].mouseStartScreenY = mouseYInCanvas
+    canvas2DSceneManage.list[0].panStartOffsetOfWorld = {
+      x: canvas2DSceneManage.list[0].panOffset.x,
+      y: canvas2DSceneManage.list[0].panOffset.y,
+    }
   }
 }
 
@@ -1697,9 +1613,6 @@ const handleMouseUp = (point: {
   matchedHandelInfo = null
   if (canvas2DSceneManage.list[0].isPanningScreen) {
     canvas2DSceneManage.list[0].isPanningScreen = false
-  }
-  if (canvas2DSceneManage.list[0].isPaningAngel) {
-    canvas2DSceneManage.list[0].isPaningAngel = false
   }
 }
 

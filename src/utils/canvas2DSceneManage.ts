@@ -23,11 +23,14 @@ class Canvas2DScene {
     x: number,
     y: number,
   } = { x: 0, y: 0 }
+
   panStartOffsetOfWorld: {
     x: number,
     y: number,
   } = { x: 0, y: 0 }
+
   mouseStartScreenX: number = 0
+
   mouseStartScreenY: number = 0;
 
   constructor(
@@ -59,6 +62,113 @@ class Canvas2DScene {
     canvasList[1].addEventListener('contextmenu', (e) => {
       e.preventDefault()
       e.stopPropagation()
+    })
+
+    this.onMouseDown((point) => {
+      const canvas = this.canvasList[0]
+      const mouseXInCanvas = point.x
+      const mouseYInCanvas = point.y
+      if (point.button === 2) {
+        this.isPaningAngel = true
+        this.isPaningAngelMoved = false;
+        this.panStartAngel = window.worldApi.getData().angleY
+        console.log('panStartAngel', canvas.height / 2, mouseYInCanvas)
+        let xTemp = 0;
+        let yTemp = 0;
+        const yDiff = canvas.height / 2 - mouseYInCanvas;
+        const xDiff = canvas.width / 2 - mouseXInCanvas;
+        if (Math.abs(yDiff) < 100 && Math.abs(xDiff) < 100) {
+          if (Math.abs(yDiff) > Math.abs(xDiff)) {
+            if (mouseYInCanvas < canvas.height / 2 && yDiff < 100) {
+              yTemp = 100 - yDiff;
+            } else if (mouseYInCanvas > canvas.height / 2 && -yDiff < 100) {
+              yTemp = -100 - yDiff;
+            }
+          } else {
+            if (mouseXInCanvas < canvas.width / 2 && xDiff < 100) {
+              xTemp = 100 - xDiff;
+            } else if (mouseXInCanvas > canvas.width / 2 && -xDiff < 100) {
+              xTemp = -100 - xDiff;
+            }
+          }
+        }
+
+        this.panningScreenCenter = {
+          x: canvas.width / 2 + xTemp,
+          y: canvas.height / 2 + yTemp,
+        }
+        this.mouseStartScreenX = mouseXInCanvas
+        this.mouseStartScreenY = mouseYInCanvas
+        this.panStartOffsetOfWorld = {
+          x: this.panOffset.x,
+          y: this.panOffset.y,
+        }
+      }
+    })
+
+    this.onMouseMove((point) => {
+      const mouseXInCanvas = point.x
+      const mouseYInCanvas = point.y
+      if (this.isPaningAngel) {
+        this.isPanningScreen = false
+        this.isPaningAngelMoved = true;
+        const centerX = this.panningScreenCenter.x
+        const centerY = this.panningScreenCenter.y
+
+        const startVecX = this.mouseStartScreenX - centerX
+        const startVecY = this.mouseStartScreenY - centerY
+        const currentVecX = mouseXInCanvas - centerX
+        const currentVecY = mouseYInCanvas - centerY
+
+        const startAngle = Math.atan2(startVecY, startVecX)
+        const currentAngle = Math.atan2(currentVecY, currentVecX)
+        let rotateAngle = currentAngle - startAngle;
+        (() => {
+          // newAngleY每30度增加一个磁吸，接近这个度数上下5度，会吸附过去
+          let targetAngel = this.panStartAngel + rotateAngle * -1;
+          const snapAngle = 30 * (Math.PI / 180); // 30度转换为弧度
+          const snapThresholdAngle = 5 * (Math.PI / 180); // 5度转换为弧度
+          const nearestSnapAngle = Math.round(targetAngel / snapAngle) * snapAngle;
+          const diff = Math.abs(targetAngel - nearestSnapAngle);
+          if (diff < snapThresholdAngle) {
+            targetAngel = nearestSnapAngle;
+          }
+          rotateAngle = this.panStartAngel - targetAngel;
+        })()
+
+        const newAngleY = this.panStartAngel + rotateAngle * -1
+
+        const worldData = window.worldApi.getData();
+        (() => {
+          // 0, 370
+          const { x: positionX, y: positionY } = this.panStartOffsetOfWorld;
+          const dx = positionX - centerX
+          const dy = positionY - centerY
+          const cos = Math.cos(rotateAngle)
+          const sin = Math.sin(rotateAngle)
+          const newPositionX = centerX + dx * cos - dy * sin
+          const newPositionY = centerY + dx * sin + dy * cos
+          this.setPanOffset({
+            x: newPositionX,
+            y: newPositionY,
+          })
+        })();
+
+        window.worldApi.setData({
+          ...worldData,
+          angleY: newAngleY,
+        });
+        const canvasAction = this.canvasList[1]!;
+        const ctxAction = canvasAction.getContext('2d')!
+        // 绘制操作句柄
+        ctxAction.clearRect(0, 0, canvasAction.width, canvasAction.height)
+        return;
+      }
+    })
+    this.onMouseUp(() => {
+      if (this.isPaningAngel) {
+        this.isPaningAngel = false
+      }
     })
   }
 
