@@ -200,7 +200,7 @@ export class CubeEntity extends PointEntityClass<CubeData> {
       y: data.y,
       width: data.width,
       depth: data.depth,
-      angleY: data.angleY * -1,
+      angleY: data.angleY,
     })) {
       return new MatchRectArea(data)
     }

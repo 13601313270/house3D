@@ -264,7 +264,7 @@ export class ImportFileEntity extends PointEntityClass<ImportFileData> {
       y: data.y + center.z,
       width: box.x,
       depth: box.z,
-      angleY: angel.y * -1,
+      angleY: angel.y,
     })) {
       return new MatchRectArea({
         x: data.x + center.x,

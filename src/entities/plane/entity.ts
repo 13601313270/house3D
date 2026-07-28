@@ -212,7 +212,7 @@ export class PlaneEntity extends PointEntityClass<PlaneData> {
       y: data.y,
       width: Math.max(data.width, data.length),
       depth: Math.max(data.width, data.length),
-      angleY: angleY * -1,
+      angleY: angleY,
     })) {
       return new MatchRectArea({
         x: data.x,

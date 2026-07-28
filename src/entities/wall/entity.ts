@@ -381,7 +381,7 @@ export class WallEntity extends LineEntityClass<WallPoint, WallData> {
         y: midY,
         width,
         depth: this.getData().thickness + 2,
-        angleY: angel,
+        angleY: angel * -1,
       })) {
         return new MatchRectArea({
           x: midX,

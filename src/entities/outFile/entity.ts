@@ -438,7 +438,7 @@ export class OutFileEntity extends PointEntityClass<OutFileData> {
           y: data.y - matchAreaOffsetX * Math.sin(data.angleY) + matchAreaOffsetY * Math.cos(data.angleY),
           width: Math.max(matchAreaNumber1, 30) * zoom,
           depth: Math.max(matchAreaNumber2, 30) * zoom,
-          angleY: data.angleY * -1,
+          angleY: data.angleY,
         })) {
           return new MatchRectArea({
             x: data.x + matchAreaOffsetX * Math.cos(data.angleY) + matchAreaOffsetY * Math.sin(data.angleY),

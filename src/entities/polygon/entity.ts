@@ -211,7 +211,7 @@ export class PolygonEntity extends LineEntityClass<PolygonPoint, PolygonData> {
         y: midY,
         width,
         depth: this.thickness + 2,
-        angleY: angel,
+        angleY: angel * -1,
       })) {
         return new MatchRectArea({
           x: midX,

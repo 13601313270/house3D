@@ -193,7 +193,7 @@ export class CurtainInWallEntity extends EntityClassInWall<CurtainInWallData> {
       y: data.y + offsetY / 2,
       width: data.width + 30,
       depth: this.depth + this.circleRadius,
-      angleY: angle,
+      angleY: angle * -1,
     })) {
       return new MatchRectArea({
         x: data.x + offsetX / 2,

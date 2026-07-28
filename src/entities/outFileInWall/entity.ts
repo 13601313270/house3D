@@ -311,7 +311,7 @@ export class OutFileInWallEntity extends EntityClassInWall<OutFileInWallData> {
           y: dataY,
           width: Math.max(matchAreaNumber1, 30),
           depth: Math.max(matchAreaNumber2 + wallThickness * 4, 30),
-          angleY: data.angle,
+          angleY: data.angle * -1,
         })) {
           return new MatchRectArea({
             x: dataX,

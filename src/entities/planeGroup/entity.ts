@@ -295,7 +295,7 @@ export class PlaneGroupEntity extends GroupBaseEntity<PlaneGroupData> {
       y: yy,
       width,
       depth: height,
-      angleY: data.angleY * -1,
+      angleY: data.angleY,
     })) {
       return new MatchRectArea({
         x: xx,

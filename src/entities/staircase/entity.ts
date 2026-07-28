@@ -316,7 +316,7 @@ export class StaircaseEntity extends LineEntityClass<StaircasePoint, StaircaseDa
         y: midY,
         width,
         depth: thickness + 2,
-        angleY: angel,
+        angleY: angel * -1,
       })) {
         return new MatchRectArea({
           x: midX,
