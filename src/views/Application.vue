@@ -100,8 +100,7 @@
         <!-- {{ insertTempDoor }} -->
         <div class="center-panel-content">
           <Canvas3D ref="canvas3DRefCenter" v-model:cameraState="cameraStateCenter" :camera="centerPanelCamera"
-            :aspectRatio="aspectRatio2" :showCamera="true" cameraType="perspective" @objectHover="handleObjectHover"
-            @objectClick="handleObjectClick" />
+            :aspectRatio="aspectRatio2" :showCamera="true" cameraType="perspective" />
         </div>
       </div>
 
@@ -188,12 +187,8 @@ import { CameraState } from '@/types/camera'
 import { allFileKeys } from '@/entities'
 import initAllPlugin from '@/entities/initAllPlugin'
 import { PointEntityClass } from '@/types/pointEntity'
-import { EntityClassInWall } from '@/types/entityInWall'
 import { BaseObjData, HandelInfo, LineObjData } from '@/types/map2d'
-import pointToLineDistance from '@/utils/pointToLineDistance'
-import { getClosestPointOnLine } from '@/utils/geometry'
 import { CameraData } from '@/entities/camera/index.d'
-import { WallEntity } from '@/entities/wall/entity'
 import { ImportFileType, ObjOutputFileType } from '@/entities/allObjs'
 import ObjTypeSelect from '@/components/ObjTypeSelect.vue'
 import EnvironmentEditor from '@/components/EnvironmentEditor.vue'
@@ -202,15 +197,12 @@ import Login from '@/components/Login.vue'
 import { useStore } from 'vuex';
 import { Store } from '@/store';
 import Help from '@/components/help.vue'
-import { MatchCircleArea, MatchRectArea } from '@/utils/matchArea';
 import processUploadedFile from '@/utils/processUploadedFile';
 import DataTypeEditPanel from './DataTypeEditPanel.vue'
 import { BaseEntityClass } from '@/types/baseEntity';
 import { LineEntityClass } from '@/types/lineEntity';
 import AllWorldObjSelect from '@/components/AllWorldObjSelect.vue'
 import message from '@/utils/message';
-import getNearestWall, { snapThreshold } from '@/utils/getNearestWall';
-import getSnapPointAndLine from '@/utils/getSnapPoint';
 import importOutObj from '@/utils/importOutObj';
 import { CameraBase } from '@/types/CameraBase';
 import { sleep } from '@/utils/sleep';
@@ -1113,14 +1105,7 @@ function logout() {
     localStorage.removeItem('token')
   }
 }
-function handleObjectHover(object: THREE.Object3D | null) {
-  if (object) {
-  }
-}
 
-function handleObjectClick(object: THREE.Object3D | null) {
-  console.log('object', object)
-}
 function changeObjTypeSelect(type: string, baseObj: BaseEntityClass<any>) {
   activeToolsIndex.value = -1
   if (window.globalEditGroup.insertTempObj) {
