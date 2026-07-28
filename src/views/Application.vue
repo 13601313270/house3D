@@ -80,7 +80,7 @@
           <input type="file" id="fileInput" ref="loadProgramFileInputRef" accept=".devt" style="display: none"
             @change="handleLoadProgramFileChange" />
         </div>
-        <div class="canvas-container" :style="{ opacity: isSplitting ? 0 : 1 }">
+        <div class="canvas-container" :style="{ opacity: (isSplitting || isSplitTimeLine) ? 0 : 1 }">
           <canvas ref="canvas2DRef" class="drawing-canvas" />
           <canvas ref="canvas2DActionRef" class="drawing-canvas" />
           <!-- <img v-if="isPaningAngel && isPaningAngelMoved" class="protractor" src="protractor.png"
@@ -134,7 +134,8 @@
       <AllWorldObjSelect v-if="showAllObjSelect" @close="showAllObjSelect = false" />
       <EnvironmentEditor v-if="showEnvironmentEditor" @close="showEnvironmentEditor = false" />
     </div>
-    <div class="timeLine">
+    <div class="timeLine" :style="{ height: timeHeight + 'px' }">
+      <div class="split-bar-x" @mousedown.prevent="startSplitTimeLine()"></div>
       <TimeLine />
     </div>
   </div>
@@ -231,7 +232,9 @@ const lastPoint = ref<Point | null>(null)
 const isMenuing = ref(false);
 const panel1SplitWidthPer = ref(0.35)
 const panel2SplitWidthPer = ref(0.35)
+const timeHeight = ref(40)
 const isSplitting = ref(false)
+const isSplitTimeLine = ref(false)
 const showLogin = ref(false)
 const showDemos = ref(false)
 const onlyDemos = ref(false)
@@ -292,16 +295,14 @@ const updateCanvasSize = () => {
   if (!container) return
   canvas2DSceneManage.resize()
 
-  if (canvas3DRefCenter.value) {
-    const centerPanelContainer = document.querySelector('.center-panel-content')
-    if (centerPanelContainer) {
-      const canvasRect = centerPanelContainer.getBoundingClientRect()
-      const width = Math.floor(canvasRect.width)
-      const height = Math.floor(canvasRect.height)
+  const centerPanelContainer = document.querySelector('.center-panel-content')
+  if (centerPanelContainer) {
+    const canvasRect = centerPanelContainer.getBoundingClientRect()
+    const width = Math.floor(canvasRect.width)
+    const height = Math.floor(canvasRect.height)
 
-      if (width > 0 && height > 0) {
-        aspectRatio2.value = width / height
-      }
+    if (width > 0 && height > 0) {
+      aspectRatio2.value = width / height
     }
   }
 
@@ -614,6 +615,8 @@ onMounted(async () => {
   initUserInfo();
   window.addEventListener('mousemove', handleMouseMoveSplit)
   window.addEventListener('mouseup', handleMouseUpSplit)
+  window.addEventListener('mousemove', handleMouseMoveTimeLine)
+  window.addEventListener('mouseup', handleMouseUpTimeLine)
 
   // 劫持Ctrl+S保存事件
   window.addEventListener('keydown', handleKeyDown)
@@ -1022,9 +1025,32 @@ const handleMouseUpSplit = () => {
   }
 }
 
+const startSplitTimeLine = () => {
+  isSplitTimeLine.value = true
+  document.body.style.cursor = 'row-resize'
+}
+const handleMouseMoveTimeLine = (e: MouseEvent) => {
+  if (!isSplitTimeLine.value) return
+  const containerHeight = window.innerHeight
+  console.log('ddddd', containerHeight, e.clientY)
+  const minHeight = 20;
+  const maxHeight = 300;
+  const mousePositionPer = Math.min(Math.max(containerHeight - e.clientY, minHeight), maxHeight)
+  timeHeight.value = mousePositionPer
+}
+const handleMouseUpTimeLine = () => {
+  if (isSplitTimeLine.value) {
+    isSplitTimeLine.value = false
+    document.body.style.cursor = 'default'
+    updateCanvasSize()
+  }
+}
+
 onUnmounted(() => {
   window.removeEventListener('mousemove', handleMouseMoveSplit)
   window.removeEventListener('mouseup', handleMouseUpSplit)
+  window.removeEventListener('mousemove', handleMouseMoveTimeLine)
+  window.removeEventListener('mouseup', handleMouseUpTimeLine)
 })
 
 watch(() => editPropInputInfo.value, () => {
@@ -1589,6 +1615,7 @@ button {
     // padding: 8px;
     width: 100%;
     flex-grow: 1;
+    overflow: hidden;
     box-sizing: border-box;
   }
 
@@ -1596,6 +1623,7 @@ button {
     padding: 8px;
     width: 100%;
     flex-grow: 1;
+    overflow: hidden;
     box-sizing: border-box;
   }
 }
@@ -1609,6 +1637,18 @@ button {
 }
 
 .split-bar:hover {
+  background: #1890ff;
+}
+
+.split-bar-x {
+  height: 4px;
+  background: #d9d9d9;
+  cursor: row-resize;
+  transition: background 0.2s;
+  z-index: 100;
+}
+
+.split-bar-x:hover {
   background: #1890ff;
 }
 
