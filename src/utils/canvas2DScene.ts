@@ -1,6 +1,5 @@
 import { BaseEntityClass } from "@/types/baseEntity";
 import { HandelInfo, Point } from "@/types/map2d";
-import { P } from "vue-router/dist/router-CWoNjPRp.mjs";
 
 class Canvas2DScene {
   canvasList: [

@@ -134,6 +134,9 @@
       <AllWorldObjSelect v-if="showAllObjSelect" @close="showAllObjSelect = false" />
       <EnvironmentEditor v-if="showEnvironmentEditor" @close="showEnvironmentEditor = false" />
     </div>
+    <div class="timeLine">
+      <TimeLine />
+    </div>
   </div>
   <div v-if="showDemos" class="allDemosContent">
     <div class="allDemosContentInner">
@@ -216,6 +219,7 @@ import { PlaneGroupData } from '@/entities/planeGroup/index.d';
 import canvas2DSceneManage from '@/utils/canvas2DSceneManage'
 import bindDanvas2DSceneDefaultEvent from '@/utils/bindDanvas2DSceneDefaultEvent';
 import setHoverPoint from '@/utils/setHoverPoint';
+import TimeLine from '@/components/timeLine.vue'
 
 const canvas2DRef = ref<HTMLCanvasElement | null>(null)
 const canvas2DActionRef = ref<HTMLCanvasElement | null>(null)
@@ -1339,6 +1343,10 @@ function groupExit() {
   overflow: hidden;
   position: relative;
 }
+
+// .timeLine {
+//   // background-color: blue;
+// }
 
 .toolbar {
   display: flex;
