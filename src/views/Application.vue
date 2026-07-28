@@ -222,6 +222,7 @@ import { editItem } from '@/utils/editItem';
 import WorldGroup, { EnvironmentConfig } from '@/world/world';
 import { PlaneGroupData } from '@/entities/planeGroup/index.d';
 import canvas2DSceneManage from '@/utils/canvas2DSceneManage'
+import bindDanvas2DSceneDefaultEvent from '@/utils/bindDanvas2DSceneDefaultEvent';
 
 const canvas2DRef = ref<HTMLCanvasElement | null>(null)
 const canvas2DActionRef = ref<HTMLCanvasElement | null>(null)
@@ -580,6 +581,7 @@ onMounted(async () => {
       y: dy,
     }
   );
+  bindDanvas2DSceneDefaultEvent(scene2D)
   scene2D.onClick(handleCanvasClick)
   scene2D.onMouseDown(handleMouseDown)
   scene2D.onMouseMove(handleMouseMove)
@@ -1164,20 +1166,7 @@ const handleMouseMove = (point: {
     // console.log('ddddddddd', Math.ceil(dx2), Math.ceil(dy2), "|", cosGroup, sinGroup, '|', xInGroup, yInGroup)
   }
 
-  if (canvas2DSceneManage.list[0].beCopyEntity) {
-    if (canvas2DSceneManage.list[0].beCopyEntity instanceof PointEntityClass) {
-      canvas2DSceneManage.list[0].beCopyEntity.setData({
-        ...canvas2DSceneManage.list[0].beCopyEntity.getData(),
-        x: xInGroup,
-        y: yInGroup,
-      })
-    } else if (canvas2DSceneManage.list[0].beCopyEntity instanceof LineEntityClass) {
-      if (canvas2DSceneManage.list[0].beCopyEntityHandelInfo) {
-        canvas2DSceneManage.list[0].beCopyEntity.offset.x = xInGroup - canvas2DSceneManage.list[0].beCopyEntityHandelInfo.x
-        canvas2DSceneManage.list[0].beCopyEntity.offset.y = yInGroup - canvas2DSceneManage.list[0].beCopyEntityHandelInfo.y
-      }
-    }
-  } else if (window.globalEditGroup.insertTempObj) {
+  if (window.globalEditGroup.insertTempObj) {
     if (window.globalEditGroup.insertTempObj instanceof LineEntityClass) {
       if (tempPointInsertData.value && tempPointInsertData.value.length > 0) {
         const last = tempPointInsertData.value[tempPointInsertData.value.length - 1]
