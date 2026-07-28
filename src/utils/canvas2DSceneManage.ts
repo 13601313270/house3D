@@ -1,3 +1,8 @@
+import { BaseEntityClass } from "@/types/baseEntity";
+import { HandelInfo, Point } from "@/types/map2d";
+import { MatchCircleArea, MatchRectArea } from "./matchArea";
+import { PointEntityClass } from "@/types/pointEntity";
+
 class Canvas2DScene {
   canvasList: [
     HTMLCanvasElement,
@@ -33,6 +38,10 @@ class Canvas2DScene {
 
   mouseStartScreenY: number = 0;
 
+  matchHandelObj: BaseEntityClass<any> | null = null;
+  matchedHandelInfo: HandelInfo | null = null
+  matchHandelStartPoint: Point | null = null;
+
   constructor(
     canvasList: [
       HTMLCanvasElement,
@@ -64,7 +73,7 @@ class Canvas2DScene {
       e.stopPropagation()
     })
 
-    this.onMouseDown((point) => {
+    this.onMouseDown(async (point) => {
       const canvas = this.canvasList[0]
       const mouseXInCanvas = point.x
       const mouseYInCanvas = point.y
@@ -103,10 +112,61 @@ class Canvas2DScene {
           x: this.panOffset.x,
           y: this.panOffset.y,
         }
+      } else {
+        const worldData = window.worldApi.getData();
+        const { angleY } = worldData;
+        const dx = mouseXInCanvas - this.panOffset.x
+        const dy = mouseYInCanvas - this.panOffset.y
+        const cos = Math.cos(angleY * -1)
+        const sin = Math.sin(angleY * -1)
+        const xInWorld = (dx * cos + dy * sin) / this.level
+        const yInWorld = (-dx * sin + dy * cos) / this.level
+
+        let xInGroup = xInWorld;
+        let yInGroup = yInWorld;
+        // 先平移，再旋转，再缩放
+        if (window.globalEditGroup !== window.worldApi) {
+          const { x: groupX, y: groupY, angleY: groupAngle } = window.globalEditGroup.getData()
+          const dx2 = xInWorld - groupX
+          const dy2 = yInWorld - groupY
+          const cosGroup = Math.cos(groupAngle * -1)
+          const sinGroup = Math.sin(groupAngle * -1)
+          xInGroup = dx2 * cosGroup + dy2 * sinGroup
+          yInGroup = -dx2 * sinGroup + dy2 * cosGroup
+        }
+        const { getHandleInfoByXY } = await import('./getHandleInfoByXY') // 因为循环import，所以不能定义在头部。（canvas2DSceneManage->getHandleInfoByXY->lineEntity->baseEntity->canvas2DSceneManage）
+        const handleInfoList = getHandleInfoByXY(window.globalEditGroup, xInGroup, yInGroup)
+        if (handleInfoList) {
+          const { classInfo, handle, startPoint } = handleInfoList
+          if (!classInfo.getData().isLocked) {
+            this.matchHandelObj = classInfo
+            this.matchedHandelInfo = handle
+            this.matchHandelStartPoint = { x: xInGroup, y: yInGroup }
+            const canvasAction = this.canvasList[1]!;
+            const screenX = worldData.x * this.level + this.panOffset.x;
+            const screenY = worldData.y * this.level + this.panOffset.y;
+            const ctxAction = canvasAction.getContext('2d')!
+            ctxAction.clearRect(0, 0, canvasAction.width, canvasAction.height)
+            ctxAction.save()
+            ctxAction.translate(screenX, screenY)
+            ctxAction.rotate(worldData.angleY * -1)
+            this.matchHandelObj.draw2DActionHandle(ctxAction, this.level)
+            ctxAction.restore()
+            return
+          }
+        }
+        // 如果没有拖拽到任何点，开始平移
+        this.isPanningScreen = true
+        this.mouseStartScreenX = mouseXInCanvas
+        this.mouseStartScreenY = mouseYInCanvas
+        this.panStartOffsetOfWorld = {
+          x: this.panOffset.x,
+          y: this.panOffset.y,
+        }
       }
     })
 
-    this.onMouseMove((point) => {
+    this.onMouseMove(async (point) => {
       const mouseXInCanvas = point.x
       const mouseYInCanvas = point.y
       if (this.isPaningAngel) {
@@ -163,8 +223,130 @@ class Canvas2DScene {
         // 绘制操作句柄
         ctxAction.clearRect(0, 0, canvasAction.width, canvasAction.height)
         return;
+      } else if (this.isPanningScreen) {
+        this.isPaningAngel = false
+        const dx = mouseXInCanvas - this.mouseStartScreenX
+        const dy = mouseYInCanvas - this.mouseStartScreenY
+
+        this.setPanOffset({
+          x: this.panStartOffsetOfWorld.x + dx,
+          y: this.panStartOffsetOfWorld.y + dy,
+        })
+        this.canvasList[1]!.getContext('2d')!.clearRect(0, 0, this.width, this.height)
+      } else {
+        const self = this;
+        const worldData = window.worldApi.getData();
+        const angleY = worldData.angleY;// + groupAngle;
+        const dx = mouseXInCanvas - this.panOffset.x
+        const dy = mouseYInCanvas - this.panOffset.y
+        const cos = Math.cos(angleY * -1)
+        const sin = Math.sin(angleY * -1)
+        const xInWorld___ = (dx * cos + dy * sin) / this.level;// - groupX
+        const yInWorld___ = (-dx * sin + dy * cos) / this.level;// - groupY
+        let xInGroup = xInWorld___;
+        let yInGroup = yInWorld___;
+        // 先平移，再旋转，再缩放
+        if (window.globalEditGroup !== window.worldApi) {
+          const { x: groupX, y: groupY, angleY: groupAngle } = window.globalEditGroup.getData()
+          const dx2 = xInWorld___ - groupX
+          const dy2 = yInWorld___ - groupY
+          const cosGroup = Math.cos(groupAngle * -1)
+          const sinGroup = Math.sin(groupAngle * -1)
+          xInGroup = dx2 * cosGroup + dy2 * sinGroup
+          yInGroup = -dx2 * sinGroup + dy2 * cosGroup
+          // console.log('ddddddddd', Math.ceil(dx2), Math.ceil(dy2), "|", cosGroup, sinGroup, '|', xInGroup, yInGroup)
+        }
+
+        const canvasAction = this.canvasList[1]!;
+        const ctxAction = canvasAction.getContext('2d')!
+        // 鼠标浮动而过
+        ctxAction.clearRect(0, 0, canvasAction.width, canvasAction.height)
+        const { getHandleInAreaInfoByXY } = await import('./getHandleInfoByXY') // 因为循环import，所以不能定义在头部。（canvas2DSceneManage->getHandleInfoByXY->lineEntity->baseEntity->canvas2DSceneManage）
+        const handleInfo = getHandleInAreaInfoByXY(window.globalEditGroup, xInGroup, yInGroup)
+        if (handleInfo) {
+          const { classInfo, matchArea } = handleInfo;
+          (() => {
+            // 暂无操作句柄
+            // 先平移，再旋转，再缩放
+            const worldData__ = window.worldApi.getData(); // window.globalEditGroup
+            ctxAction.save()
+            ctxAction.translate(
+              worldData__.x + this.panOffset.x,
+              worldData__.y + this.panOffset.y
+            )
+            ctxAction.rotate(worldData__.angleY * -1)
+            // ctxAction.scale(canvas2DSceneManage.list[0].level, canvas2DSceneManage.list[0].level)
+            if (window.globalEditGroup !== window.worldApi) {
+              const groupData = window.globalEditGroup.getData()
+              ctxAction.translate(
+                groupData.x * this.level,
+                groupData.y * this.level,
+              )
+              ctxAction.rotate(
+                groupData.angleY * -1,
+              )
+              drawFUnc()
+            } else {
+              drawFUnc()
+            }
+            function drawFUnc() {
+              if (matchArea instanceof MatchRectArea) {
+                ctxAction.lineWidth = 2
+                ctxAction.strokeStyle = 'yellow'
+                ctxAction.save()
+                ctxAction.translate(
+                  matchArea.data.x * self.level,
+                  matchArea.data.y * self.level
+                ); // 移动原点到目标中心
+                ctxAction.rotate(matchArea.data.angleY * -1);
+                // 绘制一个方块
+                ctxAction.strokeRect(
+                  matchArea.data.width / -2 * self.level,
+                  matchArea.data.depth / -2 * self.level,
+                  matchArea.data.width * self.level,
+                  matchArea.data.depth * self.level,
+                )
+                ctxAction.restore()
+              } else if (matchArea instanceof MatchCircleArea) {
+                ctxAction.lineWidth = 2
+                ctxAction.strokeStyle = 'yellow'
+                // 绘制一个圆
+                ctxAction.beginPath()
+                ctxAction.arc(
+                  matchArea.data.x * self.level,
+                  matchArea.data.y * self.level,
+                  matchArea.data.r * self.level,
+                  0,
+                  Math.PI * 2,
+                )
+                ctxAction.stroke()
+              }
+              classInfo.draw2DActionHandle(ctxAction, self.level)
+            }
+            ctxAction.restore()
+            if (classInfo instanceof PointEntityClass) {
+              ctxAction.font = `${Math.max(14 * self.level, 14)}px '微软雅黑'`
+              ctxAction.textAlign = 'center'
+              ctxAction.strokeStyle = 'white'
+              ctxAction.lineWidth = 2
+              const text = classInfo.inAreaHoverText()
+              ctxAction.strokeText(
+                text,
+                mouseXInCanvas,
+                mouseYInCanvas - 10,
+              )
+              ctxAction.fillStyle = 'black'
+              ctxAction.fillText(
+                `${text}`,
+                mouseXInCanvas,
+                mouseYInCanvas - 10,
+              )
+            }
+          })();
+        }
       }
     })
+
     this.onMouseUp(() => {
       if (this.isPaningAngel) {
         this.isPaningAngel = false
