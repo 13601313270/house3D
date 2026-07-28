@@ -236,7 +236,7 @@ const tempPointInsertData = ref<{
 }[]>([])
 const hoverPoint = ref<Point | null>(null)
 const lastPoint = ref<Point | null>(null)
-const isMenuing = ref(false);// 选中对象的柄
+const isMenuing = ref(false);
 const panel1SplitWidthPer = ref(0.35)
 const panel2SplitWidthPer = ref(0.35)
 const isSplitting = ref(false)
@@ -287,8 +287,6 @@ type ObjFileType = {
 const ObjFileTypes = ref<Array<ObjFileType>>([])
 let menuEntity: BaseEntityClass<any> | null = null
 let menuEntiryHandelInfo: HandelInfo | null = null;// 选中的对象的柄信息
-let beCopyEntity: BaseEntityClass<any> | null = null;// 被复制移动中的对象
-let beCopyEntityHandelInfo: HandelInfo & Point | null = null;// 被复制移动中的对象的柄信息(非引用，是拷贝)
 const insertAdding = ref(false)
 
 const centerPanelCamera = ref(new THREE.PerspectiveCamera(55, aspectRatio2.value, 0.1, 20000));
@@ -1017,12 +1015,12 @@ const handleCanvasClick = async (point: {
   x: number,
   y: number,
 }) => {
-  if (beCopyEntity) {
-    if (beCopyEntity instanceof LineEntityClass) {
-      beCopyEntity.applyOffsetToData()
+  if (canvas2DSceneManage.list[0].beCopyEntity) {
+    if (canvas2DSceneManage.list[0].beCopyEntity instanceof LineEntityClass) {
+      canvas2DSceneManage.list[0].beCopyEntity.applyOffsetToData()
     }
-    beCopyEntity = null
-    beCopyEntityHandelInfo = null
+    canvas2DSceneManage.list[0].beCopyEntity = null
+    canvas2DSceneManage.list[0].beCopyEntityHandelInfo = null
     canvas2DSceneManage.list[0].matchHandelObj = null
     contextMenu.value = null
     canvas2DSceneManage.renderPreview()
@@ -1166,17 +1164,17 @@ const handleMouseMove = (point: {
     // console.log('ddddddddd', Math.ceil(dx2), Math.ceil(dy2), "|", cosGroup, sinGroup, '|', xInGroup, yInGroup)
   }
 
-  if (beCopyEntity) {
-    if (beCopyEntity instanceof PointEntityClass) {
-      beCopyEntity.setData({
-        ...beCopyEntity.getData(),
+  if (canvas2DSceneManage.list[0].beCopyEntity) {
+    if (canvas2DSceneManage.list[0].beCopyEntity instanceof PointEntityClass) {
+      canvas2DSceneManage.list[0].beCopyEntity.setData({
+        ...canvas2DSceneManage.list[0].beCopyEntity.getData(),
         x: xInGroup,
         y: yInGroup,
       })
-    } else if (beCopyEntity instanceof LineEntityClass) {
-      if (beCopyEntityHandelInfo) {
-        beCopyEntity.offset.x = xInGroup - beCopyEntityHandelInfo.x
-        beCopyEntity.offset.y = yInGroup - beCopyEntityHandelInfo.y
+    } else if (canvas2DSceneManage.list[0].beCopyEntity instanceof LineEntityClass) {
+      if (canvas2DSceneManage.list[0].beCopyEntityHandelInfo) {
+        canvas2DSceneManage.list[0].beCopyEntity.offset.x = xInGroup - canvas2DSceneManage.list[0].beCopyEntityHandelInfo.x
+        canvas2DSceneManage.list[0].beCopyEntity.offset.y = yInGroup - canvas2DSceneManage.list[0].beCopyEntityHandelInfo.y
       }
     }
   } else if (window.globalEditGroup.insertTempObj) {
@@ -1297,6 +1295,8 @@ const handleMouseDown = (point: {
   // 只有在拖拽模式下才能拖拽点
   if (point.button === 2) {
     isMenuing.value = true
+  } else {
+    isMenuing.value = false
   }
 }
 
@@ -1313,9 +1313,7 @@ const handleMouseUp = (point: {
   }
   canvas2DSceneManage.list[0].matchHandelObj = null
   canvas2DSceneManage.list[0].matchedHandelInfo = null
-  if (canvas2DSceneManage.list[0].isPanningScreen) {
-    canvas2DSceneManage.list[0].isPanningScreen = false
-  }
+  canvas2DSceneManage.list[0].isPanningScreen = false
 }
 
 const dragSplitIndex = ref(0)
@@ -1464,27 +1462,27 @@ async function copyEntity() {
     const values = JSON.parse(JSON.stringify(menuEntity.getData()));
     values.id = Date.now().toString()
     const apiList = await window.globalEditGroup.add(type, [values])
-    beCopyEntity = apiList[0]
+    canvas2DSceneManage.list[0].beCopyEntity = apiList[0]
     if (menuEntity && menuEntiryHandelInfo) {
       if (menuEntity instanceof LineEntityClass) {
         const { points } = (menuEntity as LineEntityClass<Point, LineObjData<Point>>).getData()
         const { index } = menuEntiryHandelInfo
         if (index % 2 === 0) {
           // 拖动的是点
-          beCopyEntityHandelInfo = {
+          canvas2DSceneManage.list[0].beCopyEntityHandelInfo = {
             ...menuEntiryHandelInfo,
             x: points[index / 2].x,
             y: points[index / 2].y,
           };
         } else if (index % 2 === 1) {
-          beCopyEntityHandelInfo = {
+          canvas2DSceneManage.list[0].beCopyEntityHandelInfo = {
             ...menuEntiryHandelInfo,
             x: points[(index - 1) / 2].x,
             y: points[(index - 1) / 2].y,
           };
         }
       } else if (menuEntity instanceof PointEntityClass) {
-        beCopyEntityHandelInfo = {
+        canvas2DSceneManage.list[0].beCopyEntityHandelInfo = {
           ...menuEntiryHandelInfo,
           x: values.x,
           y: values.y,

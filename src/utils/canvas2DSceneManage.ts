@@ -50,6 +50,9 @@ class Canvas2DScene {
   xAxisSnappedY: number | null = null;
   yAxisSnappedX: number | null = null;
 
+  beCopyEntity: BaseEntityClass<any> | null = null;// 被复制移动中的对象
+  beCopyEntityHandelInfo: HandelInfo & Point | null = null;// 被复制移动中的对象的柄信息(非引用，是拷贝)
+
   constructor(
     canvasList: [
       HTMLCanvasElement,
@@ -201,6 +204,8 @@ class Canvas2DScene {
         yInGroup = -dx2 * sinGroup + dy2 * cosGroup
       }
       if (window.globalEditGroup.insertTempObj) {
+      } else if (this.beCopyEntity) {
+
       } else if (this.isPaningAngel) {
         this.isPanningScreen = false
         this.isPaningAngelMoved = true;
