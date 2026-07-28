@@ -215,7 +215,6 @@ import importOutObj from '@/utils/importOutObj';
 import { CameraBase } from '@/types/CameraBase';
 import { sleep } from '@/utils/sleep';
 import saveWorld, { fileData } from '@/utils/saveWorld';
-import { getHandleInAreaInfoByXY, getHandleInfoByXY } from '@/utils/getHandleInfoByXY';
 import AiPic from '@/components/aiPic.vue'
 import ShowPayModal from '@/components/showPayModal.vue'
 import WorldState from '@/utils/worldState';
@@ -237,8 +236,6 @@ const tempPointInsertData = ref<{
 }[]>([])
 const hoverPoint = ref<Point | null>(null)
 const lastPoint = ref<Point | null>(null)
-const xAxisSnappedY = ref<number | null>(null)
-const yAxisSnappedX = ref<number | null>(null)
 const isMenuing = ref(false);// 选中对象的柄
 const panel1SplitWidthPer = ref(0.35)
 const panel2SplitWidthPer = ref(0.35)
@@ -398,7 +395,12 @@ function setHoverPoint(point: Point | null) {
   ctx.clearRect(0, 0, 100000, 100000)
   function drawTemp() {
     if (hoverPoint.value) {
-      window.globalEditGroup.drawAxis(ctx, level, xAxisSnappedY.value, yAxisSnappedX.value);
+      window.globalEditGroup.drawAxis(
+        ctx,
+        level,
+        canvas2DSceneManage.list[0].xAxisSnappedY,
+        canvas2DSceneManage.list[0].yAxisSnappedX
+      );
     } else {
       window.globalEditGroup.drawAxis(ctx, level, null, null);
     }
@@ -628,7 +630,7 @@ onMounted(async () => {
         }
       }
     } else if (event.key === 'Escape') {
-      if (window.globalEditGroup.insertTempObj && currentTool.value !== 'drag') {
+      if (window.globalEditGroup.insertTempObj) {
         if (window.globalEditGroup.insertTempObj instanceof LineEntityClass) {
           insertAdding.value = true
           window.globalEditGroup.insertTempObj.setPreparePoint(tempPointInsertData.value)
@@ -1026,16 +1028,8 @@ const handleCanvasClick = async (point: {
     canvas2DSceneManage.renderPreview()
     return
   }
-  // 如果当前是拖拽模式，不执行任何操作
-  if (currentTool.value === 'drag') {
-    return
-  }
   const canvas = canvas2DSceneManage.list[0].canvasList[0]
   if (!canvas) return
-
-  const rect = canvas.getBoundingClientRect()
-
-  console.log('ddddd11111', rect.left, rect.top)
 
   // 点击空白处隐藏 context menu
   if (contextMenu.value) {
@@ -1145,7 +1139,6 @@ const handleMouseMove = (point: {
   const mouseXInCanvas = point.x
   const mouseYInCanvas = point.y
   if (canvas2DSceneManage.list[0].isPaningAngel) {
-    isMenuing.value = false
     return;
   }
 
@@ -1186,244 +1179,109 @@ const handleMouseMove = (point: {
         beCopyEntity.offset.y = yInGroup - beCopyEntityHandelInfo.y
       }
     }
-  }
-  if (currentTool.value === 'drag') { // drag代表拖拽和鼠标移动
-    const canvasAction = canvas2DSceneManage.list[0].canvasList[1]!;
-    // 绘制操作句柄
-    const ctxAction = canvasAction.getContext('2d')!
-    // 如果正在拖拽，处理拖拽逻辑（即使当前工具不是 drag）
-    if (canvas2DSceneManage.list[0].matchHandelObj && canvas2DSceneManage.list[0].matchedHandelInfo) {
-      isMenuing.value = false
-      canvas2DSceneManage.list[0].isPaningAngel = false
-      function matchWall(wall: WallEntity): boolean {
-        if (canvas2DSceneManage.list[0].matchHandelObj && canvas2DSceneManage.list[0].matchedHandelInfo) {
-          const beMatchPoints = wall.getMineBeSnapPoints(canvas2DSceneManage.list[0].matchedHandelInfo)
-          if (beMatchPoints.length > 0) {
-            const snapped33 = getSnapPointAndLine(
-              { x: xInGroup, y: yInGroup },
-              [],
-              [],
-              beMatchPoints,
-            )
-            if (snapped33 !== null) {
-              xAxisSnappedY.value = snapped33.xAxisSnappedY || null
-              yAxisSnappedX.value = snapped33.yAxisSnappedX || null
-              const result = canvas2DSceneManage.list[0].matchHandelObj.inSceneSnapPointArea(
-                {
-                  objType: wall.type,
-                  snapFromType: 'point',
-                  point: snapped33.point
-                },
-                canvas2DSceneManage.list[0].matchedHandelInfo,
-              )
-              if (result) {
-                return true;
-              }
-            }
+  } else if (window.globalEditGroup.insertTempObj) {
+    if (window.globalEditGroup.insertTempObj instanceof LineEntityClass) {
+      if (tempPointInsertData.value && tempPointInsertData.value.length > 0) {
+        const last = tempPointInsertData.value[tempPointInsertData.value.length - 1]
+        // 收集所有点（包括临时折线和已绘制的墙上的点）
+        const allPoints = [...tempPointInsertData.value];
+        (window.globalEditGroup.getTypeObjectsData(currentTool.value) as LineObjData<any>[]).forEach((item: LineObjData<any>) => {
+          item.points.forEach((point: any) => {
+            allPoints.push(point)
+          })
+        })
+        const snapAngles = [0, 45, 90, 135, 180, -135, -90, -45]
+        snapAngles.push(...getTempPointInsertDataLastAngel())
+        let snappedPoint44 = getSnapPointAndLine(
+          { x: xInGroup, y: yInGroup },
+          [{
+            objType: currentTool.value,
+            snapFromType: 'point',
+            point: last
+          }],
+          snapAngles,
+          allPoints.map(v => ({
+            objType: currentTool.value,
+            snapFromType: 'point',
+            point: v
+          })),
+        )
+        if (snappedPoint44 === null) {
+          // console.log('===dist---find', snappedPoint44)
+          snappedPoint44 = {
+            objType: currentTool.value,
+            snapFromType: 'point',
+            point: { x: xInGroup, y: yInGroup },
+            xAxisSnappedY: yInGroup,
+            yAxisSnappedX: xInGroup,
           }
-          const beMatchLines = wall.getMineBeSnapLines()
-          if (beMatchLines.length > 0 && canvas2DSceneManage.list[0].matchHandelObj instanceof PointEntityClass) {
-            let nearestPoint: Point | null = null
-            let minDistance = Infinity
-            let matchLine = null;
-            for (let j = 0; j < beMatchLines.length; j++) {
-              const line = beMatchLines[j]
-              const distance = pointToLineDistance({ x: xInGroup, y: yInGroup }, line[0], line[1])
-              if (distance < minDistance) {
-                matchLine = line
-                minDistance = distance
-                nearestPoint = getClosestPointOnLine({ x: xInGroup, y: yInGroup }, line[0], line[1])
-              }
-            }
-            if (nearestPoint && minDistance < snapThreshold && matchLine) {
-              const result2 = canvas2DSceneManage.list[0].matchHandelObj.inSceneSnapLineArea(wall, matchLine, nearestPoint)
-              if (result2) {
-                return true;
-              }
-            }
-          }
+          canvas2DSceneManage.list[0].xAxisSnappedY = null
+          canvas2DSceneManage.list[0].yAxisSnappedX = null
+        } else {
+          canvas2DSceneManage.list[0].xAxisSnappedY = snappedPoint44.xAxisSnappedY
+          canvas2DSceneManage.list[0].yAxisSnappedX = snappedPoint44.yAxisSnappedX
         }
-        return false;
-      }
-      if (window.globalEditGroup.getTypeListEntity('wall')) {
-        for (let i = 0; i < window.globalEditGroup.getTypeObjectsData('wall').length; i++) {
-          const api: WallEntity = window.globalEditGroup.getTypeListEntity('wall')[i] as WallEntity;
-          // 类型“WallEntity”的参数不能赋给类型“BaseEntityClass<PointObjData>”的参数。
-          if (matchWall(api)) {
-            (() => {
-              const screenX = worldData.x * canvas2DSceneManage.list[0].level + canvas2DSceneManage.list[0].panOffset.x;
-              const screenY = worldData.y * canvas2DSceneManage.list[0].level + canvas2DSceneManage.list[0].panOffset.y;
-              ctxAction.clearRect(0, 0, canvasAction.width, canvasAction.height)
-              ctxAction.save()
-              ctxAction.translate(screenX, screenY)
-              ctxAction.rotate(angleY * -1)
-              // 绘制操作句柄
-              canvas2DSceneManage.list[0].matchHandelObj.draw2DActionHandle(ctxAction, canvas2DSceneManage.list[0].level)
-              ctxAction.restore()
-            })();
-            return;
-          }
+        const points = [...tempPointInsertData.value]
+        if (!(Math.abs(snappedPoint44.point.x - last.x) < 3 && Math.abs(snappedPoint44.point.y - last.y) < 3)) {
+          points.push(snappedPoint44.point)
+        } else {
+          // console.log('match point 99999', snappedPoint44.point.x, last.x, snappedPoint44.point.y, last.y)
         }
-      }
-      if (canvas2DSceneManage.list[0].matchHandelObj instanceof PointEntityClass) {
-        canvas2DSceneManage.list[0].matchHandelObj.notInSceneSnapLineArea()
-      }
-      const tipTexts = canvas2DSceneManage.list[0].matchHandelObj.matchHandelMoveCallback({
-        x: xInGroup,
-        y: yInGroup,
-        startX: canvas2DSceneManage.list[0].matchHandelStartPoint ? canvas2DSceneManage.list[0].matchHandelStartPoint.x : undefined,
-        startY: canvas2DSceneManage.list[0].matchHandelStartPoint ? canvas2DSceneManage.list[0].matchHandelStartPoint.y : undefined,
-      }, canvas2DSceneManage.list[0].matchedHandelInfo)
-      // 绘制操作句柄
-      ctxAction.clearRect(0, 0, canvasAction.width, canvasAction.height);
-
-      (() => {
-        const screenX = worldData.x * canvas2DSceneManage.list[0].level + canvas2DSceneManage.list[0].panOffset.x;
-        const screenY = worldData.y * canvas2DSceneManage.list[0].level + canvas2DSceneManage.list[0].panOffset.y;
-        ctxAction.save()
-        ctxAction.translate(screenX, screenY)
-        ctxAction.rotate(angleY * -1)
-        if (window.globalEditGroup !== worldApi) {
-          const groupData = window.globalEditGroup.getData()
-          ctxAction.translate(
-            groupData.x * canvas2DSceneManage.list[0].level,
-            groupData.y * canvas2DSceneManage.list[0].level,
-          )
-          ctxAction.rotate(
-            groupData.angleY * -1,
-          )
-        }
-        canvas2DSceneManage.list[0].matchHandelObj.draw2DActionHandle(ctxAction, canvas2DSceneManage.list[0].level)
-        ctxAction.restore()
-      })();
-
-      if (tipTexts && tipTexts.length > 0) {
+        const tipTexts = window.globalEditGroup.insertTempObj.setPreparePoint(points)
+        setHoverPoint({
+          x: snappedPoint44.point.x,
+          y: snappedPoint44.point.y,
+        })
+        canvas2DSceneManage.renderPreview()
+        const hoverScreenX = hoverPoint.value!.x * canvas2DSceneManage.list[0].level + canvas2DSceneManage.list[0].panOffset.x
+        const hoverScreenY = hoverPoint.value!.y * canvas2DSceneManage.list[0].level + canvas2DSceneManage.list[0].panOffset.y
         const canvasAction = canvas2DSceneManage.list[0].canvasList[0]!;
         const ctxAction = canvasAction.getContext('2d')!
-
-        const hoverScreenX = xInWorld___ * canvas2DSceneManage.list[0].level + canvas2DSceneManage.list[0].panOffset.x
-        const hoverScreenY = yInWorld___ * canvas2DSceneManage.list[0].level + canvas2DSceneManage.list[0].panOffset.y
-        const startY = hoverScreenY + 14;
-        // 绘制一个背景矩形
-        ctxAction.fillStyle = 'rgba(0, 0, 0, 0.5)'
-        ctxAction.fillRect(hoverScreenX - 60, startY, 120, 8 + 15 * tipTexts.length);
-        ctxAction.font = '14px Arial'
-        ctxAction.textBaseline = 'middle'
-        ctxAction.strokeStyle = 'white'
-        ctxAction.fillStyle = 'white'
-        ctxAction.textAlign = 'center'
-        tipTexts.forEach((v, index) => {
-          ctxAction.fillText(v, hoverScreenX, startY + 15 * index + 13)
-        })
-      }
-      return;
-    }
-    if (canvas2DSceneManage.list[0].isPanningScreen) {
-      isMenuing.value = false
-    } else {
-      // 鼠标浮动而过
-    }
-  } else if (window.globalEditGroup.insertTempObj instanceof LineEntityClass) {
-    if (tempPointInsertData.value && tempPointInsertData.value.length > 0) {
-      const last = tempPointInsertData.value[tempPointInsertData.value.length - 1]
-      // 收集所有点（包括临时折线和已绘制的墙上的点）
-      const allPoints = [...tempPointInsertData.value];
-      (window.globalEditGroup.getTypeObjectsData(currentTool.value) as LineObjData<any>[]).forEach((item: LineObjData<any>) => {
-        item.points.forEach((point: any) => {
-          allPoints.push(point)
-        })
-      })
-      const snapAngles = [0, 45, 90, 135, 180, -135, -90, -45]
-      snapAngles.push(...getTempPointInsertDataLastAngel())
-      let snappedPoint44 = getSnapPointAndLine(
-        { x: xInGroup, y: yInGroup },
-        [{
-          objType: currentTool.value,
-          snapFromType: 'point',
-          point: last
-        }],
-        snapAngles,
-        allPoints.map(v => ({
-          objType: currentTool.value,
-          snapFromType: 'point',
-          point: v
-        })),
-      )
-      if (snappedPoint44 === null) {
-        // console.log('===dist---find', snappedPoint44)
-        snappedPoint44 = {
-          objType: currentTool.value,
-          snapFromType: 'point',
-          point: { x: xInGroup, y: yInGroup },
-          xAxisSnappedY: yInGroup,
-          yAxisSnappedX: xInGroup,
+        const startY = snappedPoint44.point.y > last.y ? hoverScreenY + 14 : hoverScreenY - 15 * tipTexts.length - 22;
+        if (tipTexts.length > 0) {
+          // 绘制一个背景矩形
+          ctxAction.fillStyle = 'rgba(0, 0, 0, 0.5)'
+          ctxAction.fillRect(hoverScreenX - 50, startY, 100, 8 + 15 * tipTexts.length);
+          ctxAction.font = '14px Arial'
+          ctxAction.textBaseline = 'middle'
+          ctxAction.strokeStyle = 'white'
+          ctxAction.fillStyle = 'white'
+          ctxAction.textAlign = 'center'
+          tipTexts.forEach((v, index) => {
+            ctxAction.fillText(v, hoverScreenX, startY + 15 * index + 13)
+          })
         }
-        xAxisSnappedY.value = null
-        yAxisSnappedX.value = null
-      } else {
-        xAxisSnappedY.value = snappedPoint44.xAxisSnappedY
-        yAxisSnappedX.value = snappedPoint44.yAxisSnappedX
       }
-      const points = [...tempPointInsertData.value]
-      if (!(Math.abs(snappedPoint44.point.x - last.x) < 3 && Math.abs(snappedPoint44.point.y - last.y) < 3)) {
-        points.push(snappedPoint44.point)
-      } else {
-        // console.log('match point 99999', snappedPoint44.point.x, last.x, snappedPoint44.point.y, last.y)
-      }
-      const tipTexts = window.globalEditGroup.insertTempObj.setPreparePoint(points)
-      setHoverPoint({
-        x: snappedPoint44.point.x,
-        y: snappedPoint44.point.y,
-      })
-      canvas2DSceneManage.renderPreview()
-      const hoverScreenX = hoverPoint.value!.x * canvas2DSceneManage.list[0].level + canvas2DSceneManage.list[0].panOffset.x
-      const hoverScreenY = hoverPoint.value!.y * canvas2DSceneManage.list[0].level + canvas2DSceneManage.list[0].panOffset.y
-      const canvasAction = canvas2DSceneManage.list[0].canvasList[0]!;
-      const ctxAction = canvasAction.getContext('2d')!
-      const startY = snappedPoint44.point.y > last.y ? hoverScreenY + 14 : hoverScreenY - 15 * tipTexts.length - 22;
-      if (tipTexts.length > 0) {
-        // 绘制一个背景矩形
-        ctxAction.fillStyle = 'rgba(0, 0, 0, 0.5)'
-        ctxAction.fillRect(hoverScreenX - 50, startY, 100, 8 + 15 * tipTexts.length);
-        ctxAction.font = '14px Arial'
-        ctxAction.textBaseline = 'middle'
-        ctxAction.strokeStyle = 'white'
-        ctxAction.fillStyle = 'white'
-        ctxAction.textAlign = 'center'
-        tipTexts.forEach((v, index) => {
-          ctxAction.fillText(v, hoverScreenX, startY + 15 * index + 13)
-        })
-      }
-    }
-  } else {
-    const nearest = getNearestWall(window.globalEditGroup, { x: xInGroup, y: yInGroup })
-    if (nearest) {
-      // console.log('nearest', nearest)
-      setHoverPoint(nearest.pointOnWall)
     } else {
-      setHoverPoint(null)
-    }
-    let tipTexts: string[] = []
-    if (window.globalEditGroup.insertTempObj instanceof PointEntityClass) {
-      tipTexts = window.globalEditGroup.insertTempObj.setPrepareState(xInGroup, yInGroup)
-      if (tipTexts && tipTexts.length > 0) {
-        const canvasAction = canvas2DSceneManage.list[0].canvasList[0]!;
-        const ctxAction = canvasAction.getContext('2d')!
+      const nearest = getNearestWall(window.globalEditGroup, { x: xInGroup, y: yInGroup })
+      if (nearest) {
+        // console.log('nearest', nearest)
+        setHoverPoint(nearest.pointOnWall)
+      } else {
+        setHoverPoint(null)
+      }
+      let tipTexts: string[] = []
+      if (window.globalEditGroup.insertTempObj instanceof PointEntityClass) {
+        tipTexts = window.globalEditGroup.insertTempObj.setPrepareState(xInGroup, yInGroup)
+        if (tipTexts && tipTexts.length > 0) {
+          const canvasAction = canvas2DSceneManage.list[0].canvasList[0]!;
+          const ctxAction = canvasAction.getContext('2d')!
 
-        const hoverScreenX = xInWorld___ * canvas2DSceneManage.list[0].level + canvas2DSceneManage.list[0].panOffset.x
-        const hoverScreenY = yInWorld___ * canvas2DSceneManage.list[0].level + canvas2DSceneManage.list[0].panOffset.y
-        const startY = hoverScreenY + 14;
-        // 绘制一个背景矩形
-        ctxAction.fillStyle = 'rgba(0, 0, 0, 0.5)'
-        ctxAction.fillRect(hoverScreenX - 50, startY, 100, 8 + 15 * tipTexts.length);
-        ctxAction.font = '14px Arial'
-        ctxAction.textBaseline = 'middle'
-        ctxAction.strokeStyle = 'white'
-        ctxAction.fillStyle = 'white'
-        ctxAction.textAlign = 'center'
-        tipTexts.forEach((v, index) => {
-          ctxAction.fillText(v, hoverScreenX, startY + 15 * index + 13)
-        })
+          const hoverScreenX = xInWorld___ * canvas2DSceneManage.list[0].level + canvas2DSceneManage.list[0].panOffset.x
+          const hoverScreenY = yInWorld___ * canvas2DSceneManage.list[0].level + canvas2DSceneManage.list[0].panOffset.y
+          const startY = hoverScreenY + 14;
+          // 绘制一个背景矩形
+          ctxAction.fillStyle = 'rgba(0, 0, 0, 0.5)'
+          ctxAction.fillRect(hoverScreenX - 50, startY, 100, 8 + 15 * tipTexts.length);
+          ctxAction.font = '14px Arial'
+          ctxAction.textBaseline = 'middle'
+          ctxAction.strokeStyle = 'white'
+          ctxAction.fillStyle = 'white'
+          ctxAction.textAlign = 'center'
+          tipTexts.forEach((v, index) => {
+            ctxAction.fillText(v, hoverScreenX, startY + 15 * index + 13)
+          })
+        }
       }
     }
   }
@@ -1435,7 +1293,7 @@ const handleMouseDown = (point: {
   y: number,
 }) => {
   contextMenu.value = null;
-  if (currentTool.value !== 'drag') return;
+  if (window.globalEditGroup.insertTempObj) return;
   // 只有在拖拽模式下才能拖拽点
   if (point.button === 2) {
     isMenuing.value = true

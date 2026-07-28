@@ -2,6 +2,11 @@ import { BaseEntityClass } from "@/types/baseEntity";
 import { HandelInfo, Point } from "@/types/map2d";
 import { MatchCircleArea, MatchRectArea } from "./matchArea";
 import { PointEntityClass } from "@/types/pointEntity";
+import { WallEntity } from "@/entities/wall/entity";
+import pointToLineDistance from "./pointToLineDistance";
+import { getClosestPointOnLine } from "./geometry";
+import { snapThreshold } from "./getNearestWall";
+import getSnapPointAndLine from "./getSnapPoint";
 
 class Canvas2DScene {
   canvasList: [
@@ -41,6 +46,9 @@ class Canvas2DScene {
   matchHandelObj: BaseEntityClass<any> | null = null;
   matchedHandelInfo: HandelInfo | null = null
   matchHandelStartPoint: Point | null = null;
+
+  xAxisSnappedY: number | null = null;
+  yAxisSnappedX: number | null = null;
 
   constructor(
     canvasList: [
@@ -169,7 +177,31 @@ class Canvas2DScene {
     this.onMouseMove(async (point) => {
       const mouseXInCanvas = point.x
       const mouseYInCanvas = point.y
-      if (this.isPaningAngel) {
+      const self = this;
+      const worldData = window.worldApi.getData();
+      const angleY = worldData.angleY;// + groupAngle;
+      const dx = mouseXInCanvas - this.panOffset.x
+      const dy = mouseYInCanvas - this.panOffset.y
+      const cos = Math.cos(angleY * -1)
+      const sin = Math.sin(angleY * -1)
+      const xInWorld___ = (dx * cos + dy * sin) / this.level;// - groupX
+      const yInWorld___ = (-dx * sin + dy * cos) / this.level;// - groupY
+      let xInGroup = xInWorld___;
+      let yInGroup = yInWorld___;
+      const canvasAction = this.canvasList[1]!;
+      const ctxAction = canvasAction.getContext('2d')!
+      // 先平移，再旋转，再缩放
+      if (window.globalEditGroup !== window.worldApi) {
+        const { x: groupX, y: groupY, angleY: groupAngle } = window.globalEditGroup.getData()
+        const dx2 = xInWorld___ - groupX
+        const dy2 = yInWorld___ - groupY
+        const cosGroup = Math.cos(groupAngle * -1)
+        const sinGroup = Math.sin(groupAngle * -1)
+        xInGroup = dx2 * cosGroup + dy2 * sinGroup
+        yInGroup = -dx2 * sinGroup + dy2 * cosGroup
+      }
+      if (window.globalEditGroup.insertTempObj) {
+      } else if (this.isPaningAngel) {
         this.isPanningScreen = false
         this.isPaningAngelMoved = true;
         const centerX = this.panningScreenCenter.x
@@ -233,32 +265,131 @@ class Canvas2DScene {
           y: this.panStartOffsetOfWorld.y + dy,
         })
         this.canvasList[1]!.getContext('2d')!.clearRect(0, 0, this.width, this.height)
-      } else {
+      } else if (this.matchHandelObj && this.matchedHandelInfo) {
+        this.isPaningAngel = false
         const self = this;
-        const worldData = window.worldApi.getData();
-        const angleY = worldData.angleY;// + groupAngle;
-        const dx = mouseXInCanvas - this.panOffset.x
-        const dy = mouseYInCanvas - this.panOffset.y
-        const cos = Math.cos(angleY * -1)
-        const sin = Math.sin(angleY * -1)
-        const xInWorld___ = (dx * cos + dy * sin) / this.level;// - groupX
-        const yInWorld___ = (-dx * sin + dy * cos) / this.level;// - groupY
-        let xInGroup = xInWorld___;
-        let yInGroup = yInWorld___;
-        // 先平移，再旋转，再缩放
-        if (window.globalEditGroup !== window.worldApi) {
-          const { x: groupX, y: groupY, angleY: groupAngle } = window.globalEditGroup.getData()
-          const dx2 = xInWorld___ - groupX
-          const dy2 = yInWorld___ - groupY
-          const cosGroup = Math.cos(groupAngle * -1)
-          const sinGroup = Math.sin(groupAngle * -1)
-          xInGroup = dx2 * cosGroup + dy2 * sinGroup
-          yInGroup = -dx2 * sinGroup + dy2 * cosGroup
-          // console.log('ddddddddd', Math.ceil(dx2), Math.ceil(dy2), "|", cosGroup, sinGroup, '|', xInGroup, yInGroup)
+        function matchWall(wall: WallEntity): boolean {
+          if (self.matchHandelObj && self.matchedHandelInfo) {
+            const beMatchPoints = wall.getMineBeSnapPoints(self.matchedHandelInfo)
+            if (beMatchPoints.length > 0) {
+              const snapped33 = getSnapPointAndLine(
+                { x: xInGroup, y: yInGroup },
+                [],
+                [],
+                beMatchPoints,
+              )
+              if (snapped33 !== null) {
+                self.xAxisSnappedY = snapped33.xAxisSnappedY || null
+                self.yAxisSnappedX = snapped33.yAxisSnappedX || null
+                const result = self.matchHandelObj.inSceneSnapPointArea(
+                  {
+                    objType: wall.type,
+                    snapFromType: 'point',
+                    point: snapped33.point
+                  },
+                  self.matchedHandelInfo,
+                )
+                if (result) {
+                  return true;
+                }
+              }
+            }
+            const beMatchLines = wall.getMineBeSnapLines()
+            if (beMatchLines.length > 0 && self.matchHandelObj instanceof PointEntityClass) {
+              let nearestPoint: Point | null = null
+              let minDistance = Infinity
+              let matchLine = null;
+              for (let j = 0; j < beMatchLines.length; j++) {
+                const line = beMatchLines[j]
+                const distance = pointToLineDistance({ x: xInGroup, y: yInGroup }, line[0], line[1])
+                if (distance < minDistance) {
+                  matchLine = line
+                  minDistance = distance
+                  nearestPoint = getClosestPointOnLine({ x: xInGroup, y: yInGroup }, line[0], line[1])
+                }
+              }
+              if (nearestPoint && minDistance < snapThreshold && matchLine) {
+                const result2 = self.matchHandelObj.inSceneSnapLineArea(wall, matchLine, nearestPoint)
+                if (result2) {
+                  return true;
+                }
+              }
+            }
+          }
+          return false;
         }
+        if (window.globalEditGroup.getTypeListEntity('wall')) {
+          for (let i = 0; i < window.globalEditGroup.getTypeObjectsData('wall').length; i++) {
+            const api: WallEntity = window.globalEditGroup.getTypeListEntity('wall')[i] as WallEntity;
+            // 类型“WallEntity”的参数不能赋给类型“BaseEntityClass<PointObjData>”的参数。
+            if (matchWall(api)) {
+              (() => {
+                const screenX = worldData.x * this.level + this.panOffset.x;
+                const screenY = worldData.y * this.level + this.panOffset.y;
+                ctxAction.clearRect(0, 0, canvasAction.width, canvasAction.height)
+                ctxAction.save()
+                ctxAction.translate(screenX, screenY)
+                ctxAction.rotate(angleY * -1)
+                // 绘制操作句柄
+                this.matchHandelObj.draw2DActionHandle(ctxAction, this.level)
+                ctxAction.restore()
+              })();
+              return;
+            }
+          }
+        }
+        if (this.matchHandelObj instanceof PointEntityClass) {
+          this.matchHandelObj.notInSceneSnapLineArea()
+        }
+        const tipTexts = this.matchHandelObj.matchHandelMoveCallback({
+          x: xInGroup,
+          y: yInGroup,
+          startX: this.matchHandelStartPoint ? this.matchHandelStartPoint.x : undefined,
+          startY: this.matchHandelStartPoint ? this.matchHandelStartPoint.y : undefined,
+        }, this.matchedHandelInfo)
+        // 绘制操作句柄
+        ctxAction.clearRect(0, 0, canvasAction.width, canvasAction.height);
 
-        const canvasAction = this.canvasList[1]!;
-        const ctxAction = canvasAction.getContext('2d')!
+        (() => {
+          const screenX = worldData.x * this.level + this.panOffset.x;
+          const screenY = worldData.y * this.level + this.panOffset.y;
+          ctxAction.save()
+          ctxAction.translate(screenX, screenY)
+          ctxAction.rotate(angleY * -1)
+          if (window.globalEditGroup !== window.worldApi) {
+            const groupData = window.globalEditGroup.getData()
+            ctxAction.translate(
+              groupData.x * this.level,
+              groupData.y * this.level,
+            )
+            ctxAction.rotate(
+              groupData.angleY * -1,
+            )
+          }
+          this.matchHandelObj.draw2DActionHandle(ctxAction, this.level)
+          ctxAction.restore()
+        })();
+
+        if (tipTexts && tipTexts.length > 0) {
+          const canvasAction = this.canvasList[0]!;
+          const ctxAction = canvasAction.getContext('2d')!
+
+          const hoverScreenX = xInWorld___ * this.level + this.panOffset.x
+          const hoverScreenY = yInWorld___ * this.level + this.panOffset.y
+          const startY = hoverScreenY + 14;
+          // 绘制一个背景矩形
+          ctxAction.fillStyle = 'rgba(0, 0, 0, 0.5)'
+          ctxAction.fillRect(hoverScreenX - 60, startY, 120, 8 + 15 * tipTexts.length);
+          ctxAction.font = '14px Arial'
+          ctxAction.textBaseline = 'middle'
+          ctxAction.strokeStyle = 'white'
+          ctxAction.fillStyle = 'white'
+          ctxAction.textAlign = 'center'
+          tipTexts.forEach((v, index) => {
+            ctxAction.fillText(v, hoverScreenX, startY + 15 * index + 13)
+          })
+        }
+      } else {
         // 鼠标浮动而过
         ctxAction.clearRect(0, 0, canvasAction.width, canvasAction.height)
         const { getHandleInAreaInfoByXY } = await import('./getHandleInfoByXY') // 因为循环import，所以不能定义在头部。（canvas2DSceneManage->getHandleInfoByXY->lineEntity->baseEntity->canvas2DSceneManage）
