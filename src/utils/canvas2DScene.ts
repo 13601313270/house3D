@@ -1,5 +1,6 @@
 import { BaseEntityClass } from "@/types/baseEntity";
 import { HandelInfo, Point } from "@/types/map2d";
+import { P } from "vue-router/dist/router-CWoNjPRp.mjs";
 
 class Canvas2DScene {
   canvasList: [
@@ -45,6 +46,13 @@ class Canvas2DScene {
 
   beCopyEntity: BaseEntityClass<any> | null = null;// 被复制移动中的对象
   beCopyEntityHandelInfo: HandelInfo & Point | null = null;// 被复制移动中的对象的柄信息(非引用，是拷贝)
+  // 所有用连续点作为创建的元素的那个点阵
+  tempPointInsertData: Array<{
+    x: number,
+    y: number
+  }> = [];
+
+  hoverPoint: Point | null = null;
 
   constructor(
     canvasList: [
@@ -204,6 +212,18 @@ class Canvas2DScene {
         x: mouseXInCanvas,
         y: mouseYInCanvas,
       })
+    })
+  }
+
+  allOnInsertAddingCallBack: Array<(value: boolean) => void> = []
+  insertAdding: boolean = false
+  onInsertAdding(callBack: (value: boolean) => void) {
+    this.allOnInsertAddingCallBack.push(callBack)
+  }
+
+  triggerInsertAdding(value: boolean) {
+    this.allOnInsertAddingCallBack.forEach(callBack => {
+      callBack(value)
     })
   }
 }
