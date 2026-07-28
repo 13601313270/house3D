@@ -396,7 +396,7 @@ export class SignEntity extends PointEntityClass<SignData> {
       y: data.y,
       width: Math.max(width, length),
       depth: Math.max(width, length),
-      angleY: angleY,
+      angleY,
     })) {
       return new MatchRectArea({
         x: data.x,

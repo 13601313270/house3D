@@ -143,7 +143,6 @@ export class ImportFileEntity extends PointEntityClass<ImportFileData> {
       ctx.restore(); // 恢复原始状态
     })();
 
-
     // 控制点
     (() => {
       ctx.fillStyle = '#fff'

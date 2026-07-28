@@ -175,7 +175,7 @@ export class CurtainEntity extends PointEntityClass<CurtainData> {
       y: data.y,
       width: data.width + 30,
       depth: this.depth + 30,
-      angleY: angleY,
+      angleY,
     })) {
       return new MatchRectArea({
         x: data.x,
@@ -234,7 +234,7 @@ export class CurtainEntity extends PointEntityClass<CurtainData> {
       y: data.y,
       width: data.width - this.circleRadius * 2,
       depth: this.depth + 30,
-      angleY: angleY,
+      angleY,
     })) {
       return {
         index: 0,
