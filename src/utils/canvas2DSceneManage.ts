@@ -15,6 +15,21 @@ class Canvas2DScene {
     y: number,
   }
 
+  isPaningAngel: boolean = false;// 平移角度
+  isPaningAngelMoved: boolean = false;// 平移角度时候，是否移动了
+  panStartAngel: number = 0;
+  isPanningScreen: boolean = false;// 平移屏幕
+  panningScreenCenter: {
+    x: number,
+    y: number,
+  } = { x: 0, y: 0 }
+  panStartOffsetOfWorld: {
+    x: number,
+    y: number,
+  } = { x: 0, y: 0 }
+  mouseStartScreenX: number = 0
+  mouseStartScreenY: number = 0;
+
   constructor(
     canvasList: [
       HTMLCanvasElement,

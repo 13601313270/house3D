@@ -83,8 +83,8 @@
         <div class="canvas-container" :style="{ opacity: isSplitting ? 0 : 1 }">
           <canvas ref="canvas2DRef" class="drawing-canvas" />
           <canvas ref="canvas2DActionRef" class="drawing-canvas" />
-          <img v-if="isPaningAngel && isPaningAngelMoved" class="protractor" src="protractor.png"
-            :style="{ left: panningScreenCenter.x + 'px', top: panningScreenCenter.y + 'px' }" />
+          <!-- <img v-if="isPaningAngel && isPaningAngelMoved" class="protractor" src="protractor.png"
+            :style="{ left: panningScreenCenter.x + 'px', top: panningScreenCenter.y + 'px' }" /> -->
           <div class="showGroupExit" v-if="showGroupExit">
             <div class="showGroupExitButton" @click="groupExit">退出组编辑</div>
           </div>
@@ -241,16 +241,7 @@ const xAxisSnappedY = ref<number | null>(null)
 const yAxisSnappedX = ref<number | null>(null)
 const dragOffset = ref<Point | null>(null)
 const dragStartPoint = ref<Point | null>(null)
-const isPanningScreen = ref(false);// 平移屏幕
-const isPaningAngel = ref(false);// 平移角度
-const isPaningAngelMoved = ref(false);// 平移角度时候，是否移动了
-// 平移角度时候，围绕的中心点
-const panningScreenCenter = ref<{
-  x: number
-  y: number
-}>({ x: 0, y: 0 })
 const isMenuing = ref(false);// 选中对象的柄
-const panStartAngel = ref(0);
 const panel1SplitWidthPer = ref(0.35)
 const panel2SplitWidthPer = ref(0.35)
 const isSplitting = ref(false)
@@ -310,11 +301,6 @@ const rightPanelCamera = ref<THREE.PerspectiveCamera | THREE.OrthographicCamera>
 
 const showPayModal = ref(false)
 initAllPlugin();
-
-let mouseStartScreenX = 0
-let mouseStartScreenY = 0
-let panStartOffsetOfWorld = { x: 0, y: 0 }
-let startWorldAngelCenterOfWorld = { x: 0, y: 0 }
 
 const updateCanvasSize = () => {
   const container = document.querySelector('.map2d-container')
@@ -601,8 +587,6 @@ onMounted(async () => {
   scene2D.onMouseMove(handleMouseMove)
   scene2D.onMouseUp(handleMouseUp)
 
-  mouseStartScreenX = screenX
-  mouseStartScreenY = screenY
   canvas2DSceneManage.renderPreview()
   nextTick(() => {
     const match = location.href.match(/initId=(\d+)/);
@@ -1162,16 +1146,15 @@ const handleMouseMove = (point: {
 }) => {
   const mouseXInCanvas = point.x
   const mouseYInCanvas = point.y
-
-  if (isPaningAngel.value) {
+  if (canvas2DSceneManage.list[0].isPaningAngel) {
     isMenuing.value = false
-    isPanningScreen.value = false
-    isPaningAngelMoved.value = true;
-    const centerX = panningScreenCenter.value.x
-    const centerY = panningScreenCenter.value.y
+    canvas2DSceneManage.list[0].isPanningScreen = false
+    canvas2DSceneManage.list[0].isPaningAngelMoved = true;
+    const centerX = canvas2DSceneManage.list[0].panningScreenCenter.x
+    const centerY = canvas2DSceneManage.list[0].panningScreenCenter.y
 
-    const startVecX = mouseStartScreenX - centerX
-    const startVecY = mouseStartScreenY - centerY
+    const startVecX = canvas2DSceneManage.list[0].mouseStartScreenX - centerX
+    const startVecY = canvas2DSceneManage.list[0].mouseStartScreenY - centerY
     const currentVecX = mouseXInCanvas - centerX
     const currentVecY = mouseYInCanvas - centerY
 
@@ -1180,7 +1163,7 @@ const handleMouseMove = (point: {
     let rotateAngle = currentAngle - startAngle;
     (() => {
       // newAngleY每30度增加一个磁吸，接近这个度数上下5度，会吸附过去
-      let targetAngel = panStartAngel.value + rotateAngle * -1;
+      let targetAngel = canvas2DSceneManage.list[0].panStartAngel + rotateAngle * -1;
       const snapAngle = 30 * (Math.PI / 180); // 30度转换为弧度
       const snapThresholdAngle = 5 * (Math.PI / 180); // 5度转换为弧度
       const nearestSnapAngle = Math.round(targetAngel / snapAngle) * snapAngle;
@@ -1188,15 +1171,15 @@ const handleMouseMove = (point: {
       if (diff < snapThresholdAngle) {
         targetAngel = nearestSnapAngle;
       }
-      rotateAngle = panStartAngel.value - targetAngel;
+      rotateAngle = canvas2DSceneManage.list[0].panStartAngel - targetAngel;
     })()
 
-    const newAngleY = panStartAngel.value + rotateAngle * -1
+    const newAngleY = canvas2DSceneManage.list[0].panStartAngel + rotateAngle * -1
 
     const worldData = worldApi.getData();
     (() => {
       // 0, 370
-      const { x: positionX, y: positionY } = panStartOffsetOfWorld;
+      const { x: positionX, y: positionY } = canvas2DSceneManage.list[0].panStartOffsetOfWorld;
       const dx = positionX - centerX
       const dy = positionY - centerY
       const cos = Math.cos(rotateAngle)
@@ -1265,7 +1248,7 @@ const handleMouseMove = (point: {
     // 如果正在拖拽，处理拖拽逻辑（即使当前工具不是 drag）
     if (matchHandelObj && matchedHandelInfo) {
       isMenuing.value = false
-      isPaningAngel.value = false
+      canvas2DSceneManage.list[0].isPaningAngel = false
       function matchWall(wall: WallEntity): boolean {
         if (matchHandelObj && matchedHandelInfo) {
           const beMatchPoints = wall.getMineBeSnapPoints(matchedHandelInfo)
@@ -1389,16 +1372,16 @@ const handleMouseMove = (point: {
       }
       return;
     }
-    if (isPanningScreen.value) {
+    if (canvas2DSceneManage.list[0].isPanningScreen) {
       isMenuing.value = false
-      isPaningAngel.value = false
+      canvas2DSceneManage.list[0].isPaningAngel = false
       isMenuing.value = false
-      const dx = mouseXInCanvas - mouseStartScreenX
-      const dy = mouseYInCanvas - mouseStartScreenY
+      const dx = mouseXInCanvas - canvas2DSceneManage.list[0].mouseStartScreenX
+      const dy = mouseYInCanvas - canvas2DSceneManage.list[0].mouseStartScreenY
 
       canvas2DSceneManage.list[0].setPanOffset({
-        x: panStartOffsetOfWorld.x + dx,
-        y: panStartOffsetOfWorld.y + dy,
+        x: canvas2DSceneManage.list[0].panStartOffsetOfWorld.x + dx,
+        y: canvas2DSceneManage.list[0].panStartOffsetOfWorld.y + dy,
       })
       canvas2DSceneManage.list[0].canvasList[1]!.getContext('2d')!.clearRect(0, 0, canvas2DSceneManage.list[0].canvasList[1]!.width, canvas2DSceneManage.list[0].canvasList[1]!.height)
     } else {
@@ -1608,19 +1591,14 @@ const handleMouseDown = (point: {
   if (currentTool.value !== 'drag') return;
 
   // 只有在拖拽模式下才能拖拽点
-  const rect = canvas.getBoundingClientRect()
   const mouseXInCanvas = point.x
   const mouseYInCanvas = point.y
   if (point.button === 2) {
     isMenuing.value = true
-    isPaningAngel.value = true
-    isPaningAngelMoved.value = false;
-    startWorldAngelCenterOfWorld = {
-      x: (rect.width / 2 - canvas2DSceneManage.list[0].panOffset.x) / canvas2DSceneManage.list[0].level,
-      y: (rect.height / 2 - canvas2DSceneManage.list[0].panOffset.y) / canvas2DSceneManage.list[0].level,
-    }
-    panStartAngel.value = worldApi.getData().angleY
-    console.log('panStartAngel.value', canvas.height / 2, mouseYInCanvas)
+    canvas2DSceneManage.list[0].isPaningAngel = true
+    canvas2DSceneManage.list[0].isPaningAngelMoved = false;
+    canvas2DSceneManage.list[0].panStartAngel = worldApi.getData().angleY
+    console.log('panStartAngel', canvas.height / 2, mouseYInCanvas)
     let xTemp = 0;
     let yTemp = 0;
     const yDiff = canvas.height / 2 - mouseYInCanvas;
@@ -1641,7 +1619,7 @@ const handleMouseDown = (point: {
       }
     }
 
-    panningScreenCenter.value = {
+    canvas2DSceneManage.list[0].panningScreenCenter = {
       x: canvas.width / 2 + xTemp,
       y: canvas.height / 2 + yTemp,
     }
@@ -1694,11 +1672,11 @@ const handleMouseDown = (point: {
       }
     }
     // 如果没有拖拽到任何点，开始平移
-    isPanningScreen.value = true
+    canvas2DSceneManage.list[0].isPanningScreen = true
   }
-  mouseStartScreenX = mouseXInCanvas
-  mouseStartScreenY = mouseYInCanvas
-  panStartOffsetOfWorld = {
+  canvas2DSceneManage.list[0].mouseStartScreenX = mouseXInCanvas
+  canvas2DSceneManage.list[0].mouseStartScreenY = mouseYInCanvas
+  canvas2DSceneManage.list[0].panStartOffsetOfWorld = {
     x: canvas2DSceneManage.list[0].panOffset.x,
     y: canvas2DSceneManage.list[0].panOffset.y,
   }
@@ -1711,17 +1689,17 @@ const handleMouseUp = (point: {
 }) => {
   if (isMenuing.value) {
     handleContextMenu(point)
-    isPaningAngel.value = false
-    isPanningScreen.value = false
+    canvas2DSceneManage.list[0].isPaningAngel = false
+    canvas2DSceneManage.list[0].isPanningScreen = false
     return;
   }
   matchHandelObj = null
   matchedHandelInfo = null
-  if (isPanningScreen.value) {
-    isPanningScreen.value = false
+  if (canvas2DSceneManage.list[0].isPanningScreen) {
+    canvas2DSceneManage.list[0].isPanningScreen = false
   }
-  if (isPaningAngel.value) {
-    isPaningAngel.value = false
+  if (canvas2DSceneManage.list[0].isPaningAngel) {
+    canvas2DSceneManage.list[0].isPaningAngel = false
   }
 }
 
