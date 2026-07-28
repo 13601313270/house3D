@@ -109,10 +109,41 @@ export class ImportFileEntity extends PointEntityClass<ImportFileData> {
     const screenY = data.y * zoomLevel
     const iconWidth = this.circleRadius * 2 * zoomLevel * 0.8;
     // 计算中心点到上下左右哪个边最远
-    const [size, offset] = this.basicBoxData_!
+    const [basicSize, basicOffset] = this.basicBoxData_!
     const renderBox = this.boundingBoxData;
-    const drawAngelLength = renderBox ? (renderBox[0].x / 2 + offset.x) : this.baseDrawAngelLength;
+    const drawAngelLength = renderBox ? (renderBox[0].x / 2 + basicOffset.x) : this.baseDrawAngelLength;
     const circleRadius = drawAngelLength / 10 * zoomLevel + 3;
+
+    // 绘制 轮廓
+    (() => {
+      if (!renderBox) return
+      const offset = renderBox[1];
+      const matchArea = new MatchRectArea({
+        x: data.x + offset.x,
+        y: data.y + offset.z,
+        width: basicSize.x,
+        depth: basicSize.z,
+        angleY: data.angleY,
+      })
+      ctx.lineWidth = 2
+      ctx.strokeStyle = 'red'
+      ctx.save(); // 保存当前状态
+      ctx.translate(
+        matchArea.data.x * zoomLevel,
+        matchArea.data.y * zoomLevel
+      ); // 移动原点到目标中心
+      ctx.rotate(matchArea.data.angleY * -1); // 围绕新原点旋转
+      // 绘制一个方块
+      ctx.strokeRect(
+        matchArea.data.width / -2 * zoomLevel * data.scale,
+        matchArea.data.depth / -2 * zoomLevel * data.scale,
+        matchArea.data.width * zoomLevel * data.scale,
+        matchArea.data.depth * zoomLevel * data.scale,
+      )
+      ctx.restore(); // 恢复原始状态
+    })();
+
+
     // 控制点
     (() => {
       ctx.fillStyle = '#fff'
@@ -125,7 +156,7 @@ export class ImportFileEntity extends PointEntityClass<ImportFileData> {
       ctx.drawImage(moveIcon, screenX - circleRadius / 2, screenY - circleRadius / 2, circleRadius, circleRadius);
     })();
 
-    const imgAngel = offset.x > 0 ? data.angleY : data.angleY + Math.PI;
+    const imgAngel = basicOffset.x > 0 ? data.angleY : data.angleY + Math.PI;
     // 绘制旋转角度控制
     const rotatedXAdd = data.x + Math.cos(imgAngel) * drawAngelLength
     const rotatedYAdd = data.y - Math.sin(imgAngel) * drawAngelLength
