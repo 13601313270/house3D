@@ -15,54 +15,70 @@
         <span class="speed-label">{{ Math.round(zoomLevel * 100) }}%</span>
       </div>
     </div>
-
+    <div class="timeline-ruler" ref="timelineRuler" @scroll.prevent.stop>
+      <div class="ruler-track" :style="{ width: `${timelineData.duration * zoomLevel * 50}px` }">
+        <div class="ruler-marks">
+          <div v-for="mark in rulerMarks" :key="mark.time" class="ruler-mark" :class="{ major: mark.major }"
+            :style="{ left: `${(mark.time / timelineData.duration) * 100}%` }">
+            <span v-if="mark.major" class="mark-label">{{ formatTime(mark.time) }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
     <div class="timeline-scroll-container" @scroll="onScroll">
-      <div class="timeline-content-wrapper" :style="{ width: `${timelineData.duration * zoomLevel * 50}px` }"
-        @click="handleWrapperClick">
+      <div class="objInfo">
         <div class="timeline-track-area">
           <div class="track-list">
             <div v-for="clip in timelineData.clips" :key="clip.entityId" class="track-item"
-              :class="{ collapsed: collapsedClips.has(clip.entityId) }">
+              :class="{ collapsed: !collapsedClips.has(clip.entityId) }">
               <div class="track-header" @click="toggleCollapse(clip.entityId)">
-                <span class="collapse-icon">{{ collapsedClips.has(clip.entityId) ? '▶' : '▼' }}</span>
+                <span class="collapse-icon">{{ !collapsedClips.has(clip.entityId) ? '▶' : '▼' }}</span>
                 <span class="entity-name">{{ clip.entityId }}</span>
                 <span class="track-count">{{ clip.tracks.length }} 轨道</span>
               </div>
-              <div class="track-content" v-show="!collapsedClips.has(clip.entityId)">
+              <div class="track-content" v-show="collapsedClips.has(clip.entityId)">
                 <div v-for="track in clip.tracks" :key="track.trackType" class="track-row">
                   <div class="track-label">{{ translateTrackType(track.trackType) }}</div>
-                  <div class="track-timeline" @click="handleTrackClick($event, track)">
-                    <div class="track-background">
-                      <svg class="curve-line" viewBox="0 0 100 20" preserveAspectRatio="none">
-                        <polyline :points="getCurvePoints(track)" fill="none" stroke="#4CAF50" stroke-width="1" />
-                      </svg>
-                      <div v-for="keyframe in track.keyframes" :key="keyframe.time" class="keyframe-node"
-                        :style="{ left: `${(keyframe.time / timelineData.duration) * 100}%` }"
-                        @click.stop="selectKeyframe(clip.entityId, track.trackType, keyframe)"
-                        :class="{ selected: isKeyframeSelected(clip.entityId, track.trackType, keyframe) }"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="timeInfo" @scroll="scrollTimeInfo">
+        <div class="timeline-content-wrapper" :style="{ width: `${timelineData.duration * zoomLevel * 50}px` }"
+          @click="handleWrapperClick">
+          <div class="timeline-track-area">
+            <div class="track-list">
+              <div v-for="clip in timelineData.clips" :key="clip.entityId" class="track-item"
+                :class="{ collapsed: !collapsedClips.has(clip.entityId) }">
+                <div class="track-content" v-show="collapsedClips.has(clip.entityId)">
+                  <div style="height: 35px;"></div>
+                  <div v-for="track in clip.tracks" :key="track.trackType" class="track-row">
+                    <div class="track-timeline" @click="handleTrackClick($event, track)">
+                      <div class="track-background">
+                        <svg class="curve-line" viewBox="0 0 100 20" preserveAspectRatio="none">
+                          <polyline :points="getCurvePoints(track)" fill="none" stroke="#4CAF50" stroke-width="1" />
+                        </svg>
+                        <div v-for="keyframe in track.keyframes" :key="keyframe.time" class="keyframe-node"
+                          :style="{ left: `${(keyframe.time / timelineData.duration) * 100}%` }"
+                          @click.stop="selectKeyframe(clip.entityId, track.trackType, keyframe)"
+                          :class="{ selected: isKeyframeSelected(clip.entityId, track.trackType, keyframe) }"></div>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
 
-        <div class="timeline-ruler">
-          <div class="ruler-track">
-            <div class="ruler-marks">
-              <div v-for="mark in rulerMarks" :key="mark.time" class="ruler-mark" :class="{ major: mark.major }"
-                :style="{ left: `${(mark.time / timelineData.duration) * 100}%` }">
-                <span v-if="mark.major" class="mark-label">{{ formatTime(mark.time) }}</span>
-              </div>
-            </div>
+          <div class="playhead-container">
+            <div class="playhead-line" :style="{ left: `${(currentTime / timelineData.duration) * 100}%` }"
+              @mousedown="startDragging"></div>
+            <!-- <div class="playhead-handle"
+              :style="{ left: `calc(${(currentTime / timelineData.duration) * 100}% - 6px)` }"
+              @mousedown="startDragging"></div> -->
           </div>
-        </div>
-
-        <div class="playhead-container">
-          <div class="playhead-line" :style="{ left: `${(currentTime / timelineData.duration) * 100}%` }"></div>
-          <div class="playhead-handle" :style="{ left: `calc(${(currentTime / timelineData.duration) * 100}% - 6px)` }"
-            @mousedown="startDragging"></div>
         </div>
       </div>
     </div>
@@ -127,10 +143,11 @@ interface TimelineData {
 }
 
 const timelineData = ref<TimelineData>({
-  duration: 10,
+  duration: 30,
   clips: []
 })
 
+const timelineRuler = ref();
 const currentTime = ref(0)
 const isPlaying = ref(false)
 const playbackSpeed = ref(1)
@@ -581,6 +598,11 @@ onMounted(() => {
   addCube()
 })
 
+function scrollTimeInfo(e: Event) {
+  // @ts-ignore
+  timelineRuler.value.scrollLeft = e.target.scrollLeft
+}
+
 onUnmounted(() => {
   if (animationFrameId) {
     cancelAnimationFrame(animationFrameId)
@@ -600,367 +622,409 @@ onUnmounted(() => {
   // border-radius: 8px;
   overflow: hidden;
   font-family: 'Segoe UI', sans-serif;
-}
 
-.timeline-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 4px 8px;
-  // background: #16213e;
-  border-bottom: 1px solid #0f3460;
-}
+  .timeline-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 4px 8px;
+    // background: #16213e;
+    border-bottom: 1px solid #0f3460;
 
-.header-left {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
 
-.title {
-  font-size: 16px;
-  font-weight: bold;
-  color: #e94560;
-}
+      .title {
+        font-size: 16px;
+        font-weight: bold;
+        color: #e94560;
+      }
 
-.time-display {
-  font-size: 14px;
-  color: #a8b2d1;
-  font-family: monospace;
-}
+      .time-display {
+        font-size: 14px;
+        color: #a8b2d1;
+        font-family: monospace;
+      }
+    }
 
-.header-right {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
 
-.control-btn {
-  width: 32px;
-  height: 32px;
-  border: none;
-  border-radius: 6px;
-  background: #0f3460;
-  color: #fff;
-  font-size: 14px;
-  cursor: pointer;
-  transition: background 0.2s;
+      .control-btn {
+        width: 32px;
+        height: 32px;
+        border: none;
+        border-radius: 6px;
+        background: #0f3460;
+        color: #fff;
+        font-size: 14px;
+        cursor: pointer;
+        transition: background 0.2s;
 
-  &:hover {
-    background: #1a4d7a;
-  }
-}
+        &:hover {
+          background: #1a4d7a;
+        }
+      }
 
-.speed-control {
-  width: 80px;
-  height: 6px;
-  cursor: pointer;
-}
+      .speed-control {
+        width: 80px;
+        height: 6px;
+        cursor: pointer;
+      }
 
-.speed-label {
-  font-size: 12px;
-  color: #a8b2d1;
-  min-width: 30px;
-}
-
-.timeline-scroll-container {
-  flex: 1;
-  overflow-x: auto;
-  overflow-y: auto;
-  position: relative;
-}
-
-.timeline-content-wrapper {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  min-width: 100%;
-}
-
-.timeline-track-area {
-  overflow-y: auto;
-  box-sizing: border-box;
-  position: relative;
-}
-
-.track-list {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.track-item {
-  // background: #16213e;
-  border-radius: 6px;
-  overflow: hidden;
-  border: 1px solid #1a4d7a;
-}
-
-.track-header {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 12px;
-  background: #0f3460;
-  cursor: pointer;
-  user-select: none;
-
-  &:hover {
-    background: #1a4d7a;
-  }
-}
-
-.collapse-icon {
-  font-size: 10px;
-  color: #a8b2d1;
-  width: 12px;
-  flex-shrink: 0;
-}
-
-.entity-name {
-  font-size: 13px;
-  color: #e94560;
-  font-weight: 500;
-  flex: 1;
-}
-
-.track-count {
-  font-size: 12px;
-  color: #6b7280;
-}
-
-.track-content {
-  // padding: 4px 0;
-}
-
-.track-row {
-  display: flex;
-  align-items: center;
-  height: 36px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-
-  &:last-child {
-    border-bottom: none;
-  }
-}
-
-.track-label {
-  width: 70px;
-  padding: 0 12px;
-  font-size: 12px;
-  color: #a8b2d1;
-  text-align: right;
-  flex-shrink: 0;
-}
-
-.track-timeline {
-  flex: 1;
-  position: relative;
-  height: 100%;
-  cursor: crosshair;
-}
-
-.track-background {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  background: rgba(255, 255, 255, 0.02);
-}
-
-.keyframe-node {
-  position: absolute;
-  top: 50%;
-  width: 12px;
-  height: 12px;
-  margin-left: -6px;
-  margin-top: -6px;
-  border-radius: 50%;
-  background: #4CAF50;
-  border: 2px solid #fff;
-  cursor: move;
-  transition: transform 0.15s, background 0.15s;
-  z-index: 2;
-
-  &:hover {
-    transform: scale(1.3);
-  }
-
-  &.selected {
-    background: #e94560;
-    transform: scale(1.3);
-  }
-}
-
-.curve-line {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-}
-
-.timeline-ruler {
-  height: 40px;
-  background: #0f3460;
-  border-top: 1px solid #1a4d7a;
-  box-sizing: border-box;
-  position: relative;
-  width: 100%;
-  margin-left: 100px;
-}
-
-.ruler-track {
-  position: relative;
-  width: 100%;
-  height: 100%;
-}
-
-.playhead-container {
-  position: absolute;
-  top: 0;
-  left: 100px;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: 100;
-}
-
-.playhead-line {
-  position: absolute;
-  top: 0;
-  width: 2px;
-  height: 100%;
-  background: rgba(233, 69, 96, 0.6);
-  pointer-events: none;
-  box-shadow: 0 0 6px rgba(233, 69, 96, 0.3);
-}
-
-.playhead-handle {
-  position: absolute;
-  bottom: 40px;
-  width: 12px;
-  height: 12px;
-  background: #e94560;
-  cursor: ew-resize;
-  pointer-events: auto;
-  z-index: 101;
-  clip-path: polygon(0 0, 100% 0, 50% 100%);
-  transform: translateX(0);
-
-  &:hover {
-    background: #ff5c7a;
-    transform: scale(1.2) translateX(0);
-  }
-}
-
-.ruler-marks {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-}
-
-.ruler-mark {
-  position: absolute;
-  top: 0;
-  width: 1px;
-  height: 100%;
-  background: rgba(255, 255, 255, 0.2);
-
-  &.major {
-    height: 100%;
-    background: rgba(255, 255, 255, 0.4);
-
-    .mark-label {
-      position: absolute;
-      top: 4px;
-      left: 2px;
-      font-size: 10px;
-      color: #a8b2d1;
-      white-space: nowrap;
+      .speed-label {
+        font-size: 12px;
+        color: #a8b2d1;
+        min-width: 30px;
+      }
     }
   }
-}
 
-.keyframe-panel {
-  padding: 12px;
-  background: #16213e;
-  border-top: 1px solid #0f3460;
-}
+  .timeline-scroll-container {
+    flex: 1;
+    overflow-x: auto;
+    overflow-y: auto;
+    position: relative;
+    display: flex;
+    flex-direction: row;
+    align-items: start;
+    padding: 0 4px 4px 4px;
 
-.panel-header {
-  font-size: 13px;
-  font-weight: 500;
-  color: #e94560;
-  margin-bottom: 8px;
-}
+    .objInfo {
+      flex-shrink: 0;
+      width: 250px;
 
-.panel-content {
-  display: flex;
-  gap: 16px;
-}
+      .track-list {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
 
-.property-row {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
+        .track-item {
+          // background: #0f3460;
+          border: 1px solid #1a4d7a;
+          border-radius: 6px 0 0 6px;
 
-.property-row label {
-  font-size: 12px;
-  color: #6b7280;
-}
+          .track-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            cursor: pointer;
+            user-select: none;
+            height: 35px;
+            box-sizing: border-box;
 
-.property-row input,
-.property-row select {
-  padding: 4px 8px;
-  border: 1px solid #0f3460;
-  border-radius: 4px;
-  background: #0f3460;
-  color: #fff;
-  font-size: 12px;
-}
+            &:hover {
+              background: #1a4d7a;
+            }
 
-.demo-controls {
-  display: flex;
-  gap: 8px;
-  padding: 12px;
-  background: #16213e;
-  border-top: 1px solid #0f3460;
-}
+            .collapse-icon {
+              font-size: 10px;
+              color: #a8b2d1;
+              width: 12px;
+              flex-shrink: 0;
+            }
 
-.demo-btn {
-  padding: 6px 12px;
-  border: none;
-  border-radius: 4px;
-  background: #0f3460;
-  color: #fff;
-  font-size: 12px;
-  cursor: pointer;
-  transition: background 0.2s;
+            .entity-name {
+              font-size: 13px;
+              color: #e94560;
+              font-weight: 500;
+              flex: 1;
+            }
 
-  &:hover {
-    background: #1a4d7a;
+            .track-count {
+              font-size: 12px;
+              color: #6b7280;
+            }
+          }
+
+          .track-content {
+            .track-row {
+              height: 35px;
+              color: white;
+            }
+          }
+        }
+      }
+    }
+
+    .timeInfo {
+      flex-grow: 1;
+      flex-shrink: 1;
+      overflow-x: auto;
+      overflow-y: hidden;
+
+      .timeline-content-wrapper {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+
+        .playhead-container {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          pointer-events: none;
+          z-index: 100;
+
+          .playhead-line {
+            position: absolute;
+            top: 0;
+            width: 2px;
+            height: 100%;
+            background: rgba(233, 69, 96, 0.6);
+            cursor: ew-resize;
+            box-shadow: 0 0 6px rgba(233, 69, 96, 0.3);
+          }
+
+          .playhead-handle {
+            position: absolute;
+            bottom: 40px;
+            width: 12px;
+            height: 12px;
+            background: #e94560;
+            cursor: ew-resize;
+            pointer-events: auto;
+            z-index: 101;
+            clip-path: polygon(0 0, 100% 0, 50% 100%);
+            transform: translateX(0);
+
+            &:hover {
+              background: #ff5c7a;
+              transform: scale(1.2) translateX(0);
+            }
+          }
+        }
+
+        .timeline-track-area {
+          overflow-y: auto;
+          box-sizing: border-box;
+          position: relative;
+
+          .track-list {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+
+            .track-item {
+              border-radius: 0 6px 6px 0;
+              overflow: hidden;
+              border: 1px solid #1a4d7a;
+              min-height: 37px;
+              box-sizing: border-box;
+
+              .track-content {
+                // padding: 4px 0;
+
+                .track-row {
+                  display: flex;
+                  align-items: center;
+                  height: 35px;
+                  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+                  box-sizing: border-box;
+
+                  &:last-child {
+                    border-bottom: none;
+                  }
+
+                  // .track-label {
+                  //   width: 70px;
+                  //   padding: 0 12px;
+                  //   font-size: 12px;
+                  //   color: #a8b2d1;
+                  //   text-align: right;
+                  //   flex-shrink: 0;
+                  // }
+
+                  .track-timeline {
+                    flex: 1;
+                    position: relative;
+                    height: 100%;
+                    cursor: crosshair;
+
+                    .track-background {
+                      position: relative;
+                      width: 100%;
+                      height: 100%;
+                      background: rgba(255, 255, 255, 0.02);
+                    }
+
+                    .keyframe-node {
+                      position: absolute;
+                      top: 50%;
+                      width: 12px;
+                      height: 12px;
+                      margin-left: -6px;
+                      margin-top: -6px;
+                      border-radius: 50%;
+                      background: #4CAF50;
+                      border: 2px solid #fff;
+                      cursor: move;
+                      transition: transform 0.15s, background 0.15s;
+                      z-index: 2;
+
+                      &:hover {
+                        transform: scale(1.3);
+                      }
+
+                      &.selected {
+                        background: #e94560;
+                        transform: scale(1.3);
+                      }
+                    }
+
+                    .curve-line {
+                      position: absolute;
+                      top: 0;
+                      left: 0;
+                      width: 100%;
+                      height: 100%;
+                      pointer-events: none;
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
   }
-}
 
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
+  .timeline-ruler {
+    height: 24px;
+    // background: #0f3460;
+    box-sizing: border-box;
+    position: relative;
+    overflow-x: hidden;
+    margin-left: 254px;
+    // background-color: red;
 
-::-webkit-scrollbar-track {
-  background: #16213e;
-}
+    &::-webkit-scrollbar {
+      // background-color: red;
+      display: none;
+    }
 
-::-webkit-scrollbar-thumb {
-  background: #0f3460;
-  border-radius: 3px;
+    .ruler-track {
+      position: relative;
+      width: 100%;
+      height: 100%;
+    }
 
-  &:hover {
-    background: #1a4d7a;
+    .ruler-marks {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+
+      .ruler-mark {
+        position: absolute;
+        top: 0;
+        width: 1px;
+        height: 100%;
+        background: rgba(255, 255, 255, 0.2);
+
+        &.major {
+          height: 100%;
+          background: rgba(255, 255, 255, 0.4);
+
+          .mark-label {
+            position: absolute;
+            top: 4px;
+            left: 2px;
+            font-size: 10px;
+            color: #a8b2d1;
+            white-space: nowrap;
+          }
+        }
+      }
+    }
   }
+
+  .keyframe-panel {
+    padding: 12px;
+    background: #16213e;
+    border-top: 1px solid #0f3460;
+
+    .panel-header {
+      font-size: 13px;
+      font-weight: 500;
+      color: #e94560;
+      margin-bottom: 8px;
+    }
+
+    .panel-content {
+      display: flex;
+      gap: 16px;
+
+      .property-row {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+
+        label {
+          font-size: 12px;
+          color: #6b7280;
+        }
+
+        input,
+        select {
+          padding: 4px 8px;
+          border: 1px solid #0f3460;
+          border-radius: 4px;
+          background: #0f3460;
+          color: #fff;
+          font-size: 12px;
+        }
+      }
+    }
+  }
+
+  .demo-controls {
+    display: flex;
+    gap: 8px;
+    padding: 12px;
+    background: #16213e;
+    border-top: 1px solid #0f3460;
+
+    .demo-btn {
+      padding: 6px 12px;
+      border: none;
+      border-radius: 4px;
+      background: #0f3460;
+      color: #fff;
+      font-size: 12px;
+      cursor: pointer;
+      transition: background 0.2s;
+
+      &:hover {
+        background: #1a4d7a;
+      }
+    }
+  }
+
+  // ::-webkit-scrollbar {
+  //   width: 6px;
+  //   height: 6px;
+  // }
+
+  // ::-webkit-scrollbar-track {
+  //   background: #879cd4;
+  // }
+
+  // ::-webkit-scrollbar-thumb {
+  //   background: #0f3460;
+  //   border-radius: 3px;
+
+  //   &:hover {
+  //     background: #1a4d7a;
+  //   }
+  // }
 }
 </style>
