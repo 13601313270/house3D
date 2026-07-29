@@ -232,7 +232,8 @@ const lastPoint = ref<Point | null>(null)
 const isMenuing = ref(false);
 const panel1SplitWidthPer = ref(0.35)
 const panel2SplitWidthPer = ref(0.35)
-const timeHeight = ref(40)
+const maxTimeHeight = 600;
+const timeHeight = ref(600)
 const isSplitting = ref(false)
 const isSplitTimeLine = ref(false)
 const showLogin = ref(false)
@@ -1034,8 +1035,7 @@ const handleMouseMoveTimeLine = (e: MouseEvent) => {
   const containerHeight = window.innerHeight
   console.log('ddddd', containerHeight, e.clientY)
   const minHeight = 20;
-  const maxHeight = 300;
-  const mousePositionPer = Math.min(Math.max(containerHeight - e.clientY, minHeight), maxHeight)
+  const mousePositionPer = Math.min(Math.max(containerHeight - e.clientY, minHeight), maxTimeHeight)
   timeHeight.value = mousePositionPer
 }
 const handleMouseUpTimeLine = () => {
@@ -1630,7 +1630,7 @@ button {
 
 .split-bar {
   width: 4px;
-  background: #d9d9d9;
+  background: #141b44;
   cursor: col-resize;
   transition: background 0.2s;
   z-index: 100;
@@ -1642,7 +1642,7 @@ button {
 
 .split-bar-x {
   height: 4px;
-  background: #d9d9d9;
+  background: #141b44;
   cursor: row-resize;
   transition: background 0.2s;
   z-index: 100;
@@ -1685,6 +1685,8 @@ button {
   }
 
   .buttons {
+    display: flex;
+
     >button {
       margin-left: 4px;
     }
