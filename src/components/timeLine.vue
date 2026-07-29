@@ -26,7 +26,7 @@
       </div>
     </div>
     <div class="timeline-scroll-container" @scroll="onScroll">
-      <div class="timeInfo" @click="handleWrapperClick">
+      <div class="timeInfo" @mousedown="handleTimeInfoMouseDown">
         <div class="timeline-content-wrapper" :style="{ width: `${effectiveDuration * zoomLevel * 50}px` }">
           <div class="timeline-track-area">
             <div v-for="(row, rowIndex) in rowsByIndex" :key="`time-row-${rowIndex}`" class="timeline-row">
@@ -182,6 +182,8 @@ let dragClipId: string | null = null
 let dragStartX = 0
 let dragMoved = false
 const dragStartTimes = new Map<string, number[]>()
+let isScrubbing = false
+let scrubClosedPanel = false
 
 const rulerMarks = computed(() => {
   const marks = []
@@ -299,37 +301,56 @@ function zoomOut() {
   zoomLevel.value = Math.max(zoomLevel.value - 0.2, 0.2)
 }
 
-function handleWrapperClick(event: MouseEvent) {
+function getTimeFromMouseEvent(event: MouseEvent): number {
+  const wrapper = document.querySelector('.timeline-content-wrapper') as HTMLElement
+  if (!wrapper) return currentTime.value
+
+  const wrapperRect = wrapper.getBoundingClientRect()
+  const timeInfo = document.querySelector('.timeInfo') as HTMLElement
+  if (!timeInfo) return currentTime.value
+
+  const scrollLeft = timeInfo.scrollLeft
+  const x = event.clientX - wrapperRect.left + scrollLeft
+  const time = (x / wrapperRect.width) * effectiveDuration.value
+  return Math.max(0, Math.min(time, effectiveDuration.value))
+}
+
+function handleTimeInfoMouseDown(event: MouseEvent) {
   if (dragMoved) {
     dragMoved = false
     return
   }
 
   const target = event.target as HTMLElement
-  if (target.closest('.keyframe-node') || target.closest('.track-timeline') || target.closest('.track-header') || target.closest('.track-item')) {
+  if (target.closest('.keyframe-node') || target.closest('.track-timeline') || target.closest('.track-header') || target.closest('.track-item') || target.closest('.playhead-line')) {
     return
   }
 
   if (activeClipId.value) {
     closeClipContent()
+    scrubClosedPanel = true
     return
   }
 
-  const wrapper = document.querySelector('.timeline-content-wrapper') as HTMLElement
-  if (!wrapper) return
-
-  const wrapperRect = wrapper.getBoundingClientRect()
-  const timeInfo = document.querySelector('.timeInfo') as HTMLElement
-  if (!timeInfo) return
-
-  const timeInfoRect = timeInfo.getBoundingClientRect()
-  const scrollLeft = timeInfo.scrollLeft
-
-  const x = event.clientX - wrapperRect.left + scrollLeft
-  const time = (x / wrapperRect.width) * effectiveDuration.value
-
-  currentTime.value = Math.max(0, Math.min(time, effectiveDuration.value))
+  isScrubbing = true
+  scrubClosedPanel = false
+  currentTime.value = getTimeFromMouseEvent(event)
   evaluateTimeline(currentTime.value)
+
+  document.addEventListener('mousemove', onScrubDrag)
+  document.addEventListener('mouseup', stopScrub)
+}
+
+function onScrubDrag(event: MouseEvent) {
+  if (!isScrubbing) return
+  currentTime.value = getTimeFromMouseEvent(event)
+  evaluateTimeline(currentTime.value)
+}
+
+function stopScrub() {
+  isScrubbing = false
+  document.removeEventListener('mousemove', onScrubDrag)
+  document.removeEventListener('mouseup', stopScrub)
 }
 
 function onScroll(event: Event) {
