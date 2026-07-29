@@ -3,7 +3,7 @@
     <div class="timeline-header">
       <div class="header-left">
         <span class="title">时间轴</span>
-        <span class="time-display">{{ formatTime(currentTime) }} / {{ formatTime(timelineData.duration) }}</span>
+        <span class="time-display">{{ formatTime(currentTime) }} / {{ formatTime(effectiveDuration) }}</span>
       </div>
       <div class="header-right">
         <button class="control-btn" @click="stop">⏹</button>
@@ -16,54 +16,40 @@
       </div>
     </div>
     <div class="timeline-ruler" ref="timelineRuler" @scroll.prevent.stop>
-      <div class="ruler-track" :style="{ width: `${timelineData.duration * zoomLevel * 50}px` }">
+      <div class="ruler-track" :style="{ width: `${effectiveDuration * zoomLevel * 50}px` }">
         <div class="ruler-marks">
           <div v-for="mark in rulerMarks" :key="mark.time" class="ruler-mark" :class="{ major: mark.major }"
-            :style="{ left: `${(mark.time / timelineData.duration) * 100}%` }">
+            :style="{ left: `${(mark.time / effectiveDuration) * 100}%` }">
             <span v-if="mark.major" class="mark-label">{{ formatTime(mark.time) }}</span>
           </div>
         </div>
       </div>
     </div>
     <div class="timeline-scroll-container" @scroll="onScroll">
-      <div class="objInfo">
-        <div class="timeline-track-area">
-          <div class="track-list">
-            <div v-for="clip in timelineData.clips" :key="clip.entityId" class="track-item"
-              :class="{ collapsed: !collapsedClips.has(clip.entityId) }">
-              <div class="track-header" @click="toggleCollapse(clip.entityId)">
-                <span class="collapse-icon">{{ !collapsedClips.has(clip.entityId) ? '▶' : '▼' }}</span>
-                <span class="entity-name">{{ clip.entityId }}</span>
-                <span class="track-count">{{ clip.tracks.length }} 轨道</span>
-              </div>
-              <div class="track-content" v-show="collapsedClips.has(clip.entityId)">
-                <div v-for="track in clip.tracks" :key="track.trackType" class="track-row">
-                  <div class="track-label">{{ translateTrackType(track.trackType) }}</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
       <div class="timeInfo" @scroll="scrollTimeInfo">
-        <div class="timeline-content-wrapper" :style="{ width: `${timelineData.duration * zoomLevel * 50}px` }"
+        <div class="timeline-content-wrapper" :style="{ width: `${effectiveDuration * zoomLevel * 50}px` }"
           @click="handleWrapperClick">
           <div class="timeline-track-area">
-            <div class="track-list">
-              <div v-for="clip in timelineData.clips" :key="clip.entityId" class="track-item"
-                :class="{ collapsed: !collapsedClips.has(clip.entityId) }">
-                <div class="track-content" v-show="collapsedClips.has(clip.entityId)">
+            <div v-for="(row, rowIndex) in rowsByIndex" :key="`time-row-${rowIndex}`" class="timeline-row">
+              <div v-for="segment in row" :key="segment.clip.entityId" class="track-item"
+                :class="{ collapsed: !collapsedClips.has(segment.clip.entityId) }" :style="{
+                  left: `${(segment.startTime / effectiveDuration) * 100}%`,
+                  width: `${((segment.endTime - segment.startTime) / effectiveDuration) * 100}%`
+                }">
+                <div class="track-content" v-show="collapsedClips.has(segment.clip.entityId)">
                   <div style="height: 35px;"></div>
-                  <div v-for="track in clip.tracks" :key="track.trackType" class="track-row">
-                    <div class="track-timeline" @click="handleTrackClick($event, track)">
+                  <div v-for="track in segment.clip.tracks" :key="track.trackType" class="track-row">
+                    <div class="track-timeline" @click="handleTrackClick($event, track, segment)">
                       <div class="track-background">
                         <svg class="curve-line" viewBox="0 0 100 20" preserveAspectRatio="none">
-                          <polyline :points="getCurvePoints(track)" fill="none" stroke="#4CAF50" stroke-width="1" />
+                          <polyline :points="getCurvePoints(track, segment)" fill="none" stroke="#4CAF50"
+                            stroke-width="1" />
                         </svg>
                         <div v-for="keyframe in track.keyframes" :key="keyframe.time" class="keyframe-node"
-                          :style="{ left: `${(keyframe.time / timelineData.duration) * 100}%` }"
-                          @click.stop="selectKeyframe(clip.entityId, track.trackType, keyframe)"
-                          :class="{ selected: isKeyframeSelected(clip.entityId, track.trackType, keyframe) }"></div>
+                          :style="{ left: `${((keyframe.time - segment.startTime) / (segment.endTime - segment.startTime || 1)) * 100}%` }"
+                          @click.stop="selectKeyframe(segment.clip.entityId, track.trackType, keyframe)"
+                          :class="{ selected: isKeyframeSelected(segment.clip.entityId, track.trackType, keyframe) }">
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -73,11 +59,8 @@
           </div>
 
           <div class="playhead-container">
-            <div class="playhead-line" :style="{ left: `${(currentTime / timelineData.duration) * 100}%` }"
+            <div class="playhead-line" :style="{ left: `${(currentTime / effectiveDuration) * 100}%` }"
               @mousedown="startDragging"></div>
-            <!-- <div class="playhead-handle"
-              :style="{ left: `calc(${(currentTime / timelineData.duration) * 100}% - 6px)` }"
-              @mousedown="startDragging"></div> -->
           </div>
         </div>
       </div>
@@ -147,6 +130,18 @@ const timelineData = ref<TimelineData>({
   clips: []
 })
 
+const effectiveDuration = computed(() => {
+  let maxTime = timelineData.value.duration
+  for (const clip of timelineData.value.clips) {
+    for (const track of clip.tracks) {
+      for (const kf of track.keyframes) {
+        if (kf.time > maxTime) maxTime = kf.time
+      }
+    }
+  }
+  return Math.max(maxTime + 5, 30)
+})
+
 const timelineRuler = ref();
 const currentTime = ref(0)
 const isPlaying = ref(false)
@@ -163,14 +158,89 @@ let isDragging = false
 
 const rulerMarks = computed(() => {
   const marks = []
-  const step = timelineData.value.duration / 20
-  for (let i = 0; i <= timelineData.value.duration; i += step) {
+  const dur = effectiveDuration.value
+  const step = dur / 20
+  for (let i = 0; i <= dur; i += step) {
     marks.push({
       time: i,
       major: i % 1 === 0
     })
   }
   return marks
+})
+
+interface ClipSegment {
+  clip: ClipData
+  startTime: number
+  endTime: number
+  rowIndex: number
+}
+
+const clipSegments = computed<ClipSegment[]>(() => {
+  const segments: ClipSegment[] = []
+
+  for (const clip of timelineData.value.clips) {
+    const allTimes: number[] = []
+    for (const track of clip.tracks) {
+      for (const kf of track.keyframes) {
+        allTimes.push(kf.time)
+      }
+    }
+
+    if (allTimes.length === 0) continue
+
+    const startTime = Math.min(...allTimes)
+    const endTime = Math.max(...allTimes)
+
+    segments.push({
+      clip,
+      startTime,
+      endTime,
+      rowIndex: 0
+    })
+  }
+
+  segments.sort((a, b) => a.startTime - b.startTime)
+
+  const rowEndTimes: number[] = []
+
+  for (const segment of segments) {
+    let assignedRow = -1
+
+    for (let r = 0; r < rowEndTimes.length; r++) {
+      if (rowEndTimes[r] <= segment.startTime) {
+        assignedRow = r
+        break
+      }
+    }
+
+    if (assignedRow === -1) {
+      assignedRow = rowEndTimes.length
+      rowEndTimes.push(segment.endTime)
+    } else {
+      rowEndTimes[assignedRow] = segment.endTime
+    }
+
+    segment.rowIndex = assignedRow
+  }
+
+  return segments
+})
+
+const totalRows = computed(() => {
+  if (clipSegments.value.length === 0) return 0
+  return Math.max(...clipSegments.value.map(s => s.rowIndex)) + 1
+})
+
+const rowsByIndex = computed(() => {
+  const rows: ClipSegment[][] = []
+  for (let i = 0; i < totalRows.value; i++) {
+    rows.push([])
+  }
+  for (const segment of clipSegments.value) {
+    rows[segment.rowIndex].push(segment)
+  }
+  return rows
 })
 
 function formatTime(time: number): string {
@@ -220,9 +290,9 @@ function handleWrapperClick(event: MouseEvent) {
 
   const rect = wrapper.getBoundingClientRect()
   const x = Math.max(0, Math.min(event.clientX - rect.left, rect.width))
-  const time = (x / rect.width) * timelineData.value.duration
+  const time = (x / rect.width) * effectiveDuration.value
 
-  currentTime.value = Math.max(0, Math.min(time, timelineData.value.duration))
+  currentTime.value = Math.max(0, Math.min(time, effectiveDuration.value))
   evaluateTimeline(currentTime.value)
 }
 
@@ -241,13 +311,17 @@ function toggleCollapse(entityId: string) {
   collapsedClips.value = next
 }
 
-function getCurvePoints(track: TrackData): string {
+function getCurvePoints(track: TrackData, segment?: ClipSegment): string {
   if (track.keyframes.length < 2) return ''
+
+  const startTime = segment ? segment.startTime : 0
+  const endTime = segment ? segment.endTime : effectiveDuration.value
+  const segDuration = endTime - startTime || 1
 
   const points = track.keyframes
     .sort((a, b) => a.time - b.time)
     .map(kf => {
-      const x = (kf.time / timelineData.value.duration) * 100
+      const x = ((kf.time - startTime) / segDuration) * 100
       let y = 10
       if (track.trackType === 'opacity') {
         y = 18 - kf.value * 16
@@ -273,11 +347,13 @@ function selectKeyframe(entityId: string, trackType: TrackType, keyframe: Keyfra
   selectedKeyframeValue.value = typeof keyframe.value === 'object' ? JSON.stringify(keyframe.value) : String(keyframe.value)
 }
 
-function handleTrackClick(event: MouseEvent, track: TrackData) {
+function handleTrackClick(event: MouseEvent, track: TrackData, segment?: ClipSegment) {
   const target = event.currentTarget as HTMLElement
   const rect = target.getBoundingClientRect()
   const x = event.clientX - rect.left
-  const time = (x / rect.width) * timelineData.value.duration
+  const segDuration = segment ? (segment.endTime - segment.startTime) : effectiveDuration.value
+  const startTime = segment ? segment.startTime : 0
+  const time = startTime + (x / rect.width) * segDuration
 
   let defaultValue: any = null
   switch (track.trackType) {
@@ -340,7 +416,7 @@ function playLoop() {
 
   currentTime.value += deltaTime * playbackSpeed.value
 
-  if (currentTime.value >= timelineData.value.duration) {
+  if (currentTime.value >= effectiveDuration.value) {
     currentTime.value = 0
   }
 
@@ -364,9 +440,9 @@ function onDrag(e: MouseEvent) {
 
   const rect = wrapper.getBoundingClientRect()
   const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width))
-  const time = (x / rect.width) * timelineData.value.duration
+  const time = (x / rect.width) * effectiveDuration.value
 
-  currentTime.value = Math.max(0, Math.min(time, timelineData.value.duration))
+  currentTime.value = Math.max(0, Math.min(time, effectiveDuration.value))
   evaluateTimeline(currentTime.value)
 }
 
@@ -521,33 +597,38 @@ function addCube() {
   scene.add(cube)
   animatedObjects.set(id, cube)
 
+  const clipCount = timelineData.value.clips.length
+  const startTime = clipCount * 3
+  const midTime = startTime + 5
+  const endTime = startTime + 10
+
   timelineData.value.clips.push({
     entityId: id,
     tracks: [
       {
         trackType: 'position',
         keyframes: [
-          { time: 0, value: { x: cube.position.x, y: cube.position.y, z: cube.position.z }, easing: 'easeInOut' },
-          { time: 5, value: { x: cube.position.x + 100, y: cube.position.y + 50, z: cube.position.z }, easing: 'easeInOut' },
-          { time: 10, value: { x: cube.position.x, y: cube.position.y, z: cube.position.z }, easing: 'easeInOut' }
+          { time: startTime, value: { x: cube.position.x, y: cube.position.y, z: cube.position.z }, easing: 'easeInOut' },
+          { time: midTime, value: { x: cube.position.x + 100, y: cube.position.y + 50, z: cube.position.z }, easing: 'easeInOut' },
+          { time: endTime, value: { x: cube.position.x, y: cube.position.y, z: cube.position.z }, easing: 'easeInOut' }
         ],
         interpolation: 'linear'
       },
       {
         trackType: 'rotation',
         keyframes: [
-          { time: 0, value: { x: 0, y: 0, z: 0 }, easing: 'linear' },
-          { time: 5, value: { x: Math.PI, y: Math.PI, z: 0 }, easing: 'linear' },
-          { time: 10, value: { x: Math.PI * 2, y: Math.PI * 2, z: 0 }, easing: 'linear' }
+          { time: startTime, value: { x: 0, y: 0, z: 0 }, easing: 'linear' },
+          { time: midTime, value: { x: Math.PI, y: Math.PI, z: 0 }, easing: 'linear' },
+          { time: endTime, value: { x: Math.PI * 2, y: Math.PI * 2, z: 0 }, easing: 'linear' }
         ],
         interpolation: 'linear'
       },
       {
         trackType: 'opacity',
         keyframes: [
-          { time: 0, value: 1, easing: 'linear' },
-          { time: 8, value: 0.3, easing: 'easeOut' },
-          { time: 10, value: 1, easing: 'easeIn' }
+          { time: startTime, value: 1, easing: 'linear' },
+          { time: startTime + 8, value: 0.3, easing: 'easeOut' },
+          { time: endTime, value: 1, easing: 'easeIn' }
         ],
         interpolation: 'linear'
       }
@@ -694,69 +775,12 @@ onUnmounted(() => {
     align-items: start;
     padding: 0 4px 4px 4px;
 
-    .objInfo {
-      flex-shrink: 0;
-      width: 250px;
-
-      .track-list {
-        display: flex;
-        flex-direction: column;
-        gap: 2px;
-
-        .track-item {
-          // background: #0f3460;
-          border: 1px solid #1a4d7a;
-          border-radius: 6px 0 0 6px;
-
-          .track-header {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 8px 12px;
-            cursor: pointer;
-            user-select: none;
-            height: 35px;
-            box-sizing: border-box;
-
-            &:hover {
-              background: #1a4d7a;
-            }
-
-            .collapse-icon {
-              font-size: 10px;
-              color: #a8b2d1;
-              width: 12px;
-              flex-shrink: 0;
-            }
-
-            .entity-name {
-              font-size: 13px;
-              color: #e94560;
-              font-weight: 500;
-              flex: 1;
-            }
-
-            .track-count {
-              font-size: 12px;
-              color: #6b7280;
-            }
-          }
-
-          .track-content {
-            .track-row {
-              height: 35px;
-              color: white;
-            }
-          }
-        }
-      }
-    }
-
     .timeInfo {
       flex-grow: 1;
       flex-shrink: 1;
       overflow-x: auto;
-      overflow-y: hidden;
+      overflow-y: auto;
+      height: 100%;
 
       .timeline-content-wrapper {
         position: relative;
@@ -781,24 +805,6 @@ onUnmounted(() => {
             cursor: ew-resize;
             box-shadow: 0 0 6px rgba(233, 69, 96, 0.3);
           }
-
-          .playhead-handle {
-            position: absolute;
-            bottom: 40px;
-            width: 12px;
-            height: 12px;
-            background: #e94560;
-            cursor: ew-resize;
-            pointer-events: auto;
-            z-index: 101;
-            clip-path: polygon(0 0, 100% 0, 50% 100%);
-            transform: translateX(0);
-
-            &:hover {
-              background: #ff5c7a;
-              transform: scale(1.2) translateX(0);
-            }
-          }
         }
 
         .timeline-track-area {
@@ -809,18 +815,25 @@ onUnmounted(() => {
           .track-list {
             display: flex;
             flex-direction: column;
-            gap: 2px;
+            gap: 4px;
+          }
+
+          .timeline-row {
+            position: relative;
+            height: 30px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
 
             .track-item {
-              border-radius: 0 6px 6px 0;
+              position: absolute;
+              border-radius: 6px;
               overflow: hidden;
               border: 1px solid #1a4d7a;
-              min-height: 37px;
               box-sizing: border-box;
+              min-width: 20px;
+              z-index: 5;
+              height: 100%;
 
               .track-content {
-                // padding: 4px 0;
-
                 .track-row {
                   display: flex;
                   align-items: center;
@@ -831,15 +844,6 @@ onUnmounted(() => {
                   &:last-child {
                     border-bottom: none;
                   }
-
-                  // .track-label {
-                  //   width: 70px;
-                  //   padding: 0 12px;
-                  //   font-size: 12px;
-                  //   color: #a8b2d1;
-                  //   text-align: right;
-                  //   flex-shrink: 0;
-                  // }
 
                   .track-timeline {
                     flex: 1;
