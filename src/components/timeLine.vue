@@ -26,45 +26,57 @@
       </div>
     </div>
     <div class="timeline-scroll-container" @scroll="onScroll">
-      <div class="timeInfo" @scroll="scrollTimeInfo">
-        <div class="timeline-content-wrapper" :style="{ width: `${effectiveDuration * zoomLevel * 50}px` }"
-          @click="handleWrapperClick">
+      <div class="timeInfo" @click="handleWrapperClick">
+        <div class="timeline-content-wrapper" :style="{ width: `${effectiveDuration * zoomLevel * 50}px` }">
           <div class="timeline-track-area">
             <div v-for="(row, rowIndex) in rowsByIndex" :key="`time-row-${rowIndex}`" class="timeline-row">
               <div v-for="segment in row" :key="segment.clip.entityId" class="track-item"
-                :class="{ collapsed: !collapsedClips.has(segment.clip.entityId) }" :style="{
+                :class="{ active: activeClipId === segment.clip.entityId }"
+                :style="{
                   left: `${(segment.startTime / effectiveDuration) * 100}%`,
                   width: `${((segment.endTime - segment.startTime) / effectiveDuration) * 100}%`
-                }">
-                <div class="track-content" v-show="collapsedClips.has(segment.clip.entityId)">
-                  <div style="height: 35px;"></div>
-                  <div v-for="track in segment.clip.tracks" :key="track.trackType" class="track-row">
-                    <div class="track-timeline" @click="handleTrackClick($event, track, segment)">
-                      <div class="track-background">
-                        <svg class="curve-line" viewBox="0 0 100 20" preserveAspectRatio="none">
-                          <polyline :points="getCurvePoints(track, segment)" fill="none" stroke="#4CAF50"
-                            stroke-width="1" />
-                        </svg>
-                        <div v-for="keyframe in track.keyframes" :key="keyframe.time" class="keyframe-node"
-                          :style="{ left: `${((keyframe.time - segment.startTime) / (segment.endTime - segment.startTime || 1)) * 100}%` }"
-                          @click.stop="selectKeyframe(segment.clip.entityId, track.trackType, keyframe)"
-                          :class="{ selected: isKeyframeSelected(segment.clip.entityId, track.trackType, keyframe) }">
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+                }" @mousedown="startClipDrag($event, segment.clip.entityId)" @click.stop="toggleClipContent($event, segment)">
+                <div class="track-header-bar">
+                  <span class="clip-name">{{ segment.clip.entityId }}</span>
+                  <span class="clip-duration">{{ formatTime(segment.startTime) }} - {{ formatTime(segment.endTime) }}</span>
                 </div>
               </div>
             </div>
           </div>
+        </div>
 
-          <div class="playhead-container">
-            <div class="playhead-line" :style="{ left: `${(currentTime / effectiveDuration) * 100}%` }"
-              @mousedown="startDragging"></div>
-          </div>
+        <div class="playhead-container" :style="{ width: `${effectiveDuration * zoomLevel * 50}px` }">
+          <div class="playhead-line" :style="{ left: `${(currentTime / effectiveDuration) * 100}%` }"
+            @mousedown="startDragging"></div>
         </div>
       </div>
     </div>
+
+    <teleport to="#teleport" v-if="activeSegment">
+      <div class="track-content-floating" :style="trackContentStyle" @click.stop>
+        <div class="floating-header">
+          <span class="floating-title">{{ activeSegment.clip.entityId }}</span>
+          <span class="floating-time">{{ formatTime(activeSegment.startTime) }} - {{ formatTime(activeSegment.endTime) }}</span>
+          <button class="floating-close" @click="closeClipContent">×</button>
+        </div>
+        <div v-for="track in activeSegment.clip.tracks" :key="track.trackType" class="track-row">
+          <div class="track-label">{{ translateTrackType(track.trackType) }}</div>
+          <div class="track-timeline" @click="handleTrackClick($event, track, activeSegment)">
+            <div class="track-background">
+              <svg class="curve-line" viewBox="0 0 100 20" preserveAspectRatio="none">
+                <polyline :points="getCurvePoints(track, activeSegment)" fill="none" stroke="#4CAF50"
+                  stroke-width="1" />
+              </svg>
+              <div v-for="keyframe in track.keyframes" :key="keyframe.time" class="keyframe-node"
+                :style="{ left: `${((keyframe.time - activeSegment.startTime) / (activeSegment.endTime - activeSegment.startTime || 1)) * 100}%` }"
+                @click.stop="selectKeyframe(activeSegment.clip.entityId, track.trackType, keyframe)"
+                :class="{ selected: isKeyframeSelected(activeSegment.clip.entityId, track.trackType, keyframe) }">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </teleport>
 
     <div v-if="selectedKeyframe" class="keyframe-panel">
       <div class="panel-header">关键帧属性</div>
@@ -120,6 +132,13 @@ interface ClipData {
   tracks: TrackData[]
 }
 
+interface ClipSegment {
+  clip: ClipData
+  startTime: number
+  endTime: number
+  rowIndex: number
+}
+
 interface TimelineData {
   duration: number
   clips: ClipData[]
@@ -151,10 +170,18 @@ const selectedKeyframeValue = ref('')
 const zoomLevel = ref(1)
 const scrollLeft = ref(0)
 const collapsedClips = ref<Set<string>>(new Set())
+const activeClipId = ref<string | null>(null)
+const activeSegment = ref<ClipSegment | null>(null)
+const trackContentStyle = ref<Record<string, string>>({})
 
 let animationFrameId: number | null = null
 let lastTimestamp = 0
 let isDragging = false
+let isDraggingClip = false
+let dragClipId: string | null = null
+let dragStartX = 0
+let dragMoved = false
+const dragStartTimes = new Map<string, number[]>()
 
 const rulerMarks = computed(() => {
   const marks = []
@@ -168,13 +195,6 @@ const rulerMarks = computed(() => {
   }
   return marks
 })
-
-interface ClipSegment {
-  clip: ClipData
-  startTime: number
-  endTime: number
-  rowIndex: number
-}
 
 const clipSegments = computed<ClipSegment[]>(() => {
   const segments: ClipSegment[] = []
@@ -280,17 +300,33 @@ function zoomOut() {
 }
 
 function handleWrapperClick(event: MouseEvent) {
+  if (dragMoved) {
+    dragMoved = false
+    return
+  }
+
   const target = event.target as HTMLElement
-  if (target.closest('.keyframe-node') || target.closest('.track-timeline') || target.closest('.track-header')) {
+  if (target.closest('.keyframe-node') || target.closest('.track-timeline') || target.closest('.track-header') || target.closest('.track-item')) {
+    return
+  }
+
+  if (activeClipId.value) {
+    closeClipContent()
     return
   }
 
   const wrapper = document.querySelector('.timeline-content-wrapper') as HTMLElement
   if (!wrapper) return
 
-  const rect = wrapper.getBoundingClientRect()
-  const x = Math.max(0, Math.min(event.clientX - rect.left, rect.width))
-  const time = (x / rect.width) * effectiveDuration.value
+  const wrapperRect = wrapper.getBoundingClientRect()
+  const timeInfo = document.querySelector('.timeInfo') as HTMLElement
+  if (!timeInfo) return
+
+  const timeInfoRect = timeInfo.getBoundingClientRect()
+  const scrollLeft = timeInfo.scrollLeft
+
+  const x = event.clientX - wrapperRect.left + scrollLeft
+  const time = (x / wrapperRect.width) * effectiveDuration.value
 
   currentTime.value = Math.max(0, Math.min(time, effectiveDuration.value))
   evaluateTimeline(currentTime.value)
@@ -299,6 +335,44 @@ function handleWrapperClick(event: MouseEvent) {
 function onScroll(event: Event) {
   const target = event.target as HTMLElement
   scrollLeft.value = target.scrollLeft
+}
+
+function toggleClipContent(event: MouseEvent, segment: ClipSegment) {
+  if (dragMoved) {
+    dragMoved = false
+    return
+  }
+
+  if (activeClipId.value === segment.clip.entityId) {
+    closeClipContent()
+    return
+  }
+
+  activeClipId.value = segment.clip.entityId
+  activeSegment.value = segment
+
+  const target = event.currentTarget as HTMLElement
+  const rect = target.getBoundingClientRect()
+
+  const panelWidth = Math.max(rect.width, 200)
+  let left = rect.left
+  if (left + panelWidth > window.innerWidth) {
+    left = window.innerWidth - panelWidth - 10
+  }
+  if (left < 10) left = 10
+
+  trackContentStyle.value = {
+    position: 'fixed',
+    left: `${left}px`,
+    top: `${rect.bottom + 4}px`,
+    width: `${panelWidth}px`,
+    zIndex: '1000'
+  }
+}
+
+function closeClipContent() {
+  activeClipId.value = null
+  activeSegment.value = null
 }
 
 function toggleCollapse(entityId: string) {
@@ -348,6 +422,11 @@ function selectKeyframe(entityId: string, trackType: TrackType, keyframe: Keyfra
 }
 
 function handleTrackClick(event: MouseEvent, track: TrackData, segment?: ClipSegment) {
+  if (dragMoved) {
+    dragMoved = false
+    return
+  }
+
   const target = event.currentTarget as HTMLElement
   const rect = target.getBoundingClientRect()
   const x = event.clientX - rect.left
@@ -450,6 +529,71 @@ function stopDragging() {
   isDragging = false
   document.removeEventListener('mousemove', onDrag)
   document.removeEventListener('mouseup', stopDragging)
+}
+
+function startClipDrag(e: MouseEvent, entityId: string) {
+  e.stopPropagation()
+  isDraggingClip = true
+  dragClipId = entityId
+  dragStartX = e.clientX
+  dragMoved = false
+  dragStartTimes.clear()
+
+  if (activeClipId.value) {
+    closeClipContent()
+  }
+
+  const clip = timelineData.value.clips.find(c => c.entityId === entityId)
+  if (clip) {
+    for (const track of clip.tracks) {
+      const times = track.keyframes.map(kf => kf.time)
+      dragStartTimes.set(track.trackType, times)
+    }
+  }
+
+  document.addEventListener('mousemove', onClipDrag)
+  document.addEventListener('mouseup', stopClipDrag)
+}
+
+function onClipDrag(e: MouseEvent) {
+  if (!isDraggingClip || !dragClipId) return
+
+  const wrapper = document.querySelector('.timeline-content-wrapper') as HTMLElement
+  if (!wrapper) return
+
+  const rect = wrapper.getBoundingClientRect()
+  const widthPerSecond = rect.width / effectiveDuration.value
+  const deltaX = e.clientX - dragStartX
+
+  if (Math.abs(deltaX) > 2) {
+    dragMoved = true
+  }
+
+  if (!dragMoved) return
+
+  const deltaTime = deltaX / widthPerSecond
+
+  const clip = timelineData.value.clips.find(c => c.entityId === dragClipId)
+  if (!clip) return
+
+  for (const track of clip.tracks) {
+    const originalTimes = dragStartTimes.get(track.trackType)
+    if (!originalTimes) continue
+
+    for (let i = 0; i < track.keyframes.length; i++) {
+      if (originalTimes[i] !== undefined) {
+        track.keyframes[i].time = Math.max(0, originalTimes[i] + deltaTime)
+      }
+    }
+  }
+}
+
+function stopClipDrag() {
+  isDraggingClip = false
+  dragClipId = null
+  dragStartTimes.clear()
+  document.removeEventListener('mousemove', onClipDrag)
+  document.removeEventListener('mouseup', stopClipDrag)
 }
 
 const animatedObjects = new Map<string, THREE.Mesh>()
@@ -781,32 +925,36 @@ onUnmounted(() => {
       overflow-x: auto;
       overflow-y: auto;
       height: 100%;
+      display: grid;
+      grid-template-areas: "layer";
 
       .timeline-content-wrapper {
+        grid-area: layer;
         position: relative;
         display: flex;
         flex-direction: column;
+      }
 
-        .playhead-container {
+      .playhead-container {
+        grid-area: layer;
+        position: relative;
+        top: 0;
+        left: 0;
+        pointer-events: none;
+        z-index: 100;
+
+        .playhead-line {
           position: absolute;
           top: 0;
-          left: 0;
-          width: 100%;
+          width: 2px;
           height: 100%;
-          pointer-events: none;
-          z-index: 100;
-
-          .playhead-line {
-            position: absolute;
-            top: 0;
-            width: 2px;
-            height: 100%;
-            background: rgba(233, 69, 96, 0.6);
-            cursor: ew-resize;
-            box-shadow: 0 0 6px rgba(233, 69, 96, 0.3);
-          }
+          background: rgba(233, 69, 96, 0.6);
+          cursor: ew-resize;
+          box-shadow: 0 0 6px rgba(233, 69, 96, 0.3);
         }
+      }
 
+      .timeline-content-wrapper {
         .timeline-track-area {
           overflow-y: auto;
           box-sizing: border-box;
@@ -820,77 +968,59 @@ onUnmounted(() => {
 
           .timeline-row {
             position: relative;
-            height: 30px;
+            height: 35px;
             border-bottom: 1px solid rgba(255, 255, 255, 0.03);
 
             .track-item {
               position: absolute;
               border-radius: 6px;
-              overflow: hidden;
+              overflow: visible;
               border: 1px solid #1a4d7a;
               box-sizing: border-box;
               min-width: 20px;
               z-index: 5;
-              height: 100%;
+              height: 35px;
+              top: 0;
+              cursor: move;
+              background: rgba(15, 52, 96, 0.4);
+              transition: box-shadow 0.15s;
 
-              .track-content {
-                .track-row {
-                  display: flex;
-                  align-items: center;
-                  height: 35px;
-                  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-                  box-sizing: border-box;
+              &:hover {
+                box-shadow: 0 0 0 1px rgba(233, 69, 96, 0.5);
+              }
 
-                  &:last-child {
-                    border-bottom: none;
-                  }
+              &.active {
+                box-shadow: 0 0 0 1px #e94560;
+                z-index: 50;
+              }
 
-                  .track-timeline {
-                    flex: 1;
-                    position: relative;
-                    height: 100%;
-                    cursor: crosshair;
+              &:active {
+                cursor: grabbing;
+              }
 
-                    .track-background {
-                      position: relative;
-                      width: 100%;
-                      height: 100%;
-                      background: rgba(255, 255, 255, 0.02);
-                    }
+              .track-header-bar {
+                display: flex;
+                align-items: center;
+                height: 35px;
+                padding: 0 8px;
+                gap: 8px;
+                color: white;
+                font-size: 12px;
+                overflow: hidden;
 
-                    .keyframe-node {
-                      position: absolute;
-                      top: 50%;
-                      width: 12px;
-                      height: 12px;
-                      margin-left: -6px;
-                      margin-top: -6px;
-                      border-radius: 50%;
-                      background: #4CAF50;
-                      border: 2px solid #fff;
-                      cursor: move;
-                      transition: transform 0.15s, background 0.15s;
-                      z-index: 2;
+                .clip-name {
+                  font-weight: 500;
+                  color: #e94560;
+                  flex-shrink: 0;
+                  max-width: 80px;
+                  overflow: hidden;
+                  text-overflow: ellipsis;
+                  white-space: nowrap;
+                }
 
-                      &:hover {
-                        transform: scale(1.3);
-                      }
-
-                      &.selected {
-                        background: #e94560;
-                        transform: scale(1.3);
-                      }
-                    }
-
-                    .curve-line {
-                      position: absolute;
-                      top: 0;
-                      left: 0;
-                      width: 100%;
-                      height: 100%;
-                      pointer-events: none;
-                    }
-                  }
+                .clip-duration {
+                  color: #a8b2d1;
+                  font-size: 10px;
                 }
               }
             }
@@ -906,7 +1036,7 @@ onUnmounted(() => {
     box-sizing: border-box;
     position: relative;
     overflow-x: hidden;
-    margin-left: 254px;
+    margin-left: 4px;
     // background-color: red;
 
     &::-webkit-scrollbar {
@@ -1030,5 +1160,117 @@ onUnmounted(() => {
   //     background: #1a4d7a;
   //   }
   // }
+}
+
+.track-content-floating {
+  background: rgba(15, 52, 96, 0.98);
+  border: 1px solid #e94560;
+  border-radius: 6px;
+  padding: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
+  box-sizing: border-box;
+
+  .floating-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding-bottom: 8px;
+    margin-bottom: 4px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+
+    .floating-title {
+      font-weight: 500;
+      color: #e94560;
+      font-size: 13px;
+      flex: 1;
+    }
+
+    .floating-time {
+      color: #a8b2d1;
+      font-size: 11px;
+    }
+
+    .floating-close {
+      background: none;
+      border: none;
+      color: #a8b2d1;
+      cursor: pointer;
+      font-size: 16px;
+      padding: 0 4px;
+      line-height: 1;
+
+      &:hover {
+        color: #fff;
+      }
+    }
+  }
+
+  .track-row {
+    display: flex;
+    align-items: center;
+    height: 35px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    box-sizing: border-box;
+    white-space: nowrap;
+    gap: 8px;
+
+    &:last-child {
+      border-bottom: none;
+    }
+
+    .track-label {
+      width: 60px;
+      font-size: 11px;
+      color: #a8b2d1;
+      flex-shrink: 0;
+    }
+
+    .track-timeline {
+      flex: 1;
+      position: relative;
+      height: 100%;
+      cursor: crosshair;
+
+      .track-background {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        background: rgba(255, 255, 255, 0.02);
+      }
+
+      .keyframe-node {
+        position: absolute;
+        top: 50%;
+        width: 12px;
+        height: 12px;
+        margin-left: -6px;
+        margin-top: -6px;
+        border-radius: 50%;
+        background: #4CAF50;
+        border: 2px solid #fff;
+        cursor: move;
+        transition: transform 0.15s, background 0.15s;
+        z-index: 2;
+
+        &:hover {
+          transform: scale(1.3);
+        }
+
+        &.selected {
+          background: #e94560;
+          transform: scale(1.3);
+        }
+      }
+
+      .curve-line {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+      }
+    }
+  }
 }
 </style>
