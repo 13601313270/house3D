@@ -17,45 +17,52 @@
     </div>
 
     <div class="timeline-scroll-container" @scroll="onScroll">
-      <div class="timeline-track-area" :style="{ width: `${timelineData.duration * zoomLevel * 50}px` }">
-        <div class="track-list">
-          <div v-for="clip in timelineData.clips" :key="clip.entityId" class="track-item"
-            :class="{ collapsed: collapsedClips.has(clip.entityId) }">
-            <div class="track-header" @click="toggleCollapse(clip.entityId)">
-              <span class="collapse-icon">{{ collapsedClips.has(clip.entityId) ? '▶' : '▼' }}</span>
-              <span class="entity-name">{{ clip.entityId }}</span>
-              <span class="track-count">{{ clip.tracks.length }} 轨道</span>
-            </div>
-            <div class="track-content" v-show="!collapsedClips.has(clip.entityId)">
-              <div v-for="track in clip.tracks" :key="track.trackType" class="track-row">
-                <div class="track-label">{{ translateTrackType(track.trackType) }}</div>
-                <div class="track-timeline" @click="handleTrackClick($event, track)">
-                  <div class="track-background">
-                    <svg class="curve-line" viewBox="0 0 100 20" preserveAspectRatio="none">
-                      <polyline :points="getCurvePoints(track)" fill="none" stroke="#4CAF50" stroke-width="1" />
-                    </svg>
-                    <div v-for="keyframe in track.keyframes" :key="keyframe.time" class="keyframe-node"
-                      :style="{ left: `${(keyframe.time / timelineData.duration) * 100}%` }"
-                      @click.stop="selectKeyframe(clip.entityId, track.trackType, keyframe)"
-                      :class="{ selected: isKeyframeSelected(clip.entityId, track.trackType, keyframe) }"></div>
+      <div class="timeline-content-wrapper" :style="{ width: `${timelineData.duration * zoomLevel * 50}px` }"
+        @click="handleWrapperClick">
+        <div class="timeline-track-area">
+          <div class="track-list">
+            <div v-for="clip in timelineData.clips" :key="clip.entityId" class="track-item"
+              :class="{ collapsed: collapsedClips.has(clip.entityId) }">
+              <div class="track-header" @click="toggleCollapse(clip.entityId)">
+                <span class="collapse-icon">{{ collapsedClips.has(clip.entityId) ? '▶' : '▼' }}</span>
+                <span class="entity-name">{{ clip.entityId }}</span>
+                <span class="track-count">{{ clip.tracks.length }} 轨道</span>
+              </div>
+              <div class="track-content" v-show="!collapsedClips.has(clip.entityId)">
+                <div v-for="track in clip.tracks" :key="track.trackType" class="track-row">
+                  <div class="track-label">{{ translateTrackType(track.trackType) }}</div>
+                  <div class="track-timeline" @click="handleTrackClick($event, track)">
+                    <div class="track-background">
+                      <svg class="curve-line" viewBox="0 0 100 20" preserveAspectRatio="none">
+                        <polyline :points="getCurvePoints(track)" fill="none" stroke="#4CAF50" stroke-width="1" />
+                      </svg>
+                      <div v-for="keyframe in track.keyframes" :key="keyframe.time" class="keyframe-node"
+                        :style="{ left: `${(keyframe.time / timelineData.duration) * 100}%` }"
+                        @click.stop="selectKeyframe(clip.entityId, track.trackType, keyframe)"
+                        :class="{ selected: isKeyframeSelected(clip.entityId, track.trackType, keyframe) }"></div>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <div class="timeline-ruler" :style="{ width: `${timelineData.duration * zoomLevel * 50}px` }">
-        <div class="ruler-track">
-          <div class="playhead" :style="{ left: `${(currentTime / timelineData.duration) * 100}%` }"
-            @mousedown="startDragging"></div>
-          <div class="ruler-marks">
-            <div v-for="mark in rulerMarks" :key="mark.time" class="ruler-mark" :class="{ major: mark.major }"
-              :style="{ left: `${(mark.time / timelineData.duration) * 100}%` }">
-              <span v-if="mark.major" class="mark-label">{{ formatTime(mark.time) }}</span>
+        <div class="timeline-ruler">
+          <div class="ruler-track">
+            <div class="ruler-marks">
+              <div v-for="mark in rulerMarks" :key="mark.time" class="ruler-mark" :class="{ major: mark.major }"
+                :style="{ left: `${(mark.time / timelineData.duration) * 100}%` }">
+                <span v-if="mark.major" class="mark-label">{{ formatTime(mark.time) }}</span>
+              </div>
             </div>
           </div>
+        </div>
+
+        <div class="playhead-container">
+          <div class="playhead-line" :style="{ left: `${(currentTime / timelineData.duration) * 100}%` }"></div>
+          <div class="playhead-handle" :style="{ left: `calc(${(currentTime / timelineData.duration) * 100}% - 6px)` }"
+            @mousedown="startDragging"></div>
         </div>
       </div>
     </div>
@@ -183,6 +190,23 @@ function zoomIn() {
 
 function zoomOut() {
   zoomLevel.value = Math.max(zoomLevel.value - 0.2, 0.2)
+}
+
+function handleWrapperClick(event: MouseEvent) {
+  const target = event.target as HTMLElement
+  if (target.closest('.keyframe-node') || target.closest('.track-timeline') || target.closest('.track-header')) {
+    return
+  }
+
+  const wrapper = document.querySelector('.timeline-content-wrapper') as HTMLElement
+  if (!wrapper) return
+
+  const rect = wrapper.getBoundingClientRect()
+  const x = Math.max(0, Math.min(event.clientX - rect.left, rect.width))
+  const time = (x / rect.width) * timelineData.value.duration
+
+  currentTime.value = Math.max(0, Math.min(time, timelineData.value.duration))
+  evaluateTimeline(currentTime.value)
 }
 
 function onScroll(event: Event) {
@@ -318,10 +342,10 @@ function startDragging(e: MouseEvent) {
 function onDrag(e: MouseEvent) {
   if (!isDragging) return
 
-  const rulerTrack = document.querySelector('.ruler-track') as HTMLElement
-  if (!rulerTrack) return
+  const wrapper = document.querySelector('.timeline-content-wrapper') as HTMLElement
+  if (!wrapper) return
 
-  const rect = rulerTrack.getBoundingClientRect()
+  const rect = wrapper.getBoundingClientRect()
   const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width))
   const time = (x / rect.width) * timelineData.value.duration
 
@@ -582,7 +606,7 @@ onUnmounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px 16px;
+  padding: 4px 8px;
   // background: #16213e;
   border-bottom: 1px solid #0f3460;
 }
@@ -642,17 +666,21 @@ onUnmounted(() => {
 .timeline-scroll-container {
   flex: 1;
   overflow-x: auto;
-  overflow-y: hidden;
+  overflow-y: auto;
+  position: relative;
+}
+
+.timeline-content-wrapper {
   position: relative;
   display: flex;
   flex-direction: column;
+  min-width: 100%;
 }
 
 .timeline-track-area {
-  padding: 8px;
-  flex-grow: 1;
   overflow-y: auto;
   box-sizing: border-box;
+  position: relative;
 }
 
 .track-list {
@@ -702,7 +730,7 @@ onUnmounted(() => {
 }
 
 .track-content {
-  padding: 4px 0;
+  // padding: 4px 0;
 }
 
 .track-row {
@@ -774,10 +802,12 @@ onUnmounted(() => {
 
 .timeline-ruler {
   height: 40px;
-  flex-shrink: 0;
   background: #0f3460;
   border-top: 1px solid #1a4d7a;
   box-sizing: border-box;
+  position: relative;
+  width: 100%;
+  margin-left: 100px;
 }
 
 .ruler-track {
@@ -786,25 +816,41 @@ onUnmounted(() => {
   height: 100%;
 }
 
-.playhead {
+.playhead-container {
+  position: absolute;
+  top: 0;
+  left: 100px;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 100;
+}
+
+.playhead-line {
   position: absolute;
   top: 0;
   width: 2px;
   height: 100%;
+  background: rgba(233, 69, 96, 0.6);
+  pointer-events: none;
+  box-shadow: 0 0 6px rgba(233, 69, 96, 0.3);
+}
+
+.playhead-handle {
+  position: absolute;
+  bottom: 40px;
+  width: 12px;
+  height: 12px;
   background: #e94560;
   cursor: ew-resize;
-  z-index: 10;
+  pointer-events: auto;
+  z-index: 101;
+  clip-path: polygon(0 0, 100% 0, 50% 100%);
+  transform: translateX(0);
 
-  &::after {
-    content: '';
-    position: absolute;
-    top: -8px;
-    left: -6px;
-    width: 14px;
-    height: 14px;
-    background: #e94560;
-    border-radius: 4px;
-    transform: rotate(45deg);
+  &:hover {
+    background: #ff5c7a;
+    transform: scale(1.2) translateX(0);
   }
 }
 
