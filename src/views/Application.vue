@@ -126,18 +126,18 @@
           <div v-else class="noCamera">请至少在场景中添加一个摄像机</div>
         </div>
       </div>
-      <DataTypeEditPanel v-if="contextMenu?.visible && editPropTypeKey" :typeKey="editPropTypeKey"
-        :editPropConfigInfo="editPropConfigInfo" v-model="editPropInputInfo"
-        :initPosition="{ x: contextMenu.x, y: contextMenu.y }" @deleteContextMenuEntity="deleteContextMenuEntity"
-        @close="contextMenu = null" @copyEntity="copyEntity" @moveToGroup="moveToGroup"
-        @changeGlobalEditGroup="changeGlobalEditGroup" />
-      <AllWorldObjSelect v-if="showAllObjSelect" @close="showAllObjSelect = false" />
-      <EnvironmentEditor v-if="showEnvironmentEditor" @close="showEnvironmentEditor = false" />
     </div>
     <div class="timeLine" :style="{ height: timeHeight + 'px' }">
       <div class="split-bar-x" @mousedown.prevent="startSplitTimeLine()"></div>
       <TimeLine />
     </div>
+    <DataTypeEditPanel v-if="contextMenu?.visible && editPropTypeKey" :typeKey="editPropTypeKey"
+      :editPropConfigInfo="editPropConfigInfo" v-model="editPropInputInfo"
+      :initPosition="{ x: contextMenu.x, y: contextMenu.y }" @deleteContextMenuEntity="deleteContextMenuEntity"
+      @close="contextMenu = null" @copyEntity="copyEntity" @moveToGroup="moveToGroup"
+      @changeGlobalEditGroup="changeGlobalEditGroup" />
+    <AllWorldObjSelect v-if="showAllObjSelect" @close="showAllObjSelect = false" />
+    <EnvironmentEditor v-if="showEnvironmentEditor" @close="showEnvironmentEditor = false" />
   </div>
   <div v-if="showDemos" class="allDemosContent">
     <div class="allDemosContentInner">
