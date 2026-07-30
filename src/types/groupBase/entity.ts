@@ -461,6 +461,10 @@ export abstract class GroupBaseEntity<T extends GroupBaseData> extends PointEnti
     return this.children.length
   }
 
+  getEditPropConfigData(data: T): editItem[] {
+    return []
+  }
+
   editPropConfig(
     snapPoint: HandelInfo,
     editShow: (editInfoList: editItem[], callback: (val: any) => void) => void,

@@ -282,9 +282,8 @@ export class CirclePlaneEntity extends PointEntityClass<CirclePlaneData> {
     return []
   }
 
-  editPropConfig(snapPoint: HandelInfo, editShow: (editInfoList: editItem[], callback: (val: any) => void) => void): void {
-    const data = this.getData();
-    editShow([
+  getEditPropConfigData(data: CirclePlaneData): editItem[] {
+    return [
       {
         id: 'r',
         label: '半径',
@@ -327,7 +326,12 @@ export class CirclePlaneEntity extends PointEntityClass<CirclePlaneData> {
         dataType: 'boolean',
         value: data.ds,
       },
-    ], (val) => {
+    ]
+  }
+
+  editPropConfig(snapPoint: HandelInfo, editShow: (editInfoList: editItem[], callback: (val: any) => void) => void): void {
+    const data = this.getData();
+    editShow(this.getEditPropConfigData(data), (val) => {
       this.setData({
         ...data,
         ...val,

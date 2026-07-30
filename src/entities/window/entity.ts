@@ -472,9 +472,8 @@ export class WindowEntity extends EntityClassInWall<WindowData> {
     return []
   }
 
-  editPropConfig(snapPoint: HandelInfo, editShow: (editInfoList: editItem[], callback: (val: any) => void) => void): void {
-    const data = this.getData();
-    editShow([
+  getEditPropConfigData(data: WindowData): editItem[] {
+    return [
       {
         id: 'bottom',
         label: '距离地面',
@@ -562,7 +561,12 @@ export class WindowEntity extends EntityClassInWall<WindowData> {
         step: 15,
         value: data.leftOpenAngle,
       },
-    ], (val) => {
+    ]
+  }
+
+  editPropConfig(snapPoint: HandelInfo, editShow: (editInfoList: editItem[], callback: (val: any) => void) => void): void {
+    const data = this.getData();
+    editShow(this.getEditPropConfigData(data), (val) => {
       this.setData({
         ...data,
         ...val,

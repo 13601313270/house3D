@@ -481,9 +481,8 @@ export class SignEntity extends PointEntityClass<SignData> {
     return []
   }
 
-  editPropConfig(snapPoint: HandelInfo, editShow: (editInfoList: editItem[], callback: (val: any) => void) => void): void {
-    const data = this.getData();
-    editShow([
+  getEditPropConfigData(data: SignData): editItem[] {
+    return [
       {
         id: 'shape',
         label: '形状',
@@ -576,7 +575,12 @@ export class SignEntity extends PointEntityClass<SignData> {
         value: data.z,
         unit: 'cm',
       },
-    ], async (val) => {
+    ];
+  }
+
+  editPropConfig(snapPoint: HandelInfo, editShow: (editInfoList: editItem[], callback: (val: any) => void) => void): void {
+    const data = this.getData();
+    editShow(this.getEditPropConfigData(data), async (val) => {
       this.setData({
         ...data,
         ...val,

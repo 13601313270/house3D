@@ -163,9 +163,8 @@ export class TorusEntity extends PointEntityClass<TorusData> {
     return []
   }
 
-  editPropConfig(snapPoint: HandelInfo, editShow: (editInfoList: editItem[], callback: (val: any) => void) => void): void {
-    const data = this.getData();
-    editShow([
+  getEditPropConfigData(data: TorusData): editItem[] {
+    return [
       {
         id: 'r',
         label: '半径',
@@ -230,7 +229,12 @@ export class TorusEntity extends PointEntityClass<TorusData> {
       //   max: 360,
       //   value: data.thetaLength,
       // },
-    ], (val) => {
+    ]
+  }
+
+  editPropConfig(snapPoint: HandelInfo, editShow: (editInfoList: editItem[], callback: (val: any) => void) => void): void {
+    const data = this.getData();
+    editShow(this.getEditPropConfigData(data), (val) => {
       this.setData({
         ...data,
         ...val,

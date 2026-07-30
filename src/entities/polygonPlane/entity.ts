@@ -392,19 +392,8 @@ export class PolygonPlaneEntity extends LineEntityClass<PolygonPlanePoint, Polyg
     return lines;
   }
 
-  editPropConfig(snapPoint: HandelInfo, editShow: (editInfoList: editItem[], callback: (val: any) => void) => void, close: () => void): void {
-    const data = this.getData();
-    const wallBaseConfig: editItem[] = [
-      // {
-      //   id: 'height',
-      //   label: '高度',
-      //   dataType: 'number',
-      //   min: 1,
-      //   max: Infinity,
-      //   step: 1,
-      //   value: data.height,
-      //   unit: 'cm',
-      // },
+  getEditPropConfigData(data: PolygonPlaneData): editItem[] {
+    return [
       {
         id: 'color',
         label: '颜色',
@@ -433,14 +422,12 @@ export class PolygonPlaneEntity extends LineEntityClass<PolygonPlanePoint, Polyg
         dataType: 'material',
         value: data.mt,
       },
-      // {
-      //   id: 'cornerType',
-      //   label: '转角类型',
-      //   dataType: 'cornerType',
-      //   value: data.cornerType,
-      //   panelDesc: '某些角类型3D渲染是一致的，但是区分“独立墙蹲”，区别在于隐藏墙的时候，独立墙蹲不会隐藏。',
-      // }
     ];
+  }
+
+  editPropConfig(snapPoint: HandelInfo, editShow: (editInfoList: editItem[], callback: (val: any) => void) => void, close: () => void): void {
+    const data = this.getData();
+    const wallBaseConfig: editItem[] = this.getEditPropConfigData(data);
     if (snapPoint.index % 2 === 0) {
       const configList: editItem[] = [...wallBaseConfig]
       editShow([

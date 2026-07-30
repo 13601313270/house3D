@@ -262,9 +262,8 @@ export class DoorEntity extends EntityClassInWall<DoorData> {
     return []
   }
 
-  editPropConfig(snapPoint: HandelInfo, editShow: (editInfoList: editItem[], callback: (val: any) => void) => void): void {
-    const data = this.getData();
-    editShow([
+  getEditPropConfigData(data: DoorData): editItem[] {
+    return [
       {
         id: 'width',
         label: '宽度',
@@ -310,7 +309,12 @@ export class DoorEntity extends EntityClassInWall<DoorData> {
         step: 1,
         value: data.z,
       }
-    ], (val) => {
+    ];
+  }
+
+  editPropConfig(snapPoint: HandelInfo, editShow: (editInfoList: editItem[], callback: (val: any) => void) => void): void {
+    const data = this.getData();
+    editShow(this.getEditPropConfigData(data), (val) => {
       this.setData({
         ...data,
         ...val,

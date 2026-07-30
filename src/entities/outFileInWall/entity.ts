@@ -389,42 +389,50 @@ export class OutFileInWallEntity extends EntityClassInWall<OutFileInWallData> {
     return []
   }
 
+  getEditPropConfigData(data: OutFileInWallData): Promise<editItem[]> {
+    return new Promise(resolve => {
+      outFileDataExtension(data.fileTypeId, data).then(moreConfig => {
+        const configList: editItem[] = [
+          {
+            id: 'bm',
+            label: '材质',
+            dataType: 'material',
+            value: data.bm,
+          },
+          {
+            id: 'z',
+            label: '距离地面',
+            dataType: 'number',
+            min: 0,
+            max: 200,
+            step: 1,
+            value: data.z,
+          },
+          {
+            id: 'color',
+            label: '颜色',
+            dataType: 'color',
+            value: data.color,
+          },
+          {
+            id: 'isOuter',
+            label: '是否挂在外墙',
+            dataType: 'boolean',
+            value: data.isOuter,
+          },
+          ...moreConfig,
+        ]
+        resolve(configList)
+      })
+    })
+  }
+
   editPropConfig(snapPoint: HandelInfo, editShow: (editInfoList: editItem[], callback: (val: any) => void) => void): void {
     const data = this.getData();
-    outFileDataExtension(data.fileTypeId, data).then(moreConfig => {
-      const configList: editItem[] = [
-        {
-          id: 'bm',
-          label: '材质',
-          dataType: 'material',
-          value: data.bm,
-        },
-        {
-          id: 'z',
-          label: '距离地面',
-          dataType: 'number',
-          min: 0,
-          max: 200,
-          step: 1,
-          value: data.z,
-        },
-        {
-          id: 'color',
-          label: '颜色',
-          dataType: 'color',
-          value: data.color,
-        },
-        {
-          id: 'isOuter',
-          label: '是否挂在外墙',
-          dataType: 'boolean',
-          value: data.isOuter,
-        },
-        ...moreConfig,
-      ]
+    this.getEditPropConfigData(data).then(configList => {
       editShow(configList, (val) => {
         this.setData({
-          ...this.getData(),
+          ...data,
           ...val,
         })
       })

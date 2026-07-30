@@ -158,9 +158,8 @@ export class SphereEntity extends PointEntityClass<SphereData> {
     return []
   }
 
-  editPropConfig(snapPoint: HandelInfo, editShow: (editInfoList: editItem[], callback: (val: any) => void) => void): void {
-    const data = this.getData();
-    editShow([
+  getEditPropConfigData(data: SphereData): editItem[] {
+    return [
       {
         id: 'r',
         label: '半径',
@@ -191,7 +190,12 @@ export class SphereEntity extends PointEntityClass<SphereData> {
         step: 1,
         value: data.z,
       }
-    ], (val) => {
+    ]
+  }
+
+  editPropConfig(snapPoint: HandelInfo, editShow: (editInfoList: editItem[], callback: (val: any) => void) => void): void {
+    const data = this.getData();
+    editShow(this.getEditPropConfigData(data), (val) => {
       this.setData({
         ...data,
         ...val,

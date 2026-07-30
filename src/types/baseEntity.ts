@@ -121,6 +121,8 @@ export abstract class BaseEntityClass<T extends BaseObjData> {
     zoomLevel: number,
   ): void;
 
+  abstract getEditPropConfigData(data: T): editItem[] | Promise<editItem[]>;
+
   abstract editPropConfig(
     snapPoint: HandelInfo,
     editShow: (editInfoList: editItem[], callback: (val: any) => void) => void,

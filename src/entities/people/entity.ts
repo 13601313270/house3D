@@ -460,9 +460,8 @@ export class PeopleEntity extends PointEntityClass<PeopleData> {
     return [];
   }
 
-  editPropConfig(snapPoint: HandelInfo, editShow: (editInfoList: editItem[], callback: (val: any) => void) => void): void {
-    const data = this.getData();
-    editShow([
+  getEditPropConfigData(data: PeopleData): editItem[] {
+    return [
       {
         id: 'tipGroup',
         label: '基本信息',
@@ -515,7 +514,12 @@ export class PeopleEntity extends PointEntityClass<PeopleData> {
         max: 180,
         value: data.angle,
       },
-    ], (val) => {
+    ]
+  }
+
+  editPropConfig(snapPoint: HandelInfo, editShow: (editInfoList: editItem[], callback: (val: any) => void) => void): void {
+    const data = this.getData();
+    editShow(this.getEditPropConfigData(data), (val) => {
       this.setData({
         ...data,
         ...val,

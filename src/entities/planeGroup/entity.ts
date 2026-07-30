@@ -254,27 +254,6 @@ export class PlaneGroupEntity extends GroupBaseEntity<PlaneGroupData> {
         max: 1000,
         step: 1,
       },
-      // {
-      //   id: '增加对象',
-      //   label: '增加对象',
-      //   dataType: 'button',
-      //   value: () => {
-      //     const cubeData: CubeData = {
-      //       id: Date.now().toString(),
-      //       x: Math.random() * 300 - 150,
-      //       y: Math.random() * 600 - 300,
-      //       z: 0,
-      //       angleY: data.angleY,
-      //       color: 'red',
-      //       mt: null,
-      //       width: 30,
-      //       height: 30,
-      //       depth: 30,
-      //     }
-      //     this.add('cube', [cubeData])
-      //     close()
-      //   }
-      // },
     ], (val) => {
       this.setData({
         ...data,

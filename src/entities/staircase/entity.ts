@@ -457,9 +457,8 @@ export class StaircaseEntity extends LineEntityClass<StaircasePoint, StaircaseDa
   setPrepareState(): void {
   }
 
-  editPropConfig(snapPoint: HandelInfo, editShow: (editInfoList: editItem[], callback: (val: any) => void) => void, close: () => void): void {
-    const data = this.getData();
-    const wallBaseConfig: editItem[] = [
+  getEditPropConfigData(data: StaircaseData): editItem[] {
+    return [
       {
         id: 'thickness',
         label: '楼梯宽度',
@@ -527,7 +526,12 @@ export class StaircaseEntity extends LineEntityClass<StaircasePoint, StaircaseDa
           // },
         ],
       }
-    ];
+    ]
+  }
+
+  editPropConfig(snapPoint: HandelInfo, editShow: (editInfoList: editItem[], callback: (val: any) => void) => void, close: () => void): void {
+    const data = this.getData();
+    const wallBaseConfig: editItem[] = this.getEditPropConfigData(data);
     if (snapPoint.index % 2 === 0) {
       const configList: editItem[] = [...wallBaseConfig]
       const pointIndex = snapPoint.index / 2;

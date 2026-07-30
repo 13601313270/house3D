@@ -296,9 +296,8 @@ export class PlaneEntity extends PointEntityClass<PlaneData> {
     return []
   }
 
-  editPropConfig(snapPoint: HandelInfo, editShow: (editInfoList: editItem[], callback: (val: any) => void) => void): void {
-    const data = this.getData();
-    editShow([
+  getEditPropConfigData(data: PlaneData): editItem[] {
+    return [
       {
         id: 'width',
         label: '宽度',
@@ -352,7 +351,12 @@ export class PlaneEntity extends PointEntityClass<PlaneData> {
         max: 180,
         value: data.angleY,
       },
-    ], (val) => {
+    ]
+  }
+
+  editPropConfig(snapPoint: HandelInfo, editShow: (editInfoList: editItem[], callback: (val: any) => void) => void): void {
+    const data = this.getData();
+    editShow(this.getEditPropConfigData(data), (val) => {
       this.setData({
         ...data,
         ...val,

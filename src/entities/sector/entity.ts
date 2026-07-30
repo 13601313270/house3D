@@ -311,9 +311,8 @@ export class SectorEntity extends PointEntityClass<SectorData> {
     return []
   }
 
-  editPropConfig(snapPoint: HandelInfo, editShow: (editInfoList: editItem[], callback: (val: any) => void) => void): void {
-    const data = this.getData();
-    editShow([
+  getEditPropConfigData(data: SectorData): editItem[] {
+    return [
       {
         id: 'r',
         label: '半径',
@@ -371,7 +370,12 @@ export class SectorEntity extends PointEntityClass<SectorData> {
         step: 0.1,
         value: data.endAngle,
       }
-    ], (val) => {
+    ];
+  }
+
+  editPropConfig(snapPoint: HandelInfo, editShow: (editInfoList: editItem[], callback: (val: any) => void) => void): void {
+    const data = this.getData();
+    editShow(this.getEditPropConfigData(data), (val) => {
       this.setData({
         ...data,
         ...val,

@@ -373,9 +373,8 @@ export class ImportFileEntity extends PointEntityClass<ImportFileData> {
     return [];
   }
 
-  editPropConfig(snapPoint: HandelInfo, editShow: (editInfoList: editItem[], callback: (val: any) => void) => void): void {
-    const data = this.getData();
-    const configList: editItem[] = [
+  getEditPropConfigData(data: ImportFileData): editItem[] {
+    return [
       {
         id: 'z',
         label: '高度',
@@ -394,6 +393,13 @@ export class ImportFileEntity extends PointEntityClass<ImportFileData> {
         step: 0.1,
         value: data.scale,
       },
+    ]
+  }
+
+  editPropConfig(snapPoint: HandelInfo, editShow: (editInfoList: editItem[], callback: (val: any) => void) => void): void {
+    const data = this.getData();
+    const configList: editItem[] = [
+      ...this.getEditPropConfigData(data),
       {
         id: 'downLoadFile',
         label: '下载文件',
@@ -416,9 +422,8 @@ export class ImportFileEntity extends PointEntityClass<ImportFileData> {
       },
     ]
     editShow(configList, (val) => {
-      console.log('save-val', val)
       this.setData({
-        ...this.getData(),
+        ...data,
         ...val,
       })
     })

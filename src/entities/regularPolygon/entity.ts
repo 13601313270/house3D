@@ -281,9 +281,8 @@ export class RegularPolygonEntity extends PointEntityClass<RegularPolygonData> {
     return []
   }
 
-  editPropConfig(snapPoint: HandelInfo, editShow: (editInfoList: editItem[], callback: (val: any) => void) => void): void {
-    const data = this.getData();
-    editShow([
+  getEditPropConfigData(data: RegularPolygonData): editItem[] {
+    return [
       {
         id: 'n',
         label: '边数',
@@ -326,7 +325,12 @@ export class RegularPolygonEntity extends PointEntityClass<RegularPolygonData> {
         step: 1,
         value: data.h,
       },
-    ], (val) => {
+    ]
+  }
+
+  editPropConfig(snapPoint: HandelInfo, editShow: (editInfoList: editItem[], callback: (val: any) => void) => void): void {
+    const data = this.getData();
+    editShow(this.getEditPropConfigData(data), (val) => {
       this.setData({
         ...data,
         ...val,

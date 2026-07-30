@@ -311,9 +311,8 @@ export class CurtainEntity extends PointEntityClass<CurtainData> {
     return []
   }
 
-  editPropConfig(snapPoint: HandelInfo, editShow: (editInfoList: editItem[], callback: (val: any) => void) => void): void {
-    const data = this.getData();
-    editShow([
+  getEditPropConfigData(data: CurtainData): editItem[] {
+    return [
       {
         id: 'width',
         label: '宽度',
@@ -347,7 +346,12 @@ export class CurtainEntity extends PointEntityClass<CurtainData> {
         step: 1,
         value: data.z,
       },
-    ], (val) => {
+    ]
+  }
+
+  editPropConfig(snapPoint: HandelInfo, editShow: (editInfoList: editItem[], callback: (val: any) => void) => void): void {
+    const data = this.getData();
+    editShow(this.getEditPropConfigData(data), (val) => {
       this.setData({
         ...data,
         ...val,

@@ -160,9 +160,8 @@ export class ConeEntity extends PointEntityClass<ConeData> {
     return []
   }
 
-  editPropConfig(snapPoint: HandelInfo, editShow: (editInfoList: editItem[], callback: (val: any) => void) => void): void {
-    const data = this.getData();
-    editShow([
+  getEditPropConfigData(data: ConeData): editItem[] {
+    return [
       {
         id: 'r',
         label: '半径',
@@ -202,7 +201,12 @@ export class ConeEntity extends PointEntityClass<ConeData> {
         step: 1,
         value: data.z,
       }
-    ], (val) => {
+    ]
+  }
+
+  editPropConfig(snapPoint: HandelInfo, editShow: (editInfoList: editItem[], callback: (val: any) => void) => void): void {
+    const data = this.getData();
+    editShow(this.getEditPropConfigData(data), (val) => {
       this.setData({
         ...data,
         ...val,

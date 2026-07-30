@@ -563,9 +563,8 @@ export class DirectionCameraEntity extends CameraBase<DirectionCameraData> {
     return [];
   }
 
-  editPropConfig(snapPoint: HandelInfo, editShow: (editInfoList: editItem[], callback: (val: any) => void) => void): void {
-    const data = this.getData();
-    editShow([
+  getEditPropConfigData(data: DirectionCameraData): editItem[] {
+    return [
       {
         id: 'fov',
         label: '角度',
@@ -611,7 +610,12 @@ export class DirectionCameraEntity extends CameraBase<DirectionCameraData> {
       //   step: 1,
       //   value: data.targetPositionZ,
       // }
-    ], (val) => {
+    ]
+  }
+
+  editPropConfig(snapPoint: HandelInfo, editShow: (editInfoList: editItem[], callback: (val: any) => void) => void): void {
+    const data = this.getData();
+    editShow(this.getEditPropConfigData(data), (val) => {
       this.setData({
         ...data,
         ...val,

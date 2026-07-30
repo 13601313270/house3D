@@ -576,9 +576,8 @@ export class WallEntity extends LineEntityClass<WallPoint, WallData> {
     return lines;
   }
 
-  editPropConfig(snapPoint: HandelInfo, editShow: (editInfoList: editItem[], callback: (val: any) => void) => void, close: () => void): void {
-    const data = this.getData();
-    const wallBaseConfig: editItem[] = [
+  getEditPropConfigData(data: WallData): editItem[] {
+    return [
       {
         id: 'thickness',
         label: '墙体厚度',
@@ -671,6 +670,11 @@ export class WallEntity extends LineEntityClass<WallPoint, WallData> {
         panelDesc: '某些角类型3D渲染是一致的，但是区分“独立墙蹲”，区别在于隐藏墙的时候，独立墙蹲不会隐藏。',
       }
     ];
+  }
+
+  editPropConfig(snapPoint: HandelInfo, editShow: (editInfoList: editItem[], callback: (val: any) => void) => void, close: () => void): void {
+    const data = this.getData();
+    const wallBaseConfig: editItem[] = this.getEditPropConfigData(data)
     if (snapPoint.index % 2 === 0) {
       const configList: editItem[] = [...wallBaseConfig]
       editShow([

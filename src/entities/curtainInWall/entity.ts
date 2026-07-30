@@ -267,9 +267,8 @@ export class CurtainInWallEntity extends EntityClassInWall<CurtainInWallData> {
     return []
   }
 
-  editPropConfig(snapPoint: HandelInfo, editShow: (editInfoList: editItem[], callback: (val: any) => void) => void): void {
-    const data = this.getData();
-    const configList: editItem[] = [
+  getEditPropConfigData(data: CurtainInWallData): editItem[] {
+    return [
       {
         id: 'width',
         label: '宽度',
@@ -309,10 +308,15 @@ export class CurtainInWallEntity extends EntityClassInWall<CurtainInWallData> {
         dataType: 'boolean',
         value: data.isOuter,
       },
-    ]
+    ];
+  }
+
+  editPropConfig(snapPoint: HandelInfo, editShow: (editInfoList: editItem[], callback: (val: any) => void) => void): void {
+    const data = this.getData();
+    const configList: editItem[] = this.getEditPropConfigData(data)
     editShow(configList, (val) => {
       this.setData({
-        ...this.getData(),
+        ...data,
         ...val,
       })
     })
