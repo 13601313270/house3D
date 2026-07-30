@@ -146,6 +146,7 @@ export interface TimelineData {
 
 const props = defineProps<{
   modelValue: TimelineData
+  getObject?: (entityId: string) => THREE.Object3D | null
 }>()
 
 const emit = defineEmits<{
@@ -631,11 +632,9 @@ function stopClipDrag() {
   document.removeEventListener('mouseup', stopClipDrag)
 }
 
-const animatedObjects = new Map<string, THREE.Mesh | THREE.Group>()
-
 function evaluateTimeline(time: number) {
   timelineData.value.clips.forEach(clip => {
-    const obj = animatedObjects.get(clip.entityId)
+    const obj = props.getObject?.(clip.entityId)
     if (!obj) return
 
     clip.tracks.forEach(track => {
@@ -772,28 +771,6 @@ function applyTrackValue(obj: THREE.Object3D, trackType: TrackType, value: any) 
 }
 
 function clearAll() {
-  const scene = (window as any).worldApi?.scene
-  if (!scene) return
-
-  animatedObjects.forEach(obj => {
-    scene.remove(obj)
-    if (obj instanceof THREE.Mesh) {
-      obj.geometry.dispose()
-      if (obj.material instanceof THREE.Material) {
-        obj.material.dispose()
-      }
-    } else {
-      obj.traverse(child => {
-        if (child instanceof THREE.Mesh) {
-          child.geometry.dispose()
-          if (child.material instanceof THREE.Material) {
-            child.material.dispose()
-          }
-        }
-      })
-    }
-  })
-  animatedObjects.clear()
   timelineData.value = { ...timelineData.value, clips: [] }
   currentTime.value = 0
   selectedKeyframe.value = null
@@ -821,16 +798,6 @@ watch(selectedKeyframeValue, (val) => {
     timelineData.value = { ...timelineData.value }
   }
 })
-
-function registerAnimatedObject(id: string, mesh: THREE.Mesh | THREE.Group) {
-  animatedObjects.set(id, mesh as THREE.Mesh)
-}
-
-function unregisterAnimatedObject(id: string) {
-  animatedObjects.delete(id)
-}
-
-defineExpose({ registerAnimatedObject, unregisterAnimatedObject })
 
 function scrollTimeInfo(e: Event) {
   // @ts-ignore

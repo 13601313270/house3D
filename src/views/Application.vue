@@ -130,7 +130,7 @@
     </div>
     <div class="timeLine" :style="{ height: timeHeight + 'px' }">
       <div class="split-bar-x" @mousedown.prevent="startSplitTimeLine()"></div>
-      <TimeLine ref="timeLineRef" v-model="timelineData" />
+      <TimeLine v-model="timelineData" :get-object="getEntityMesh" />
     </div>
     <DataTypeEditPanel v-if="contextMenu?.visible && editPropTypeKey" :typeKey="editPropTypeKey"
       :editPropConfigInfo="editPropConfigInfo" v-model="editPropInputInfo"
@@ -228,8 +228,6 @@ const timelineData = ref<TimelineData>({
   duration: 30,
   clips: []
 })
-
-const timeLineRef = ref<InstanceType<typeof TimeLine> | null>(null)
 
 const canvas2DRef = ref<HTMLCanvasElement | null>(null)
 const canvas2DActionRef = ref<HTMLCanvasElement | null>(null)
@@ -723,8 +721,6 @@ const handleLoadProgramFileChange = async (e: Event) => {
     }
   } = JSON.parse(sceneJsonText);
 
-  console.log('[DEBUG load] sceneData.timelineData:', sceneData.timelineData)
-
   const allFileTypeId: Set<string> = new Set();
 
   if (sceneData.importFile && sceneData.importFile.length) {
@@ -779,33 +775,8 @@ const handleLoadProgramFileChange = async (e: Event) => {
 
     // 还原动画数据
     if (sceneData.timelineData && sceneData.timelineData.clips.length > 0) {
-      console.log('[DEBUG load] restoring timelineData:', sceneData.timelineData)
       timelineData.value = sceneData.timelineData as any
-
-      // 注册动画对象
-      if (timeLineRef.value) {
-        const allEntities = getAllEntitiesMap()
-        for (const clip of sceneData.timelineData.clips) {
-          const entityId = clip.entityId
-          const entityEntry = allEntities.get(entityId)
-          if (entityEntry) {
-            const [typeKey, index] = entityEntry
-            const entityList = worldApi.getTypeListEntity(typeKey)
-            const entity = entityList?.[index]
-            if (entity && entity.meshList.length > 0) {
-              const mesh = entity.meshList[0]
-              console.log('[DEBUG load] registering animatedObject:', entityId, mesh.uuid)
-              timeLineRef.value.registerAnimatedObject(entityId, mesh)
-            } else {
-              console.warn('[DEBUG load] entity not found for timeline clip:', entityId)
-            }
-          } else {
-            console.warn('[DEBUG load] entityId not found in any entity:', entityId)
-          }
-        }
-      }
     } else {
-      console.log('[DEBUG load] no timelineData to restore')
       timelineData.value = { duration: 30, clips: [] }
     }
   } catch (error) {
@@ -831,6 +802,20 @@ function getAllEntitiesMap(): Map<string, [string, number]> {
     }
   }
   return map
+}
+
+// 根据 entityId 获取 3D 对象
+function getEntityMesh(entityId: string): THREE.Object3D | null {
+  const allEntities = getAllEntitiesMap()
+  const entityEntry = allEntities.get(entityId)
+  if (!entityEntry) return null
+
+  const [typeKey, index] = entityEntry
+  const entityList = worldApi.getTypeListEntity(typeKey)
+  const entity = entityList?.[index]
+  if (!entity || entity.meshList.length === 0) return null
+
+  return entity.meshList[0]
 }
 
 async function initWorldByData(data: fileData & {
@@ -1056,11 +1041,6 @@ const deleteContextMenuEntity = () => {
         clip => clip.entityId !== entityId
       )
       timelineData.value = { ...timelineData.value }
-
-      // 从 TimeLine 组件中移除对应的 animatedObject
-      if (timeLineRef.value) {
-        timeLineRef.value.unregisterAnimatedObject(entityId)
-      }
     }
   }
   contextMenu.value = null
@@ -1390,7 +1370,6 @@ function handleAddAnimation(data: { typeKey: string; modelValue: Record<string, 
   const entityData = entity.getData()
   const entityId = entityData.id
 
-  const mesh = entity.meshList[0]
   const clipCount = timelineData.value.clips.length
   const startTime = clipCount * 3
   const midTime = startTime + 5
@@ -1436,10 +1415,6 @@ function handleAddAnimation(data: { typeKey: string; modelValue: Record<string, 
 
   timelineData.value.clips.push(newClip)
   timelineData.value = { ...timelineData.value }
-
-  if (timeLineRef.value) {
-    timeLineRef.value.registerAnimatedObject(entityId, mesh)
-  }
 }
 </script>
 
