@@ -77,7 +77,8 @@
               </svg>
               <div v-for="keyframe in track.keyframes" :key="keyframe.time" class="keyframe-node"
                 :style="{ left: `${((keyframe.time - activeSegment.startTime) / (activeSegment.endTime - activeSegment.startTime || 1)) * 100}%` }"
-                :class="{ selected: isKeyframeSelected(activeSegment.clip.clipId, track.trackType, keyframe) }">
+                :class="{ selected: isKeyframeSelected(activeSegment.clip.clipId, track.trackType, keyframe) }"
+                @click.stop="onKeyframeClick(activeSegment.clip.clipId, track.trackType, keyframe)">
               </div>
             </div>
           </div>
@@ -104,38 +105,7 @@
 import { ref, computed, onUnmounted } from 'vue'
 import * as THREE from 'three'
 import { message } from '@/utils/message'
-
-type TrackType = 'position' | 'rotation' | 'scale' | 'visible' | 'opacity'
-
-interface Keyframe {
-  time: number
-  value: any
-  easing?: string
-}
-
-interface TrackData {
-  trackType: TrackType
-  keyframes: Keyframe[]
-  interpolation?: 'linear' | 'step' | 'bezier'
-}
-
-interface ClipData {
-  clipId: string
-  entityId: string
-  tracks: TrackData[]
-}
-
-interface ClipSegment {
-  clip: ClipData
-  startTime: number
-  endTime: number
-  rowIndex: number
-}
-
-export interface TimelineData {
-  duration: number
-  clips: ClipData[]
-}
+import { ClipSegment, TimelineData, TrackData, TrackType, Keyframe } from '@/utils/timelineState';
 
 const props = defineProps<{
   modelValue: TimelineData
@@ -174,6 +144,7 @@ const activeClipId = ref<string | null>(null)
 const activeSegment = ref<ClipSegment | null>(null)
 const trackContentStyle = ref<Record<string, string>>({})
 const showTrackDropdown = ref(false)
+const selectedKeyframe = ref<{ clipId: string; trackType: TrackType; keyframe: Keyframe } | null>(null)
 
 let animationFrameId: number | null = null
 let lastTimestamp = 0
@@ -426,11 +397,9 @@ function toggleClipContent(event: MouseEvent, segment: ClipSegment) {
   if (left < 10) left = 10
 
   trackContentStyle.value = {
-    position: 'fixed',
     left: `${left}px`,
     top: `${rect.bottom + 4}px`,
-    width: `${panelWidth}px`,
-    zIndex: '1000'
+    width: `${panelWidth}px`
   }
 }
 
@@ -481,8 +450,18 @@ function getCurvePoints(track: TrackData, segment?: ClipSegment): string {
   return points.join(' ')
 }
 
-function isKeyframeSelected(_clipId: string, _trackType: TrackType, _keyframe: Keyframe): boolean {
-  return false
+function isKeyframeSelected(clipId: string, trackType: TrackType, keyframe: Keyframe): boolean {
+  return selectedKeyframe.value?.clipId === clipId &&
+    selectedKeyframe.value?.trackType === trackType &&
+    selectedKeyframe.value?.keyframe === keyframe
+}
+
+function onKeyframeClick(clipId: string, trackType: TrackType, keyframe: Keyframe) {
+  if (isPlaying.value) {
+    togglePlay()
+  }
+  selectedKeyframe.value = { clipId, trackType, keyframe }
+  ;(window as any).activekeyFrameNode = keyframe
 }
 
 function handleTrackClick(event: MouseEvent, track: TrackData, segment?: ClipSegment) {
@@ -1156,6 +1135,8 @@ onUnmounted(() => {
 }
 
 .track-content-floating {
+  position: fixed;
+  z-index: 999;
   background: rgba(15, 52, 96, 0.98);
   border: 1px solid #e94560;
   border-radius: 6px;
@@ -1284,6 +1265,12 @@ onUnmounted(() => {
 
         &:hover {
           transform: scale(1.3);
+        }
+
+        &.selected {
+          background: #e94560;
+          transform: scale(1.4);
+          box-shadow: 0 0 0 3px rgba(233, 69, 96, 0.4);
         }
       }
 
