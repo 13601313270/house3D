@@ -102,7 +102,6 @@
     </div>
 
     <div class="demo-controls">
-      <button class="demo-btn" @click="addCube">+ 添加动画立方体</button>
       <button class="demo-btn" @click="clearAll">清空全部</button>
       <button class="demo-btn" @click="saveAnimation">保存 JSON</button>
     </div>
@@ -110,7 +109,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
+import { ref, computed, onUnmounted, watch } from 'vue'
 import * as THREE from 'three'
 
 type TrackType = 'position' | 'rotation' | 'scale' | 'visible' | 'opacity'
@@ -573,6 +572,10 @@ function startClipDrag(e: MouseEvent, entityId: string) {
   dragMoved = false
   dragStartTimes.clear()
 
+  console.log('[DEBUG] startClipDrag', { entityId, clientX: e.clientX })
+  console.log('[DEBUG] animatedObjects keys:', [...animatedObjects.keys()])
+  console.log('[DEBUG] timelineData clips:', timelineData.value.clips.map(c => c.entityId))
+
   if (activeClipId.value) {
     closeClipContent()
   }
@@ -583,6 +586,9 @@ function startClipDrag(e: MouseEvent, entityId: string) {
       const times = track.keyframes.map(kf => kf.time)
       dragStartTimes.set(track.trackType, times)
     }
+    console.log('[DEBUG] clip found:', clip.entityId, 'tracks:', clip.tracks.length)
+  } else {
+    console.warn('[DEBUG] clip NOT found for entityId:', entityId)
   }
 
   document.addEventListener('mousemove', onClipDrag)
@@ -606,9 +612,13 @@ function onClipDrag(e: MouseEvent) {
   if (!dragMoved) return
 
   const deltaTime = deltaX / widthPerSecond
+  console.log('[DEBUG] onClipDrag', { deltaX, deltaTime, dragClipId })
 
   const clip = timelineData.value.clips.find(c => c.entityId === dragClipId)
-  if (!clip) return
+  if (!clip) {
+    console.warn('[DEBUG] onClipDrag: clip not found for', dragClipId)
+    return
+  }
 
   for (const track of clip.tracks) {
     const originalTimes = dragStartTimes.get(track.trackType)
@@ -620,10 +630,13 @@ function onClipDrag(e: MouseEvent) {
       }
     }
   }
+  // 回退：使用原来的浅拷贝
   timelineData.value = { ...timelineData.value }
+  console.log('[DEBUG] timelineData updated, first clip time:', timelineData.value.clips[0]?.tracks[0]?.keyframes[0]?.time)
 }
 
 function stopClipDrag() {
+  console.log('[DEBUG] stopClipDrag, dragMoved:', dragMoved)
   isDraggingClip = false
   dragClipId = null
   dragStartTimes.clear()
@@ -631,7 +644,7 @@ function stopClipDrag() {
   document.removeEventListener('mouseup', stopClipDrag)
 }
 
-const animatedObjects = new Map<string, THREE.Mesh>()
+const animatedObjects = new Map<string, THREE.Mesh | THREE.Group>()
 
 function evaluateTimeline(time: number) {
   timelineData.value.clips.forEach(clip => {
@@ -722,7 +735,7 @@ function interpolateValues(a: any, b: any, t: number, trackType: TrackType): any
   return b
 }
 
-function applyTrackValue(obj: THREE.Mesh, trackType: TrackType, value: any) {
+function applyTrackValue(obj: THREE.Object3D, trackType: TrackType, value: any) {
   if (!value) return
 
   switch (trackType) {
@@ -745,75 +758,29 @@ function applyTrackValue(obj: THREE.Mesh, trackType: TrackType, value: any) {
       obj.visible = !!value
       break
     case 'opacity':
-      if (obj.material instanceof THREE.MeshBasicMaterial) {
-        obj.material.opacity = value
-        obj.material.transparent = value < 1
-      } else if (obj.material instanceof THREE.MeshStandardMaterial) {
-        obj.material.opacity = value
-        obj.material.transparent = value < 1
+      if (obj instanceof THREE.Mesh) {
+        const materials = Array.isArray(obj.material) ? obj.material : [obj.material]
+        materials.forEach(m => {
+          if (m instanceof THREE.Material) {
+            (m as THREE.MeshStandardMaterial).opacity = value
+            m.transparent = value < 1
+          }
+        })
+      } else {
+        obj.traverse(child => {
+          if (child instanceof THREE.Mesh) {
+            const materials = Array.isArray(child.material) ? child.material : [child.material]
+            materials.forEach(m => {
+              if (m instanceof THREE.Material) {
+                (m as THREE.MeshStandardMaterial).opacity = value
+                m.transparent = value < 1
+              }
+            })
+          }
+        })
       }
       break
   }
-}
-
-function addCube() {
-  const scene = (window as any).worldApi?.scene
-  if (!scene) return
-
-  const id = `cube-${Date.now()}`
-
-  const geometry = new THREE.BoxGeometry(50, 50, 50)
-  const material = new THREE.MeshStandardMaterial({
-    color: Math.random() * 0xffffff,
-    transparent: true,
-    opacity: 1
-  })
-  const cube = new THREE.Mesh(geometry, material)
-  cube.position.set(Math.random() * 100 - 50, 25, Math.random() * 100 - 50)
-  cube.castShadow = true
-  cube.receiveShadow = true
-
-  scene.add(cube)
-  animatedObjects.set(id, cube)
-
-  const clipCount = timelineData.value.clips.length
-  const startTime = clipCount * 3
-  const midTime = startTime + 5
-  const endTime = startTime + 10
-
-  timelineData.value.clips.push({
-    entityId: id,
-    tracks: [
-      {
-        trackType: 'position',
-        keyframes: [
-          { time: startTime, value: { x: cube.position.x, y: cube.position.y, z: cube.position.z }, easing: 'easeInOut' },
-          { time: midTime, value: { x: cube.position.x + 100, y: cube.position.y + 50, z: cube.position.z }, easing: 'easeInOut' },
-          { time: endTime, value: { x: cube.position.x, y: cube.position.y, z: cube.position.z }, easing: 'easeInOut' }
-        ],
-        interpolation: 'linear'
-      },
-      {
-        trackType: 'rotation',
-        keyframes: [
-          { time: startTime, value: { x: 0, y: 0, z: 0 }, easing: 'linear' },
-          { time: midTime, value: { x: Math.PI, y: Math.PI, z: 0 }, easing: 'linear' },
-          { time: endTime, value: { x: Math.PI * 2, y: Math.PI * 2, z: 0 }, easing: 'linear' }
-        ],
-        interpolation: 'linear'
-      },
-      {
-        trackType: 'opacity',
-        keyframes: [
-          { time: startTime, value: 1, easing: 'linear' },
-          { time: startTime + 8, value: 0.3, easing: 'easeOut' },
-          { time: endTime, value: 1, easing: 'easeIn' }
-        ],
-        interpolation: 'linear'
-      }
-    ]
-  })
-  timelineData.value = { ...timelineData.value }
 }
 
 function clearAll() {
@@ -822,14 +789,24 @@ function clearAll() {
 
   animatedObjects.forEach(obj => {
     scene.remove(obj)
-    obj.geometry.dispose()
-    if (obj.material instanceof THREE.Material) {
-      obj.material.dispose()
+    if (obj instanceof THREE.Mesh) {
+      obj.geometry.dispose()
+      if (obj.material instanceof THREE.Material) {
+        obj.material.dispose()
+      }
+    } else {
+      obj.traverse(child => {
+        if (child instanceof THREE.Mesh) {
+          child.geometry.dispose()
+          if (child.material instanceof THREE.Material) {
+            child.material.dispose()
+          }
+        }
+      })
     }
   })
   animatedObjects.clear()
-  timelineData.value.clips = []
-  timelineData.value = { ...timelineData.value }
+  timelineData.value = { ...timelineData.value, clips: [] }
   currentTime.value = 0
   selectedKeyframe.value = null
 }
@@ -857,9 +834,11 @@ watch(selectedKeyframeValue, (val) => {
   }
 })
 
-onMounted(() => {
-  addCube()
-})
+function registerAnimatedObject(id: string, mesh: THREE.Mesh | THREE.Group) {
+  animatedObjects.set(id, mesh as THREE.Mesh)
+}
+
+defineExpose({ registerAnimatedObject })
 
 function scrollTimeInfo(e: Event) {
   // @ts-ignore

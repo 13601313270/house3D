@@ -58,6 +58,7 @@
           <button @click="copyEntity">复制</button>
           <button @click="moveToGroup" v-if="!['planeGroup'].includes(typeKey)">移动到组</button>
           <button @click="changeGlobalEditGroup" v-else-if="['planeGroup'].includes(typeKey)">编辑组</button>
+          <button @click="addAnimation">添加动画</button>
         </div>
         <div style="flex-grow: 1;"></div>
         <button class="deleteButton" @click="deleteContextMenuEntity">删除</button>
@@ -120,6 +121,7 @@ const emit = defineEmits<{
   (e: 'copyEntity'): void
   (e: 'moveToGroup', id: string): void
   (e: 'changeGlobalEditGroup'): void
+  (e: 'addAnimation', data: { typeKey: string; modelValue: Record<string, any> }): void
 }>()
 
 function handleUpdate(id: string, value: any) {
@@ -260,6 +262,14 @@ function handleSelectGroup(id: string) {
 function changeGlobalEditGroup() {
   emit('changeGlobalEditGroup')
 }
+function addAnimation() {
+  console.log('[DEBUG DataTypeEditPanel] modelValue:', props.modelValue)
+  console.log('[DEBUG DataTypeEditPanel] modelValue keys:', Object.keys(props.modelValue))
+  emit('addAnimation', {
+    typeKey: props.typeKey,
+    modelValue: props.modelValue
+  })
+}
 </script>
 <style scoped lang="less">
 .context-menu {
@@ -283,7 +293,7 @@ function changeGlobalEditGroup() {
   }
 
   .configContainer {
-    width: 340px;
+    width: 360px;
     overflow: hidden;
     display: flex;
     flex-direction: column;

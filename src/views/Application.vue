@@ -128,15 +128,15 @@
         </div>
       </div>
     </div>
-    <!-- <div class="timeLine" :style="{ height: timeHeight + 'px' }">
+    <div class="timeLine" :style="{ height: timeHeight + 'px' }">
       <div class="split-bar-x" @mousedown.prevent="startSplitTimeLine()"></div>
-      <TimeLine v-model="timelineData" />
-    </div> -->
+      <TimeLine ref="timeLineRef" v-model="timelineData" />
+    </div>
     <DataTypeEditPanel v-if="contextMenu?.visible && editPropTypeKey" :typeKey="editPropTypeKey"
       :editPropConfigInfo="editPropConfigInfo" v-model="editPropInputInfo"
       :initPosition="{ x: contextMenu.x, y: contextMenu.y }" @deleteContextMenuEntity="deleteContextMenuEntity"
       @close="contextMenu = null" @copyEntity="copyEntity" @moveToGroup="moveToGroup"
-      @changeGlobalEditGroup="changeGlobalEditGroup" />
+      @changeGlobalEditGroup="changeGlobalEditGroup" @addAnimation="handleAddAnimation" />
     <AllWorldObjSelect v-if="showAllObjSelect" @close="showAllObjSelect = false" />
     <EnvironmentEditor v-if="showEnvironmentEditor" @close="showEnvironmentEditor = false" />
   </div>
@@ -228,6 +228,8 @@ const timelineData = ref<TimelineData>({
   duration: 30,
   clips: []
 })
+
+const timeLineRef = ref<InstanceType<typeof TimeLine> | null>(null)
 
 const canvas2DRef = ref<HTMLCanvasElement | null>(null)
 const canvas2DActionRef = ref<HTMLCanvasElement | null>(null)
@@ -1280,6 +1282,81 @@ function groupExit() {
     window.globalEditGroup.insertTempObj = null
   }
 }
+
+function handleAddAnimation(data: { typeKey: string; modelValue: Record<string, any> }) {
+  const { typeKey, modelValue } = data
+
+  const entityList = worldApi.getTypeListEntity(typeKey)
+  if (!entityList || !contextMenu.value) return
+
+  const entityIndex = contextMenu.value.index
+  const entity = entityList[entityIndex]
+  if (!entity || entity.meshList.length === 0) return
+
+  const entityData = entity.getData()
+  const entityId = entityData.id
+  console.log('[DEBUG] entityId from data:', entityId)
+
+  const mesh = entity.meshList[0]
+  console.log('[DEBUG] mesh:', mesh)
+  console.log('[DEBUG] mesh.uuid:', mesh?.uuid)
+  console.log('[DEBUG] mesh.isMesh:', mesh instanceof THREE.Mesh)
+  console.log('[DEBUG] mesh.isGroup:', mesh instanceof THREE.Group)
+  const clipCount = timelineData.value.clips.length
+  const startTime = clipCount * 3
+  const midTime = startTime + 5
+  const endTime = startTime + 10
+
+  const posX = modelValue.x || 0
+  const posY = modelValue.y || 0
+  const posZ = modelValue.z || 0
+
+  const newClip = {
+    entityId,
+    tracks: [
+      {
+        trackType: 'position' as const,
+        keyframes: [
+          { time: startTime, value: { x: posX, y: posY, z: posZ }, easing: 'linear' },
+          { time: midTime, value: { x: posX + 100, y: posY + 50, z: posZ }, easing: 'easeInOut' },
+          { time: endTime, value: { x: posX, y: posY, z: posZ }, easing: 'linear' }
+        ],
+        interpolation: 'linear' as const
+      },
+      {
+        trackType: 'rotation' as const,
+        keyframes: [
+          { time: startTime, value: { x: 0, y: 0, z: 0 }, easing: 'linear' },
+          { time: midTime, value: { x: 0, y: Math.PI, z: 0 }, easing: 'linear' },
+          { time: endTime, value: { x: 0, y: Math.PI * 2, z: 0 }, easing: 'linear' }
+        ],
+        interpolation: 'linear' as const
+      },
+      {
+        trackType: 'opacity' as const,
+        keyframes: [
+          { time: startTime, value: 1, easing: 'linear' },
+          { time: startTime + 8, value: 0.3, easing: 'easeOut' },
+          { time: endTime, value: 1, easing: 'easeIn' }
+        ],
+        interpolation: 'linear' as const
+      }
+    ]
+  }
+
+  timelineData.value.clips.push(newClip)
+  timelineData.value = { ...timelineData.value }
+
+  console.log('[DEBUG] timelineData updated, clips count:', timelineData.value.clips.length)
+  console.log('[DEBUG] clips entityIds:', timelineData.value.clips.map(c => c.entityId))
+
+  if (timeLineRef.value) {
+    console.log('[DEBUG] calling registerAnimatedObject with:', entityId)
+    timeLineRef.value.registerAnimatedObject(entityId, mesh)
+  } else {
+    console.warn('[DEBUG] timeLineRef is null, cannot register object')
+  }
+}
 </script>
 
 <style scoped lang="less">
@@ -1641,10 +1718,10 @@ button {
   cursor: col-resize;
   transition: background 0.2s;
   z-index: 100;
-}
 
-.split-bar:hover {
-  background: #1890ff;
+  &:hover {
+    background: #1890ff;
+  }
 }
 
 .split-bar-x {
