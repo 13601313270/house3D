@@ -129,7 +129,7 @@
     </div>
     <div class="timeLine" :style="{ height: timeHeight + 'px' }">
       <div class="split-bar-x" @mousedown.prevent="startSplitTimeLine()"></div>
-      <TimeLine />
+      <TimeLine v-model="timelineData" />
     </div>
     <DataTypeEditPanel v-if="contextMenu?.visible && editPropTypeKey" :typeKey="editPropTypeKey"
       :editPropConfigInfo="editPropConfigInfo" v-model="editPropInputInfo"
@@ -221,6 +221,12 @@ import canvas2DSceneManage from '@/utils/canvas2DSceneManage'
 import bindDanvas2DSceneDefaultEvent from '@/utils/bindDanvas2DSceneDefaultEvent';
 import setHoverPoint from '@/utils/setHoverPoint';
 import TimeLine from '@/components/timeLine.vue'
+import type { TimelineData } from '@/components/timeLine.vue'
+
+const timelineData = ref<TimelineData>({
+  duration: 30,
+  clips: []
+})
 
 const canvas2DRef = ref<HTMLCanvasElement | null>(null)
 const canvas2DActionRef = ref<HTMLCanvasElement | null>(null)

@@ -83,7 +83,7 @@
       <div class="panel-content">
         <div class="property-row">
           <label>时间:</label>
-          <input type="number" v-model.number="selectedKeyframe.keyframe.time" step="0.1" />
+          <input type="number" v-model.number="selectedKeyframe.keyframe.time" step="0.1" @change="syncTimelineData" />
         </div>
         <div class="property-row">
           <label>值:</label>
@@ -91,7 +91,7 @@
         </div>
         <div class="property-row">
           <label>缓动:</label>
-          <select v-model="selectedKeyframe.keyframe.easing">
+          <select v-model="selectedKeyframe.keyframe.easing" @change="syncTimelineData">
             <option value="linear">线性</option>
             <option value="easeIn">缓入</option>
             <option value="easeOut">缓出</option>
@@ -139,14 +139,22 @@ interface ClipSegment {
   rowIndex: number
 }
 
-interface TimelineData {
+export interface TimelineData {
   duration: number
   clips: ClipData[]
 }
 
-const timelineData = ref<TimelineData>({
-  duration: 30,
-  clips: []
+const props = defineProps<{
+  modelValue: TimelineData
+}>()
+
+const emit = defineEmits<{
+  (e: 'update:modelValue', value: TimelineData): void
+}>()
+
+const timelineData = computed({
+  get: () => props.modelValue,
+  set: (value) => emit('update:modelValue', value)
 })
 
 const effectiveDuration = computed(() => {
@@ -269,6 +277,10 @@ function formatTime(time: number): string {
   const seconds = Math.floor(time)
   const milliseconds = Math.floor((time - seconds) * 100)
   return `${seconds.toString().padStart(2, '0')}:${milliseconds.toString().padStart(2, '0')}`
+}
+
+function syncTimelineData() {
+  timelineData.value = { ...timelineData.value }
 }
 
 function translateTrackType(type: TrackType): string {
@@ -483,6 +495,7 @@ function handleTrackClick(event: MouseEvent, track: TrackData, segment?: ClipSeg
   track.keyframes.push(newKeyframe)
   track.keyframes.sort((a, b) => a.time - b.time)
 
+  timelineData.value = { ...timelineData.value }
   selectKeyframe('', track.trackType, newKeyframe)
 }
 
@@ -607,6 +620,7 @@ function onClipDrag(e: MouseEvent) {
       }
     }
   }
+  timelineData.value = { ...timelineData.value }
 }
 
 function stopClipDrag() {
@@ -799,6 +813,7 @@ function addCube() {
       }
     ]
   })
+  timelineData.value = { ...timelineData.value }
 }
 
 function clearAll() {
@@ -814,6 +829,7 @@ function clearAll() {
   })
   animatedObjects.clear()
   timelineData.value.clips = []
+  timelineData.value = { ...timelineData.value }
   currentTime.value = 0
   selectedKeyframe.value = null
 }
@@ -837,6 +853,7 @@ watch(selectedKeyframeValue, (val) => {
     } catch {
       selectedKeyframe.value.keyframe.value = val
     }
+    timelineData.value = { ...timelineData.value }
   }
 })
 
