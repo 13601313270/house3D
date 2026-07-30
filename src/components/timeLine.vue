@@ -573,8 +573,6 @@ function startClipDrag(e: MouseEvent, clipId: string) {
   dragMoved = false
   dragStartTimes.clear()
 
-  console.log('[DEBUG] startClipDrag', { clipId, clientX: e.clientX })
-
   if (activeClipId.value) {
     closeClipContent()
   }
@@ -585,9 +583,6 @@ function startClipDrag(e: MouseEvent, clipId: string) {
       const times = track.keyframes.map(kf => kf.time)
       dragStartTimes.set(track.trackType, times)
     }
-    console.log('[DEBUG] clip found:', clip.clipId, 'entityId:', clip.entityId, 'tracks:', clip.tracks.length)
-  } else {
-    console.warn('[DEBUG] clip NOT found for clipId:', clipId)
   }
 
   document.addEventListener('mousemove', onClipDrag)
@@ -611,13 +606,9 @@ function onClipDrag(e: MouseEvent) {
   if (!dragMoved) return
 
   const deltaTime = deltaX / widthPerSecond
-  console.log('[DEBUG] onClipDrag', { deltaX, deltaTime, dragClipId })
 
   const clip = timelineData.value.clips.find(c => c.clipId === dragClipId)
-  if (!clip) {
-    console.warn('[DEBUG] onClipDrag: clip not found for', dragClipId)
-    return
-  }
+  if (!clip) return
 
   for (const track of clip.tracks) {
     const originalTimes = dragStartTimes.get(track.trackType)
@@ -630,11 +621,9 @@ function onClipDrag(e: MouseEvent) {
     }
   }
   timelineData.value = { ...timelineData.value }
-  console.log('[DEBUG] timelineData updated, clipId:', clip.clipId, 'first keyframe time:', clip.tracks[0]?.keyframes[0]?.time)
 }
 
 function stopClipDrag() {
-  console.log('[DEBUG] stopClipDrag, dragMoved:', dragMoved)
   isDraggingClip = false
   dragClipId = null
   dragStartTimes.clear()
@@ -662,8 +651,9 @@ function evaluateTrack(track: TrackData, time: number): any {
 
   const sortedKeyframes = [...track.keyframes].sort((a, b) => a.time - b.time)
 
-  if (time <= sortedKeyframes[0].time) return sortedKeyframes[0].value
-  if (time >= sortedKeyframes[sortedKeyframes.length - 1].time) return sortedKeyframes[sortedKeyframes.length - 1].value
+  // 当时间在关键帧范围外时，返回 null 表示该 clip 不应在此时间段内生效
+  if (time < sortedKeyframes[0].time) return null
+  if (time > sortedKeyframes[sortedKeyframes.length - 1].time) return null
 
   let leftIndex = 0
   let rightIndex = sortedKeyframes.length - 1
@@ -734,7 +724,7 @@ function interpolateValues(a: any, b: any, t: number, trackType: TrackType): any
 }
 
 function applyTrackValue(obj: THREE.Object3D, trackType: TrackType, value: any) {
-  if (!value) return
+  if (value === null || value === undefined) return
 
   switch (trackType) {
     case 'position':

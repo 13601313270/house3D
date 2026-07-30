@@ -263,8 +263,6 @@ function changeGlobalEditGroup() {
   emit('changeGlobalEditGroup')
 }
 function addAnimation() {
-  console.log('[DEBUG DataTypeEditPanel] modelValue:', props.modelValue)
-  console.log('[DEBUG DataTypeEditPanel] modelValue keys:', Object.keys(props.modelValue))
   emit('addAnimation', {
     typeKey: props.typeKey,
     modelValue: props.modelValue

@@ -664,7 +664,6 @@ const saveDrawing = async () => {
     return
   }
   activeToolsIndex.value = -1
-  console.log('[DEBUG save] timelineData:', JSON.parse(JSON.stringify(timelineData.value)))
   await saveWorld(
     canvas2DSceneManage.list[0].panOffset,
     canvas2DSceneManage.list[0].level,
@@ -1390,13 +1389,8 @@ function handleAddAnimation(data: { typeKey: string; modelValue: Record<string, 
 
   const entityData = entity.getData()
   const entityId = entityData.id
-  console.log('[DEBUG] entityId from data:', entityId)
 
   const mesh = entity.meshList[0]
-  console.log('[DEBUG] mesh:', mesh)
-  console.log('[DEBUG] mesh.uuid:', mesh?.uuid)
-  console.log('[DEBUG] mesh.isMesh:', mesh instanceof THREE.Mesh)
-  console.log('[DEBUG] mesh.isGroup:', mesh instanceof THREE.Group)
   const clipCount = timelineData.value.clips.length
   const startTime = clipCount * 3
   const midTime = startTime + 5
@@ -1443,14 +1437,8 @@ function handleAddAnimation(data: { typeKey: string; modelValue: Record<string, 
   timelineData.value.clips.push(newClip)
   timelineData.value = { ...timelineData.value }
 
-  console.log('[DEBUG] timelineData updated, clips count:', timelineData.value.clips.length)
-  console.log('[DEBUG] clips entityIds:', timelineData.value.clips.map(c => c.entityId))
-
   if (timeLineRef.value) {
-    console.log('[DEBUG] calling registerAnimatedObject with:', entityId)
     timeLineRef.value.registerAnimatedObject(entityId, mesh)
-  } else {
-    console.warn('[DEBUG] timeLineRef is null, cannot register object')
   }
 }
 </script>
