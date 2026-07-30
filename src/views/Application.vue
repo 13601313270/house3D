@@ -130,7 +130,7 @@
     </div>
     <div class="timeLine" :style="{ height: timeHeight + 'px' }">
       <div class="split-bar-x" @mousedown.prevent="startSplitTimeLine()"></div>
-      <TimeLine v-model="timelineData" :get-object="getEntityMesh" />
+      <TimeLine v-model="timelineData" :get-object="getEntityMesh" @activeKeyFrameNode="activeKeyFrameNode" />
     </div>
     <DataTypeEditPanel v-if="contextMenu?.visible && editPropTypeKey" :typeKey="editPropTypeKey"
       :editPropConfigInfo="editPropConfigInfo" v-model="editPropInputInfo"
@@ -222,7 +222,7 @@ import canvas2DSceneManage from '@/utils/canvas2DSceneManage'
 import bindDanvas2DSceneDefaultEvent from '@/utils/bindDanvas2DSceneDefaultEvent';
 import setHoverPoint from '@/utils/setHoverPoint';
 import TimeLine from '@/components/timeLine.vue'
-import { TimelineData } from '@/utils/timelineState';
+import { TimelineData, Keyframe } from '@/utils/timelineState';
 
 const timelineData = ref<TimelineData>({
   duration: 30,
@@ -1378,6 +1378,9 @@ function handleAddAnimation(data: { typeKey: string; modelValue: Record<string, 
 
   timelineData.value.clips.push(newClip)
   timelineData.value = { ...timelineData.value }
+}
+function activeKeyFrameNode(keyframe: Keyframe) {
+  window.activeKeyFrameNode = keyframe
 }
 </script>
 

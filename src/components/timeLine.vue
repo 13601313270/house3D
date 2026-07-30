@@ -35,10 +35,12 @@
                 :style="{
                   left: `${(segment.startTime / effectiveDuration) * 100}%`,
                   width: `${((segment.endTime - segment.startTime) / effectiveDuration) * 100}%`
-                }" @mousedown="startClipDrag($event, segment.clip.clipId)" @click.stop="toggleClipContent($event, segment)">
+                }" @mousedown="startClipDrag($event, segment.clip.clipId)"
+                @click.stop="toggleClipContent($event, segment)">
                 <div class="track-header-bar">
                   <span class="clip-name">{{ segment.clip.entityId }}</span>
-                  <span class="clip-duration">{{ formatTime(segment.startTime) }} - {{ formatTime(segment.endTime) }}</span>
+                  <span class="clip-duration">{{ formatTime(segment.startTime) }} - {{ formatTime(segment.endTime)
+                  }}</span>
                 </div>
                 <div v-if="overlappingClipIds.has(segment.clip.clipId)" class="warning-badge" title="同一个物体对象不允许时间重叠">
                   <span class="warning-icon">⚠</span>
@@ -60,7 +62,8 @@
       <div class="track-content-floating" :style="trackContentStyle" @click.stop>
         <div class="floating-header">
           <span class="floating-title">{{ activeSegment.clip.entityId }}</span>
-          <span class="floating-time">{{ formatTime(activeSegment.startTime) }} - {{ formatTime(activeSegment.endTime) }}</span>
+          <span class="floating-time">{{ formatTime(activeSegment.startTime) }} - {{ formatTime(activeSegment.endTime)
+          }}</span>
           <button class="floating-delete" @click="deleteClip(activeSegment.clip.clipId)" title="删除动画">🗑</button>
           <button class="floating-close" @click="closeClipContent">×</button>
         </div>
@@ -72,8 +75,8 @@
           <div class="track-timeline" @click="handleTrackClick($event, track, activeSegment)">
             <div class="track-background">
               <svg class="curve-line" viewBox="0 0 100 20" preserveAspectRatio="none">
-                <polyline :points="getCurvePoints(track, activeSegment)" fill="none" :stroke="getTrackColor(track.trackType)"
-                  stroke-width="1" />
+                <polyline :points="getCurvePoints(track, activeSegment)" fill="none"
+                  :stroke="getTrackColor(track.trackType)" stroke-width="1" />
               </svg>
               <div v-for="keyframe in track.keyframes" :key="keyframe.time" class="keyframe-node"
                 :style="{ left: `${((keyframe.time - activeSegment.startTime) / (activeSegment.endTime - activeSegment.startTime || 1)) * 100}%` }"
@@ -89,8 +92,7 @@
           </select>
           <div v-else class="track-dropdown">
             <div class="track-dropdown-header">选择属性</div>
-            <div v-for="type in availableTrackTypes" :key="type" class="track-dropdown-item"
-              @click="addTrack(type)">
+            <div v-for="type in availableTrackTypes" :key="type" class="track-dropdown-item" @click="addTrack(type)">
               {{ translateTrackType(type) }}
             </div>
             <div class="track-dropdown-close" @click="showTrackDropdown = false">取消</div>
@@ -113,6 +115,7 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
+  (e: 'activeKeyFrameNode', value: Keyframe): void
   (e: 'update:modelValue', value: TimelineData): void
 }>()
 
@@ -461,7 +464,7 @@ function onKeyframeClick(clipId: string, trackType: TrackType, keyframe: Keyfram
     togglePlay()
   }
   selectedKeyframe.value = { clipId, trackType, keyframe }
-  ;(window as any).activekeyFrameNode = keyframe
+  emit('activeKeyFrameNode', keyframe)
 }
 
 function handleTrackClick(event: MouseEvent, track: TrackData, segment?: ClipSegment) {
@@ -1367,9 +1370,12 @@ onUnmounted(() => {
 }
 
 @keyframes warning-pulse {
-  0%, 100% {
+
+  0%,
+  100% {
     box-shadow: 0 0 0 0 rgba(255, 152, 0, 0.4);
   }
+
   50% {
     box-shadow: 0 0 0 4px rgba(255, 152, 0, 0.1);
   }

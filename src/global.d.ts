@@ -9,6 +9,6 @@ declare global {
     worldApi: WorldGroup
     worldState: WorldState
     globalEditGroup: GroupBaseEntity<GroupBaseData> // 全局正在编辑状态的组
-    activekeyFrameNode: Keyframe,
+    activeKeyFrameNode: Keyframe,
   }
 }
