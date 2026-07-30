@@ -87,7 +87,7 @@
           </div>
         </div>
         <div class="add-track-area">
-          <select v-if="!showTrackDropdown" class="add-track-select" @click="showTrackDropdown = true">
+          <select v-if="!isShowTrackDropdown" class="add-track-select" @click="showTrackDropdown">
             <option value="" disabled selected>＋ 添加属性</option>
           </select>
           <div v-else class="track-dropdown">
@@ -95,7 +95,11 @@
             <div v-for="type in availableTrackTypes" :key="type" class="track-dropdown-item" @click="addTrack(type)">
               {{ translateTrackType(type) }}
             </div>
-            <div class="track-dropdown-close" @click="showTrackDropdown = false">取消</div>
+            -----
+            <div v-for="type in availableTrackTypes2" :key="type" class="track-dropdown-item" @click="addTrack(type)">
+              {{ translateTrackType(type) }}
+            </div>
+            <div class="track-dropdown-close" @click="isShowTrackDropdown = false">取消</div>
           </div>
         </div>
       </div>
@@ -146,7 +150,7 @@ const collapsedClips = ref<Set<string>>(new Set())
 const activeClipId = ref<string | null>(null)
 const activeSegment = ref<ClipSegment | null>(null)
 const trackContentStyle = ref<Record<string, string>>({})
-const showTrackDropdown = ref(false)
+const isShowTrackDropdown = ref(false)
 const selectedKeyframe = ref<{ clipId: string; trackType: TrackType; keyframe: Keyframe } | null>(null)
 
 let animationFrameId: number | null = null
@@ -409,7 +413,7 @@ function toggleClipContent(event: MouseEvent, segment: ClipSegment) {
 function closeClipContent() {
   activeClipId.value = null
   activeSegment.value = null
-  showTrackDropdown.value = false
+  isShowTrackDropdown.value = false
 }
 
 function deleteClip(clipId: string) {
@@ -800,6 +804,7 @@ const availableTrackTypes = computed(() => {
   const existingTypes = new Set(activeSegment.value.clip.tracks.map(t => t.trackType))
   return allTrackTypes.filter(t => !existingTypes.has(t))
 })
+const availableTrackTypes2 = ref<TrackType[]>([])
 
 function addTrack(trackType: TrackType) {
   if (!activeSegment.value) return
@@ -810,7 +815,7 @@ function addTrack(trackType: TrackType) {
   }
   activeSegment.value.clip.tracks.push(newTrack)
   timelineData.value = { ...timelineData.value }
-  showTrackDropdown.value = false
+  isShowTrackDropdown.value = false
 }
 
 function removeTrack(trackType: TrackType) {
@@ -820,9 +825,16 @@ function removeTrack(trackType: TrackType) {
   timelineData.value = { ...timelineData.value }
 }
 
-function scrollTimeInfo(e: Event) {
-  // @ts-ignore
-  timelineRuler.value.scrollLeft = e.target.scrollLeft
+function showTrackDropdown() {
+  if (!activeSegment.value) return;
+  const { entityId } = activeSegment.value.clip
+  const entity = window.worldApi.children.find(v => v.getData().id === entityId)
+  console.log(entity)
+  if (!entity) return;
+  // entity.editPropConfig()
+  // window.worldApi.get
+  // availableTrackTypes2.value.push(...availableTrackTypes.value)
+  isShowTrackDropdown.value = true
 }
 
 onUnmounted(() => {
