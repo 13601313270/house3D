@@ -130,7 +130,7 @@
     </div>
     <div class="timeLine" :style="{ height: timeHeight + 'px' }">
       <div class="split-bar-x" @mousedown.prevent="startSplitTimeLine()"></div>
-      <TimeLine v-model="timelineData" :get-object="getEntityMesh" @activeKeyFrameNode="activeKeyFrameNode" />
+      <TimeLine v-model="timelineData" :get-object="getEntityMesh" />
     </div>
     <DataTypeEditPanel v-if="contextMenu?.visible && editPropTypeKey" :typeKey="editPropTypeKey"
       :editPropConfigInfo="editPropConfigInfo" v-model="editPropInputInfo"
@@ -1378,9 +1378,6 @@ function handleAddAnimation(data: { typeKey: string; modelValue: Record<string, 
 
   timelineData.value.clips.push(newClip)
   timelineData.value = { ...timelineData.value }
-}
-function activeKeyFrameNode(keyframe: Keyframe) {
-  window.activeKeyFrameNode = keyframe
 }
 </script>
 

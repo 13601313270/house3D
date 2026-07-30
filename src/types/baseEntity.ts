@@ -63,10 +63,6 @@ export abstract class BaseEntityClass<T extends BaseObjData> {
   }
 
   setData(data: T) {
-    if (window.activeKeyFrameNode) {
-      console.log('zzzzz')
-      return;
-    }
     this.data = data
     canvas2DSceneManage.renderPreview()
     this.reCreate3DMeshAnd2DPreviewIfNeed()

@@ -1,6 +1,4 @@
 
-export type TrackType = 'position' | 'rotation' | 'scale' | 'visible' | 'opacity'
-
 export interface Keyframe {
   time: number
   value: any
@@ -8,7 +6,7 @@ export interface Keyframe {
 }
 
 export interface TrackData {
-  trackType: TrackType
+  trackType: string
   keyframes: Keyframe[]
   interpolation?: 'linear' | 'step' | 'bezier'
 }

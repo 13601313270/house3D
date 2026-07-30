@@ -69,14 +69,14 @@
         </div>
         <div v-for="track in activeSegment.clip.tracks" :key="track.trackType" class="track-row">
           <div class="track-label">
-            <span>{{ translateTrackType(track.trackType) }}</span>
+            <span>{{ track.trackType }}</span>
             <button class="track-remove" @click="removeTrack(track.trackType)" title="移除轨道">✕</button>
           </div>
           <div class="track-timeline" @click="handleTrackClick($event, track, activeSegment)">
             <div class="track-background">
               <svg class="curve-line" viewBox="0 0 100 20" preserveAspectRatio="none">
-                <polyline :points="getCurvePoints(track, activeSegment)" fill="none"
-                  :stroke="getTrackColor(track.trackType)" stroke-width="1" />
+                <polyline :points="getCurvePoints(track, activeSegment)" fill="none" stroke="#4CAF50"
+                  stroke-width="1" />
               </svg>
               <div v-for="keyframe in track.keyframes" :key="keyframe.time" class="keyframe-node"
                 :style="{ left: `${((keyframe.time - activeSegment.startTime) / (activeSegment.endTime - activeSegment.startTime || 1)) * 100}%` }"
@@ -87,17 +87,18 @@
           </div>
         </div>
         <div class="add-track-area">
-          <select v-if="!isShowTrackDropdown" class="add-track-select" @click="showTrackDropdown">
-            <option value="" disabled selected>＋ 添加属性</option>
-          </select>
+          <div v-if="!isShowTrackDropdown" class="add-track-select" @click="showTrackDropdown">
+            <span>＋ 添加属性</span>
+          </div>
           <div v-else class="track-dropdown">
             <div class="track-dropdown-header">选择属性</div>
             <div v-for="type in availableTrackTypes" :key="type" class="track-dropdown-item" @click="addTrack(type)">
               {{ translateTrackType(type) }}
             </div>
             -----
-            <div v-for="type in availableTrackTypes2" :key="type" class="track-dropdown-item" @click="addTrack(type)">
-              {{ translateTrackType(type) }}
+            <div v-for="item in availableTrackTypes2" :key="item.id" class="track-dropdown-item"
+              @click="addTrack(item.id)">
+              {{ item.label }}
             </div>
             <div class="track-dropdown-close" @click="isShowTrackDropdown = false">取消</div>
           </div>
@@ -111,7 +112,7 @@
 import { ref, computed, onUnmounted } from 'vue'
 import * as THREE from 'three'
 import { message } from '@/utils/message'
-import { ClipSegment, TimelineData, TrackData, TrackType, Keyframe } from '@/utils/timelineState';
+import { ClipSegment, TimelineData, TrackData, Keyframe } from '@/utils/timelineState';
 
 const props = defineProps<{
   modelValue: TimelineData
@@ -119,7 +120,6 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-  (e: 'activeKeyFrameNode', value: Keyframe): void
   (e: 'update:modelValue', value: TimelineData): void
 }>()
 
@@ -151,7 +151,7 @@ const activeClipId = ref<string | null>(null)
 const activeSegment = ref<ClipSegment | null>(null)
 const trackContentStyle = ref<Record<string, string>>({})
 const isShowTrackDropdown = ref(false)
-const selectedKeyframe = ref<{ clipId: string; trackType: TrackType; keyframe: Keyframe } | null>(null)
+const selectedKeyframe = ref<{ clipId: string; trackType: string; keyframe: Keyframe } | null>(null)
 
 let animationFrameId: number | null = null
 let lastTimestamp = 0
@@ -288,8 +288,8 @@ function formatTime(time: number): string {
   return `${seconds.toString().padStart(2, '0')}:${milliseconds.toString().padStart(2, '0')}`
 }
 
-function translateTrackType(type: TrackType): string {
-  const translations: Record<TrackType, string> = {
+function translateTrackType(type: string): string {
+  const translations: Record<string, string> = {
     position: '位置',
     rotation: '旋转',
     scale: '缩放',
@@ -297,17 +297,6 @@ function translateTrackType(type: TrackType): string {
     opacity: '透明度'
   }
   return translations[type] || type
-}
-
-function getTrackColor(type: TrackType): string {
-  const colors: Record<TrackType, string> = {
-    position: '#4CAF50',
-    rotation: '#2196F3',
-    scale: '#FF9800',
-    visible: '#9C27B0',
-    opacity: '#E91E63'
-  }
-  return colors[type] || '#ffffff'
 }
 
 function zoomIn() {
@@ -457,18 +446,17 @@ function getCurvePoints(track: TrackData, segment?: ClipSegment): string {
   return points.join(' ')
 }
 
-function isKeyframeSelected(clipId: string, trackType: TrackType, keyframe: Keyframe): boolean {
+function isKeyframeSelected(clipId: string, trackType: string, keyframe: Keyframe): boolean {
   return selectedKeyframe.value?.clipId === clipId &&
     selectedKeyframe.value?.trackType === trackType &&
     selectedKeyframe.value?.keyframe === keyframe
 }
 
-function onKeyframeClick(clipId: string, trackType: TrackType, keyframe: Keyframe) {
+function onKeyframeClick(clipId: string, trackType: string, keyframe: Keyframe) {
   if (isPlaying.value) {
     togglePlay()
   }
   selectedKeyframe.value = { clipId, trackType, keyframe }
-  emit('activeKeyFrameNode', keyframe)
 }
 
 function handleTrackClick(event: MouseEvent, track: TrackData, segment?: ClipSegment) {
@@ -715,7 +703,7 @@ function applyEasing(t: number, easing: string): number {
   }
 }
 
-function interpolateValues(a: any, b: any, t: number, trackType: TrackType): any {
+function interpolateValues(a: any, b: any, t: number, trackType: string): any {
   if (trackType === 'visible') {
     return t >= 0.5 ? b : a
   }
@@ -749,7 +737,7 @@ function interpolateValues(a: any, b: any, t: number, trackType: TrackType): any
   return b
 }
 
-function applyTrackValue(obj: THREE.Object3D, trackType: TrackType, value: any) {
+function applyTrackValue(obj: THREE.Object3D, trackType: string, value: any) {
   if (value === null || value === undefined) return
 
   switch (trackType) {
@@ -797,16 +785,19 @@ function applyTrackValue(obj: THREE.Object3D, trackType: TrackType, value: any) 
   }
 }
 
-const allTrackTypes: TrackType[] = ['position', 'rotation', 'scale', 'visible', 'opacity']
+const allTrackTypes: string[] = ['position', 'rotation', 'scale', 'visible', 'opacity']
 
 const availableTrackTypes = computed(() => {
   if (!activeSegment.value) return allTrackTypes
   const existingTypes = new Set(activeSegment.value.clip.tracks.map(t => t.trackType))
   return allTrackTypes.filter(t => !existingTypes.has(t))
 })
-const availableTrackTypes2 = ref<TrackType[]>([])
+const availableTrackTypes2 = ref<{
+  id: string,
+  label: string,
+}[]>([])
 
-function addTrack(trackType: TrackType) {
+function addTrack(trackType: string) {
   if (!activeSegment.value) return
   const newTrack: TrackData = {
     trackType,
@@ -818,7 +809,7 @@ function addTrack(trackType: TrackType) {
   isShowTrackDropdown.value = false
 }
 
-function removeTrack(trackType: TrackType) {
+function removeTrack(trackType: string) {
   if (!activeSegment.value) return
   const clip = activeSegment.value.clip
   clip.tracks = clip.tracks.filter(t => t.trackType !== trackType)
@@ -829,12 +820,25 @@ function showTrackDropdown() {
   if (!activeSegment.value) return;
   const { entityId } = activeSegment.value.clip
   const entity = window.worldApi.children.find(v => v.getData().id === entityId)
-  console.log(entity)
   if (!entity) return;
-  // entity.editPropConfig()
-  // window.worldApi.get
-  // availableTrackTypes2.value.push(...availableTrackTypes.value)
-  isShowTrackDropdown.value = true
+  console.log('entity.editPropConfig', entity.editPropConfig)
+  // @ts-ignore
+  entity.editPropConfig(null, (editInfoList, callback) => {
+    console.log('entity.editPropConfig', callback)
+    // console.log('editInfoList', editInfoList.map(v => {
+    //   return {
+    //     id: v.id,
+    //     label: v.label
+    //   }
+    // }))
+    availableTrackTypes2.value.push(...editInfoList.map(v => {
+      return {
+        id: v.id,
+        label: v.label
+      }
+    }))
+    isShowTrackDropdown.value = true
+  })
 }
 
 onUnmounted(() => {
