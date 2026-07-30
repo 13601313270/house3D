@@ -1373,6 +1373,11 @@ function groupExit() {
   }
 }
 
+// 生成唯一 clipId
+function generateClipId(): string {
+  return `clip-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`
+}
+
 function handleAddAnimation(data: { typeKey: string; modelValue: Record<string, any> }) {
   const { typeKey, modelValue } = data
 
@@ -1402,6 +1407,7 @@ function handleAddAnimation(data: { typeKey: string; modelValue: Record<string, 
   const posZ = modelValue.z || 0
 
   const newClip = {
+    clipId: generateClipId(),
     entityId,
     tracks: [
       {

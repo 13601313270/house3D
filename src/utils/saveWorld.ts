@@ -11,6 +11,7 @@ export type fileData = {
 export type TimelineDataForSave = {
   duration: number
   clips: Array<{
+    clipId: string
     entityId: string
     tracks: Array<{
       trackType: string

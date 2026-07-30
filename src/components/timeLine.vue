@@ -30,12 +30,12 @@
         <div class="timeline-content-wrapper" :style="{ width: `${effectiveDuration * zoomLevel * 50}px` }">
           <div class="timeline-track-area">
             <div v-for="(row, rowIndex) in rowsByIndex" :key="`time-row-${rowIndex}`" class="timeline-row">
-              <div v-for="segment in row" :key="segment.clip.entityId" class="track-item"
-                :class="{ active: activeClipId === segment.clip.entityId }"
+              <div v-for="segment in row" :key="segment.clip.clipId" class="track-item"
+                :class="{ active: activeClipId === segment.clip.clipId }"
                 :style="{
                   left: `${(segment.startTime / effectiveDuration) * 100}%`,
                   width: `${((segment.endTime - segment.startTime) / effectiveDuration) * 100}%`
-                }" @mousedown="startClipDrag($event, segment.clip.entityId)" @click.stop="toggleClipContent($event, segment)">
+                }" @mousedown="startClipDrag($event, segment.clip.clipId)" @click.stop="toggleClipContent($event, segment)">
                 <div class="track-header-bar">
                   <span class="clip-name">{{ segment.clip.entityId }}</span>
                   <span class="clip-duration">{{ formatTime(segment.startTime) }} - {{ formatTime(segment.endTime) }}</span>
@@ -69,8 +69,8 @@
               </svg>
               <div v-for="keyframe in track.keyframes" :key="keyframe.time" class="keyframe-node"
                 :style="{ left: `${((keyframe.time - activeSegment.startTime) / (activeSegment.endTime - activeSegment.startTime || 1)) * 100}%` }"
-                @click.stop="selectKeyframe(activeSegment.clip.entityId, track.trackType, keyframe)"
-                :class="{ selected: isKeyframeSelected(activeSegment.clip.entityId, track.trackType, keyframe) }">
+                @click.stop="selectKeyframe(activeSegment.clip.clipId, track.trackType, keyframe)"
+                :class="{ selected: isKeyframeSelected(activeSegment.clip.clipId, track.trackType, keyframe) }">
               </div>
             </div>
           </div>
@@ -127,6 +127,7 @@ interface TrackData {
 }
 
 interface ClipData {
+  clipId: string
   entityId: string
   tracks: TrackData[]
 }
@@ -172,7 +173,7 @@ const timelineRuler = ref();
 const currentTime = ref(0)
 const isPlaying = ref(false)
 const playbackSpeed = ref(1)
-const selectedKeyframe = ref<{ entityId: string; trackType: TrackType; keyframe: Keyframe } | null>(null)
+const selectedKeyframe = ref<{ clipId: string; trackType: TrackType; keyframe: Keyframe } | null>(null)
 const selectedKeyframeValue = ref('')
 const zoomLevel = ref(1)
 const scrollLeft = ref(0)
@@ -375,12 +376,12 @@ function toggleClipContent(event: MouseEvent, segment: ClipSegment) {
     return
   }
 
-  if (activeClipId.value === segment.clip.entityId) {
+  if (activeClipId.value === segment.clip.clipId) {
     closeClipContent()
     return
   }
 
-  activeClipId.value = segment.clip.entityId
+  activeClipId.value = segment.clip.clipId
   activeSegment.value = segment
 
   const target = event.currentTarget as HTMLElement
@@ -442,14 +443,14 @@ function getCurvePoints(track: TrackData, segment?: ClipSegment): string {
   return points.join(' ')
 }
 
-function isKeyframeSelected(entityId: string, trackType: TrackType, keyframe: Keyframe): boolean {
-  return selectedKeyframe.value?.entityId === entityId &&
+function isKeyframeSelected(clipId: string, trackType: TrackType, keyframe: Keyframe): boolean {
+  return selectedKeyframe.value?.clipId === clipId &&
     selectedKeyframe.value?.trackType === trackType &&
     selectedKeyframe.value?.keyframe === keyframe
 }
 
-function selectKeyframe(entityId: string, trackType: TrackType, keyframe: Keyframe) {
-  selectedKeyframe.value = { entityId, trackType, keyframe }
+function selectKeyframe(clipId: string, trackType: TrackType, keyframe: Keyframe) {
+  selectedKeyframe.value = { clipId, trackType, keyframe }
   selectedKeyframeValue.value = typeof keyframe.value === 'object' ? JSON.stringify(keyframe.value) : String(keyframe.value)
 }
 
@@ -564,31 +565,29 @@ function stopDragging() {
   document.removeEventListener('mouseup', stopDragging)
 }
 
-function startClipDrag(e: MouseEvent, entityId: string) {
+function startClipDrag(e: MouseEvent, clipId: string) {
   e.stopPropagation()
   isDraggingClip = true
-  dragClipId = entityId
+  dragClipId = clipId
   dragStartX = e.clientX
   dragMoved = false
   dragStartTimes.clear()
 
-  console.log('[DEBUG] startClipDrag', { entityId, clientX: e.clientX })
-  console.log('[DEBUG] animatedObjects keys:', [...animatedObjects.keys()])
-  console.log('[DEBUG] timelineData clips:', timelineData.value.clips.map(c => c.entityId))
+  console.log('[DEBUG] startClipDrag', { clipId, clientX: e.clientX })
 
   if (activeClipId.value) {
     closeClipContent()
   }
 
-  const clip = timelineData.value.clips.find(c => c.entityId === entityId)
+  const clip = timelineData.value.clips.find(c => c.clipId === clipId)
   if (clip) {
     for (const track of clip.tracks) {
       const times = track.keyframes.map(kf => kf.time)
       dragStartTimes.set(track.trackType, times)
     }
-    console.log('[DEBUG] clip found:', clip.entityId, 'tracks:', clip.tracks.length)
+    console.log('[DEBUG] clip found:', clip.clipId, 'entityId:', clip.entityId, 'tracks:', clip.tracks.length)
   } else {
-    console.warn('[DEBUG] clip NOT found for entityId:', entityId)
+    console.warn('[DEBUG] clip NOT found for clipId:', clipId)
   }
 
   document.addEventListener('mousemove', onClipDrag)
@@ -614,7 +613,7 @@ function onClipDrag(e: MouseEvent) {
   const deltaTime = deltaX / widthPerSecond
   console.log('[DEBUG] onClipDrag', { deltaX, deltaTime, dragClipId })
 
-  const clip = timelineData.value.clips.find(c => c.entityId === dragClipId)
+  const clip = timelineData.value.clips.find(c => c.clipId === dragClipId)
   if (!clip) {
     console.warn('[DEBUG] onClipDrag: clip not found for', dragClipId)
     return
@@ -630,9 +629,8 @@ function onClipDrag(e: MouseEvent) {
       }
     }
   }
-  // 回退：使用原来的浅拷贝
   timelineData.value = { ...timelineData.value }
-  console.log('[DEBUG] timelineData updated, first clip time:', timelineData.value.clips[0]?.tracks[0]?.keyframes[0]?.time)
+  console.log('[DEBUG] timelineData updated, clipId:', clip.clipId, 'first keyframe time:', clip.tracks[0]?.keyframes[0]?.time)
 }
 
 function stopClipDrag() {
