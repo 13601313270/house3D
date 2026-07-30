@@ -31,7 +31,7 @@
           <div class="timeline-track-area">
             <div v-for="(row, rowIndex) in rowsByIndex" :key="`time-row-${rowIndex}`" class="timeline-row">
               <div v-for="segment in row" :key="segment.clip.clipId" class="track-item"
-                :class="{ active: activeClipId === segment.clip.clipId }"
+                :class="{ active: activeClipId === segment.clip.clipId, warning: overlappingClipIds.has(segment.clip.clipId) }"
                 :style="{
                   left: `${(segment.startTime / effectiveDuration) * 100}%`,
                   width: `${((segment.endTime - segment.startTime) / effectiveDuration) * 100}%`
@@ -39,6 +39,10 @@
                 <div class="track-header-bar">
                   <span class="clip-name">{{ segment.clip.entityId }}</span>
                   <span class="clip-duration">{{ formatTime(segment.startTime) }} - {{ formatTime(segment.endTime) }}</span>
+                </div>
+                <div v-if="overlappingClipIds.has(segment.clip.clipId)" class="warning-badge" title="同一个物体对象不允许时间重叠">
+                  <span class="warning-icon">⚠</span>
+                  <span class="warning-text">同一个物体对象不允许时间重叠</span>
                 </div>
               </div>
             </div>
@@ -57,60 +61,49 @@
         <div class="floating-header">
           <span class="floating-title">{{ activeSegment.clip.entityId }}</span>
           <span class="floating-time">{{ formatTime(activeSegment.startTime) }} - {{ formatTime(activeSegment.endTime) }}</span>
+          <button class="floating-delete" @click="deleteClip(activeSegment.clip.clipId)" title="删除动画">🗑</button>
           <button class="floating-close" @click="closeClipContent">×</button>
         </div>
         <div v-for="track in activeSegment.clip.tracks" :key="track.trackType" class="track-row">
-          <div class="track-label">{{ translateTrackType(track.trackType) }}</div>
+          <div class="track-label">
+            <span>{{ translateTrackType(track.trackType) }}</span>
+            <button class="track-remove" @click="removeTrack(track.trackType)" title="移除轨道">✕</button>
+          </div>
           <div class="track-timeline" @click="handleTrackClick($event, track, activeSegment)">
             <div class="track-background">
               <svg class="curve-line" viewBox="0 0 100 20" preserveAspectRatio="none">
-                <polyline :points="getCurvePoints(track, activeSegment)" fill="none" stroke="#4CAF50"
+                <polyline :points="getCurvePoints(track, activeSegment)" fill="none" :stroke="getTrackColor(track.trackType)"
                   stroke-width="1" />
               </svg>
               <div v-for="keyframe in track.keyframes" :key="keyframe.time" class="keyframe-node"
                 :style="{ left: `${((keyframe.time - activeSegment.startTime) / (activeSegment.endTime - activeSegment.startTime || 1)) * 100}%` }"
-                @click.stop="selectKeyframe(activeSegment.clip.clipId, track.trackType, keyframe)"
                 :class="{ selected: isKeyframeSelected(activeSegment.clip.clipId, track.trackType, keyframe) }">
               </div>
             </div>
           </div>
         </div>
+        <div class="add-track-area">
+          <select v-if="!showTrackDropdown" class="add-track-select" @click="showTrackDropdown = true">
+            <option value="" disabled selected>＋ 添加属性</option>
+          </select>
+          <div v-else class="track-dropdown">
+            <div class="track-dropdown-header">选择属性</div>
+            <div v-for="type in availableTrackTypes" :key="type" class="track-dropdown-item"
+              @click="addTrack(type)">
+              {{ translateTrackType(type) }}
+            </div>
+            <div class="track-dropdown-close" @click="showTrackDropdown = false">取消</div>
+          </div>
+        </div>
       </div>
     </teleport>
-
-    <div v-if="selectedKeyframe" class="keyframe-panel">
-      <div class="panel-header">关键帧属性</div>
-      <div class="panel-content">
-        <div class="property-row">
-          <label>时间:</label>
-          <input type="number" v-model.number="selectedKeyframe.keyframe.time" step="0.1" @change="syncTimelineData" />
-        </div>
-        <div class="property-row">
-          <label>值:</label>
-          <input type="text" v-model="selectedKeyframeValue" />
-        </div>
-        <div class="property-row">
-          <label>缓动:</label>
-          <select v-model="selectedKeyframe.keyframe.easing" @change="syncTimelineData">
-            <option value="linear">线性</option>
-            <option value="easeIn">缓入</option>
-            <option value="easeOut">缓出</option>
-            <option value="easeInOut">缓入缓出</option>
-          </select>
-        </div>
-      </div>
-    </div>
-
-    <div class="demo-controls">
-      <button class="demo-btn" @click="clearAll">清空全部</button>
-      <button class="demo-btn" @click="saveAnimation">保存 JSON</button>
-    </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, onUnmounted, watch } from 'vue'
+import { ref, computed, onUnmounted } from 'vue'
 import * as THREE from 'three'
+import { message } from '@/utils/message'
 
 type TrackType = 'position' | 'rotation' | 'scale' | 'visible' | 'opacity'
 
@@ -174,14 +167,13 @@ const timelineRuler = ref();
 const currentTime = ref(0)
 const isPlaying = ref(false)
 const playbackSpeed = ref(1)
-const selectedKeyframe = ref<{ clipId: string; trackType: TrackType; keyframe: Keyframe } | null>(null)
-const selectedKeyframeValue = ref('')
 const zoomLevel = ref(1)
 const scrollLeft = ref(0)
 const collapsedClips = ref<Set<string>>(new Set())
 const activeClipId = ref<string | null>(null)
 const activeSegment = ref<ClipSegment | null>(null)
 const trackContentStyle = ref<Record<string, string>>({})
+const showTrackDropdown = ref(false)
 
 let animationFrameId: number | null = null
 let lastTimestamp = 0
@@ -210,7 +202,8 @@ const rulerMarks = computed(() => {
 const clipSegments = computed<ClipSegment[]>(() => {
   const segments: ClipSegment[] = []
 
-  for (const clip of timelineData.value.clips) {
+  for (let index = 0; index < timelineData.value.clips.length; index++) {
+    const clip = timelineData.value.clips[index]
     const allTimes: number[] = []
     for (const track of clip.tracks) {
       for (const kf of track.keyframes) {
@@ -218,10 +211,16 @@ const clipSegments = computed<ClipSegment[]>(() => {
       }
     }
 
-    if (allTimes.length === 0) continue
+    let startTime: number
+    let endTime: number
 
-    const startTime = Math.min(...allTimes)
-    const endTime = Math.max(...allTimes)
+    if (allTimes.length === 0) {
+      startTime = index * 3
+      endTime = startTime + 10
+    } else {
+      startTime = Math.min(...allTimes)
+      endTime = Math.max(...allTimes)
+    }
 
     segments.push({
       clip,
@@ -274,14 +273,41 @@ const rowsByIndex = computed(() => {
   return rows
 })
 
+// 检测同一对象的多个 clip 是否存在时间重叠
+const overlappingClipIds = computed(() => {
+  const overlappingIds = new Set<string>()
+  const clipsByEntity = new Map<string, ClipSegment[]>()
+
+  for (const segment of clipSegments.value) {
+    const entityId = segment.clip.entityId
+    if (!clipsByEntity.has(entityId)) {
+      clipsByEntity.set(entityId, [])
+    }
+    clipsByEntity.get(entityId)!.push(segment)
+  }
+
+  for (const [, segments] of clipsByEntity) {
+    if (segments.length <= 1) continue
+
+    for (let i = 0; i < segments.length; i++) {
+      for (let j = i + 1; j < segments.length; j++) {
+        const a = segments[i]
+        const b = segments[j]
+        if (a.startTime < b.endTime && b.startTime < a.endTime) {
+          overlappingIds.add(a.clip.clipId)
+          overlappingIds.add(b.clip.clipId)
+        }
+      }
+    }
+  }
+
+  return overlappingIds
+})
+
 function formatTime(time: number): string {
   const seconds = Math.floor(time)
   const milliseconds = Math.floor((time - seconds) * 100)
   return `${seconds.toString().padStart(2, '0')}:${milliseconds.toString().padStart(2, '0')}`
-}
-
-function syncTimelineData() {
-  timelineData.value = { ...timelineData.value }
 }
 
 function translateTrackType(type: TrackType): string {
@@ -382,6 +408,10 @@ function toggleClipContent(event: MouseEvent, segment: ClipSegment) {
     return
   }
 
+  if (isPlaying.value) {
+    togglePlay()
+  }
+
   activeClipId.value = segment.clip.clipId
   activeSegment.value = segment
 
@@ -407,6 +437,13 @@ function toggleClipContent(event: MouseEvent, segment: ClipSegment) {
 function closeClipContent() {
   activeClipId.value = null
   activeSegment.value = null
+  showTrackDropdown.value = false
+}
+
+function deleteClip(clipId: string) {
+  const newClips = timelineData.value.clips.filter(c => c.clipId !== clipId)
+  timelineData.value = { ...timelineData.value, clips: newClips }
+  closeClipContent()
 }
 
 function toggleCollapse(entityId: string) {
@@ -444,21 +481,18 @@ function getCurvePoints(track: TrackData, segment?: ClipSegment): string {
   return points.join(' ')
 }
 
-function isKeyframeSelected(clipId: string, trackType: TrackType, keyframe: Keyframe): boolean {
-  return selectedKeyframe.value?.clipId === clipId &&
-    selectedKeyframe.value?.trackType === trackType &&
-    selectedKeyframe.value?.keyframe === keyframe
-}
-
-function selectKeyframe(clipId: string, trackType: TrackType, keyframe: Keyframe) {
-  selectedKeyframe.value = { clipId, trackType, keyframe }
-  selectedKeyframeValue.value = typeof keyframe.value === 'object' ? JSON.stringify(keyframe.value) : String(keyframe.value)
+function isKeyframeSelected(_clipId: string, _trackType: TrackType, _keyframe: Keyframe): boolean {
+  return false
 }
 
 function handleTrackClick(event: MouseEvent, track: TrackData, segment?: ClipSegment) {
   if (dragMoved) {
     dragMoved = false
     return
+  }
+
+  if (isPlaying.value) {
+    togglePlay()
   }
 
   const target = event.currentTarget as HTMLElement
@@ -497,10 +531,14 @@ function handleTrackClick(event: MouseEvent, track: TrackData, segment?: ClipSeg
   track.keyframes.sort((a, b) => a.time - b.time)
 
   timelineData.value = { ...timelineData.value }
-  selectKeyframe('', track.trackType, newKeyframe)
 }
 
 function togglePlay() {
+  if (!isPlaying.value && overlappingClipIds.value.size > 0) {
+    message.warning('同一个物体对象不允许时间重叠，请先解决时间重叠问题')
+    return
+  }
+
   isPlaying.value = !isPlaying.value
   if (isPlaying.value) {
     lastTimestamp = performance.now()
@@ -568,6 +606,9 @@ function stopDragging() {
 
 function startClipDrag(e: MouseEvent, clipId: string) {
   e.stopPropagation()
+  if (isPlaying.value) {
+    togglePlay()
+  }
   isDraggingClip = true
   dragClipId = clipId
   dragStartX = e.clientX
@@ -770,34 +811,32 @@ function applyTrackValue(obj: THREE.Object3D, trackType: TrackType, value: any) 
   }
 }
 
-function clearAll() {
-  timelineData.value = { ...timelineData.value, clips: [] }
-  currentTime.value = 0
-  selectedKeyframe.value = null
-}
+const allTrackTypes: TrackType[] = ['position', 'rotation', 'scale', 'visible', 'opacity']
 
-function saveAnimation() {
-  const data = JSON.stringify(timelineData.value, null, 2)
-  const blob = new Blob([data], { type: 'application/json' })
-  const url = URL.createObjectURL(blob)
-  const a = document.createElement('a')
-  a.href = url
-  a.download = 'animation.json'
-  a.click()
-  URL.revokeObjectURL(url)
-}
-
-watch(selectedKeyframeValue, (val) => {
-  if (selectedKeyframe.value) {
-    try {
-      const parsed = JSON.parse(val)
-      selectedKeyframe.value.keyframe.value = parsed
-    } catch {
-      selectedKeyframe.value.keyframe.value = val
-    }
-    timelineData.value = { ...timelineData.value }
-  }
+const availableTrackTypes = computed(() => {
+  if (!activeSegment.value) return allTrackTypes
+  const existingTypes = new Set(activeSegment.value.clip.tracks.map(t => t.trackType))
+  return allTrackTypes.filter(t => !existingTypes.has(t))
 })
+
+function addTrack(trackType: TrackType) {
+  if (!activeSegment.value) return
+  const newTrack: TrackData = {
+    trackType,
+    keyframes: [],
+    interpolation: 'linear'
+  }
+  activeSegment.value.clip.tracks.push(newTrack)
+  timelineData.value = { ...timelineData.value }
+  showTrackDropdown.value = false
+}
+
+function removeTrack(trackType: TrackType) {
+  if (!activeSegment.value) return
+  const clip = activeSegment.value.clip
+  clip.tracks = clip.tracks.filter(t => t.trackType !== trackType)
+  timelineData.value = { ...timelineData.value }
+}
 
 function scrollTimeInfo(e: Event) {
   // @ts-ignore
@@ -932,6 +971,7 @@ onUnmounted(() => {
 
       .timeline-content-wrapper {
         .timeline-track-area {
+          padding-top: 8px;
           overflow-y: auto;
           box-sizing: border-box;
           position: relative;
@@ -968,6 +1008,45 @@ onUnmounted(() => {
               &.active {
                 box-shadow: 0 0 0 1px #e94560;
                 z-index: 50;
+              }
+
+              &.warning {
+                border-color: #ff9800;
+                background: rgba(255, 152, 0, 0.2);
+                animation: warning-pulse 1.5s ease-in-out infinite;
+
+                &:hover {
+                  box-shadow: 0 0 0 1px #ff9800;
+                }
+              }
+
+              .warning-badge {
+                position: absolute;
+                top: -8px;
+                right: -6px;
+                padding: 2px 6px;
+                background: #ff9800;
+                color: white;
+                border-radius: 4px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 3px;
+                font-size: 10px;
+                font-weight: bold;
+                line-height: 1;
+                white-space: nowrap;
+                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+
+                .warning-icon {
+                  font-size: 10px;
+                  line-height: 1;
+                }
+
+                .warning-text {
+                  font-size: 10px;
+                  line-height: 1;
+                }
               }
 
               &:active {
@@ -1057,68 +1136,6 @@ onUnmounted(() => {
     }
   }
 
-  .keyframe-panel {
-    padding: 12px;
-    background: #16213e;
-    border-top: 1px solid #0f3460;
-
-    .panel-header {
-      font-size: 13px;
-      font-weight: 500;
-      color: #e94560;
-      margin-bottom: 8px;
-    }
-
-    .panel-content {
-      display: flex;
-      gap: 16px;
-
-      .property-row {
-        display: flex;
-        flex-direction: column;
-        gap: 4px;
-
-        label {
-          font-size: 12px;
-          color: #6b7280;
-        }
-
-        input,
-        select {
-          padding: 4px 8px;
-          border: 1px solid #0f3460;
-          border-radius: 4px;
-          background: #0f3460;
-          color: #fff;
-          font-size: 12px;
-        }
-      }
-    }
-  }
-
-  .demo-controls {
-    display: flex;
-    gap: 8px;
-    padding: 12px;
-    background: #16213e;
-    border-top: 1px solid #0f3460;
-
-    .demo-btn {
-      padding: 6px 12px;
-      border: none;
-      border-radius: 4px;
-      background: #0f3460;
-      color: #fff;
-      font-size: 12px;
-      cursor: pointer;
-      transition: background 0.2s;
-
-      &:hover {
-        background: #1a4d7a;
-      }
-    }
-  }
-
   // ::-webkit-scrollbar {
   //   width: 6px;
   //   height: 6px;
@@ -1166,6 +1183,20 @@ onUnmounted(() => {
       font-size: 11px;
     }
 
+    .floating-delete {
+      background: none;
+      border: none;
+      color: #a8b2d1;
+      cursor: pointer;
+      font-size: 14px;
+      padding: 0 4px;
+      line-height: 1;
+
+      &:hover {
+        color: #f56c6c;
+      }
+    }
+
     .floating-close {
       background: none;
       border: none;
@@ -1195,10 +1226,33 @@ onUnmounted(() => {
     }
 
     .track-label {
-      width: 60px;
+      width: 70px;
       font-size: 11px;
       color: #a8b2d1;
       flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+
+      .track-remove {
+        background: none;
+        border: none;
+        color: #a8b2d1;
+        cursor: pointer;
+        font-size: 10px;
+        padding: 0;
+        line-height: 1;
+        opacity: 0;
+        transition: opacity 0.15s, color 0.15s;
+
+        &:hover {
+          color: #f56c6c;
+        }
+      }
+
+      &:hover .track-remove {
+        opacity: 1;
+      }
     }
 
     .track-timeline {
@@ -1231,11 +1285,6 @@ onUnmounted(() => {
         &:hover {
           transform: scale(1.3);
         }
-
-        &.selected {
-          background: #e94560;
-          transform: scale(1.3);
-        }
       }
 
       .curve-line {
@@ -1247,6 +1296,95 @@ onUnmounted(() => {
         pointer-events: none;
       }
     }
+  }
+
+  .add-track-area {
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    position: relative;
+
+    .add-track-select {
+      width: 100%;
+      padding: 6px 10px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px dashed rgba(255, 255, 255, 0.2);
+      border-radius: 4px;
+      color: #a8b2d1;
+      font-size: 12px;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s;
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: rgba(255, 255, 255, 0.4);
+        color: #fff;
+      }
+
+      option {
+        background: #1a1a2e;
+        color: #a8b2d1;
+      }
+    }
+
+    .track-dropdown {
+      position: absolute;
+      bottom: 100%;
+      left: 0;
+      right: 0;
+      background: #1a1a2e;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 6px;
+      padding: 6px 0;
+      margin-bottom: 6px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+      z-index: 100;
+
+      .track-dropdown-header {
+        padding: 4px 10px 6px;
+        font-size: 11px;
+        color: #a8b2d1;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        margin-bottom: 4px;
+      }
+
+      .track-dropdown-item {
+        padding: 6px 10px;
+        font-size: 12px;
+        color: #d0d0d0;
+        cursor: pointer;
+        transition: background 0.15s;
+
+        &:hover {
+          background: rgba(233, 69, 96, 0.2);
+          color: #e94560;
+        }
+      }
+
+      .track-dropdown-close {
+        padding: 6px 10px 2px;
+        font-size: 11px;
+        color: #666;
+        cursor: pointer;
+        text-align: center;
+        border-top: 1px solid rgba(255, 255, 255, 0.05);
+        margin-top: 4px;
+
+        &:hover {
+          color: #a8b2d1;
+        }
+      }
+    }
+  }
+}
+
+@keyframes warning-pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(255, 152, 0, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 4px rgba(255, 152, 0, 0.1);
   }
 }
 </style>

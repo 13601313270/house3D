@@ -640,7 +640,7 @@ function calcVerticalFovByHorizontalFov(hFov: number, aspect: number) {
   :deep(>canvas) {
     width: 100%;
     height: 100%;
-    border: 1px solid #a1a1a1;
+    // border: 1px solid #a1a1a1;
     box-sizing: border-box;
     // border-radius: 8px;
     // box-shadow: 0 0 14px #8d8d8d;

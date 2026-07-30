@@ -239,8 +239,8 @@ const lastPoint = ref<Point | null>(null)
 const isMenuing = ref(false);
 const panel1SplitWidthPer = ref(0.35)
 const panel2SplitWidthPer = ref(0.35)
-const maxTimeHeight = 600;
-const timeHeight = ref(600)
+const maxTimeHeight = 400;
+const timeHeight = ref(400)
 const isSplitting = ref(false)
 const isSplitTimeLine = ref(false)
 const showLogin = ref(false)
@@ -1358,7 +1358,7 @@ function generateClipId(): string {
 }
 
 function handleAddAnimation(data: { typeKey: string; modelValue: Record<string, any> }) {
-  const { typeKey, modelValue } = data
+  const { typeKey } = data
 
   const entityList = worldApi.getTypeListEntity(typeKey)
   if (!entityList || !contextMenu.value) return
@@ -1370,47 +1370,10 @@ function handleAddAnimation(data: { typeKey: string; modelValue: Record<string, 
   const entityData = entity.getData()
   const entityId = entityData.id
 
-  const clipCount = timelineData.value.clips.length
-  const startTime = clipCount * 3
-  const midTime = startTime + 5
-  const endTime = startTime + 10
-
-  const posX = modelValue.x || 0
-  const posY = modelValue.y || 0
-  const posZ = modelValue.z || 0
-
   const newClip = {
     clipId: generateClipId(),
     entityId,
-    tracks: [
-      {
-        trackType: 'position' as const,
-        keyframes: [
-          { time: startTime, value: { x: posX, y: posY, z: posZ }, easing: 'linear' },
-          { time: midTime, value: { x: posX + 100, y: posY + 50, z: posZ }, easing: 'easeInOut' },
-          { time: endTime, value: { x: posX, y: posY, z: posZ }, easing: 'linear' }
-        ],
-        interpolation: 'linear' as const
-      },
-      {
-        trackType: 'rotation' as const,
-        keyframes: [
-          { time: startTime, value: { x: 0, y: 0, z: 0 }, easing: 'linear' },
-          { time: midTime, value: { x: 0, y: Math.PI, z: 0 }, easing: 'linear' },
-          { time: endTime, value: { x: 0, y: Math.PI * 2, z: 0 }, easing: 'linear' }
-        ],
-        interpolation: 'linear' as const
-      },
-      {
-        trackType: 'opacity' as const,
-        keyframes: [
-          { time: startTime, value: 1, easing: 'linear' },
-          { time: startTime + 8, value: 0.3, easing: 'easeOut' },
-          { time: endTime, value: 1, easing: 'easeIn' }
-        ],
-        interpolation: 'linear' as const
-      }
-    ]
+    tracks: []
   }
 
   timelineData.value.clips.push(newClip)
