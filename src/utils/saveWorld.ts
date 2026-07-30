@@ -8,11 +8,28 @@ export type fileData = {
   [key in string]?: BaseObjData[]
 }
 
+export type TimelineDataForSave = {
+  duration: number
+  clips: Array<{
+    entityId: string
+    tracks: Array<{
+      trackType: string
+      keyframes: Array<{
+        time: number
+        value: any
+        easing?: string
+      }>
+      interpolation?: string
+    }>
+  }>
+}
+
 async function saveWorld(
   panOffset: Point,
   zoom2DLevel: number,
   cameraStateCenter: CameraState,
-  activeCameraIndex: number
+  activeCameraIndex: number,
+  timelineData?: TimelineDataForSave
 ) {
   const allFileObjectsByGroup: fileData = {};
   window.worldApi.children.forEach((item) => {
@@ -45,6 +62,7 @@ async function saveWorld(
     activeCameraIndex: number
     allImportImgs: string[]
     environmentConfig: EnvironmentConfig
+    timelineData?: TimelineDataForSave
   } = {
     ...allFileObjectsByGroup as any,
     panOffset,
@@ -53,6 +71,7 @@ async function saveWorld(
     activeCameraIndex,
     allImportImgs: window.worldState.allImportImgs.map(v => v.fileTypeId),
     environmentConfig: window.worldApi.environmentConfig,
+    timelineData: timelineData || undefined,
   }
 
   const zip = new JSZip();

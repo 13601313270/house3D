@@ -664,11 +664,13 @@ const saveDrawing = async () => {
     return
   }
   activeToolsIndex.value = -1
+  console.log('[DEBUG save] timelineData:', JSON.parse(JSON.stringify(timelineData.value)))
   await saveWorld(
     canvas2DSceneManage.list[0].panOffset,
     canvas2DSceneManage.list[0].level,
     cameraStateCenter.value,
-    activeCameraIndex.value
+    activeCameraIndex.value,
+    JSON.parse(JSON.stringify(timelineData.value))
   )
 }
 
@@ -679,6 +681,7 @@ const loadProgramFile = () => {
 
 const handleLoadProgramFileChange = async (e: Event) => {
   worldApi.clearAll()
+  timelineData.value = { duration: 30, clips: [] }
   initWorldLoading.value = true
   const input = e.target as HTMLInputElement
   const file = input.files?.[0]
@@ -704,7 +707,24 @@ const handleLoadProgramFileChange = async (e: Event) => {
     cameraState: CameraState
     activeCameraIndex: number
     environmentConfig?: EnvironmentConfig
+    timelineData?: {
+      duration: number
+      clips: Array<{
+        entityId: string
+        tracks: Array<{
+          trackType: string
+          keyframes: Array<{
+            time: number
+            value: any
+            easing?: string
+          }>
+          interpolation?: string
+        }>
+      }>
+    }
   } = JSON.parse(sceneJsonText);
+
+  console.log('[DEBUG load] sceneData.timelineData:', sceneData.timelineData)
 
   const allFileTypeId: Set<string> = new Set();
 
@@ -757,11 +777,61 @@ const handleLoadProgramFileChange = async (e: Event) => {
     initWorldLoading.value = true
     await initWorldByData(sceneData)
     initWorldLoading.value = false
+
+    // 还原动画数据
+    if (sceneData.timelineData && sceneData.timelineData.clips.length > 0) {
+      console.log('[DEBUG load] restoring timelineData:', sceneData.timelineData)
+      timelineData.value = sceneData.timelineData as any
+
+      // 注册动画对象
+      if (timeLineRef.value) {
+        const allEntities = getAllEntitiesMap()
+        for (const clip of sceneData.timelineData.clips) {
+          const entityId = clip.entityId
+          const entityEntry = allEntities.get(entityId)
+          if (entityEntry) {
+            const [typeKey, index] = entityEntry
+            const entityList = worldApi.getTypeListEntity(typeKey)
+            const entity = entityList?.[index]
+            if (entity && entity.meshList.length > 0) {
+              const mesh = entity.meshList[0]
+              console.log('[DEBUG load] registering animatedObject:', entityId, mesh.uuid)
+              timeLineRef.value.registerAnimatedObject(entityId, mesh)
+            } else {
+              console.warn('[DEBUG load] entity not found for timeline clip:', entityId)
+            }
+          } else {
+            console.warn('[DEBUG load] entityId not found in any entity:', entityId)
+          }
+        }
+      }
+    } else {
+      console.log('[DEBUG load] no timelineData to restore')
+      timelineData.value = { duration: 30, clips: [] }
+    }
   } catch (error) {
     initWorldLoading.value = false
     console.error(error)
   }
   input.value = ''
+}
+
+// 辅助函数：获取所有实体的 entityId -> [typeKey, index] 映射
+function getAllEntitiesMap(): Map<string, [string, number]> {
+  const map = new Map<string, [string, number]>()
+  for (const typeKey of allFileKeys) {
+    const entityList = worldApi.getTypeListEntity(typeKey)
+    if (entityList) {
+      for (let i = 0; i < entityList.length; i++) {
+        const entity = entityList[i]
+        const entityId = entity.getData()?.id
+        if (entityId) {
+          map.set(entityId, [typeKey, i])
+        }
+      }
+    }
+  }
+  return map
 }
 
 async function initWorldByData(data: fileData & {
@@ -1000,6 +1070,7 @@ const deleteContextMenuEntity = () => {
 const clearDrawing = () => {
   if (confirm('确定要清空所有绘制内容吗？')) {
     worldApi.clearAll();
+    timelineData.value = { duration: 30, clips: [] }
     activeToolsIndex.value = -1
   }
 }
