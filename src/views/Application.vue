@@ -971,9 +971,28 @@ let editPropConfigEditCallback = (val: any) => {
 const deleteContextMenuEntity = () => {
   if (!contextMenu.value) return
 
-  const type = contextMenu.value.type;
+  const type = contextMenu.value.type
   if (contextMenu.value.index !== undefined) {
+    // 获取实体的 entityId
+    const entityList = worldApi.getTypeListEntity(type)
+    const entity = entityList?.[contextMenu.value.index]
+    const entityId = entity?.getData()?.id
+
+    // 删除实体
     window.globalEditGroup.delete(type, contextMenu.value.index)
+
+    // 从 timelineData 中移除对应的动画数据
+    if (entityId) {
+      timelineData.value.clips = timelineData.value.clips.filter(
+        clip => clip.entityId !== entityId
+      )
+      timelineData.value = { ...timelineData.value }
+
+      // 从 TimeLine 组件中移除对应的 animatedObject
+      if (timeLineRef.value) {
+        timeLineRef.value.unregisterAnimatedObject(entityId)
+      }
+    }
   }
   contextMenu.value = null
 }

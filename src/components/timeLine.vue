@@ -838,7 +838,11 @@ function registerAnimatedObject(id: string, mesh: THREE.Mesh | THREE.Group) {
   animatedObjects.set(id, mesh as THREE.Mesh)
 }
 
-defineExpose({ registerAnimatedObject })
+function unregisterAnimatedObject(id: string) {
+  animatedObjects.delete(id)
+}
+
+defineExpose({ registerAnimatedObject, unregisterAnimatedObject })
 
 function scrollTimeInfo(e: Event) {
   // @ts-ignore
