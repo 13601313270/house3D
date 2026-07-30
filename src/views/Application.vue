@@ -74,9 +74,6 @@
           <button @click="showAllObjSelect = true" type="button">
             对象列表({{ allObjCount }})
           </button>
-          <button @click="showEnvironmentEditor = true" type="button">
-            环境
-          </button>
           <input type="file" id="fileInput" ref="loadProgramFileInputRef" accept=".devt" style="display: none"
             @change="handleLoadProgramFileChange" />
         </div>
@@ -96,6 +93,10 @@
       <div class="right-panel" :style="{ width: panel2SplitWidthPer * 100 + '%' }">
         <div class="tools">
           <div style="flex-shrink: 0;">全景图</div>
+          <div style="flex-grow: 1;"></div>
+          <button @click="showEnvironmentEditor = true" type="button">
+            环境
+          </button>
         </div>
         <!-- {{ insertTempDoor }} -->
         <div class="center-panel-content">
@@ -127,10 +128,10 @@
         </div>
       </div>
     </div>
-    <div class="timeLine" :style="{ height: timeHeight + 'px' }">
+    <!-- <div class="timeLine" :style="{ height: timeHeight + 'px' }">
       <div class="split-bar-x" @mousedown.prevent="startSplitTimeLine()"></div>
       <TimeLine v-model="timelineData" />
-    </div>
+    </div> -->
     <DataTypeEditPanel v-if="contextMenu?.visible && editPropTypeKey" :typeKey="editPropTypeKey"
       :editPropConfigInfo="editPropConfigInfo" v-model="editPropInputInfo"
       :initPosition="{ x: contextMenu.x, y: contextMenu.y }" @deleteContextMenuEntity="deleteContextMenuEntity"
