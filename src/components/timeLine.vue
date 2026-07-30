@@ -40,7 +40,7 @@
                 <div class="track-header-bar">
                   <span class="clip-name">{{ segment.clip.entityId }}</span>
                   <span class="clip-duration">{{ formatTime(segment.startTime) }} - {{ formatTime(segment.endTime)
-                  }}</span>
+                    }}</span>
                 </div>
                 <div v-if="overlappingClipIds.has(segment.clip.clipId)" class="warning-badge" title="同一个物体对象不允许时间重叠">
                   <span class="warning-icon">⚠</span>
@@ -57,13 +57,16 @@
         </div>
       </div>
     </div>
+    <DataTypeEditPanel v-if="editPropConfigInfo.length && contextMenu" :typeKey="editPropTypeKey || ''"
+      :editPropConfigInfo="editPropConfigInfo" v-model="editPropInputInfo"
+      :initPosition="{ x: contextMenu.x, y: contextMenu.y }" @close="editPropConfigInfo = []" />
 
     <teleport to="#teleport" v-if="activeSegment">
       <div class="track-content-floating" :style="trackContentStyle" @click.stop>
         <div class="floating-header">
           <span class="floating-title">{{ activeSegment.clip.entityId }}</span>
           <span class="floating-time">{{ formatTime(activeSegment.startTime) }} - {{ formatTime(activeSegment.endTime)
-          }}</span>
+            }}</span>
           <button class="floating-delete" @click="deleteClip(activeSegment.clip.clipId)" title="删除动画">🗑</button>
           <button class="floating-close" @click="closeClipContent">×</button>
         </div>
@@ -81,7 +84,7 @@
               <div v-for="keyframe in track.keyframes" :key="keyframe.time" class="keyframe-node"
                 :style="{ left: `${((keyframe.time - activeSegment.startTime) / (activeSegment.endTime - activeSegment.startTime || 1)) * 100}%` }"
                 :class="{ selected: isKeyframeSelected(activeSegment.clip.clipId, track.trackType, keyframe) }"
-                @click.stop="onKeyframeClick(activeSegment.clip.clipId, track.trackType, keyframe)">
+                @click.stop="onKeyframeClick($event, activeSegment.clip.clipId, activeSegment.clip.entityId, track.trackType, keyframe)">
               </div>
             </div>
           </div>
@@ -109,10 +112,12 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, onUnmounted } from 'vue'
+import { ref, computed, onUnmounted, watch } from 'vue'
 import * as THREE from 'three'
 import { message } from '@/utils/message'
 import { ClipSegment, TimelineData, TrackData, Keyframe } from '@/utils/timelineState';
+import editItem from '@/utils/editItem';
+import DataTypeEditPanel from '../views/DataTypeEditPanel.vue'
 
 const props = defineProps<{
   modelValue: TimelineData
@@ -151,7 +156,7 @@ const activeClipId = ref<string | null>(null)
 const activeSegment = ref<ClipSegment | null>(null)
 const trackContentStyle = ref<Record<string, string>>({})
 const isShowTrackDropdown = ref(false)
-const selectedKeyframe = ref<{ clipId: string; trackType: string; keyframe: Keyframe } | null>(null)
+const selectedKeyframe = ref<{ clipId: string; entityId: string; trackType: string; keyframe: Keyframe } | null>(null)
 
 let animationFrameId: number | null = null
 let lastTimestamp = 0
@@ -452,12 +457,71 @@ function isKeyframeSelected(clipId: string, trackType: string, keyframe: Keyfram
     selectedKeyframe.value?.keyframe === keyframe
 }
 
-function onKeyframeClick(clipId: string, trackType: string, keyframe: Keyframe) {
+const editPropConfigInfo = ref<editItem[]>([])
+const editPropInputInfo = ref<any>({})
+const editPropTypeKey = ref<string>()
+const contextMenu = ref<{
+  visible: boolean;
+  x: number;
+  y: number;
+} | null>(null)
+let editPropConfigEditCallback = (val: any) => {
+  console.log(val)
+}
+
+function onKeyframeClick(event: MouseEvent, clipId: string, entityId: string, trackType: string, keyframe: Keyframe) {
   if (isPlaying.value) {
     togglePlay()
   }
-  selectedKeyframe.value = { clipId, trackType, keyframe }
+  // console.log('keyframe', clipId, entityId, trackType, keyframe)
+  const entity = window.worldApi.children.find(v => v.getData().id === entityId)
+  if (!entity) return;
+
+  editPropConfigEditCallback = (val: any) => {
+    console.log('vvvvv', keyframe.value, val, trackType, val[trackType])
+    keyframe.value = val[trackType]
+  }
+
+  function callback(config: editItem[]) {
+    const match = config.find(v => v.id === trackType)
+    console.log('match', match)
+    if (!match) return
+    editPropConfigInfo.value = [match]
+    editPropTypeKey.value = entity!.type;
+    const inputData: any = {
+      [trackType]: keyframe.value
+    }
+    // editPropConfigInfo.value.forEach(v => {
+    //   if (v.dataType !== 'title') {
+    //     inputData[v.id] = v.value
+    //   }
+    // })
+    editPropInputInfo.value = inputData;
+
+    const contextMenuX = event.clientX
+    const contextMenuY = event.clientY
+    contextMenu.value = {
+      visible: true,
+      x: contextMenuX,
+      y: contextMenuY,
+    }
+  }
+  const config = entity.getEditPropConfigData(entity.getData())
+  if (config instanceof Promise) {
+    config.then(callback)
+  } else {
+    callback(config)
+  }
+  selectedKeyframe.value = { clipId, entityId, trackType, keyframe }
 }
+
+watch(() => editPropInputInfo.value, () => {
+  if (contextMenu.value?.visible) {
+    editPropConfigEditCallback(editPropInputInfo.value)
+  }
+}, {
+  deep: true
+})
 
 function handleTrackClick(event: MouseEvent, track: TrackData, segment?: ClipSegment) {
   if (dragMoved) {
@@ -822,23 +886,21 @@ function showTrackDropdown() {
   const entity = window.worldApi.children.find(v => v.getData().id === entityId)
   if (!entity) return;
   console.log('entity.editPropConfig', entity.editPropConfig)
-  // @ts-ignore
-  entity.editPropConfig(null, (editInfoList, callback) => {
-    console.log('entity.editPropConfig', callback)
-    // console.log('editInfoList', editInfoList.map(v => {
-    //   return {
-    //     id: v.id,
-    //     label: v.label
-    //   }
-    // }))
-    availableTrackTypes2.value.push(...editInfoList.map(v => {
+  function callback(config: editItem[]) {
+    availableTrackTypes2.value.push(...config.map(v => {
       return {
         id: v.id,
         label: v.label
       }
     }))
     isShowTrackDropdown.value = true
-  })
+  }
+  const config = entity.getEditPropConfigData(entity.getData())
+  if (config instanceof Promise) {
+    config.then(callback)
+  } else {
+    callback(config)
+  }
 }
 
 onUnmounted(() => {
