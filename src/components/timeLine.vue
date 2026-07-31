@@ -705,8 +705,6 @@ function evaluateTimeline(time: number) {
       return v.getData().id === clip.entityId
     })
     if (!entity) return;
-    const obj = props.getObject?.(clip.entityId)
-    if (!obj) return
 
     const data: any = {}
     clip.tracks.forEach(track => {
@@ -717,8 +715,8 @@ function evaluateTimeline(time: number) {
       // applyTrackValue(obj, track.trackType, value)
     })
     console.log('entity', data)
-    entity.setData({
-      ...entity.getData(),
+    entity.setTempData({
+      ...entity.getTempData(),
       ...data,
     });
   })

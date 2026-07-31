@@ -269,10 +269,8 @@ const initThree = () => {
               canvas1LastMouseX = e.clientX;
               canvas1LastMouseY = e.clientY;
               canvas1HoveredObject = hoveredObject
-              // console.log('entity.getData().z', entity.getData().z)
               camera1MouseMoveStartZ = entity.getData().z;
             }
-            // console.log('hoveredObject', hoveredObject)
           } else {
             // 移动相机
             camera1TargetPositionStartX = cameraStateZ.value.targetPositionX;
@@ -333,8 +331,6 @@ const initThree = () => {
             // @ts-ignore
             const entity = canvas1HoveredObject.entity as BaseEntityClass<any>
             if (entity instanceof PointEntityClass) {
-              // console.log('entity.getData().z', deltaY * -1)
-              // entity.getData().z = camera1MouseMoveStartZ + (deltaY * -1)
               entity.setData({
                 ...entity.getData(),
                 z: camera1MouseMoveStartZ + (deltaY * -1)
