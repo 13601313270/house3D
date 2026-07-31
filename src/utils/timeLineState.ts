@@ -11,9 +11,11 @@ export interface TrackData {
   interpolation?: 'linear' | 'step' | 'bezier'
 }
 
-interface ClipData {
+export interface ClipData {
   clipId: string
   entityId: string
+  startTime: number
+  endTime: number
   tracks: TrackData[]
 }
 

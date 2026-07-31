@@ -40,7 +40,7 @@
                 <div class="track-header-bar">
                   <span class="clip-name">{{ segment.clip.entityId }}</span>
                   <span class="clip-duration">{{ formatTime(segment.startTime) }} - {{ formatTime(segment.endTime)
-                    }}</span>
+                  }}</span>
                 </div>
                 <div v-if="overlappingClipIds.has(segment.clip.clipId)" class="warning-badge" title="同一个物体对象不允许时间重叠">
                   <span class="warning-icon">⚠</span>
@@ -66,7 +66,7 @@
         <div class="floating-header">
           <span class="floating-title">{{ activeSegment.clip.entityId }}</span>
           <span class="floating-time">{{ formatTime(activeSegment.startTime) }} - {{ formatTime(activeSegment.endTime)
-            }}</span>
+          }}</span>
           <button class="floating-delete" @click="deleteClip(activeSegment.clip.clipId)" title="删除动画">🗑</button>
           <button class="floating-close" @click="closeClipContent">×</button>
         </div>
@@ -108,7 +108,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, onUnmounted, watch } from 'vue'
+import { ref, computed, onUnmounted, watch, onMounted } from 'vue'
 import * as THREE from 'three'
 import { message } from '@/utils/message'
 import { ClipSegment, TimelineData, TrackData, Keyframe } from '@/utils/timelineState';
@@ -132,11 +132,7 @@ const timelineData = computed({
 const effectiveDuration = computed(() => {
   let maxTime = timelineData.value.duration
   for (const clip of timelineData.value.clips) {
-    for (const track of clip.tracks) {
-      for (const kf of track.keyframes) {
-        if (kf.time > maxTime) maxTime = kf.time
-      }
-    }
+    if (clip.endTime > maxTime) maxTime = clip.endTime
   }
   return Math.max(maxTime + 5, 30)
 })
@@ -161,6 +157,7 @@ let isDraggingClip = false
 let dragClipId: string | null = null
 let dragStartX = 0
 let dragMoved = false
+let dragStartClipRange: { startTime: number; endTime: number } | null = null
 const dragStartTimes = new Map<string, number[]>()
 let isScrubbing = false
 let scrubClosedPanel = false
@@ -181,30 +178,11 @@ const rulerMarks = computed(() => {
 const clipSegments = computed<ClipSegment[]>(() => {
   const segments: ClipSegment[] = []
 
-  for (let index = 0; index < timelineData.value.clips.length; index++) {
-    const clip = timelineData.value.clips[index]
-    const allTimes: number[] = []
-    for (const track of clip.tracks) {
-      for (const kf of track.keyframes) {
-        allTimes.push(kf.time)
-      }
-    }
-
-    let startTime: number
-    let endTime: number
-
-    if (allTimes.length === 0) {
-      startTime = index * 3
-      endTime = startTime + 10
-    } else {
-      startTime = Math.min(...allTimes)
-      endTime = Math.max(...allTimes)
-    }
-
+  for (const clip of timelineData.value.clips) {
     segments.push({
       clip,
-      startTime,
-      endTime,
+      startTime: clip.startTime,
+      endTime: clip.endTime,
       rowIndex: 0
     })
   }
@@ -534,7 +512,8 @@ function handleTrackClick(event: MouseEvent, track: TrackData, segment?: ClipSeg
   const x = event.clientX - rect.left
   const segDuration = segment ? (segment.endTime - segment.startTime) : effectiveDuration.value
   const startTime = segment ? segment.startTime : 0
-  const time = startTime + (x / rect.width) * segDuration
+  const endTime = segment ? segment.endTime : effectiveDuration.value
+  const time = Math.max(startTime, Math.min(endTime, startTime + (x / rect.width) * segDuration))
 
   let defaultValue: any = null
   switch (track.trackType) {
@@ -648,6 +627,7 @@ function startClipDrag(e: MouseEvent, clipId: string) {
   dragStartX = e.clientX
   dragMoved = false
   dragStartTimes.clear()
+  dragStartClipRange = null
 
   if (activeClipId.value) {
     closeClipContent()
@@ -655,6 +635,7 @@ function startClipDrag(e: MouseEvent, clipId: string) {
 
   const clip = timelineData.value.clips.find(c => c.clipId === clipId)
   if (clip) {
+    dragStartClipRange = { startTime: clip.startTime, endTime: clip.endTime }
     for (const track of clip.tracks) {
       const times = track.keyframes.map(kf => kf.time)
       dragStartTimes.set(track.trackType, times)
@@ -666,7 +647,7 @@ function startClipDrag(e: MouseEvent, clipId: string) {
 }
 
 function onClipDrag(e: MouseEvent) {
-  if (!isDraggingClip || !dragClipId) return
+  if (!isDraggingClip || !dragClipId || !dragStartClipRange) return
 
   const wrapper = document.querySelector('.timeline-content-wrapper') as HTMLElement
   if (!wrapper) return
@@ -686,6 +667,13 @@ function onClipDrag(e: MouseEvent) {
   const clip = timelineData.value.clips.find(c => c.clipId === dragClipId)
   if (!clip) return
 
+  const duration = dragStartClipRange.endTime - dragStartClipRange.startTime
+  const newStartTime = Math.max(0, dragStartClipRange.startTime + deltaTime)
+  const newEndTime = newStartTime + duration
+
+  clip.startTime = newStartTime
+  clip.endTime = newEndTime
+
   for (const track of clip.tracks) {
     const originalTimes = dragStartTimes.get(track.trackType)
     if (!originalTimes) continue
@@ -703,12 +691,16 @@ function stopClipDrag() {
   isDraggingClip = false
   dragClipId = null
   dragStartTimes.clear()
+  dragStartClipRange = null
   document.removeEventListener('mousemove', onClipDrag)
   document.removeEventListener('mouseup', stopClipDrag)
 }
 
 function evaluateTimeline(time: number) {
   timelineData.value.clips.forEach(clip => {
+    // 超出 clip 时间范围的不生效
+    if (time < clip.startTime || time > clip.endTime) return
+
     const entity = window.worldApi.children.find(v => {
       return v.getData().id === clip.entityId
     })

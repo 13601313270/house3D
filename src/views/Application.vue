@@ -1370,14 +1370,21 @@ function handleAddAnimation(data: { typeKey: string; modelValue: Record<string, 
   const entityData = entity.getData()
   const entityId = entityData.id
 
+  const clipCount = timelineData.value.clips.length
+  const startTime = clipCount * 3
+  const endTime = startTime + 10
+
   const newClip = {
     clipId: generateClipId(),
     entityId,
+    startTime,
+    endTime,
     tracks: []
   }
 
   timelineData.value.clips.push(newClip)
   timelineData.value = { ...timelineData.value }
+  contextMenu.value = null
 }
 </script>
 

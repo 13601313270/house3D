@@ -13,6 +13,8 @@ export type TimelineDataForSave = {
   clips: Array<{
     clipId: string
     entityId: string
+    startTime: number
+    endTime: number
     tracks: Array<{
       trackType: string
       keyframes: Array<{
