@@ -19,7 +19,6 @@ export class PlaneGroupEntity extends GroupBaseEntity<PlaneGroupData> {
 
   constructor(parent: GroupBaseEntity<PlaneGroupData> | null, data: PlaneGroupData) {
     super(parent, data)
-    this.data = data;
     if (this.parentEntity) {
       // this.parentEntity.group.clear()
       this.parentEntity.group.add(this.group)

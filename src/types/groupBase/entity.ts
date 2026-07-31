@@ -31,7 +31,6 @@ export abstract class GroupBaseEntity<T extends GroupBaseData> extends PointEnti
 
   constructor(parent: GroupBaseEntity<T> | null, data: T) {
     super(parent, data)
-    this.data = data;
 
     this.gridHelper = new THREE.GridHelper(1000, 50, 0xcccccc, 0xeeeeee)
     this.gridHelper.layers.set(2)
@@ -50,8 +49,9 @@ export abstract class GroupBaseEntity<T extends GroupBaseData> extends PointEnti
   }
 
   async init() {
+    const data = this.getData()
     const apiList = [];
-    for (const item of this.data.childrenData) {
+    for (const item of data.childrenData) {
       const type = item.type
       const EntityClassItem: EntityConstructor = fileDataKeyToClass[type];
       if (EntityClassItem) {
@@ -310,21 +310,27 @@ export abstract class GroupBaseEntity<T extends GroupBaseData> extends PointEnti
     }
   }
 
-  async add(type: string, data: BaseObjData[]): Promise<BaseEntityClass<BaseObjData>[]> {
+  async add(type: string, initData: BaseObjData[]): Promise<BaseEntityClass<BaseObjData>[]> {
     const EntityClassItem: EntityConstructor = fileDataKeyToClass[type] as any;
     if (!this.allObjectsByGroup[type]) {
       this.allObjectsByGroup[type] = []
     }
     const apiList = [];
-    for (let i = 0; i < data.length; i++) {
-      const api: BaseEntityClass<BaseObjData> = new EntityClassItem(this, data[i]);
+    for (let i = 0; i < initData.length; i++) {
+      const api: BaseEntityClass<BaseObjData> = new EntityClassItem(this, initData[i]);
       await api.init()
       api.reBuildBoundingBoxData()
       apiList.push(api);
       this.allObjectsByGroup[type].push(api)
-      this.data.childrenData.push({
+      const data = this.getData();
+      const childrenData = [...data.childrenData];
+      childrenData.push({
         type,
         value: api.getData(),
+      })
+      this.setData({
+        ...data,
+        childrenData,
       })
       this.children.push(api);
       this.worldAddBindList.forEach(callback => callback(api))
@@ -352,7 +358,14 @@ export abstract class GroupBaseEntity<T extends GroupBaseData> extends PointEnti
 
       const index2 = this.children.indexOf(backup)
       this.children.splice(index2, 1)
-      this.data.childrenData.splice(index2, 1)
+      const data = this.getData();
+      const childrenData = [...data.childrenData];
+      childrenData.splice(index2, 1)
+
+      this.setData({
+        ...data,
+        childrenData,
+      })
 
       if (backup.getData().isLocked) {
         const index = this.lockedObjList.indexOf(backup)
@@ -380,7 +393,11 @@ export abstract class GroupBaseEntity<T extends GroupBaseData> extends PointEnti
     })
     this.allObjectsByGroup = {}
     this.children = []
-    this.data.childrenData = []
+    const data = this.getData();
+    this.setData({
+      ...data,
+      childrenData: [],
+    })
     canvas2DSceneManage.renderPreview()
     this.reCreate3DMeshAnd2DPreviewIfNeed()
     this.change3DMeshState()
@@ -444,7 +461,7 @@ export abstract class GroupBaseEntity<T extends GroupBaseData> extends PointEnti
       })
     }
     return {
-      ...this.data,
+      ...super.getData(),
       childrenData,
     }
   }

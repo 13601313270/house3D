@@ -53,9 +53,10 @@ export class DirectionCameraEntity extends CameraBase<DirectionCameraData> {
   }
 
   getTargetPosition(): Point {
+    const data = this.getData()
     return {
-      x: this.data.x + this.distance * Math.cos(this.data.angleY),
-      y: this.data.y + this.distance * Math.sin(this.data.angleY),
+      x: data.x + this.distance * Math.cos(data.angleY),
+      y: data.y + this.distance * Math.sin(data.angleY),
     }
   }
 
@@ -64,7 +65,7 @@ export class DirectionCameraEntity extends CameraBase<DirectionCameraData> {
     const index: number = this.parentEntity ? this.parentEntity.getTypeListEntity('camera').indexOf(this) : -1;
     const screenX = data.x * zoomLevel;
     const screenY = data.y * zoomLevel;
-    const angleY = this.data.angleY;
+    const angleY = data.angleY;
     const preImgScale = 0.2
     ctx.save(); // 保存当前状态
     const { width, height } = img;

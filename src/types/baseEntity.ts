@@ -24,7 +24,8 @@ export abstract class BaseEntityClass<T extends BaseObjData> {
   abstract name: string
   abstract type: string
   parentEntity: GroupBaseEntity<GroupBaseData> | null;
-  protected data: T
+  private data: T
+  protected tempData: T // 临时数据，播放动画的时候，动画效果对应的data
   meshList: THREE.Group[] = []
   boundingBoxData: [THREE.Vector3, THREE.Vector3, THREE.Vector3] | null = null // 第一个是尺寸，第二个是位置偏移，第三个是旋转角度
   // eslint-disable-next-line
@@ -36,6 +37,7 @@ export abstract class BaseEntityClass<T extends BaseObjData> {
   constructor(parentEntity: GroupBaseEntity<GroupBaseData> | null, data: T) {
     this.parentEntity = parentEntity
     this.data = data
+    this.tempData = data;
     this.cacheCanvas = document.createElement("canvas")
     this.cacheCanvas.width = 100
     this.cacheCanvas.height = 100

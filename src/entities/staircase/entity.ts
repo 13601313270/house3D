@@ -19,12 +19,12 @@ export class StaircaseEntity extends LineEntityClass<StaircasePoint, StaircaseDa
   private circleRadius = 6
 
   constructor(world: GroupBaseEntity<GroupBaseData>, data: StaircaseData) {
-    super(world, data)
-    if (this.data) {
-      if (this.data.stepType === undefined) {
-        this.data.stepType = 1
+    if (data) {
+      if (data.stepType === undefined) {
+        data.stepType = 1
       }
     }
+    super(world, data)
   }
 
   setPreparePoint(points: (Point & StaircasePoint)[]): string[] {

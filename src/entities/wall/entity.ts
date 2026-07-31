@@ -19,10 +19,10 @@ export class WallEntity extends LineEntityClass<WallPoint, WallData> {
   private circleRadius = 6
 
   constructor(world: GroupBaseEntity<GroupBaseData>, data: WallData) {
-    super(world, data);
-    if (this.data.cornerType === undefined) {
-      this.data.cornerType = 1
+    if (data.cornerType === undefined) {
+      data.cornerType = 1
     }
+    super(world, data);
   }
 
   draw2DPreview(ctx: CanvasRenderingContext2D, zoomLevel: number): void {

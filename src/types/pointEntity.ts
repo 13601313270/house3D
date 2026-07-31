@@ -76,6 +76,7 @@ export abstract class PointEntityClass<T extends PointObjData> extends BaseEntit
   abstract getBoundingBoxData(): [THREE.Vector3, THREE.Vector3, THREE.Vector3] | null // 第一个是尺寸，第二个是位置偏移，第三个是旋转角度
 
   reCreate3DMeshAnd2DPreviewIfNeed(): void {
+    const data = this.getData();
     const oldCacheKey = this.cacheKeyStr;
     super.reCreate3DMeshAnd2DPreviewIfNeed();
     const newKeyByData = this.create3DUnionKey();
@@ -90,14 +91,14 @@ export abstract class PointEntityClass<T extends PointObjData> extends BaseEntit
     }
     // 容器包裹立方体
     (() => {
-      if (this.boundingBoxData && this.data.tip) {
+      if (this.boundingBoxData && data.tip) {
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d')!;
 
         // 设置canvas尺寸
-        const fontSize = this.data.tipFontSize || 96;
+        const fontSize = data.tipFontSize || 96;
         ctx.font = `bold ${fontSize}px Arial`;
-        const textWidth = ctx.measureText(this.data.tip).width;
+        const textWidth = ctx.measureText(data.tip).width;
         const heightPadding = 5;
         canvas.width = textWidth + 20;  // 文字宽度 + 边距
         canvas.height = fontSize + heightPadding * 2;  // 字体高度 + 边距
@@ -109,7 +110,7 @@ export abstract class PointEntityClass<T extends PointObjData> extends BaseEntit
         ctx.font = `bold ${fontSize}px Arial`;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.fillText(this.data.tip, canvas.width / 2, canvas.height / 2 + heightPadding);
+        ctx.fillText(data.tip, canvas.width / 2, canvas.height / 2 + heightPadding);
 
         const texture = new THREE.CanvasTexture(canvas);
         const spriteMaterial = new THREE.SpriteMaterial({ map: texture });
@@ -139,7 +140,7 @@ export abstract class PointEntityClass<T extends PointObjData> extends BaseEntit
   // 当前对象是否需要重新生成3D模型状态
   create3DUnionKey(): string {
     const cacheData = {
-      ...this.data,
+      ...this.getData(),
       x: undefined,
       y: undefined,
       z: undefined,

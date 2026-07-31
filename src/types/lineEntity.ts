@@ -11,7 +11,7 @@ export abstract class LineEntityClass<V, T extends LineObjData<V>> extends BaseE
   // 当前对象是否需要重新生成3D模型状态
   create3DUnionKey(): string {
     const cacheData = {
-      ...this.data,
+      ...this.getData(),
     }
     return JSON.stringify(cacheData)
   }
@@ -46,11 +46,19 @@ export abstract class LineEntityClass<V, T extends LineObjData<V>> extends BaseE
 
   // 把偏移坐标叠加到data上
   public applyOffsetToData() {
-    this.data.points.forEach(point => {
-      point.x += this.offset.x
-      point.y += this.offset.y
+    const data = this.getData();
+    const newPoints = data.points.map(v => {
+      return {
+        ...v,
+        x: v.x + this.offset.x,
+        y: v.y + this.offset.y,
+      }
     })
     this.offset = { x: 0, y: 0 }
+    this.setData({
+      ...data,
+      points: newPoints,
+    })
   }
 
   getBoundingBoxData(): [THREE.Vector3, THREE.Vector3, THREE.Vector3] | null {
