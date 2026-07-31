@@ -703,8 +703,61 @@ function evaluateTimeline(time: number) {
   const matchIndex = timelineData.value.clips.findIndex(clip => {
     return time > clip.startTime && time < clip.endTime
   })
-  timelineState.isPlaying = true;// !isPlaying.value;
-  if (matchIndex > -1) {
+  if (matchIndex === -1) {
+    if (time < timelineData.value.clips[0].startTime) {
+      timelineState.isPlaying = true;// !isPlaying.value;
+      const match = timelineData.value.clips[0];
+      if (match) {
+        const entity = window.worldApi.children.find(v => {
+          return v.getData().id === match.entityId
+        })
+        if (!entity) return;
+
+        const data: any = {}
+        match.tracks.forEach(track => {
+          const { trackType } = track;
+          timelineState.isPlaying = false;
+          // @ts-ignore
+          data[trackType] = entity.getData()[trackType] as any;
+          timelineState.isPlaying = true;
+        })
+        entity.setTempData({
+          ...entity.getTempData(),
+          ...data,
+        });
+      }
+    } else {
+      timelineState.isPlaying = true;// !isPlaying.value;
+      const matchPreIndex = timelineData.value.clips.reduce((preIndex, clip, index) => {
+        if (clip.endTime <= time) {
+          if (preIndex === -1 || clip.endTime > timelineData.value.clips[preIndex].endTime) {
+            return index
+          }
+        }
+        return preIndex
+      }, -1)
+      const match = timelineData.value.clips[matchPreIndex];
+      if (match) {
+        const entity = window.worldApi.children.find(v => {
+          return v.getData().id === match.entityId
+        })
+        if (!entity) return;
+
+        const data: any = {}
+        match.tracks.forEach(track => {
+          const { trackType, keyframes } = track;
+          const lastValue = keyframes[keyframes.length - 1].value;
+          console.log('matchPreIndex', trackType, lastValue)
+          data[trackType] = lastValue;
+        })
+        entity.setTempData({
+          ...entity.getTempData(),
+          ...data,
+        });
+      }
+    }
+  } else if (matchIndex > -1) {
+    timelineState.isPlaying = true;// !isPlaying.value;
     const match = timelineData.value.clips[matchIndex];
     const entity = window.worldApi.children.find(v => {
       return v.getData().id === match.entityId
