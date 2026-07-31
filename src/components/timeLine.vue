@@ -95,11 +95,7 @@
           </div>
           <div v-else class="track-dropdown">
             <div class="track-dropdown-header">选择属性</div>
-            <div v-for="type in availableTrackTypes" :key="type" class="track-dropdown-item" @click="addTrack(type)">
-              {{ translateTrackType(type) }}
-            </div>
-            -----
-            <div v-for="item in availableTrackTypes2" :key="item.id" class="track-dropdown-item"
+            <div v-for="item in availableTrackTypes" :key="item.id" class="track-dropdown-item"
               @click="addTrack(item.id)">
               {{ item.label }}
             </div>
@@ -713,13 +709,26 @@ function stopClipDrag() {
 
 function evaluateTimeline(time: number) {
   timelineData.value.clips.forEach(clip => {
+    const entity = window.worldApi.children.find(v => {
+      return v.getData().id === clip.entityId
+    })
+    if (!entity) return;
     const obj = props.getObject?.(clip.entityId)
     if (!obj) return
 
+    const data: any = {}
     clip.tracks.forEach(track => {
       const value = evaluateTrack(track, time)
-      applyTrackValue(obj, track.trackType, value)
+      if (value !== undefined && value !== null) {
+        data[track.trackType] = value;
+      }
+      // applyTrackValue(obj, track.trackType, value)
     })
+    console.log('entity', data)
+    entity.setData({
+      ...entity.getData(),
+      ...data,
+    });
   })
 }
 
@@ -801,62 +810,7 @@ function interpolateValues(a: any, b: any, t: number, trackType: string): any {
   return b
 }
 
-function applyTrackValue(obj: THREE.Object3D, trackType: string, value: any) {
-  if (value === null || value === undefined) return
-
-  switch (trackType) {
-    case 'position':
-      if (typeof value === 'object') {
-        obj.position.set(value.x || 0, value.y || 0, value.z || 0)
-      }
-      break
-    case 'rotation':
-      if (typeof value === 'object') {
-        obj.rotation.set(value.x || 0, value.y || 0, value.z || 0)
-      }
-      break
-    case 'scale':
-      if (typeof value === 'object') {
-        obj.scale.set(value.x || 1, value.y || 1, value.z || 1)
-      }
-      break
-    case 'visible':
-      obj.visible = !!value
-      break
-    case 'opacity':
-      if (obj instanceof THREE.Mesh) {
-        const materials = Array.isArray(obj.material) ? obj.material : [obj.material]
-        materials.forEach(m => {
-          if (m instanceof THREE.Material) {
-            (m as THREE.MeshStandardMaterial).opacity = value
-            m.transparent = value < 1
-          }
-        })
-      } else {
-        obj.traverse(child => {
-          if (child instanceof THREE.Mesh) {
-            const materials = Array.isArray(child.material) ? child.material : [child.material]
-            materials.forEach(m => {
-              if (m instanceof THREE.Material) {
-                (m as THREE.MeshStandardMaterial).opacity = value
-                m.transparent = value < 1
-              }
-            })
-          }
-        })
-      }
-      break
-  }
-}
-
-const allTrackTypes: string[] = ['position', 'rotation', 'scale', 'visible', 'opacity']
-
-const availableTrackTypes = computed(() => {
-  if (!activeSegment.value) return allTrackTypes
-  const existingTypes = new Set(activeSegment.value.clip.tracks.map(t => t.trackType))
-  return allTrackTypes.filter(t => !existingTypes.has(t))
-})
-const availableTrackTypes2 = ref<{
+const availableTrackTypes = ref<{
   id: string,
   label: string,
 }[]>([])
@@ -887,7 +841,7 @@ function showTrackDropdown() {
   if (!entity) return;
   console.log('entity.editPropConfig', entity.editPropConfig)
   function callback(config: editItem[]) {
-    availableTrackTypes2.value.push(...config.map(v => {
+    availableTrackTypes.value.push(...config.map(v => {
       return {
         id: v.id,
         label: v.label
