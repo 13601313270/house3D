@@ -222,7 +222,7 @@ import canvas2DSceneManage from '@/utils/canvas2DSceneManage'
 import bindDanvas2DSceneDefaultEvent from '@/utils/bindDanvas2DSceneDefaultEvent';
 import setHoverPoint from '@/utils/setHoverPoint';
 import TimeLine from '@/components/timeLine.vue'
-import { TimelineData, Keyframe } from '@/utils/timelineState';
+import { TimelineData, Keyframe } from '@/utils/timelineManage';
 
 const timelineData = ref<TimelineData>({
   duration: 30,

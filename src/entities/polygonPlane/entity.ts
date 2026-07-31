@@ -221,14 +221,6 @@ export class PolygonPlaneEntity extends LineEntityClass<PolygonPlanePoint, Polyg
           angleY: angel * -1,
         })
       }
-      // const dist = Math.hypot(x - midX, y - midY)
-      // if (dist < this.getData().thickness) {
-      //   return new MatchCircleArea({
-      //     x: midX,
-      //     y: midY,
-      //     r: this.getData().thickness,
-      //   })
-      // }
     }
     return null
   }

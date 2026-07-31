@@ -1,4 +1,3 @@
-
 export interface Keyframe {
   time: number
   value: any
@@ -30,3 +29,10 @@ export interface TimelineData {
   duration: number
   clips: ClipData[]
 }
+
+class TimelineStateClass {
+  public isPlaying = false;
+}
+const api = new TimelineStateClass()
+
+export const timelineState = api;

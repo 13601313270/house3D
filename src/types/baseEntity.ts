@@ -5,6 +5,7 @@ import { editItem } from '@/utils/editItem'
 import { GroupBaseEntity } from './groupBase/entity'
 import { GroupBaseData } from './groupBase'
 import canvas2DSceneManage from '@/utils/canvas2DSceneManage'
+import { timelineState } from '@/utils/timelineManage'
 
 export type allSnapFromType = 'point' | 'line' | 'axis'
 // 磁吸点
@@ -99,8 +100,11 @@ export abstract class BaseEntityClass<T extends BaseObjData> {
   }
 
   getData(): T {
-    // return this.tempData;
-    return this.data
+    if (timelineState.isPlaying) {
+      return this.tempData;
+    } else {
+      return this.data
+    }
   }
 
   getTempData(): T {

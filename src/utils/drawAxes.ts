@@ -40,7 +40,6 @@ const drawAxes = (
   else if (zoomLevel < 0.6) {
     scale = 100;
   }
-  console.log('zoomLevel', zoomLevel, scale)
 
   const originX = 0; // panOffset.x
   const originY = 0; // panOffset.y

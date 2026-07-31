@@ -111,7 +111,7 @@
 import { ref, computed, onUnmounted, watch, onMounted } from 'vue'
 import * as THREE from 'three'
 import { message } from '@/utils/message'
-import { ClipSegment, TimelineData, TrackData, Keyframe } from '@/utils/timelineState';
+import { ClipSegment, TimelineData, TrackData, Keyframe, timelineState } from '@/utils/timelineManage';
 import editItem from '@/utils/editItem';
 import DataTypeEditPanel from '../views/DataTypeEditPanel.vue'
 
@@ -553,6 +553,7 @@ function togglePlay() {
   }
 
   isPlaying.value = !isPlaying.value
+  timelineState.isPlaying = true;// !isPlaying.value;
   if (isPlaying.value) {
     lastTimestamp = performance.now()
     playLoop()
@@ -564,6 +565,8 @@ function togglePlay() {
 
 function stop() {
   isPlaying.value = false
+  console.log('timelineState.isPlaying', timelineState)
+  timelineState.isPlaying = false;
   currentTime.value = 0
   if (animationFrameId) {
     cancelAnimationFrame(animationFrameId)
@@ -697,29 +700,30 @@ function stopClipDrag() {
 }
 
 function evaluateTimeline(time: number) {
-  timelineData.value.clips.forEach(clip => {
-    // 超出 clip 时间范围的不生效
-    if (time < clip.startTime || time > clip.endTime) return
-
+  const matchIndex = timelineData.value.clips.findIndex(clip => {
+    return time > clip.startTime && time < clip.endTime
+  })
+  timelineState.isPlaying = true;// !isPlaying.value;
+  if (matchIndex > -1) {
+    const match = timelineData.value.clips[matchIndex];
     const entity = window.worldApi.children.find(v => {
-      return v.getData().id === clip.entityId
+      return v.getData().id === match.entityId
     })
     if (!entity) return;
 
     const data: any = {}
-    clip.tracks.forEach(track => {
+    match.tracks.forEach(track => {
       const value = evaluateTrack(track, time)
       if (value !== undefined && value !== null) {
         data[track.trackType] = value;
       }
       // applyTrackValue(obj, track.trackType, value)
     })
-    console.log('entity', data)
     entity.setTempData({
       ...entity.getTempData(),
       ...data,
     });
-  })
+  }
 }
 
 function evaluateTrack(track: TrackData, time: number): any {
