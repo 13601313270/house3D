@@ -1,6 +1,6 @@
 export interface Keyframe {
   time: number
-  value: any
+  value: number
   easing?: string
 }
 

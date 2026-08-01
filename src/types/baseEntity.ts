@@ -107,6 +107,10 @@ export abstract class BaseEntityClass<T extends BaseObjData> {
     }
   }
 
+  getOriginalData(): T {
+    return this.data
+  }
+
   getTempData(): T {
     return this.tempData;
   }
