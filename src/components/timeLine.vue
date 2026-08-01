@@ -84,6 +84,7 @@
               <div v-for="keyframe in track.keyframes" :key="keyframe.time" class="keyframe-node"
                 :style="{ left: `${((keyframe.time - activeSegment.startTime) / (activeSegment.endTime - activeSegment.startTime || 1)) * 100}%` }"
                 :class="{ selected: isKeyframeSelected(activeSegment.clip.clipId, track.trackType, keyframe) }"
+                @mousedown.stop="startKeyframeDrag($event, activeSegment.clip.clipId, track.trackType, keyframe)"
                 @click.stop="onKeyframeClick($event, activeSegment.clip.clipId, activeSegment.clip.entityId, track.trackType, keyframe)">
               </div>
             </div>
@@ -161,6 +162,17 @@ let dragStartClipRange: { startTime: number; endTime: number } | null = null
 const dragStartTimes = new Map<string, number[]>()
 let isScrubbing = false
 let scrubClosedPanel = false
+let isDraggingKeyframe = false
+let dragKeyframeStartX = 0
+let dragKeyframeInfo: {
+  clipId: string
+  trackType: string
+  keyframe: Keyframe
+  startTime: number
+  endTime: number
+  originalTime: number
+  container: HTMLElement | null
+} | null = null
 
 const rulerMarks = computed(() => {
   const marks = []
@@ -444,6 +456,10 @@ let editPropConfigEditCallback = (val: any) => {
 }
 
 function onKeyframeClick(event: MouseEvent, clipId: string, entityId: string, trackType: string, keyframe: Keyframe) {
+  if (dragMoved) {
+    dragMoved = false
+    return
+  }
   if (isPlaying.value) {
     togglePlay()
   }
@@ -697,6 +713,69 @@ function stopClipDrag() {
   dragStartClipRange = null
   document.removeEventListener('mousemove', onClipDrag)
   document.removeEventListener('mouseup', stopClipDrag)
+}
+
+function startKeyframeDrag(e: MouseEvent, clipId: string, trackType: string, keyframe: Keyframe) {
+  e.stopPropagation()
+  if (isPlaying.value) {
+    togglePlay()
+  }
+
+  const clip = timelineData.value.clips.find(c => c.clipId === clipId)
+  if (!clip) return
+
+  const trackTimeline = (e.currentTarget as HTMLElement).closest('.track-timeline') as HTMLElement
+  const container = trackTimeline || document.querySelector('.track-timeline') as HTMLElement
+
+  isDraggingKeyframe = true
+  dragKeyframeStartX = e.clientX
+  dragMoved = false
+  dragKeyframeInfo = {
+    clipId,
+    trackType,
+    keyframe,
+    startTime: clip.startTime,
+    endTime: clip.endTime,
+    originalTime: keyframe.time,
+    container,
+  }
+
+  document.addEventListener('mousemove', onKeyframeDrag)
+  document.addEventListener('mouseup', stopKeyframeDrag)
+}
+
+function onKeyframeDrag(e: MouseEvent) {
+  if (!isDraggingKeyframe || !dragKeyframeInfo) return
+
+  const container = dragKeyframeInfo.container
+  if (!container) return
+
+  const rect = container.getBoundingClientRect()
+  const clipDuration = dragKeyframeInfo.endTime - dragKeyframeInfo.startTime
+  const widthPerSecond = rect.width / clipDuration
+  const deltaX = e.clientX - dragKeyframeStartX
+
+  if (Math.abs(deltaX) > 2) {
+    dragMoved = true
+  }
+
+  if (!dragMoved) return
+
+  const deltaTime = deltaX / widthPerSecond
+  const newTime = Math.max(
+    dragKeyframeInfo.startTime,
+    Math.min(dragKeyframeInfo.endTime, dragKeyframeInfo.originalTime + deltaTime)
+  )
+
+  dragKeyframeInfo.keyframe.time = newTime
+  timelineData.value = { ...timelineData.value }
+}
+
+function stopKeyframeDrag() {
+  isDraggingKeyframe = false
+  dragKeyframeInfo = null
+  document.removeEventListener('mousemove', onKeyframeDrag)
+  document.removeEventListener('mouseup', stopKeyframeDrag)
 }
 
 function evaluateTimeline(time: number) {
