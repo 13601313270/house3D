@@ -983,8 +983,8 @@ function evaluateTimeline(time: number) {
             // @ts-ignore - trackType 为动态字符串，Entity 接口无法穷举
             data[trackType] = entity.getData()[trackType] as any;
           })
-          entity.setTempData({
-            ...entity.getTempData(),
+          entity.setAnimationData({
+            ...entity.getAnimationData(),
             ...data,
           });
         }
@@ -1013,8 +1013,8 @@ function evaluateTimeline(time: number) {
               data[trackType] = lastValue;
             }
           })
-          entity.setTempData({
-            ...entity.getTempData(),
+          entity.setAnimationData({
+            ...entity.getAnimationData(),
             ...data,
           });
         }
@@ -1031,7 +1031,7 @@ function evaluateTimeline(time: number) {
     const data: any = {}
     // if (time < timelineState.timelineData.clips[0].startTime) {
     match.tracks.forEach(track => {
-      console.log('evaluateTimeline', track, time)
+      // console.log('evaluateTimeline', track, time)
       const { keyframes, trackType } = track;
       if (keyframes.length === 0) {
         return
@@ -1041,7 +1041,7 @@ function evaluateTimeline(time: number) {
       if (time < sortedKeyframes[0].time) {
         // sortedKeyframes 头部添加
         let valuePre: number | undefined | null;
-        console.log('sortedKeyframes-1', sortedKeyframes)
+        // console.log('sortedKeyframes-1', sortedKeyframes)
         const firstClipTrack = timelineState.timelineData.clips[0].tracks.find(v => {
           return v.trackType === trackType
         })
@@ -1076,8 +1076,8 @@ function evaluateTimeline(time: number) {
         data[trackType] = value;
       }
     })
-    entity.setTempData({
-      ...entity.getTempData(),
+    entity.setAnimationData({
+      ...entity.getAnimationData(),
       ...data,
     });
   }

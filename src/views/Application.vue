@@ -238,11 +238,6 @@ import setHoverPoint from '@/utils/setHoverPoint';
 import TimeLine from '@/components/timeLine.vue'
 import { TimelineData, Keyframe, timelineState } from '@/utils/timelineManage';
 
-const timelineData____ = ref<TimelineData>({
-  duration: 30,
-  clips: []
-})
-
 const canvas2DRef = ref<HTMLCanvasElement | null>(null)
 const canvas2DActionRef = ref<HTMLCanvasElement | null>(null)
 const canvas3DRefCenter = ref<typeof Canvas3D | null>(null)
