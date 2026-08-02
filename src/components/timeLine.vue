@@ -452,10 +452,12 @@ function toggleClipContent(event: MouseEvent, segment: ClipSegment) {
   }
   if (left < 10) left = 10
 
+  const moreWidth = 20; // 额外预留10px
+
   trackContentStyle.value = {
-    left: `${left}px`,
+    left: `${left - moreWidth / 2}px`,
     top: `${rect.bottom + 4}px`,
-    width: `${panelWidth}px`
+    width: `${panelWidth + moreWidth}px`
   }
 }
 
@@ -1426,14 +1428,14 @@ onUnmounted(() => {
                   font-weight: 500;
                   color: #e94560;
                   flex-shrink: 0;
-                  max-width: 80px;
+                  max-width: 100px;
                   overflow: hidden;
                   text-overflow: ellipsis;
                   white-space: nowrap; // 过长 entityId 截断成 ...
                 }
 
                 .clip-duration {
-                  color: #a8b2d1;
+                  color: #023068;
                   font-size: 10px; // 时间范围小一号
                 }
               }
@@ -1511,25 +1513,24 @@ onUnmounted(() => {
 .track-content-floating {
   position: fixed;
   z-index: 999;
-  background: rgba(15, 52, 96, 0.98); // 深蓝 98% 不透明，与时间轴背景一致
-  border: 1px solid #e94560; // 红色边框强调弹出态
   border-radius: 6px;
-  padding: 8px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6); // 投影让面板浮出
+  box-shadow: 0px 1px 16px 3px rgb(0 0 0); // 投影让面板浮出
   box-sizing: border-box;
+  overflow: hidden;
 
   // 面板顶部标题栏：entityId + 时间范围 + 删除按钮 + ×关闭按钮
   .floating-header {
     display: flex;
     align-items: center;
     gap: 8px;
+    padding: 8px;
     padding-bottom: 8px;
-    margin-bottom: 4px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    background: black;
 
     .floating-title {
       font-weight: 500;
-      color: #e94560;
+      color: white;
       font-size: 13px;
       flex: 1; // 占剩余空间
     }
@@ -1573,12 +1574,14 @@ onUnmounted(() => {
   // track-row：每个属性轨道一行（左 label + 右 timeline）高度 35px 与 timeline-row 一致
   .track-row {
     display: flex;
+    flex-direction: column;
     align-items: center;
-    height: 35px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.25);
     box-sizing: border-box;
     white-space: nowrap;
+    padding: 8px 10px;
     gap: 8px;
+    height: 52px;
 
     // 最后一行不加分隔线
     &:last-child {
@@ -1621,6 +1624,7 @@ onUnmounted(() => {
     .track-timeline {
       flex: 1;
       position: relative;
+      width: 100%;
       height: 100%;
       cursor: crosshair; // 十字光标提示「点击可插入关键帧」
 
@@ -1634,7 +1638,7 @@ onUnmounted(() => {
       // keyframe-node：关键帧圆点节点（绿色默认，红色选中态）
       .keyframe-node {
         position: absolute;
-        top: 50%;
+        top: 0;
         width: 12px;
         height: 12px;
         margin-left: -6px; // 左半补偿居中（否则左边对齐而非中心）
@@ -1664,7 +1668,8 @@ onUnmounted(() => {
         top: 0;
         left: 0;
         width: 100%;
-        height: 100%;
+        height: 4px;
+        background: #bababa;
         pointer-events: none; // 不拦截点击（关键帧可穿透点击）
       }
     }
@@ -1672,23 +1677,22 @@ onUnmounted(() => {
 
   // 「＋ 添加属性」区域：面板底部，一行虚线按钮 + 向上展开的下拉菜单
   .add-track-area {
-    margin-top: 8px;
-    padding-top: 8px;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 8px;
     position: relative;
+    border-top: solid 1px #d3d3d3;
 
     // 默认状态：「＋ 添加属性」虚线按钮
     .add-track-select {
       width: 100%;
       padding: 6px 10px;
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px dashed rgba(255, 255, 255, 0.2);
+      background: rgb(229 230 235);
       border-radius: 4px;
-      color: #a8b2d1;
+      color: black;
       font-size: 12px;
       cursor: pointer;
       text-align: center;
       transition: all 0.2s;
+      box-sizing: border-box;
 
       &:hover {
         background: rgba(255, 255, 255, 0.1);
