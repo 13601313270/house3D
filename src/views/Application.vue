@@ -144,7 +144,7 @@
 
     <div v-if="editMode === 'animation'" class="timeLine" :style="{ height: timeHeight + 'px' }">
       <div class="split-bar-x" @mousedown.prevent="startSplitTimeLine()"></div>
-      <TimeLine v-model="timelineData" />
+      <TimeLine />
     </div>
     <DataTypeEditPanel v-if="contextMenu?.visible && editPropTypeKey" :typeKey="editPropTypeKey"
       :editPropConfigInfo="editPropConfigInfo" v-model="editPropInputInfo"
@@ -238,7 +238,7 @@ import setHoverPoint from '@/utils/setHoverPoint';
 import TimeLine from '@/components/timeLine.vue'
 import { TimelineData, Keyframe, timelineState } from '@/utils/timelineManage';
 
-const timelineData = ref<TimelineData>({
+const timelineData____ = ref<TimelineData>({
   duration: 30,
   clips: []
 })
@@ -691,7 +691,7 @@ const saveDrawing = async () => {
     canvas2DSceneManage.list[0].level,
     cameraStateCenter.value,
     activeCameraIndex.value,
-    JSON.parse(JSON.stringify(timelineData.value))
+    JSON.parse(JSON.stringify(timelineState.timelineData))
   )
 }
 
@@ -702,7 +702,9 @@ const loadProgramFile = () => {
 
 const handleLoadProgramFileChange = async (e: Event) => {
   worldApi.clearAll()
-  timelineData.value = { duration: 30, clips: [] }
+  // timelineData____.value = { duration: 30, clips: [] }
+  console.log('1111-0', timelineState.timelineData.clips)
+  timelineState.timelineData = { duration: 30, clips: [] }
   initWorldLoading.value = true
   const input = e.target as HTMLInputElement
   const file = input.files?.[0]
@@ -799,9 +801,11 @@ const handleLoadProgramFileChange = async (e: Event) => {
 
     // 还原动画数据
     if (sceneData.timelineData && sceneData.timelineData.clips.length > 0) {
-      timelineData.value = sceneData.timelineData as any
+      // timelineData____.value = sceneData.timelineData as any
+      timelineState.timelineData = sceneData.timelineData as any
     } else {
-      timelineData.value = { duration: 30, clips: [] }
+      // timelineData____.value = { duration: 30, clips: [] }
+      timelineState.timelineData = { duration: 30, clips: [] }
     }
   } catch (error) {
     initWorldLoading.value = false
@@ -1047,10 +1051,17 @@ const deleteContextMenuEntity = () => {
 
     // 从 timelineData 中移除对应的动画数据
     if (entityId) {
-      timelineData.value.clips = timelineData.value.clips.filter(
-        clip => clip.entityId !== entityId
-      )
-      timelineData.value = { ...timelineData.value }
+      // timelineData____.value.clips = timelineData____.value.clips.filter(
+      //   clip => clip.entityId !== entityId
+      // )
+      // timelineData____.value = { ...timelineData____.value }
+
+      timelineState.timelineData = {
+        ...timelineState.timelineData,
+        clips: timelineState.timelineData.clips.filter(
+          clip => clip.entityId !== entityId
+        )
+      }
     }
   }
   contextMenu.value = null
@@ -1059,7 +1070,8 @@ const deleteContextMenuEntity = () => {
 const clearDrawing = () => {
   if (confirm('确定要清空所有绘制内容吗？')) {
     worldApi.clearAll();
-    timelineData.value = { duration: 30, clips: [] }
+    // timelineData____.value = { duration: 30, clips: [] }
+    timelineState.timelineData = { duration: 30, clips: [] }
     activeToolsIndex.value = -1
   }
 }
@@ -1380,7 +1392,7 @@ function handleAddAnimation(data: { typeKey: string; modelValue: Record<string, 
   const entityData = entity.getData()
   const entityId = entityData.id
 
-  const clipCount = timelineData.value.clips.length
+  const clipCount = timelineState.timelineData.clips.length
   const startTime = clipCount * 3
   const endTime = startTime + 10
 
@@ -1392,8 +1404,15 @@ function handleAddAnimation(data: { typeKey: string; modelValue: Record<string, 
     tracks: []
   }
 
-  timelineData.value.clips.push(newClip)
-  timelineData.value = { ...timelineData.value }
+  // timelineData____.value.clips.push(newClip)
+  // timelineData____.value = { ...timelineData____.value }
+  const clips = [...timelineState.timelineData.clips];
+  clips.push(newClip)
+  timelineState.timelineData = {
+    ...timelineState.timelineData,
+    clips,
+  }
+  // timelineState.timelineData.clips.push(newClip);
   contextMenu.value = null
 }
 </script>

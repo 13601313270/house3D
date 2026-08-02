@@ -32,6 +32,30 @@ export interface TimelineData {
 
 class TimelineStateClass {
   public isPlaying = false;
+
+  private timelineData_: TimelineData = {
+    duration: 30,
+    clips: []
+  };
+
+  set timelineData(value: TimelineData) {
+    this.timelineData_ = value
+    this.triggerChange()
+  }
+
+  get timelineData(): TimelineData {
+    return this.timelineData_;
+  }
+
+  private onChangeCallbacks: (() => void)[] = []
+
+  public onChange(callback: () => void) {
+    this.onChangeCallbacks.push(callback)
+  }
+
+  public triggerChange() {
+    this.onChangeCallbacks.forEach(callback => callback())
+  }
 }
 const api = new TimelineStateClass()
 

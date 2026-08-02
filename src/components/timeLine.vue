@@ -139,7 +139,7 @@
 
 <script lang="ts" setup>
 // onMounted 已预留（未来可能需要挂载后初始化标尺同步滚动等），暂未使用
-import { ref, computed, onUnmounted, watch } from 'vue'
+import { ref, computed, onUnmounted, watch, onMounted } from 'vue'
 import { message } from '@/utils/message'
 // timelineState 模块：管理时间轴状态，clip/track/keyframe 数据结构，以及全局播放状态标志
 import { ClipSegment, TimelineData, TrackData, Keyframe, timelineState, ClipData } from '@/utils/timelineManage';
@@ -149,29 +149,117 @@ import DataTypeEditPanel from '../views/DataTypeEditPanel.vue'
 // ========== Props & 事件 ==========
 // - modelValue：由父组件（Application.vue）通过 v-model 控制的时间轴动画数据
 // - getObject：根据 entityId 获取 THREE.Object3D（Mesh/Group），用于场景对象的 opacity/visible 等属性应用
-const props = defineProps<{
-  modelValue: TimelineData
-}>()
+// const props = defineProps<{
+//   modelValue: TimelineData
+// }>()
 
-const emit = defineEmits<{
-  (e: 'update:modelValue', value: TimelineData): void
-}>()
+// const emit = defineEmits<{
+//   (e: 'update:modelValue', value: TimelineData): void
+// }>()
 
 // timelineData 计算属性：作为 v-model 的包装，读 props.modelValue，写时 emit 向上通知父组件更新
-const timelineData = computed({
-  get: () => props.modelValue,
-  set: (value) => emit('update:modelValue', value)
+// const timelineData___ = computed({
+//   get: () => props.modelValue,
+//   set: (value) => emit('update:modelValue', value)
+// })
+const effectiveDuration = ref<number>(0)
+const rulerMarks = ref<{
+  time: number;
+  major: boolean;
+}[]>([])
+const clipSegments = ref<ClipSegment[]>([])
+onMounted(() => {
+  function updateRef() {
+    effectiveDuration.value = (() => {
+      console.log('1111-1', timelineState.timelineData.clips)
+      if (timelineState.timelineData.clips) {
+        let maxTime = timelineState.timelineData.duration
+        for (const clip of timelineState.timelineData.clips) {
+          if (clip.endTime > maxTime) maxTime = clip.endTime
+        }
+        return Math.max(maxTime + 5, 30);
+      } else {
+        return 0;
+      }
+    })();
+    // rulerMarks：标尺刻度（平均切成 20 份；整数秒为主刻度（major带标签），其余为次刻度
+    rulerMarks.value = (() => {
+      const marks: any[] = []
+      const dur = effectiveDuration.value
+      const step = dur / 20
+      console.log('ddddddd', marks, dur, step);
+      if (dur > 0) {
+        for (let i = 0; i <= dur; i += step) {
+          marks.push({
+            time: i,
+            major: i % 1 === 0
+          })
+        }
+      }
+      return marks
+    })()
+
+    // clipSegments：将 clips 包装成渲染用的 ClipSegment 列表
+    //  核心逻辑：区间图着色（Interval Graph Coloring）贪心算法，按 startTime 排序，
+    // 每个 segment 分配到最早可用的 row（rowEndTimes[r] <= segment.startTime 时占用该行），
+    // 时间冲突时新增一行，实现多 clip 时间不冲突的共用一行，减少垂直占用
+    clipSegments.value = (() => {
+      const segments: ClipSegment[] = []
+
+      if (timelineState.timelineData.clips) {
+        for (const clip of timelineState.timelineData.clips) {
+          segments.push({
+            clip,
+            startTime: clip.startTime,
+            endTime: clip.endTime,
+            rowIndex: 0
+          })
+        }
+      }
+
+      segments.sort((a, b) => a.startTime - b.startTime)
+
+      const rowEndTimes: number[] = []
+
+      for (const segment of segments) {
+        let assignedRow = -1
+
+        for (let r = 0; r < rowEndTimes.length; r++) {
+          if (rowEndTimes[r] <= segment.startTime) {
+            assignedRow = r
+            break
+          }
+        }
+
+        if (assignedRow === -1) {
+          assignedRow = rowEndTimes.length
+          rowEndTimes.push(segment.endTime)
+        } else {
+          rowEndTimes[assignedRow] = segment.endTime
+        }
+
+        segment.rowIndex = assignedRow
+      }
+
+      return segments
+    })();
+  }
+  updateRef()
+  timelineState.onChange(() => {
+    console.log(1111)
+    updateRef()
+  })
 })
 
 // effectiveDuration（计算实际显示总时长
 // = max(timelineData.duration, 所有clip.endTime) + 5秒尾部留白；最小 30秒
-const effectiveDuration = computed(() => {
-  let maxTime = timelineData.value.duration
-  for (const clip of timelineData.value.clips) {
-    if (clip.endTime > maxTime) maxTime = clip.endTime
-  }
-  return Math.max(maxTime + 5, 30)
-})
+// const effectiveDuration = computed(() => {
+//   let maxTime = timelineState.timelineData.duration
+//   for (const clip of timelineState.timelineData.clips) {
+//     if (clip.endTime > maxTime) maxTime = clip.endTime
+//   }
+//   return Math.max(maxTime + 5, 30)
+// })
 
 // ========== 响应式状态（播放控制） ==========
 // timelineRuler：标尺 DOM 引用（预留，未来用于标尺与轨道 scrollLeft 同步；TS 提示未使用不影响功能）
@@ -216,63 +304,6 @@ let dragKeyframeInfo: {
   originalTime: number      // 拖拽开始时的原始 keyframe.time
   container: HTMLElement | null
 } | null = null
-
-// rulerMarks：标尺刻度（平均切成 20 份；整数秒为主刻度（major带标签），其余为次刻度
-const rulerMarks = computed(() => {
-  const marks = []
-  const dur = effectiveDuration.value
-  const step = dur / 20
-  for (let i = 0; i <= dur; i += step) {
-    marks.push({
-      time: i,
-      major: i % 1 === 0
-    })
-  }
-  return marks
-})
-
-// clipSegments：将 clips 包装成渲染用的 ClipSegment 列表
-//  核心逻辑：区间图着色（Interval Graph Coloring）贪心算法，按 startTime 排序，
-// 每个 segment 分配到最早可用的 row（rowEndTimes[r] <= segment.startTime 时占用该行），
-// 时间冲突时新增一行，实现多 clip 时间不冲突的共用一行，减少垂直占用
-const clipSegments = computed<ClipSegment[]>(() => {
-  const segments: ClipSegment[] = []
-
-  for (const clip of timelineData.value.clips) {
-    segments.push({
-      clip,
-      startTime: clip.startTime,
-      endTime: clip.endTime,
-      rowIndex: 0
-    })
-  }
-
-  segments.sort((a, b) => a.startTime - b.startTime)
-
-  const rowEndTimes: number[] = []
-
-  for (const segment of segments) {
-    let assignedRow = -1
-
-    for (let r = 0; r < rowEndTimes.length; r++) {
-      if (rowEndTimes[r] <= segment.startTime) {
-        assignedRow = r
-        break
-      }
-    }
-
-    if (assignedRow === -1) {
-      assignedRow = rowEndTimes.length
-      rowEndTimes.push(segment.endTime)
-    } else {
-      rowEndTimes[assignedRow] = segment.endTime
-    }
-
-    segment.rowIndex = assignedRow
-  }
-
-  return segments
-})
 
 // totalRows：实际使用的总行数（= 最大 rowIndex + 1）
 const totalRows = computed(() => {
@@ -468,8 +499,8 @@ function closeClipContent() {
 
 // deleteClip：按 clipId 从 timelineData.clips 中删除该动画配置
 function deleteClip(clipId: string) {
-  const newClips = timelineData.value.clips.filter(c => c.clipId !== clipId)
-  timelineData.value = { ...timelineData.value, clips: newClips }
+  const newClips = timelineState.timelineData.clips.filter(c => c.clipId !== clipId)
+  timelineState.timelineData = { ...timelineState.timelineData, clips: newClips }
   closeClipContent()
 }
 
@@ -660,7 +691,8 @@ function handleTrackClick(event: MouseEvent, track: TrackData, segment?: ClipSeg
   track.keyframes.push(newKeyframe)
   track.keyframes.sort((a, b) => a.time - b.time)
 
-  timelineData.value = { ...timelineData.value }
+  // timelineData___.value = { ...timelineData___.value }
+  timelineState.timelineData = { ...timelineState.timelineData }
 }
 
 // togglePlay：播放/暂停切换按钮点击处理
@@ -772,7 +804,7 @@ function startClipDrag(e: MouseEvent, clipId: string) {
     closeClipContent()
   }
 
-  const clip = timelineData.value.clips.find(c => c.clipId === clipId)
+  const clip = timelineState.timelineData.clips.find(c => c.clipId === clipId)
   if (clip) {
     dragStartClipRange = { startTime: clip.startTime, endTime: clip.endTime }
     for (const track of clip.tracks) {
@@ -807,7 +839,7 @@ function onClipDrag(e: MouseEvent) {
 
   const deltaTime = deltaX / widthPerSecond
 
-  const clip = timelineData.value.clips.find(c => c.clipId === dragClipId)
+  const clip = timelineState.timelineData.clips.find(c => c.clipId === dragClipId)
   if (!clip) return
 
   const duration = dragStartClipRange.endTime - dragStartClipRange.startTime
@@ -827,7 +859,8 @@ function onClipDrag(e: MouseEvent) {
       }
     }
   }
-  timelineData.value = { ...timelineData.value }
+  // timelineData___.value = { ...timelineData___.value }
+  timelineState.timelineData = { ...timelineState.timelineData }
 }
 
 function stopClipDrag() {
@@ -848,7 +881,7 @@ function startKeyframeDrag(e: MouseEvent, clipId: string, trackType: string, key
     togglePlay()
   }
 
-  const clip = timelineData.value.clips.find(c => c.clipId === clipId)
+  const clip = timelineState.timelineData.clips.find(c => c.clipId === clipId)
   if (!clip) return
 
   const trackTimeline = (e.currentTarget as HTMLElement).closest('.track-timeline') as HTMLElement
@@ -898,7 +931,8 @@ function onKeyframeDrag(e: MouseEvent) {
   )
 
   dragKeyframeInfo.keyframe.time = newTime
-  timelineData.value = { ...timelineData.value }
+  // timelineData.value = { ...timelineData.value }
+  timelineState.timelineData = { ...timelineState.timelineData }
 }
 
 function stopKeyframeDrag() {
@@ -928,17 +962,17 @@ function stopKeyframeDrag() {
 //   避免两者互相覆盖。因此在写入 entity.getData() 初始值之前临时设为 false，之后立刻恢复 true。
 function evaluateTimeline(time: number) {
   // 先尝试查找 time 落在哪个 clip 的 (startTime, endTime) 开区间内
-  const matchIndex = timelineData.value.clips.findIndex(clip => {
+  const matchIndex = timelineState.timelineData.clips.findIndex(clip => {
     return time > clip.startTime && time < clip.endTime
   })
 
   if (matchIndex === -1) {
-    if (timelineData.value.clips.length > 0) {
+    if (timelineState.timelineData.clips.length > 0) {
       let match: ClipData;
       const data: any = {}
       // --- 情况2：time 在所有 clip 之前（还没开始第一个动画） ---
-      if (time < timelineData.value.clips[0].startTime) {
-        match = timelineData.value.clips[0];
+      if (time < timelineState.timelineData.clips[0].startTime) {
+        match = timelineState.timelineData.clips[0];
         if (match) {
           const entity = window.worldApi.children.find(v => {
             return v.getData().id === match.entityId
@@ -957,15 +991,15 @@ function evaluateTimeline(time: number) {
       } else {
         // --- 情况3：time 在至少一个 clip 之后（取最近已结束 clip 的最终态） ---
         // reduce 遍历 clips：找出满足 endTime <= time 且 endTime 最大的 clip 索引（即「上一段已结束动画」）
-        const matchPreIndex = timelineData.value.clips.reduce((preIndex, clip, index) => {
+        const matchPreIndex = timelineState.timelineData.clips.reduce((preIndex, clip, index) => {
           if (clip.endTime <= time) {
-            if (preIndex === -1 || clip.endTime > timelineData.value.clips[preIndex].endTime) {
+            if (preIndex === -1 || clip.endTime > timelineState.timelineData.clips[preIndex].endTime) {
               return index
             }
           }
           return preIndex
         }, -1)
-        match = timelineData.value.clips[matchPreIndex];
+        match = timelineState.timelineData.clips[matchPreIndex];
         if (match) {
           const entity = window.worldApi.children.find(v => {
             return v.getData().id === match.entityId
@@ -988,14 +1022,14 @@ function evaluateTimeline(time: number) {
     }
   } else if (matchIndex > -1) {
     // --- 情况1：命中某个 clip 区间 → 对每个轨道执行关键帧插值 ---
-    const match = timelineData.value.clips[matchIndex];
+    const match = timelineState.timelineData.clips[matchIndex];
     const entity = window.worldApi.children.find(v => {
       return v.getData().id === match.entityId
     })
     if (!entity) return;
 
     const data: any = {}
-    // if (time < timelineData.value.clips[0].startTime) {
+    // if (time < timelineState.timelineData.clips[0].startTime) {
     match.tracks.forEach(track => {
       console.log('evaluateTimeline', track, time)
       const { keyframes, trackType } = track;
@@ -1008,21 +1042,21 @@ function evaluateTimeline(time: number) {
         // sortedKeyframes 头部添加
         let valuePre: number | undefined | null;
         console.log('sortedKeyframes-1', sortedKeyframes)
-        const firstClipTrack = timelineData.value.clips[0].tracks.find(v => {
+        const firstClipTrack = timelineState.timelineData.clips[0].tracks.find(v => {
           return v.trackType === trackType
         })
         if (firstClipTrack && time < firstClipTrack.keyframes[0].time) {
           valuePre = (entity.getOriginalData() as any)[trackType] as number;
         } else {
-          const matchPreIndex = timelineData.value.clips.reduce((preIndex, clip, index) => {
+          const matchPreIndex = timelineState.timelineData.clips.reduce((preIndex, clip, index) => {
             if (clip.endTime <= time) {
-              if (preIndex === -1 || clip.endTime > timelineData.value.clips[preIndex].endTime) {
+              if (preIndex === -1 || clip.endTime > timelineState.timelineData.clips[preIndex].endTime) {
                 return index
               }
             }
             return preIndex
           }, -1)
-          const match = timelineData.value.clips[matchPreIndex];
+          const match = timelineState.timelineData.clips[matchPreIndex];
           if (match) {
             valuePre = match.tracks.find(t => t.trackType === trackType)?.keyframes[keyframes.length - 1].value;
           }
@@ -1030,7 +1064,7 @@ function evaluateTimeline(time: number) {
         }
         if (valuePre !== undefined && valuePre !== null) {
           sortedKeyframes.unshift({
-            time: timelineData.value.clips[matchIndex].startTime,
+            time: timelineState.timelineData.clips[matchIndex].startTime,
             value: valuePre,
             easing: 'linear',
           })
@@ -1115,7 +1149,8 @@ function addTrack(trackType: string) {
     interpolation: 'linear'
   }
   activeSegment.value.clip.tracks.push(newTrack)
-  timelineData.value = { ...timelineData.value }
+  // timelineData___.value = { ...timelineData___.value }
+  timelineState.timelineData = { ...timelineState.timelineData }
   isShowTrackDropdown.value = false
 }
 
@@ -1124,7 +1159,8 @@ function removeTrack(trackType: string) {
   if (!activeSegment.value) return
   const clip = activeSegment.value.clip
   clip.tracks = clip.tracks.filter(t => t.trackType !== trackType)
-  timelineData.value = { ...timelineData.value }
+  // timelineData___.value = { ...timelineData___.value }
+  timelineState.timelineData = { ...timelineState.timelineData }
 }
 
 // showTrackDropdown：点击「＋ 添加属性」按钮时展开下拉菜单
