@@ -38,6 +38,17 @@ class TimelineStateClass {
     clips: []
   };
 
+  currentTime_: number = 0;
+
+  get currentTime() {
+    return this.currentTime_;
+  }
+
+  set currentTime(value: number) {
+    this.currentTime_ = value
+    this.triggerChangeCurrentTime()
+  }
+
   set timelineData(value: TimelineData) {
     this.timelineData_ = value
     this.triggerChange()
@@ -55,6 +66,15 @@ class TimelineStateClass {
 
   public triggerChange() {
     this.onChangeCallbacks.forEach(callback => callback())
+  }
+
+  private onChangeCurrentTimeCallbacks: (() => void)[] = []
+  public onChangeCurrentTime(callback: () => void) {
+    this.onChangeCurrentTimeCallbacks.push(callback)
+  }
+
+  public triggerChangeCurrentTime() {
+    this.onChangeCurrentTimeCallbacks.forEach(callback => callback())
   }
 }
 const api = new TimelineStateClass()

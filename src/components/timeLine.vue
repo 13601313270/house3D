@@ -249,6 +249,10 @@ onMounted(() => {
     console.log(1111)
     updateRef()
   })
+  currentTime.value = timelineState.currentTime
+  timelineState.onChangeCurrentTime(() => {
+    currentTime.value = timelineState.currentTime
+  })
 })
 
 // effectiveDuration（计算实际显示总时长
@@ -363,19 +367,6 @@ function formatTime(time: number): string {
   return `${seconds.toString().padStart(2, '0')}:${milliseconds.toString().padStart(2, '0')}`
 }
 
-// translateTrackType：轨道类型英文 → 中文映射（预留翻译函数，TS 未使用提示不影响功能）
-// 未来若界面需要全中文显示轨道名时可直接调用
-function translateTrackType(type: string): string {
-  const translations: Record<string, string> = {
-    position: '位置',
-    rotation: '旋转',
-    scale: '缩放',
-    visible: '可见',
-    opacity: '透明度'
-  }
-  return translations[type] || type
-}
-
 // zoomIn / zoomOut：时间轴缩放（0.2x ~ 5x），每次变化 0.2
 function zoomIn() {
   zoomLevel.value = Math.min(zoomLevel.value + 0.2, 5)
@@ -388,11 +379,11 @@ function zoomOut() {
 // getTimeFromMouseEvent：将鼠标事件坐标换算为时间（考虑横向滚动偏移），用于空白区域 scrub
 function getTimeFromMouseEvent(event: MouseEvent): number {
   const wrapper = document.querySelector('.timeline-content-wrapper') as HTMLElement
-  if (!wrapper) return currentTime.value
+  if (!wrapper) return timelineState.currentTime
 
   const wrapperRect = wrapper.getBoundingClientRect()
   const timeInfo = document.querySelector('.timeInfo') as HTMLElement
-  if (!timeInfo) return currentTime.value
+  if (!timeInfo) return timelineState.currentTime
 
   const scrollLeft = timeInfo.scrollLeft
   const x = event.clientX - wrapperRect.left + scrollLeft
@@ -423,8 +414,8 @@ function handleTimeInfoMouseDown(event: MouseEvent) {
 
   isScrubbing = true
   scrubClosedPanel = false
-  currentTime.value = getTimeFromMouseEvent(event)
-  evaluateTimeline(currentTime.value)
+  timelineState.currentTime = getTimeFromMouseEvent(event)
+  evaluateTimeline(timelineState.currentTime)
 
   document.addEventListener('mousemove', onScrubDrag)
   document.addEventListener('mouseup', stopScrub)
@@ -433,8 +424,8 @@ function handleTimeInfoMouseDown(event: MouseEvent) {
 // onScrubDrag：scrub 模式下鼠标移动实时更新播放时间
 function onScrubDrag(event: MouseEvent) {
   if (!isScrubbing) return
-  currentTime.value = getTimeFromMouseEvent(event)
-  evaluateTimeline(currentTime.value)
+  timelineState.currentTime = getTimeFromMouseEvent(event)
+  evaluateTimeline(timelineState.currentTime)
 }
 
 function stopScrub() {
@@ -725,7 +716,7 @@ function togglePlay() {
 // 5) evaluateTimeline(0)：重新计算 0 秒时所有实体的初始态并写入 setTempData
 function stop() {
   isPlaying.value = false
-  currentTime.value = 0
+  timelineState.currentTime = 0
   if (animationFrameId) {
     cancelAnimationFrame(animationFrameId)
     animationFrameId = null
@@ -744,13 +735,13 @@ function playLoop() {
   const deltaTime = (now - lastTimestamp) / 1000
   lastTimestamp = now
 
-  currentTime.value += deltaTime * playbackSpeed.value
+  timelineState.currentTime += deltaTime * playbackSpeed.value
 
-  if (currentTime.value >= effectiveDuration.value) {
-    currentTime.value = 0
+  if (timelineState.currentTime >= effectiveDuration.value) {
+    timelineState.currentTime = 0
   }
 
-  evaluateTimeline(currentTime.value)
+  evaluateTimeline(timelineState.currentTime)
 
   animationFrameId = requestAnimationFrame(playLoop)
 }
@@ -774,8 +765,8 @@ function onDrag(e: MouseEvent) {
   const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width))
   const time = (x / rect.width) * effectiveDuration.value
 
-  currentTime.value = Math.max(0, Math.min(time, effectiveDuration.value))
-  evaluateTimeline(currentTime.value)
+  timelineState.currentTime = Math.max(0, Math.min(time, effectiveDuration.value))
+  evaluateTimeline(timelineState.currentTime)
 }
 
 function stopDragging() {

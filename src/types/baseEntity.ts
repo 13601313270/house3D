@@ -69,7 +69,46 @@ export abstract class BaseEntityClass<T extends BaseObjData> {
     if (timelineState.isPlaying) {
       // this.animationData = data
       const findClip = timelineState.timelineData.clips.find(v => v.entityId === this.data.id);
-      console.log(222222, findClip)
+      if (findClip) {
+        Object.keys(data).forEach((key) => {
+          const findTrack = findClip.tracks.find(v => v.trackType === key)
+          if (findTrack) {
+            const keyframes = [...findTrack.keyframes];
+            console.log(222222, keyframes)
+            if (keyframes.find(v => v.time === timelineState.currentTime)) {
+              const index = keyframes.findIndex(v => v.time === timelineState.currentTime)
+              // @ts-ignore
+              keyframes[index].value = data[key]
+              findTrack.keyframes = keyframes;
+            } else {
+              keyframes.push({
+                time: timelineState.currentTime,
+                // @ts-ignore
+                value: data[key],
+              })
+              findTrack.keyframes = keyframes.sort((a, b) => a.time - b.time);
+            }
+          } else {
+            findClip.tracks.push({
+              trackType: key,
+              keyframes: [{
+                time: timelineState.currentTime,
+                // @ts-ignore
+                value: data[key],
+              }]
+            })
+          }
+        })
+
+        this.setAnimationData({
+          ...this.animationData,
+          ...data,
+        })
+
+        timelineState.timelineData = {
+          ...timelineState.timelineData
+        };
+      }
     } else {
       this.data = {
         ...this.data,
