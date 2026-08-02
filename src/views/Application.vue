@@ -36,17 +36,18 @@
         </div>
       </div>
       <div class="editMode">
-        <div v-if="!isTimeShow">
+        <div>
           <div class="timeLineTitle">
-            <button>
+            <button :class="{ active: editMode === 'scene' }" @click="setEditMode('scene')">
               场景编辑
             </button>
-            <button>
+            <button :class="{ active: editMode === 'animation' }" @click="setEditMode('animation')">
               动画编辑
             </button>
           </div>
         </div>
       </div>
+      <div style="flex-grow: 1;"></div>
       <div class="toolbar right">
         <div class="toolbar-item" @mouseleave="activeToolsIndex = -1">
           <div v-if="store.state.main.userInfo">
@@ -79,11 +80,11 @@
         <div class="toolbar">
           <div style="flex-shrink: 0;">布局图</div>
           <ObjTypeSelect :currentTool="currentTool" @select="changeObjTypeSelect" @showHelpModal="showHelpModal = true"
-            v-if="!isTimeShow" />
-          <button @click="triggerImportFile" type="button" v-if="!isTimeShow">
+            v-if="editMode === 'scene'" />
+          <button @click="triggerImportFile" type="button" v-if="editMode === 'scene'">
             导入模型
           </button>
-          <button @click="showAllObjSelect = true" type="button" v-if="!isTimeShow">
+          <button @click="showAllObjSelect = true" type="button" v-if="editMode === 'scene'">
             对象列表({{ allObjCount }})
           </button>
           <input type="file" id="fileInput" ref="loadProgramFileInputRef" accept=".devt" style="display: none"
@@ -106,7 +107,7 @@
         <div class="tools">
           <div style="flex-shrink: 0;">全景图</div>
           <div style="flex-grow: 1;"></div>
-          <button @click="showEnvironmentEditor = true" type="button" v-if="!isTimeShow">
+          <button @click="showEnvironmentEditor = true" type="button" v-if="editMode === 'scene'">
             环境
           </button>
         </div>
@@ -141,9 +142,9 @@
       </div>
     </div>
 
-    <div v-if="isTimeShow" class="timeLine" :style="{ height: timeHeight + 'px' }">
+    <div v-if="editMode === 'animation'" class="timeLine" :style="{ height: timeHeight + 'px' }">
       <div class="split-bar-x" @mousedown.prevent="startSplitTimeLine()"></div>
-      <TimeLine v-model="timelineData" @setIsTimeShow="setIsTimeShow" />
+      <TimeLine v-model="timelineData" />
     </div>
     <DataTypeEditPanel v-if="contextMenu?.visible && editPropTypeKey" :typeKey="editPropTypeKey"
       :editPropConfigInfo="editPropConfigInfo" v-model="editPropInputInfo"
@@ -309,12 +310,16 @@ const rightPanelCamera = ref<THREE.PerspectiveCamera | THREE.OrthographicCamera>
 
 const showPayModal = ref(false)
 
-const isTimeShow = ref<boolean>(false)
+const editMode = ref<'scene' | 'animation'>('scene')
 
-function setIsTimeShow(value: boolean) {
-  isTimeShow.value = value;
-  timelineState.isPlaying = value;
+function setEditMode(mode: 'scene' | 'animation') {
+  editMode.value = mode
+  timelineState.isPlaying = mode === 'animation';
+  nextTick(() => {
+    updateCanvasSize()
+  })
 }
+
 initAllPlugin();
 
 const updateCanvasSize = () => {
@@ -1759,19 +1764,36 @@ button {
 }
 
 .editMode {
+  padding: 6px 12px;
+  margin-left: 48px;
+
   .timeLineTitle {
-    padding: 4px 12px;
+    display: flex;
+    background: #e4e6eb;
+    border-radius: 12px;
+    padding: 4px;
 
     button {
-      padding: 4px 8px;
+      padding: 2px 12px;
       border: none;
-      border-radius: 4px;
-      background: #e4e6eb;
+      border-radius: 10px;
+      background: transparent;
       cursor: pointer;
-      font-size: 16px;
+      font-size: 14px;
       transition: all 0.3s;
       flex-shrink: 0;
-      margin-right: 12px;
+      margin-right: 0;
+      color: #8a8f99;
+
+      &:not(:last-child) {
+        margin-right: 4px;
+      }
+
+      &.active {
+        background: #fff;
+        color: #1a1a1a;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+      }
     }
   }
 }

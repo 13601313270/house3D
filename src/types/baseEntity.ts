@@ -66,13 +66,34 @@ export abstract class BaseEntityClass<T extends BaseObjData> {
   }
 
   setData(data: T) {
-    this.data = data
+    if (timelineState.isPlaying) {
+      // this.tempData = data
+    } else {
+      this.data = data
+    }
+
     this.update();
   }
 
   setTempData(data: T) {
     this.tempData = data;
     this.update();
+  }
+
+  getData(): T {
+    if (timelineState.isPlaying) {
+      return this.tempData;
+    } else {
+      return this.data
+    }
+  }
+
+  getTempData(): T {
+    return this.tempData;
+  }
+
+  getOriginalData(): T {
+    return this.data
   }
 
   private update() {
@@ -97,22 +118,6 @@ export abstract class BaseEntityClass<T extends BaseObjData> {
     }
     this.reCreate3DMeshAnd2DPreviewIfNeed() // 第二次reCreate3DMeshIfNeed，我也不知道为什么必须加，但是不加上，挂在墙上的门，拖动y轴的时候，墙不会刷新渲染
     this.parentEntity?.change3DMeshState()
-  }
-
-  getData(): T {
-    if (timelineState.isPlaying) {
-      return this.tempData;
-    } else {
-      return this.data
-    }
-  }
-
-  getOriginalData(): T {
-    return this.data
-  }
-
-  getTempData(): T {
-    return this.tempData;
   }
 
   // 生成3D模型

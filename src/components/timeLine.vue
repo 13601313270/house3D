@@ -154,7 +154,6 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-  (e: 'setIsTimeShow', value: boolean): void,
   (e: 'update:modelValue', value: TimelineData): void
 }>()
 
@@ -677,7 +676,6 @@ function togglePlay() {
   }
 
   isPlaying.value = !isPlaying.value
-  emit('setIsTimeShow', true)
   if (isPlaying.value) {
     lastTimestamp = performance.now()
     playLoop()
@@ -695,7 +693,6 @@ function togglePlay() {
 // 5) evaluateTimeline(0)：重新计算 0 秒时所有实体的初始态并写入 setTempData
 function stop() {
   isPlaying.value = false
-  emit('setIsTimeShow', false)
   currentTime.value = 0
   if (animationFrameId) {
     cancelAnimationFrame(animationFrameId)
@@ -937,7 +934,6 @@ function evaluateTimeline(time: number) {
 
   if (matchIndex === -1) {
     if (timelineData.value.clips.length > 0) {
-      emit('setIsTimeShow', true)
       let match: ClipData;
       const data: any = {}
       // --- 情况2：time 在所有 clip 之前（还没开始第一个动画） ---
@@ -950,10 +946,8 @@ function evaluateTimeline(time: number) {
           if (!entity) return;
           match.tracks.forEach(track => {
             const { trackType } = track;
-            emit('setIsTimeShow', false)
             // @ts-ignore - trackType 为动态字符串，Entity 接口无法穷举
             data[trackType] = entity.getData()[trackType] as any;
-            emit('setIsTimeShow', true)
           })
           entity.setTempData({
             ...entity.getTempData(),
@@ -994,7 +988,6 @@ function evaluateTimeline(time: number) {
     }
   } else if (matchIndex > -1) {
     // --- 情况1：命中某个 clip 区间 → 对每个轨道执行关键帧插值 ---
-    emit('setIsTimeShow', true)
     const match = timelineData.value.clips[matchIndex];
     const entity = window.worldApi.children.find(v => {
       return v.getData().id === match.entityId
