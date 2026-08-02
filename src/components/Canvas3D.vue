@@ -332,7 +332,7 @@ const initThree = () => {
             const entity = canvas1HoveredObject.entity as BaseEntityClass<any>
             if (entity instanceof PointEntityClass) {
               entity.setData({
-                ...entity.getData(),
+                // ...entity.getData(),
                 z: camera1MouseMoveStartZ + (deltaY * -1)
               })
               entity.moveZBox.visible = true

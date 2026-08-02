@@ -238,7 +238,7 @@ export class DoorEntity extends EntityClassInWall<DoorData> {
   }) {
     const { x, y } = position
     this.setData({
-      ...this.getData(),
+      // ...this.getData(),
       x,
       y,
     })
@@ -316,7 +316,7 @@ export class DoorEntity extends EntityClassInWall<DoorData> {
     const data = this.getData();
     editShow(this.getEditPropConfigData(data), (val) => {
       this.setData({
-        ...data,
+        // ...data,
         ...val,
       })
     })

@@ -361,7 +361,7 @@ export class OutFileInWallEntity extends EntityClassInWall<OutFileInWallData> {
     const { x, y } = position
     if (matchHandelInfo.index === 0) {
       this.setData({
-        ...this.getData(),
+        // ...this.getData(),
         x,
         y,
       })
@@ -432,7 +432,7 @@ export class OutFileInWallEntity extends EntityClassInWall<OutFileInWallData> {
     this.getEditPropConfigData(data).then(configList => {
       editShow(configList, (val) => {
         this.setData({
-          ...data,
+          // ...data,
           ...val,
         })
       })
@@ -451,7 +451,7 @@ export class OutFileInWallEntity extends EntityClassInWall<OutFileInWallData> {
       const data = this.getData();
       const objData = obj.getData()
       this.setData({
-        ...data,
+        // ...data,
         x: point.x,
         y: point.y,
         angle: nearestAngle,
@@ -468,7 +468,7 @@ export class OutFileInWallEntity extends EntityClassInWall<OutFileInWallData> {
     if (data.wallId) {
       const data = this.getData();
       this.setData({
-        ...data,
+        // ...data,
         wallId: undefined,
         wallPointId: -1,
       })

@@ -134,7 +134,7 @@ export class SphereEntity extends PointEntityClass<SphereData> {
   }) {
     const { x, y } = position
     this.setData({
-      ...this.getData(),
+      // ...this.getData(),
       x,
       y,
     })
@@ -197,7 +197,7 @@ export class SphereEntity extends PointEntityClass<SphereData> {
     const data = this.getData();
     editShow(this.getEditPropConfigData(data), (val) => {
       this.setData({
-        ...data,
+        // ...data,
         ...val,
       })
     })
@@ -213,7 +213,7 @@ export class SphereEntity extends PointEntityClass<SphereData> {
 
   setPrepareState(x: number, y: number): string[] {
     this.setData({
-      ...this.getData(),
+      // ...this.getData(),
       x,
       y,
     })

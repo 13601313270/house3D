@@ -489,13 +489,13 @@ export class CameraEntity extends CameraBase<CameraData> {
     const data = this.getData();
     if (matchHandelInfo.index === 1) {
       this.setData({
-        ...data,
+        // ...data,
         targetPositionX: x,
         targetPositionY: y,
       })
     } else {
       this.setData({
-        ...data,
+        // ...data,
         x,
         y,
       })
@@ -529,7 +529,7 @@ export class CameraEntity extends CameraBase<CameraData> {
 
   setPrepareState(x: number, y: number): string[] {
     this.setData({
-      ...this.getData(),
+      // ...this.getData(),
       x,
       y,
       targetPositionX: x + 100,
@@ -592,7 +592,7 @@ export class CameraEntity extends CameraBase<CameraData> {
     const data = this.getData();
     editShow(this.getEditPropConfigData(data), (val) => {
       this.setData({
-        ...data,
+        // ...data,
         ...val,
       })
     })

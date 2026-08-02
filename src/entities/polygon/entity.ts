@@ -442,7 +442,7 @@ export class PolygonEntity extends LineEntityClass<PolygonPoint, PolygonData> {
             if (data.points.length > 2) {
               const index = snapPoint.index / 2;
               this.setData({
-                ...data,
+                // ...data,
                 points: [...data.points.slice(0, index), ...data.points.slice(index + 1)],
               })
               close()
@@ -460,7 +460,7 @@ export class PolygonEntity extends LineEntityClass<PolygonPoint, PolygonData> {
       ], (val) => {
         this.markObjectIsDirty()
         this.setData({
-          ...data,
+          // ...data,
           ...val,
         })
       })
@@ -482,7 +482,7 @@ export class PolygonEntity extends LineEntityClass<PolygonPoint, PolygonData> {
             const prePoint = data.points[index - 1]
             const nextPoint = index === data.points.length ? data.points[0] : data.points[index]
             this.setData({
-              ...data,
+              // ...data,
               points: [
                 ...data.points.slice(0, index),
                 {
@@ -510,7 +510,7 @@ export class PolygonEntity extends LineEntityClass<PolygonPoint, PolygonData> {
         const saveVal = { ...val }
         delete saveVal.hidden
         this.setData({
-          ...data,
+          // ...data,
           ...saveVal,
           points,
         })

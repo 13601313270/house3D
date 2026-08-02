@@ -489,7 +489,7 @@ export class WallEntity extends LineEntityClass<WallPoint, WallData> {
           snw: this.getData().points[index].snw
         }
         this.setData({
-          ...this.getData(),
+          // ...this.getData(),
           points: oldPoints,
         })
       } else {
@@ -691,7 +691,7 @@ export class WallEntity extends LineEntityClass<WallPoint, WallData> {
             if (data.points.length > 2) {
               const index = snapPoint.index / 2;
               this.setData({
-                ...data,
+                // ...data,
                 points: [...data.points.slice(0, index), ...data.points.slice(index + 1)],
               })
               close()
@@ -750,7 +750,7 @@ export class WallEntity extends LineEntityClass<WallPoint, WallData> {
       ], (val) => {
         this.markObjectIsDirty()
         this.setData({
-          ...data,
+          // ...data,
           ...val,
         })
       })
@@ -776,7 +776,7 @@ export class WallEntity extends LineEntityClass<WallPoint, WallData> {
             const index = (snapPoint.index + 1) / 2;
             console.log('index', index)
             this.setData({
-              ...data,
+              // ...data,
               points: [
                 ...data.points.slice(0, index),
                 {
@@ -806,7 +806,7 @@ export class WallEntity extends LineEntityClass<WallPoint, WallData> {
         const saveVal = { ...val }
         delete saveVal.hidden
         this.setData({
-          ...data,
+          // ...data,
           ...saveVal,
           points,
         })

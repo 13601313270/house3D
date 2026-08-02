@@ -274,7 +274,7 @@ export class CurtainEntity extends PointEntityClass<CurtainData> {
     if (matchHandelInfo.index === 0) {
       const { centerOffset } = this.beforeMatchHandleSaveData!
       this.setData({
-        ...this.getData(),
+        // ...this.getData(),
         x: x - centerOffset.x,
         y: y - centerOffset.y,
       })
@@ -294,7 +294,7 @@ export class CurtainEntity extends PointEntityClass<CurtainData> {
       const allDistance = Math.hypot(newDragPoint2.x - newDragPoint3.x, newDragPoint2.y - newDragPoint3.y)
       const angleY = Math.atan2(newDragPoint2.y - newDragPoint3.y, newDragPoint2.x - newDragPoint3.x)
       this.setData({
-        ...this.getData(),
+        // ...this.getData(),
         width: Math.round(allDistance),
         x: Math.round(center.x),
         y: Math.round(center.y),
@@ -353,7 +353,7 @@ export class CurtainEntity extends PointEntityClass<CurtainData> {
     const data = this.getData();
     editShow(this.getEditPropConfigData(data), (val) => {
       this.setData({
-        ...data,
+        // ...data,
         ...val,
       })
     })
@@ -369,7 +369,7 @@ export class CurtainEntity extends PointEntityClass<CurtainData> {
 
   setPrepareState(x: number, y: number): string[] {
     this.setData({
-      ...this.getData(),
+      // ...this.getData(),
       x,
       y,
     })

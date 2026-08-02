@@ -247,7 +247,7 @@ function handleUnLock(group: GroupBaseEntity<GroupBaseData> | undefined, item: I
   const thisObj = group.children.find(v => v.getData().id === item.id)
   if (thisObj) {
     thisObj.setData({
-      ...thisObj.getData(),
+      // ...thisObj.getData(),
       isLocked,
     })
     item.isLocked = isLocked
@@ -296,7 +296,7 @@ function show3DMesh(group: GroupBaseEntity<GroupBaseData> | undefined, id: strin
   const api = group.children.find(v => v.getData().id === id)
   if (api) {
     api.setData({
-      ...api.getData(),
+      // ...api.getData(),
       isHidden,
     })
     setTimeout(() => {

@@ -322,7 +322,7 @@ export class RegularPolygonEntity extends PointEntityClass<RegularPolygon2Data> 
     const { x, y } = position
     if (matchHandelInfo.index === 0) {
       this.setData({
-        ...this.getData(),
+        // ...this.getData(),
         x,
         y,
       })
@@ -331,7 +331,7 @@ export class RegularPolygonEntity extends PointEntityClass<RegularPolygon2Data> 
       // 根据x,y计算angleY
       const angleY = Math.atan2(y - data.y, x - data.x)
       this.setData({
-        ...this.getData(),
+        // ...this.getData(),
         angleY: angleY * -1,
       })
     }
@@ -415,7 +415,7 @@ export class RegularPolygonEntity extends PointEntityClass<RegularPolygon2Data> 
     const data = this.getData();
     editShow(this.getEditPropConfigData(data), (val) => {
       this.setData({
-        ...data,
+        // ...data,
         ...val,
       })
     })
@@ -431,7 +431,7 @@ export class RegularPolygonEntity extends PointEntityClass<RegularPolygon2Data> 
 
   setPrepareState(x: number, y: number): string[] {
     this.setData({
-      ...this.getData(),
+      // ...this.getData(),
       x,
       y,
     })

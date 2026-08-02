@@ -262,7 +262,7 @@ export class PlaneEntity extends PointEntityClass<PlaneData> {
     const { x, y } = position
     if (matchHandelInfo.index === 0) {
       this.setData({
-        ...this.getData(),
+        // ...this.getData(),
         x,
         y,
       })
@@ -272,7 +272,7 @@ export class PlaneEntity extends PointEntityClass<PlaneData> {
       const angleY = Math.atan2(y - data.y, x - data.x)
       console.log(angleY)
       this.setData({
-        ...this.getData(),
+        // ...this.getData(),
         angleY: angleY * -1,
       })
     }
@@ -358,7 +358,7 @@ export class PlaneEntity extends PointEntityClass<PlaneData> {
     const data = this.getData();
     editShow(this.getEditPropConfigData(data), (val) => {
       this.setData({
-        ...data,
+        // ...data,
         ...val,
       })
     })
@@ -374,7 +374,7 @@ export class PlaneEntity extends PointEntityClass<PlaneData> {
 
   setPrepareState(x: number, y: number): string[] {
     this.setData({
-      ...this.getData(),
+      // ...this.getData(),
       x,
       y,
     })

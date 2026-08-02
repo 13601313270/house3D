@@ -65,13 +65,16 @@ export abstract class BaseEntityClass<T extends BaseObjData> {
     })
   }
 
-  setData(data: T) {
+  setData(data: Partial<T>) {
     if (timelineState.isPlaying) {
       // this.animationData = data
       const findClip = timelineState.timelineData.clips.find(v => v.entityId === this.data.id);
       console.log(222222, findClip)
     } else {
-      this.data = data
+      this.data = {
+        ...this.data,
+        ...data
+      }
     }
 
     this.update();

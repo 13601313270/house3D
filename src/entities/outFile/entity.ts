@@ -517,7 +517,7 @@ export class OutFileEntity extends PointEntityClass<OutFileData> {
     const { x, y } = position
     if (matchHandelInfo.index === 0) {
       this.setData({
-        ...this.getData(),
+        // ...this.getData(),
         x,
         y,
       })
@@ -528,7 +528,7 @@ export class OutFileEntity extends PointEntityClass<OutFileData> {
       const findObjInfo = window.worldState.ObjFileTypes.find(item => item.id === data.fileTypeId)
       console.log(angleY)
       this.setData({
-        ...this.getData(),
+        // ...this.getData(),
         angleY: angleY * -1 - (findObjInfo?.drawAngelAngel || 0),
       })
       return [
@@ -564,7 +564,7 @@ export class OutFileEntity extends PointEntityClass<OutFileData> {
 
   setPrepareState(x: number, y: number): string[] {
     this.setData({
-      ...this.getData(),
+      // ...this.getData(),
       x,
       y,
     })
@@ -625,7 +625,7 @@ export class OutFileEntity extends PointEntityClass<OutFileData> {
     this.getEditPropConfigData(data).then(configList => {
       editShow(configList, (val) => {
         this.setData({
-          ...data,
+          // ...data,
           ...val,
         })
       })

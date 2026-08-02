@@ -265,7 +265,7 @@ export class SectorEntity extends PointEntityClass<SectorData> {
     const { x, y } = position
     if (index === 0) {
       this.setData({
-        ...data,
+        // ...data,
         x,
         y,
       })
@@ -273,21 +273,21 @@ export class SectorEntity extends PointEntityClass<SectorData> {
       // 计算(x,y)到(data.x,data.y)的角度
       const angle = Math.atan2(y - data.y, x - data.x)
       this.setData({
-        ...data,
+        // ...data,
         startAngle: angle * -1,
       })
     } else if (index === 2) {
       // 计算(x,y)到(data.x,data.y)的角度
       const angle = Math.atan2(y - data.y, x - data.x)
       this.setData({
-        ...data,
+        // ...data,
         endAngle: angle * -1,
       })
     } else if (index === 3) {
       // 计算(x,y)到(data.x,data.y)的距离
       const dist = Math.hypot(x - data.x, y - data.y)
       this.setData({
-        ...data,
+        // ...data,
         r: dist,
       })
     }
@@ -377,7 +377,7 @@ export class SectorEntity extends PointEntityClass<SectorData> {
     const data = this.getData();
     editShow(this.getEditPropConfigData(data), (val) => {
       this.setData({
-        ...data,
+        // ...data,
         ...val,
       })
     })
@@ -393,7 +393,7 @@ export class SectorEntity extends PointEntityClass<SectorData> {
 
   setPrepareState(x: number, y: number): string[] {
     this.setData({
-      ...this.getData(),
+      // ...this.getData(),
       x,
       y,
     })

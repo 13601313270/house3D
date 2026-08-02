@@ -255,7 +255,7 @@ export class PlaneGroupEntity extends GroupBaseEntity<PlaneGroupData> {
       },
     ], (val) => {
       this.setData({
-        ...data,
+        // ...data,
         ...val,
       })
     })
@@ -321,7 +321,7 @@ export class PlaneGroupEntity extends GroupBaseEntity<PlaneGroupData> {
     const { x, y } = position
     if (matchHandelInfo.index === 0) {
       this.setData({
-        ...this.getData(),
+        // ...this.getData(),
         x,
         y,
       })
@@ -330,7 +330,7 @@ export class PlaneGroupEntity extends GroupBaseEntity<PlaneGroupData> {
       // 根据x,y计算angleY
       const angleY = Math.atan2(y - data.y, x - data.x)
       this.setData({
-        ...this.getData(),
+        // ...this.getData(),
         angleY: angleY * -1,
       })
     }
@@ -338,7 +338,7 @@ export class PlaneGroupEntity extends GroupBaseEntity<PlaneGroupData> {
 
   setPrepareState(x: number, y: number): string[] {
     this.setData({
-      ...this.getData(),
+      // ...this.getData(),
       x,
       y,
     })

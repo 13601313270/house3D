@@ -165,7 +165,7 @@ export class WindowEntity extends EntityClassInWall<WindowData> {
   }) {
     const { x, y } = position
     this.setData({
-      ...this.getData(),
+      // ...this.getData(),
       x,
       y,
     })
@@ -568,7 +568,7 @@ export class WindowEntity extends EntityClassInWall<WindowData> {
     const data = this.getData();
     editShow(this.getEditPropConfigData(data), (val) => {
       this.setData({
-        ...data,
+        // ...data,
         ...val,
       })
     })

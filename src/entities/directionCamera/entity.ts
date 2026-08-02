@@ -511,14 +511,14 @@ export class DirectionCameraEntity extends CameraBase<DirectionCameraData> {
     if (matchHandelInfo.index === 1) {
       const angleY = Math.atan2(y - data.y, x - data.x)
       this.setData({
-        ...data,
+        // ...data,
         angleY,
         // targetPositionX: x,
         // targetPositionY: y,
       })
     } else {
       this.setData({
-        ...data,
+        // ...data,
         x,
         y,
       })
@@ -554,7 +554,7 @@ export class DirectionCameraEntity extends CameraBase<DirectionCameraData> {
     // const targetPosition = this.getTargetPosition();
     const angleY = 0;// Math.atan2(y - data.y, x - data.x)
     this.setData({
-      ...this.getData(),
+      // ...this.getData(),
       x,
       y,
       angleY,
@@ -618,7 +618,7 @@ export class DirectionCameraEntity extends CameraBase<DirectionCameraData> {
     const data = this.getData();
     editShow(this.getEditPropConfigData(data), (val) => {
       this.setData({
-        ...data,
+        // ...data,
         ...val,
       })
     })

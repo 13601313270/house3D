@@ -25,15 +25,14 @@ export abstract class EntityClassInWall<T extends ObjInWallData> extends PointEn
       const wallScreenX = pointOnWall.x
       const wallScreenY = pointOnWall.y
 
-      const newData: T = {
+      this.setData({
         ...this.getData(),
         wallId: nearest.wall.id,
         wallPointId: nearest.lineIndex,
         x: wallScreenX,
         y: wallScreenY,
         angle,
-      };
-      this.setData(newData)
+      })
 
       // 双向去除原有的关联对象
       this.associationEntity.forEach(entity => {

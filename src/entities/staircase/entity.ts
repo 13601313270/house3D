@@ -559,7 +559,7 @@ export class StaircaseEntity extends LineEntityClass<StaircasePoint, StaircaseDa
             if (data.points.length > 2) {
               const index = snapPoint.index / 2;
               this.setData({
-                ...data,
+                // ...data,
                 points: [...data.points.slice(0, index), ...data.points.slice(index + 1)],
               })
               close()
@@ -583,7 +583,7 @@ export class StaircaseEntity extends LineEntityClass<StaircasePoint, StaircaseDa
         const saveVal = { ...val }
         delete saveVal.z;
         this.setData({
-          ...data,
+          // ...data,
           ...saveVal,
           points,
         })
@@ -610,7 +610,7 @@ export class StaircaseEntity extends LineEntityClass<StaircasePoint, StaircaseDa
         const saveVal = { ...val }
         delete saveVal.hidden
         this.setData({
-          ...data,
+          // ...data,
           ...saveVal,
           points,
         })

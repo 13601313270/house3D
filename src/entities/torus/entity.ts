@@ -139,7 +139,7 @@ export class TorusEntity extends PointEntityClass<TorusData> {
   }) {
     const { x, y } = position
     this.setData({
-      ...this.getData(),
+      // ...this.getData(),
       x,
       y,
     })
@@ -236,7 +236,7 @@ export class TorusEntity extends PointEntityClass<TorusData> {
     const data = this.getData();
     editShow(this.getEditPropConfigData(data), (val) => {
       this.setData({
-        ...data,
+        // ...data,
         ...val,
       })
     })
@@ -252,7 +252,7 @@ export class TorusEntity extends PointEntityClass<TorusData> {
 
   setPrepareState(x: number, y: number): string[] {
     this.setData({
-      ...this.getData(),
+      // ...this.getData(),
       x,
       y,
     })

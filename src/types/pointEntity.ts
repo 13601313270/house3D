@@ -200,7 +200,7 @@ export abstract class PointEntityClass<T extends PointObjData> extends BaseEntit
     this.updateBoundingBoxState()
   }
 
-  setData(data: T) {
+  setData(data: Partial<T>) {
     super.setData(data)
     this.updateBoundingBoxState();
   }

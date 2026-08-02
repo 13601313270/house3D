@@ -136,7 +136,7 @@ export class ConeEntity extends PointEntityClass<ConeData> {
   }) {
     const { x, y } = position
     this.setData({
-      ...this.getData(),
+      // ...this.getData(),
       x,
       y,
     })
@@ -208,7 +208,7 @@ export class ConeEntity extends PointEntityClass<ConeData> {
     const data = this.getData();
     editShow(this.getEditPropConfigData(data), (val) => {
       this.setData({
-        ...data,
+        // ...data,
         ...val,
       })
     })
@@ -224,7 +224,7 @@ export class ConeEntity extends PointEntityClass<ConeData> {
 
   setPrepareState(x: number, y: number): string[] {
     this.setData({
-      ...this.getData(),
+      // ...this.getData(),
       x,
       y,
     })
