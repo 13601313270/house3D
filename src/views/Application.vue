@@ -35,6 +35,18 @@
           </div>
         </div>
       </div>
+      <div class="editMode">
+        <div v-if="!isTimeShow">
+          <div class="timeLineTitle">
+            <button>
+              场景编辑
+            </button>
+            <button>
+              动画编辑
+            </button>
+          </div>
+        </div>
+      </div>
       <div class="toolbar right">
         <div class="toolbar-item" @mouseleave="activeToolsIndex = -1">
           <div v-if="store.state.main.userInfo">
@@ -66,12 +78,12 @@
       <div class="left-panel" :style="{ width: panel1SplitWidthPer * 100 + '%' }">
         <div class="toolbar">
           <div style="flex-shrink: 0;">布局图</div>
-          <ObjTypeSelect :currentTool="currentTool" @select="changeObjTypeSelect"
-            @showHelpModal="showHelpModal = true" />
-          <button @click="triggerImportFile" type="button">
+          <ObjTypeSelect :currentTool="currentTool" @select="changeObjTypeSelect" @showHelpModal="showHelpModal = true"
+            v-if="!isTimeShow" />
+          <button @click="triggerImportFile" type="button" v-if="!isTimeShow">
             导入模型
           </button>
-          <button @click="showAllObjSelect = true" type="button">
+          <button @click="showAllObjSelect = true" type="button" v-if="!isTimeShow">
             对象列表({{ allObjCount }})
           </button>
           <input type="file" id="fileInput" ref="loadProgramFileInputRef" accept=".devt" style="display: none"
@@ -94,7 +106,7 @@
         <div class="tools">
           <div style="flex-shrink: 0;">全景图</div>
           <div style="flex-grow: 1;"></div>
-          <button @click="showEnvironmentEditor = true" type="button">
+          <button @click="showEnvironmentEditor = true" type="button" v-if="!isTimeShow">
             环境
           </button>
         </div>
@@ -128,9 +140,10 @@
         </div>
       </div>
     </div>
-    <div class="timeLine" :style="{ height: timeHeight + 'px' }">
+
+    <div v-if="isTimeShow" class="timeLine" :style="{ height: timeHeight + 'px' }">
       <div class="split-bar-x" @mousedown.prevent="startSplitTimeLine()"></div>
-      <TimeLine v-model="timelineData" :get-object="getEntityMesh" />
+      <TimeLine v-model="timelineData" @setIsTimeShow="setIsTimeShow" />
     </div>
     <DataTypeEditPanel v-if="contextMenu?.visible && editPropTypeKey" :typeKey="editPropTypeKey"
       :editPropConfigInfo="editPropConfigInfo" v-model="editPropInputInfo"
@@ -222,7 +235,7 @@ import canvas2DSceneManage from '@/utils/canvas2DSceneManage'
 import bindDanvas2DSceneDefaultEvent from '@/utils/bindDanvas2DSceneDefaultEvent';
 import setHoverPoint from '@/utils/setHoverPoint';
 import TimeLine from '@/components/timeLine.vue'
-import { TimelineData, Keyframe } from '@/utils/timelineManage';
+import { TimelineData, Keyframe, timelineState } from '@/utils/timelineManage';
 
 const timelineData = ref<TimelineData>({
   duration: 30,
@@ -248,7 +261,6 @@ const showDemos = ref(false)
 const onlyDemos = ref(false)
 const showHelpModal = ref(false)
 const initWorldLoading = ref(false)
-
 const allDemos = ref<any[]>([])
 const demoIniting = ref(false)
 
@@ -296,6 +308,13 @@ const centerPanelCamera = ref(new THREE.PerspectiveCamera(55, aspectRatio2.value
 const rightPanelCamera = ref<THREE.PerspectiveCamera | THREE.OrthographicCamera>();
 
 const showPayModal = ref(false)
+
+const isTimeShow = ref<boolean>(false)
+
+function setIsTimeShow(value: boolean) {
+  isTimeShow.value = value;
+  timelineState.isPlaying = value;
+}
 initAllPlugin();
 
 const updateCanvasSize = () => {
@@ -802,20 +821,6 @@ function getAllEntitiesMap(): Map<string, [string, number]> {
     }
   }
   return map
-}
-
-// 根据 entityId 获取 3D 对象
-function getEntityMesh(entityId: string): THREE.Object3D | null {
-  const allEntities = getAllEntitiesMap()
-  const entityEntry = allEntities.get(entityId)
-  if (!entityEntry) return null
-
-  const [typeKey, index] = entityEntry
-  const entityList = worldApi.getTypeListEntity(typeKey)
-  const entity = entityList?.[index]
-  if (!entity || entity.meshList.length === 0) return null
-
-  return entity.meshList[0]
 }
 
 async function initWorldByData(data: fileData & {
@@ -1753,16 +1758,36 @@ button {
   }
 }
 
-.split-bar-x {
-  height: 4px;
-  background: #141b44;
-  cursor: row-resize;
-  transition: background 0.2s;
-  z-index: 100;
+.editMode {
+  .timeLineTitle {
+    padding: 4px 12px;
+
+    button {
+      padding: 4px 8px;
+      border: none;
+      border-radius: 4px;
+      background: #e4e6eb;
+      cursor: pointer;
+      font-size: 16px;
+      transition: all 0.3s;
+      flex-shrink: 0;
+      margin-right: 12px;
+    }
+  }
 }
 
-.split-bar-x:hover {
-  background: #1890ff;
+.timeLine {
+  .split-bar-x {
+    height: 4px;
+    background: #141b44;
+    cursor: row-resize;
+    transition: background 0.2s;
+    z-index: 100;
+
+    &:hover {
+      background: #1890ff;
+    }
+  }
 }
 
 .left-panel,

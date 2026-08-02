@@ -139,8 +139,7 @@
 
 <script lang="ts" setup>
 // onMounted 已预留（未来可能需要挂载后初始化标尺同步滚动等），暂未使用
-import { ref, computed, onUnmounted, watch, /* onMounted, */ } from 'vue'
-import * as THREE from 'three'
+import { ref, computed, onUnmounted, watch } from 'vue'
 import { message } from '@/utils/message'
 // timelineState 模块：管理时间轴状态，clip/track/keyframe 数据结构，以及全局播放状态标志
 import { ClipSegment, TimelineData, TrackData, Keyframe, timelineState, ClipData } from '@/utils/timelineManage';
@@ -152,10 +151,10 @@ import DataTypeEditPanel from '../views/DataTypeEditPanel.vue'
 // - getObject：根据 entityId 获取 THREE.Object3D（Mesh/Group），用于场景对象的 opacity/visible 等属性应用
 const props = defineProps<{
   modelValue: TimelineData
-  getObject?: (entityId: string) => THREE.Object3D | null
 }>()
 
 const emit = defineEmits<{
+  (e: 'setIsTimeShow', value: boolean): void,
   (e: 'update:modelValue', value: TimelineData): void
 }>()
 
@@ -668,7 +667,7 @@ function handleTrackClick(event: MouseEvent, track: TrackData, segment?: ClipSeg
 // togglePlay：播放/暂停切换按钮点击处理
 // 关键规则：
 //  - 开始播放前必须检查 overlappingClipIds：若存在同一对象多 clip 时间重叠 → 调用 message.warning 拦截
-//  - 开始播放：设置 timelineState.isPlaying=true（让外部 setTempData 写入生效），记录 lastTimestamp，启动 playLoop
+//  - 开始播放：设置，记录 lastTimestamp，启动 playLoop
 //  - 暂停播放：不修改 timelineState.isPlaying（保持 true，因为当前仍处于时间轴评估态），仅 cancelAnimationFrame 中止主循环
 function togglePlay() {
   // 播放前检查：存在时间重叠的 clip 时禁止播放，提示用户手动调整
@@ -678,9 +677,7 @@ function togglePlay() {
   }
 
   isPlaying.value = !isPlaying.value
-  // timelineState.isPlaying 表示「当前场景状态来自时间轴评估」，与 isPlaying（是否正在连续播放）不完全等价：
-  // 即使手动拖动播放头（暂停状态）也需要该标志为 true，因为此时 setTempData 写入来源还是时间轴。
-  timelineState.isPlaying = true;
+  emit('setIsTimeShow', true)
   if (isPlaying.value) {
     lastTimestamp = performance.now()
     playLoop()
@@ -693,13 +690,12 @@ function togglePlay() {
 // stop：停止播放并重置到 0 秒
 // 执行顺序：
 // 1) 设置 isPlaying=false 中止 playLoop 循环
-// 2) timelineState.isPlaying=false：通知外部模块「当前不是时间轴写入状态」，避免 setTempData 覆盖用户手动编辑
 // 3) currentTime 归零到起始点
 // 4) cancelAnimationFrame 取消待执行的帧回调，防止内存泄漏
 // 5) evaluateTimeline(0)：重新计算 0 秒时所有实体的初始态并写入 setTempData
 function stop() {
   isPlaying.value = false
-  timelineState.isPlaying = false;
+  emit('setIsTimeShow', false)
   currentTime.value = 0
   if (animationFrameId) {
     cancelAnimationFrame(animationFrameId)
@@ -931,8 +927,6 @@ function stopKeyframeDrag() {
 //      然后取该 clip 每个轨道 keyframes 的「最后一个值」（最终态）写入 setTempData
 //      （保证动画结束后，对象停留在最后一帧的状态，而不是跳回初始值）
 //
-// 关于 timelineState.isPlaying 的作用：
-//   外部模块（例如 Entity.update / 手动编辑面板）通过检查 timelineState.isPlaying 标志，
 //   判断当前 setTempData 写入来源是「时间轴评估结果」还是「用户手动修改」，
 //   避免两者互相覆盖。因此在写入 entity.getData() 初始值之前临时设为 false，之后立刻恢复 true。
 function evaluateTimeline(time: number) {
@@ -943,7 +937,7 @@ function evaluateTimeline(time: number) {
 
   if (matchIndex === -1) {
     if (timelineData.value.clips.length > 0) {
-      timelineState.isPlaying = true;
+      emit('setIsTimeShow', true)
       let match: ClipData;
       const data: any = {}
       // --- 情况2：time 在所有 clip 之前（还没开始第一个动画） ---
@@ -956,11 +950,10 @@ function evaluateTimeline(time: number) {
           if (!entity) return;
           match.tracks.forEach(track => {
             const { trackType } = track;
-            // 读取初始值前先置 false：getData() 内部若检查该标志，需知道此时不是「时间轴写入中」
-            timelineState.isPlaying = false;
+            emit('setIsTimeShow', false)
             // @ts-ignore - trackType 为动态字符串，Entity 接口无法穷举
             data[trackType] = entity.getData()[trackType] as any;
-            timelineState.isPlaying = true;
+            emit('setIsTimeShow', true)
           })
           entity.setTempData({
             ...entity.getTempData(),
@@ -1001,7 +994,7 @@ function evaluateTimeline(time: number) {
     }
   } else if (matchIndex > -1) {
     // --- 情况1：命中某个 clip 区间 → 对每个轨道执行关键帧插值 ---
-    timelineState.isPlaying = true;
+    emit('setIsTimeShow', true)
     const match = timelineData.value.clips[matchIndex];
     const entity = window.worldApi.children.find(v => {
       return v.getData().id === match.entityId
