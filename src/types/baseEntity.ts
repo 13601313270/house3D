@@ -68,7 +68,6 @@ export abstract class BaseEntityClass<T extends BaseObjData> {
   }
 
   setData(data: Partial<T>) {
-    // console.trace('ddddddd', data)
     if (timelineState.isPlaying) {
       // this.animationData = data
       let findClip = timelineState.timelineData.clips.find(v => v.entityId === this.data.id);

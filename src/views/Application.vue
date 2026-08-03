@@ -984,7 +984,13 @@ const handleContextMenu = (point: {
                 value: data.tipFontSize || 96,
               })
             }
-            editPropConfigInfo.value = modifyConfig
+            if (timelineState.isPlaying) {
+              editPropConfigInfo.value = modifyConfig.filter(v => {
+                return api.canEditAnimationDataColumn.includes(v.id)
+              })
+            } else {
+              editPropConfigInfo.value = modifyConfig
+            }
             const inputData: any = {}
             modifyConfig.forEach(v => {
               if (v.dataType !== 'title') {

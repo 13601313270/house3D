@@ -964,7 +964,6 @@ function evaluateTimeline(time: number) {
   if (matchIndex === -1) {
     if (timelineState.timelineData.clips.length > 0) {
       let match: ClipData;
-      const data: any = {}
       // --- 情况2：time 在所有 clip 之前（还没开始第一个动画） ---
       if (time < timelineState.timelineData.clips[0].startTime) {
         match = timelineState.timelineData.clips[0];
@@ -974,19 +973,21 @@ function evaluateTimeline(time: number) {
             return v.getOriginalData().id === match.entityId
           })
           if (!entity) return;
+          const data: any = { ...entity.getOriginalData() };
           match.tracks.forEach(track => {
-            const { trackType, } = track;
+            const { trackType } = track;
             const leftTime = 0;
             const rightTime = match.startTime;
             const t = (time - leftTime) / (rightTime - leftTime)
             // @ts-ignore - trackType 为动态字符串，Entity 接口无法穷举
             const leftVal = entity.getOriginalData()[trackType] as any;
             const rightVal = track.keyframes[0].value
-            // console.log('track.keyframes', track.keyframes[0].value)
-            const previewVal = leftVal + (rightVal - leftVal) * t;
-
-            // @ts-ignore - trackType 为动态字符串，Entity 接口无法穷举
-            data[trackType] = previewVal;// entity.getOriginalData()[trackType] as any;
+            if (track.keyframes[0].time === match.startTime) {
+              // console.log('track.keyframes', track.keyframes[0].value)
+              const previewVal = leftVal + (rightVal - leftVal) * t;
+              // @ts-ignore - trackType 为动态字符串，Entity 接口无法穷举
+              data[trackType] = previewVal;// entity.getOriginalData()[trackType] as any;
+            }
           })
           entity.setAnimationData({
             ...entity.getAnimationData(),
@@ -994,6 +995,7 @@ function evaluateTimeline(time: number) {
           });
         }
       } else {
+        const data: any = {}
         // --- 情况3：time 在至少一个 clip 之后（取最近已结束 clip 的最终态） ---
         // reduce 遍历 clips：找出满足 endTime <= time 且 endTime 最大的 clip 索引（即「上一段已结束动画」）
         const matchPreIndex = timelineState.timelineData.clips.reduce((preIndex, clip, index) => {
