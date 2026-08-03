@@ -19,7 +19,8 @@
     </div>
 
     <!-- 时间标尺：显示主/次刻度，宽度随缩放级别变化，与内容宽度保持一致 -->
-    <div class="timeline-ruler" ref="timelineRuler" @scroll.prevent.stop>
+    <div class="timeline-ruler" :style="{ marginLeft: (scrollLeft * -1 + moreLeft + 4) + 'px' }" ref="timelineRuler"
+      @scroll.prevent.stop>
       <div class="ruler-track" :style="{ width: `${effectiveDuration * zoomLevel * 50}px` }">
         <div class="ruler-marks">
           <!-- ruler-mark.major：整数秒刻度，带时间标签；minor：次级刻度无标签 -->
@@ -32,9 +33,10 @@
     </div>
 
     <!-- 滚动容器：控制轨道区域横向与纵向滚动，onScroll 同步 scrollLeft 状态 -->
-    <div class="timeline-scroll-container" :style="{ paddingLeft: (moreLeft + 4) + 'px' }" @scroll="onScroll">
+    <div class="timeline-scroll-container">
       <!-- timeInfo：使用 CSS Grid 叠加两层（timeline-content-wrapper + playhead-container），使播放头贯穿整个区域 -->
-      <div class="timeInfo" @mousedown="handleTimeInfoMouseDown">
+      <div class="timeInfo" :style="{ paddingLeft: (moreLeft + 4) + 'px' }" @mousedown="handleTimeInfoMouseDown"
+        @scroll="onScroll">
         <!-- 轨道内容层：承载所有 timeline-row + track-item，宽度随 zoomLevel 放大 -->
         <div class="timeline-content-wrapper" :style="{ width: `${effectiveDuration * zoomLevel * 50}px` }">
           <div class="timeline-track-area">
@@ -54,7 +56,7 @@
                 <div class="track-header-bar">
                   <span class="clip-name">{{ segment.clip.entityId }}</span>
                   <span class="clip-duration">{{ formatTime(segment.startTime) }} - {{ formatTime(segment.endTime)
-                    }}</span>
+                  }}</span>
                 </div>
                 <!-- 时间重叠警告徽章：hover 时显示 title 文案，点击播放时会被拦截 -->
                 <div v-if="overlappingClipIds.has(segment.clip.clipId)" class="warning-badge" title="同一个物体对象不允许时间重叠">
@@ -88,7 +90,7 @@
         <div class="floating-header">
           <span class="floating-title">{{ activeSegment.clip.entityId }}</span>
           <span class="floating-time">{{ formatTime(activeSegment.startTime) }} - {{ formatTime(activeSegment.endTime)
-            }}</span>
+          }}</span>
           <button class="floating-delete" @click="deleteClip(activeSegment.clip.clipId)" title="删除动画">🗑</button>
           <button class="floating-close" @click="closeClipContent">×</button>
         </div>
@@ -190,8 +192,8 @@ onMounted(() => {
     rulerMarks.value = (() => {
       const marks: any[] = []
       const dur = effectiveDuration.value
-      const step = dur / 20
-      console.log('ddddddd', marks, dur, step);
+      const step = 1;// dur / 20
+      // console.log('ddddddd', marks, dur, step);
       if (dur > 0) {
         for (let i = 0; i <= dur; i += step) {
           marks.push({
@@ -441,6 +443,7 @@ function stopScrub() {
 // onScroll：timeline-scroll-container 滚动事件 → 同步 scrollLeft 状态（预留，用于未来缩放时定位对齐）
 function onScroll(event: Event) {
   const target = event.target as HTMLElement
+  console.log('target.scrollLeft', target.scrollLeft)
   scrollLeft.value = target.scrollLeft
 }
 
@@ -1496,12 +1499,12 @@ onUnmounted(() => {
         top: 0;
         width: 1px;
         height: 100%;
-        background: rgba(255, 255, 255, 0.2);
+        background: rgba(0, 0, 0, 0.7);
 
         // major：整数秒主刻度（更清晰的 40% 背景 + 左下角标签）
         &.major {
           height: 100%;
-          background: rgba(255, 255, 255, 0.4);
+          background: rgba(0, 0, 0, 0.7);
 
           .mark-label {
             position: absolute;
