@@ -237,6 +237,7 @@ import bindDanvas2DSceneDefaultEvent from '@/utils/bindDanvas2DSceneDefaultEvent
 import setHoverPoint from '@/utils/setHoverPoint';
 import TimeLine from '@/components/timeLine.vue'
 import { TimelineData, Keyframe, timelineState } from '@/utils/timelineManage';
+import generateClipId from '@/utils/generateClipId';
 
 const canvas2DRef = ref<HTMLCanvasElement | null>(null)
 const canvas2DActionRef = ref<HTMLCanvasElement | null>(null)
@@ -686,7 +687,6 @@ const saveDrawing = async () => {
     canvas2DSceneManage.list[0].level,
     cameraStateCenter.value,
     activeCameraIndex.value,
-    JSON.parse(JSON.stringify(timelineState.timelineData))
   )
 }
 
@@ -950,6 +950,7 @@ const handleContextMenu = (point: {
             continue
           }
           api.editPropConfig(snapPoint, (propConfig, callback) => {
+            const data = api.getData()
             console.log('dist', propConfig)
             const contextMenuX = point.e.clientX
             const contextMenuY = point.e.clientY
@@ -992,7 +993,7 @@ const handleContextMenu = (point: {
                 inputData[v.id] = v.value
               }
             })
-            inputData.isLocked = api.getData().isLocked || false
+            inputData.isLocked = data.isLocked || false
             console.log('初始化数据', inputData)
             editPropInputInfo.value = inputData;
             nextTick(() => {
@@ -1005,7 +1006,14 @@ const handleContextMenu = (point: {
                 index: j
               }
               editPropConfigEditCallback = (val: any) => {
-                callback(val)
+                const changeData: any = {};
+                Object.keys(val).forEach(key => {
+                  if (val[key] !== data[key]) {
+                    changeData[key] = val[key];
+                  }
+                })
+                console.log('编辑数据', data, val, changeData)
+                callback(changeData)
               }
               nextTick(() => {
                 const height = document.querySelector('.context-menu')?.clientHeight
@@ -1367,11 +1375,6 @@ function groupExit() {
     window.globalEditGroup.insertTempObj.beforeRemove()
     window.globalEditGroup.insertTempObj = null
   }
-}
-
-// 生成唯一 clipId
-function generateClipId(): string {
-  return `clip-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`
 }
 
 function handleAddAnimation(data: { typeKey: string; modelValue: Record<string, any> }) {

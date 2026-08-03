@@ -6,6 +6,7 @@ import { GroupBaseEntity } from './groupBase/entity'
 import { GroupBaseData } from './groupBase'
 import canvas2DSceneManage from '@/utils/canvas2DSceneManage'
 import { timelineState } from '@/utils/timelineManage'
+import generateClipId from '@/utils/generateClipId'
 
 export type allSnapFromType = 'point' | 'line' | 'axis'
 // 磁吸点
@@ -66,9 +67,20 @@ export abstract class BaseEntityClass<T extends BaseObjData> {
   }
 
   setData(data: Partial<T>) {
+    console.trace('ddddddd', data)
     if (timelineState.isPlaying) {
       // this.animationData = data
-      const findClip = timelineState.timelineData.clips.find(v => v.entityId === this.data.id);
+      let findClip = timelineState.timelineData.clips.find(v => v.entityId === this.data.id);
+      if (!findClip) {
+        timelineState.timelineData.clips.push({
+          entityId: this.data.id,
+          clipId: generateClipId(),
+          startTime: timelineState.currentTime,
+          endTime: timelineState.currentTime + 1,
+          tracks: [],
+        })
+        findClip = timelineState.timelineData.clips.find(v => v.entityId === this.data.id)
+      }
       if (findClip) {
         Object.keys(data).forEach((key) => {
           const findTrack = findClip.tracks.find(v => v.trackType === key)
@@ -99,6 +111,14 @@ export abstract class BaseEntityClass<T extends BaseObjData> {
             })
           }
         })
+
+        // 如果timelineState.currentTime，在findClip.startTime和findClip.endTime之外，那么调整findClip.startTime和findClip.endTime，包括进这个时间
+        if (timelineState.currentTime < findClip.startTime) {
+          findClip.startTime = timelineState.currentTime;
+        }
+        if (timelineState.currentTime > findClip.endTime) {
+          findClip.endTime = timelineState.currentTime;
+        }
 
         this.setAnimationData({
           ...this.animationData,

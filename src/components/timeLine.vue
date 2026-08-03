@@ -32,7 +32,7 @@
     </div>
 
     <!-- 滚动容器：控制轨道区域横向与纵向滚动，onScroll 同步 scrollLeft 状态 -->
-    <div class="timeline-scroll-container" @scroll="onScroll">
+    <div class="timeline-scroll-container" :style="{ paddingLeft: (moreLeft + 4) + 'px' }" @scroll="onScroll">
       <!-- timeInfo：使用 CSS Grid 叠加两层（timeline-content-wrapper + playhead-container），使播放头贯穿整个区域 -->
       <div class="timeInfo" @mousedown="handleTimeInfoMouseDown">
         <!-- 轨道内容层：承载所有 timeline-row + track-item，宽度随 zoomLevel 放大 -->
@@ -54,7 +54,7 @@
                 <div class="track-header-bar">
                   <span class="clip-name">{{ segment.clip.entityId }}</span>
                   <span class="clip-duration">{{ formatTime(segment.startTime) }} - {{ formatTime(segment.endTime)
-                  }}</span>
+                    }}</span>
                 </div>
                 <!-- 时间重叠警告徽章：hover 时显示 title 文案，点击播放时会被拦截 -->
                 <div v-if="overlappingClipIds.has(segment.clip.clipId)" class="warning-badge" title="同一个物体对象不允许时间重叠">
@@ -88,14 +88,14 @@
         <div class="floating-header">
           <span class="floating-title">{{ activeSegment.clip.entityId }}</span>
           <span class="floating-time">{{ formatTime(activeSegment.startTime) }} - {{ formatTime(activeSegment.endTime)
-          }}</span>
+            }}</span>
           <button class="floating-delete" @click="deleteClip(activeSegment.clip.clipId)" title="删除动画">🗑</button>
           <button class="floating-close" @click="closeClipContent">×</button>
         </div>
 
         <!-- 每个轨道一行：左侧 track-label（含移除按钮），右侧 track-timeline（点击添加/拖拽关键帧 + 曲线预览） -->
         <div v-for="track in activeSegment.clip.tracks" :key="track.trackType" class="track-row">
-          <div class="track-label">
+          <div class="track-label" :style="{ width: moreLeft + 'px' }">
             <span>{{ track.trackType }}</span>
             <button class="track-remove" @click="removeTrack(track.trackType)" title="移除轨道">✕</button>
           </div>
@@ -168,6 +168,11 @@ const rulerMarks = ref<{
   major: boolean;
 }[]>([])
 const clipSegments = ref<ClipSegment[]>([])
+
+const moreLeft = 70;
+const moreRight = 10;
+const moreWidth = moreLeft + moreRight; // 额外预留10px
+
 onMounted(() => {
   function updateRef() {
     effectiveDuration.value = (() => {
@@ -472,10 +477,8 @@ function toggleClipContent(event: MouseEvent, segment: ClipSegment) {
   }
   if (left < 10) left = 10
 
-  const moreWidth = 20; // 额外预留10px
-
   trackContentStyle.value = {
-    left: `${left - moreWidth / 2}px`,
+    left: `${left - moreLeft}px`,
     top: `${rect.bottom + 4}px`,
     width: `${panelWidth + moreWidth}px`
   }
@@ -1287,7 +1290,6 @@ onUnmounted(() => {
     display: flex;
     flex-direction: row;
     align-items: start;
-    padding: 0 4px 4px 4px;
 
     // timeInfo：核心「双层叠加」区域，使用 CSS Grid 让 content / playhead 占同一格
     // 两层互不干扰，content 负责点击/拖拽 track-item，playhead 贯穿显示红色竖线
@@ -1376,7 +1378,7 @@ onUnmounted(() => {
 
               // active：当前打开了浮动编辑面板的 clip，更亮的红色边框 + 更高 z-index
               &.active {
-                box-shadow: 0 0 0 1px #e94560;
+                box-shadow: inset 0 0 0 1px #e94560;
                 z-index: 50;
               }
 
@@ -1587,14 +1589,13 @@ onUnmounted(() => {
   // track-row：每个属性轨道一行（左 label + 右 timeline）高度 35px 与 timeline-row 一致
   .track-row {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
     border-bottom: 1px solid rgba(255, 255, 255, 0.25);
     box-sizing: border-box;
     white-space: nowrap;
-    padding: 8px 10px;
-    gap: 8px;
-    height: 52px;
+    padding-right: 10px;
+    height: 36px;
 
     // 最后一行不加分隔线
     &:last-child {
@@ -1603,13 +1604,14 @@ onUnmounted(() => {
 
     // 轨道类型标签（position / rotation / opacity ...），固定宽度 70px
     .track-label {
-      width: 70px;
       font-size: 11px;
       color: #a8b2d1;
       flex-shrink: 0;
       display: flex;
       align-items: center;
       justify-content: space-between;
+      padding-left: 4px;
+      box-sizing: border-box;
 
       // ✕ 移除轨道按钮：默认透明，hover track-label 时出现
       .track-remove {
@@ -1651,15 +1653,16 @@ onUnmounted(() => {
       // keyframe-node：关键帧圆点节点（绿色默认，红色选中态）
       .keyframe-node {
         position: absolute;
-        top: 0;
-        width: 12px;
-        height: 12px;
-        margin-left: -6px; // 左半补偿居中（否则左边对齐而非中心）
+        top: 15px;
+        width: 16px;
+        height: 16px;
+        margin-left: -8px;
         margin-top: -6px;
         border-radius: 50%;
-        background: #4CAF50; // 绿色=正常（添加但未选中）
+        background: #4CAF50;
         border: 2px solid #fff;
         cursor: move;
+        box-sizing: border-box;
         transition: transform 0.15s, background 0.15s;
         z-index: 2;
 
@@ -1678,7 +1681,7 @@ onUnmounted(() => {
       // curve-line：SVG polyline 插值曲线预览（opacity / visible / position Y 等映射）
       .curve-line {
         position: absolute;
-        top: 0;
+        top: 15px;
         left: 0;
         width: 100%;
         height: 4px;

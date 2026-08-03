@@ -3,6 +3,7 @@ import { Point } from "@/types"
 import { CameraState } from "@/types/camera"
 import { BaseObjData } from "@/types/map2d"
 import { EnvironmentConfig } from "@/world/world"
+import { timelineState } from "./timelineManage"
 
 export type fileData = {
   [key in string]?: BaseObjData[]
@@ -32,15 +33,15 @@ async function saveWorld(
   zoom2DLevel: number,
   cameraStateCenter: CameraState,
   activeCameraIndex: number,
-  timelineData?: TimelineDataForSave
 ) {
+  const timelineData = JSON.parse(JSON.stringify(timelineState.timelineData))
   const allFileObjectsByGroup: fileData = {};
   window.worldApi.children.forEach((item) => {
     const key = item.type
     if (!allFileObjectsByGroup[key]) {
       allFileObjectsByGroup[key] = []
     }
-    allFileObjectsByGroup[key].push(item.getData())
+    allFileObjectsByGroup[key].push(item.getOriginalData())
   })
 
   // getAllFileObjects(): fileData {
