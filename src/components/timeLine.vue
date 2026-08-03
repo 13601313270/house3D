@@ -118,20 +118,19 @@
         </div>
 
         <!-- 添加属性区域：默认显示「＋ 添加属性」按钮；点击后展开 dropdown 选择轨道类型 -->
-        <div class="add-track-area">
+        <!-- <div class="add-track-area">
           <div v-if="!isShowTrackDropdown" class="add-track-select" @click="showTrackDropdown">
             <span>＋ 添加属性</span>
           </div>
           <div v-else class="track-dropdown">
             <div class="track-dropdown-header">选择属性</div>
-            <!-- 动态读取 entity 的编辑配置，仅展示当前 clip 还未添加的轨道类型 -->
             <div v-for="item in availableTrackTypes" :key="item.id" class="track-dropdown-item"
               @click="addTrack(item.id)">
               {{ item.label }}
             </div>
             <div class="track-dropdown-close" @click="isShowTrackDropdown = false">取消</div>
           </div>
-        </div>
+        </div> -->
       </div>
     </teleport>
   </div>
@@ -583,7 +582,7 @@ function onKeyframeClick(event: MouseEvent, clipId: string, entityId: string, tr
     togglePlay()
   }
   // 从 worldApi 场景根节点下查找匹配 entityId 的实体对象
-  const entity = window.worldApi.children.find(v => v.getData().id === entityId)
+  const entity = window.worldApi.children.find(v => v.getOriginalData().id === entityId)
   if (!entity) return;
 
   // 编辑面板回调：用户在 DataTypeEditPanel 修改值后，自动同步到当前 keyframe.value
@@ -967,15 +966,16 @@ function evaluateTimeline(time: number) {
       // --- 情况2：time 在所有 clip 之前（还没开始第一个动画） ---
       if (time < timelineState.timelineData.clips[0].startTime) {
         match = timelineState.timelineData.clips[0];
+        console.log('ssss-3', match)
         if (match) {
           const entity = window.worldApi.children.find(v => {
-            return v.getData().id === match.entityId
+            return v.getOriginalData().id === match.entityId
           })
           if (!entity) return;
           match.tracks.forEach(track => {
             const { trackType } = track;
             // @ts-ignore - trackType 为动态字符串，Entity 接口无法穷举
-            data[trackType] = entity.getData()[trackType] as any;
+            data[trackType] = entity.getOriginalData()[trackType] as any;
           })
           entity.setAnimationData({
             ...entity.getAnimationData(),
@@ -996,7 +996,7 @@ function evaluateTimeline(time: number) {
         match = timelineState.timelineData.clips[matchPreIndex];
         if (match) {
           const entity = window.worldApi.children.find(v => {
-            return v.getData().id === match.entityId
+            return v.getOriginalData().id === match.entityId
           })
           if (!entity) return;
           match.tracks.forEach(track => {
@@ -1018,7 +1018,7 @@ function evaluateTimeline(time: number) {
     // --- 情况1：命中某个 clip 区间 → 对每个轨道执行关键帧插值 ---
     const match = timelineState.timelineData.clips[matchIndex];
     const entity = window.worldApi.children.find(v => {
-      return v.getData().id === match.entityId
+      return v.getOriginalData().id === match.entityId
     })
     if (!entity) return;
 
@@ -1161,29 +1161,29 @@ function removeTrack(trackType: string) {
 // 读取对应 entity 的 getEditPropConfigData（支持同步/Promise 返回），
 // 将配置中的可编辑字段映射为 {id, label} 列表填充 availableTrackTypes 并展开下拉。
 // 注意：下拉项可能包含非动画属性，由用户自行选择是否需要添加为轨道。
-function showTrackDropdown() {
-  if (!activeSegment.value) return;
-  const { entityId } = activeSegment.value.clip
-  const entity = window.worldApi.children.find(v => v.getData().id === entityId)
-  if (!entity) return;
+// function showTrackDropdown() {
+//   if (!activeSegment.value) return;
+//   const { entityId } = activeSegment.value.clip
+//   const entity = window.worldApi.children.find(v => v.getOriginalData().id === entityId)
+//   if (!entity) return;
 
-  function callback(config: editItem[]) {
-    // 先清空旧数据避免重复累加
-    availableTrackTypes.value = config.map(v => {
-      return {
-        id: v.id,
-        label: v.label
-      }
-    })
-    isShowTrackDropdown.value = true
-  }
-  const config = entity.getEditPropConfigData(entity.getData())
-  if (config instanceof Promise) {
-    config.then(callback)
-  } else {
-    callback(config)
-  }
-}
+//   function callback(config: editItem[]) {
+//     // 先清空旧数据避免重复累加
+//     availableTrackTypes.value = config.map(v => {
+//       return {
+//         id: v.id,
+//         label: v.label
+//       }
+//     })
+//     isShowTrackDropdown.value = true
+//   }
+//   const config = entity.getEditPropConfigData(entity.getData())
+//   if (config instanceof Promise) {
+//     config.then(callback)
+//   } else {
+//     callback(config)
+//   }
+// }
 
 // onUnmounted：组件卸载时清理动画帧与事件监听，避免内存泄漏
 onUnmounted(() => {
