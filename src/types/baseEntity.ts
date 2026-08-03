@@ -67,7 +67,7 @@ export abstract class BaseEntityClass<T extends BaseObjData> {
   }
 
   setData(data: Partial<T>) {
-    console.trace('ddddddd', data)
+    // console.trace('ddddddd', data)
     if (timelineState.isPlaying) {
       // this.animationData = data
       let findClip = timelineState.timelineData.clips.find(v => v.entityId === this.data.id);
@@ -86,7 +86,7 @@ export abstract class BaseEntityClass<T extends BaseObjData> {
           const findTrack = findClip.tracks.find(v => v.trackType === key)
           if (findTrack) {
             const keyframes = [...findTrack.keyframes];
-            console.log(222222, keyframes)
+            // console.log(222222, keyframes)
             if (keyframes.find(v => v.time === timelineState.currentTime)) {
               const index = keyframes.findIndex(v => v.time === timelineState.currentTime)
               // @ts-ignore

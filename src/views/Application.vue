@@ -697,8 +697,6 @@ const loadProgramFile = () => {
 
 const handleLoadProgramFileChange = async (e: Event) => {
   worldApi.clearAll()
-  // timelineData____.value = { duration: 30, clips: [] }
-  console.log('1111-0', timelineState.timelineData.clips)
   timelineState.timelineData = { duration: 30, clips: [] }
   initWorldLoading.value = true
   const input = e.target as HTMLInputElement
@@ -1009,10 +1007,13 @@ const handleContextMenu = (point: {
                 const changeData: any = {};
                 Object.keys(val).forEach(key => {
                   if (val[key] !== data[key]) {
-                    changeData[key] = val[key];
+                    if (!['isHidden', 'tip', 'tipFontSize', 'isLocked'].includes(key)) {
+                      console.log('编辑数据', key, val[key], data[key])
+                      changeData[key] = val[key];
+                    }
                   }
                 })
-                console.log('编辑数据', data, val, changeData)
+
                 callback(changeData)
               }
               nextTick(() => {

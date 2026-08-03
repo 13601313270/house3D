@@ -177,7 +177,6 @@ const moreWidth = moreLeft + moreRight; // 额外预留10px
 onMounted(() => {
   function updateRef() {
     effectiveDuration.value = (() => {
-      console.log('1111-1', timelineState.timelineData.clips)
       if (timelineState.timelineData.clips) {
         let maxTime = timelineState.timelineData.duration
         for (const clip of timelineState.timelineData.clips) {
@@ -252,7 +251,6 @@ onMounted(() => {
   }
   updateRef()
   timelineState.onChange(() => {
-    console.log(1111)
     updateRef()
   })
   currentTime.value = timelineState.currentTime
@@ -392,7 +390,8 @@ function getTimeFromMouseEvent(event: MouseEvent): number {
   if (!timeInfo) return timelineState.currentTime
 
   const scrollLeft = timeInfo.scrollLeft
-  const x = event.clientX - wrapperRect.left + scrollLeft
+  const x = event.clientX + scrollLeft - moreLeft - 4;
+  console.log('event----', event.clientX, wrapperRect.left, scrollLeft)
   const time = (x / wrapperRect.width) * effectiveDuration.value
   return Math.max(0, Math.min(time, effectiveDuration.value))
 }
@@ -969,7 +968,7 @@ function evaluateTimeline(time: number) {
       // --- 情况2：time 在所有 clip 之前（还没开始第一个动画） ---
       if (time < timelineState.timelineData.clips[0].startTime) {
         match = timelineState.timelineData.clips[0];
-        console.log('ssss-3', match)
+        // console.log('ssss-3', match)
         if (match) {
           const entity = window.worldApi.children.find(v => {
             return v.getOriginalData().id === match.entityId
@@ -983,7 +982,7 @@ function evaluateTimeline(time: number) {
             // @ts-ignore - trackType 为动态字符串，Entity 接口无法穷举
             const leftVal = entity.getOriginalData()[trackType] as any;
             const rightVal = track.keyframes[0].value
-            console.log('track.keyframes', track.keyframes[0].value)
+            // console.log('track.keyframes', track.keyframes[0].value)
             const previewVal = leftVal + (rightVal - leftVal) * t;
 
             // @ts-ignore - trackType 为动态字符串，Entity 接口无法穷举
@@ -1339,6 +1338,7 @@ onUnmounted(() => {
           position: absolute;
           top: 0;
           width: 2px;
+          margin-left: -1px;
           height: 100%;
           background: rgba(233, 69, 96, 0.6);
           cursor: ew-resize; // 左右箭头光标，提示可拖拽

@@ -52,7 +52,7 @@
             :record="modelValue" @update:modelValue="handleUpdate(item.id, $event)" />
         </div>
       </div>
-      <div class="buttonGroup">
+      <div class="buttonGroup" v-if="!isTimelineStatePlaying">
         <div class="leftGroup">
           <button @click="LockObj(!modelValue.isLocked)">{{ modelValue.isLocked ? '解锁' : '锁定' }}</button>
           <button @click="copyEntity">复制</button>
@@ -75,6 +75,7 @@ import DataTypeEdit from './DataTypeEdit.vue'
 import BoneEdit from './boneEdit.vue'
 import message from '@/utils/message';
 import GroupSelect from './groupSelect.vue';
+import { timelineState } from '@/utils/timelineManage';
 
 const props = defineProps<{
   typeKey: string
@@ -89,6 +90,7 @@ const boneEditIsShow = ref(false)
 const position = ref(props.initPosition)
 const showGroupSelect = ref(false)
 const EDGE_PADDING = 6
+const isTimelineStatePlaying = ref<boolean>(false)
 
 // @ts-ignore
 window.showBoneEditIsShow = () => {
@@ -112,6 +114,7 @@ onMounted(() => {
       position.value = { ...position.value, y: clampedTop }
     }
   }
+  isTimelineStatePlaying.value = timelineState.isPlaying
 })
 
 const emit = defineEmits<{

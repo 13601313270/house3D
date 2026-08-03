@@ -26,7 +26,7 @@ export default class OutFilePlus71 extends OutFilePlusBase {
 
   static modify3DMesh(data: Record<string, any>, mesh: THREE.Group): void {
     // const material: THREE.MeshStandardMaterial = ((mesh.children[9] as THREE.Mesh).material as THREE.MeshStandardMaterial).clone();
-    console.log('ddddddd', data, mesh.children);
+    // console.log('ddddddd', data, mesh.children);
     const leftAngle = data.leftAngle || 0
     const rightAngle = data.rightAngle || 0
     // material.color.set(data.frameColor || '#B70000');
