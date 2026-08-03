@@ -16,6 +16,7 @@ export class WindowEntity extends EntityClassInWall<WindowData> {
   name: string = '窗户'
   type: string = 'window'
   private circleRadius = 6
+  canEditAnimationDataColumn: Array<keyof WindowData> = [];
 
   constructor(world: GroupBaseEntity<GroupBaseData>, window: WindowData) {
     super(world, window)

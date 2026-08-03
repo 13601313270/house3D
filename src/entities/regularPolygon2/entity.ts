@@ -26,6 +26,7 @@ export class RegularPolygonEntity extends PointEntityClass<RegularPolygon2Data> 
   name: string = 'N边形锥'
   type: string = 'regularPolygon2';
   private circleRadius = 6
+  canEditAnimationDataColumn: Array<keyof RegularPolygon2Data> = [];
 
   draw2DPreview(ctx: CanvasRenderingContext2D, zoomLevel: number): void {
     const data = this.getData();

@@ -26,6 +26,7 @@ export class DirectionCameraEntity extends CameraBase<DirectionCameraData> {
   active: boolean = false // 这个不存在数据库里，只是在前端动态调整
   private circleRadius = 6
   private distance = 100;
+  canEditAnimationDataColumn: Array<keyof DirectionCameraData> = [];
 
   constructor(world: GroupBaseEntity<GroupBaseData>, data: DirectionCameraData) {
     super(world, data)

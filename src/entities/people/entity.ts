@@ -22,8 +22,8 @@ export class PeopleEntity extends PointEntityClass<PeopleData> {
   active: boolean = false // 这个不存在数据库里，只是在前端动态调整
   drawAngelLength: number = 40
   private circleRadius = 6
-
   ManClean: THREE.Group | null = null
+  canEditAnimationDataColumn: Array<keyof PeopleData> = [];
 
   draw2DPreview(ctx: CanvasRenderingContext2D, zoomLevel: number): void {
     const data = this.getData();

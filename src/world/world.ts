@@ -25,6 +25,7 @@ class WorldGroup extends GroupBaseEntity<WorldData> {
   groundMesh: THREE.Mesh | null = null
   ambientLight: THREE.AmbientLight | null = null
   directionalLight: THREE.DirectionalLight | null = null
+  canEditAnimationDataColumn: Array<keyof WorldData> = [];
 
   constructor(parent: null, data: WorldData) {
     super(parent, data)

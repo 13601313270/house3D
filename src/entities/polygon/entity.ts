@@ -14,6 +14,7 @@ export class PolygonEntity extends LineEntityClass<PolygonPoint, PolygonData> {
   type: string = 'polygon'
   private circleRadius = 6
   private thickness = 10
+  canEditAnimationDataColumn: Array<keyof PolygonData> = [];
 
   // constructor(world: World, data: PolygonData) {
   //   super(world, data);

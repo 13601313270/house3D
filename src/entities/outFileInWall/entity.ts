@@ -26,6 +26,7 @@ export class OutFileInWallEntity extends EntityClassInWall<OutFileInWallData> {
   private baseDrawAngelLength = 40;
   img: HTMLImageElement = new Image()
   private circleRadius = 6
+  canEditAnimationDataColumn: Array<keyof OutFileInWallData> = [];
 
   init(): Promise<void> {
     const findObjInfo = window.worldState.ObjFileTypes.find(item => item.id === this.getData().fileTypeId)

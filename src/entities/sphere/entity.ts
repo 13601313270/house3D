@@ -11,6 +11,7 @@ export class SphereEntity extends PointEntityClass<SphereData> {
   name: string = '球体'
   type: string = 'sphere'
   private circleRadius = 6
+  canEditAnimationDataColumn: Array<keyof SphereData> = [];
 
   draw2DPreview(ctx: CanvasRenderingContext2D, zoomLevel: number): void {
     const data = this.getData();

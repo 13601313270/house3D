@@ -12,6 +12,7 @@ export class CylinderEntity extends PointEntityClass<CylinderData> {
   type: string = 'cylinder'
   private circleRadius = 6
   public radialSegments = 32
+  canEditAnimationDataColumn: Array<keyof CylinderData> = [];
 
   draw2DPreview(ctx: CanvasRenderingContext2D, zoomLevel: number): void {
     const data = this.getData();

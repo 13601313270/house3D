@@ -13,6 +13,7 @@ export class SignEntity extends PointEntityClass<SignData> {
   name: string = '交通标识'
   type: string = 'sign'
   private circleRadius = 6
+  canEditAnimationDataColumn: Array<keyof SignData> = [];
 
   async init() {
     const { img } = this.getData();

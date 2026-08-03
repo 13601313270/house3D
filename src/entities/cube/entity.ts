@@ -12,6 +12,7 @@ export class CubeEntity extends PointEntityClass<CubeData> {
   name: string = '方块'
   type: string = 'cube'
   private circleRadius = 6
+  canEditAnimationDataColumn: Array<keyof CubeData> = [];
 
   draw2DPreview(ctx: CanvasRenderingContext2D, zoomLevel: number): void {
     const data = this.getData();

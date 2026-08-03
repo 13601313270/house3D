@@ -17,6 +17,7 @@ export class StaircaseEntity extends LineEntityClass<StaircasePoint, StaircaseDa
   name: string = '楼梯'
   type: string = 'staircase'
   private circleRadius = 6
+  canEditAnimationDataColumn: Array<keyof StaircaseData> = [];
 
   constructor(world: GroupBaseEntity<GroupBaseData>, data: StaircaseData) {
     if (data) {

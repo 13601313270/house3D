@@ -12,6 +12,7 @@ export class TorusEntity extends PointEntityClass<TorusData> {
   type: string = 'torus'
   private circleRadius = 6
   public radialSegments = 32
+  canEditAnimationDataColumn: Array<keyof TorusData> = [];
 
   draw2DPreview(ctx: CanvasRenderingContext2D, zoomLevel: number): void {
     const data = this.getData();

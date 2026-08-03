@@ -16,6 +16,7 @@ export class DoorEntity extends EntityClassInWall<DoorData> {
   name: string = '洞'
   type: string = 'doorway'
   private circleRadius = 6
+  canEditAnimationDataColumn: Array<keyof DoorData> = [];
 
   constructor(world: GroupBaseEntity<GroupBaseData>, door: DoorData) {
     super(world, door)

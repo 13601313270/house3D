@@ -24,6 +24,7 @@ export class OutFileEntity extends PointEntityClass<OutFileData> {
   private baseDrawAngelLength = 40;
   img: HTMLImageElement = new Image()
   private circleRadius = 6
+  canEditAnimationDataColumn: Array<keyof OutFileData> = [];
 
   init(): Promise<void> {
     const findObjInfo = window.worldState.ObjFileTypes.find(item => item.id === this.getData().fileTypeId)

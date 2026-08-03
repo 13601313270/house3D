@@ -17,6 +17,7 @@ export class WallEntity extends LineEntityClass<WallPoint, WallData> {
   name: string = '墙'
   type: string = 'wall'
   private circleRadius = 6
+  canEditAnimationDataColumn: Array<keyof WallData> = [];
 
   constructor(world: GroupBaseEntity<GroupBaseData>, data: WallData) {
     if (data.cornerType === undefined) {

@@ -25,6 +25,7 @@ export class CameraEntity extends CameraBase<CameraData> {
   colorOpacityActive: string = 'red'
   active: boolean = false // 这个不存在数据库里，只是在前端动态调整
   private circleRadius = 6
+  canEditAnimationDataColumn: Array<keyof CameraData> = [];
 
   constructor(world: GroupBaseEntity<GroupBaseData>, data: CameraData) {
     super(world, data)

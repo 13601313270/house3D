@@ -12,6 +12,7 @@ export class ConeEntity extends PointEntityClass<ConeData> {
   type: string = 'cone'
   private circleRadius = 6
   public radialSegments = 32
+  canEditAnimationDataColumn: Array<keyof ConeData> = [];
 
   draw2DPreview(ctx: CanvasRenderingContext2D, zoomLevel: number): void {
     const data = this.getData();

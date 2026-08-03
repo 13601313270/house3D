@@ -15,6 +15,7 @@ export class SectorPlaneEntity extends PointEntityClass<SectorPlaneData> {
   private circleRadius = 5
   private static textureLoader = new THREE.TextureLoader();
   private static textureCache = new Map<string | File, THREE.Texture>();
+  canEditAnimationDataColumn: Array<keyof SectorPlaneData> = [];
 
   draw2DPreview(ctx: CanvasRenderingContext2D, zoomLevel: number): void {
     const data = this.getData();
