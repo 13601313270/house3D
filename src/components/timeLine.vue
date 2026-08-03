@@ -56,7 +56,7 @@
                 <div class="track-header-bar">
                   <span class="clip-name">{{ segment.clip.entityId }}</span>
                   <span class="clip-duration">{{ formatTime(segment.startTime) }} - {{ formatTime(segment.endTime)
-                  }}</span>
+                    }}</span>
                 </div>
                 <!-- 时间重叠警告徽章：hover 时显示 title 文案，点击播放时会被拦截 -->
                 <div v-if="overlappingClipIds.has(segment.clip.clipId)" class="warning-badge" title="同一个物体对象不允许时间重叠">
@@ -90,7 +90,7 @@
         <div class="floating-header">
           <span class="floating-title">{{ activeSegment.clip.entityId }}</span>
           <span class="floating-time">{{ formatTime(activeSegment.startTime) }} - {{ formatTime(activeSegment.endTime)
-          }}</span>
+            }}</span>
           <button class="floating-delete" @click="deleteClip(activeSegment.clip.clipId)" title="删除动画">🗑</button>
           <button class="floating-close" @click="closeClipContent">×</button>
         </div>
@@ -976,9 +976,18 @@ function evaluateTimeline(time: number) {
           })
           if (!entity) return;
           match.tracks.forEach(track => {
-            const { trackType } = track;
+            const { trackType, } = track;
+            const leftTime = 0;
+            const rightTime = match.startTime;
+            const t = (time - leftTime) / (rightTime - leftTime)
             // @ts-ignore - trackType 为动态字符串，Entity 接口无法穷举
-            data[trackType] = entity.getOriginalData()[trackType] as any;
+            const leftVal = entity.getOriginalData()[trackType] as any;
+            const rightVal = track.keyframes[0].value
+            console.log('track.keyframes', track.keyframes[0].value)
+            const previewVal = leftVal + (rightVal - leftVal) * t;
+
+            // @ts-ignore - trackType 为动态字符串，Entity 接口无法穷举
+            data[trackType] = previewVal;// entity.getOriginalData()[trackType] as any;
           })
           entity.setAnimationData({
             ...entity.getAnimationData(),
