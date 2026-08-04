@@ -210,15 +210,6 @@ export class CubeEntity extends PointEntityClass<CubeData> {
 
   matchHandelInfo(x: number, y: number) {
     const data = this.getData();
-    const dist = Math.hypot(x - data.x, y - data.y)
-    if (dist < this.circleRadius + 3) {
-      return {
-        index: 0,
-        type: this.type,
-        id: data.id,
-        dist,
-      }
-    }
     const drawAngelLength = Math.max(this.getData().width / 2, this.circleRadius * 2) * 0.9;// 0.9避免超过方块范围
     // 控制点向着angleY角度延伸10个单位后的坐标
     const rotatedXAdd = data.x + Math.cos(data.angleY) * drawAngelLength
@@ -233,6 +224,10 @@ export class CubeEntity extends PointEntityClass<CubeData> {
         id: data.id,
         dist: dist2,
       }
+    }
+    const parentHandle = super.matchHandelInfo(x, y)
+    if (parentHandle) {
+      return parentHandle
     }
     return null;
   }

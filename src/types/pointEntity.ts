@@ -157,6 +157,21 @@ export abstract class PointEntityClass<T extends PointObjData> extends BaseEntit
     })
   }
 
+  private circleRadius_ = 6
+  matchHandelInfo(x: number, y: number) {
+    const data = this.getData();
+    const dist = Math.hypot(x - data.x, y - data.y)
+    if (dist < this.circleRadius_ + 3) {
+      return {
+        index: 0,
+        type: this.type,
+        id: data.id,
+        dist,
+      }
+    }
+    return null;
+  }
+
   private updateBoundingBoxState() {
     const boxData = this.boundingBoxData;
     if (boxData && this.boundingBox) {
