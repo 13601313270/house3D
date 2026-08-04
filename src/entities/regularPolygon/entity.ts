@@ -5,6 +5,7 @@ import { PointEntityClass } from '@/types/pointEntity'
 import { editItem } from '@/utils/editItem';
 import { MatchCircleArea } from '@/utils/matchArea';
 import { allSnapFromType } from '@/types/baseEntity';
+import { PointCanAngleEntity } from '@/types/pointCanAngleEntity';
 
 function getAllPointsByN(x: number, y: number, n: number, r: number, angle: number): Point[] {
   const points: Point[] = []
@@ -22,7 +23,7 @@ function getAllPointsByN(x: number, y: number, n: number, r: number, angle: numb
   return points
 }
 
-export class RegularPolygonEntity extends PointEntityClass<RegularPolygonData> {
+export class RegularPolygonEntity extends PointCanAngleEntity<RegularPolygonData> {
   name: string = 'N边形体'
   type: string = 'regularPolygon';
   private circleRadius = 6

@@ -7,8 +7,9 @@ import { getMaterialById } from '@/material';
 import { isPointInRotatedRect } from '@/utils/isPointInRotatedRect'
 import { MatchRectArea } from '@/utils/matchArea';
 import { allSnapFromType } from '@/types/baseEntity';
+import { PointCanAngleEntity } from '@/types/pointCanAngleEntity';
 
-export class CubeEntity extends PointEntityClass<CubeData> {
+export class CubeEntity extends PointCanAngleEntity<CubeData> {
   name: string = '方块'
   type: string = 'cube'
   private circleRadius = 6

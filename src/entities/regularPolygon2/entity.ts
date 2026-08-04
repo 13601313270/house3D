@@ -1,10 +1,10 @@
 import * as THREE from 'three'
 import { HandelInfo, Point } from '@/types/map2d'
 import { RegularPolygon2Data } from "./index.d"
-import { PointEntityClass } from '@/types/pointEntity'
 import { editItem } from '@/utils/editItem';
 import { MatchCircleArea } from '@/utils/matchArea';
 import { allSnapFromType } from '@/types/baseEntity';
+import { PointCanAngleEntity } from '@/types/pointCanAngleEntity';
 
 function getAllPointsByN(x: number, y: number, n: number, r: number, angle: number): Point[] {
   const points: Point[] = []
@@ -22,7 +22,7 @@ function getAllPointsByN(x: number, y: number, n: number, r: number, angle: numb
   return points
 }
 
-export class RegularPolygonEntity extends PointEntityClass<RegularPolygon2Data> {
+export class RegularPolygon2Entity extends PointCanAngleEntity<RegularPolygon2Data> {
   name: string = 'N边形锥'
   type: string = 'regularPolygon2';
   private circleRadius = 6

@@ -14,8 +14,9 @@ import { MatchCircleArea, MatchRectArea } from '@/utils/matchArea'
 import { isPointInRotatedRect } from '@/utils/isPointInRotatedRect'
 import { OrigionSnapPoint } from '@/types/baseEntity'
 import { outFileDataExtension, modify3DMesh } from '@/outFilePlus/index'
+import { PointCanAngleEntity } from '@/types/pointCanAngleEntity'
 
-export class OutFileEntity extends PointEntityClass<OutFileData> {
+export class OutFileEntity extends PointCanAngleEntity<OutFileData> {
   name: string = '外部文件'
   type: string = 'outFile'
   color: string = '#0c7f25'

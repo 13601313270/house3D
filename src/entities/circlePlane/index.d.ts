@@ -1,10 +1,9 @@
-import { PointObjData } from '@/types/map2d'
+import { PointObjData, PointCanAngleObjData } from '@/types/map2d'
 
-export type CirclePlaneData = PointObjData & {
+export type CirclePlaneData = PointCanAngleObjData & {
   r: number
   color: string
   img?: string // 图片
   mt: number | null // 方块材质
   ds: boolean // 是否双面可见
-  angleY: number // 旋转角度Y
 }

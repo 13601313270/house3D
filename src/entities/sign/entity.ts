@@ -8,8 +8,9 @@ import { MatchRectArea } from '@/utils/matchArea';
 import { allSnapFromType } from '@/types/baseEntity';
 
 import { loadImage as globalLoadImage } from '@/utils/imageCache'
+import { PointCanAngleEntity } from '@/types/pointCanAngleEntity';
 
-export class SignEntity extends PointEntityClass<SignData> {
+export class SignEntity extends PointCanAngleEntity<SignData> {
   name: string = '交通标识'
   type: string = 'sign'
   private circleRadius = 6

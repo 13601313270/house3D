@@ -1,8 +1,7 @@
-import { PointObjData } from '@/types/map2d'
+import { PointObjData, PointCanAngleObjData } from '@/types/map2d'
 import type { CanvasShape } from '@/components/GroundTextureEditor/renderer'
 
-export type SignData = PointObjData & {
-  angleY: number // 旋转角度
+export type SignData = PointCanAngleObjData & {
   width: number // 大小
   height: number // 大小
   signZ: number // 牌子离地高度

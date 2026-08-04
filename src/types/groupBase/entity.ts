@@ -8,10 +8,11 @@ import { GroupBaseData } from './index.d'
 import drawAxes from '@/utils/drawAxes'
 import canvas2DSceneManage from '@/utils/canvas2DSceneManage'
 import { PlaneGroupEntity } from '@/entities/planeGroup/entity'
+import { PointCanAngleEntity } from '../pointCanAngleEntity'
 
 type WorldChangeType = 'add' | 'remove' | 'change'
 
-export abstract class GroupBaseEntity<T extends GroupBaseData> extends PointEntityClass<T> {
+export abstract class GroupBaseEntity<T extends GroupBaseData> extends PointCanAngleEntity<T> {
   group: THREE.Group = new THREE.Group()
   // width: number = 0;
   // height: number = 0;

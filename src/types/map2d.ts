@@ -23,11 +23,16 @@ export interface BaseObjData {
   isLocked?: boolean,// 是否锁定，无法被移动
   isHidden?: boolean,// 是否隐藏
 }
+
 // 点状对象数据基类
 export interface PointObjData extends BaseObjData {
   x: number
   y: number
   z: number
+}
+
+export interface PointCanAngleObjData extends PointObjData {
+  angleY: number// 旋转角度Y
 }
 
 // 链状对象数据基类

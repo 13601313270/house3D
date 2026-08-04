@@ -1,14 +1,14 @@
 import * as THREE from 'three'
 import { HandelInfo, Point } from '@/types/map2d'
 import { CirclePlaneData } from './index.d'
-import { PointEntityClass } from '@/types/pointEntity'
 import { editItem } from '@/utils/editItem';
 import { getMaterialById } from '@/material';
 import { MatchCircleArea } from '@/utils/matchArea';
 import { importImgFileHead } from '../allObjs';
 import { allSnapFromType } from '@/types/baseEntity';
+import { PointCanAngleEntity } from '@/types/pointCanAngleEntity';
 
-export class CirclePlaneEntity extends PointEntityClass<CirclePlaneData> {
+export class CirclePlaneEntity extends PointCanAngleEntity<CirclePlaneData> {
   name: string = '圆形平面'
   type: string = 'circlePlane'
   private circleRadius = 6

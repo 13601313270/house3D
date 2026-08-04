@@ -6,8 +6,9 @@ import { editItem } from '@/utils/editItem';
 import { isPointInRotatedRect } from '@/utils/isPointInRotatedRect';
 import { MatchRectArea } from '@/utils/matchArea';
 import { importImgFileHead } from '../allObjs';
+import { PointCanAngleEntity } from '@/types/pointCanAngleEntity';
 
-export class CurtainEntity extends PointEntityClass<CurtainData> {
+export class CurtainEntity extends PointCanAngleEntity<CurtainData> {
   name: string = '垂直方形幕布'
   type: string = 'curtain'
   private circleRadius = 6

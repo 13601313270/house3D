@@ -7,8 +7,9 @@ import { MatchRectArea } from '@/utils/matchArea'
 import { OrigionSnapPoint } from '@/types/baseEntity'
 import { isPointInRotatedRect } from '@/utils/isPointInRotatedRect'
 import { angelIcon, moveIcon } from '@/utils/handleImgs'
+import { PointCanAngleEntity } from '@/types/pointCanAngleEntity'
 
-export class ImportFileEntity extends PointEntityClass<ImportFileData> {
+export class ImportFileEntity extends PointCanAngleEntity<ImportFileData> {
   name: string = '导入文件'
   type: string = 'importFile'
   color: string = '#0c7f25'

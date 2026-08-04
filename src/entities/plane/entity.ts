@@ -8,8 +8,9 @@ import { isPointInRotatedRect } from '@/utils/isPointInRotatedRect';
 import { MatchRectArea } from '@/utils/matchArea';
 import { importImgFileHead } from '../allObjs';
 import { allSnapFromType } from '@/types/baseEntity';
+import { PointCanAngleEntity } from '@/types/pointCanAngleEntity';
 
-export class PlaneEntity extends PointEntityClass<PlaneData> {
+export class PlaneEntity extends PointCanAngleEntity<PlaneData> {
   name: string = '方形平面'
   type: string = 'plane'
   private circleRadius = 6
