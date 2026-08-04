@@ -167,13 +167,6 @@ export abstract class GroupBaseEntity<T extends GroupBaseData> extends PointEnti
     ctx.restore()
   }
 
-  draw2DActionHandle(
-    ctx: CanvasRenderingContext2D,
-    zoomLevel: number,
-  ) {
-    // 暂无操作句柄
-  }
-
   create3DMesh(): THREE.Group[] {
     const group = this.group;// as new THREE.Group()
     group.clear()

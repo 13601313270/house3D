@@ -57,13 +57,7 @@ export class PeopleEntity extends PointEntityClass<PeopleData> {
     const screenY = data.y * zoomLevel
 
     // 控制点
-    ctx.fillStyle = '#fff'
-    ctx.strokeStyle = '#e67e22'
-    ctx.lineWidth = 2
-    ctx.beginPath()
-    ctx.arc(screenX, screenY, this.circleRadius * zoomLevel + 3, 0, Math.PI * 2)
-    ctx.fill()
-    ctx.stroke()
+    super.draw2DActionHandle(ctx, zoomLevel)
 
     const drawAngelLength = this.drawAngelLength * data.height / 170
 
@@ -409,13 +403,7 @@ export class PeopleEntity extends PointEntityClass<PeopleData> {
     y: number,
   }, matchHandelInfo: HandelInfo) {
     const { x, y } = position
-    if (matchHandelInfo.index === 0) {
-      this.setData({
-        // ...this.getData(),
-        x,
-        y,
-      })
-    } else if (matchHandelInfo.index === 1) {
+    if (matchHandelInfo.index === 1) {
       const data = this.getData();
       // 根据x,y计算angleY
       const angleY = Math.atan2(y - data.y, x - data.x)
@@ -423,6 +411,8 @@ export class PeopleEntity extends PointEntityClass<PeopleData> {
         // ...this.getData(),
         angle: angleY,
       })
+    } else {
+      return super.matchHandelMoveCallback(position, matchHandelInfo)
     }
   }
 
@@ -449,15 +439,6 @@ export class PeopleEntity extends PointEntityClass<PeopleData> {
 
   inSceneSnapLineArea() {
     return false;
-  }
-
-  setPrepareState(x: number, y: number): string[] {
-    this.setData({
-      // ...this.getData(),
-      x,
-      y,
-    })
-    return [];
   }
 
   getEditPropConfigData(data: PeopleData): editItem[] {

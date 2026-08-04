@@ -41,17 +41,13 @@ export class SphereEntity extends PointEntityClass<SphereData> {
     zoomLevel: number,
   ): void {
     const data = this.getData();
-    const screenX = data.x * zoomLevel
-    const screenY = data.y * zoomLevel
 
     // 控制点
+    super.draw2DActionHandle(ctx, zoomLevel)
+
     ctx.fillStyle = '#fff'
     ctx.strokeStyle = '#e67e22'
     ctx.lineWidth = 2
-    ctx.beginPath()
-    ctx.arc(screenX, screenY, this.circleRadius * zoomLevel + 3, 0, Math.PI * 2)
-    ctx.fill()
-    ctx.stroke()
 
     // 绘制轮廓
     const circleArea = new MatchCircleArea({ x: data.x, y: data.y, r: data.r })
@@ -132,13 +128,8 @@ export class SphereEntity extends PointEntityClass<SphereData> {
   matchHandelMoveCallback(position: {
     x: number,
     y: number,
-  }) {
-    const { x, y } = position
-    this.setData({
-      // ...this.getData(),
-      x,
-      y,
-    })
+  }, matchHandelInfo: HandelInfo) {
+    super.matchHandelMoveCallback(position, matchHandelInfo)
   }
 
   getMineBeSnapPoints() {
@@ -210,14 +201,5 @@ export class SphereEntity extends PointEntityClass<SphereData> {
 
   inSceneSnapLineArea() {
     return false
-  }
-
-  setPrepareState(x: number, y: number): string[] {
-    this.setData({
-      // ...this.getData(),
-      x,
-      y,
-    })
-    return [];
   }
 }

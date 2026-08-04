@@ -67,13 +67,7 @@ export class RegularPolygonEntity extends PointEntityClass<RegularPolygonData> {
     const { n, r, angleY } = data
 
     // 控制点
-    ctx.fillStyle = '#fff'
-    ctx.strokeStyle = '#e67e22'
-    ctx.lineWidth = 2
-    ctx.beginPath()
-    ctx.arc(screenX, screenY, this.circleRadius * zoomLevel + 3, 0, Math.PI * 2)
-    ctx.fill()
-    ctx.stroke()
+    super.draw2DActionHandle(ctx, zoomLevel)
 
     const drawAngelLength = Math.max(this.getData().r, this.circleRadius * 2) * 0.7;// 0.7避免超过方块范围
     // 控制点向着angleY角度延伸10个单位后的坐标
@@ -247,13 +241,7 @@ export class RegularPolygonEntity extends PointEntityClass<RegularPolygonData> {
     y: number,
   }, matchHandelInfo: HandelInfo) {
     const { x, y } = position
-    if (matchHandelInfo.index === 0) {
-      this.setData({
-        // ...this.getData(),
-        x,
-        y,
-      })
-    } else if (matchHandelInfo.index === 1) {
+    if (matchHandelInfo.index === 1) {
       const data = this.getData();
       // 根据x,y计算angleY
       const angleY = Math.atan2(y - data.y, x - data.x)
@@ -261,6 +249,8 @@ export class RegularPolygonEntity extends PointEntityClass<RegularPolygonData> {
         // ...this.getData(),
         angleY: angleY * -1,
       })
+    } else {
+      return super.matchHandelMoveCallback(position, matchHandelInfo)
     }
   }
 
@@ -345,15 +335,6 @@ export class RegularPolygonEntity extends PointEntityClass<RegularPolygonData> {
 
   inSceneSnapLineArea() {
     return false
-  }
-
-  setPrepareState(x: number, y: number): string[] {
-    this.setData({
-      // ...this.getData(),
-      x,
-      y,
-    })
-    return [];
   }
 
   create3DUnionKey() {

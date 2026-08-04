@@ -145,14 +145,10 @@ export class PlaneGroupEntity extends GroupBaseEntity<PlaneGroupData> {
 
     // 控制点
     (() => {
+      super.draw2DActionHandle(ctx, zoomLevel)
       ctx.fillStyle = '#fff'
       ctx.strokeStyle = 'black'
       ctx.lineWidth = 2
-      ctx.beginPath()
-      ctx.arc(screenX, screenY, this.circleRadius * zoomLevel + 3, 0, Math.PI * 2)
-      ctx.fill()
-      ctx.stroke();
-      ctx.drawImage(moveIcon, screenX - iconWidth / 2, screenY - iconWidth / 2, iconWidth, iconWidth);
     })();
 
     if (!this.boundingBoxData) return
@@ -319,13 +315,7 @@ export class PlaneGroupEntity extends GroupBaseEntity<PlaneGroupData> {
     y: number,
   }, matchHandelInfo: HandelInfo) {
     const { x, y } = position
-    if (matchHandelInfo.index === 0) {
-      this.setData({
-        // ...this.getData(),
-        x,
-        y,
-      })
-    } else if (matchHandelInfo.index === 1) {
+    if (matchHandelInfo.index === 1) {
       const data = this.getData();
       // 根据x,y计算angleY
       const angleY = Math.atan2(y - data.y, x - data.x)
@@ -333,15 +323,8 @@ export class PlaneGroupEntity extends GroupBaseEntity<PlaneGroupData> {
         // ...this.getData(),
         angleY: angleY * -1,
       })
+    } else {
+      super.matchHandelMoveCallback(position, matchHandelInfo)
     }
-  }
-
-  setPrepareState(x: number, y: number): string[] {
-    this.setData({
-      // ...this.getData(),
-      x,
-      y,
-    })
-    return [];
   }
 }

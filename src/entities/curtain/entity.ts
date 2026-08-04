@@ -368,15 +368,6 @@ export class CurtainEntity extends PointEntityClass<CurtainData> {
     return false
   }
 
-  setPrepareState(x: number, y: number): string[] {
-    this.setData({
-      // ...this.getData(),
-      x,
-      y,
-    })
-    return [];
-  }
-
   // 当前对象是否需要重新生成3D模型状态
   create3DUnionKey(): string {
     const cacheData = {

@@ -49,13 +49,7 @@ export class PlaneEntity extends PointEntityClass<PlaneData> {
     const angleY = data.angleY || 0;// 历史数据问题，有的数据不存在angleY，所以用了一个【|| 0】给予默认值
 
     // 控制点
-    ctx.fillStyle = '#fff'
-    ctx.strokeStyle = '#e67e22'
-    ctx.lineWidth = 2
-    ctx.beginPath()
-    ctx.arc(screenX, screenY, this.circleRadius * zoomLevel + 3, 0, Math.PI * 2)
-    ctx.fill()
-    ctx.stroke()
+    super.draw2DActionHandle(ctx, zoomLevel)
 
     const drawAngelLength = Math.max(this.getData().width / 2, this.circleRadius * 2) * 0.9;// 0.9避免超过方块范围
     // alert(drawAngelLength)
@@ -261,13 +255,7 @@ export class PlaneEntity extends PointEntityClass<PlaneData> {
     y: number,
   }, matchHandelInfo: HandelInfo) {
     const { x, y } = position
-    if (matchHandelInfo.index === 0) {
-      this.setData({
-        // ...this.getData(),
-        x,
-        y,
-      })
-    } else if (matchHandelInfo.index === 1) {
+    if (matchHandelInfo.index === 1) {
       const data = this.getData();
       // 根据x,y计算angleY
       const angleY = Math.atan2(y - data.y, x - data.x)
@@ -276,6 +264,8 @@ export class PlaneEntity extends PointEntityClass<PlaneData> {
         // ...this.getData(),
         angleY: angleY * -1,
       })
+    } else {
+      return super.matchHandelMoveCallback(position, matchHandelInfo)
     }
   }
 
@@ -371,14 +361,5 @@ export class PlaneEntity extends PointEntityClass<PlaneData> {
 
   inSceneSnapLineArea() {
     return false
-  }
-
-  setPrepareState(x: number, y: number): string[] {
-    this.setData({
-      // ...this.getData(),
-      x,
-      y,
-    })
-    return [];
   }
 }

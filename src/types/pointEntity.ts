@@ -1,8 +1,9 @@
 import * as THREE from 'three'
-import { PointObjData, Point, BaseObjData } from './map2d'
+import { PointObjData, Point, BaseObjData, HandelInfo } from './map2d'
 import { GroupBaseEntity } from '@/types/groupBase/entity'
 import { BaseEntityClass } from './baseEntity'
 import { GroupBaseData } from './groupBase'
+import { moveIcon } from '@/utils/handleImgs'
 
 export abstract class PointEntityClass<T extends PointObjData> extends BaseEntityClass<T> {
   boundingBox: THREE.Group
@@ -70,6 +71,28 @@ export abstract class PointEntityClass<T extends PointObjData> extends BaseEntit
       }
     })();
     this.updateBoundingBoxState();
+  }
+
+  private circleRadius_ = 8
+
+  draw2DActionHandle(
+    ctx: CanvasRenderingContext2D,
+    zoomLevel: number,
+  ): void {
+    const data = this.getData();
+    const screenX = data.x * zoomLevel
+    const screenY = data.y * zoomLevel
+    // 控制点
+    const circleRadius = this.circleRadius_ * zoomLevel + 3;
+    const imgSize = circleRadius * 1.5;
+    ctx.fillStyle = '#fff'
+    ctx.strokeStyle = 'black'
+    ctx.lineWidth = 2
+    ctx.beginPath()
+    ctx.arc(screenX, screenY, circleRadius, 0, Math.PI * 2)
+    ctx.fill()
+    ctx.stroke();
+    ctx.drawImage(moveIcon, screenX - imgSize / 2, screenY - imgSize / 2, imgSize, imgSize);
   }
 
   // 获取包裹立方体的数据
@@ -157,11 +180,10 @@ export abstract class PointEntityClass<T extends PointObjData> extends BaseEntit
     })
   }
 
-  private circleRadius_ = 6
   matchHandelInfo(x: number, y: number) {
     const data = this.getData();
     const dist = Math.hypot(x - data.x, y - data.y)
-    if (dist < this.circleRadius_ + 3) {
+    if (dist < this.circleRadius_) {
       return {
         index: 0,
         type: this.type,
@@ -170,6 +192,18 @@ export abstract class PointEntityClass<T extends PointObjData> extends BaseEntit
       }
     }
     return null;
+  }
+
+  matchHandelMoveCallback(position: {
+    x: number,
+    y: number,
+  }, matchHandelInfo: HandelInfo) {
+    if (matchHandelInfo.index === 0) {
+      this.setData({
+        x: position.x,
+        y: position.y,
+      } as Partial<T>)
+    }
   }
 
   private updateBoundingBoxState() {
@@ -231,7 +265,13 @@ export abstract class PointEntityClass<T extends PointObjData> extends BaseEntit
   notInSceneSnapLineArea(): void { }
 
   // 待添加状态（鼠标新增悬浮的时候）
-  abstract setPrepareState(x: number, y: number): string[]
+  setPrepareState(x: number, y: number): string[] {
+    this.setData({
+      x,
+      y,
+    } as Partial<T>)
+    return [];
+  }
 
   beforeRemove() {
     super.beforeRemove()

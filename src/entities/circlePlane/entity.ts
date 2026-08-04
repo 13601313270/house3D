@@ -48,13 +48,7 @@ export class CirclePlaneEntity extends PointEntityClass<CirclePlaneData> {
     const screenY = data.y * zoomLevel
 
     // 控制点
-    ctx.fillStyle = '#fff'
-    ctx.strokeStyle = '#e67e22'
-    ctx.lineWidth = 2
-    ctx.beginPath()
-    ctx.arc(screenX, screenY, this.circleRadius * zoomLevel + 3, 0, Math.PI * 2)
-    ctx.fill()
-    ctx.stroke()
+    super.draw2DActionHandle(ctx, zoomLevel)
 
     // 绘制轮廓
     const circleArea = new MatchCircleArea({ x: data.x, y: data.y, r: data.r })
@@ -247,21 +241,16 @@ export class CirclePlaneEntity extends PointEntityClass<CirclePlaneData> {
     y: number,
   }, matchHandelInfo: HandelInfo) {
     const { x, y } = position
-    if (matchHandelInfo.index === 0) {
-      this.setData({
-        // ...this.getData(),
-        x,
-        y,
-      })
-    } else if (matchHandelInfo.index === 1) {
+    if (matchHandelInfo.index === 1) {
       const data = this.getData();
       // 根据x,y计算angleY
       const angleY = Math.atan2(y - data.y, x - data.x)
       console.log(angleY)
       this.setData({
-        // ...this.getData(),
         angleY: angleY * -1,
       })
+    } else {
+      return super.matchHandelMoveCallback(position, matchHandelInfo)
     }
   }
 
@@ -346,14 +335,5 @@ export class CirclePlaneEntity extends PointEntityClass<CirclePlaneData> {
 
   inSceneSnapLineArea() {
     return false
-  }
-
-  setPrepareState(x: number, y: number): string[] {
-    this.setData({
-      // ...this.getData(),
-      x,
-      y,
-    })
-    return [];
   }
 }

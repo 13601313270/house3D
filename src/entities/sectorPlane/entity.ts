@@ -79,13 +79,7 @@ export class SectorPlaneEntity extends PointEntityClass<SectorPlaneData> {
 
     // 控制点
     const circleRadius = this.circleRadius;
-    ctx.fillStyle = '#fff'
-    ctx.strokeStyle = '#e67e22'
-    ctx.lineWidth = 2
-    ctx.beginPath()
-    ctx.arc(screenX, screenY, Math.max(circleRadius * zoomLevel, 6), 0, Math.PI * 2)
-    ctx.fill()
-    ctx.stroke()
+    super.draw2DActionHandle(ctx, zoomLevel)
 
     // 绘制startAngle的点
     ctx.beginPath()
@@ -311,13 +305,7 @@ export class SectorPlaneEntity extends PointEntityClass<SectorPlaneData> {
     const data = this.getData();
     const { index } = matchHandelInfo;
     const { x, y } = position
-    if (index === 0) {
-      this.setData({
-        // ...data,
-        x,
-        y,
-      })
-    } else if (index === 1) {
+    if (index === 1) {
       // 计算(x,y)到(data.x,data.y)的角度
       const angle = Math.atan2(y - data.y, x - data.x)
       this.setData({
@@ -338,6 +326,8 @@ export class SectorPlaneEntity extends PointEntityClass<SectorPlaneData> {
         // ...data,
         r: dist,
       })
+    } else {
+      return super.matchHandelMoveCallback(position, matchHandelInfo)
     }
   }
 
@@ -448,14 +438,5 @@ export class SectorPlaneEntity extends PointEntityClass<SectorPlaneData> {
 
   inSceneSnapLineArea() {
     return false
-  }
-
-  setPrepareState(x: number, y: number): string[] {
-    this.setData({
-      // ...this.getData(),
-      x,
-      y,
-    })
-    return [];
   }
 }

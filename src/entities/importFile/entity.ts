@@ -146,14 +146,15 @@ export class ImportFileEntity extends PointEntityClass<ImportFileData> {
 
     // 控制点
     (() => {
-      ctx.fillStyle = '#fff'
-      ctx.strokeStyle = 'black'
-      ctx.lineWidth = 2
-      ctx.beginPath()
-      ctx.arc(screenX, screenY, circleRadius, 0, Math.PI * 2)
-      ctx.fill()
-      ctx.stroke();
-      ctx.drawImage(moveIcon, screenX - circleRadius / 2, screenY - circleRadius / 2, circleRadius, circleRadius);
+      super.draw2DActionHandle(ctx, zoomLevel)
+      // ctx.fillStyle = '#fff'
+      // ctx.strokeStyle = 'black'
+      // ctx.lineWidth = 2
+      // ctx.beginPath()
+      // ctx.arc(screenX, screenY, circleRadius, 0, Math.PI * 2)
+      // ctx.fill()
+      // ctx.stroke();
+      // ctx.drawImage(moveIcon, screenX - circleRadius / 2, screenY - circleRadius / 2, circleRadius, circleRadius);
     })();
 
     const imgAngel = basicOffset.x > 0 ? data.angleY : data.angleY + Math.PI;
@@ -317,13 +318,7 @@ export class ImportFileEntity extends PointEntityClass<ImportFileData> {
     y: number,
   }, matchHandelInfo: HandelInfo) {
     const { x, y } = position
-    if (matchHandelInfo.index === 0) {
-      this.setData({
-        // ...this.getData(),
-        x,
-        y,
-      })
-    } else if (matchHandelInfo.index === 1) {
+    if (matchHandelInfo.index === 1) {
       const [size, offset] = this.basicBoxData_!
       const data = this.getData();
       // 根据x,y计算angleY
@@ -333,6 +328,8 @@ export class ImportFileEntity extends PointEntityClass<ImportFileData> {
         // ...this.getData(),
         angleY: (angleY * -1) + (offset.x > 0 ? 0 : Math.PI),
       })
+    } else {
+      return super.matchHandelMoveCallback(position, matchHandelInfo)
     }
   }
 
@@ -363,15 +360,6 @@ export class ImportFileEntity extends PointEntityClass<ImportFileData> {
 
   inSceneSnapLineArea() {
     return false
-  }
-
-  setPrepareState(x: number, y: number): string[] {
-    this.setData({
-      // ...this.getData(),
-      x,
-      y,
-    })
-    return [];
   }
 
   getEditPropConfigData(data: ImportFileData): editItem[] {

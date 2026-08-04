@@ -516,13 +516,7 @@ export class OutFileEntity extends PointEntityClass<OutFileData> {
     y: number,
   }, matchHandelInfo: HandelInfo) {
     const { x, y } = position
-    if (matchHandelInfo.index === 0) {
-      this.setData({
-        // ...this.getData(),
-        x,
-        y,
-      })
-    } else if (matchHandelInfo.index === 1) {
+    if (matchHandelInfo.index === 1) {
       const data = this.getData();
       // 根据x,y计算angleY
       const angleY = Math.atan2(y - data.y, x - data.x)
@@ -535,6 +529,8 @@ export class OutFileEntity extends PointEntityClass<OutFileData> {
       return [
         '角度:' + (angleY * -180 / Math.PI).toFixed(2) + '°',
       ]
+    } else {
+      return super.matchHandelMoveCallback(position, matchHandelInfo)
     }
   }
 
@@ -561,15 +557,6 @@ export class OutFileEntity extends PointEntityClass<OutFileData> {
 
   inSceneSnapLineArea() {
     return false
-  }
-
-  setPrepareState(x: number, y: number): string[] {
-    this.setData({
-      // ...this.getData(),
-      x,
-      y,
-    })
-    return [];
   }
 
   getEditPropConfigData(data: OutFileData): Promise<editItem[]> {
