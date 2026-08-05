@@ -311,6 +311,17 @@ const editMode = ref<'scene' | 'animation'>('scene')
 function setEditMode(mode: 'scene' | 'animation') {
   editMode.value = mode
   timelineState.isPlaying = mode === 'animation';
+  if (mode === 'scene') {
+    console.log('timelineState.timelineData', timelineState.timelineData)
+    // 把所有有动画状态的对象恢复到默认编辑态数据
+    timelineState.timelineData.clips.forEach(v => {
+      const entity = window.worldApi.children.find(vv => {
+        return vv.getOriginalData().id === v.entityId
+      })
+      if (!entity) return;
+      entity.setAnimationData({})
+    })
+  }
   nextTick(() => {
     updateCanvasSize()
   })

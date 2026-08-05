@@ -99,7 +99,6 @@
         <div v-for="track in activeSegment.clip.tracks" :key="track.trackType" class="track-row">
           <div class="track-label" :style="{ width: moreLeft + 'px' }">
             <span>{{ track.trackType }}</span>
-            <button class="track-remove" @click="removeTrack(track.trackType)" title="移除轨道">✕</button>
           </div>
           <div class="track-timeline" @click="handleTrackClick($event, track, activeSegment)">
             <div class="track-background">
@@ -116,6 +115,9 @@
                 @click.stop="onKeyframeClick($event, activeSegment.clip.clipId, activeSegment.clip.entityId, track.trackType, keyframe)">
               </div>
             </div>
+          </div>
+          <div class="track-remove" :style="{ width: moreRight + 'px' }">
+            <div class="button" @click="removeTrack(track.trackType)" title="移除轨道">✕</div>
           </div>
         </div>
 
@@ -171,7 +173,7 @@ const rulerMarks = ref<{
 const clipSegments = ref<ClipSegment[]>([])
 
 const moreLeft = 70;
-const moreRight = 10;
+const moreRight = 40;
 const moreWidth = moreLeft + moreRight; // 额外预留10px
 
 onMounted(() => {
@@ -257,6 +259,7 @@ onMounted(() => {
   timelineState.onChangeCurrentTime(() => {
     currentTime.value = timelineState.currentTime
   })
+  evaluateTimeline(timelineState.currentTime)
 })
 
 // effectiveDuration（计算实际显示总时长
@@ -272,7 +275,6 @@ onMounted(() => {
 // ========== 响应式状态（播放控制） ==========
 // timelineRuler：标尺 DOM 引用（预留，未来用于标尺与轨道 scrollLeft 同步；TS 提示未使用不影响功能）
 // 变量由模板中的 ref="timelineRuler" 绑定实际注入
-const timelineRuler = ref();
 const currentTime = ref(0)                     // 当前播放时间（秒，可小数）
 const isPlaying = ref(false)                  // 是否正在播放
 const playbackSpeed = ref(1)                // 播放倍速（0.1x ~ 3x）
@@ -470,7 +472,7 @@ function toggleClipContent(event: MouseEvent, segment: ClipSegment) {
   const target = event.currentTarget as HTMLElement
   const rect = target.getBoundingClientRect()
 
-  const panelWidth = Math.max(rect.width, 200)
+  const panelWidth = Math.max(rect.width, 150)
   let left = rect.left
   // 边界校正：避免面板超出屏幕左右
   if (left + panelWidth > window.innerWidth) {
@@ -478,6 +480,7 @@ function toggleClipContent(event: MouseEvent, segment: ClipSegment) {
   }
   if (left < 10) left = 10
 
+  console.log('panelWidth', panelWidth)
   trackContentStyle.value = {
     left: `${left - moreLeft}px`,
     top: `${rect.bottom + 4}px`,
@@ -1027,6 +1030,8 @@ function evaluateTimeline(time: number) {
           });
         }
       }
+    } else {
+      console.log('dddddd')
     }
   } else if (matchIndex > -1) {
     // --- 情况1：命中某个 clip 区间 → 对每个轨道执行关键帧插值 ---
@@ -1467,6 +1472,7 @@ onUnmounted(() => {
                 .clip-duration {
                   color: #023068;
                   font-size: 10px; // 时间范围小一号
+                  white-space: nowrap;
                 }
               }
             }
@@ -1610,7 +1616,6 @@ onUnmounted(() => {
     border-bottom: 1px solid rgba(255, 255, 255, 0.25);
     box-sizing: border-box;
     white-space: nowrap;
-    padding-right: 10px;
     height: 36px;
 
     // 最后一行不加分隔线
@@ -1628,26 +1633,45 @@ onUnmounted(() => {
       justify-content: space-between;
       padding-left: 4px;
       box-sizing: border-box;
+    }
 
-      // ✕ 移除轨道按钮：默认透明，hover track-label 时出现
-      .track-remove {
-        background: none;
-        border: none;
+    // ✕ 移除轨道按钮：默认透明，hover track-label 时出现
+    .track-remove {
+      background: none;
+      border: none;
+      color: #a8b2d1;
+      cursor: pointer;
+      font-size: 10px;
+      width: 14px;
+      height: 14px;
+      padding: 0;
+      line-height: 1;
+      transition: opacity 0.15s, color 0.15s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      padding-left: 3px;
+      box-sizing: border-box;
+
+      .button {
+        border: solid 1px white;
         color: #a8b2d1;
-        cursor: pointer;
-        font-size: 10px;
-        padding: 0;
-        line-height: 1;
-        opacity: 0;
-        transition: opacity 0.15s, color 0.15s;
+        width: 22px;
+        height: 22px;
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-sizing: border-box;
 
         &:hover {
-          color: #f56c6c; // 红色提醒「删除」语义
+          border: solid 1px #a8b2d1;
         }
       }
 
-      &:hover .track-remove {
-        opacity: 1;
+      &:hover {
+        color: #f56c6c; // 红色提醒「删除」语义
       }
     }
 
