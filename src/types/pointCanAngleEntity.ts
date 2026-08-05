@@ -25,27 +25,30 @@ export abstract class PointCanAngleEntity<T extends PointCanAngleObjData> extend
     }
     let drawAngelLength = this.baseDrawAngelLength;
     const [size, offset] = this.boundingBoxData
+    let circleRadius = 0;
     if (size.x >= size.z) {
-      // if (offset.x > 0) {
-      //   this.startDownAngelY = 0;
-      // } else {
-      //   this.startDownAngelY = Math.PI;
-      // }
-      this.startDownAngelY = 0;
-      drawAngelLength = size.x / 2 + offset.x;
+      const offsetX = offset.x * Math.cos(this.getData().angleY) - offset.z * Math.sin(this.getData().angleY);
+      if (offsetX > 0) {
+        this.startDownAngelY = 0;
+      } else {
+        this.startDownAngelY = -Math.PI;
+      }
+      drawAngelLength = size.x / 2 + Math.abs(offsetX);
+      circleRadius = size.x / 20;
     } else {
-      // if (offset.z > 0) {
-      //   this.startDownAngelY = Math.PI / 2;
-      // } else {
-      //   this.startDownAngelY = -Math.PI / 2;
-      // }
-      this.startDownAngelY = Math.PI / 2;
-      drawAngelLength = size.z / 2 + offset.z;
+      const offsetZ = offset.x * Math.sin(this.getData().angleY) + offset.z * Math.cos(this.getData().angleY);
+      if (offsetZ > 0) {
+        this.startDownAngelY = -Math.PI / 2;
+      } else {
+        this.startDownAngelY = Math.PI / 2;
+      }
+      drawAngelLength = size.z / 2 + Math.abs(offsetZ);
+      circleRadius = size.z / 20
     }
     return {
       angel: this.startDownAngelY,
       length: drawAngelLength * 0.9,
-      circleRadius: drawAngelLength / 10,
+      circleRadius,
     };
   }
 
@@ -56,7 +59,6 @@ export abstract class PointCanAngleEntity<T extends PointCanAngleObjData> extend
     if (!this.boundingBoxData) return
     const angelHandelInfo = this.getStartDownAngelY()
     const imgAngel = data.angleY + (angelHandelInfo.angel || 0);
-    console.log('basicSize.x', imgAngel)
     // 绘制旋转角度控制
     const circleRadius = angelHandelInfo.circleRadius * zoomLevel + 3;
     const drawAngelLength = angelHandelInfo.length;

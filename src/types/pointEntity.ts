@@ -82,9 +82,9 @@ export abstract class PointEntityClass<T extends PointObjData> extends BaseEntit
     let drawAngelLength: number;
     const [size, offset] = this.boundingBoxData
     if (size.x >= size.z) {
-      drawAngelLength = size.x / 2 + offset.x;
+      drawAngelLength = size.x / 2;
     } else {
-      drawAngelLength = size.z / 2 + offset.z;
+      drawAngelLength = size.z / 2;
     }
     return drawAngelLength / 10;
   }
