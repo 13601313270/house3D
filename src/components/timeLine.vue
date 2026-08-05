@@ -143,7 +143,7 @@
 import { ref, computed, onUnmounted, watch, onMounted } from 'vue'
 import { message } from '@/utils/message'
 // timelineState 模块：管理时间轴状态，clip/track/keyframe 数据结构，以及全局播放状态标志
-import { ClipSegment, TimelineData, TrackData, Keyframe, timelineState, ClipData } from '@/utils/timelineManage';
+import { ClipSegment, TrackData, Keyframe, timelineState, ClipData } from '@/utils/timelineManage';
 import editItem from '@/utils/editItem';
 import DataTypeEditPanel from '../views/DataTypeEditPanel.vue'
 
@@ -391,7 +391,7 @@ function getTimeFromMouseEvent(event: MouseEvent): number {
 
   const scrollLeft = timeInfo.scrollLeft
   const x = event.clientX + scrollLeft - moreLeft - 4;
-  console.log('event----', event.clientX, wrapperRect.left, scrollLeft)
+  // console.log('event----', event.clientX, wrapperRect.left, scrollLeft)
   const time = (x / wrapperRect.width) * effectiveDuration.value
   return Math.max(0, Math.min(time, effectiveDuration.value))
 }
@@ -442,7 +442,7 @@ function stopScrub() {
 // onScroll：timeline-scroll-container 滚动事件 → 同步 scrollLeft 状态（预留，用于未来缩放时定位对齐）
 function onScroll(event: Event) {
   const target = event.target as HTMLElement
-  console.log('target.scrollLeft', target.scrollLeft)
+  // console.log('target.scrollLeft', target.scrollLeft)
   scrollLeft.value = target.scrollLeft
 }
 
@@ -982,6 +982,7 @@ function evaluateTimeline(time: number) {
             // @ts-ignore - trackType 为动态字符串，Entity 接口无法穷举
             const leftVal = entity.getOriginalData()[trackType] as any;
             const rightVal = track.keyframes[0].value
+            // 这里，应该有一个特例，就是角度angelY，比如从162到-154度。
             if (track.keyframes[0].time === match.startTime) {
               // console.log('track.keyframes', track.keyframes[0].value)
               const previewVal = leftVal + (rightVal - leftVal) * t;
@@ -1546,6 +1547,7 @@ onUnmounted(() => {
   box-shadow: 0px 1px 16px 3px rgb(0 0 0); // 投影让面板浮出
   box-sizing: border-box;
   overflow: hidden;
+  background-color: white;
 
   // 面板顶部标题栏：entityId + 时间范围 + 删除按钮 + ×关闭按钮
   .floating-header {
