@@ -45,72 +45,6 @@ export class PlaneEntity extends PointCanAngleEntity<PlaneData> {
     zoomLevel: number,
   ): void {
     const data = this.getData();
-    const screenX = data.x * zoomLevel
-    const screenY = data.y * zoomLevel
-    const angleY = data.angleY || 0;// 历史数据问题，有的数据不存在angleY，所以用了一个【|| 0】给予默认值
-
-    // 控制点
-    super.draw2DActionHandle(ctx, zoomLevel)
-
-    const drawAngelLength = Math.max(this.getData().width / 2, this.circleRadius * 2) * 0.9;// 0.9避免超过方块范围
-    // alert(drawAngelLength)
-    // console.log('drawAngelLength', angleY, drawAngelLength)
-    // 控制点向着angleY角度延伸10个单位后的坐标
-    const rotatedXAdd = data.x + Math.cos(angleY) * drawAngelLength
-    const rotatedYAdd = data.y - Math.sin(angleY) * drawAngelLength
-    const circleX = rotatedXAdd * zoomLevel
-    const circleY = rotatedYAdd * zoomLevel
-    const circleRadius = this.circleRadius * zoomLevel + 3
-
-    function ttt(angel: number, drawAngelLength: number) {
-      const tempX = data.x + Math.cos(angel) * drawAngelLength;
-      const tempY = data.y - Math.sin(angel) * drawAngelLength;
-      return [tempX * zoomLevel, tempY * zoomLevel]
-    }
-
-    // 绘制双向箭头表示旋转角度
-    ctx.fillStyle = '#fff'
-    ctx.strokeStyle = '#e67e22'
-    ctx.lineWidth = 2 * zoomLevel
-    // 绘制双向箭头的主线（圆弧）
-    ctx.beginPath();
-    ctx.arc(screenX, screenY, drawAngelLength * zoomLevel, angleY * -1 - Math.PI / 4, angleY * -1 + Math.PI / 4);
-    ctx.stroke();
-
-    // 左侧箭头
-    (() => {
-      ctx.beginPath()
-      const [p1X, p1Y] = ttt(angleY + 0.1 + Math.PI / 4, drawAngelLength)
-      const [p2X, p2Y] = ttt(angleY + Math.PI / 4, drawAngelLength + 5)
-      const [p3X, p3Y] = ttt(angleY + Math.PI / 4, drawAngelLength - 5)
-      ctx.moveTo(
-        p1X,
-        p1Y
-      )
-      ctx.lineTo(p2X, p2Y)
-      ctx.lineTo(p3X, p3Y)
-      ctx.closePath()
-      ctx.fill()
-    })();
-
-    // 右侧箭头
-    ctx.beginPath()
-    const [p1X, p1Y] = ttt(angleY - 0.1 - Math.PI / 4, drawAngelLength)
-    const [p2X, p2Y] = ttt(angleY - Math.PI / 4, drawAngelLength + 5)
-    const [p3X, p3Y] = ttt(angleY - Math.PI / 4, drawAngelLength - 5)
-    ctx.moveTo(
-      p1X,
-      p1Y
-    )
-    ctx.lineTo(p2X, p2Y)
-    ctx.lineTo(p3X, p3Y)
-    ctx.closePath()
-    ctx.fill()
-    // 绘制旋转角度线
-    ctx.beginPath()
-    ctx.arc(circleX, circleY, circleRadius, 0, Math.PI * 2)
-    ctx.fill()
-    ctx.stroke()
 
     // 绘制 轮廓
     const matchArea = new MatchRectArea({
@@ -136,6 +70,8 @@ export class PlaneEntity extends PointCanAngleEntity<PlaneData> {
       matchArea.data.depth * zoomLevel,
     )
     ctx.restore(); // 恢复原始状态
+    // 控制点
+    super.draw2DActionHandle(ctx, zoomLevel)
   }
 
   glbObj: THREE.Group | null = null;
@@ -221,54 +157,54 @@ export class PlaneEntity extends PointCanAngleEntity<PlaneData> {
     return null;
   }
 
-  matchHandelInfo(x: number, y: number) {
-    const data = this.getData();
-    const dist = Math.hypot(x - data.x, y - data.y)
-    const angleY = data.angleY || 0;// 历史数据问题，有的数据不存在angleY，所以用了一个【|| 0】给予默认值
-    if (dist < this.circleRadius + 3) {
-      return {
-        index: 0,
-        type: this.type,
-        id: data.id,
-        dist,
-      }
-    }
-    const drawAngelLength = Math.max(this.getData().width / 2, this.circleRadius * 2) * 0.9;// 0.9避免超过方块范围
-    // 控制点向着angleY角度延伸10个单位后的坐标
-    const rotatedXAdd = data.x + Math.cos(angleY) * drawAngelLength
-    const rotatedYAdd = data.y - Math.sin(angleY) * drawAngelLength
+  // matchHandelInfo(x: number, y: number) {
+  //   const data = this.getData();
+  //   const dist = Math.hypot(x - data.x, y - data.y)
+  //   const angleY = data.angleY || 0;// 历史数据问题，有的数据不存在angleY，所以用了一个【|| 0】给予默认值
+  //   if (dist < this.circleRadius + 3) {
+  //     return {
+  //       index: 0,
+  //       type: this.type,
+  //       id: data.id,
+  //       dist,
+  //     }
+  //   }
+  //   const drawAngelLength = Math.max(this.getData().width / 2, this.circleRadius * 2) * 0.9;// 0.9避免超过方块范围
+  //   // 控制点向着angleY角度延伸10个单位后的坐标
+  //   const rotatedXAdd = data.x + Math.cos(angleY) * drawAngelLength
+  //   const rotatedYAdd = data.y - Math.sin(angleY) * drawAngelLength
 
-    const dist2 = Math.hypot(x - rotatedXAdd, y - rotatedYAdd)
-    // console.log('dist2', dist2)
-    if (dist2 < this.circleRadius + 3) {
-      return {
-        index: 1,
-        type: this.type,
-        id: data.id,
-        dist: dist2,
-      }
-    }
-    return null;
-  }
+  //   const dist2 = Math.hypot(x - rotatedXAdd, y - rotatedYAdd)
+  //   // console.log('dist2', dist2)
+  //   if (dist2 < this.circleRadius + 3) {
+  //     return {
+  //       index: 1,
+  //       type: this.type,
+  //       id: data.id,
+  //       dist: dist2,
+  //     }
+  //   }
+  //   return null;
+  // }
 
-  matchHandelMoveCallback(position: {
-    x: number,
-    y: number,
-  }, matchHandelInfo: HandelInfo) {
-    const { x, y } = position
-    if (matchHandelInfo.index === 1) {
-      const data = this.getData();
-      // 根据x,y计算angleY
-      const angleY = Math.atan2(y - data.y, x - data.x)
-      console.log(angleY)
-      this.setData({
-        // ...this.getData(),
-        angleY: angleY * -1,
-      })
-    } else {
-      return super.matchHandelMoveCallback(position, matchHandelInfo)
-    }
-  }
+  // matchHandelMoveCallback(position: {
+  //   x: number,
+  //   y: number,
+  // }, matchHandelInfo: HandelInfo) {
+  //   const { x, y } = position
+  //   if (matchHandelInfo.index === 1) {
+  //     const data = this.getData();
+  //     // 根据x,y计算angleY
+  //     const angleY = Math.atan2(y - data.y, x - data.x)
+  //     console.log(angleY)
+  //     this.setData({
+  //       // ...this.getData(),
+  //       angleY: angleY * -1,
+  //     })
+  //   } else {
+  //     return super.matchHandelMoveCallback(position, matchHandelInfo)
+  //   }
+  // }
 
   getMineBeSnapPoints() {
     const key: allSnapFromType = 'point';

@@ -16,7 +16,7 @@ export class ImportFileEntity extends PointCanAngleEntity<ImportFileData> {
   color3D: string = '#0c7f25'
   colorOpacity: string = '#14b737a5'
   private circleRadius = 6
-  private baseDrawAngelLength = 40;
+
   img: HTMLImageElement = new Image()
   imgBeCreateByScale: number = 1; // 这个图片是以哪个缩放比例创建的
   canEditAnimationDataColumn: Array<keyof ImportFileData> = [];
@@ -107,14 +107,9 @@ export class ImportFileEntity extends PointCanAngleEntity<ImportFileData> {
     zoomLevel: number
   ): void {
     const data = this.getData();
-    const screenX = data.x * zoomLevel
-    const screenY = data.y * zoomLevel
-    const iconWidth = this.circleRadius * 2 * zoomLevel * 0.8;
     // 计算中心点到上下左右哪个边最远
-    const [basicSize, basicOffset] = this.basicBoxData_!
+    const [basicSize] = this.basicBoxData_!
     const renderBox = this.boundingBoxData;
-    const drawAngelLength = renderBox ? (renderBox[0].x / 2 + basicOffset.x) : this.baseDrawAngelLength;
-    const circleRadius = drawAngelLength / 10 * zoomLevel + 3;
 
     // 绘制 轮廓
     (() => {
@@ -146,36 +141,7 @@ export class ImportFileEntity extends PointCanAngleEntity<ImportFileData> {
     })();
 
     // 控制点
-    (() => {
-      super.draw2DActionHandle(ctx, zoomLevel)
-      // ctx.fillStyle = '#fff'
-      // ctx.strokeStyle = 'black'
-      // ctx.lineWidth = 2
-      // ctx.beginPath()
-      // ctx.arc(screenX, screenY, circleRadius, 0, Math.PI * 2)
-      // ctx.fill()
-      // ctx.stroke();
-      // ctx.drawImage(moveIcon, screenX - circleRadius / 2, screenY - circleRadius / 2, circleRadius, circleRadius);
-    })();
-
-    const imgAngel = basicOffset.x > 0 ? data.angleY : data.angleY + Math.PI;
-    // 绘制旋转角度控制
-    const rotatedXAdd = data.x + Math.cos(imgAngel) * drawAngelLength
-    const rotatedYAdd = data.y - Math.sin(imgAngel) * drawAngelLength
-    const circleX = rotatedXAdd * zoomLevel
-    const circleY = rotatedYAdd * zoomLevel
-    ctx.fillStyle = '#fff'
-    ctx.lineWidth = 2
-    ctx.strokeStyle = 'black'
-    ctx.save();
-    ctx.translate(circleX, circleY); // 移动原点到目标中心
-    ctx.rotate(imgAngel * -1); // 围绕新原点旋转
-    ctx.beginPath()
-    ctx.arc(0, 0, circleRadius, 0, Math.PI * 2)
-    ctx.fill()
-    ctx.stroke()
-    ctx.drawImage(angelIcon, -circleRadius / 2, -circleRadius / 2, circleRadius, circleRadius);
-    ctx.restore();
+    super.draw2DActionHandle(ctx, zoomLevel)
   }
 
   create3DMesh(): THREE.Group[] {
@@ -277,61 +243,6 @@ export class ImportFileEntity extends PointCanAngleEntity<ImportFileData> {
       })
     }
     return null;
-  }
-
-  matchHandelInfo(x: number, y: number) {
-    const data = this.getData();
-    const dist = Math.hypot(x - data.x, y - data.y)
-    const [size, offset] = this.basicBoxData_!
-    const renderBox = this.boundingBoxData;
-    const drawAngelLength = renderBox ? (renderBox[0].x / 2 + offset.x) : this.baseDrawAngelLength;
-    const circleRadius = drawAngelLength / 10 + 3;
-
-    // console.log('dist', dist)
-    if (dist < circleRadius) {
-      return {
-        index: 0,
-        type: this.type,
-        id: data.id,
-        dist,
-      }
-    }
-    const imgAngel = offset.x > 0 ? data.angleY : data.angleY + Math.PI;
-    // 控制点向着angleY角度延伸10个单位后的坐标
-    const rotatedXAdd = data.x + Math.cos(imgAngel) * drawAngelLength
-    const rotatedYAdd = data.y - Math.sin(imgAngel) * drawAngelLength
-
-    const dist2 = Math.hypot(x - rotatedXAdd, y - rotatedYAdd)
-    // console.log('dist2', dist2)
-    if (dist2 < circleRadius) {
-      return {
-        index: 1,
-        type: this.type,
-        id: data.id,
-        dist: dist2,
-      }
-    }
-    return null;
-  }
-
-  matchHandelMoveCallback(position: {
-    x: number,
-    y: number,
-  }, matchHandelInfo: HandelInfo) {
-    const { x, y } = position
-    if (matchHandelInfo.index === 1) {
-      const [size, offset] = this.basicBoxData_!
-      const data = this.getData();
-      // 根据x,y计算angleY
-      const angleY = Math.atan2(y - data.y, x - data.x)
-      console.log(angleY)
-      this.setData({
-        // ...this.getData(),
-        angleY: (angleY * -1) + (offset.x > 0 ? 0 : Math.PI),
-      })
-    } else {
-      return super.matchHandelMoveCallback(position, matchHandelInfo)
-    }
   }
 
   inSceneSnapPointArea() {

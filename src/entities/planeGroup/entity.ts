@@ -144,36 +144,7 @@ export class PlaneGroupEntity extends GroupBaseEntity<PlaneGroupData> {
     })();
 
     // 控制点
-    (() => {
-      super.draw2DActionHandle(ctx, zoomLevel)
-      ctx.fillStyle = '#fff'
-      ctx.strokeStyle = 'black'
-      ctx.lineWidth = 2
-    })();
-
-    if (!this.boundingBoxData) return
-    const drawAngelLength = data.width / 2 - this.circleRadius;
-    // 控制点向着angleY角度延伸10个单位后的坐标
-
-    // 绘制旋转角度控制
-    if (zoomLevel > 0.5) {
-      const rotatedXAdd = data.x + Math.cos(data.angleY) * drawAngelLength
-      const rotatedYAdd = data.y - Math.sin(data.angleY) * drawAngelLength
-      const circleX = rotatedXAdd * zoomLevel
-      const circleY = rotatedYAdd * zoomLevel
-      ctx.fillStyle = '#fff'
-      ctx.lineWidth = 2
-      ctx.strokeStyle = 'black'
-      ctx.save();
-      ctx.translate(circleX, circleY); // 移动原点到目标中心
-      ctx.rotate(angle.y * -1); // 围绕新原点旋转
-      ctx.beginPath()
-      ctx.arc(0, 0, this.circleRadius * zoomLevel + 3, 0, Math.PI * 2)
-      ctx.fill()
-      ctx.stroke()
-      ctx.drawImage(angelIcon, -iconWidth / 2, -iconWidth / 2, iconWidth, iconWidth);
-      ctx.restore();
-    }
+    super.draw2DActionHandle(ctx, zoomLevel);
   }
 
   change3DMeshState(): void {
@@ -282,49 +253,49 @@ export class PlaneGroupEntity extends GroupBaseEntity<PlaneGroupData> {
     return null;
   }
 
-  matchHandelInfo(x: number, y: number) {
-    const data = this.getData();
-    const dist = Math.hypot(x - data.x, y - data.y)
-    if (dist < this.circleRadius + 3) {
-      return {
-        index: 0,
-        type: this.type,
-        id: data.id,
-        dist,
-      }
-    }
-    const drawAngelLength = data.width / 2 - this.circleRadius;
-    // 控制点向着angleY角度延伸10个单位后的坐标
-    const rotatedXAdd = data.x + Math.cos(data.angleY) * drawAngelLength
-    const rotatedYAdd = data.y - Math.sin(data.angleY) * drawAngelLength
+  // matchHandelInfo(x: number, y: number) {
+  //   const data = this.getData();
+  //   const dist = Math.hypot(x - data.x, y - data.y)
+  //   if (dist < this.circleRadius + 3) {
+  //     return {
+  //       index: 0,
+  //       type: this.type,
+  //       id: data.id,
+  //       dist,
+  //     }
+  //   }
+  //   const drawAngelLength = data.width / 2 - this.circleRadius;
+  //   // 控制点向着angleY角度延伸10个单位后的坐标
+  //   const rotatedXAdd = data.x + Math.cos(data.angleY) * drawAngelLength
+  //   const rotatedYAdd = data.y - Math.sin(data.angleY) * drawAngelLength
 
-    const dist2 = Math.hypot(x - rotatedXAdd, y - rotatedYAdd)
-    if (dist2 < this.circleRadius + 3) {
-      return {
-        index: 1,
-        type: this.type,
-        id: data.id,
-        dist: dist2,
-      }
-    }
-    return null;
-  }
+  //   const dist2 = Math.hypot(x - rotatedXAdd, y - rotatedYAdd)
+  //   if (dist2 < this.circleRadius + 3) {
+  //     return {
+  //       index: 1,
+  //       type: this.type,
+  //       id: data.id,
+  //       dist: dist2,
+  //     }
+  //   }
+  //   return null;
+  // }
 
-  matchHandelMoveCallback(position: {
-    x: number,
-    y: number,
-  }, matchHandelInfo: HandelInfo) {
-    const { x, y } = position
-    if (matchHandelInfo.index === 1) {
-      const data = this.getData();
-      // 根据x,y计算angleY
-      const angleY = Math.atan2(y - data.y, x - data.x)
-      this.setData({
-        // ...this.getData(),
-        angleY: angleY * -1,
-      })
-    } else {
-      super.matchHandelMoveCallback(position, matchHandelInfo)
-    }
-  }
+  // matchHandelMoveCallback(position: {
+  //   x: number,
+  //   y: number,
+  // }, matchHandelInfo: HandelInfo) {
+  //   const { x, y } = position
+  //   if (matchHandelInfo.index === 1) {
+  //     const data = this.getData();
+  //     // 根据x,y计算angleY
+  //     const angleY = Math.atan2(y - data.y, x - data.x)
+  //     this.setData({
+  //       // ...this.getData(),
+  //       angleY: angleY * -1,
+  //     })
+  //   } else {
+  //     super.matchHandelMoveCallback(position, matchHandelInfo)
+  //   }
+  // }
 }

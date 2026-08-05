@@ -73,7 +73,21 @@ export abstract class PointEntityClass<T extends PointObjData> extends BaseEntit
     this.updateBoundingBoxState();
   }
 
-  private circleRadius_ = 8
+  protected circleRadius_ = 8
+
+  private getCircleRadius(): number {
+    if (!this.boundingBoxData) {
+      return this.circleRadius_
+    }
+    let drawAngelLength: number;
+    const [size, offset] = this.boundingBoxData
+    if (size.x >= size.z) {
+      drawAngelLength = size.x / 2 + offset.x;
+    } else {
+      drawAngelLength = size.z / 2 + offset.z;
+    }
+    return drawAngelLength / 10;
+  }
 
   draw2DActionHandle(
     ctx: CanvasRenderingContext2D,
@@ -83,7 +97,7 @@ export abstract class PointEntityClass<T extends PointObjData> extends BaseEntit
     const screenX = data.x * zoomLevel
     const screenY = data.y * zoomLevel
     // 控制点
-    const circleRadius = this.circleRadius_ * zoomLevel + 3;
+    const circleRadius = this.getCircleRadius() * zoomLevel + 3;
     const imgSize = circleRadius * 1.5;
     ctx.fillStyle = '#fff'
     ctx.strokeStyle = 'black'
@@ -183,7 +197,10 @@ export abstract class PointEntityClass<T extends PointObjData> extends BaseEntit
   matchHandelInfo(x: number, y: number) {
     const data = this.getData();
     const dist = Math.hypot(x - data.x, y - data.y)
-    if (dist < this.circleRadius_) {
+
+    const circleRadius = this.getCircleRadius();
+
+    if (dist < circleRadius) {
       return {
         index: 0,
         type: this.type,

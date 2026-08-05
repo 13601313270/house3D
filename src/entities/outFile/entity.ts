@@ -22,7 +22,6 @@ export class OutFileEntity extends PointCanAngleEntity<OutFileData> {
   color: string = '#0c7f25'
   color3D: string = '#0c7f25'
   colorOpacity: string = '#14b737a5'
-  private baseDrawAngelLength = 40;
   img: HTMLImageElement = new Image()
   private circleRadius = 6
   canEditAnimationDataColumn: Array<keyof OutFileData> = [];
@@ -88,15 +87,6 @@ export class OutFileEntity extends PointCanAngleEntity<OutFileData> {
     }
     centerCircleRadius = Math.max(centerCircleRadius, this.circleRadius) * zoom;
 
-    // 控制点
-    ctx.fillStyle = '#fff'
-    ctx.strokeStyle = '#e67e22'
-    ctx.lineWidth = 2
-    ctx.beginPath()
-    ctx.arc(screenX, screenY, centerCircleRadius * zoomLevel + 3, 0, Math.PI * 2)
-    ctx.fill()
-    ctx.stroke()
-
     if (findObjInfo && !findObjInfo.canAngelZ) {
       return;
     }
@@ -114,56 +104,8 @@ export class OutFileEntity extends PointCanAngleEntity<OutFileData> {
       return [tempX * zoomLevel, tempY * zoomLevel]
     }
 
-    // 绘制双向箭头表示旋转角度
-    ctx.strokeStyle = '#e67e22'
-    ctx.fillStyle = '#e67e22'
-    ctx.lineWidth = 2 * zoomLevel
-    // 绘制双向箭头的主线（圆弧）
-    ctx.beginPath();
-    ctx.arc(screenX, screenY, drawAngelLength * zoomLevel, drawAngelHandelAngel * -1 - Math.PI / 4, drawAngelHandelAngel * -1 + Math.PI / 4);
-    ctx.stroke();
-
-    // 左侧箭头
-    (() => {
-      ctx.beginPath()
-      const [p1X, p1Y] = ttt(drawAngelHandelAngel + 0.1 + Math.PI / 4, drawAngelLength)
-      const [p2X, p2Y] = ttt(drawAngelHandelAngel + Math.PI / 4, drawAngelLength + 5)
-      const [p3X, p3Y] = ttt(drawAngelHandelAngel + Math.PI / 4, drawAngelLength - 5)
-      ctx.moveTo(
-        p1X,
-        p1Y
-      )
-      ctx.lineTo(p2X, p2Y)
-      ctx.lineTo(p3X, p3Y)
-      ctx.closePath()
-      ctx.fill()
-    })();
-
-    // 右侧箭头
-    ctx.beginPath()
-    const [p1X, p1Y] = ttt(drawAngelHandelAngel - 0.1 - Math.PI / 4, drawAngelLength)
-    const [p2X, p2Y] = ttt(drawAngelHandelAngel - Math.PI / 4, drawAngelLength + 5)
-    const [p3X, p3Y] = ttt(drawAngelHandelAngel - Math.PI / 4, drawAngelLength - 5)
-    ctx.moveTo(
-      p1X,
-      p1Y
-    )
-    ctx.lineTo(p2X, p2Y)
-    ctx.lineTo(p3X, p3Y)
-    ctx.closePath()
-    ctx.fill()
-
-    // 在(rotatedXAdd, rotatedYAdd)位置绘制一个圆圈
-    const circleX = rotatedXAdd * zoomLevel
-    const circleY = rotatedYAdd * zoomLevel
-    const circleRadius = centerCircleRadius * zoomLevel + 3
-    ctx.fillStyle = '#fff'
-    ctx.strokeStyle = '#e67e22'
-    ctx.lineWidth = 2 * zoomLevel
-    ctx.beginPath()
-    ctx.arc(circleX, circleY, circleRadius, 0, Math.PI * 2)
-    ctx.fill()
-    ctx.stroke()
+    // 绘制操作句柄
+    super.draw2DActionHandle(ctx, zoomLevel)
 
     if (findObjInfo) {
       const { matchAreaType, matchAreaNumber1, matchAreaNumber2, matchAreaOffsetX, matchAreaOffsetY } = findObjInfo
@@ -468,72 +410,72 @@ export class OutFileEntity extends PointCanAngleEntity<OutFileData> {
     }
   }
 
-  matchHandelInfo(x: number, y: number) {
-    const data = this.getData();
-    const zoom = data.zoom || 1;
-    const dist = Math.hypot(x - data.x, y - data.y)
+  // matchHandelInfo(x: number, y: number) {
+  //   const data = this.getData();
+  //   const zoom = data.zoom || 1;
+  //   const dist = Math.hypot(x - data.x, y - data.y)
 
-    const findObjInfo = window.worldState.ObjFileTypes.find(item => item.id === data.fileTypeId)
-    let centerCircleRadius = this.circleRadius
-    if (findObjInfo) {
-      if (findObjInfo.matchAreaType === 1) {
-        centerCircleRadius = Math.max(findObjInfo.matchAreaNumber1, findObjInfo.matchAreaNumber2) / 10
-      } else if (findObjInfo.matchAreaType === 2) {
-        centerCircleRadius = findObjInfo.matchAreaNumber1 / 10
-      }
-    }
-    centerCircleRadius = Math.max(centerCircleRadius, this.circleRadius) * zoom
-    // console.log('dist', dist)
-    if (dist < centerCircleRadius + 3) {
-      return {
-        index: 0,
-        type: this.type,
-        id: data.id,
-        dist,
-      }
-    }
-    const drawAngelHandelAngel = data.angleY + (findObjInfo?.drawAngelAngel || 0);
-    const drawAngelLength = Math.max(findObjInfo?.drawAngelLength || this.baseDrawAngelLength, centerCircleRadius * 2)
-    // 控制点向着angleY角度延伸10个单位后的坐标
-    const rotatedXAdd = data.x + Math.cos(drawAngelHandelAngel) * drawAngelLength * zoom
-    const rotatedYAdd = data.y - Math.sin(drawAngelHandelAngel) * drawAngelLength * zoom
+  //   const findObjInfo = window.worldState.ObjFileTypes.find(item => item.id === data.fileTypeId)
+  //   let centerCircleRadius = this.circleRadius
+  //   if (findObjInfo) {
+  //     if (findObjInfo.matchAreaType === 1) {
+  //       centerCircleRadius = Math.max(findObjInfo.matchAreaNumber1, findObjInfo.matchAreaNumber2) / 10
+  //     } else if (findObjInfo.matchAreaType === 2) {
+  //       centerCircleRadius = findObjInfo.matchAreaNumber1 / 10
+  //     }
+  //   }
+  //   centerCircleRadius = Math.max(centerCircleRadius, this.circleRadius) * zoom
+  //   // console.log('dist', dist)
+  //   if (dist < centerCircleRadius + 3) {
+  //     return {
+  //       index: 0,
+  //       type: this.type,
+  //       id: data.id,
+  //       dist,
+  //     }
+  //   }
+  //   const drawAngelHandelAngel = data.angleY + (findObjInfo?.drawAngelAngel || 0);
+  //   const drawAngelLength = Math.max(findObjInfo?.drawAngelLength || this.baseDrawAngelLength, centerCircleRadius * 2)
+  //   // 控制点向着angleY角度延伸10个单位后的坐标
+  //   const rotatedXAdd = data.x + Math.cos(drawAngelHandelAngel) * drawAngelLength * zoom
+  //   const rotatedYAdd = data.y - Math.sin(drawAngelHandelAngel) * drawAngelLength * zoom
 
-    const dist2 = Math.hypot(x - rotatedXAdd, y - rotatedYAdd)
-    // console.log('dist2', dist2)
-    console.log('centerCircleRadius', dist2, centerCircleRadius)
-    if (dist2 < centerCircleRadius + 3) {
-      return {
-        index: 1,
-        type: this.type,
-        id: data.id,
-        dist: dist2,
-      }
-    }
-    return null;
-  }
+  //   const dist2 = Math.hypot(x - rotatedXAdd, y - rotatedYAdd)
+  //   // console.log('dist2', dist2)
+  //   console.log('centerCircleRadius', dist2, centerCircleRadius)
+  //   if (dist2 < centerCircleRadius + 3) {
+  //     return {
+  //       index: 1,
+  //       type: this.type,
+  //       id: data.id,
+  //       dist: dist2,
+  //     }
+  //   }
+  //   return null;
+  // }
 
-  matchHandelMoveCallback(position: {
-    x: number,
-    y: number,
-  }, matchHandelInfo: HandelInfo) {
-    const { x, y } = position
-    if (matchHandelInfo.index === 1) {
-      const data = this.getData();
-      // 根据x,y计算angleY
-      const angleY = Math.atan2(y - data.y, x - data.x)
-      const findObjInfo = window.worldState.ObjFileTypes.find(item => item.id === data.fileTypeId)
-      console.log(angleY)
-      this.setData({
-        // ...this.getData(),
-        angleY: angleY * -1 - (findObjInfo?.drawAngelAngel || 0),
-      })
-      return [
-        '角度:' + (angleY * -180 / Math.PI).toFixed(2) + '°',
-      ]
-    } else {
-      return super.matchHandelMoveCallback(position, matchHandelInfo)
-    }
-  }
+  // matchHandelMoveCallback(position: {
+  //   x: number,
+  //   y: number,
+  // }, matchHandelInfo: HandelInfo) {
+  //   const { x, y } = position
+  //   if (matchHandelInfo.index === 1) {
+  //     const data = this.getData();
+  //     // 根据x,y计算angleY
+  //     const angleY = Math.atan2(y - data.y, x - data.x)
+  //     const findObjInfo = window.worldState.ObjFileTypes.find(item => item.id === data.fileTypeId)
+  //     console.log(angleY)
+  //     this.setData({
+  //       // ...this.getData(),
+  //       angleY: angleY * -1 - (findObjInfo?.drawAngelAngel || 0),
+  //     })
+  //     return [
+  //       '角度:' + (angleY * -180 / Math.PI).toFixed(2) + '°',
+  //     ]
+  //   } else {
+  //     return super.matchHandelMoveCallback(position, matchHandelInfo)
+  //   }
+  // }
 
   inSceneSnapPointArea() {
     return false
