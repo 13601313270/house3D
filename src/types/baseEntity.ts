@@ -27,7 +27,7 @@ export abstract class BaseEntityClass<T extends BaseObjData> {
   abstract type: string
   parentEntity: GroupBaseEntity<GroupBaseData> | null;
   private data: T
-  private animationData: T // 临时数据，播放动画的时候，动画效果对应的data
+  private animationData: Partial<T> // 临时数据，播放动画的时候，动画效果对应的data
   meshList: THREE.Group[] = []
   boundingBoxData: [THREE.Vector3, THREE.Vector3, THREE.Vector3] | null = null // 第一个是尺寸，第二个是位置偏移，第三个是旋转角度
   // eslint-disable-next-line
@@ -40,7 +40,7 @@ export abstract class BaseEntityClass<T extends BaseObjData> {
   constructor(parentEntity: GroupBaseEntity<GroupBaseData> | null, data: T) {
     this.parentEntity = parentEntity
     this.data = data
-    this.animationData = data;
+    this.animationData = {};
     this.cacheCanvas = document.createElement("canvas")
     this.cacheCanvas.width = 100
     this.cacheCanvas.height = 100
@@ -69,7 +69,6 @@ export abstract class BaseEntityClass<T extends BaseObjData> {
 
   setData(data: Partial<T>) {
     if (timelineState.isPlaying) {
-      // this.animationData = data
       let findClip = timelineState.timelineData.clips.find(v => v.entityId === this.data.id);
       if (!findClip) {
         timelineState.timelineData.clips.push({
@@ -139,20 +138,23 @@ export abstract class BaseEntityClass<T extends BaseObjData> {
     this.update();
   }
 
-  setAnimationData(data: T) {
+  setAnimationData(data: Partial<T>) {
     this.animationData = data;
     this.update();
   }
 
   getData(): T {
     if (timelineState.isPlaying) {
-      return this.animationData;
+      return {
+        ...this.data,
+        ...this.animationData
+      };
     } else {
       return this.data
     }
   }
 
-  getAnimationData(): T {
+  getAnimationData(): Partial<T> {
     return this.animationData;
   }
 
