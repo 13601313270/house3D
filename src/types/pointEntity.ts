@@ -75,12 +75,12 @@ export abstract class PointEntityClass<T extends PointObjData> extends BaseEntit
 
   protected circleRadius_ = 8
 
-  private getCircleRadius(): number {
+  protected getCircleRadius(): number {
     if (!this.boundingBoxData) {
       return this.circleRadius_
     }
     let drawAngelLength: number;
-    const [size, offset] = this.boundingBoxData
+    const [size] = this.boundingBoxData
     if (size.x >= size.z) {
       drawAngelLength = size.x / 2;
     } else {

@@ -239,7 +239,7 @@ function bindDanvas2DSceneDefaultEvent(sense: Canvas2DScene) {
       })();
 
       if (tipTexts && tipTexts.length > 0) {
-        const canvasAction = sense.canvasList[0]!;
+        const canvasAction = sense.canvasList[1]!;
         const ctxAction = canvasAction.getContext('2d')!
 
         const hoverScreenX = xInWorld___ * sense.level + sense.panOffset.x
