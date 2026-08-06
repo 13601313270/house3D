@@ -58,7 +58,7 @@
           <button @click="copyEntity">复制</button>
           <button @click="moveToGroup" v-if="!['planeGroup'].includes(typeKey)">移动到组</button>
           <button @click="changeGlobalEditGroup" v-else-if="['planeGroup'].includes(typeKey)">编辑组</button>
-          <button @click="addAnimation">添加动画</button>
+          <!-- <button @click="addAnimation">添加动画</button> -->
         </div>
         <div style="flex-grow: 1;"></div>
         <button class="deleteButton" @click="deleteContextMenuEntity">删除</button>

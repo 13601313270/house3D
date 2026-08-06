@@ -37,14 +37,14 @@
       </div>
       <div class="editMode">
         <div>
-          <div class="timeLineTitle">
+          <!-- <div class="timeLineTitle">
             <button :class="{ active: editMode === 'scene' }" @click="setEditMode('scene')">
               场景编辑
             </button>
             <button :class="{ active: editMode === 'animation' }" @click="setEditMode('animation')">
               动画编辑
             </button>
-          </div>
+          </div> -->
         </div>
       </div>
       <div style="flex-grow: 1;"></div>
