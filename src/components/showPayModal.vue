@@ -38,6 +38,7 @@
               </div>
             </div>
           </div>
+          <img src="/fa29cde1.png" class="headImg" />
         </div>
       </div>
     </div>
@@ -140,6 +141,8 @@ window.addEventListener('focus', handleFocus)
     background: white;
     border-radius: 12px;
     padding: 24px;
+    position: relative;
+    margin-top: 80px;
 
     .title {
       font-size: 20px;
@@ -149,7 +152,7 @@ window.addEventListener('focus', handleFocus)
     }
 
     .sectionTitle {
-      font-size: 14px;
+      font-size: 18px;
       color: #666;
       margin-bottom: 12px;
     }
@@ -163,7 +166,8 @@ window.addEventListener('focus', handleFocus)
         gap: 12px;
 
         .amountItem {
-          width: calc(25% - 9px);
+          width: calc(47%);
+          height: 100px;
           padding: 10px 0;
           text-align: center;
           border: 2px solid #eee;
@@ -173,10 +177,11 @@ window.addEventListener('focus', handleFocus)
           display: flex;
           flex-direction: column;
           align-items: center;
+          justify-content: center;
           gap: 4px;
 
           .amountText {
-            font-size: 16px;
+            font-size: 24px;
             color: #333;
             font-weight: bold;
           }
@@ -192,7 +197,7 @@ window.addEventListener('focus', handleFocus)
             }
 
             .coinText {
-              font-size: 12px;
+              font-size: 16px;
               color: #999;
             }
           }
@@ -440,6 +445,13 @@ window.addEventListener('focus', handleFocus)
           background: #e8e8e8;
         }
       }
+    }
+
+    .headImg {
+      width: 250px;
+      position: absolute;
+      top: -151px;
+      left: 80px;
     }
   }
 }

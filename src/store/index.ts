@@ -1,11 +1,16 @@
 import { createStore } from 'vuex'
 
 type IState = {
-  userInfo: any,
+  userInfo: {
+    email: string
+    getJoinGroupMoney: boolean
+    id: number
+    money: number
+  },
 }
 
 type Store = {
-  main: { [key in keyof IState]: IState[key] }
+  main: IState
 }
 
 const main = {

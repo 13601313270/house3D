@@ -37,14 +37,14 @@
       </div>
       <div class="editMode">
         <div>
-          <!-- <div class="timeLineTitle">
+          <div class="timeLineTitle">
             <button :class="{ active: editMode === 'scene' }" @click="setEditMode('scene')">
               场景编辑
             </button>
             <button :class="{ active: editMode === 'animation' }" @click="setEditMode('animation')">
               动画编辑
             </button>
-          </div> -->
+          </div>
         </div>
       </div>
       <div style="flex-grow: 1;"></div>
@@ -56,10 +56,16 @@
               <img src="money.png" />
               <span>{{ store.state.main.userInfo.money }}金币）</span>
             </div>
-            <div class="list" v-show="activeToolsIndex === 2">
+            <div class="list user" v-show="activeToolsIndex === 2">
               <div class="userMoney">
-                <span>当前金币：{{ store.state.main.userInfo.money }}</span>
+                <div class="userMoneyInner">
+                  <span>当前金币：{{ store.state.main.userInfo.money }}</span>
+                  <img src="money.png" />
+                </div>
+              </div>
+              <div class="addGroupAddMoney" v-if="!store.state.main.userInfo.getJoinGroupMoney" @click="showGroupQrModal = true">
                 <img src="money.png" />
+                <div class="text">添加微信群，获得<span class="price">20</span>金币</div>
               </div>
               <div @click="showPayModal = true" class="childItem">
                 充值
@@ -191,6 +197,7 @@
     }" @close="isShowAiPic = false" />
   </teleport>
   <ShowPayModal v-if="showPayModal" @close="showPayModal = false" @paySuccess="handlePaySuccess" />
+  <ShowGroupQrModal v-if="showGroupQrModal" @close="showGroupQrModal = false" />
 </template>
 
 <script lang="ts" setup>
@@ -228,6 +235,7 @@ import { sleep } from '@/utils/sleep';
 import saveWorld, { fileData } from '@/utils/saveWorld';
 import AiPic from '@/components/aiPic.vue'
 import ShowPayModal from '@/components/showPayModal.vue'
+import ShowGroupQrModal from '@/components/showGroupQrModal.vue'
 import WorldState from '@/utils/worldState';
 import { editItem } from '@/utils/editItem';
 import WorldGroup, { EnvironmentConfig } from '@/world/world';
@@ -305,6 +313,7 @@ const centerPanelCamera = ref(new THREE.PerspectiveCamera(55, aspectRatio2.value
 const rightPanelCamera = ref<THREE.PerspectiveCamera | THREE.OrthographicCamera>();
 
 const showPayModal = ref(false)
+const showGroupQrModal = ref(false)
 
 const editMode = ref<'scene' | 'animation'>('scene')
 
@@ -1502,21 +1511,58 @@ function handleAddAnimation(data: { typeKey: string; modelValue: Record<string, 
   }
 
   .userMoney {
-    color: #333;
     padding: 4px 8px;
     border-radius: 4px;
-    font-size: 14px;
-    font-weight: bold;
     margin: 0 8px 8px;
     border: 1px solid #d9d9d9;
     border-radius: 4px;
     box-sizing: border-box;
+
+    .userMoneyInner {
+      color: #333;
+      display: flex;
+      align-items: center;
+      font-size: 14px;
+      font-weight: bold;
+
+      >img {
+        height: 18px;
+        margin-left: 8px;
+      }
+    }
+  }
+
+  .addGroupAddMoney {
     display: flex;
+    flex-direction: column;
     align-items: center;
+    justify-content: center;
+    margin: 0 8px 8px;
+    color: #181818;
+    font-size: 14px;
+    border-radius: 4px;
+    padding: 8px 8px;
+    cursor: pointer;
+    border: solid 1px #eff6e3;
+    background-color: #f2f7ea;
 
     >img {
-      height: 18px;
-      margin-left: 8px;
+      height: 48px;
+    }
+
+    .text {
+      margin-top: 4px;
+      font-size: 14px;
+
+      .price {
+        font-size: 18px;
+        font-weight: bold;
+        color: #44a23b;
+      }
+    }
+
+    &:hover {
+      background-color: #f0f0f0;
     }
   }
 }
@@ -1559,6 +1605,11 @@ function handleAddAnimation(data: { typeKey: string; modelValue: Record<string, 
       padding: 8px 0;
       z-index: 1000;
       max-height: 80vh;
+
+      &.user {
+        width: 200px;
+      }
+
       // overflow: auto;
 
       .typeItemContent {
