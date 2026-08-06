@@ -66,6 +66,9 @@ class Canvas2DSceneManage {
       const canvasRect = ctxList[0].getBoundingClientRect()
       const width = Math.floor(canvasRect.width)
       const height = Math.floor(canvasRect.height)
+      canvas2DSceneItem.width = width;
+      canvas2DSceneItem.height = height;
+
       if (width > 0 && height > 0) {
         ctxList.forEach(ctx => {
           if (ctx) {
