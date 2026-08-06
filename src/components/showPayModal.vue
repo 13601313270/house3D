@@ -2,7 +2,7 @@
   <teleport to="#teleport">
     <div class="showPayModal" @click.self="closeModal">
       <div class="showPayModalInner">
-        <div class="title">充值</div>
+        <div class="title">-</div>
         <div v-if="checkStatus === 'checking'" class="checkingState">
           <div class="spinner"></div>
           <div class="checkingText">正在验证支付状态...</div>

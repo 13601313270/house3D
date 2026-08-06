@@ -63,12 +63,16 @@
                   <img src="money.png" />
                 </div>
               </div>
-              <div class="addGroupAddMoney" v-if="!store.state.main.userInfo.getJoinGroupMoney" @click="showGroupQrModal = true">
+              <div class="addGroupAddMoney" v-if="!store.state.main.userInfo.getJoinGroupMoney"
+                @click="showGroupQrModal = true">
                 <img src="money.png" />
                 <div class="text">添加微信群，获得<span class="price">20</span>金币</div>
               </div>
               <div @click="showPayModal = true" class="childItem">
-                充值
+                购买金币
+              </div>
+              <div class="childItem" @click="showVipModal = true">
+                购买VIP
               </div>
               <div @click="logout" class="childItem">
                 退出
@@ -198,6 +202,7 @@
   </teleport>
   <ShowPayModal v-if="showPayModal" @close="showPayModal = false" @paySuccess="handlePaySuccess" />
   <ShowGroupQrModal v-if="showGroupQrModal" @close="showGroupQrModal = false" />
+  <ShowVipModal v-if="showVipModal" @close="showVipModal = false" @paySuccess="handleVipPaySuccess" />
 </template>
 
 <script lang="ts" setup>
@@ -236,6 +241,7 @@ import saveWorld, { fileData } from '@/utils/saveWorld';
 import AiPic from '@/components/aiPic.vue'
 import ShowPayModal from '@/components/showPayModal.vue'
 import ShowGroupQrModal from '@/components/showGroupQrModal.vue'
+import ShowVipModal from '@/components/showVipModal.vue'
 import WorldState from '@/utils/worldState';
 import { editItem } from '@/utils/editItem';
 import WorldGroup, { EnvironmentConfig } from '@/world/world';
@@ -314,6 +320,7 @@ const rightPanelCamera = ref<THREE.PerspectiveCamera | THREE.OrthographicCamera>
 
 const showPayModal = ref(false)
 const showGroupQrModal = ref(false)
+const showVipModal = ref(false)
 
 const editMode = ref<'scene' | 'animation'>('scene')
 
@@ -1376,6 +1383,11 @@ function showAiPic() {
 
 function handlePaySuccess() {
   showPayModal.value = false
+  initUserInfo()
+}
+
+function handleVipPaySuccess() {
+  showVipModal.value = false
   initUserInfo()
 }
 

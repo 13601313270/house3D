@@ -6,6 +6,7 @@ type IState = {
     getJoinGroupMoney: boolean
     id: number
     money: number
+    vipEndDate: string,
   },
 }
 
