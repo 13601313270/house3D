@@ -276,8 +276,6 @@ export class PolygonPlaneEntity extends LineEntityClass<PolygonPlanePoint, Polyg
     const {
       x,
       y,
-      // startX,
-      // startY
     } = position
     if (matchHandelInfo.index !== undefined) {
       this.markObjectIsDirty()
@@ -307,7 +305,11 @@ export class PolygonPlaneEntity extends LineEntityClass<PolygonPlanePoint, Polyg
             }
           }
         }
-        this.getData().points[index] = { x, y }
+        const points = [...wall.points];
+        points[index] = { x, y };
+        this.setData({
+          points,
+        })
       } else {
         // 拖拽线开启后，墙上的窗户移动的时候，无法被触发，所以关闭掉。
         // if (startX !== undefined && startY !== undefined) {

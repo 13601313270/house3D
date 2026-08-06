@@ -47,7 +47,7 @@ export abstract class PointCanAngleEntity<T extends PointCanAngleObjData> extend
     }
     return {
       angel: this.startDownAngelY,
-      length: drawAngelLength * 0.9,
+      length: drawAngelLength * 0.7,
       circleRadius,
     };
   }

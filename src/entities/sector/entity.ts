@@ -7,6 +7,7 @@ import { getMaterialById } from '@/material';
 import { MatchCircleArea, MatchRectArea } from '@/utils/matchArea';
 import { allSnapFromType } from '@/types/baseEntity';
 import getMatchRectAreaBySector from '@/utils/getMatchRectAreaBySector';
+import { resize } from '@/utils/handleImgs';
 
 export class SectorEntity extends PointEntityClass<SectorData> {
   name: string = '扇形体'
@@ -75,7 +76,7 @@ export class SectorEntity extends PointEntityClass<SectorData> {
     ctx.restore(); // 恢复原始状态
 
     // 控制点
-    const circleRadius = this.circleRadius;
+    const circleRadius = this.getCircleRadius() * zoomLevel + 3;
     super.draw2DActionHandle(ctx, zoomLevel)
 
     // 绘制startAngle的点
@@ -83,7 +84,7 @@ export class SectorEntity extends PointEntityClass<SectorData> {
     ctx.arc(
       screenX + r * Math.cos(startAngle) * zoomLevel,
       screenY - r * Math.sin(startAngle) * zoomLevel,
-      Math.max(circleRadius * zoomLevel, 6),
+      Math.max(circleRadius, 6),
       0,
       Math.PI * 2
     )
@@ -96,7 +97,7 @@ export class SectorEntity extends PointEntityClass<SectorData> {
     ctx.arc(
       screenX + r * Math.cos(endAngle) * zoomLevel,
       screenY - r * Math.sin(endAngle) * zoomLevel,
-      Math.max(circleRadius * zoomLevel, 6),
+      Math.max(circleRadius, 6),
       0,
       Math.PI * 2
     )
@@ -106,16 +107,25 @@ export class SectorEntity extends PointEntityClass<SectorData> {
 
     // 绘制一个缩放尺寸的点
     ctx.beginPath()
+    const xTemp = screenX + r * Math.cos((startAngle + endAngle) / 2) * zoomLevel;
+    const yTemp = screenY - r * Math.sin((startAngle + endAngle) / 2) * zoomLevel;
     ctx.arc(
-      screenX + r * Math.cos((startAngle + endAngle) / 2) * zoomLevel,
-      screenY - r * Math.sin((startAngle + endAngle) / 2) * zoomLevel,
-      Math.max(circleRadius * zoomLevel, 6),
+      xTemp,
+      yTemp,
+      Math.max(circleRadius, 6),
       0,
       Math.PI * 2
     )
     ctx.fill()
     ctx.stroke()
     ctx.closePath()
+    const imgSize = circleRadius * 1.5;
+    const midAngle = (startAngle + endAngle) / 2;
+    ctx.save();
+    ctx.translate(xTemp, yTemp);
+    ctx.rotate(midAngle * -1);
+    ctx.drawImage(resize, -imgSize / 2, -imgSize / 2, imgSize, imgSize);
+    ctx.restore();
   }
 
   glbObj: THREE.Group | null = null;
