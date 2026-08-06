@@ -5,6 +5,7 @@ import { editItem } from '@/utils/editItem';
 import { MatchCircleArea } from '@/utils/matchArea';
 import { allSnapFromType } from '@/types/baseEntity';
 import { PointCanAngleEntity } from '@/types/pointCanAngleEntity';
+import { resize } from '@/utils/handleImgs';
 
 function getAllPointsByN(x: number, y: number, n: number, r: number, angle: number): Point[] {
   const points: Point[] = []
@@ -84,67 +85,6 @@ export class RegularPolygon2Entity extends PointCanAngleEntity<RegularPolygon2Da
     const data = this.getData();
     const { n, r, angleY, r2 } = data
 
-    // const drawAngelLength = Math.max(this.getData().r, this.circleRadius * 2) * 0.7;// 0.7避免超过方块范围
-    // 控制点向着angleY角度延伸10个单位后的坐标
-    // const rotatedXAdd = data.x + Math.cos(data.angleY) * drawAngelLength
-    // const rotatedYAdd = data.y - Math.sin(data.angleY) * drawAngelLength
-    // const circleX = rotatedXAdd * zoomLevel
-    // const circleY = rotatedYAdd * zoomLevel
-    // const circleRadius = this.circleRadius * zoomLevel + 3
-
-    // function ttt(angel: number, drawAngelLength: number) {
-    //   const tempX = data.x + Math.cos(angel) * drawAngelLength;
-    //   const tempY = data.y - Math.sin(angel) * drawAngelLength;
-    //   return [tempX * zoomLevel, tempY * zoomLevel]
-    // }
-
-    // // 绘制双向箭头表示旋转角度
-    // ctx.fillStyle = '#fff'
-    // ctx.strokeStyle = '#e67e22'
-    // ctx.lineWidth = 2 * zoomLevel
-    // // 绘制双向箭头的主线（圆弧）
-    // ctx.beginPath();
-    // ctx.arc(screenX, screenY, drawAngelLength * zoomLevel, data.angleY * -1 - Math.PI / 4, data.angleY * -1 + Math.PI / 4);
-    // ctx.stroke();
-
-    // // 左侧箭头
-    // (() => {
-    //   ctx.beginPath()
-    //   const [p1X, p1Y] = ttt(data.angleY + 0.1 + Math.PI / 4, drawAngelLength)
-    //   const [p2X, p2Y] = ttt(data.angleY + Math.PI / 4, drawAngelLength + 5)
-    //   const [p3X, p3Y] = ttt(data.angleY + Math.PI / 4, drawAngelLength - 5)
-    //   ctx.moveTo(
-    //     p1X,
-    //     p1Y
-    //   )
-    //   ctx.lineTo(p2X, p2Y)
-    //   ctx.lineTo(p3X, p3Y)
-    //   ctx.closePath()
-    //   ctx.fill()
-    // })();
-
-    // // 右侧箭头
-    // (() => {
-    //   ctx.beginPath()
-    //   const [p1X, p1Y] = ttt(data.angleY - 0.1 - Math.PI / 4, drawAngelLength)
-    //   const [p2X, p2Y] = ttt(data.angleY - Math.PI / 4, drawAngelLength + 5)
-    //   const [p3X, p3Y] = ttt(data.angleY - Math.PI / 4, drawAngelLength - 5)
-    //   ctx.moveTo(
-    //     p1X,
-    //     p1Y
-    //   )
-    //   ctx.lineTo(p2X, p2Y)
-    //   ctx.lineTo(p3X, p3Y)
-    //   ctx.closePath()
-    //   ctx.fill()
-    // })();
-
-    // // 绘制旋转角度控制
-    // ctx.beginPath()
-    // ctx.arc(circleX, circleY, circleRadius, 0, Math.PI * 2)
-    // ctx.fill()
-    // ctx.stroke()
-
     // 绘制 轮廓
     const bottomPoints = getAllPointsByN(data.x, data.y, n, r, angleY * -1)
     if (bottomPoints.length >= 3) {
@@ -186,7 +126,23 @@ export class RegularPolygon2Entity extends PointCanAngleEntity<RegularPolygon2Da
       }
     }
     // 控制点
-    super.draw2DActionHandle(ctx, zoomLevel)
+    super.draw2DActionHandle(ctx, zoomLevel);
+    // 调整半径的控制点
+    (() => {
+      const circleRadius = this.getCircleRadius() * zoomLevel + 3;
+      const imgSize = circleRadius * 1.5;
+      ctx.fillStyle = '#fff'
+      ctx.strokeStyle = 'black'
+      ctx.lineWidth = 2
+      const screenX = (data.x + data.r) * zoomLevel;
+      const screenY = data.y * zoomLevel;
+
+      ctx.beginPath()
+      ctx.arc(screenX, screenY, circleRadius, 0, Math.PI * 2)
+      ctx.fill()
+      ctx.stroke();
+      ctx.drawImage(resize, screenX - imgSize / 2, screenY - imgSize / 2, imgSize, imgSize);
+    })();
   }
 
   glbObj: THREE.Group | null = null;
@@ -278,52 +234,39 @@ export class RegularPolygon2Entity extends PointCanAngleEntity<RegularPolygon2Da
     return null;
   }
 
-  // matchHandelInfo(x: number, y: number) {
-  //   const data = this.getData();
-  //   const dist = Math.hypot(x - data.x, y - data.y)
-  //   if (dist < this.circleRadius + 3) {
-  //     return {
-  //       index: 0,
-  //       type: this.type,
-  //       id: data.id,
-  //       dist,
-  //     }
-  //   }
-  //   const drawAngelLength = Math.max(this.getData().r, this.circleRadius * 2) * 0.7;// 0.7避免超过方块范围
-  //   // 控制点向着angleY角度延伸10个单位后的坐标
-  //   const rotatedXAdd = data.x + Math.cos(data.angleY) * drawAngelLength
-  //   const rotatedYAdd = data.y - Math.sin(data.angleY) * drawAngelLength
+  matchHandelInfo(x: number, y: number) {
+    const data = this.getData()
 
-  //   const dist2 = Math.hypot(x - rotatedXAdd, y - rotatedYAdd)
-  //   // console.log('dist2', dist2)
-  //   if (dist2 < this.circleRadius + 3) {
-  //     return {
-  //       index: 1,
-  //       type: this.type,
-  //       id: data.id,
-  //       dist: dist2,
-  //     }
-  //   }
-  //   return null;
-  // }
+    const circleRadius = this.getCircleRadius();
 
-  // matchHandelMoveCallback(position: {
-  //   x: number,
-  //   y: number,
-  // }, matchHandelInfo: HandelInfo) {
-  //   const { x, y } = position
-  //   if (matchHandelInfo.index === 1) {
-  //     const data = this.getData();
-  //     // 根据x,y计算angleY
-  //     const angleY = Math.atan2(y - data.y, x - data.x)
-  //     this.setData({
-  //       // ...this.getData(),
-  //       angleY: angleY * -1,
-  //     })
-  //   } else {
-  //     return super.matchHandelMoveCallback(position, matchHandelInfo)
-  //   }
-  // }
+    const dist = Math.hypot(x - (data.x + data.r), y - data.y)
+    if (dist < circleRadius) {
+      return {
+        index: 2,
+        type: this.type,
+        id: data.id,
+        dist,
+      }
+    }
+
+    return super.matchHandelInfo(x, y)
+  }
+
+  matchHandelMoveCallback(position: {
+    x: number,
+    y: number,
+  }, matchHandelInfo: HandelInfo) {
+    if (matchHandelInfo.index === 2) {
+      const data = this.getData()
+      const dist = Number((position.x - data.x).toFixed(1));
+      this.setData({
+        r: dist,
+      } as Partial<RegularPolygon2Data>)
+      return [dist + 'cm']
+    } else {
+      super.matchHandelMoveCallback(position, matchHandelInfo)
+    }
+  }
 
   getMineBeSnapPoints() {
     const key: allSnapFromType = 'point';

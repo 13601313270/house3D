@@ -6,6 +6,7 @@ import { editItem } from '@/utils/editItem';
 import { getMaterialById } from '@/material';
 import { MatchCircleArea } from '@/utils/matchArea';
 import { allSnapFromType } from '@/types/baseEntity';
+import { resize } from '@/utils/handleImgs';
 
 export class TorusEntity extends PointEntityClass<TorusData> {
   name: string = '环体'
@@ -40,12 +41,8 @@ export class TorusEntity extends PointEntityClass<TorusData> {
     zoomLevel: number,
   ): void {
     const data = this.getData();
-    const screenX = data.x * zoomLevel
-    const screenY = data.y * zoomLevel
     const { r, t } = data;
 
-    // 控制点
-    super.draw2DActionHandle(ctx, zoomLevel)
     ctx.fillStyle = '#fff'
     ctx.strokeStyle = '#e67e22'
     ctx.lineWidth = 2
@@ -69,6 +66,25 @@ export class TorusEntity extends PointEntityClass<TorusData> {
     )
     ctx.stroke()
     ctx.restore(); // 恢复原始状态
+
+    // 控制点
+    super.draw2DActionHandle(ctx, zoomLevel);
+    // 调整半径的控制点
+    (() => {
+      const circleRadius = this.getCircleRadius() * zoomLevel + 3;
+      const imgSize = circleRadius * 1.5;
+      ctx.fillStyle = '#fff'
+      ctx.strokeStyle = 'black'
+      ctx.lineWidth = 2
+      const screenX = (data.x + data.r) * zoomLevel;
+      const screenY = data.y * zoomLevel;
+
+      ctx.beginPath()
+      ctx.arc(screenX, screenY, circleRadius, 0, Math.PI * 2)
+      ctx.fill()
+      ctx.stroke();
+      ctx.drawImage(resize, screenX - imgSize / 2, screenY - imgSize / 2, imgSize, imgSize);
+    })();
   }
 
   create3DMesh() {
@@ -118,25 +134,38 @@ export class TorusEntity extends PointEntityClass<TorusData> {
   }
 
   matchHandelInfo(x: number, y: number) {
-    const data = this.getData();
-    const dist = Math.hypot(x - data.x, y - data.y)
-    if (dist < this.circleRadius + 3) {
+    const data = this.getData()
+
+    const circleRadius = this.getCircleRadius();
+
+    const dist = Math.hypot(x - (data.x + data.r), y - data.y)
+    if (dist < circleRadius) {
       return {
-        index: 0,
+        index: 2,
         type: this.type,
         id: data.id,
         dist,
       }
     }
-    return null;
+
+    return super.matchHandelInfo(x, y)
   }
 
-  // matchHandelMoveCallback(position: {
-  //   x: number,
-  //   y: number,
-  // }, matchHandelInfo: HandelInfo) {
-  //   super.matchHandelMoveCallback(position, matchHandelInfo)
-  // }
+  matchHandelMoveCallback(position: {
+    x: number,
+    y: number,
+  }, matchHandelInfo: HandelInfo) {
+    if (matchHandelInfo.index === 2) {
+      const data = this.getData()
+      const dist = Number((position.x - data.x).toFixed(1));
+      this.setData({
+        r: dist,
+      } as Partial<TorusData>)
+      return [dist + 'cm']
+    } else {
+      super.matchHandelMoveCallback(position, matchHandelInfo)
+    }
+  }
 
   getMineBeSnapPoints() {
     const key: allSnapFromType = 'point';

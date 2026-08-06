@@ -11,7 +11,6 @@ import { PointCanAngleEntity } from '@/types/pointCanAngleEntity';
 export class CubeEntity extends PointCanAngleEntity<CubeData> {
   name: string = '方块'
   type: string = 'cube'
-  private circleRadius = 6
   canEditAnimationDataColumn: Array<keyof CubeData> = ['width', 'height', 'depth'];
 
   draw2DPreview(ctx: CanvasRenderingContext2D, zoomLevel: number): void {

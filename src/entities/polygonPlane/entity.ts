@@ -13,7 +13,6 @@ import { PolygonPlanePoint, PolygonPlaneData } from './index.d'
 export class PolygonPlaneEntity extends LineEntityClass<PolygonPlanePoint, PolygonPlaneData> {
   name: string = '折线平面'
   type: string = 'polygonPlane'
-  private circleRadius = 6
   private thickness = 10
   canEditAnimationDataColumn: Array<keyof PolygonPlaneData> = [];
 
@@ -55,6 +54,17 @@ export class PolygonPlaneEntity extends LineEntityClass<PolygonPlanePoint, Polyg
     zoomLevel: number,
   ): void {
     const data = this.getData();
+
+    let minX = data.points[0].x
+    let maxX = data.points[0].x
+    data.points.forEach(v => {
+      minX = Math.min(minX, v.x)
+      maxX = Math.max(maxX, v.x)
+    })
+    const width = maxX - minX
+    const fontSize = width / 20;
+    const circleRadius = fontSize / 2;
+
     if (data.points && data.points.length > 2) {
       // 绘制墙上的点
       ctx.lineWidth = 3
@@ -64,7 +74,7 @@ export class PolygonPlaneEntity extends LineEntityClass<PolygonPlanePoint, Polyg
         const screenX = point.x * zoomLevel
         const screenY = point.y * zoomLevel
         ctx.beginPath()
-        ctx.arc(screenX, screenY, this.circleRadius * zoomLevel + 3, 0, Math.PI * 2)
+        ctx.arc(screenX, screenY, circleRadius * zoomLevel + 3, 0, Math.PI * 2)
         ctx.stroke()
         ctx.fill()
         ctx.closePath()
@@ -100,12 +110,12 @@ export class PolygonPlaneEntity extends LineEntityClass<PolygonPlanePoint, Polyg
             // console.log('angleAngel', angleAngel)
             // 计算角度文本位置：在夹角内侧
             const offset = {
-              x: Math.cos(angleAngel) * 30,
-              y: Math.sin(angleAngel) * 20
+              x: Math.cos(angleAngel) * fontSize * 1.5,
+              y: Math.sin(angleAngel) * fontSize
             }
             const angleX = screenX - offset.x * zoomLevel
             const angleY = screenY - offset.y * zoomLevel
-            ctx.font = `${Math.max(20 * zoomLevel, 20)}px Arial`
+            ctx.font = `${Math.max(fontSize * zoomLevel, fontSize)}px Arial`
             ctx.textBaseline = 'middle'
             ctx.strokeStyle = 'white'
             ctx.lineWidth = Math.max(3 * zoomLevel, 2)
@@ -129,14 +139,14 @@ export class PolygonPlaneEntity extends LineEntityClass<PolygonPlanePoint, Polyg
         ctx.fillStyle = 'white'
         ctx.lineWidth = 2
         ctx.beginPath()
-        ctx.arc(screenX, screenY, this.circleRadius * zoomLevel + 3, 0, Math.PI * 2)
+        ctx.arc(screenX, screenY, circleRadius * zoomLevel + 3, 0, Math.PI * 2)
         ctx.stroke()
         ctx.fill()
         ctx.closePath()
         // 绘制p1到p2长度
         const len = Math.sqrt((p2.x - p1.x) * (p2.x - p1.x) + (p2.y - p1.y) * (p2.y - p1.y))
         const lenText = `${Math.round(len)}cm`
-        ctx.font = `${Math.max(20 * zoomLevel, 20)}px Arial`
+        ctx.font = `${Math.max(fontSize * zoomLevel, fontSize)}px Arial`
         ctx.textBaseline = 'middle'
         ctx.strokeStyle = 'white'
         ctx.lineWidth = Math.max(3 * zoomLevel, 2)
@@ -144,8 +154,8 @@ export class PolygonPlaneEntity extends LineEntityClass<PolygonPlanePoint, Polyg
         ctx.fillStyle = 'red'
         // p1到p2的角度
         const angle = Math.atan2(p2.y - p1.y, p2.x - p1.x)
-        const textX = Math.abs(Math.tan(angle)) > 1 ? screenX + 30 * zoomLevel : screenX
-        const textY = Math.abs(Math.tan(angle)) > 1 ? screenY : screenY + 20 * zoomLevel
+        const textX = Math.abs(Math.tan(angle)) > 1 ? screenX + fontSize * 1.5 * zoomLevel : screenX
+        const textY = Math.abs(Math.tan(angle)) > 1 ? screenY : screenY + fontSize * zoomLevel
         ctx.strokeText(lenText, textX, textY)
         ctx.fillText(lenText, textX, textY)
       }
