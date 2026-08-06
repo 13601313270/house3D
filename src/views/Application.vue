@@ -52,7 +52,9 @@
         <div class="toolbar-item" @mouseleave="activeToolsIndex = -1">
           <div v-if="store.state.main.userInfo">
             <div class="userInfo" @mouseenter="activeToolsIndex = 2">
-              <span>欢迎登录：{{ store.state.main.userInfo.email }}（</span>
+              <span>欢迎登录：{{ store.state.main.userInfo.email }}</span>
+              <span v-if="isVip" class="vipBadgeTop">VIP</span>
+              <span>（</span>
               <img src="money.png" />
               <span>{{ store.state.main.userInfo.money }}金币）</span>
             </div>
@@ -61,6 +63,15 @@
                 <div class="userMoneyInner">
                   <span>当前金币：{{ store.state.main.userInfo.money }}</span>
                   <img src="money.png" />
+                </div>
+              </div>
+              <div class="userVip" v-if="isVip">
+                <div class="userVipInner">
+                  <div class="vipCrown">👑</div>
+                  <div class="vipInfo">
+                    <div class="vipTitle">尊贵VIP会员</div>
+                    <div class="vipSubtitle">到期：{{ formattedVipEndDate }}（剩{{ vipRemainingDays }}天）</div>
+                  </div>
                 </div>
               </div>
               <div class="addGroupAddMoney" v-if="!store.state.main.userInfo.getJoinGroupMoney"
@@ -206,7 +217,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted, onUnmounted, nextTick, watch } from 'vue'
+import { ref, onMounted, onUnmounted, nextTick, watch, computed } from 'vue'
 import axios from 'axios'
 import * as THREE from 'three'
 import JSZip from 'jszip';
@@ -321,6 +332,30 @@ const rightPanelCamera = ref<THREE.PerspectiveCamera | THREE.OrthographicCamera>
 const showPayModal = ref(false)
 const showGroupQrModal = ref(false)
 const showVipModal = ref(false)
+
+const isVip = computed(() => {
+  const vipEndDate = store.state.main.userInfo.vipEndDate
+  if (!vipEndDate) return false
+  return new Date(vipEndDate).getTime() > Date.now()
+})
+
+const formattedVipEndDate = computed(() => {
+  const vipEndDate = store.state.main.userInfo.vipEndDate
+  if (!vipEndDate) return ''
+  const d = new Date(vipEndDate)
+  const year = d.getFullYear()
+  const month = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+})
+
+const vipRemainingDays = computed(() => {
+  const vipEndDate = store.state.main.userInfo.vipEndDate
+  if (!vipEndDate) return 0
+  const diff = new Date(vipEndDate).getTime() - Date.now()
+  if (diff <= 0) return 0
+  return Math.ceil(diff / (1000 * 60 * 60 * 24))
+})
 
 const editMode = ref<'scene' | 'animation'>('scene')
 
@@ -1520,6 +1555,21 @@ function handleAddAnimation(data: { typeKey: string; modelValue: Record<string, 
     >img {
       height: 18px;
     }
+
+    .vipBadgeTop {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 4px;
+      padding: 1px 6px;
+      font-size: 11px;
+      font-weight: bold;
+      border-radius: 3px;
+      background: linear-gradient(135deg, #ffd66b 0%, #d4a74a 100%);
+      color: #5c3d00;
+      box-shadow: 0 1px 3px rgba(212, 167, 74, 0.4);
+      letter-spacing: 0.5px;
+    }
   }
 
   .userMoney {
@@ -1540,6 +1590,47 @@ function handleAddAnimation(data: { typeKey: string; modelValue: Record<string, 
       >img {
         height: 18px;
         margin-left: 8px;
+      }
+    }
+  }
+
+  .userVip {
+    padding: 4px 8px;
+    border-radius: 4px;
+    margin: 0 8px 8px;
+    box-sizing: border-box;
+    background: linear-gradient(135deg, #fff8e6 0%, #ffecc0 100%);
+    border: 1px solid #f0d88a;
+    border-radius: 6px;
+
+    .userVipInner {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+
+      .vipCrown {
+        font-size: 24px;
+        flex-shrink: 0;
+      }
+
+      .vipInfo {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+
+        .vipTitle {
+          font-size: 14px;
+          font-weight: bold;
+          background: linear-gradient(135deg, #e6c06b 0%, #d4a74a 100%);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+        }
+
+        .vipSubtitle {
+          font-size: 12px;
+          color: #996600;
+        }
       }
     }
   }
