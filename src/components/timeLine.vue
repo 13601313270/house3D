@@ -142,7 +142,7 @@
 
 <script lang="ts" setup>
 // onMounted 已预留（未来可能需要挂载后初始化标尺同步滚动等），暂未使用
-import { ref, computed, onUnmounted, watch, onMounted } from 'vue'
+import { ref, computed, onUnmounted, watch, onMounted, nextTick } from 'vue'
 import { message } from '@/utils/message'
 // timelineState 模块：管理时间轴状态，clip/track/keyframe 数据结构，以及全局播放状态标志
 import { ClipSegment, TrackData, Keyframe, timelineState, ClipData } from '@/utils/timelineManage';
@@ -1040,7 +1040,6 @@ function evaluateTimeline(time: number) {
       return v.getOriginalData().id === match.entityId
     })
     if (!entity) return;
-
     const data: any = {}
     // if (time < timelineState.timelineData.clips[0].startTime) {
     match.tracks.forEach(track => {
@@ -1171,9 +1170,32 @@ function addTrack(trackType: string) {
 function removeTrack(trackType: string) {
   if (!activeSegment.value) return
   const clip = activeSegment.value.clip
-  clip.tracks = clip.tracks.filter(t => t.trackType !== trackType)
-  // timelineData___.value = { ...timelineData___.value }
+  const newTracks: TrackData[] = [];
+  const removeTracks: string[] = [];
+  const { entityId, tracks } = clip;
+  const entity = window.worldApi.children.find(v => {
+    return v.getOriginalData().id === entityId
+  })
+  tracks.forEach(t => {
+    if (t.trackType !== trackType) {
+      newTracks.push(t)
+    } else {
+      removeTracks.push(t.trackType);
+    }
+  })
+  if (entity) {
+    removeTracks.forEach(removeKey => {
+      entity.setAnimationData({
+        ...entity.getAnimationData(),
+        [removeKey]: undefined,
+      })
+    })
+  }
+  clip.tracks = newTracks;
   timelineState.timelineData = { ...timelineState.timelineData }
+  nextTick(() => {
+    evaluateTimeline(timelineState.currentTime)
+  })
 }
 
 // showTrackDropdown：点击「＋ 添加属性」按钮时展开下拉菜单

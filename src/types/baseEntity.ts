@@ -139,7 +139,16 @@ export abstract class BaseEntityClass<T extends BaseObjData> {
   }
 
   setAnimationData(data: Partial<T>) {
-    this.animationData = data;
+    // 过滤掉data中值为undefined的key
+    const filteredData: Partial<T> = {};
+    Object.keys(data).forEach(key => {
+      const value = (data as any)[key];
+      if (value !== undefined) {
+        (filteredData as any)[key] = value;
+      }
+    });
+    // data = filteredData;
+    this.animationData = filteredData;
     this.update();
   }
 

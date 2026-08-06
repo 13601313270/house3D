@@ -1154,7 +1154,7 @@ const startSplitTimeLine = () => {
 const handleMouseMoveTimeLine = (e: MouseEvent) => {
   if (!isSplitTimeLine.value) return
   const containerHeight = window.innerHeight
-  console.log('ddddd', containerHeight, e.clientY)
+  // console.log('ddddd', containerHeight, e.clientY)
   const minHeight = 20;
   const mousePositionPer = Math.min(Math.max(containerHeight - e.clientY, minHeight), maxTimeHeight)
   timeHeight.value = mousePositionPer

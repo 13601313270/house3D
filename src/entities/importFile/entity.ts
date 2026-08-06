@@ -191,7 +191,7 @@ export class ImportFileEntity extends PointCanAngleEntity<ImportFileData> {
     center.set(finalOffsetX * scale, offsetY * scale, finalOffsetZ * scale)
     const angel = this.basicBoxData_[2].clone();
     angel.setY(angleY)
-    console.log('size', size)
+    // console.log('size', size)
     return [
       size,
       center,
