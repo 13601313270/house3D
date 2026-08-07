@@ -58,7 +58,7 @@
                 <div class="track-header-bar">
                   <span class="clip-name">{{ segment.clip.entityId }}</span>
                   <span class="clip-duration">{{ formatTime(segment.startTime) }} - {{ formatTime(segment.endTime)
-                    }}</span>
+                  }}</span>
                 </div>
                 <!-- 时间重叠警告徽章：hover 时显示 title 文案，点击播放时会被拦截 -->
                 <div v-if="overlappingClipIds.has(segment.clip.clipId)" class="warning-badge" title="同一个物体对象不允许时间重叠">
@@ -680,7 +680,7 @@ function evaluateTimeline(time: number) {
       return v.getOriginalData().id === clip.entityId
     })
     if (!entity) return;
-    const inArea = time > clip.startTime && time < clip.endTime
+    const inArea = time >= clip.startTime && time <= clip.endTime
     if (inArea) {
       // --- 情况1：命中某个 clip 区间 → 对每个轨道执行关键帧插值 ---
       clip.columns.forEach(track => {
@@ -714,9 +714,10 @@ function evaluateTimeline(time: number) {
       });
     } else {
       // --- 情况2：time 在所有 clip 之前（还没开始第一个动画） ---
-      if (time < clip.startTime) {
-        const data: any = { ...entity.getOriginalData() };
-        clip.columns.forEach(track => {
+      const data: any = { ...entity.getOriginalData() };
+      console.log('clip.columns', clip, clip.columns)
+      clip.columns.forEach(track => {
+        if (time < track.keyTimePoints[0].time) {
           const { trackType } = track;
           const leftTime = 0;
           const rightTime = clip.startTime;
@@ -729,23 +730,16 @@ function evaluateTimeline(time: number) {
             // @ts-ignore - trackType 为动态字符串，Entity 接口无法穷举
             data[trackType] = previewVal;// entity.getOriginalData()[trackType] as any;
           }
-        })
-        entity.setAnimationData({
-          ...entity.getAnimationData(),
-          ...data,
-        });
-      } else if (time > clip.endTime) {
-        const data: any = { ...entity.getOriginalData() };
-        clip.columns.forEach(track => {
+        } else if (time > track.keyTimePoints[track.keyTimePoints.length - 1].time) {
           const { trackType } = track;
           const rightVal = track.keyTimePoints[track.keyTimePoints.length - 1].value
           data[trackType] = rightVal;
-        })
-        entity.setAnimationData({
-          ...entity.getAnimationData(),
-          ...data,
-        });
-      }
+        }
+      })
+      entity.setAnimationData({
+        ...entity.getAnimationData(),
+        ...data,
+      });
     }
   })
 
