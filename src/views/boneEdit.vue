@@ -2,13 +2,13 @@
   <div class="viewport-container" ref="viewportRef">
     <div class="topPanel">
       <div class="postList">
-        <div v-for="item in allDemoList.slice(0, 5)" :key="item.file" class="item" @click="playAnimation(item.file)">
+        <div v-for="item in allDemoList.slice(0, 6)" :key="item.file" class="item" @click="playAnimation(item.file)">
           <div class="name">{{ item.name }}</div>
           <img :src="item.img" alt="animation" />
         </div>
       </div>
       <div class="postList">
-        <div v-for="item in allDemoList.slice(5, 9)" :key="item.file" class="item" @click="playAnimation(item.file)">
+        <div v-for="item in allDemoList.slice(6, 11)" :key="item.file" class="item" @click="playAnimation(item.file)">
           <div class="name">{{ item.name }}</div>
           <img :src="item.img" alt="animation" />
         </div>
@@ -29,24 +29,63 @@
           <div class="timeDisplay">
             {{ formatTime(currentTime) }} / {{ formatTime(totalDuration) }}
           </div>
-          <div @click="togglePlay" class="controlBtn">
+          <div @click="togglePlay" class="controlBtn playBtn">
             {{ isPlaying ? '⏸' : '▶' }}
           </div>
         </div>
-        <div class="controlButtons">
-          <div class="controlBtn" @click="save()">应用本帧</div>
-          <div class="dropdown-wrapper" @mouseenter="handleDropdownEnter" @mouseleave="handleDropdownLeave">
-            <div class="controlBtn dropdown-btn">...</div>
-            <div :class="{ 'dropdown-menu': true, 'dropdown-menu-hidden': !showDropdown }"
-              @mouseenter="handleDropdownEnter" @mouseleave="handleDropdownLeave">
-              <div class="dropdown-item" @click.stop="saveUpperBody">仅应用上半身</div>
-              <div class="dropdown-item" @click.stop="saveLowerBody">仅应用下半身</div>
-              <div class="dropdown-item" @click.stop="saveHead">仅应用头</div>
-              <div class="dropdown-item" @click.stop="saveLeftArm">仅应用左臂</div>
-              <div class="dropdown-item" @click.stop="saveRightArm">仅应用右臂</div>
+        <div class="optionsSection">
+          <div class="optionGroup">
+            <div class="optionGroupTitle">导出内容</div>
+            <div class="optionRow">
+              <label class="radioOption" :class="{ active: exportContent === 'currentFrame' }">
+                <input type="radio" v-model="exportContent" value="currentFrame" hidden />
+                <span class="radioDot"></span>
+                <span>当前帧</span>
+              </label>
+              <label class="radioOption" :class="{ active: exportContent === 'wholeAnimation' }">
+                <input type="radio" v-model="exportContent" value="wholeAnimation" hidden />
+                <span class="radioDot"></span>
+                <span>整个动画</span>
+              </label>
+            </div>
+          </div>
+          <div class="optionGroup">
+            <div class="optionGroupTitle">应用范围</div>
+            <div class="optionRow">
+              <label class="radioOption" :class="{ active: applyScope === 'fullBody' }">
+                <input type="radio" v-model="applyScope" value="fullBody" hidden />
+                <span class="radioDot"></span>
+                <span>全身</span>
+              </label>
+              <label class="radioOption" :class="{ active: applyScope === 'upperBody' }">
+                <input type="radio" v-model="applyScope" value="upperBody" hidden />
+                <span class="radioDot"></span>
+                <span>上半身</span>
+              </label>
+              <label class="radioOption" :class="{ active: applyScope === 'lowerBody' }">
+                <input type="radio" v-model="applyScope" value="lowerBody" hidden />
+                <span class="radioDot"></span>
+                <span>下半身</span>
+              </label>
+              <label class="radioOption" :class="{ active: applyScope === 'head' }">
+                <input type="radio" v-model="applyScope" value="head" hidden />
+                <span class="radioDot"></span>
+                <span>头部</span>
+              </label>
+              <label class="radioOption" :class="{ active: applyScope === 'leftArm' }">
+                <input type="radio" v-model="applyScope" value="leftArm" hidden />
+                <span class="radioDot"></span>
+                <span>左臂</span>
+              </label>
+              <label class="radioOption" :class="{ active: applyScope === 'rightArm' }">
+                <input type="radio" v-model="applyScope" value="rightArm" hidden />
+                <span class="radioDot"></span>
+                <span>右臂</span>
+              </label>
             </div>
           </div>
         </div>
+        <div class="applyBtn" @click="handleApply">应用</div>
       </div>
       <div v-if="loading" class="loading">
         <img src="../assets/loading_white.svg" alt="loading" />
@@ -131,8 +170,14 @@ let rootBone: THREE.Object3D | null = null
 const originalPosition = new THREE.Vector3()
 
 const showModal = ref(false)
-const showDropdown = ref(false)
-let dropdownHideTimer: ReturnType<typeof setTimeout> | null = null
+
+// 导出内容：当前帧 / 整个动画
+type ExportContent = 'currentFrame' | 'wholeAnimation'
+const exportContent = ref<ExportContent>('currentFrame')
+
+// 应用范围：全身 / 上半身 / 下半身 / 头部 / 左臂 / 右臂
+type ApplyScope = 'fullBody' | 'upperBody' | 'lowerBody' | 'head' | 'leftArm' | 'rightArm'
+const applyScope = ref<ApplyScope>('fullBody')
 
 const props = defineProps<{
   modelValue: Array<BoneStepItem>
@@ -311,12 +356,6 @@ type ViewportConfig = {
   position: [number, number, number]
   fov: number
   aspect: number
-  getContainer: () => HTMLDivElement | null
-} | {
-  id: string
-  type: 'orthographic'
-  position: [number, number, number]
-  orthoSize: number
   getContainer: () => HTMLDivElement | null
 }
 
@@ -549,22 +588,21 @@ const allBones = ref<Array<{
 //     maxX: 3.14,
 //   },
 // })
-const viewportConfigs: ViewportConfig[] = [
-  {
-    id: 'main',
-    type: 'perspective',
-    position: [-300, 300, 400],
-    fov: 45,
-    aspect: 1,
-    getContainer: () => containerRef.value
-  },
-]
+const viewportConfigs: ViewportConfig = {
+  id: 'main',
+  type: 'perspective',
+  position: [-300, 300, 400],
+  fov: 45,
+  aspect: 2,
+  getContainer: () => containerRef.value
+};
 
-let allPanel: Array<{
+let allPanel: {
   camera: THREE.Camera
   renderer: THREE.WebGLRenderer
-}>
+}
 let controls: OrbitControls | null = null
+const allPanelWidth = ref(0)
 const allPanelHeight = ref(0)
 
 const fbxLoader = new FBXLoader()
@@ -586,49 +624,30 @@ function initThree() {
 
   const axesHelper = new THREE.AxesHelper(100)
   scene.add(axesHelper)
-  const leftPanelCount = 3;
-  const allBorderHeight = leftPanelCount * 2 * 1 + (leftPanelCount - 1) * 6;
-  const allPanelHeight2 = allPanelHeight.value - allBorderHeight;
-  // 添加4个机位
-  allPanel = viewportConfigs.map((config, index) => {
-    let camera: THREE.Camera;
-    if (config.type === 'perspective') {
-      camera = new THREE.PerspectiveCamera(config.fov || 45, config.aspect || 1, 0.1, 2000)
-    } else {
-      camera = new THREE.OrthographicCamera(-config.orthoSize, config.orthoSize, config.orthoSize, -config.orthoSize)
-    }
-    camera.position.set(...config.position)
-    camera.lookAt(0, 100, 0)
-    const renderer = new THREE.WebGLRenderer({ antialias: true })
-    renderer.setPixelRatio(window.devicePixelRatio)
-    renderer.shadowMap.enabled = true
+  const config: ViewportConfig = viewportConfigs
+  const camera: THREE.Camera = new THREE.PerspectiveCamera(config.fov || 45, config.aspect || 1, 0.1, 2000)
+  camera.position.set(...config.position)
+  camera.lookAt(0, 100, 0)
+  const renderer = new THREE.WebGLRenderer({ antialias: true })
+  renderer.setPixelRatio(window.devicePixelRatio)
+  renderer.shadowMap.enabled = true
 
-    const container = config.getContainer() || document.createElement('div')
-    if (config.type === 'perspective') {
-      container.style.width = `${allPanelHeight.value - 2}px`
-      container.style.height = `${allPanelHeight.value - 2}px`
-      renderer.setSize(allPanelHeight.value - 2, allPanelHeight.value - 2)
-    } else {
-      container.style.width = `${allPanelHeight2 / 3}px`
-      container.style.height = `${allPanelHeight2 / 3}px`
-      renderer.setSize(allPanelHeight2 / 3, allPanelHeight2 / 3)
-    }
+  const container = config.getContainer() || document.createElement('div')
+  container.style.width = `${allPanelWidth.value - 2}px`
+  container.style.height = `${allPanelHeight.value - 2}px`
+  renderer.setSize(allPanelWidth.value - 2, allPanelHeight.value - 2)
 
-    container.appendChild(renderer.domElement)
+  container.appendChild(renderer.domElement)
 
-    if (index === 0 && config.type === 'perspective') {
-      controls = new OrbitControls(camera, renderer.domElement)
-      controls.target.set(0, 100, 0)
-      controls.enableDamping = true
-      controls.dampingFactor = 0.05
-      controls.enablePan = false
-    }
-
-    return {
-      camera,
-      renderer,
-    }
-  })
+  controls = new OrbitControls(camera, renderer.domElement)
+  controls.target.set(0, 100, 0)
+  controls.enableDamping = true
+  controls.dampingFactor = 0.05
+  controls.enablePan = false
+  allPanel = {
+    camera,
+    renderer,
+  }
 
   fbxLoader.load('/ManClean.fbx', (fbxModel_: any) => {
     console.log('FBX模型加载成功:', fbxModel_)
@@ -730,15 +749,14 @@ function animate() {
   }
 
   controls?.update()
-
-  allPanel.forEach((panel) => {
-    panel.renderer.render(scene, panel.camera!)
-  })
+  const panel = allPanel
+  panel.renderer.render(scene, panel.camera!)
 }
 
 onMounted(() => {
   if (!viewportRef.value) return
-  allPanelHeight.value = 428;
+  allPanelWidth.value = 594
+  allPanelHeight.value = 297;
   nextTick(() => {
     initThree()
   })
@@ -751,9 +769,7 @@ onUnmounted(() => {
   mixer?.stopAllAction()
   mixer = null;
   controls?.dispose()
-  allPanel.forEach((panel) => {
-    panel.renderer.dispose()
-  })
+  allPanel.renderer.dispose()
 })
 // function changeBoneValue(item: {
 //   name: string,
@@ -886,41 +902,42 @@ const lowerBodyBones = [
   'mixamorigLeftToe_End',
 ]
 
-function saveUpperBody() {
-  showDropdown.value = false
-  save(name => upperBodyBones.includes(name))
-}
-
-function saveLowerBody() {
-  showDropdown.value = false
-  save(name => lowerBodyBones.includes(name))
-}
-function saveHead() {
-  showDropdown.value = false
-  save(name => headBones.includes(name))
-}
-function saveLeftArm() {
-  showDropdown.value = false
-  save(name => leftArmBones.includes(name))
-}
-function saveRightArm() {
-  showDropdown.value = false
-  save(name => rightArmBones.includes(name))
-}
-
-function handleDropdownEnter() {
-  if (dropdownHideTimer) {
-    clearTimeout(dropdownHideTimer)
-    dropdownHideTimer = null
+function getBoneFilter(scope: ApplyScope): ((name: string) => boolean) | undefined {
+  switch (scope) {
+    case 'fullBody':
+      return undefined
+    case 'upperBody':
+      return (name: string) => upperBodyBones.includes(name)
+    case 'lowerBody':
+      return (name: string) => lowerBodyBones.includes(name)
+    case 'head':
+      return (name: string) => headBones.includes(name)
+    case 'leftArm':
+      return (name: string) => leftArmBones.includes(name)
+    case 'rightArm':
+      return (name: string) => rightArmBones.includes(name)
   }
-  showDropdown.value = true
 }
 
-function handleDropdownLeave() {
-  dropdownHideTimer = setTimeout(() => {
-    showDropdown.value = false
-    dropdownHideTimer = null
-  }, 200)
+const applyScopeLabelMap: Record<ApplyScope, string> = {
+  fullBody: '全身',
+  upperBody: '上半身',
+  lowerBody: '下半身',
+  head: '头部',
+  leftArm: '左臂',
+  rightArm: '右臂',
+}
+
+function handleApply() {
+  const boneFilter = getBoneFilter(applyScope.value)
+
+  if (exportContent.value === 'currentFrame') {
+    // 当前帧模式：复用现有 save 逻辑
+    save(boneFilter)
+  } else {
+    // 整个动画模式：UI入口已就位，后续再实现动画导出逻辑
+    message.info(`将应用整个动画（范围：${applyScopeLabelMap[applyScope.value]}）`)
+  }
 }
 const loading = ref(false)
 function playAnimation(file: string) {
@@ -1006,8 +1023,6 @@ function showModelPanel() {
     margin-bottom: 4px;
 
     .item {
-      top: 4px;
-      left: 4px;
       padding: 5px;
       background: rgba(255, 255, 255, 0.9);
       border: 1px solid #d9d9d9;
@@ -1015,9 +1030,20 @@ function showModelPanel() {
       font-size: 14px;
       font-weight: bold;
       z-index: 10;
+      position: relative;
+      width: 80px;
+      height: 80px;
+      box-sizing: border-box;
 
       .name {
         font-size: 12px;
+        text-align: center;
+        position: absolute;
+        top: 6px;
+        left: 5px;
+        color: white;
+        background: #0000004f;
+        padding: 2px;
       }
 
       >img {
@@ -1027,9 +1053,8 @@ function showModelPanel() {
     }
 
     .moreBtn {
-      top: 4px;
-      left: 4px;
-      width: 78px;
+      width: 80px;
+      height: 80px;
       padding: 5px 10px;
       background: rgba(255, 255, 255, 0.9);
       border: 1px solid #d9d9d9;
@@ -1037,7 +1062,6 @@ function showModelPanel() {
       font-size: 14px;
       font-weight: bold;
       z-index: 10;
-      height: 102px;
       box-sizing: border-box;
       display: flex;
       align-items: center;
@@ -1185,21 +1209,17 @@ function showModelPanel() {
 
 .animationControls {
   padding: 12px;
-  background: #f5f5f5;
-  border-radius: 4px;
-  position: absolute;
-  bottom: 0;
+  background: #fff;
+  border-top: 1px solid #e5e7eb;
   width: 100%;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  gap: 8px;
 
   .progressContainer {
     display: flex;
     width: 100%;
-    flex-grow: 1;
     align-items: center;
 
     .progressBar {
@@ -1220,7 +1240,7 @@ function showModelPanel() {
         left: 0;
         top: 0;
         height: 100%;
-        background: #409eff;
+        background: #2563eb;
         border-radius: 4px;
         transition: width 0.1s;
       }
@@ -1230,7 +1250,7 @@ function showModelPanel() {
         top: 50%;
         width: 16px;
         height: 16px;
-        background: #409eff;
+        background: #2563eb;
         border-radius: 50%;
         transform: translate(-50%, -50%);
         border: 2px solid white;
@@ -1240,102 +1260,154 @@ function showModelPanel() {
     }
 
     .timeDisplay {
-      margin-left: 8px;
+      margin-left: 12px;
       text-align: center;
-      font-size: 12px;
-      color: #666;
+      font-size: 14px;
+      color: #374151;
+      min-width: 90px;
     }
 
-    .controlBtn {
+    .controlBtn.playBtn {
       flex-shrink: 0;
-      padding: 8px 12px;
       margin-left: 12px;
       border: none;
-      border-radius: 4px;
-      background: #409eff;
+      border-radius: 8px;
+      background: #2563eb;
       color: white;
       cursor: pointer;
-      font-size: 14px;
+      font-size: 16px;
+      width: 38px;
+      height: 38px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       transition: all 0.2s;
 
       &:hover {
-        background: #66b1ff;
+        background: #3b82f6;
       }
 
       &:active {
-        transform: scale(0.98);
+        transform: scale(0.96);
       }
     }
   }
 
-  .controlButtons {
+  .optionsSection {
     display: flex;
-    align-items: center;
-    justify-content: center;
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
     gap: 8px;
-    margin-left: 12px;
-    flex-shrink: 0;
 
-    .controlBtn {
-      flex-shrink: 0;
-      padding: 8px 12px;
-      border: none;
-      border-radius: 4px;
-      background: #409eff;
-      color: white;
-      cursor: pointer;
-      font-size: 14px;
-      transition: all 0.2s;
+    .optionGroup {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 4px;
 
-      &:hover {
-        background: #66b1ff;
+      .optionGroupTitle {
+        font-size: 16px;
+        font-weight: 500;
+        color: #111827;
       }
 
-      &:active {
-        transform: scale(0.98);
-      }
-    }
+      .optionRow {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
 
-    .dropdown-wrapper {
-      position: relative;
-
-      .dropdown-btn {
-        padding: 8px 16px;
-        font-size: 14px;
-        height: 20px;
-      }
-
-      .dropdown-menu {
-        position: absolute;
-        bottom: calc(100% + 4px);
-        right: 0;
-        background: white;
-        border-radius: 4px;
-        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
-        padding: 4px 0;
-        min-width: 140px;
-        z-index: 100;
-        opacity: 1;
-        pointer-events: auto;
-        transition: opacity 0.2s;
-
-        &.dropdown-menu-hidden {
-          opacity: 0;
-          pointer-events: none;
-        }
-
-        .dropdown-item {
-          padding: 8px 16px;
-          font-size: 14px;
-          color: #333;
+        .radioOption {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          padding: 6px;
+          border: 1px solid #d1d5db;
+          border-radius: 8px;
           cursor: pointer;
-          transition: background 0.2s;
+          font-size: 14px;
+          color: #374151;
+          transition: all 0.2s;
+          background: #fff;
 
           &:hover {
-            background: #f5f5f5;
+            border-color: #9ca3af;
+          }
+
+          .radioDot {
+            width: 16px;
+            height: 16px;
+            border: 1.5px solid #9ca3af;
+            border-radius: 50%;
+            position: relative;
+            flex-shrink: 0;
+            transition: all 0.2s;
+
+            &::after {
+              content: '';
+              position: absolute;
+              top: 50%;
+              left: 50%;
+              transform: translate(-50%, -50%) scale(0);
+              width: 8px;
+              height: 8px;
+              background: #2563eb;
+              border-radius: 50%;
+              transition: transform 0.2s;
+            }
+          }
+
+          &.active {
+            border-color: #2563eb;
+            background: #eff6ff;
+            color: #1d4ed8;
+
+            .radioDot {
+              border-color: #2563eb;
+
+              &::after {
+                transform: translate(-50%, -50%) scale(1);
+              }
+            }
           }
         }
       }
+    }
+  }
+
+  .applyBtn {
+    width: 100%;
+    padding: 4px 0;
+    background: #2563eb;
+    color: white;
+    font-size: 20px;
+    font-weight: 500;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+
+    &:hover {
+      background: #3b82f6;
+    }
+
+    &:active {
+      transform: scale(0.99);
+    }
+  }
+
+  .applyHint {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: #6b7280;
+
+    .hintIcon {
+      color: #9ca3af;
+      font-size: 14px;
     }
   }
 }
