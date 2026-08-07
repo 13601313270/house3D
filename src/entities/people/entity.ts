@@ -1,6 +1,6 @@
 import * as THREE from 'three'
 import { HandelInfo, Point } from '@/types/map2d'
-import { PeopleData } from './index.d'
+import { BoneStepItem, PeopleData } from './index.d'
 import { PointEntityClass } from '@/types/pointEntity'
 import { editItem } from '@/utils/editItem'
 // @ts-ignore
@@ -23,7 +23,6 @@ export class PeopleEntity extends PointEntityClass<PeopleData> {
   drawAngelLength: number = 40
   private circleRadius = 6
   ManClean: THREE.Group | null = null
-  canEditAnimationDataColumn: Array<keyof PeopleData> = [];
 
   draw2DPreview(ctx: CanvasRenderingContext2D, zoomLevel: number): void {
     const data = this.getData();
@@ -506,6 +505,32 @@ export class PeopleEntity extends PointEntityClass<PeopleData> {
         ...val,
       })
     })
+  }
+
+  canEditAnimationDataColumn() {
+    return [...super.canEditAnimationDataColumn(), 'boneEditButton']
+  }
+
+  editAnimationDataColumn(column: string, a: any, b: any, t: number) {
+    console.log('sssss', column, a, b, t)
+    if (column === 'bone') {
+      const centerBone: BoneStepItem[] = [];
+      (a as BoneStepItem[]).forEach((aItem, index) => {
+        const bItem = b[index];
+        centerBone.push({
+          ...aItem,
+          value: {
+            ...aItem.value,
+            x: aItem.value.x + (bItem.value.x - aItem.value.x) * t,
+            y: aItem.value.y + (bItem.value.y - aItem.value.y) * t,
+            z: aItem.value.z + (bItem.value.z - aItem.value.z) * t,
+          }
+        })
+      })
+      return centerBone;
+    } else {
+      return super.editAnimationDataColumn(column, a, b, t)
+    }
   }
 }
 

@@ -30,8 +30,6 @@ export abstract class GroupBaseEntity<T extends GroupBaseData> extends PointCanA
   // 锁定状态的对象列表
   lockedObjList: BaseEntityClass<BaseObjData>[] = []
 
-  canEditAnimationDataColumn: string[] = [];
-
   constructor(parent: GroupBaseEntity<T> | null, data: T) {
     super(parent, data)
 

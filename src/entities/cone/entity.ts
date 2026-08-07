@@ -11,9 +11,7 @@ import { resize } from '@/utils/handleImgs';
 export class ConeEntity extends PointEntityClass<ConeData> {
   name: string = '圆锥体'
   type: string = 'cone'
-  private circleRadius = 6
   public radialSegments = 32
-  canEditAnimationDataColumn: Array<keyof ConeData> = [];
 
   draw2DPreview(ctx: CanvasRenderingContext2D, zoomLevel: number): void {
     const data = this.getData();

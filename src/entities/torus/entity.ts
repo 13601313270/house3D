@@ -11,9 +11,7 @@ import { resize } from '@/utils/handleImgs';
 export class TorusEntity extends PointEntityClass<TorusData> {
   name: string = '环体'
   type: string = 'torus'
-  private circleRadius = 6
   public radialSegments = 32
-  canEditAnimationDataColumn: Array<keyof TorusData> = [];
 
   draw2DPreview(ctx: CanvasRenderingContext2D, zoomLevel: number): void {
     const data = this.getData();

@@ -14,7 +14,6 @@ export class PolygonPlaneEntity extends LineEntityClass<PolygonPlanePoint, Polyg
   name: string = '折线平面'
   type: string = 'polygonPlane'
   private thickness = 10
-  canEditAnimationDataColumn: Array<keyof PolygonPlaneData> = [];
 
   // constructor(world: World, data: PolygonPlaneData) {
   //   super(world, data);

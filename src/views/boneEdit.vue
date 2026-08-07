@@ -118,6 +118,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 import { FBXLoader } from 'three/addons/loaders/FBXLoader.js'
 import message from '@/utils/message'
 import { sleep } from '@/utils/sleep'
+import type { BoneStepItem } from '@/entities/people/index.d'
 
 const viewportRef = ref<HTMLDivElement | null>(null)
 const containerRef = ref<HTMLDivElement | null>(null)
@@ -134,17 +135,7 @@ const showDropdown = ref(false)
 let dropdownHideTimer: ReturnType<typeof setTimeout> | null = null
 
 const props = defineProps<{
-  modelValue: Array<{
-    name: string,
-    value: {
-      x: number,
-      y: number,
-      z: number,
-      px: number,
-      py: number,
-      pz: number,
-    },
-  }>
+  modelValue: Array<BoneStepItem>
 }>()
 
 const allDemoList = ref<Array<{

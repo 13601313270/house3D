@@ -13,7 +13,6 @@ export class SectorEntity extends PointEntityClass<SectorData> {
   name: string = '扇形体'
   type: string = 'sector'
   private circleRadius = 3
-  canEditAnimationDataColumn: Array<keyof SectorData> = [];
 
   draw2DPreview(ctx: CanvasRenderingContext2D, zoomLevel: number): void {
     const data = this.getData();

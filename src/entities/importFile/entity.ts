@@ -19,7 +19,6 @@ export class ImportFileEntity extends PointCanAngleEntity<ImportFileData> {
 
   img: HTMLImageElement = new Image()
   imgBeCreateByScale: number = 1; // 这个图片是以哪个缩放比例创建的
-  canEditAnimationDataColumn: Array<keyof ImportFileData> = [];
 
   init(): Promise<void> {
     const { fileTypeId } = this.getData();

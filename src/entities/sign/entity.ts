@@ -13,8 +13,6 @@ import { PointCanAngleEntity } from '@/types/pointCanAngleEntity';
 export class SignEntity extends PointCanAngleEntity<SignData> {
   name: string = '交通标识'
   type: string = 'sign'
-  private circleRadius = 6
-  canEditAnimationDataColumn: Array<keyof SignData> = [];
 
   async init() {
     const { img } = this.getData();

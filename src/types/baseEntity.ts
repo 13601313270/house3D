@@ -35,7 +35,6 @@ export abstract class BaseEntityClass<T extends BaseObjData> {
 
   protected cacheCanvas: HTMLCanvasElement
   protected cacheCtx: CanvasRenderingContext2D
-  abstract canEditAnimationDataColumn: string[]// 可以设置动画的属性
 
   constructor(parentEntity: GroupBaseEntity<GroupBaseData> | null, data: T) {
     this.parentEntity = parentEntity
@@ -294,6 +293,18 @@ export abstract class BaseEntityClass<T extends BaseObjData> {
     newPosition: MatchSnapPoint,
     dragHandelInfo: HandelInfo,
   ): boolean;
+
+  // 可以设置动画的属性(可计算差值)
+  canEditAnimationDataColumn(): string[] {
+    return [];
+  }
+
+  // 创建属性补间动画值
+  editAnimationDataColumn(column: string, a: any, b: any, time: number): any | undefined {
+    if (typeof a === 'number' && typeof b === 'number') {
+      return a + (b - a) * time
+    }
+  }
 }
 
 export type EntityConstructor = new (world: GroupBaseEntity<GroupBaseData>, data: BaseObjData) => BaseEntityClass<any>;

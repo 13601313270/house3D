@@ -27,8 +27,6 @@ function getAllPointsByN(x: number, y: number, n: number, r: number, angle: numb
 export class RegularPolygonEntity extends PointCanAngleEntity<RegularPolygonData> {
   name: string = 'N边形体'
   type: string = 'regularPolygon';
-  private circleRadius = 6
-  canEditAnimationDataColumn: Array<keyof RegularPolygonData> = [];
 
   draw2DPreview(ctx: CanvasRenderingContext2D, zoomLevel: number): void {
     const data = this.getData();

@@ -24,7 +24,6 @@ export class OutFileEntity extends PointCanAngleEntity<OutFileData> {
   colorOpacity: string = '#14b737a5'
   img: HTMLImageElement = new Image()
   private circleRadius = 6
-  canEditAnimationDataColumn: Array<keyof OutFileData> = [];
 
   init(): Promise<void> {
     const findObjInfo = window.worldState.ObjFileTypes.find(item => item.id === this.getData().fileTypeId)

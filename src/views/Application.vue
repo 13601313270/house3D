@@ -1048,7 +1048,7 @@ const handleContextMenu = (point: {
             }
             if (timelineState.isPlaying) {
               editPropConfigInfo.value = modifyConfig.filter(v => {
-                return v.dataType === 'number';
+                return v.dataType === 'number' || api.canEditAnimationDataColumn().includes(v.id);
               })
             } else {
               editPropConfigInfo.value = modifyConfig
