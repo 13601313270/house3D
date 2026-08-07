@@ -165,7 +165,7 @@
 
     <div v-if="editMode === 'animation'" class="timeLine" :style="{ height: timeHeight + 'px' }">
       <div class="split-bar-x" @mousedown.prevent="startSplitTimeLine()"></div>
-      <TimeLine :isVip="isVip" />
+      <TimeLine :isVip="isVip" @showBuyVip="showVipModal = true" />
     </div>
     <DataTypeEditPanel v-if="contextMenu?.visible && editPropTypeKey" :typeKey="editPropTypeKey"
       :editPropConfigInfo="editPropConfigInfo" v-model="editPropInputInfo"

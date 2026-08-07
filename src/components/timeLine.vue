@@ -79,7 +79,7 @@
           <div v-if="showLockedArea" class="locked-overlay"
             :style="{ left: `${(FREE_DURATION / effectiveDuration) * 100}%`, width: `${((effectiveDuration - FREE_DURATION) / effectiveDuration) * 100}%` }">
             <div class="locked-pattern"></div>
-            <div class="locked-text">
+            <div class="locked-text" @click="showBuyVip">
               <span class="locked-big-icon">🔒</span>
               <span class="locked-message">升级VIP解锁更长时长</span>
             </div>
@@ -137,6 +137,8 @@ const editableMaxTime = computed(() => {
 const showLockedArea = computed(() => {
   return !props.isVip && effectiveDuration.value > FREE_DURATION
 })
+
+const emits = defineEmits(['showBuyVip'])
 
 onMounted(() => {
   function updateRef() {
@@ -310,7 +312,7 @@ function getTimeFromMouseEvent(event: MouseEvent): number {
 // 3) 其余空白 → 进入 scrub 模式（按下+移动=实时拖动播放头，按下+立即松开=跳转时间）
 function handleTimeInfoMouseDown(event: MouseEvent) {
   const target = event.target as HTMLElement
-  if (target.closest('.keyframe-node') || target.closest('.track-timeline') || target.closest('.track-header') || target.closest('.track-item') || target.closest('.playhead-line')) {
+  if (target.closest('.keyframe-node') || target.closest('.track-timeline') || target.closest('.track-header') || target.closest('.playhead-line')) {
     return
   }
 
@@ -805,6 +807,10 @@ function applyEasing(t: number, easing: string): number {
   }
 }
 
+function showBuyVip() {
+  emits('showBuyVip')
+}
+
 // onUnmounted：组件卸载时清理动画帧与事件监听，避免内存泄漏
 onUnmounted(() => {
   if (animationFrameId) {
@@ -1091,11 +1097,6 @@ onUnmounted(() => {
                 }
               }
 
-              // 按住拖拽 clip 时：光标改为 grabbing（手型抓紧）
-              &:active {
-                cursor: grabbing;
-              }
-
               // track-header-bar：track-item 内部紧凑信息行（对象名 + 时间范围），高度 35px 居中
               .track-header-bar {
                 display: flex;
@@ -1134,7 +1135,6 @@ onUnmounted(() => {
                 border-radius: 50%;
                 background: #4CAF50;
                 border: 2px solid #fff;
-                cursor: move;
                 box-sizing: border-box;
                 transition: transform 0.15s, background 0.15s;
                 z-index: 2;
@@ -1160,7 +1160,7 @@ onUnmounted(() => {
           top: 0;
           bottom: 0;
           width: 2px;
-          z-index: 60;
+          z-index: 102;
           pointer-events: none;
 
           .vip-divider-line {
@@ -1198,13 +1198,11 @@ onUnmounted(() => {
           }
         }
 
-        // locked-overlay：未解锁区域遮罩层，覆盖10秒以后的所有区域（与timeline-track-area平级）
         .locked-overlay {
           position: absolute;
           top: 0;
           bottom: 0;
-          z-index: 55;
-          pointer-events: none; // 不拦截事件，让内部逻辑控制
+          z-index: 101;
 
           .locked-pattern {
             position: absolute;
