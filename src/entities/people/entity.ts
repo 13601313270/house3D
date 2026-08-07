@@ -11,6 +11,20 @@ import { OrigionSnapPoint } from '@/types/baseEntity'
 const img = new Image()
 img.src = 'people.png'
 
+/**
+ * 角度最短路径线性插值
+ * 确保从 start 到 end 走的是圆周上较近的旋转方向
+ */
+function lerpAngle(start: number, end: number, t: number): number {
+  let diff = end - start
+  if (diff > Math.PI) {
+    diff -= Math.PI * 2
+  } else if (diff < -Math.PI) {
+    diff += Math.PI * 2
+  }
+  return start + diff * t
+}
+
 export class PeopleEntity extends PointEntityClass<PeopleData> {
   name: string = '人物'
   type: string = 'people'
@@ -512,7 +526,6 @@ export class PeopleEntity extends PointEntityClass<PeopleData> {
   }
 
   editAnimationDataColumn(column: string, a: any, b: any, t: number) {
-    console.log('sssss', column, a, b, t)
     if (column === 'bone') {
       const centerBone: BoneStepItem[] = [];
       (a as BoneStepItem[]).forEach((aItem, index) => {
@@ -521,9 +534,9 @@ export class PeopleEntity extends PointEntityClass<PeopleData> {
           ...aItem,
           value: {
             ...aItem.value,
-            x: aItem.value.x + (bItem.value.x - aItem.value.x) * t,
-            y: aItem.value.y + (bItem.value.y - aItem.value.y) * t,
-            z: aItem.value.z + (bItem.value.z - aItem.value.z) * t,
+            x: lerpAngle(aItem.value.x, bItem.value.x, t),
+            y: lerpAngle(aItem.value.y, bItem.value.y, t),
+            z: lerpAngle(aItem.value.z, bItem.value.z, t),
           }
         })
       })
