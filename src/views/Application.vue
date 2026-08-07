@@ -1048,7 +1048,7 @@ const handleContextMenu = (point: {
             }
             if (timelineState.isPlaying) {
               editPropConfigInfo.value = modifyConfig.filter(v => {
-                return api.canEditAnimationDataColumn.includes(v.id)
+                return v.dataType === 'number';
               })
             } else {
               editPropConfigInfo.value = modifyConfig
@@ -1075,9 +1075,8 @@ const handleContextMenu = (point: {
                 const changeData: any = {};
                 const data = api.getData();// 这个一定不要用上面的data，而是每次都要重新getData。
                 Object.keys(val).forEach(key => {
-                  if (val[key] !== data[key]) {
-                    if (!['isHidden', 'tip', 'tipFontSize', 'isLocked'].includes(key)) {
-                      console.log('编辑数据', key, val[key], data[key])
+                  if (!['isHidden', 'tip', 'tipFontSize', 'isLocked'].includes(key) && typeof val[key] !== 'function') {
+                    if (JSON.stringify(val[key]) !== JSON.stringify(data[key])) {
                       changeData[key] = val[key];
                     }
                   }
