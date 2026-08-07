@@ -35,7 +35,7 @@
           </div>
         </div>
       </div>
-      <!-- <div class="editMode">
+      <div class="editMode">
         <div>
           <div class="timeLineTitle">
             <button :class="{ active: editMode === 'scene' }" @click="setEditMode('scene')">
@@ -46,7 +46,7 @@
             </button>
           </div>
         </div>
-      </div> -->
+      </div>
       <div style="flex-grow: 1;"></div>
       <div class="toolbar right">
         <div class="toolbar-item" @mouseleave="activeToolsIndex = -1">
@@ -165,7 +165,7 @@
 
     <div v-if="editMode === 'animation'" class="timeLine" :style="{ height: timeHeight + 'px' }">
       <div class="split-bar-x" @mousedown.prevent="startSplitTimeLine()"></div>
-      <TimeLine />
+      <TimeLine :isVip="isVip" />
     </div>
     <DataTypeEditPanel v-if="contextMenu?.visible && editPropTypeKey" :typeKey="editPropTypeKey"
       :editPropConfigInfo="editPropConfigInfo" v-model="editPropInputInfo"
@@ -275,7 +275,7 @@ const isMenuing = ref(false);
 const panel1SplitWidthPer = ref(0.35)
 const panel2SplitWidthPer = ref(0.35)
 const maxTimeHeight = 400;
-const timeHeight = ref(400)
+const timeHeight = ref(200)
 const isSplitting = ref(false)
 const isSplitTimeLine = ref(false)
 const showLogin = ref(false)

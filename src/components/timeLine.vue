@@ -29,6 +29,11 @@
             <span v-if="mark.major" class="mark-label">{{ formatTime(mark.time) }}</span>
           </div>
         </div>
+        <!-- 标尺上的VIP标记：非VIP时在10秒位置显示 -->
+        <div v-if="showLockedArea" class="ruler-vip-marker"
+          :style="{ left: `${(FREE_DURATION / effectiveDuration) * 100}%` }">
+          <span class="ruler-vip-icon">👑</span>
+        </div>
       </div>
     </div>
 
@@ -44,26 +49,62 @@
             <div v-for="(row, rowIndex) in rowsByIndex" :key="`time-row-${rowIndex}`" class="timeline-row">
               <!-- track-item：单个动画片段（Clip），绝对定位由 startTime + duration 决定
                    warning class：同一 entityId 的多个 clip 时间重叠时高亮
+                   locked class：非VIP时clip跨越或超过免费时长
                    @mousedown：开始拖拽 clip（整体平移，含 clip 边界和内部 keyframes 时间）
                    @click.stop：切换浮动编辑面板显示/隐藏 -->
-              <div v-for="segment in row" :key="segment.clip.clipId" class="track-item"
-                :class="{ active: activeClipId === segment.clip.clipId, warning: overlappingClipIds.has(segment.clip.clipId) }"
-                :style="{
-                  left: `${(segment.startTime / effectiveDuration) * 100}%`,
-                  width: `${((segment.endTime - segment.startTime) / effectiveDuration) * 100}%`
-                }" @mousedown="startClipDrag($event, segment.clip.clipId)"
-                @click.stop="toggleClipContent($event, segment)">
+              <div v-for="segment in row" :key="segment.clip.clipId" class="track-item" :class="{
+                active: activeClipId === segment.clip.clipId,
+                warning: overlappingClipIds.has(segment.clip.clipId),
+                locked: !props.isVip && segment.startTime >= FREE_DURATION
+              }" :style="{
+                left: `${(segment.startTime / effectiveDuration) * 100}%`,
+                width: `${((segment.endTime - segment.startTime) / effectiveDuration) * 100}%`
+              }" @contextmenu.stop.prevent="toggleClipContent($event, segment)">
                 <div class="track-header-bar">
                   <span class="clip-name">{{ segment.clip.entityId }}</span>
                   <span class="clip-duration">{{ formatTime(segment.startTime) }} - {{ formatTime(segment.endTime)
-                    }}</span>
+                  }}</span>
                 </div>
                 <!-- 时间重叠警告徽章：hover 时显示 title 文案，点击播放时会被拦截 -->
                 <div v-if="overlappingClipIds.has(segment.clip.clipId)" class="warning-badge" title="同一个物体对象不允许时间重叠">
                   <span class="warning-icon">⚠</span>
                   <span class="warning-text">同一个物体对象不允许时间重叠</span>
                 </div>
+                <!-- 未解锁徽章：非VIP时超过免费时长的clip显示 -->
+                <div v-if="!props.isVip && segment.startTime >= FREE_DURATION" class="locked-badge" title="升级VIP解锁此功能">
+                  <span class="locked-icon">🔒</span>
+                </div>
+
+                <div v-for="time in getAllTimeInSegment(segment)" :key="time" class="keyframe-node"
+                  :style="{ left: `${((time - segment.startTime) / (segment.endTime - segment.startTime || 1)) * 100}%` }"
+                  :class="{ selected: time === currentTime }" @click.stop="onKeyframeClick(time)"
+                  @contextmenu.prevent.stop="toggleClipContentFrame($event, segment, time)"></div>
+
+                <!-- <div v-for="keyframe in segment.clip.tracks[0].keyframes" :key="keyframe.time" class="keyframe-node"
+                  :style="{ left: `${((keyframe.time - segment.startTime) / (segment.endTime - segment.startTime || 1)) * 100}%` }"
+                  :class="{ selected: isKeyframeSelected(segment.clip.clipId, segment.clip.tracks[0].trackType, keyframe) }"
+                  @click.stop="onKeyframeClick(segment.clip.clipId, segment.clip.entityId, segment.clip.tracks[0].trackType, keyframe)"
+                  @contextmenu.prevent.stop="toggleClipContentFrame($event, keyframe)">
+                </div> -->
               </div>
+            </div>
+          </div>
+          <!-- VIP分界线：非VIP时在10秒位置显示（与timeline-track-area平级） -->
+          <div v-if="showLockedArea" class="vip-divider"
+            :style="{ left: `${(FREE_DURATION / effectiveDuration) * 100}%` }">
+            <div class="vip-divider-line"></div>
+            <div class="vip-divider-label">
+              <span class="vip-icon">👑</span>
+              <span>VIP解锁</span>
+            </div>
+          </div>
+          <!-- 未解锁遮罩层：非VIP时10秒以后的区域（与timeline-track-area平级） -->
+          <div v-if="showLockedArea" class="locked-overlay"
+            :style="{ left: `${(FREE_DURATION / effectiveDuration) * 100}%`, width: `${((effectiveDuration - FREE_DURATION) / effectiveDuration) * 100}%` }">
+            <div class="locked-pattern"></div>
+            <div class="locked-text">
+              <span class="locked-big-icon">🔒</span>
+              <span class="locked-message">升级VIP解锁更长时长</span>
             </div>
           </div>
         </div>
@@ -81,62 +122,6 @@
     <DataTypeEditPanel v-if="editPropConfigInfo.length && contextMenu" :typeKey="editPropTypeKey || ''"
       :editPropConfigInfo="editPropConfigInfo" v-model="editPropInputInfo"
       :initPosition="{ x: contextMenu.x, y: contextMenu.y }" @close="editPropConfigInfo = []" />
-
-    <!-- 浮动轨道编辑面板：通过 <teleport to="#teleport"> 渲染在全局，
-         样式位置由 trackContentStyle 计算，避免被父容器 overflow 裁剪 -->
-    <teleport to="#teleport" v-if="activeSegment">
-      <div class="track-content-floating" :style="trackContentStyle" @click.stop>
-        <!-- 面板头部：标题 + 时间范围 + 删除动画按钮 + 关闭按钮 -->
-        <div class="floating-header">
-          <span class="floating-title">{{ activeSegment.clip.entityId }}</span>
-          <span class="floating-time">{{ formatTime(activeSegment.startTime) }} - {{ formatTime(activeSegment.endTime)
-            }}</span>
-          <button class="floating-delete" @click="deleteClip(activeSegment.clip.clipId)" title="删除动画">🗑</button>
-          <button class="floating-close" @click="closeClipContent">×</button>
-        </div>
-
-        <!-- 每个轨道一行：左侧 track-label（含移除按钮），右侧 track-timeline（点击添加/拖拽关键帧 + 曲线预览） -->
-        <div v-for="track in activeSegment.clip.tracks" :key="track.trackType" class="track-row">
-          <div class="track-label" :style="{ width: moreLeft + 'px' }">
-            <span>{{ track.trackType }}</span>
-          </div>
-          <div class="track-timeline" @click="handleTrackClick($event, track, activeSegment)">
-            <div class="track-background">
-              <!-- SVG polyline：绘制关键帧之间的数值曲线（opacity/visible 会做 Y 轴映射，其他默认水平线） -->
-              <svg class="curve-line" viewBox="0 0 100 20" preserveAspectRatio="none">
-                <polyline :points="getCurvePoints(track, activeSegment)" fill="none" stroke="#4CAF50"
-                  stroke-width="1" />
-              </svg>
-              <!-- keyframe-node：可拖拽调整时间，点击选中态（红色高亮），点击打开 DataTypeEditPanel -->
-              <div v-for="keyframe in track.keyframes" :key="keyframe.time" class="keyframe-node"
-                :style="{ left: `${((keyframe.time - activeSegment.startTime) / (activeSegment.endTime - activeSegment.startTime || 1)) * 100}%` }"
-                :class="{ selected: isKeyframeSelected(activeSegment.clip.clipId, track.trackType, keyframe) }"
-                @mousedown.stop="startKeyframeDrag($event, activeSegment.clip.clipId, track.trackType, keyframe)"
-                @click.stop="onKeyframeClick($event, activeSegment.clip.clipId, activeSegment.clip.entityId, track.trackType, keyframe)">
-              </div>
-            </div>
-          </div>
-          <div class="track-remove" :style="{ width: moreRight + 'px' }">
-            <div class="button" @click="removeTrack(track.trackType)" title="移除轨道">✕</div>
-          </div>
-        </div>
-
-        <!-- 添加属性区域：默认显示「＋ 添加属性」按钮；点击后展开 dropdown 选择轨道类型 -->
-        <!-- <div class="add-track-area">
-          <div v-if="!isShowTrackDropdown" class="add-track-select" @click="showTrackDropdown">
-            <span>＋ 添加属性</span>
-          </div>
-          <div v-else class="track-dropdown">
-            <div class="track-dropdown-header">选择属性</div>
-            <div v-for="item in availableTrackTypes" :key="item.id" class="track-dropdown-item"
-              @click="addTrack(item.id)">
-              {{ item.label }}
-            </div>
-            <div class="track-dropdown-close" @click="isShowTrackDropdown = false">取消</div>
-          </div>
-        </div> -->
-      </div>
-    </teleport>
   </div>
 </template>
 
@@ -148,23 +133,11 @@ import { message } from '@/utils/message'
 import { ClipSegment, TrackData, Keyframe, timelineState, ClipData } from '@/utils/timelineManage';
 import editItem from '@/utils/editItem';
 import DataTypeEditPanel from '../views/DataTypeEditPanel.vue'
+import showContextMenu from '@/utils/contextMenu';
 
-// ========== Props & 事件 ==========
-// - modelValue：由父组件（Application.vue）通过 v-model 控制的时间轴动画数据
-// - getObject：根据 entityId 获取 THREE.Object3D（Mesh/Group），用于场景对象的 opacity/visible 等属性应用
-// const props = defineProps<{
-//   modelValue: TimelineData
-// }>()
-
-// const emit = defineEmits<{
-//   (e: 'update:modelValue', value: TimelineData): void
-// }>()
-
-// timelineData 计算属性：作为 v-model 的包装，读 props.modelValue，写时 emit 向上通知父组件更新
-// const timelineData___ = computed({
-//   get: () => props.modelValue,
-//   set: (value) => emit('update:modelValue', value)
-// })
+const props = defineProps<{
+  isVip: boolean
+}>()
 const effectiveDuration = ref<number>(0)
 const rulerMarks = ref<{
   time: number;
@@ -175,6 +148,18 @@ const clipSegments = ref<ClipSegment[]>([])
 const moreLeft = 70;
 const moreRight = 40;
 const moreWidth = moreLeft + moreRight; // 额外预留10px
+const FREE_DURATION = 10; // 非VIP免费时长（秒）
+
+// 可编辑的最大时间：VIP时不受限制，非VIP时限制在FREE_DURATION
+const editableMaxTime = computed(() => {
+  if (props.isVip) return effectiveDuration.value
+  return Math.min(FREE_DURATION, effectiveDuration.value)
+})
+
+// 是否显示未解锁区域：非VIP且总时长超过免费时长
+const showLockedArea = computed(() => {
+  return !props.isVip && effectiveDuration.value > FREE_DURATION
+})
 
 onMounted(() => {
   function updateRef() {
@@ -283,37 +268,15 @@ const scrollLeft = ref(0)                     // 当前横向滚动位置
 const collapsedClips = ref<Set<string>>(new Set()) // 折叠的对象轨道集合（预留）
 const activeClipId = ref<string | null>(null) // 当前展开浮动面板的 clipId
 const activeSegment = ref<ClipSegment | null>(null) // 当前展开浮动面板的 segment（含 startTime/endTime/rowIndex）
-const trackContentStyle = ref<Record<string, string>>({}) // 浮动面板位置样式（left/top/width）
 const isShowTrackDropdown = ref(false)        // 「添加属性」下拉菜单是否展开
-// selectedKeyframe：当前被选中的关键帧（用于高亮红色），打开 DataTypeEditPanel 时赋值
-const selectedKeyframe = ref<{ clipId: string; entityId: string; trackType: string; keyframe: Keyframe } | null>(null)
 
 // ========== 非响应式临时状态（拖拽等） ==========
 let animationFrameId: number | null = null   // requestAnimationFrame id，用于播放循环
 let lastTimestamp = 0                        // 上一帧时间戳，计算 deltaTime
 let isDragging = false                       // playhead-line（红色竖线）拖拽中标志
-let isDraggingClip = false                   // track-item（整个clip）拖拽中标志
-let dragClipId: string | null = null          // 被拖拽 clip 的 clipId
-let dragStartX = 0                          // 拖拽起始 clientX
 let dragMoved = false                        // 本次 mousedown+移动 超过阈值是否真正触发了拖拽（区分 click/drag）
-// dragStartClipRange：clip 拖拽时记录的起始时间范围，用于保持时长并整体平移
-let dragStartClipRange: { startTime: number; endTime: number } | null = null
-// dragStartTimes：clip 拖拽时每个轨道的 keyframes 原始时间数组，避免累积偏移误差
-const dragStartTimes = new Map<string, number[]>()
 let isScrubbing = false                       // 空白区域按下拖动（scrub）播放头标志
 let scrubClosedPanel = false                  // scrub 时是否关闭了浮动面板（用于 click 后续逻辑）
-let isDraggingKeyframe = false               // 单个关键帧拖拽中标志
-let dragKeyframeStartX = 0                  // 关键帧拖拽起始 clientX
-// dragKeyframeInfo：关键帧拖拽上下文快照（clip边界+原始时间+容器DOM）
-let dragKeyframeInfo: {
-  clipId: string
-  trackType: string
-  keyframe: Keyframe
-  startTime: number       // clip 的边界（关键帧不可越界）
-  endTime: number
-  originalTime: number      // 拖拽开始时的原始 keyframe.time
-  container: HTMLElement | null
-} | null = null
 
 // totalRows：实际使用的总行数（= 最大 rowIndex + 1）
 const totalRows = computed(() => {
@@ -429,6 +392,7 @@ function handleTimeInfoMouseDown(event: MouseEvent) {
 }
 
 // onScrubDrag：scrub 模式下鼠标移动实时更新播放时间
+// 非VIP限制：不能超过免费时长
 function onScrubDrag(event: MouseEvent) {
   if (!isScrubbing) return
   timelineState.currentTime = getTimeFromMouseEvent(event)
@@ -451,9 +415,16 @@ function onScroll(event: Event) {
 // toggleClipContent：track-item 点击时，切换浮动面板显示/隐藏
 // 点击同一个 clip 的 track-item → 关闭；点击不同 clip → 先关闭再打开
 // 打开面板时：暂停播放（正在播放时），并根据 track-item DOM 位置计算面板 left/top/width
+// 非VIP限制：不能编辑10秒以后的clip
 function toggleClipContent(event: MouseEvent, segment: ClipSegment) {
   if (dragMoved) {
     dragMoved = false
+    return
+  }
+
+  // 非VIP限制：禁止打开10秒以后的clip编辑面板
+  if (!props.isVip && segment.startTime >= FREE_DURATION) {
+    message.warning('升级VIP解锁更长时长编辑功能')
     return
   }
 
@@ -466,26 +437,57 @@ function toggleClipContent(event: MouseEvent, segment: ClipSegment) {
     togglePlay()
   }
 
-  activeClipId.value = segment.clip.clipId
-  activeSegment.value = segment
+  showContextMenu(event, [
+    {
+      title: '删除动画',
+      icon: '🗑',
+      danger: true,
+      callback: () => deleteClip(segment.clip.clipId),
+    },
+  ])
+}
 
-  const target = event.currentTarget as HTMLElement
-  const rect = target.getBoundingClientRect()
+function getAllTimeInSegment(segment: ClipSegment): number[] {
+  const allTimes: number[] = []
+  segment.clip.tracks.forEach(track => {
+    track.keyframes.forEach(kf => {
+      if (!allTimes.includes(kf.time)) {
+        allTimes.push(kf.time)
+      }
+    })
+  })
+  return allTimes
+}
 
-  const panelWidth = Math.max(rect.width, 150)
-  let left = rect.left
-  // 边界校正：避免面板超出屏幕左右
-  if (left + panelWidth > window.innerWidth) {
-    left = window.innerWidth - panelWidth - 10
+function toggleClipContentFrame(event: MouseEvent, segment: ClipSegment, time: number) {
+  // 播放中操作关键帧 → 自动暂停，避免播放与编辑冲突
+  if (isPlaying.value) {
+    togglePlay()
   }
-  if (left < 10) left = 10
-
-  console.log('panelWidth', panelWidth)
-  trackContentStyle.value = {
-    left: `${left - moreLeft}px`,
-    top: `${rect.bottom + 4}px`,
-    width: `${panelWidth + moreWidth}px`
-  }
+  timelineState.currentTime = time;
+  evaluateTimeline(time)
+  showContextMenu(event, [
+    {
+      title: '删除节点',
+      icon: '🗑',
+      danger: true,
+      callback: () => {
+        segment.clip.tracks.forEach(track => {
+          track.keyframes.forEach(kf => {
+            if (kf.time === time) {
+              track.keyframes = track.keyframes.filter(k => k.time !== time)
+            }
+          })
+        })
+        // 把所有keyframes长度是0的track删除掉
+        segment.clip.tracks = segment.clip.tracks.filter(track => track.keyframes.length > 0)
+        // 如果segment.clip.tracks为空，删除该clip
+        if (segment.clip.tracks.length === 0) {
+          deleteClip(segment.clip.clipId)
+        }
+      },
+    },
+  ])
 }
 
 // closeClipContent：关闭浮动面板 + 收起下拉菜单
@@ -544,13 +546,6 @@ function getCurvePoints(track: TrackData, segment?: ClipSegment): string {
   return points.join(' ')
 }
 
-// isKeyframeSelected：通过 clipId + trackType + keyframe 引用比较，判断选中态（红色高亮
-function isKeyframeSelected(clipId: string, trackType: string, keyframe: Keyframe): boolean {
-  return selectedKeyframe.value?.clipId === clipId &&
-    selectedKeyframe.value?.trackType === trackType &&
-    selectedKeyframe.value?.keyframe === keyframe
-}
-
 // ========== 关键帧属性编辑：调用 entity.getEditPropConfigData 动态构造 DataTypeEditPanel ==========
 const editPropConfigInfo = ref<editItem[]>([])
 const editPropInputInfo = ref<any>({})
@@ -562,10 +557,6 @@ const contextMenu = ref<{
   y: number;
 } | null>(null)
 // editPropConfigEditCallback：DataTypeEditPanel 面板输入变化的回写回调
-// 默认空实现，点击具体 keyframe 时会被 onKeyframeClick 覆写为「回写到对应 keyframe.value」的逻辑
-let editPropConfigEditCallback = (_val: any) => {
-  // noop - 占位默认实现，onKeyframeClick 中会动态赋值
-}
 
 // onKeyframeClick：点击关键帧节点时触发
 // 执行顺序：
@@ -575,8 +566,7 @@ let editPropConfigEditCallback = (_val: any) => {
 // 4) 写 editPropConfigEditCallback：DataTypeEditPanel 输入变化时回写 keyframe.value
 // 5) 读取 entity.getEditPropConfigData，过滤出当前 trackType 对应的 editItem，打开 DataTypeEditPanel
 // 6) 设置 selectedKeyframe（用于样式高亮红色选中态）
-// 7) 赋值 window.activekeyFrameNode 全局变量，供外部模块（如属性面板）访问当前选中关键帧
-function onKeyframeClick(event: MouseEvent, clipId: string, entityId: string, trackType: string, keyframe: Keyframe) {
+function onKeyframeClick(time: number) {
   // 区分「click」和「drag结束」：若鼠标移动超过阈值则不触发点击
   if (dragMoved) {
     dragMoved = false
@@ -586,111 +576,8 @@ function onKeyframeClick(event: MouseEvent, clipId: string, entityId: string, tr
   if (isPlaying.value) {
     togglePlay()
   }
-  // 从 worldApi 场景根节点下查找匹配 entityId 的实体对象
-  const entity = window.worldApi.children.find(v => v.getOriginalData().id === entityId)
-  if (!entity) return;
-
-  // 编辑面板回调：用户在 DataTypeEditPanel 修改值后，自动同步到当前 keyframe.value
-  editPropConfigEditCallback = (val: any) => {
-    keyframe.value = val[trackType]
-  }
-
-  // 读取 entity 的可编辑属性配置（支持 Promise/同步两种返回），匹配 trackType 后弹面板
-  function callback(config: editItem[]) {
-    const match = config.find(v => v.id === trackType)
-    if (!match) return
-    // 面板配置：仅展示当前 trackType 对应的单个字段
-    editPropConfigInfo.value = [match]
-    editPropTypeKey.value = entity!.type;
-    // 面板初始值：取 keyframe.value 回填
-    const inputData: any = {
-      [trackType]: keyframe.value
-    }
-    editPropInputInfo.value = inputData;
-    // 面板定位：跟随鼠标点击位置（clientX/clientY）
-    const contextMenuX = event.clientX
-    const contextMenuY = event.clientY
-    contextMenu.value = {
-      visible: true,
-      x: contextMenuX,
-      y: contextMenuY,
-    }
-  }
-  const config = entity.getEditPropConfigData(entity.getData())
-  if (config instanceof Promise) {
-    config.then(callback)
-  } else {
-    callback(config)
-  }
-  // 记录选中态（红色高亮 + 外部引用）
-  selectedKeyframe.value = { clipId, entityId, trackType, keyframe }
-  // 写全局变量：让外部模块（如属性面板/控制台调试）可以访问当前选中的关键帧引用
-  // 注意：使用小写 k 命名 activekeyFrameNode，与用户需求严格一致
-  // @ts-ignore - 全局动态属性，Window 类型上未预定义
-  window.activekeyFrameNode = { clipId, entityId, trackType, keyframe }
-}
-
-// watch：编辑面板输入变化（deep watch）时触发回写回调
-watch(() => editPropInputInfo.value, () => {
-  if (contextMenu.value?.visible) {
-    editPropConfigEditCallback(editPropInputInfo.value)
-  }
-}, {
-  deep: true
-})
-
-// handleTrackClick：在 track-timeline 空白处点击 → 在该时间点插入关键帧
-//  - 时间被 clamp 在 clip 的 [startTime, endTime]
-//  - 按 trackType 预设默认值（position/rotation → {x:0,y:0,z:0}，opacity→1，等
-//  - 插入后 keyframes 按时间排序并触发响应式更新
-function handleTrackClick(event: MouseEvent, track: TrackData, segment?: ClipSegment) {
-  if (dragMoved) {
-    dragMoved = false
-    return
-  }
-
-  if (isPlaying.value) {
-    togglePlay()
-  }
-
-  const target = event.currentTarget as HTMLElement
-  const rect = target.getBoundingClientRect()
-  const x = event.clientX - rect.left
-  const segDuration = segment ? (segment.endTime - segment.startTime) : effectiveDuration.value
-  const startTime = segment ? segment.startTime : 0
-  const endTime = segment ? segment.endTime : effectiveDuration.value
-  const time = Math.max(startTime, Math.min(endTime, startTime + (x / rect.width) * segDuration))
-
-  let defaultValue: any = null
-  switch (track.trackType) {
-    case 'position':
-      defaultValue = { x: 0, y: 0, z: 0 }
-      break
-    case 'rotation':
-      defaultValue = { x: 0, y: 0, z: 0 }
-      break
-    case 'scale':
-      defaultValue = { x: 1, y: 1, z: 1 }
-      break
-    case 'visible':
-      defaultValue = true
-      break
-    case 'opacity':
-      defaultValue = 1
-      break
-  }
-
-  const newKeyframe: Keyframe = {
-    time: Math.round(time * 10) / 10,
-    value: defaultValue,
-    easing: 'linear'
-  }
-
-  track.keyframes.push(newKeyframe)
-  track.keyframes.sort((a, b) => a.time - b.time)
-
-  // timelineData___.value = { ...timelineData___.value }
-  timelineState.timelineData = { ...timelineState.timelineData }
+  timelineState.currentTime = time;
+  evaluateTimeline(time)
 }
 
 // togglePlay：播放/暂停切换按钮点击处理
@@ -734,6 +621,7 @@ function stop() {
 // playLoop：requestAnimationFrame 播放主循环
 //  - 使用 performance.now 计算帧间 deltaTime，与 playbackSpeed 相乘得播放推进量
 //  - 到时间尾回到 0 秒（循环播放）
+//  - 非VIP时：播放到FREE_DURATION时停止并提示
 //  - 每帧调用 evaluateTimeline 重新计算场景状态
 function playLoop() {
   if (!isPlaying.value) return
@@ -743,6 +631,19 @@ function playLoop() {
   lastTimestamp = now
 
   timelineState.currentTime += deltaTime * playbackSpeed.value
+
+  // 非VIP限制：播放到免费时长时自动暂停并提示
+  if (!props.isVip && timelineState.currentTime >= FREE_DURATION) {
+    timelineState.currentTime = FREE_DURATION
+    evaluateTimeline(timelineState.currentTime)
+    isPlaying.value = false
+    if (animationFrameId) {
+      cancelAnimationFrame(animationFrameId)
+      animationFrameId = null
+    }
+    message.warning('升级VIP解锁更长时长播放功能')
+    return
+  }
 
   if (timelineState.currentTime >= effectiveDuration.value) {
     timelineState.currentTime = 0
@@ -772,7 +673,9 @@ function onDrag(e: MouseEvent) {
   const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width))
   const time = (x / rect.width) * effectiveDuration.value
 
-  timelineState.currentTime = Math.max(0, Math.min(time, effectiveDuration.value))
+  // 非VIP限制：播放头不能超过免费时长
+  const maxTime = props.isVip ? effectiveDuration.value : Math.min(FREE_DURATION, effectiveDuration.value)
+  timelineState.currentTime = Math.max(0, Math.min(time, maxTime))
   evaluateTimeline(timelineState.currentTime)
 }
 
@@ -780,164 +683,6 @@ function stopDragging() {
   isDragging = false
   document.removeEventListener('mousemove', onDrag)
   document.removeEventListener('mouseup', stopDragging)
-}
-
-// startClipDrag：track-item 整体拖拽
-//  - 播放中 → 自动暂停
-//  - 记录 dragStartClipRange（clip 边界）和 dragStartTimes（每个轨道 keyframes 原始时间）
-//  - 拖拽时：clip.startTime/endTime 按原 duration 平移 + 内部 keyframes 同步偏移相同 deltaTime
-function startClipDrag(e: MouseEvent, clipId: string) {
-  e.stopPropagation()
-  if (isPlaying.value) {
-    togglePlay()
-  }
-  isDraggingClip = true
-  dragClipId = clipId
-  dragStartX = e.clientX
-  dragMoved = false
-  dragStartTimes.clear()
-  dragStartClipRange = null
-
-  if (activeClipId.value) {
-    closeClipContent()
-  }
-
-  const clip = timelineState.timelineData.clips.find(c => c.clipId === clipId)
-  if (clip) {
-    dragStartClipRange = { startTime: clip.startTime, endTime: clip.endTime }
-    for (const track of clip.tracks) {
-      const times = track.keyframes.map(kf => kf.time)
-      dragStartTimes.set(track.trackType, times)
-    }
-  }
-
-  document.addEventListener('mousemove', onClipDrag)
-  document.addEventListener('mouseup', stopClipDrag)
-}
-
-// onClipDrag：track-item 拖拽实时位置计算
-//  - 宽度换算 deltaTime = deltaX / (rect.width / effectiveDuration)
-//  - 关键：基于 dragStartClipRange / dragStartTimes 计算新值，避免每帧累积误差
-//  - startTime 不能小于 0（Math.max(0, ...)），endTime = newStartTime + duration 维持时长
-function onClipDrag(e: MouseEvent) {
-  if (!isDraggingClip || !dragClipId || !dragStartClipRange) return
-
-  const wrapper = document.querySelector('.timeline-content-wrapper') as HTMLElement
-  if (!wrapper) return
-
-  const rect = wrapper.getBoundingClientRect()
-  const widthPerSecond = rect.width / effectiveDuration.value
-  const deltaX = e.clientX - dragStartX
-
-  if (Math.abs(deltaX) > 2) {
-    dragMoved = true
-  }
-
-  if (!dragMoved) return
-
-  const deltaTime = deltaX / widthPerSecond
-
-  const clip = timelineState.timelineData.clips.find(c => c.clipId === dragClipId)
-  if (!clip) return
-
-  const duration = dragStartClipRange.endTime - dragStartClipRange.startTime
-  const newStartTime = Math.max(0, dragStartClipRange.startTime + deltaTime)
-  const newEndTime = newStartTime + duration
-
-  clip.startTime = newStartTime
-  clip.endTime = newEndTime
-
-  for (const track of clip.tracks) {
-    const originalTimes = dragStartTimes.get(track.trackType)
-    if (!originalTimes) continue
-
-    for (let i = 0; i < track.keyframes.length; i++) {
-      if (originalTimes[i] !== undefined) {
-        track.keyframes[i].time = Math.max(0, originalTimes[i] + deltaTime)
-      }
-    }
-  }
-  // timelineData___.value = { ...timelineData___.value }
-  timelineState.timelineData = { ...timelineState.timelineData }
-}
-
-function stopClipDrag() {
-  isDraggingClip = false
-  dragClipId = null
-  dragStartTimes.clear()
-  dragStartClipRange = null
-  document.removeEventListener('mousemove', onClipDrag)
-  document.removeEventListener('mouseup', stopClipDrag)
-}
-
-// startKeyframeDrag：单个关键帧拖拽
-//  - 找到所在 .track-timeline 容器作为基准宽度换算容器
-//  - 记录 dragKeyframeInfo 快照（边界+原始时间），拖拽过程中不累积修改
-function startKeyframeDrag(e: MouseEvent, clipId: string, trackType: string, keyframe: Keyframe) {
-  e.stopPropagation()
-  if (isPlaying.value) {
-    togglePlay()
-  }
-
-  const clip = timelineState.timelineData.clips.find(c => c.clipId === clipId)
-  if (!clip) return
-
-  const trackTimeline = (e.currentTarget as HTMLElement).closest('.track-timeline') as HTMLElement
-  const container = trackTimeline || document.querySelector('.track-timeline') as HTMLElement
-
-  isDraggingKeyframe = true
-  dragKeyframeStartX = e.clientX
-  dragMoved = false
-  dragKeyframeInfo = {
-    clipId,
-    trackType,
-    keyframe,
-    startTime: clip.startTime,
-    endTime: clip.endTime,
-    originalTime: keyframe.time,
-    container,
-  }
-
-  document.addEventListener('mousemove', onKeyframeDrag)
-  document.addEventListener('mouseup', stopKeyframeDrag)
-}
-
-// onKeyframeDrag：关键帧拖拽位置换算
-//  - 用容器 rect.width 与 clip.duration 换算 widthPerSecond
-//  - 关键帧时间 clamp 在 [clip.startTime, clip.endTime] 之间（不能越过 clip 边界
-function onKeyframeDrag(e: MouseEvent) {
-  if (!isDraggingKeyframe || !dragKeyframeInfo) return
-
-  const container = dragKeyframeInfo.container
-  if (!container) return
-
-  const rect = container.getBoundingClientRect()
-  const clipDuration = dragKeyframeInfo.endTime - dragKeyframeInfo.startTime
-  const widthPerSecond = rect.width / clipDuration
-  const deltaX = e.clientX - dragKeyframeStartX
-
-  if (Math.abs(deltaX) > 2) {
-    dragMoved = true
-  }
-
-  if (!dragMoved) return
-
-  const deltaTime = deltaX / widthPerSecond
-  const newTime = Math.max(
-    dragKeyframeInfo.startTime,
-    Math.min(dragKeyframeInfo.endTime, dragKeyframeInfo.originalTime + deltaTime)
-  )
-
-  dragKeyframeInfo.keyframe.time = newTime
-  // timelineData.value = { ...timelineData.value }
-  timelineState.timelineData = { ...timelineState.timelineData }
-}
-
-function stopKeyframeDrag() {
-  isDraggingKeyframe = false
-  dragKeyframeInfo = null
-  document.removeEventListener('mousemove', onKeyframeDrag)
-  document.removeEventListener('mouseup', stopKeyframeDrag)
 }
 
 // evaluateTimeline：核心评估函数，给定 time 秒，重新计算场景中所有实体状态
@@ -1378,6 +1123,9 @@ onUnmounted(() => {
       }
 
       .timeline-content-wrapper {
+        position: relative;
+        display: flex;
+        flex-direction: column;
 
         // timeline-track-area：所有 timeline-row 的父容器
         .timeline-track-area {
@@ -1396,7 +1144,7 @@ onUnmounted(() => {
           // 同一行内的多个 clip 时间互不冲突（由区间图着色算法保证）
           .timeline-row {
             position: relative;
-            height: 35px;
+            height: 50px;
             border-bottom: 1px solid rgba(255, 255, 255, 0.03); // 行间极细分割线
 
             // track-item：单个 clip 的视觉表示，绝对定位 left / width 按百分比占 timeline-row
@@ -1408,9 +1156,8 @@ onUnmounted(() => {
               box-sizing: border-box; // 包含 border/padding 入宽度，与 track-item 计算宽度一致
               min-width: 20px; // 极端缩放下仍能点击
               z-index: 5;
-              height: 35px;
+              height: 50px;
               top: 0;
-              cursor: move; // 十字移动光标（按住可整体拖动 clip）
               background: rgba(15, 52, 96, 0.4); // 深蓝半透明背景
               transition: box-shadow 0.15s;
 
@@ -1432,6 +1179,27 @@ onUnmounted(() => {
 
                 &:hover {
                   box-shadow: 0 0 0 1px #ff9800; // hover 也改为橙色
+                }
+              }
+
+              // locked：非VIP时10秒以后的clip，灰色禁用样式
+              &.locked {
+                border-color: #666;
+                background: rgba(100, 100, 100, 0.3);
+                cursor: not-allowed;
+                opacity: 0.7;
+                filter: grayscale(0.5);
+
+                &:hover {
+                  box-shadow: none; // 锁定状态下无hover高亮
+                }
+
+                .track-header-bar {
+
+                  .clip-name,
+                  .clip-duration {
+                    color: #888;
+                  }
                 }
               }
 
@@ -1465,6 +1233,29 @@ onUnmounted(() => {
                 }
               }
 
+              // locked-badge：非VIP未解锁徽章（🔒）
+              .locked-badge {
+                position: absolute;
+                top: -8px;
+                left: -6px;
+                width: 20px;
+                height: 20px;
+                background: linear-gradient(135deg, #9c27b0, #673ab7);
+                color: white;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 10px;
+                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+                z-index: 10;
+
+                .locked-icon {
+                  font-size: 10px;
+                  line-height: 1;
+                }
+              }
+
               // 按住拖拽 clip 时：光标改为 grabbing（手型抓紧）
               &:active {
                 cursor: grabbing;
@@ -1474,7 +1265,7 @@ onUnmounted(() => {
               .track-header-bar {
                 display: flex;
                 align-items: center;
-                height: 35px;
+                height: 20px;
                 padding: 0 8px;
                 gap: 8px;
                 color: white;
@@ -1497,6 +1288,128 @@ onUnmounted(() => {
                   white-space: nowrap;
                 }
               }
+
+              .keyframe-node {
+                position: absolute;
+                top: 30px;
+                width: 16px;
+                height: 16px;
+                margin-left: -8px;
+                margin-top: -6px;
+                border-radius: 50%;
+                background: #4CAF50;
+                border: 2px solid #fff;
+                cursor: move;
+                box-sizing: border-box;
+                transition: transform 0.15s, background 0.15s;
+                z-index: 2;
+
+                &:hover {
+                  transform: scale(1.3); // 悬浮放大方便点击
+                }
+
+                // selected 选中态：红色背景 + 更大比例 + 红色外发光
+                &.selected {
+                  background: #e94560;
+                  transform: scale(1.4);
+                  box-shadow: 0 0 0 3px rgba(233, 69, 96, 0.4);
+                }
+              }
+            }
+          }
+        }
+
+        // vip-divider：VIP分界线，在10秒位置显示竖线+标签（与timeline-track-area平级）
+        .vip-divider {
+          position: absolute;
+          top: 0;
+          bottom: 0;
+          width: 2px;
+          z-index: 60;
+          pointer-events: none;
+
+          .vip-divider-line {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 2px;
+            background: linear-gradient(to bottom, #ffd700, #ff9800, #ffd700);
+            box-shadow: 0 0 8px rgba(255, 215, 0, 0.5);
+          }
+
+          .vip-divider-label {
+            position: absolute;
+            top: 2px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #ffd700, #ff9800);
+            color: #fff;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 10px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 3px;
+            white-space: nowrap;
+            box-shadow: 0 2px 6px rgba(255, 152, 0, 0.4);
+            z-index: 61;
+
+            .vip-icon {
+              font-size: 11px;
+            }
+          }
+        }
+
+        // locked-overlay：未解锁区域遮罩层，覆盖10秒以后的所有区域（与timeline-track-area平级）
+        .locked-overlay {
+          position: absolute;
+          top: 0;
+          bottom: 0;
+          z-index: 55;
+          pointer-events: none; // 不拦截事件，让内部逻辑控制
+
+          .locked-pattern {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: repeating-linear-gradient(45deg,
+                rgba(80, 80, 80, 0.15),
+                rgba(80, 80, 80, 0.15) 10px,
+                rgba(60, 60, 60, 0.15) 10px,
+                rgba(60, 60, 60, 0.15) 20px);
+            backdrop-filter: blur(1px);
+          }
+
+          .locked-text {
+            position: absolute;
+            top: 50%;
+            left: 130px;
+            transform: translate(-50%, -50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            color: #888;
+            white-space: nowrap;
+
+            .locked-big-icon {
+              font-size: 32px;
+              opacity: 0.6;
+            }
+
+            .locked-message {
+              font-size: 12px;
+              font-weight: 500;
+              color: #aaa;
+              background: rgba(40, 40, 40, 0.8);
+              padding: 4px 12px;
+              border-radius: 12px;
+              backdrop-filter: blur(4px);
             }
           }
         }
@@ -1512,6 +1425,7 @@ onUnmounted(() => {
     position: relative;
     overflow-x: hidden; // 隐藏标尺自身的横向滚动条（用 timeline-scroll-container 统一滚动）
     margin-left: 4px;
+    border-bottom: 1px solid #0f3460;
 
     // 隐藏 webkit 滚动条，避免双滚动条视觉
     &::-webkit-scrollbar {
@@ -1557,6 +1471,39 @@ onUnmounted(() => {
         }
       }
     }
+
+    // ruler-vip-marker：标尺上的VIP标记（在10秒位置显示皇冠图标）
+    .ruler-vip-marker {
+      position: absolute;
+      top: 0;
+      height: 100%;
+      width: 24px;
+      transform: translateX(-50%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+      z-index: 10;
+
+      .ruler-vip-icon {
+        font-size: 14px;
+        filter: drop-shadow(0 0 4px rgba(255, 215, 0, 0.8));
+        animation: vip-glow 2s ease-in-out infinite;
+      }
+    }
+  }
+}
+
+// vip-glow：VIP标记的发光动画
+@keyframes vip-glow {
+
+  0%,
+  100% {
+    filter: drop-shadow(0 0 2px rgba(255, 215, 0, 0.6));
+  }
+
+  50% {
+    filter: drop-shadow(0 0 8px rgba(255, 215, 0, 1));
   }
 }
 
@@ -1710,34 +1657,6 @@ onUnmounted(() => {
         width: 100%;
         height: 100%;
         background: rgba(255, 255, 255, 0.02); // 轻微底色区分行
-      }
-
-      // keyframe-node：关键帧圆点节点（绿色默认，红色选中态）
-      .keyframe-node {
-        position: absolute;
-        top: 15px;
-        width: 16px;
-        height: 16px;
-        margin-left: -8px;
-        margin-top: -6px;
-        border-radius: 50%;
-        background: #4CAF50;
-        border: 2px solid #fff;
-        cursor: move;
-        box-sizing: border-box;
-        transition: transform 0.15s, background 0.15s;
-        z-index: 2;
-
-        &:hover {
-          transform: scale(1.3); // 悬浮放大方便点击
-        }
-
-        // selected 选中态：红色背景 + 更大比例 + 红色外发光
-        &.selected {
-          background: #e94560;
-          transform: scale(1.4);
-          box-shadow: 0 0 0 3px rgba(233, 69, 96, 0.4);
-        }
       }
 
       // curve-line：SVG polyline 插值曲线预览（opacity / visible / position Y 等映射）
