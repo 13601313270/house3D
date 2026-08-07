@@ -47,11 +47,6 @@
           <div class="timeline-track-area">
             <!-- timeline-row：一行可以放多个互不时间冲突的 track-item（由区间图着色算法分配行号） -->
             <div v-for="(row, rowIndex) in rowsByIndex" :key="`time-row-${rowIndex}`" class="timeline-row">
-              <!-- track-item：单个动画片段（Clip），绝对定位由 startTime + duration 决定
-                   warning class：同一 entityId 的多个 clip 时间重叠时高亮
-                   locked class：非VIP时clip跨越或超过免费时长
-                   @mousedown：开始拖拽 clip（整体平移，含 clip 边界和内部 keyframes 时间）
-                   @click.stop：切换浮动编辑面板显示/隐藏 -->
               <div v-for="segment in row" :key="segment.clip.clipId" class="track-item" :class="{
                 active: activeClipId === segment.clip.clipId,
                 warning: overlappingClipIds.has(segment.clip.clipId),
@@ -63,7 +58,7 @@
                 <div class="track-header-bar">
                   <span class="clip-name">{{ segment.clip.entityId }}</span>
                   <span class="clip-duration">{{ formatTime(segment.startTime) }} - {{ formatTime(segment.endTime)
-                  }}</span>
+                    }}</span>
                 </div>
                 <!-- 时间重叠警告徽章：hover 时显示 title 文案，点击播放时会被拦截 -->
                 <div v-if="overlappingClipIds.has(segment.clip.clipId)" class="warning-badge" title="同一个物体对象不允许时间重叠">
@@ -79,13 +74,6 @@
                   :style="{ left: `${((time - segment.startTime) / (segment.endTime - segment.startTime || 1)) * 100}%` }"
                   :class="{ selected: time === currentTime }" @click.stop="onKeyframeClick(time)"
                   @contextmenu.prevent.stop="toggleClipContentFrame($event, segment, time)"></div>
-
-                <!-- <div v-for="keyframe in segment.clip.tracks[0].keyframes" :key="keyframe.time" class="keyframe-node"
-                  :style="{ left: `${((keyframe.time - segment.startTime) / (segment.endTime - segment.startTime || 1)) * 100}%` }"
-                  :class="{ selected: isKeyframeSelected(segment.clip.clipId, segment.clip.tracks[0].trackType, keyframe) }"
-                  @click.stop="onKeyframeClick(segment.clip.clipId, segment.clip.entityId, segment.clip.tracks[0].trackType, keyframe)"
-                  @contextmenu.prevent.stop="toggleClipContentFrame($event, keyframe)">
-                </div> -->
               </div>
             </div>
           </div>
@@ -130,7 +118,7 @@
 import { ref, computed, onUnmounted, watch, onMounted, nextTick } from 'vue'
 import { message } from '@/utils/message'
 // timelineState 模块：管理时间轴状态，clip/track/keyframe 数据结构，以及全局播放状态标志
-import { ClipSegment, TrackData, Keyframe, timelineState, ClipData } from '@/utils/timelineManage';
+import { ClipSegment, TrackData, KeyTimePoint, timelineState, ClipData } from '@/utils/timelineManage';
 import editItem from '@/utils/editItem';
 import DataTypeEditPanel from '../views/DataTypeEditPanel.vue'
 import showContextMenu from '@/utils/contextMenu';
@@ -449,8 +437,8 @@ function toggleClipContent(event: MouseEvent, segment: ClipSegment) {
 
 function getAllTimeInSegment(segment: ClipSegment): number[] {
   const allTimes: number[] = []
-  segment.clip.tracks.forEach(track => {
-    track.keyframes.forEach(kf => {
+  segment.clip.columns.forEach(track => {
+    track.keyTimePoints.forEach(kf => {
       if (!allTimes.includes(kf.time)) {
         allTimes.push(kf.time)
       }
@@ -472,17 +460,17 @@ function toggleClipContentFrame(event: MouseEvent, segment: ClipSegment, time: n
       icon: '🗑',
       danger: true,
       callback: () => {
-        segment.clip.tracks.forEach(track => {
-          track.keyframes.forEach(kf => {
+        segment.clip.columns.forEach(track => {
+          track.keyTimePoints.forEach(kf => {
             if (kf.time === time) {
-              track.keyframes = track.keyframes.filter(k => k.time !== time)
+              track.keyTimePoints = track.keyTimePoints.filter(k => k.time !== time)
             }
           })
         })
-        // 把所有keyframes长度是0的track删除掉
-        segment.clip.tracks = segment.clip.tracks.filter(track => track.keyframes.length > 0)
+        // 把所有keyTimePoints长度是0的track删除掉
+        segment.clip.columns = segment.clip.columns.filter(track => track.keyTimePoints.length > 0)
         // 如果segment.clip.tracks为空，删除该clip
-        if (segment.clip.tracks.length === 0) {
+        if (segment.clip.columns.length === 0) {
           deleteClip(segment.clip.clipId)
         }
       },
@@ -522,13 +510,13 @@ function toggleCollapse(entityId: string) {
 //  - 其他类型：默认水平线 y=10
 //  x 轴根据 keyframe.time 在 [startTime, endTime] 之间做百分比换算
 function getCurvePoints(track: TrackData, segment?: ClipSegment): string {
-  if (track.keyframes.length < 2) return ''
+  if (track.keyTimePoints.length < 2) return ''
 
   const startTime = segment ? segment.startTime : 0
   const endTime = segment ? segment.endTime : effectiveDuration.value
   const segDuration = endTime - startTime || 1
 
-  const points = track.keyframes
+  const points = track.keyTimePoints
     .sort((a, b) => a.time - b.time)
     .map(kf => {
       const x = ((kf.time - startTime) / segDuration) * 100
@@ -685,187 +673,185 @@ function stopDragging() {
   document.removeEventListener('mouseup', stopDragging)
 }
 
-// evaluateTimeline：核心评估函数，给定 time 秒，重新计算场景中所有实体状态
-//
-// 执行逻辑分三种互斥情况（根据 time 与所有 clip 的位置关系）：
-//   1) time 落在某个 clip 的开区间 (startTime, endTime) 内 → matchIndex >= 0（命中插值）
-//      对该 clip 的每个轨道，调用 evaluateTrack 做线性/步进/缓动插值，结果写入 data 映射表
-//      最后通过 entity.setTempData 合并写入（插值运算仅在当前 clip 区间内生效）
-//
-//   2) time 在所有 clips 之前，即 time < 最早 clip.startTime → 取第 0 个 clip 的对应 entity
-//      由于动画尚未开始，所有轨道值取 entity.getData() 的「原始初始值」写入 setTempData
-//      （保证播放头拖到 0 秒附近时，对象还未开始动的状态正确显示）
-//
-//   3) 其他情况（time >= 某个 clip.endTime，即空隙中 / 所有 clip 之后）
-//      用 reduce 找到 matchPreIndex：满足 clip.endTime <= time 且 endTime 最大的那个 clip
-//      然后取该 clip 每个轨道 keyframes 的「最后一个值」（最终态）写入 setTempData
-//      （保证动画结束后，对象停留在最后一帧的状态，而不是跳回初始值）
-//
-//   判断当前 setTempData 写入来源是「时间轴评估结果」还是「用户手动修改」，
-//   避免两者互相覆盖。因此在写入 entity.getData() 初始值之前临时设为 false，之后立刻恢复 true。
 function evaluateTimeline(time: number) {
-  // 先尝试查找 time 落在哪个 clip 的 (startTime, endTime) 开区间内
-  const matchIndex = timelineState.timelineData.clips.findIndex(clip => {
-    return time > clip.startTime && time < clip.endTime
-  })
-
-  if (matchIndex === -1) {
-    if (timelineState.timelineData.clips.length > 0) {
-      let match: ClipData;
-      // --- 情况2：time 在所有 clip 之前（还没开始第一个动画） ---
-      if (time < timelineState.timelineData.clips[0].startTime) {
-        match = timelineState.timelineData.clips[0];
-        // console.log('ssss-3', match)
-        if (match) {
-          const entity = window.worldApi.children.find(v => {
-            return v.getOriginalData().id === match.entityId
-          })
-          if (!entity) return;
-          const data: any = { ...entity.getOriginalData() };
-          match.tracks.forEach(track => {
-            const { trackType } = track;
-            const leftTime = 0;
-            const rightTime = match.startTime;
-            const t = (time - leftTime) / (rightTime - leftTime)
-            // @ts-ignore - trackType 为动态字符串，Entity 接口无法穷举
-            const leftVal = entity.getOriginalData()[trackType] as any;
-            const rightVal = track.keyframes[0].value
-            // 这里，应该有一个特例，就是角度angelY，比如从162到-154度。
-            if (track.keyframes[0].time === match.startTime) {
-              // console.log('track.keyframes', track.keyframes[0].value)
-              const previewVal = leftVal + (rightVal - leftVal) * t;
-              // @ts-ignore - trackType 为动态字符串，Entity 接口无法穷举
-              data[trackType] = previewVal;// entity.getOriginalData()[trackType] as any;
-            }
-          })
-          entity.setAnimationData({
-            ...entity.getAnimationData(),
-            ...data,
-          });
-        }
-      } else {
-        const data: any = {}
-        // --- 情况3：time 在至少一个 clip 之后（取最近已结束 clip 的最终态） ---
-        // reduce 遍历 clips：找出满足 endTime <= time 且 endTime 最大的 clip 索引（即「上一段已结束动画」）
-        const matchPreIndex = timelineState.timelineData.clips.reduce((preIndex, clip, index) => {
-          if (clip.endTime <= time) {
-            if (preIndex === -1 || clip.endTime > timelineState.timelineData.clips[preIndex].endTime) {
-              return index
-            }
-          }
-          return preIndex
-        }, -1)
-        match = timelineState.timelineData.clips[matchPreIndex];
-        if (match) {
-          const entity = window.worldApi.children.find(v => {
-            return v.getOriginalData().id === match.entityId
-          })
-          if (!entity) return;
-          match.tracks.forEach(track => {
-            const { trackType, keyframes } = track;
-            // 每个轨道取最后一个 keyframe 的 value（动画结束的定格状态）；无 keyframes 跳过
-            if (keyframes.length > 0) {
-              const lastValue = keyframes[keyframes.length - 1].value;
-              data[trackType] = lastValue;
-            }
-          })
-          entity.setAnimationData({
-            ...entity.getAnimationData(),
-            ...data,
-          });
-        }
-      }
-    } else {
-      console.log('dddddd')
-    }
-  } else if (matchIndex > -1) {
-    // --- 情况1：命中某个 clip 区间 → 对每个轨道执行关键帧插值 ---
-    const match = timelineState.timelineData.clips[matchIndex];
+  const data: any = {}
+  timelineState.timelineData.clips.forEach(clip => {
     const entity = window.worldApi.children.find(v => {
-      return v.getOriginalData().id === match.entityId
+      return v.getOriginalData().id === clip.entityId
     })
     if (!entity) return;
-    const data: any = {}
-    // if (time < timelineState.timelineData.clips[0].startTime) {
-    match.tracks.forEach(track => {
-      // console.log('evaluateTimeline', track, time)
-      const { keyframes, trackType } = track;
-      if (keyframes.length === 0) {
-        return
-      }
-      const sortedKeyframes = [...keyframes].sort((a, b) => a.time - b.time)
+    const inArea = time > clip.startTime && time < clip.endTime
+    if (inArea) {
+      // --- 情况1：命中某个 clip 区间 → 对每个轨道执行关键帧插值 ---
+      clip.columns.forEach(track => {
+        // console.log('evaluateTimeline', track, time)
+        const { keyTimePoints, trackType } = track;
+        if (keyTimePoints.length === 0) {
+          return
+        }
+        const sortedKeyTimePoints = [...keyTimePoints].sort((a, b) => a.time - b.time)
 
-      if (time < sortedKeyframes[0].time) {
-        // sortedKeyframes 头部添加
-        let valuePre: number | undefined | null;
-        // console.log('sortedKeyframes-1', sortedKeyframes)
-        const firstClipTrack = timelineState.timelineData.clips[0].tracks.find(v => {
-          return v.trackType === trackType
-        })
-        if (firstClipTrack && time < firstClipTrack.keyframes[0].time) {
-          valuePre = (entity.getOriginalData() as any)[trackType] as number;
-        } else {
-          const matchPreIndex = timelineState.timelineData.clips.reduce((preIndex, clip, index) => {
-            if (clip.endTime <= time) {
-              if (preIndex === -1 || clip.endTime > timelineState.timelineData.clips[preIndex].endTime) {
-                return index
-              }
-            }
-            return preIndex
-          }, -1)
-          const match = timelineState.timelineData.clips[matchPreIndex];
-          if (match) {
-            valuePre = match.tracks.find(t => t.trackType === trackType)?.keyframes[keyframes.length - 1].value;
+        if (time < sortedKeyTimePoints[0].time) {
+          // sortedKeyTimePoints 头部添加
+          const valuePre: number | undefined | null = (entity.getOriginalData() as any)[trackType] as number;
+          if (valuePre !== undefined && valuePre !== null) {
+            sortedKeyTimePoints.unshift({
+              time: clip.startTime,
+              value: valuePre,
+              easing: 'linear',
+            })
           }
-          console.log('sortedKeyframes-2', sortedKeyframes)
         }
-        if (valuePre !== undefined && valuePre !== null) {
-          sortedKeyframes.unshift({
-            time: timelineState.timelineData.clips[matchIndex].startTime,
-            value: valuePre,
-            easing: 'linear',
-          })
+        // evaluateTrack 返回 null / undefined 时，不写入该轨道（保持 setTempData 中之前的值）
+        const value = evaluateTrack(sortedKeyTimePoints, time)
+        if (value !== null) {
+          data[trackType] = value;
         }
+      })
+      entity.setAnimationData({
+        ...entity.getAnimationData(),
+        ...data,
+      });
+    } else {
+      // --- 情况2：time 在所有 clip 之前（还没开始第一个动画） ---
+      if (time < clip.startTime) {
+        const data: any = { ...entity.getOriginalData() };
+        clip.columns.forEach(track => {
+          const { trackType } = track;
+          const leftTime = 0;
+          const rightTime = clip.startTime;
+          const t = (time - leftTime) / (rightTime - leftTime)
+          // @ts-ignore - trackType 为动态字符串，Entity 接口无法穷举
+          const leftVal = entity.getOriginalData()[trackType] as any;
+          const rightVal = track.keyTimePoints[0].value
+          if (track.keyTimePoints[0].time === clip.startTime) {
+            const previewVal = leftVal + (rightVal - leftVal) * t;
+            // @ts-ignore - trackType 为动态字符串，Entity 接口无法穷举
+            data[trackType] = previewVal;// entity.getOriginalData()[trackType] as any;
+          }
+        })
+        entity.setAnimationData({
+          ...entity.getAnimationData(),
+          ...data,
+        });
+      } else if (time > clip.endTime) {
+        const data: any = { ...entity.getOriginalData() };
+        clip.columns.forEach(track => {
+          const { trackType } = track;
+          const rightVal = track.keyTimePoints[track.keyTimePoints.length - 1].value
+          data[trackType] = rightVal;
+        })
+        entity.setAnimationData({
+          ...entity.getAnimationData(),
+          ...data,
+        });
       }
-      // evaluateTrack 返回 null / undefined 时，不写入该轨道（保持 setTempData 中之前的值）
-      const value = evaluateTrack(sortedKeyframes, time)
-      if (value !== null) {
-        data[trackType] = value;
-      }
-    })
-    entity.setAnimationData({
-      ...entity.getAnimationData(),
-      ...data,
-    });
-  }
+    }
+  })
+
+  // // 先尝试查找 time 落在哪些 clip 的 (startTime, endTime) 开区间内
+  // const matchIndex = timelineState.timelineData.clips.findIndex(clip => {
+  //   return time > clip.startTime && time < clip.endTime
+  // })
+  // const inArea = matchIndex !== -1;
+
+  // if (!inArea) {
+  //   if (timelineState.timelineData.clips.length > 0) {
+  //     let match: ClipData;
+  //     // --- 情况2：time 在所有 clip 之前（还没开始第一个动画） ---
+  //     if (time < timelineState.timelineData.clips[0].startTime) {
+  //       match = timelineState.timelineData.clips[0];
+  //       // console.log('ssss-3', match)
+  //       if (match) {
+  //         const entity = window.worldApi.children.find(v => {
+  //           return v.getOriginalData().id === match.entityId
+  //         })
+  //         if (!entity) return;
+  //         const data: any = { ...entity.getOriginalData() };
+  //         match.columns.forEach(track => {
+  //           const { trackType } = track;
+  //           const leftTime = 0;
+  //           const rightTime = match.startTime;
+  //           const t = (time - leftTime) / (rightTime - leftTime)
+  //           // @ts-ignore - trackType 为动态字符串，Entity 接口无法穷举
+  //           const leftVal = entity.getOriginalData()[trackType] as any;
+  //           const rightVal = track.keyTimePoints[0].value
+  //           // 这里，应该有一个特例，就是角度angelY，比如从162到-154度。
+  //           if (track.keyTimePoints[0].time === match.startTime) {
+  //             const previewVal = leftVal + (rightVal - leftVal) * t;
+  //             // @ts-ignore - trackType 为动态字符串，Entity 接口无法穷举
+  //             data[trackType] = previewVal;// entity.getOriginalData()[trackType] as any;
+  //           }
+  //         })
+  //         entity.setAnimationData({
+  //           ...entity.getAnimationData(),
+  //           ...data,
+  //         });
+  //       }
+  //     } else {
+  //       const data: any = {}
+  //       // --- 情况3：time 在至少一个 clip 之后（取最近已结束 clip 的最终态） ---
+  //       // reduce 遍历 clips：找出满足 endTime <= time 且 endTime 最大的 clip 索引（即「上一段已结束动画」）
+  //       const matchPreIndex = timelineState.timelineData.clips.reduce((preIndex, clip, index) => {
+  //         if (clip.endTime <= time) {
+  //           if (preIndex === -1 || clip.endTime > timelineState.timelineData.clips[preIndex].endTime) {
+  //             return index
+  //           }
+  //         }
+  //         return preIndex
+  //       }, -1)
+  //       match = timelineState.timelineData.clips[matchPreIndex];
+  //       if (match) {
+  //         const entity = window.worldApi.children.find(v => {
+  //           return v.getOriginalData().id === match.entityId
+  //         })
+  //         if (!entity) return;
+  //         match.columns.forEach(track => {
+  //           const { trackType, keyTimePoints } = track;
+  //           // 每个轨道取最后一个 keyframe 的 value（动画结束的定格状态）；无 keyTimePoints 跳过
+  //           if (keyTimePoints.length > 0) {
+  //             const lastValue = keyTimePoints[keyTimePoints.length - 1].value;
+  //             data[trackType] = lastValue;
+  //           }
+  //         })
+  //         entity.setAnimationData({
+  //           ...entity.getAnimationData(),
+  //           ...data,
+  //         });
+  //       }
+  //     }
+  //   }
+  // } else if (inArea) {
+
+  // }
 }
 
 // evaluateTrack：对单个轨道 + 给定时间进行关键帧插值求值
 //  - 0 个关键帧：null；1 个关键帧：直接取该值（无插值）
 //  - 时间 < 首个 keyframe 或 > 最后 keyframe：返回 null（该轨道不生效）
 //  - 其他：二分查找左右相邻 keyframe，根据 easing 计算 t，
-function evaluateTrack(keyframes: Keyframe[], time: number): null | number {
-  if (keyframes.length === 0) return null
-  if (keyframes.length === 1) return keyframes[0].value
+function evaluateTrack(keyTimePoints: KeyTimePoint[], time: number): null | number {
+  if (keyTimePoints.length === 0) return null
+  if (keyTimePoints.length === 1) return keyTimePoints[0].value
 
   // 当时间在关键帧范围外时，返回 null 表示该 clip 不应在此时间段内生效
-  if (time < keyframes[0].time) return null
-  if (time > keyframes[keyframes.length - 1].time) return null
+  if (time < keyTimePoints[0].time) return null
+  if (time > keyTimePoints[keyTimePoints.length - 1].time) return null
 
   let leftIndex = 0
-  let rightIndex = keyframes.length - 1
+  let rightIndex = keyTimePoints.length - 1
 
   while (leftIndex < rightIndex - 1) {
     const midIndex = Math.floor((leftIndex + rightIndex) / 2)
-    if (keyframes[midIndex].time <= time) {
+    if (keyTimePoints[midIndex].time <= time) {
       leftIndex = midIndex
     } else {
       rightIndex = midIndex
     }
   }
 
-  const leftKeyframe = keyframes[leftIndex]
-  const rightKeyframe = keyframes[rightIndex]
+  const leftKeyframe = keyTimePoints[leftIndex]
+  const rightKeyframe = keyTimePoints[rightIndex]
 
   const totalDuration = rightKeyframe.time - leftKeyframe.time
   let t = (time - leftKeyframe.time) / totalDuration
@@ -890,86 +876,6 @@ function applyEasing(t: number, easing: string): number {
     default: return t
   }
 }
-
-// availableTrackTypes：点击「＋ 添加属性」下拉菜单的候选项（动态读取 entity 的编辑配置生成
-const availableTrackTypes = ref<{
-  id: string,
-  label: string,
-}[]>([])
-
-// addTrack：将选中的轨道类型 push 到 clip.tracks，空 keyframes，之后用户在轨道上点击才能增加关键帧
-function addTrack(trackType: string) {
-  if (!activeSegment.value) return
-  const newTrack: TrackData = {
-    trackType,
-    keyframes: [],
-    interpolation: 'linear'
-  }
-  activeSegment.value.clip.tracks.push(newTrack)
-  // timelineData___.value = { ...timelineData___.value }
-  timelineState.timelineData = { ...timelineState.timelineData }
-  isShowTrackDropdown.value = false
-}
-
-// removeTrack：移除指定类型的轨道（浮动面板 track-label 上的 ✕ 按钮
-function removeTrack(trackType: string) {
-  if (!activeSegment.value) return
-  const clip = activeSegment.value.clip
-  const newTracks: TrackData[] = [];
-  const removeTracks: string[] = [];
-  const { entityId, tracks } = clip;
-  const entity = window.worldApi.children.find(v => {
-    return v.getOriginalData().id === entityId
-  })
-  tracks.forEach(t => {
-    if (t.trackType !== trackType) {
-      newTracks.push(t)
-    } else {
-      removeTracks.push(t.trackType);
-    }
-  })
-  if (entity) {
-    removeTracks.forEach(removeKey => {
-      entity.setAnimationData({
-        ...entity.getAnimationData(),
-        [removeKey]: undefined,
-      })
-    })
-  }
-  clip.tracks = newTracks;
-  timelineState.timelineData = { ...timelineState.timelineData }
-  nextTick(() => {
-    evaluateTimeline(timelineState.currentTime)
-  })
-}
-
-// showTrackDropdown：点击「＋ 添加属性」按钮时展开下拉菜单
-// 读取对应 entity 的 getEditPropConfigData（支持同步/Promise 返回），
-// 将配置中的可编辑字段映射为 {id, label} 列表填充 availableTrackTypes 并展开下拉。
-// 注意：下拉项可能包含非动画属性，由用户自行选择是否需要添加为轨道。
-// function showTrackDropdown() {
-//   if (!activeSegment.value) return;
-//   const { entityId } = activeSegment.value.clip
-//   const entity = window.worldApi.children.find(v => v.getOriginalData().id === entityId)
-//   if (!entity) return;
-
-//   function callback(config: editItem[]) {
-//     // 先清空旧数据避免重复累加
-//     availableTrackTypes.value = config.map(v => {
-//       return {
-//         id: v.id,
-//         label: v.label
-//       }
-//     })
-//     isShowTrackDropdown.value = true
-//   }
-//   const config = entity.getEditPropConfigData(entity.getData())
-//   if (config instanceof Promise) {
-//     config.then(callback)
-//   } else {
-//     callback(config)
-//   }
-// }
 
 // onUnmounted：组件卸载时清理动画帧与事件监听，避免内存泄漏
 onUnmounted(() => {
@@ -1088,7 +994,7 @@ onUnmounted(() => {
       display: grid;
       grid-template-areas: "layer"; // 同名列，两个子元素都占 layer 实现叠加
 
-      // === 第一层：轨道内容层（承载所有 timeline-row + track-item + keyframes） ===
+      // === 第一层：轨道内容层（承载所有 timeline-row + track-item + keyTimePoints） ===
       .timeline-content-wrapper {
         grid-area: layer;
         position: relative;

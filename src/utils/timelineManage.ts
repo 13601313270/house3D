@@ -1,4 +1,4 @@
-export interface Keyframe {
+export interface KeyTimePoint {
   time: number
   value: number
   easing?: string
@@ -6,7 +6,7 @@ export interface Keyframe {
 
 export interface TrackData {
   trackType: string
-  keyframes: Keyframe[]
+  keyTimePoints: KeyTimePoint[]
   interpolation?: 'linear' | 'step' | 'bezier'
 }
 
@@ -15,7 +15,7 @@ export interface ClipData {
   entityId: string
   startTime: number
   endTime: number
-  tracks: TrackData[]
+  columns: TrackData[]
 }
 
 export interface ClipSegment {

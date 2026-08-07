@@ -261,7 +261,7 @@ import canvas2DSceneManage from '@/utils/canvas2DSceneManage'
 import bindDanvas2DSceneDefaultEvent from '@/utils/bindDanvas2DSceneDefaultEvent';
 import setHoverPoint from '@/utils/setHoverPoint';
 import TimeLine from '@/components/timeLine.vue'
-import { TimelineData, Keyframe, timelineState } from '@/utils/timelineManage';
+import { TimelineData, KeyTimePoint, timelineState } from '@/utils/timelineManage';
 import generateClipId from '@/utils/generateClipId';
 
 const canvas2DRef = ref<HTMLCanvasElement | null>(null)
@@ -789,7 +789,7 @@ const handleLoadProgramFileChange = async (e: Event) => {
       duration: number
       clips: Array<{
         entityId: string
-        tracks: Array<{
+        columns: Array<{
           trackType: string
           keyframes: Array<{
             time: number
@@ -1474,7 +1474,7 @@ function handleAddAnimation(data: { typeKey: string; modelValue: Record<string, 
     entityId,
     startTime,
     endTime,
-    tracks: []
+    columns: []
   }
 
   // timelineData____.value.clips.push(newClip)

@@ -76,33 +76,33 @@ export abstract class BaseEntityClass<T extends BaseObjData> {
           clipId: generateClipId(),
           startTime: timelineState.currentTime,
           endTime: timelineState.currentTime + 1,
-          tracks: [],
+          columns: [],
         })
         findClip = timelineState.timelineData.clips.find(v => v.entityId === this.data.id)
       }
       if (findClip) {
         Object.keys(data).forEach((key) => {
-          const findTrack = findClip.tracks.find(v => v.trackType === key)
+          const findTrack = findClip.columns.find(v => v.trackType === key)
           if (findTrack) {
-            const keyframes = [...findTrack.keyframes];
-            // console.log(222222, keyframes)
-            if (keyframes.find(v => v.time === timelineState.currentTime)) {
-              const index = keyframes.findIndex(v => v.time === timelineState.currentTime)
+            const keyTimePoints = [...findTrack.keyTimePoints];
+            // console.log(222222, keyTimePoints)
+            if (keyTimePoints.find(v => v.time === timelineState.currentTime)) {
+              const index = keyTimePoints.findIndex(v => v.time === timelineState.currentTime)
               // @ts-ignore
-              keyframes[index].value = data[key]
-              findTrack.keyframes = keyframes;
+              keyTimePoints[index].value = data[key]
+              findTrack.keyTimePoints = keyTimePoints;
             } else {
-              keyframes.push({
+              keyTimePoints.push({
                 time: timelineState.currentTime,
                 // @ts-ignore
                 value: data[key],
               })
-              findTrack.keyframes = keyframes.sort((a, b) => a.time - b.time);
+              findTrack.keyTimePoints = keyTimePoints.sort((a, b) => a.time - b.time);
             }
           } else {
-            findClip.tracks.push({
+            findClip.columns.push({
               trackType: key,
-              keyframes: [{
+              keyTimePoints: [{
                 time: timelineState.currentTime,
                 // @ts-ignore
                 value: data[key],

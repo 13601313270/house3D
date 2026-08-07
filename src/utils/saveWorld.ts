@@ -3,29 +3,10 @@ import { Point } from "@/types"
 import { CameraState } from "@/types/camera"
 import { BaseObjData } from "@/types/map2d"
 import { EnvironmentConfig } from "@/world/world"
-import { timelineState } from "./timelineManage"
+import { TimelineData, timelineState } from "./timelineManage"
 
 export type fileData = {
   [key in string]?: BaseObjData[]
-}
-
-export type TimelineDataForSave = {
-  duration: number
-  clips: Array<{
-    clipId: string
-    entityId: string
-    startTime: number
-    endTime: number
-    tracks: Array<{
-      trackType: string
-      keyframes: Array<{
-        time: number
-        value: any
-        easing?: string
-      }>
-      interpolation?: string
-    }>
-  }>
 }
 
 async function saveWorld(
@@ -66,7 +47,7 @@ async function saveWorld(
     activeCameraIndex: number
     allImportImgs: string[]
     environmentConfig: EnvironmentConfig
-    timelineData?: TimelineDataForSave
+    timelineData?: TimelineData
   } = {
     ...allFileObjectsByGroup as any,
     panOffset,
