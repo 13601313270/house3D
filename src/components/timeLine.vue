@@ -40,8 +40,8 @@
     <!-- 滚动容器：控制轨道区域横向与纵向滚动，onScroll 同步 scrollLeft 状态 -->
     <div class="timeline-scroll-container">
       <!-- timeInfo：使用 CSS Grid 叠加两层（timeline-content-wrapper + playhead-container），使播放头贯穿整个区域 -->
-      <div class="timeInfo" :style="{ paddingLeft: (moreLeft + 4) + 'px' }" @mousedown="handleTimeInfoMouseDown"
-        @scroll="onScroll">
+      <div class="timeInfo" @contextmenu.stop.prevent :style="{ paddingLeft: (moreLeft + 4) + 'px' }"
+        @mousedown="handleTimeInfoMouseDown" @scroll="onScroll">
         <!-- 轨道内容层：承载所有 timeline-row + track-item，宽度随 zoomLevel 放大 -->
         <div class="timeline-content-wrapper" :style="{ width: `${effectiveDuration * zoomLevel * 50}px` }">
           <div class="timeline-track-area">
@@ -49,7 +49,6 @@
             <div v-for="(row, rowIndex) in rowsByIndex" :key="`time-row-${rowIndex}`" class="timeline-row">
               <div v-for="segment in row" :key="segment.clip.clipId" class="track-item" :class="{
                 active: activeClipId === segment.clip.clipId,
-                warning: overlappingClipIds.has(segment.clip.clipId),
                 locked: !props.isVip && segment.startTime >= FREE_DURATION
               }" :style="{
                 left: `${(segment.startTime / effectiveDuration) * 100}%`,
@@ -58,18 +57,8 @@
                 <div class="track-header-bar">
                   <span class="clip-name">{{ segment.clip.entityId }}</span>
                   <span class="clip-duration">{{ formatTime(segment.startTime) }} - {{ formatTime(segment.endTime)
-                  }}</span>
+                    }}</span>
                 </div>
-                <!-- 时间重叠警告徽章：hover 时显示 title 文案，点击播放时会被拦截 -->
-                <div v-if="overlappingClipIds.has(segment.clip.clipId)" class="warning-badge" title="同一个物体对象不允许时间重叠">
-                  <span class="warning-icon">⚠</span>
-                  <span class="warning-text">同一个物体对象不允许时间重叠</span>
-                </div>
-                <!-- 未解锁徽章：非VIP时超过免费时长的clip显示 -->
-                <div v-if="!props.isVip && segment.startTime >= FREE_DURATION" class="locked-badge" title="升级VIP解锁此功能">
-                  <span class="locked-icon">🔒</span>
-                </div>
-
                 <div v-for="time in getAllTimeInSegment(segment)" :key="time" class="keyframe-node"
                   :style="{ left: `${((time - segment.startTime) / (segment.endTime - segment.startTime || 1)) * 100}%` }"
                   :class="{ selected: time === currentTime }" @click.stop="onKeyframeClick(time)"
@@ -262,7 +251,6 @@ const isShowTrackDropdown = ref(false)        // 「添加属性」下拉菜单�
 let animationFrameId: number | null = null   // requestAnimationFrame id，用于播放循环
 let lastTimestamp = 0                        // 上一帧时间戳，计算 deltaTime
 let isDragging = false                       // playhead-line（红色竖线）拖拽中标志
-let dragMoved = false                        // 本次 mousedown+移动 超过阈值是否真正触发了拖拽（区分 click/drag）
 let isScrubbing = false                       // 空白区域按下拖动（scrub）播放头标志
 let scrubClosedPanel = false                  // scrub 时是否关闭了浮动面板（用于 click 后续逻辑）
 
@@ -282,39 +270,6 @@ const rowsByIndex = computed(() => {
     rows[segment.rowIndex].push(segment)
   }
   return rows
-})
-
-// overlappingClipIds：检测相同 entityId 的多个 clip 时间重叠
-// 判定公式：a.startTime < b.endTime && b.startTime < a.endTime
-// 存在重叠时，播放被 togglePlay 拦截并弹出 message.warning
-const overlappingClipIds = computed(() => {
-  const overlappingIds = new Set<string>()
-  const clipsByEntity = new Map<string, ClipSegment[]>()
-
-  for (const segment of clipSegments.value) {
-    const entityId = segment.clip.entityId
-    if (!clipsByEntity.has(entityId)) {
-      clipsByEntity.set(entityId, [])
-    }
-    clipsByEntity.get(entityId)!.push(segment)
-  }
-
-  for (const [, segments] of clipsByEntity) {
-    if (segments.length <= 1) continue
-
-    for (let i = 0; i < segments.length; i++) {
-      for (let j = i + 1; j < segments.length; j++) {
-        const a = segments[i]
-        const b = segments[j]
-        if (a.startTime < b.endTime && b.startTime < a.endTime) {
-          overlappingIds.add(a.clip.clipId)
-          overlappingIds.add(b.clip.clipId)
-        }
-      }
-    }
-  }
-
-  return overlappingIds
 })
 
 // formatTime：秒 → "08:30"（秒:厘秒），保留两位小数用于紧凑显示
@@ -354,11 +309,6 @@ function getTimeFromMouseEvent(event: MouseEvent): number {
 // 2) 当前有浮动面板打开 → 先关闭面板（点击空白收起）
 // 3) 其余空白 → 进入 scrub 模式（按下+移动=实时拖动播放头，按下+立即松开=跳转时间）
 function handleTimeInfoMouseDown(event: MouseEvent) {
-  if (dragMoved) {
-    dragMoved = false
-    return
-  }
-
   const target = event.target as HTMLElement
   if (target.closest('.keyframe-node') || target.closest('.track-timeline') || target.closest('.track-header') || target.closest('.track-item') || target.closest('.playhead-line')) {
     return
@@ -405,11 +355,6 @@ function onScroll(event: Event) {
 // 打开面板时：暂停播放（正在播放时），并根据 track-item DOM 位置计算面板 left/top/width
 // 非VIP限制：不能编辑10秒以后的clip
 function toggleClipContent(event: MouseEvent, segment: ClipSegment) {
-  if (dragMoved) {
-    dragMoved = false
-    return
-  }
-
   // 非VIP限制：禁止打开10秒以后的clip编辑面板
   if (!props.isVip && segment.startTime >= FREE_DURATION) {
     message.warning('升级VIP解锁更长时长编辑功能')
@@ -555,11 +500,6 @@ const contextMenu = ref<{
 // 5) 读取 entity.getEditPropConfigData，过滤出当前 trackType 对应的 editItem，打开 DataTypeEditPanel
 // 6) 设置 selectedKeyframe（用于样式高亮红色选中态）
 function onKeyframeClick(time: number) {
-  // 区分「click」和「drag结束」：若鼠标移动超过阈值则不触发点击
-  if (dragMoved) {
-    dragMoved = false
-    return
-  }
   // 播放中操作关键帧 → 自动暂停，避免播放与编辑冲突
   if (isPlaying.value) {
     togglePlay()
@@ -574,12 +514,6 @@ function onKeyframeClick(time: number) {
 //  - 开始播放：设置，记录 lastTimestamp，启动 playLoop
 //  - 暂停播放：不修改 timelineState.isPlaying（保持 true，因为当前仍处于时间轴评估态），仅 cancelAnimationFrame 中止主循环
 function togglePlay() {
-  // 播放前检查：存在时间重叠的 clip 时禁止播放，提示用户手动调整
-  if (!isPlaying.value && overlappingClipIds.value.size > 0) {
-    message.warning('同一个物体对象不允许时间重叠，请先解决时间重叠问题')
-    return
-  }
-
   isPlaying.value = !isPlaying.value
   if (isPlaying.value) {
     lastTimestamp = performance.now()
@@ -1029,7 +963,8 @@ onUnmounted(() => {
 
         // timeline-track-area：所有 timeline-row 的父容器
         .timeline-track-area {
-          padding-top: 8px; // 顶部留白，避免 row0 贴边
+          padding-top: 8px;
+          padding-bottom: 8px;
           overflow-y: auto;
           box-sizing: border-box;
           position: relative;

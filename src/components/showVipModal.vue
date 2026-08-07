@@ -17,8 +17,9 @@
           <div class="vipSection">
             <div class="sectionTitle">选择套餐</div>
             <div class="vipList">
-              <div class="vipItem" :class="{ active: selectedVip === item.id }" v-for="item in vipPrices" :key="item.id"
-                @click="selectedVip = item.id">
+              <div class="vipItem" :class="{ active: selectedVip === item.id, recommend: item.recommend }"
+                v-for="item in vipPrices" :key="item.id" @click="selectedVip = item.id">
+                <div class="recommendTag" v-if="item.recommend">推荐</div>
                 <div class="vipBadge">{{ item.title }}</div>
                 <div class="vipPrice">
                   <span class="currency">¥</span>
@@ -245,7 +246,7 @@ window.addEventListener('focus', handleFocus)
 
           &.recommend {
             background: linear-gradient(135deg, #fff8e6 0%, #fff0cc 100%);
-            border-color: #f0d88a;
+            border-color: #fff1c4;
 
             .recommendTag {
               position: absolute;
