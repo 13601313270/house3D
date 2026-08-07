@@ -243,6 +243,7 @@ onMounted(() => {
 const currentTime = ref(0)                     // 当前播放时间（秒，可小数）
 const isPlaying = ref(false)                  // 是否正在播放
 const playbackSpeed = ref(1)                // 播放倍速（0.1x ~ 3x）
+const targetFps = ref(20)                       // 目标帧率（0=不限制，跟随显示器刷新率；例如24=每秒24帧）
 const zoomLevel = ref(1)                       // 时间轴横向缩放级别（0.2x ~ 5x）
 const scrollLeft = ref(0)                     // 当前横向滚动位置
 const collapsedClips = ref<Set<string>>(new Set()) // 折叠的对象轨道集合（预留）
@@ -253,6 +254,7 @@ const isShowTrackDropdown = ref(false)        // 「添加属性」下拉菜单�
 // ========== 非响应式临时状态（拖拽等） ==========
 let animationFrameId: number | null = null   // requestAnimationFrame id，用于播放循环
 let lastTimestamp = 0                        // 上一帧时间戳，计算 deltaTime
+let frameAccumulator = 0                     // 帧率控制累积器（秒），targetFps>0 时生效
 let isDragging = false                       // playhead-line（红色竖线）拖拽中标志
 let isScrubbing = false                       // 空白区域按下拖动（scrub）播放头标志
 let scrubClosedPanel = false                  // scrub 时是否关闭了浮动面板（用于 click 后续逻辑）
@@ -282,6 +284,15 @@ function formatTime(time: number): string {
   return `${seconds.toString().padStart(2, '0')}:${milliseconds.toString().padStart(2, '0')}`
 }
 
+// snapTimeToFrame：把任意时间点对齐到 targetFps 对应的帧网格
+//  - targetFps <= 0：原样返回
+//  - targetFps > 0：对齐到 Math.round(time * fps) / fps，避免浮点漂移
+function snapTimeToFrame(time: number): number {
+  if (targetFps.value <= 0) return time
+  const frameDuration = 1 / targetFps.value
+  return Math.round(time / frameDuration) * frameDuration
+}
+
 // zoomIn / zoomOut：时间轴缩放（0.2x ~ 5x），每次变化 0.2
 function zoomIn() {
   zoomLevel.value = Math.min(zoomLevel.value + 0.2, 5)
@@ -304,7 +315,7 @@ function getTimeFromMouseEvent(event: MouseEvent): number {
   const x = event.clientX + scrollLeft - moreLeft - 4;
   // console.log('event----', event.clientX, wrapperRect.left, scrollLeft)
   const time = (x / wrapperRect.width) * effectiveDuration.value
-  return Math.max(0, Math.min(time, effectiveDuration.value))
+  return snapTimeToFrame(Math.max(0, Math.min(time, effectiveDuration.value)))
 }
 
 // handleTimeInfoMouseDown：timeInfo 区域 mousedown 统一分发
@@ -400,8 +411,8 @@ function toggleClipContentFrame(event: MouseEvent, segment: ClipSegment, time: n
   if (isPlaying.value) {
     togglePlay()
   }
-  timelineState.currentTime = time;
-  evaluateTimeline(time)
+  timelineState.currentTime = snapTimeToFrame(time);
+  evaluateTimeline(timelineState.currentTime)
   showContextMenu(event, [
     {
       title: '删除节点',
@@ -507,8 +518,8 @@ function onKeyframeClick(time: number) {
   if (isPlaying.value) {
     togglePlay()
   }
-  timelineState.currentTime = time;
-  evaluateTimeline(time)
+  timelineState.currentTime = snapTimeToFrame(time);
+  evaluateTimeline(timelineState.currentTime)
 }
 
 // togglePlay：播放/暂停切换按钮点击处理
@@ -520,6 +531,7 @@ function togglePlay() {
   isPlaying.value = !isPlaying.value
   if (isPlaying.value) {
     lastTimestamp = performance.now()
+    frameAccumulator = 0
     playLoop()
   } else if (animationFrameId) {
     cancelAnimationFrame(animationFrameId)
@@ -536,6 +548,7 @@ function togglePlay() {
 function stop() {
   isPlaying.value = false
   timelineState.currentTime = 0
+  frameAccumulator = 0
   if (animationFrameId) {
     cancelAnimationFrame(animationFrameId)
     animationFrameId = null
@@ -545,6 +558,7 @@ function stop() {
 
 // playLoop：requestAnimationFrame 播放主循环
 //  - 使用 performance.now 计算帧间 deltaTime，与 playbackSpeed 相乘得播放推进量
+//  - targetFps>0 时通过 frameAccumulator 限制评估频率（时间推进仍按真实 deltaTime，不丢进度）
 //  - 到时间尾回到 0 秒（循环播放）
 //  - 非VIP时：播放到FREE_DURATION时停止并提示
 //  - 每帧调用 evaluateTimeline 重新计算场景状态
@@ -555,7 +569,26 @@ function playLoop() {
   const deltaTime = (now - lastTimestamp) / 1000
   lastTimestamp = now
 
-  timelineState.currentTime += deltaTime * playbackSpeed.value
+  // targetFps > 0 时启用帧率控制：累积 deltaTime，达到目标帧间隔才推进评估
+  if (targetFps.value > 0) {
+    const frameInterval = 1 / targetFps.value
+    frameAccumulator += deltaTime * playbackSpeed.value
+
+    if (frameAccumulator >= frameInterval) {
+      // 一次性消费掉整数倍的帧间隔，避免长时间后台切换后雪崩式更新
+      const steps = Math.floor(frameAccumulator / frameInterval)
+      const steppedTime = steps * frameInterval
+      timelineState.currentTime += steppedTime
+      frameAccumulator -= steppedTime
+    } else {
+      // 未达到目标帧间隔，直接请求下一帧，不做评估
+      animationFrameId = requestAnimationFrame(playLoop)
+      return
+    }
+  } else {
+    // targetFps = 0：不限制，按显示器刷新率推进
+    timelineState.currentTime += deltaTime * playbackSpeed.value
+  }
 
   // 非VIP限制：播放到免费时长时自动暂停并提示
   if (!props.isVip && timelineState.currentTime >= FREE_DURATION) {
@@ -600,7 +633,7 @@ function onDrag(e: MouseEvent) {
 
   // 非VIP限制：播放头不能超过免费时长
   const maxTime = props.isVip ? effectiveDuration.value : Math.min(FREE_DURATION, effectiveDuration.value)
-  timelineState.currentTime = Math.max(0, Math.min(time, maxTime))
+  timelineState.currentTime = snapTimeToFrame(Math.max(0, Math.min(time, maxTime)))
   evaluateTimeline(timelineState.currentTime)
 }
 

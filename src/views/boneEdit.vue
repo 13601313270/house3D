@@ -29,11 +29,11 @@
           <div class="timeDisplay">
             {{ formatTime(currentTime) }} / {{ formatTime(totalDuration) }}
           </div>
+          <div @click="togglePlay" class="controlBtn">
+            {{ isPlaying ? '⏸' : '▶' }}
+          </div>
         </div>
         <div class="controlButtons">
-          <div @click="togglePlay" class="controlBtn">
-            {{ isPlaying ? '⏸ 暂停' : '▶ 播放' }}
-          </div>
           <div class="controlBtn" @click="save()">应用本帧</div>
           <div class="dropdown-wrapper" @mouseenter="handleDropdownEnter" @mouseleave="handleDropdownLeave">
             <div class="controlBtn dropdown-btn">...</div>
@@ -1192,7 +1192,7 @@ function showModelPanel() {
   width: 100%;
   box-sizing: border-box;
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
 
@@ -1244,6 +1244,27 @@ function showModelPanel() {
       text-align: center;
       font-size: 12px;
       color: #666;
+    }
+
+    .controlBtn {
+      flex-shrink: 0;
+      padding: 8px 12px;
+      margin-left: 12px;
+      border: none;
+      border-radius: 4px;
+      background: #409eff;
+      color: white;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.2s;
+
+      &:hover {
+        background: #66b1ff;
+      }
+
+      &:active {
+        transform: scale(0.98);
+      }
     }
   }
 
