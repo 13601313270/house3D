@@ -42,7 +42,7 @@ function evaluateTrack(entity: BaseEntityClass<BaseObjData>, trackType: string, 
 
   const leftKeyframe = keyTimePoints[leftIndex]
   const rightKeyframe = keyTimePoints[rightIndex]
-  console.log('左侧，右侧', trackType, keyTimePoints, leftKeyframe, rightKeyframe);
+  // console.log('左侧，右侧', trackType, keyTimePoints, leftKeyframe, rightKeyframe);
 
   const totalDuration = rightKeyframe.time - leftKeyframe.time
   let t = (time - leftKeyframe.time) / totalDuration

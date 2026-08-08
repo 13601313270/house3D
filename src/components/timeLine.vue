@@ -695,7 +695,7 @@ function evaluateTimeline(time: number) {
           const leftVal = entity.getOriginalData()[trackType] as any;
           const rightVal = track.keyTimePoints[0].value
           if (track.keyTimePoints[0].time === clip.startTime) {
-            const previewVal = leftVal + (rightVal - leftVal) * t;
+            const previewVal = entity.editAnimationDataColumn(trackType, leftVal, rightVal, t)
             // @ts-ignore - trackType 为动态字符串，Entity 接口无法穷举
             data[trackType] = previewVal;// entity.getOriginalData()[trackType] as any;
           }

@@ -537,6 +537,9 @@ export class PeopleEntity extends PointEntityClass<PeopleData> {
             x: lerpAngle(aItem.value.x, bItem.value.x, t),
             y: lerpAngle(aItem.value.y, bItem.value.y, t),
             z: lerpAngle(aItem.value.z, bItem.value.z, t),
+            px: lerpAngle(aItem.value.px, bItem.value.px, t),
+            py: lerpAngle(aItem.value.py, bItem.value.py, t),
+            pz: lerpAngle(aItem.value.pz, bItem.value.pz, t),
           }
         })
       })
