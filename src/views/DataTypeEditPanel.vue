@@ -94,7 +94,7 @@ const isTimelineStatePlaying = ref<boolean>(false)
 
 // @ts-ignore
 window.showBoneEditIsShow = () => {
-  position.value = { x: 0, y: 0 }
+  position.value = { x: 100, y: 60 }
   boneEditIsShow.value = true
 
   nextTick(() => {

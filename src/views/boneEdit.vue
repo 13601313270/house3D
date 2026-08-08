@@ -158,6 +158,8 @@ import { FBXLoader } from 'three/addons/loaders/FBXLoader.js'
 import message from '@/utils/message'
 import { sleep } from '@/utils/sleep'
 import type { BoneStepItem } from '@/entities/people/index.d'
+import { timelineState } from '@/utils/timelineManage'
+import generateClipId from '@/utils/generateClipId'
 
 const viewportRef = ref<HTMLDivElement | null>(null)
 const containerRef = ref<HTMLDivElement | null>(null)
@@ -819,6 +821,93 @@ function save(boneFilter?: (name: string) => boolean) {
   emit('update:modelValue', saveVal)
 }
 
+function saveAnimation(boneFilter?: (name: string) => boolean) {
+  if (currentAction && isPlaying.value) {
+    currentAction.paused = true
+    isPlaying.value = false
+  }
+
+  allBones.value.forEach(bone => {
+    if (boneFilter && !boneFilter(bone.name)) return
+    const boneObject = scene.getObjectByName(bone.name)
+    if (boneObject) {
+      bone.value.x = boneObject.rotation.x
+      bone.value.y = boneObject.rotation.y
+      bone.value.z = boneObject.rotation.z
+      bone.value.px = boneObject.position.x
+      bone.value.py = boneObject.position.y
+      bone.value.pz = boneObject.position.z
+    }
+  })
+
+  const saveVal = allBones.value.map(v => {
+    return {
+      name: v.name,
+      value: v.value,
+    }
+  })
+  const originalData = window.editPropEntity.getOriginalData();
+  let findClip = timelineState.timelineData.clips.find(v => v.entityId === originalData.id);
+  if (!findClip) {
+    timelineState.timelineData.clips.push({
+      entityId: originalData.id,
+      clipId: generateClipId(),
+      startTime: timelineState.currentTime,
+      endTime: timelineState.currentTime + 1,
+      columns: [],
+    })
+    findClip = timelineState.timelineData.clips.find(v => v.entityId === originalData.id)
+  }
+  console.log('findClip', findClip);
+  if (findClip) {
+    const key = 'bone';
+    const findTrack = findClip.columns.find(v => v.trackType === key)
+    if (findTrack) {
+      const keyTimePoints = [...findTrack.keyTimePoints];
+      // console.log(222222, keyTimePoints)
+      if (keyTimePoints.find(v => v.time === timelineState.currentTime)) {
+        const index = keyTimePoints.findIndex(v => v.time === timelineState.currentTime)
+        // @ts-ignore
+        keyTimePoints[index].value = saveVal
+        findTrack.keyTimePoints = keyTimePoints;
+      } else {
+        keyTimePoints.push({
+          time: timelineState.currentTime,
+          // @ts-ignore
+          value: saveVal,
+        })
+        findTrack.keyTimePoints = keyTimePoints.sort((a, b) => a.time - b.time);
+      }
+    } else {
+      findClip.columns.push({
+        trackType: key,
+        keyTimePoints: [{
+          time: timelineState.currentTime,
+          // @ts-ignore
+          value: saveVal,
+        }]
+      })
+    }
+
+    // 如果timelineState.currentTime，在findClip.startTime和findClip.endTime之外，那么调整findClip.startTime和findClip.endTime，包括进这个时间
+    if (timelineState.currentTime < findClip.startTime) {
+      findClip.startTime = timelineState.currentTime;
+    }
+    if (timelineState.currentTime > findClip.endTime) {
+      findClip.endTime = timelineState.currentTime;
+    }
+
+    // this.setAnimationData({
+    //   ...this.animationData,
+    //   ...data,
+    // })
+
+    timelineState.timelineData = {
+      ...timelineState.timelineData
+    };
+  }
+}
+
 const headBones: string[] = [
   'mixamorigNeck',
   'mixamorigHead',
@@ -890,6 +979,7 @@ const upperBodyBones = [
   ...rightArmBones,
 ]
 const lowerBodyBones = [
+  'mixamorigHips',
   'mixamorigRightUpLeg',
   'mixamorigRightLeg',
   'mixamorigRightFoot',
@@ -935,8 +1025,7 @@ function handleApply() {
     // 当前帧模式：复用现有 save 逻辑
     save(boneFilter)
   } else {
-    // 整个动画模式：UI入口已就位，后续再实现动画导出逻辑
-    message.info(`将应用整个动画（范围：${applyScopeLabelMap[applyScope.value]}）`)
+    saveAnimation(boneFilter)
   }
 }
 const loading = ref(false)

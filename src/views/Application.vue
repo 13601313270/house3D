@@ -1071,6 +1071,7 @@ const handleContextMenu = (point: {
                 type,
                 index: j
               }
+              window.editPropEntity = api;
               editPropConfigEditCallback = (val: any) => {
                 const changeData: any = {};
                 const data = api.getData();// 这个一定不要用上面的data，而是每次都要重新getData。
