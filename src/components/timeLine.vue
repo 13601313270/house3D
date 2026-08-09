@@ -10,6 +10,7 @@
       <div class="header-right">
         <button class="control-btn" @click="stop">⏹</button>
         <button class="control-btn" @click="togglePlay">{{ isPlaying ? '⏸' : '▶' }}</button>
+        <button class="control-btn" @click="recordVideoPlay">{{ isPlaying ? '⏸' : '录制 ▶' }}</button>
         <input type="range" class="speed-control" v-model="playbackSpeed" min="0.1" max="3" step="0.1" />
         <span class="speed-label">{{ playbackSpeed }}倍速</span>
         <button class="control-btn" @click="zoomIn">+</button>
@@ -507,6 +508,18 @@ function togglePlay() {
     cancelAnimationFrame(animationFrameId)
     animationFrameId = null
   }
+}
+function recordVideoPlay() {
+  // @ts-ignore
+  const canvas: HTMLCanvasElement = window.get3DCanvas();
+  if (!canvas) {
+    message.error('必须设置至少一个摄像机才可以录制')
+    return;
+  }
+  togglePlay();
+  // 从这里往下的部分，是把这个canvas录制成视频的逻辑
+
+  
 }
 
 // stop：停止播放并重置到 0 秒

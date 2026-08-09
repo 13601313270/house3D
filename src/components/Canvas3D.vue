@@ -613,7 +613,8 @@ const getImageData = (): string | null => {
 defineExpose({
   resize,
   exportImage,
-  getImageData
+  getImageData,
+  getCanvas: () => renderer?.domElement ?? null
 })
 function calcVerticalFovByHorizontalFov(hFov: number, aspect: number) {
   const vFov = 2 * Math.atan(Math.tan((hFov * Math.PI / 180) / 2) / aspect)

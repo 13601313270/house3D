@@ -523,6 +523,16 @@ async function changeCamera2(activeIndex: number = 0) {
   }
 }
 
+// @ts-ignore
+window.get3DCanvas = () => {
+  // console.log(canvas3DRef2.value)
+  // // @ts-ignore
+  // window.fff = canvas3DRef2;
+  if (canvas3DRef2.value) {
+    return canvas3DRef2.value.getCanvas()
+  }
+}
+
 onMounted(async () => {
   const res = await axios.get('https://api.studying1v1.com/video/objectFileType')
   const data = res.data as Array<{
