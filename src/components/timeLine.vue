@@ -10,7 +10,10 @@
       <div class="header-right">
         <button class="control-btn" @click="stop">⏹</button>
         <button class="control-btn" @click="togglePlay">{{ isPlaying ? '⏸' : '▶' }}</button>
-        <button class="control-btn" @click="recordVideoPlay">{{ isPlaying ? '⏸' : '录制 ▶' }}</button>
+        <button class="control-btn" :class="{ recording: isRecording, converting: isConverting }"
+          :disabled="isConverting" @click="recordVideoPlay">{{
+            isConverting ? '转码 ⟳' : (isRecording ? '停止 ■' : '录制 ▶')
+          }}</button>
         <input type="range" class="speed-control" v-model="playbackSpeed" min="0.1" max="3" step="0.1" />
         <span class="speed-label">{{ playbackSpeed }}倍速</span>
         <button class="control-btn" @click="zoomIn">+</button>
@@ -58,7 +61,7 @@
                 <div class="track-header-bar">
                   <span class="clip-name">{{ segment.clip.entityId }}</span>
                   <span class="clip-duration">{{ formatTime(segment.startTime) }} - {{ formatTime(segment.endTime)
-                    }}</span>
+                  }}</span>
                 </div>
                 <div v-for="time in getAllTimeInSegment(segment)" :key="time" class="keyframe-node"
                   :style="{ left: `${((time - segment.startTime) / (segment.endTime - segment.startTime || 1)) * 100}%` }"
@@ -113,6 +116,19 @@ import editItem from '@/utils/editItem';
 import DataTypeEditPanel from '../views/DataTypeEditPanel.vue'
 import showContextMenu from '@/utils/contextMenu';
 import evaluateTrack from '@/utils/evaluateTrack';
+// 【用户明确要求：纯 npm import，不用 CDN <script> 全局变量】
+//  - @ffmpeg/core：FFmpeg 核心，暴露 createFFmpegCore()（纯 Emscripten WASM 封装，不含任何 Web Worker 逻辑）
+//  - @ffmpeg/util：通用工具，fetchFile() 将 Blob/File/URL 转 Uint8Array
+//  - @ffmpeg/ffmpeg 包不用：它的高层 FFmpeg 类内部封装了 Web Worker，在 Webpack 5 下会触发
+//    Worker 静态分析冲突，导致 Worker 内部模块解析一连串错误。
+//  - 【Webpack 5 编译修复】：vue.config.js 里加了 3 条规则（resolve.fallback.{module:false} +
+//    关闭 unknownContextCritical/exprContextCritical + noParse /ffmpeg-core/），解决
+//    "Can't resolve 'module'" 和 "Can't resolve './'" 两个编译错误。
+//  - 注意：主线程直跑 WASM 的缺点是转码期间页面短暂卡顿（JS 事件循环被阻塞）。
+//         本次先确保"能编译 + 能跑通 + 纯 npm 引入"，之后如需流畅 UI，再加一个自己手写的
+//         极简 Web Worker（15 行）把 createFFmpegCore 移进去，转码时 UI 完全不卡。
+import { createFFmpegCore } from '@ffmpeg/core'
+import { fetchFile } from '@ffmpeg/util'
 
 const props = defineProps<{
   isVip: boolean
@@ -243,6 +259,7 @@ onMounted(() => {
 // 变量由模板中的 ref="timelineRuler" 绑定实际注入
 const currentTime = ref(0)                     // 当前播放时间（秒，可小数）
 const isPlaying = ref(false)                  // 是否正在播放
+const isRecording = ref(false)                // 是否正在录制视频
 const playbackSpeed = ref(1)                // 播放倍速（0.1x ~ 3x）
 const targetFps = ref(20)                       // 目标帧率（0=不限制，跟随显示器刷新率；例如24=每秒24帧）
 const zoomLevel = ref(1)                       // 时间轴横向缩放级别（0.2x ~ 5x）
@@ -259,6 +276,11 @@ let frameAccumulator = 0                     // 帧率控制累积器（秒）�
 let isDragging = false                       // playhead-line（红色竖线）拖拽中标志
 let isScrubbing = false                       // 空白区域按下拖动（scrub）播放头标志
 let scrubClosedPanel = false                  // scrub 时是否关闭了浮动面板（用于 click 后续逻辑）
+
+// ========== 录制相关状态 ==========
+const isConverting = ref(false)                 // 是否正在转码（WebM → MP4）
+let mediaRecorder: MediaRecorder | null = null  // MediaRecorder 实例
+let recordedChunks: Blob[] = []                 // 录制数据块缓存
 
 // totalRows：实际使用的总行数（= 最大 rowIndex + 1）
 const totalRows = computed(() => {
@@ -509,6 +531,187 @@ function togglePlay() {
     animationFrameId = null
   }
 }
+
+// convertWebmToMp4：使用 @ffmpeg/core（Wasm 主线程模式）将 WebM 转码为 H.264 MP4
+//
+// 【设计原则：严格对齐用户诉求 —— 100% npm 引入，不用任何 CDN / 全局变量 / 复制插件】
+//
+// 链路：
+//   ① 顶部正常 npm static import：
+//        import { createFFmpegCore } from '@ffmpeg/core'
+//        import { fetchFile } from '@ffmpeg/util'
+//   ② Webpack 5 编译修复（vue.config.js 3 条规则）：
+//        · resolve.fallback.module = false        → 修 "Can't resolve 'module'"（Emscripten Node 分支）
+//        · unknownContextCritical/exprContextCritical = false → 修 "Can't resolve './'"（动态 require 拼接）
+//        · module.noParse = /ffmpeg-core\.js$/    → 优化：Webpack 不解析几十 MB 的 Emscripten 巨无霸 JS
+//   ③ 转码逻辑：主线程直接 createFFmpegCore() → 写入 input.webm → callMain(ffmpeg 命令) → 读 output.mp4
+//
+//  已知 trade-off：主线程跑 Wasm，转码期间页面会短暂卡顿（JS 事件循环被阻塞）。
+//  本次先确保"能编译通过 + 功能跑通 + 完全 npm 引入"，之后如需流畅 UI，再加一个 15 行的手写 Web Worker
+//  把 createFFmpegCore 移进去（Worker 代码是我们自己写的，Webpack 处理自己写的 Worker 完全没问题，
+//  用 new Worker(new URL('./ffmpegWorker', import.meta.url), { type: 'module' }) 标准语法）
+//
+//  转码参数：libx264 + yuv420p + crf23 + +faststart，兼容绝大多数播放器和 AI 处理平台
+async function convertWebmToMp4(webmBlob: Blob): Promise<Blob> {
+  isConverting.value = true
+  console.groupCollapsed('[convertWebmToMp4] ===== 开始转码（@ffmpeg/core 主线程模式 · 纯 npm 引入）=====')
+  console.log('[1/5] 输入 WebM blob 大小：', (webmBlob.size / 1024 / 1024).toFixed(2), 'MB，type：', webmBlob.type)
+  message.loading({ content: '正在初始化转码引擎...', key: 'convert-loading' })
+
+  try {
+    // ===== Step 1：直接初始化 FFmpeg Wasm（Webpack 5 内置支持 wasm，自动加载）=====
+    console.log('[2/5] 调用 createFFmpegCore()（npm 正常 import，Webpack 自动加载 wasm）...')
+    message.loading({ content: '正在加载转码引擎（WebAssembly）...', key: 'convert-loading' })
+
+    const ffmpegLogs: string[] = []
+    const wasmStart = performance.now()
+    const core = await createFFmpegCore({
+      // stdout：收集 FFmpeg 日志，同时抽取 frame=xxx 显示进度
+      print: (text: string) => {
+        ffmpegLogs.push(text)
+        const m = text.match(/frame=\s*(\d+)/)
+        if (m) {
+          const frame = parseInt(m[1], 10)
+          message.loading({
+            content: `转码中（frame ${frame}）...`,
+            key: 'convert-loading',
+          })
+        }
+      },
+      // stderr：错误日志也收集
+      printErr: (text: string) => {
+        ffmpegLogs.push(text)
+        console.log('[ffmpeg stderr]', text)
+      },
+    })
+    console.log(`   ✅ createFFmpegCore() 成功，耗时 ${((performance.now() - wasmStart) / 1000).toFixed(1)}s`)
+
+    // ===== Step 2：写入 WebM 输入文件到 Emscripten 虚拟文件系统 =====
+    console.log('[3/5] 写入 input.webm 到 Emscripten 虚拟 FS...')
+    message.loading({ content: '正在准备转码数据...', key: 'convert-loading' })
+    const inputData = await fetchFile(webmBlob)
+    core.FS.writeFile('input.webm', inputData)
+    console.log('   ✅ writeFile 完成，大小：', (inputData.byteLength / 1024 / 1024).toFixed(2), 'MB')
+
+    // ===== Step 3：执行转码命令 =====
+    const cmd = [
+      '-i', 'input.webm',
+      '-c:v', 'libx264',
+      '-pix_fmt', 'yuv420p',
+      '-preset', 'medium',
+      '-crf', '23',
+      '-movflags', '+faststart',
+      '-y',
+      'output.mp4',
+    ]
+    console.log('[4/5] 执行 FFmpeg callMain：ffmpeg', cmd.join(' '))
+    message.loading({ content: '正在转码为 MP4（H.264）...', key: 'convert-loading' })
+    const execStart = performance.now()
+    const exitCode = core.callMain(cmd)
+    console.log(`   ✅ callMain 返回码=${exitCode}，耗时 ${((performance.now() - execStart) / 1000).toFixed(1)}s`)
+
+    if (exitCode !== 0) {
+      // 转码失败：打印最后 30 行 FFmpeg 日志方便定位
+      console.error('   ❌ FFmpeg 转码失败，退出码：', exitCode)
+      console.error('   ===== FFmpeg 日志（最后 30 行）=====')
+      ffmpegLogs.slice(-30).forEach(line => console.error('   |', line))
+      throw new Error(`FFmpeg 转码失败，退出码 ${exitCode}，详见控制台日志`)
+    }
+
+    // ===== Step 4：读取输出 MP4 + 清理 =====
+    console.log('[5/5] 从虚拟 FS 读取 output.mp4...')
+    const data = core.FS.readFile('output.mp4', { encoding: 'binary' })
+    console.log('   ✅ output.mp4 大小：', (data.byteLength / 1024 / 1024).toFixed(2), 'MB')
+
+    // 清理 Emscripten FS 临时文件，退出 FFmpeg（释放内存）
+    try { core.FS.unlink('input.webm') } catch (_) { /* noop */ }
+    try { core.FS.unlink('output.mp4') } catch (_) { /* noop */ }
+    try { core.exit(0) } catch (_) { /* noop */ }
+
+    message.destroy('convert-loading')
+    const mp4Blob = new Blob([data as any], { type: 'video/mp4' })
+    console.log('最终输出 MP4 Blob 大小：', (mp4Blob.size / 1024 / 1024).toFixed(2), 'MB')
+    console.groupEnd()
+    return mp4Blob
+  } catch (e: any) {
+    console.groupEnd()
+    console.error('[convertWebmToMp4] ❌ 转码失败：', e)
+    if (e?.stack) console.error('  错误堆栈：', e.stack)
+    if (e?.cause) console.error('  错误原因 cause：', e.cause)
+    message.destroy('convert-loading')
+    throw e
+  } finally {
+    isConverting.value = false
+  }
+}
+
+// downloadBlob：通用 Blob 下载工具
+function downloadBlob(blob: Blob, filename: string) {
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = filename
+  document.body.appendChild(a)
+  a.click()
+  document.body.removeChild(a)
+  setTimeout(() => URL.revokeObjectURL(url), 1000)
+}
+
+// stopRecordingAndExport：停止录制 → 转码 MP4 → 下载（转码失败兜底下载 WebM，避免白录）
+//  - 由 playLoop 在录制模式下达到 editableMaxTime 时自动调用
+//  - 若外部需要手动中止录制，也可以直接调用
+function stopRecordingAndExport() {
+  // 1) 停止播放循环
+  isPlaying.value = false
+  if (animationFrameId) {
+    cancelAnimationFrame(animationFrameId)
+    animationFrameId = null
+  }
+  // 2) 停止 MediaRecorder
+  if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+    mediaRecorder.onstop = async () => {
+      const timestamp = Date.now()
+      try {
+        const webmBlob = new Blob(recordedChunks, {
+          type: mediaRecorder?.mimeType || 'video/webm'
+        })
+
+        // 先重置录制状态（让按钮恢复可点击）
+        isRecording.value = false
+
+        // 空文件判断
+        if (webmBlob.size < 1024) {
+          message.error('录制内容为空，请重试')
+          return
+        }
+
+        // 3) 尝试转码为 MP4（H.264），失败则兜底下载原始 WebM
+        try {
+          const mp4Blob = await convertWebmToMp4(webmBlob)
+          downloadBlob(mp4Blob, `timeline-recording-${timestamp}.mp4`)
+          message.success(`录制完成（MP4），视频大小：${(mp4Blob.size / 1024 / 1024).toFixed(2)} MB`)
+        } catch (convertErr) {
+          console.warn('MP4 转码失败，兜底下载 WebM 格式：', convertErr)
+          message.warning('MP4 转码失败，已为您下载原始 WebM 格式，可手动使用 FFmpeg 转码')
+          downloadBlob(webmBlob, `timeline-recording-${timestamp}.webm`)
+        }
+      } catch (e) {
+        console.error('导出录制视频失败', e)
+        message.error('导出录制视频失败')
+      } finally {
+        mediaRecorder = null
+        recordedChunks = []
+      }
+    }
+    mediaRecorder.stop()
+  } else {
+    // MediaRecorder 未正常启动，直接清理
+    isRecording.value = false
+    mediaRecorder = null
+    recordedChunks = []
+  }
+}
+
 function recordVideoPlay() {
   // @ts-ignore
   const canvas: HTMLCanvasElement = window.get3DCanvas();
@@ -516,10 +719,65 @@ function recordVideoPlay() {
     message.error('必须设置至少一个摄像机才可以录制')
     return;
   }
-  togglePlay();
-  // 从这里往下的部分，是把这个canvas录制成视频的逻辑
+  if (effectiveDuration.value <= 0) {
+    message.error('时间轴没有可录制的内容')
+    return;
+  }
 
-  
+  // 如果正在录制中，点击相当于停止并导出
+  if (isRecording.value) {
+    stopRecordingAndExport()
+    return
+  }
+
+  // 1) 重置到起始位置，保证从 0 秒开始录制
+  timelineState.currentTime = 0
+  frameAccumulator = 0
+  evaluateTimeline(0)
+
+  // 2) 初始化 MediaRecorder，从 canvas 捕获视频流
+  const recordFps = targetFps.value > 0 ? targetFps.value : 30
+  const stream = (canvas as any).captureStream(recordFps)
+  recordedChunks = []
+
+  // 选择浏览器支持的最优编码
+  const mimeTypes = [
+    'video/webm;codecs=vp9',
+    'video/webm;codecs=vp8',
+    'video/webm',
+  ]
+  const selectedMime = mimeTypes.find(t => {
+    try { return MediaRecorder.isTypeSupported(t) } catch { return false }
+  })
+
+  try {
+    mediaRecorder = new MediaRecorder(
+      stream,
+      selectedMime ? { mimeType: selectedMime } : undefined
+    )
+  } catch (e) {
+    console.error('创建 MediaRecorder 失败', e)
+    message.error('当前浏览器不支持视频录制')
+    return
+  }
+
+  mediaRecorder.ondataavailable = (e) => {
+    if (e.data.size > 0) recordedChunks.push(e.data)
+  }
+
+  mediaRecorder.onerror = (e) => {
+    console.error('MediaRecorder 出错', e)
+    message.error('录制过程出错')
+    stopRecordingAndExport()
+  }
+
+  // 3) 开始录制 + 开始播放
+  mediaRecorder.start()
+  isRecording.value = true
+  isPlaying.value = true
+  lastTimestamp = performance.now()
+  playLoop()
+  message.info(`开始录制，最大时长 ${formatTime(editableMaxTime.value)}`)
 }
 
 // stop：停止播放并重置到 0 秒
@@ -573,8 +831,16 @@ function playLoop() {
     timelineState.currentTime += deltaTime * playbackSpeed.value
   }
 
-  // 非VIP限制：播放到免费时长时自动暂停并提示
-  if (!props.isVip && timelineState.currentTime >= FREE_DURATION) {
+  // 录制模式：到达最大可录制时长 → 自动停止录制并导出（不循环）
+  if (isRecording.value && timelineState.currentTime >= editableMaxTime.value) {
+    timelineState.currentTime = editableMaxTime.value
+    evaluateTimeline(timelineState.currentTime)
+    stopRecordingAndExport()
+    return
+  }
+
+  // 非VIP限制：播放到免费时长时自动暂停并提示（录制模式下不触发，由上一条统一结束）
+  if (!props.isVip && !isRecording.value && timelineState.currentTime >= FREE_DURATION) {
     timelineState.currentTime = FREE_DURATION
     evaluateTimeline(timelineState.currentTime)
     isPlaying.value = false
@@ -852,6 +1118,37 @@ onUnmounted(() => {
 
         &:hover {
           background: #1a4d7a; // 悬浮时稍亮的蓝色
+        }
+
+        // 录制中状态：红色 + 脉冲动画
+        &.recording {
+          background: #e74c3c;
+          animation: recordingPulse 1s ease-in-out infinite;
+
+          &:hover {
+            background: #c0392b;
+          }
+        }
+
+        // 转码中状态：紫色 + 不允许点击
+        &.converting,
+        &:disabled {
+          background: #8e44ad;
+          cursor: not-allowed;
+          opacity: 0.85;
+          pointer-events: none;
+        }
+      }
+
+      @keyframes recordingPulse {
+
+        0%,
+        100% {
+          box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.5);
+        }
+
+        50% {
+          box-shadow: 0 0 0 6px rgba(231, 76, 60, 0);
         }
       }
 
