@@ -24,7 +24,7 @@
                 <div class="vipPrice">
                   <span class="currency">¥</span>
                   <span class="amount">{{ item.price }}</span>
-                  <span class="unit">/月</span>
+                  <span class="unit">/{{ item.priceUnit }}</span>
                 </div>
                 <div class="vipDesc">尊享<span class="number">{{ item.date }}</span>天VIP权益</div>
                 <div class="vipGiveMoney">
@@ -107,6 +107,7 @@ const vipPrices = ref<Array<{
   date: number,
   price: number,
   giveMoney: number,
+  priceUnit: string,
   recommend?: true,
 }>>([])
 
