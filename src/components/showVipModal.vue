@@ -2,7 +2,7 @@
   <teleport to="#teleport">
     <div class="showVipModal" @click.self="closeModal">
       <div class="showVipModalInner">
-        <div class="title">购买合伙人权益</div>
+        <div class="title">解锁专业版</div>
         <div v-if="checkStatus === 'checking'" class="checkingState">
           <div class="spinner"></div>
           <div class="checkingText">正在验证支付状态...</div>
@@ -15,7 +15,10 @@
         </div>
         <div v-else>
           <div class="vipSection">
-            <div class="sectionTitle">选择套餐</div>
+            <div class="sectionTitle">
+              <span>选择套餐</span>
+              <span class="desc">(价格锁定12个月)</span>
+            </div>
             <div class="vipList">
               <div class="vipItem" :class="{ active: selectedVip === item.id, recommend: item.recommend }"
                 v-for="item in vipPrices" :key="item.id" @click="selectedVip = item.id">
@@ -26,7 +29,7 @@
                   <span class="amount">{{ item.price }}</span>
                   <span class="unit">/{{ item.priceUnit }}</span>
                 </div>
-                <div class="vipDesc">尊享<span class="number">{{ item.date }}</span>天合伙人权益</div>
+                <div class="vipDesc">尊享<span class="number">{{ item.date }}</span>天专业版权益</div>
                 <div class="vipGiveMoney">
                   <img src="money.png" />
                   <div>包含<span class="number">{{ item.giveMoney }}</span>金币</div>
@@ -39,12 +42,12 @@
               </div>
             </div>
           </div>
-          <!-- <div class="vipSection">
-            <div class="sectionTitle">合伙人权益</div>
+          <div class="vipSection">
+            <div class="sectionTitle">专业版权益</div>
             <div>
-              权益
+              <vip-benefits />
             </div>
-          </div> -->
+          </div>
           <div class="paySection">
             <div class="sectionTitle">支付方式</div>
             <div class="payList">
@@ -68,6 +71,7 @@ import message from '@/utils/message';
 import request from '@/utils/request';
 import { onMounted, onUnmounted, ref } from 'vue'
 import { useStore } from 'vuex';
+import VipBenefits from './VipBenefits.vue';
 
 const store = useStore<Store>()
 
@@ -133,7 +137,7 @@ const checkPaymentStatus = async () => {
     console.log('checkVipPaymentStatus data', data)
 
     if (data && data.status && data.isPay) {
-      message.success('合伙人权益购买成功！')
+      message.success('专业版权益购买成功！')
       emit('paySuccess')
     } else {
       checkStatus.value = 'unpaid'
@@ -179,12 +183,12 @@ window.addEventListener('focus', handleFocus)
   justify-content: center;
 
   .showVipModalInner {
-    width: 400px;
+    width: 500px;
     background: white;
     border-radius: 12px;
     padding: 24px;
     position: relative;
-    margin-top: 80px;
+    margin-top: 20px;
 
     .title {
       font-size: 20px;
@@ -201,6 +205,12 @@ window.addEventListener('focus', handleFocus)
       font-size: 16px;
       color: #666;
       margin-bottom: 12px;
+
+      .desc {
+        margin-left: 12px;
+        color: #666;
+        font-size: 14px;
+      }
     }
 
     .vipSection {
