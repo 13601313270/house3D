@@ -83,7 +83,7 @@
                 购买金币
               </div>
               <div class="childItem" @click="showVipModal = true">
-                购买VIP
+                购买合伙人权益
               </div>
               <div @click="logout" class="childItem">
                 退出

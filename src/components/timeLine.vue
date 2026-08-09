@@ -117,6 +117,7 @@ import DataTypeEditPanel from '../views/DataTypeEditPanel.vue'
 import showContextMenu from '@/utils/contextMenu';
 import evaluateTrack from '@/utils/evaluateTrack';
 import { FFmpeg } from '@ffmpeg/ffmpeg';
+// @ts-ignore
 import { fetchFile, toBlobURL } from '@ffmpeg/util';
 
 let ffmpegInstance: FFmpeg | null = null;

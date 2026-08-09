@@ -2,7 +2,7 @@
   <teleport to="#teleport">
     <div class="showVipModal" @click.self="closeModal">
       <div class="showVipModalInner">
-        <div class="title">购买VIP</div>
+        <div class="title">购买合伙人权益</div>
         <div v-if="checkStatus === 'checking'" class="checkingState">
           <div class="spinner"></div>
           <div class="checkingText">正在验证支付状态...</div>
@@ -26,7 +26,7 @@
                   <span class="amount">{{ item.price }}</span>
                   <span class="unit">/{{ item.priceUnit }}</span>
                 </div>
-                <div class="vipDesc">尊享<span class="number">{{ item.date }}</span>天VIP权益</div>
+                <div class="vipDesc">尊享<span class="number">{{ item.date }}</span>天合伙人权益</div>
                 <div class="vipGiveMoney">
                   <img src="money.png" />
                   <div>包含<span class="number">{{ item.giveMoney }}</span>金币</div>
@@ -37,39 +37,14 @@
                   </svg>
                 </div>
               </div>
-              <!-- <div class="vipItem" :class="{ active: selectedVip === 'monthly' }" @click="selectedVip = 'monthly'">
-                <div class="vipBadge">月卡</div>
-                <div class="vipPrice">
-                  <span class="currency">¥</span>
-                  <span class="amount">38</span>
-                  <span class="unit">/月</span>
-                </div>
-                <div class="vipDesc">尊享30天VIP权益</div>
-                <div class="checkMark" v-if="selectedVip === 'monthly'">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
-                    <polyline points="20 6 9 17 4 12"></polyline>
-                  </svg>
-                </div>
-              </div>
-              <div class="vipItem recommend" :class="{ active: selectedVip === 'yearly' }"
-                @click="selectedVip = 'yearly'">
-                <div class="recommendTag">推荐</div>
-                <div class="vipBadge">年卡</div>
-                <div class="vipPrice">
-                  <span class="currency">¥</span>
-                  <span class="amount">128</span>
-                  <span class="unit">/年</span>
-                </div>
-                <div class="vipDesc">尊享365天VIP权益</div>
-                <div class="vipSave">省¥228，日均仅¥0.35</div>
-                <div class="checkMark" v-if="selectedVip === 'yearly'">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
-                    <polyline points="20 6 9 17 4 12"></polyline>
-                  </svg>
-                </div>
-              </div> -->
             </div>
           </div>
+          <!-- <div class="vipSection">
+            <div class="sectionTitle">合伙人权益</div>
+            <div>
+              权益
+            </div>
+          </div> -->
           <div class="paySection">
             <div class="sectionTitle">支付方式</div>
             <div class="payList">
@@ -158,7 +133,7 @@ const checkPaymentStatus = async () => {
     console.log('checkVipPaymentStatus data', data)
 
     if (data && data.status && data.isPay) {
-      message.success('VIP购买成功！')
+      message.success('合伙人权益购买成功！')
       emit('paySuccess')
     } else {
       checkStatus.value = 'unpaid'
