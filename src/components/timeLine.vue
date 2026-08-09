@@ -107,7 +107,7 @@
 import { ref, computed, onUnmounted, watch, onMounted, nextTick } from 'vue'
 import { message } from '@/utils/message'
 // timelineState 模块：管理时间轴状态，clip/track/keyframe 数据结构，以及全局播放状态标志
-import { ClipSegment, TrackData, KeyTimePoint, timelineState, ClipData } from '@/utils/timelineManage';
+import { ClipSegment, ObjOneColumnData, KeyTimePoint, timelineState, ObjAllColumnData } from '@/utils/timelineManage';
 import editItem from '@/utils/editItem';
 import DataTypeEditPanel from '../views/DataTypeEditPanel.vue'
 import showContextMenu from '@/utils/contextMenu';
@@ -463,36 +463,6 @@ function toggleCollapse(entityId: string) {
   collapsedClips.value = next
 }
 
-// getCurvePoints：计算 SVG polyline 曲线上每个点
-//  - opacity：y 轴映射 0~1 → 18~2（越大越靠上）
-//  - visible：true/false → y=4/16
-//  - 其他类型：默认水平线 y=10
-//  x 轴根据 keyframe.time 在 [startTime, endTime] 之间做百分比换算
-function getCurvePoints(track: TrackData, segment?: ClipSegment): string {
-  if (track.keyTimePoints.length < 2) return ''
-
-  const startTime = segment ? segment.startTime : 0
-  const endTime = segment ? segment.endTime : effectiveDuration.value
-  const segDuration = endTime - startTime || 1
-
-  const points = track.keyTimePoints
-    .sort((a, b) => a.time - b.time)
-    .map(kf => {
-      const x = ((kf.time - startTime) / segDuration) * 100
-      let y = 10
-      if (track.trackType === 'opacity') {
-        y = 18 - kf.value * 16
-      } else if (track.trackType === 'visible') {
-        y = kf.value ? 4 : 16
-      } else if (Array.isArray(kf.value)) {
-        y = 18 - (kf.value[1] / 10) * 14
-      }
-      return `${x},${y}`
-    })
-
-  return points.join(' ')
-}
-
 // ========== 关键帧属性编辑：调用 entity.getEditPropConfigData 动态构造 DataTypeEditPanel ==========
 const editPropConfigInfo = ref<editItem[]>([])
 const editPropInputInfo = ref<any>({})
@@ -720,7 +690,7 @@ function evaluateTimeline(time: number) {
 
   // if (!inArea) {
   //   if (timelineState.timelineData.clips.length > 0) {
-  //     let match: ClipData;
+  //     let match: ObjAllColumnData;
   //     // --- 情况2：time 在所有 clip 之前（还没开始第一个动画） ---
   //     if (time < timelineState.timelineData.clips[0].startTime) {
   //       match = timelineState.timelineData.clips[0];

@@ -608,7 +608,7 @@ const allPanelWidth = ref(0)
 const allPanelHeight = ref(0)
 
 const fbxLoader = new FBXLoader()
-let fbxModel: THREE.Group | null = null
+let peopleModel: THREE.Group | null = null
 
 function initThree() {
   scene = new THREE.Scene()
@@ -653,7 +653,7 @@ function initThree() {
 
   fbxLoader.load('/ManClean.fbx', (fbxModel_: any) => {
     console.log('FBX模型加载成功:', fbxModel_)
-    fbxModel = fbxModel_ as THREE.Group
+    peopleModel = fbxModel_ as THREE.Group
 
     const allBonesData: Array<{
       name: string,
@@ -674,7 +674,7 @@ function initThree() {
         pz: number,
       },
     }> = [];
-    fbxModel.traverse((child: any) => {
+    peopleModel.traverse((child: any) => {
       if (child.isMesh) {
         console.log('对象:', child.name, '材质:', child.material)
         if (!child.material || child.material.type === 'MeshBasicMaterial') {
@@ -710,20 +710,20 @@ function initThree() {
     console.log('所有骨骼:', allBonesData)
     allBones.value = allBonesData;
 
-    const box = new THREE.Box3().setFromObject(fbxModel)
+    const box = new THREE.Box3().setFromObject(peopleModel)
     const center = box.getCenter(new THREE.Vector3())
     const size = box.getSize(new THREE.Vector3())
     console.log('模型包围盒 - 中心:', center, '尺寸:', size)
 
     const maxDim = Math.max(size.x, size.y, size.z)
     const scale = 200 / maxDim
-    fbxModel.scale.set(scale, scale, scale)
+    peopleModel.scale.set(scale, scale, scale)
     console.log('模型缩放:', scale)
 
-    rootBone = fbxModel.getObjectByName('Armature') || fbxModel.children[0]
+    rootBone = peopleModel.getObjectByName('Armature') || peopleModel.children[0]
     originalPosition.copy(rootBone.position)
 
-    scene.add(fbxModel)
+    scene.add(peopleModel)
 
     runPostAnimation('./pose/standing.fbx')
   })
@@ -821,7 +821,7 @@ function save(boneFilter?: (name: string) => boolean) {
   emit('update:modelValue', saveVal)
 }
 
-function saveAnimation(boneFilter?: (name: string) => boolean) {
+async function saveAnimation(boneFilter?: (name: string) => boolean) {
   if (currentAction && isPlaying.value) {
     currentAction.paused = true
     isPlaying.value = false
@@ -846,6 +846,42 @@ function saveAnimation(boneFilter?: (name: string) => boolean) {
       value: v.value,
     }
   })
+  const addTimes = [
+    {
+      saveVal: JSON.parse(JSON.stringify(saveVal)),
+      time: timelineState.currentTime,
+    }
+  ]
+  const timeDiff = 0.5
+  if (currentAction) {
+    currentAction.time += timeDiff;
+  }
+  await sleep(100);
+  (() => {
+    allBones.value.forEach(bone => {
+      if (boneFilter && !boneFilter(bone.name)) return
+      const boneObject = scene.getObjectByName(bone.name)
+      if (boneObject) {
+        bone.value.x = boneObject.rotation.x
+        bone.value.y = boneObject.rotation.y
+        bone.value.z = boneObject.rotation.z
+        bone.value.px = boneObject.position.x
+        bone.value.py = boneObject.position.y
+        bone.value.pz = boneObject.position.z
+      }
+    })
+
+    const saveVal = allBones.value.map(v => {
+      return {
+        name: v.name,
+        value: v.value,
+      }
+    })
+    addTimes.push({
+      saveVal: JSON.parse(JSON.stringify(saveVal)),
+      time: timelineState.currentTime + timeDiff,
+    })
+  })();
   const originalData = window.editPropEntity.getOriginalData();
   let findClip = timelineState.timelineData.clips.find(v => v.entityId === originalData.id);
   if (!findClip) {
@@ -861,41 +897,43 @@ function saveAnimation(boneFilter?: (name: string) => boolean) {
   console.log('findClip', findClip);
   if (findClip) {
     const key = 'bone';
-    const findTrack = findClip.columns.find(v => v.trackType === key)
-    if (findTrack) {
-      const keyTimePoints = [...findTrack.keyTimePoints];
-      // console.log(222222, keyTimePoints)
-      if (keyTimePoints.find(v => v.time === timelineState.currentTime)) {
-        const index = keyTimePoints.findIndex(v => v.time === timelineState.currentTime)
-        // @ts-ignore
-        keyTimePoints[index].value = saveVal
-        findTrack.keyTimePoints = keyTimePoints;
+    addTimes.forEach(timeParams => {
+      const findTrack = findClip.columns.find(v => v.trackType === key)
+      if (findTrack) {
+        const keyTimePoints = [...findTrack.keyTimePoints];
+        // console.log(222222, keyTimePoints)
+        if (keyTimePoints.find(v => v.time === timeParams.time)) {
+          const index = keyTimePoints.findIndex(v => v.time === timeParams.time)
+          // @ts-ignore
+          keyTimePoints[index].value = timeParams.saveVal
+          findTrack.keyTimePoints = keyTimePoints;
+        } else {
+          keyTimePoints.push({
+            time: timeParams.time,
+            // @ts-ignore
+            value: timeParams.saveVal,
+          })
+          findTrack.keyTimePoints = keyTimePoints.sort((a, b) => a.time - b.time);
+        }
       } else {
-        keyTimePoints.push({
-          time: timelineState.currentTime,
-          // @ts-ignore
-          value: saveVal,
+        findClip.columns.push({
+          trackType: key,
+          keyTimePoints: [{
+            time: timeParams.time,
+            // @ts-ignore
+            value: timeParams.saveVal,
+          }]
         })
-        findTrack.keyTimePoints = keyTimePoints.sort((a, b) => a.time - b.time);
       }
-    } else {
-      findClip.columns.push({
-        trackType: key,
-        keyTimePoints: [{
-          time: timelineState.currentTime,
-          // @ts-ignore
-          value: saveVal,
-        }]
-      })
-    }
 
-    // 如果timelineState.currentTime，在findClip.startTime和findClip.endTime之外，那么调整findClip.startTime和findClip.endTime，包括进这个时间
-    if (timelineState.currentTime < findClip.startTime) {
-      findClip.startTime = timelineState.currentTime;
-    }
-    if (timelineState.currentTime > findClip.endTime) {
-      findClip.endTime = timelineState.currentTime;
-    }
+      // 如果timelineState.currentTime，在findClip.startTime和findClip.endTime之外，那么调整findClip.startTime和findClip.endTime，包括进这个时间
+      if (timeParams.time < findClip.startTime) {
+        findClip.startTime = timeParams.time;
+      }
+      if (timeParams.time > findClip.endTime) {
+        findClip.endTime = timeParams.time;
+      }
+    })
 
     // this.setAnimationData({
     //   ...this.animationData,
@@ -1009,15 +1047,6 @@ function getBoneFilter(scope: ApplyScope): ((name: string) => boolean) | undefin
   }
 }
 
-const applyScopeLabelMap: Record<ApplyScope, string> = {
-  fullBody: '全身',
-  upperBody: '上半身',
-  lowerBody: '下半身',
-  head: '头部',
-  leftArm: '左臂',
-  rightArm: '右臂',
-}
-
 function handleApply() {
   const boneFilter = getBoneFilter(applyScope.value)
 
@@ -1054,10 +1083,10 @@ function runPostAnimation(file: string): Promise<void> {
   return new Promise((resolve, reject) => {
     fbxLoader.load(file, (fbxScene: any) => {
       if (fbxScene.animations && fbxScene.animations.length > 0) {
-        mixer = new THREE.AnimationMixer(fbxModel as THREE.Group)
+        mixer = new THREE.AnimationMixer(peopleModel!)
 
         const clip = fbxScene.animations[0]
-        currentAction = mixer.clipAction(clip, fbxModel as THREE.Group)
+        currentAction = mixer.clipAction(clip, peopleModel!)
         totalDuration.value = clip.duration
         currentAction.play()
         isPlaying.value = true

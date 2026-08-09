@@ -4,22 +4,22 @@ export interface KeyTimePoint {
   easing?: string
 }
 
-export interface TrackData {
+export interface ObjOneColumnData {
   trackType: string
   keyTimePoints: KeyTimePoint[]
   interpolation?: 'linear' | 'step' | 'bezier'
 }
 
-export interface ClipData {
+export interface ObjAllColumnData {
   clipId: string
   entityId: string
   startTime: number
   endTime: number
-  columns: TrackData[]
+  columns: ObjOneColumnData[]
 }
 
 export interface ClipSegment {
-  clip: ClipData
+  clip: ObjAllColumnData
   startTime: number
   endTime: number
   rowIndex: number
@@ -27,7 +27,7 @@ export interface ClipSegment {
 
 export interface TimelineData {
   duration: number
-  clips: ClipData[]
+  clips: ObjAllColumnData[]
 }
 
 class TimelineStateClass {
