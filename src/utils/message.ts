@@ -6,7 +6,7 @@ interface MessageOptions {
 const containerId = 'message-container'
 const styleId = 'message-keyframes'
 
-function getContainer (position: 'top-left' | 'top-center' | 'top-right'): HTMLElement {
+function getContainer(position: 'top-left' | 'top-center' | 'top-right'): HTMLElement {
   const id = `${containerId}-${position}`
   let container = document.getElementById(id)
   if (!container) {
@@ -47,7 +47,7 @@ function getContainer (position: 'top-left' | 'top-center' | 'top-right'): HTMLE
   return container
 }
 
-function injectStyles (): void {
+function injectStyles(): void {
   if (document.getElementById(styleId)) return
 
   const style = document.createElement('style')
@@ -149,7 +149,11 @@ function injectStyles (): void {
   document.head.appendChild(style)
 }
 
-function createMessage (type: 'info' | 'success' | 'warning' | 'error', text: string, options: MessageOptions = {}): void {
+function createMessage(
+  type: 'info' | 'success' | 'warning' | 'error',
+  text: string,
+  options: MessageOptions = {}
+): void {
   injectStyles()
 
   const { duration = 3000, position = 'top-right' } = options

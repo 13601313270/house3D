@@ -178,7 +178,7 @@
   <div v-if="showDemos" class="allDemosContent">
     <div class="allDemosContentInner">
       <div class="title"><img class="icon" src="/favicon.ico" />欢迎来到<span class="p">「摄影棚」</span>，请选择创建场景的模板</div>
-      <div v-if="onlyDemos" class="closeBtn" @click="showDemos = false">
+      <div class="closeBtn" @click="showDemos = false">
         <img src="../assets/close.svg" alt="close" />
       </div>
       <div class="demoList">

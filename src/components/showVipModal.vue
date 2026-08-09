@@ -26,7 +26,11 @@
                   <span class="amount">{{ item.price }}</span>
                   <span class="unit">/月</span>
                 </div>
-                <div class="vipDesc">{{ item.desc }}</div>
+                <div class="vipDesc">尊享<span class="number">{{ item.date }}</span>天VIP权益</div>
+                <div class="vipGiveMoney">
+                  <img src="money.png" />
+                  <div>包含<span class="number">{{ item.giveMoney }}</span>金币</div>
+                </div>
                 <div class="checkMark" v-if="selectedVip === item.id">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
                     <polyline points="20 6 9 17 4 12"></polyline>
@@ -102,7 +106,7 @@ const vipPrices = ref<Array<{
   title: string,
   date: number,
   price: number,
-  desc: string,
+  giveMoney: number,
   recommend?: true,
 }>>([])
 
@@ -294,9 +298,36 @@ window.addEventListener('focus', handleFocus)
           }
 
           .vipDesc {
-            font-size: 12px;
+            font-size: 14px;
             color: #666;
             margin-bottom: 4px;
+
+            .number {
+              font-size: 16px;
+              color: #e63946;
+              margin: 0 4px;
+              font-weight: bold;
+            }
+          }
+
+          .vipGiveMoney {
+            font-size: 14px;
+            color: #666;
+            display: flex;
+            align-items: center;
+            margin-top: 6px;
+
+            >img {
+              margin-right: 4px;
+              width: 18px;
+            }
+
+            .number {
+              font-size: 16px;
+              color: #e63946;
+              margin: 0 4px;
+              font-weight: bold;
+            }
           }
 
           .vipSave {
