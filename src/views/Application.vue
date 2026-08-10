@@ -214,6 +214,15 @@
   <ShowPayModal v-if="showPayModal" @close="showPayModal = false" @paySuccess="handlePaySuccess" />
   <ShowGroupQrModal v-if="showGroupQrModal" @close="showGroupQrModal = false" />
   <ShowVipModal v-if="showVipModal" @close="showVipModal = false" @paySuccess="handleVipPaySuccess" />
+  <ImportModelConfirm
+    v-model:visible="showImportModelConfirm"
+    :object="pendingImportData.object"
+    :file="pendingImportData.file"
+    :type="pendingImportData.type"
+    :scale-factor="pendingImportData.scaleFactor"
+    :position="pendingImportData.position"
+    @confirm="handleImportModelConfirm"
+  />
 </template>
 
 <script lang="ts" setup>
@@ -263,6 +272,7 @@ import setHoverPoint from '@/utils/setHoverPoint';
 import TimeLine from '@/components/timeLine.vue'
 import { TimelineData, KeyTimePoint, timelineState } from '@/utils/timelineManage';
 import generateClipId from '@/utils/generateClipId';
+import ImportModelConfirm from '@/components/ImportModelConfirm.vue';
 
 const canvas2DRef = ref<HTMLCanvasElement | null>(null)
 const canvas2DActionRef = ref<HTMLCanvasElement | null>(null)
@@ -332,6 +342,22 @@ const rightPanelCamera = ref<THREE.PerspectiveCamera | THREE.OrthographicCamera>
 const showPayModal = ref(false)
 const showGroupQrModal = ref(false)
 const showVipModal = ref(false)
+
+// 模型导入确认弹窗
+const showImportModelConfirm = ref(false)
+const pendingImportData = ref<{
+  object: THREE.Group | THREE.Mesh | null
+  file: File | null
+  type: string
+  scaleFactor: number
+  position: THREE.Vector3
+}>({
+  object: null,
+  file: null,
+  type: '',
+  scaleFactor: 1,
+  position: new THREE.Vector3(),
+})
 
 const isVip = computed(() => {
   const vipEndDate = store.state.main.userInfo.vipEndDate
@@ -1278,8 +1304,24 @@ const onDragLeave = (e: DragEvent) => {
 // 导入外部模型
 async function importOutObj2(file: File) {
   importOutObj(file, async (object, file, type, scaleFactor, position) => {
-    handleLoadedObject(object, file, type, scaleFactor, position)
+    // 保存待导入数据，显示二次确认弹窗
+    pendingImportData.value = {
+      object,
+      file,
+      type,
+      scaleFactor,
+      position,
+    }
+    showImportModelConfirm.value = true
   })
+}
+
+// 模型导入确认
+const handleImportModelConfirm = () => {
+  const { object, file, type, scaleFactor, position } = pendingImportData.value
+  if (object && file) {
+    handleLoadedObject(object, file, type, scaleFactor, position)
+  }
 }
 
 const onDrop = async (e: DragEvent) => {

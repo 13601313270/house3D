@@ -71,6 +71,10 @@
         {{ allPluginByKey[value]?.name }}
       </div>
       <div class="splitLine"></div>
+      <div class="typeItemContent" :class="{ active: activeObjTypeId === 'mineObjs' }">
+        <div class="typeName" @mouseenter="mouseEnterMineObjs($event)">个人素材库</div>
+      </div>
+      <div class="splitLine"></div>
       <div>
         <div v-for="item in ObjFileTypes" :key="item.id" class="typeItemContent"
           :class="{ active: activeObjTypeId === item.id }">
@@ -161,6 +165,12 @@ type ObjFileType = {
   }[]
 }
 const ObjFileTypes = ref<Array<ObjFileType>>([])
+const mineObjChildList = ref<Array<{
+  id: string,
+  name: string,
+  type: number,
+  previewImg?: string
+}>>([])
 const activePluginChildList = ref<Array<PluginType>>([])
 const activeObjTypeId = ref<number | string>()
 const activeObjChildList = ref<Array<{
@@ -333,6 +343,31 @@ async function mouseEnterType(event: MouseEvent, type: ObjFileType) {
     if (addOutFileChildListRef.value) {
       const { bottom } = addOutFileChildListRef.value!.getBoundingClientRect()
       // console.log('addOutFileChildListRef', bottom, window.innerHeight)
+      if (bottom > window.innerHeight) {
+        enterEventDomPosition.value = {
+          x: right,
+          y: top - (bottom - window.innerHeight) - 4
+        }
+      }
+    }
+  })
+}
+
+async function mouseEnterMineObjs(event: MouseEvent) {
+  if (mineObjChildList.value.length === 0) {
+    const { data: res } = await axios.get('https://api.studying1v1.com/video/objectFileListByType/1')
+    mineObjChildList.value = res
+  }
+  activeObjTypeId.value = 'mineObjs'
+  activeObjChildList.value = mineObjChildList.value
+  activePluginChildList.value = []
+
+  const dom = event.target as HTMLElement;
+  const { right, top } = dom.getBoundingClientRect()
+  enterEventDomPosition.value = { x: right, y: top }
+  nextTick(() => {
+    if (addOutFileChildListRef.value) {
+      const { bottom } = addOutFileChildListRef.value!.getBoundingClientRect()
       if (bottom > window.innerHeight) {
         enterEventDomPosition.value = {
           x: right,
