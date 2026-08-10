@@ -283,7 +283,7 @@ const handleConfirm = async () => {
             // }
           } catch (error) {
             console.error('添加到素材库失败:', error)
-          };
+          }
         }
       } catch (err) {
         console.error('上传失败:', err);
