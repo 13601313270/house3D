@@ -131,12 +131,12 @@ const handleConfirm = async () => {
     } = respnse.data;
     console.log(token)
     const client = new OSS({
-      region: 'oss-cn-shanghai', // 这里需要根据你的bucket实际region填写
+      region: 'oss-cn-beijing', // 这里需要根据你的bucket实际region填写
       accessKeyId: token.AccessKeyId,
       accessKeySecret: token.AccessKeySecret,
       stsToken: token.SecurityToken, // 注意这里参数名是 stsToken
-      bucket: 'video-obj', // 替换为你的bucket名称
-      // secure: true // 推荐使用HTTPS
+      bucket: 'video-user-obj', // 替换为你的bucket名称
+      secure: true // 推荐使用HTTPS
     });
 
     // 3. 执行文件上传
@@ -148,7 +148,23 @@ const handleConfirm = async () => {
         }
       });
       console.log('上传成功:', result);
-      // result.url 就是文件在OSS上的访问地址
+      if (result) {
+        const { url } = result;
+        const formData = new FormData()
+        formData.append('url', url)
+        formData.append('name', fileName.value)
+        formData.append('fileType', fileType.value)
+        formData.append('scaleFactor', String(props.scaleFactor))
+        try {
+          const data = service.post('/video/materialLibrary/upload', formData)
+          console.log('sssss', data)
+          // if (response.data?.code === 0) {
+          //   console.log('添加到素材库成功')
+          // }
+        } catch (error) {
+          console.error('添加到素材库失败:', error)
+        };
+      }
     } catch (err) {
       console.error('上传失败:', err);
     }
