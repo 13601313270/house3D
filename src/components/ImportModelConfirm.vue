@@ -104,6 +104,23 @@ let cameraTarget = new THREE.Vector3(0, 0, 0)
 
 const fileName = computed(() => props.file?.name ?? '')
 const fileType = computed(() => props.type)
+
+const getFileExtension = (name: string): string => {
+  const lastDot = name.lastIndexOf('.')
+  return lastDot !== -1 ? name.slice(lastDot) : ''
+}
+
+const computeFileMD5 = async (file: File): Promise<string> => {
+  const { default: md5 } = await import('md5')
+  const buffer = await file.arrayBuffer()
+  const uint8Array = new Uint8Array(buffer)
+  // 将Uint8Array转换为md5库可处理的字符串（逐字节拼接）
+  let binaryStr = ''
+  for (let i = 0; i < uint8Array.length; i++) {
+    binaryStr += String.fromCharCode(uint8Array[i])
+  }
+  return md5(binaryStr)
+}
 const formattedFileSize = computed(() => {
   if (!props.file) return ''
   const bytes = props.file.size
@@ -139,10 +156,13 @@ const handleConfirm = async () => {
       secure: true // 推荐使用HTTPS
     });
 
-    // 3. 执行文件上传
+    // 3. 计算文件MD5并执行上传
     try {
-      // 使用 put 方法上传，第一个参数是存储在OSS中的对象名，第二个参数是文件对象
-      const result = await client.put(fileName.value, props.file, {
+      const fileMD5 = await computeFileMD5(props.file)
+      const extension = getFileExtension(props.file.name)
+      const ossObjectName = fileMD5 + extension
+      // 使用 put 方法上传，第一个参数是存储在OSS中的对象名（MD5+扩展名），第二个参数是文件对象
+      const result = await client.put(ossObjectName, props.file, {
         headers: {
           'Content-Type': fileType.value, // 可选，设置正确的MIME类型
         }
