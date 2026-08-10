@@ -47,10 +47,24 @@
         </div>
 
         <div class="footer">
-          <label class="checkbox-label">
-            <input type="checkbox" v-model="addToMaterialLibrary" class="custom-checkbox" />
-            <span class="checkbox-text">添加到个人素材库</span>
-          </label>
+          <div>
+            <div class="checkbox-label">
+              <input type="checkbox" v-model="addToMaterialLibrary" class="custom-checkbox" />
+              <span class="checkbox-text">添加到个人素材库</span>
+            </div>
+            <div>
+              <span v-if="mySpaceInfo" class="checkbox-text">
+                已用空间：{{ formattedFileSize(mySpaceInfo?.usedSpace) }}
+              </span>
+              <span v-if="mySpaceInfo" class="checkbox-text">
+                总空间：{{ formattedFileSize(mySpaceInfo?.totalSize) }}
+              </span>
+              <span v-if="mySpaceInfo" class="checkbox-text">
+                可用空间：{{ formattedFileSize(mySpaceInfo?.freeSpace || 0) }}
+              </span>
+            </div>
+          </div>
+
           <div class="footer-btns">
             <button class="btn btn-cancel" @click="handleCancel">取消</button>
             <button class="btn btn-confirm" :class="{ loading: confirmLoading }" :disabled="confirmLoading"
@@ -270,7 +284,13 @@ const countMeshes = (obj: THREE.Object3D): number => {
   return count
 }
 
-const initPreviewScene = () => {
+const mySpaceInfo = ref<{
+  freeSpace: number,
+  usedSpace: number,
+  totalSize: number,
+}>()
+
+const initPreviewScene = async () => {
   if (!previewContainerRef.value) return
 
   // 清理旧场景
@@ -369,6 +389,10 @@ const initPreviewScene = () => {
       console.error('生成预览图失败:', snapErr)
     }
   }
+
+  const mySpaceResponse = await service.get('/video/materialLibrary/mySpace');
+  console.log('mySpaceResponse', mySpaceResponse.data)
+  mySpaceInfo.value = mySpaceResponse.data
 }
 
 const updateCameraPosition = () => {
