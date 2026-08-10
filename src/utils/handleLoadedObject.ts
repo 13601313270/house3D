@@ -1,6 +1,8 @@
 import * as THREE from 'three'
 import { ImportFileType } from '@/entities/allObjs'
 import { ImportFileData } from '@/entities/importFile/index.d';
+import { ImportFileEntity } from '@/entities/importFile/entity';
+import canvas2DSceneManage from './canvas2DSceneManage';
 
 const handleLoadedObject = async (object: THREE.Group | THREE.Mesh, file: File, type: string, scaleFactor: number, position: THREE.Vector3) => {
   const fileTypeId = `custom_${Date.now()}.${type}`
@@ -20,6 +22,19 @@ const handleLoadedObject = async (object: THREE.Group | THREE.Mesh, file: File, 
     angleY: 0,
     scale: scaleFactor,
   }
-  await window.globalEditGroup.add('importFile', [data])
+  const importFileEntity = new ImportFileEntity(window.globalEditGroup, data)
+  if (importFileEntity) {
+    importFileEntity.init()
+    importFileEntity.reBuildBoundingBoxData()
+  }
+  if (window.globalEditGroup.insertTempObj) {
+    window.globalEditGroup.insertTempObj.beforeRemove()
+    window.globalEditGroup.insertTempObj = null
+  }
+  window.globalEditGroup.insertTempObj = importFileEntity
+  canvas2DSceneManage.renderPreview()
+
+
+  // await window.globalEditGroup.add('importFile', [data])
 }
 export default handleLoadedObject

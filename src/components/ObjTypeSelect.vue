@@ -279,6 +279,8 @@ async function changeCurrentToolToImportFile(fileUrl: string) {
     await importOutObj(file, async (object, file, type, scaleFactor, position) => {
       await handleLoadedObject(object, file, type, scaleFactor, position)
       markGuideCompleted()
+      activeObjChildList.value = []
+      activePluginChildList.value = []
     })
   } catch (error) {
     console.error('文件下载失败:', error)
@@ -289,7 +291,6 @@ async function changeCurrentToolToImportFile(fileUrl: string) {
 }
 async function changeCurrentToolToOutFile(id: string) {
   if (activeObjTypeId.value === 'mineObjs') {
-
     return
   }
   activeObjChildList.value = []
