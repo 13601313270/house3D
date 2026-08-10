@@ -102,7 +102,7 @@
         <div class="name">{{ item2.name }}</div>
       </div>
       <div v-for="item2 in activeObjChildList" class="childItem" :key="item2.id"
-        @click="changeCurrentToolToOutFile(item2.id), isMouseInCate2 = false">
+        @click="(activeObjTypeId === 'mineObjs' ? changeCurrentToolToImportFile(item2.file!) : changeCurrentToolToOutFile(item2.id)), isMouseInCate2 = false">
         <div class="previewImg">
           <img v-if="item2.previewImg" :src="item2.previewImg" alt="" />
         </div>
@@ -131,6 +131,7 @@
 </template>
 <script setup lang="ts">
 import { nextTick, onMounted, ref } from 'vue'
+import * as THREE from 'three'
 import { ObjOutputFileType } from '@/entities/allObjs';
 import { fileDataKeyToClass, allFileKeysGroup, allPluginByKey, allFileWithGroupId } from '@/entities'
 import { OutFileInWallData } from '@/entities/outFileInWall/index.d'
@@ -141,6 +142,8 @@ import { BaseEntityClass } from '@/types/baseEntity';
 import PluginType, { DefaultItem } from '@/entities/pluginType';
 import { BaseObjData } from '@/types/map2d';
 import service from '@/utils/request';
+import handleLoadedObject from '@/utils/handleLoadedObject';
+import importOutObj from '@/utils/importOutObj';
 
 defineProps<{
   currentTool: string | 'drag'
@@ -177,6 +180,7 @@ const activeObjChildList = ref<Array<{
   id: string,
   name: string,
   type: number,
+  file?: string,
   previewImg?: string
 }>>([])
 
@@ -263,7 +267,31 @@ onMounted(async () => {
   }>;
   ObjFileTypes.value = data;
 })
+async function changeCurrentToolToImportFile(fileUrl: string) {
+  loading.value = true
+  try {
+    const response = await fetch(fileUrl)
+    const blob = await response.blob()
+    const urlPath = new URL(fileUrl).pathname
+    const fileName = urlPath.split('/').pop() || 'model'
+    const file = new File([blob], fileName, { type: blob.type })
+
+    await importOutObj(file, async (object, file, type, scaleFactor, position) => {
+      await handleLoadedObject(object, file, type, scaleFactor, position)
+      markGuideCompleted()
+    })
+  } catch (error) {
+    console.error('文件下载失败:', error)
+    alert('文件下载失败，请重试')
+  } finally {
+    loading.value = false
+  }
+}
 async function changeCurrentToolToOutFile(id: string) {
+  if (activeObjTypeId.value === 'mineObjs') {
+
+    return
+  }
   activeObjChildList.value = []
   activePluginChildList.value = []
   const index = window.worldState.ObjFileTypes.findIndex(item => item.id === id);
