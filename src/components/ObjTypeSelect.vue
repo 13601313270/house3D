@@ -25,11 +25,11 @@
           </div>
         </div>
         <div class="guideBubbleFooter">
-          <!-- <div class="guideBubbleStep">
-            <span class="guideBubbleStepDot active"></span>
+          <div class="guideBubbleStep">
+            <!-- <span class="guideBubbleStepDot active"></span>
             <span class="guideBubbleStepDot"></span>
-            <span class="guideBubbleStepDot"></span>
-          </div> -->
+            <span class="guideBubbleStepDot"></span> -->
+          </div>
           <button class="guideBubbleNextBtn" type="button" @click.stop="dismissAddGuide()">
             知道了
             <svg viewBox="0 0 20 20" width="14" height="14" fill="currentColor">
@@ -768,11 +768,9 @@ function showHelpModal() {
 /* ========== 复杂精美气泡 ========== */
 .guideBubble {
   top: 45px;
-  left: 110px;
-  height: 122px;
+  left: -50px;
+  height: 154px;
   position: absolute;
-  bottom: calc(100% + 20px);
-  transform: translateX(-50%);
   width: 300px;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
@@ -780,7 +778,7 @@ function showHelpModal() {
   padding: 18px 18px 14px 18px;
   z-index: 999;
   cursor: default;
-  overflow: hidden;
+  box-sizing: border-box;
   box-shadow:
     0 20px 50px -10px rgba(102, 126, 234, 0.5),
     0 10px 30px -5px rgba(118, 75, 162, 0.4),
@@ -828,19 +826,19 @@ function showHelpModal() {
   }
 }
 
-/* 气泡箭头 */
+/* 气泡箭头：位于气泡上边，指向顶部的「添加」按钮 */
 .guideBubbleArrow {
   position: absolute;
-  left: 50%;
-  bottom: -14px;
+  left: 25%;
+  top: -12px;
   transform: translateX(-50%);
   width: 0;
   height: 0;
   border-left: 14px solid transparent;
   border-right: 14px solid transparent;
-  border-top: 14px solid transparent;
-  border-top-color: #764ba2;
-  filter: drop-shadow(0 4px 6px rgba(118, 75, 162, 0.35));
+  border-bottom: 14px solid transparent;
+  border-bottom-color: #6876df;
+  filter: drop-shadow(0 -4px 6px rgba(102, 126, 234, 0.35));
 }
 
 /* 关闭按钮 */
@@ -980,16 +978,16 @@ function showHelpModal() {
 @keyframes guideBubbleIn {
   0% {
     opacity: 0;
-    transform: translateX(-50%) translateY(16px) scale(0.85);
+    transform: translateY(-16px) scale(0.85);
   }
 
   60% {
-    transform: translateX(-50%) translateY(-4px) scale(1.02);
+    transform: translateY(4px) scale(1.02);
   }
 
   100% {
     opacity: 1;
-    transform: translateX(-50%) translateY(0) scale(1);
+    transform: translateY(0) scale(1);
   }
 }
 
@@ -997,12 +995,12 @@ function showHelpModal() {
 
   0%,
   100% {
-    transform: translateX(-50%) translateY(0);
+    transform: translateY(0);
     filter: drop-shadow(0 10px 20px rgba(102, 126, 234, 0.35));
   }
 
   50% {
-    transform: translateX(-50%) translateY(-5px);
+    transform: translateY(4px);
     filter: drop-shadow(0 16px 28px rgba(102, 126, 234, 0.45));
   }
 }
