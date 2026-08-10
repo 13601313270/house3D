@@ -33,8 +33,5 @@ const handleLoadedObject = async (object: THREE.Group | THREE.Mesh, file: File, 
   }
   window.globalEditGroup.insertTempObj = importFileEntity
   canvas2DSceneManage.renderPreview()
-
-
-  // await window.globalEditGroup.add('importFile', [data])
 }
 export default handleLoadedObject
