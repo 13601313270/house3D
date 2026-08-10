@@ -53,7 +53,8 @@
           </label>
           <div class="footer-btns">
             <button class="btn btn-cancel" @click="handleCancel">取消</button>
-            <button class="btn btn-confirm" @click="handleConfirm">确认导入</button>
+            <button class="btn btn-confirm" :class="{ loading: confirmLoading }" :disabled="confirmLoading"
+              @click="handleConfirm">{{ confirmButtonText }}</button>
           </div>
         </div>
       </div>
@@ -83,9 +84,15 @@ const emit = defineEmits<{
 }>()
 
 const addToMaterialLibrary = ref(false)
+const confirmLoading = ref(false)
 const previewContainerRef = ref<HTMLDivElement | null>(null)
 const modelSize = ref<THREE.Vector3 | null>(null)
 const meshCount = ref<number | null>(null)
+
+const confirmButtonText = computed(() => {
+  if (!confirmLoading.value) return '确认导入'
+  return addToMaterialLibrary.value ? '正在上传到个人素材库' : '确认导入中'
+})
 
 let scene: THREE.Scene | null = null
 let camera: THREE.PerspectiveCamera | null = null
@@ -112,14 +119,40 @@ const getFileExtension = (name: string): string => {
 
 const computeFileMD5 = async (file: File): Promise<string> => {
   const { default: md5 } = await import('md5')
-  const buffer = await file.arrayBuffer()
-  const uint8Array = new Uint8Array(buffer)
-  // 将Uint8Array转换为md5库可处理的字符串（逐字节拼接）
-  let binaryStr = ''
-  for (let i = 0; i < uint8Array.length; i++) {
-    binaryStr += String.fromCharCode(uint8Array[i])
+  // 小文件(≤4MB)读全部，大文件只读前2MB+后2MB+文件大小，兼顾速度和区分度
+  const CHUNK_SIZE = 2 * 1024 * 1024 // 2MB
+  const fileSize = file.size
+
+  let combinedBuffer: ArrayBuffer
+  if (fileSize <= CHUNK_SIZE * 2) {
+    combinedBuffer = await file.arrayBuffer()
+  } else {
+    const headBlob = file.slice(0, CHUNK_SIZE)
+    const tailBlob = file.slice(fileSize - CHUNK_SIZE, fileSize)
+    const headBuffer = await headBlob.arrayBuffer()
+    const tailBuffer = await tailBlob.arrayBuffer()
+    // 拼接 head + fileSize(8字节) + tail
+    const combined = new Uint8Array(headBuffer.byteLength + 8 + tailBuffer.byteLength)
+    combined.set(new Uint8Array(headBuffer), 0)
+    // 将 fileSize 写入中间 8 字节（小端序 uint64）
+    const dataView = new DataView(combined.buffer, combined.byteOffset, combined.byteLength)
+    let offset = headBuffer.byteLength
+    const lo = fileSize % 0x100000000
+    const hi = (fileSize - lo) / 0x100000000
+    dataView.setUint32(offset, lo, true)
+    dataView.setUint32(offset + 4, hi, true)
+    offset += 8
+    combined.set(new Uint8Array(tailBuffer), offset)
+    combinedBuffer = combined.buffer
   }
-  return md5(binaryStr)
+
+  const uint8Array = new Uint8Array(combinedBuffer)
+  // 用数组收集 + 最后join，避免 O(n²) 字符串拼接
+  const chars: string[] = new Array(uint8Array.length)
+  for (let i = 0; i < uint8Array.length; i++) {
+    chars[i] = String.fromCharCode(uint8Array[i])
+  }
+  return md5(chars.join(''))
 }
 const formattedFileSize = computed(() => {
   if (!props.file) return ''
@@ -139,58 +172,63 @@ const handleCancel = () => {
 }
 
 const handleConfirm = async () => {
-  if (addToMaterialLibrary.value && props.file) {
-    const respnse = await service.get('/video/materialLibrary/getUploadKey');
-    const token: {
-      AccessKeyId: string,
-      AccessKeySecret: string,
-      SecurityToken: string,
-    } = respnse.data;
-    console.log(token)
-    const client = new OSS({
-      region: 'oss-cn-beijing', // 这里需要根据你的bucket实际region填写
-      accessKeyId: token.AccessKeyId,
-      accessKeySecret: token.AccessKeySecret,
-      stsToken: token.SecurityToken, // 注意这里参数名是 stsToken
-      bucket: 'video-user-obj', // 替换为你的bucket名称
-      secure: true // 推荐使用HTTPS
-    });
-
-    // 3. 计算文件MD5并执行上传
-    try {
-      const fileMD5 = await computeFileMD5(props.file)
-      const extension = getFileExtension(props.file.name)
-      const ossObjectName = fileMD5 + extension
-      // 使用 put 方法上传，第一个参数是存储在OSS中的对象名（MD5+扩展名），第二个参数是文件对象
-      const result = await client.put(ossObjectName, props.file, {
-        headers: {
-          'Content-Type': fileType.value, // 可选，设置正确的MIME类型
-        }
+  confirmLoading.value = true
+  try {
+    if (addToMaterialLibrary.value && props.file) {
+      const respnse = await service.get('/video/materialLibrary/getUploadKey');
+      const token: {
+        AccessKeyId: string,
+        AccessKeySecret: string,
+        SecurityToken: string,
+      } = respnse.data;
+      console.log(token)
+      const client = new OSS({
+        region: 'oss-cn-beijing', // 这里需要根据你的bucket实际region填写
+        accessKeyId: token.AccessKeyId,
+        accessKeySecret: token.AccessKeySecret,
+        stsToken: token.SecurityToken, // 注意这里参数名是 stsToken
+        bucket: 'video-user-obj', // 替换为你的bucket名称
+        secure: true // 推荐使用HTTPS
       });
-      console.log('上传成功:', result);
-      if (result) {
-        const { url } = result;
-        const formData = new FormData()
-        formData.append('url', url)
-        formData.append('name', fileName.value)
-        formData.append('fileType', fileType.value)
-        formData.append('scaleFactor', String(props.scaleFactor))
-        try {
-          const data = service.post('/video/materialLibrary/upload', formData)
-          console.log('sssss', data)
-          // if (response.data?.code === 0) {
-          //   console.log('添加到素材库成功')
-          // }
-        } catch (error) {
-          console.error('添加到素材库失败:', error)
-        };
+
+      // 3. 计算文件MD5并执行上传
+      try {
+        const fileMD5 = await computeFileMD5(props.file)
+        const extension = getFileExtension(props.file.name)
+        const ossObjectName = fileMD5 + extension
+        // 使用 put 方法上传，第一个参数是存储在OSS中的对象名（MD5+扩展名），第二个参数是文件对象
+        const result = await client.put(ossObjectName, props.file, {
+          headers: {
+            'Content-Type': fileType.value, // 可选，设置正确的MIME类型
+          },
+        });
+        console.log('上传成功:', result);
+        if (result) {
+          const { url } = result;
+          const formData = new FormData()
+          formData.append('url', url)
+          formData.append('name', fileName.value)
+          formData.append('fileType', fileType.value)
+          formData.append('scaleFactor', String(props.scaleFactor))
+          try {
+            const data = service.post('/video/materialLibrary/upload', formData)
+            console.log('sssss', data)
+            // if (response.data?.code === 0) {
+            //   console.log('添加到素材库成功')
+            // }
+          } catch (error) {
+            console.error('添加到素材库失败:', error)
+          };
+        }
+      } catch (err) {
+        console.error('上传失败:', err);
       }
-    } catch (err) {
-      console.error('上传失败:', err);
     }
+    emit('confirm')
+    closeModal()
+  } finally {
+    confirmLoading.value = false
   }
-  emit('confirm')
-  closeModal()
 }
 
 const countMeshes = (obj: THREE.Object3D): number => {
@@ -625,15 +663,48 @@ onUnmounted(() => {
         &.btn-confirm {
           background: linear-gradient(135deg, #1677ff 0%, #4096ff 100%);
           color: white;
+          position: relative;
+          min-width: 120px;
 
-          &:hover {
+          &:hover:not(:disabled) {
             opacity: 0.9;
             transform: translateY(-1px);
             box-shadow: 0 4px 12px rgba(22, 119, 255, 0.3);
           }
+
+          &:disabled {
+            cursor: not-allowed;
+            opacity: 0.75;
+            transform: none;
+            box-shadow: none;
+          }
+
+          &.loading {
+            padding-left: 44px;
+
+            &::before {
+              content: '';
+              position: absolute;
+              left: 20px;
+              top: 50%;
+              width: 14px;
+              height: 14px;
+              margin-top: -7px;
+              border: 2px solid rgba(255, 255, 255, 0.4);
+              border-top-color: #fff;
+              border-radius: 50%;
+              animation: btn-spin 0.8s linear infinite;
+            }
+          }
         }
       }
     }
+  }
+}
+
+@keyframes btn-spin {
+  to {
+    transform: rotate(360deg);
   }
 }
 </style>
