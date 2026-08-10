@@ -58,11 +58,11 @@ const benefits = [
     normal: '',
     vip: '支持',
   },
-  {
-    name: '新功能优先体验',
-    normal: '无',
-    vip: '有',
-  },
+  // {
+  //   name: '新功能优先体验',
+  //   normal: '无',
+  //   vip: '有',
+  // },
   // {
   //   name: '高清图片导出',
   //   normal: '普通画质',

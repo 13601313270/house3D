@@ -1,6 +1,46 @@
 <template>
   <div class="toolbar-item" @mouseleave="leaveObjTypeCate1">
-    <button class="addButton" type="button" @mouseenter="isMouseInCate1 = true, activeObjTypeId = undefined">
+    <div class="addButtonWrapper" v-if="showAddGuide">
+      <button class="addButton addButtonGuide" type="button"
+        @mouseenter="isMouseInCate1 = true, activeObjTypeId = undefined">
+        添加
+      </button>
+      <div class="guideBubble" @click.stop>
+        <div class="guideBubbleDecor guideBubbleDecor1"></div>
+        <div class="guideBubbleDecor guideBubbleDecor2"></div>
+        <div class="guideBubbleArrow"></div>
+        <button class="guideBubbleClose" type="button" @click.stop="dismissAddGuide()" title="关闭引导">×</button>
+        <div class="guideBubbleContent">
+          <div class="guideBubbleIcon">
+            <svg viewBox="0 0 24 24" width="28" height="28" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M21 16V8L12 3L3 8V16L12 21L21 16Z" stroke="white" stroke-width="1.8" stroke-linejoin="round" />
+              <path d="M3.3 8.7L12 14L20.7 8.7" stroke="white" stroke-width="1.8" stroke-linecap="round"
+                stroke-linejoin="round" />
+              <path d="M12 21V14" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </div>
+          <div class="guideBubbleTextBlock">
+            <div class="guideBubbleTitle">添加模型到场景中</div>
+            <div class="guideBubbleDesc">点击左侧「添加」按钮，<br />从分类列表中选择一个模型开始创作</div>
+          </div>
+        </div>
+        <div class="guideBubbleFooter">
+          <!-- <div class="guideBubbleStep">
+            <span class="guideBubbleStepDot active"></span>
+            <span class="guideBubbleStepDot"></span>
+            <span class="guideBubbleStepDot"></span>
+          </div> -->
+          <button class="guideBubbleNextBtn" type="button" @click.stop="dismissAddGuide()">
+            知道了
+            <svg viewBox="0 0 20 20" width="14" height="14" fill="currentColor">
+              <path
+                d="M7.05 4.05a.75.75 0 011.06 0l5.25 5.25a.75.75 0 010 1.06l-5.25 5.25a.75.75 0 11-1.06-1.06L11.69 10 7.05 5.36a.75.75 0 010-1.06z" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+    <button v-else class="addButton" type="button" @mouseenter="isMouseInCate1 = true, activeObjTypeId = undefined">
       添加
     </button>
     <div class="list insertObjTypeSelect" @mouseenter="isMouseInCate1 = true" v-show="isMouseInCate1 || isMouseInCate2">
@@ -135,6 +175,28 @@ const currentDefaultValues = ref<DefaultItem<any>[]>([])
 const currentToolType = ref('')
 const loading = ref(false)
 
+// ===== 添加引导相关 =====
+const GUIDE_STORAGE_KEY = 'house3d_add_obj_guide_completed'
+const showAddGuide = ref(false)
+
+// 用户点击气泡的「知道了」/关闭按钮：仅本次隐藏，下次仍会出现
+function dismissAddGuide() {
+  showAddGuide.value = false
+  localStorage.setItem(GUIDE_STORAGE_KEY, '1')
+}
+
+// 用户真正创建了对象：写入 localStorage，以后不再展示引导
+function markGuideCompleted() {
+  try {
+    localStorage.setItem(GUIDE_STORAGE_KEY, '1')
+  } catch (e) {
+    // localStorage 不可用时忽略
+  }
+  showAddGuide.value = false
+}
+
+// ========================
+
 async function changeCurrentTool(type: string) {
   const ClassName = fileDataKeyToClass[type];
   let defaultValue: DefaultItem<BaseObjData>[] | Promise<DefaultItem<BaseObjData>[]> = allPluginByKey[type].defaultValues()
@@ -164,11 +226,21 @@ function createObjWithDefaultValue(type: string, defaultItem: DefaultItem<any>) 
       insertTempObj.reBuildBoundingBoxData()
     }
     emits('select', type, insertTempObj)
+    // 对象创建成功，标记引导完成
+    markGuideCompleted()
   }
   showDefaultValueModal.value = false
 }
 
 onMounted(async () => {
+  try {
+    const completed = localStorage.getItem(GUIDE_STORAGE_KEY)
+    if (!completed) {
+      showAddGuide.value = true
+    }
+  } catch (e) {
+    // localStorage 不可用时跳过引导
+  }
   const res = await axios.get('https://api.studying1v1.com/video/objectFileType')
   const data = res.data as Array<{
     id: number,
@@ -215,6 +287,7 @@ async function changeCurrentToolToOutFile(id: string) {
     insertTempObj.init()
     insertTempObj.reBuildBoundingBoxData()
     emits('select', 'outFileInWall', insertTempObj)
+    markGuideCompleted()
   } else {
     const data: OutFileData = {
       fileTypeId: findObjInfo.id,
@@ -231,6 +304,7 @@ async function changeCurrentToolToOutFile(id: string) {
     insertTempObj.init()
     insertTempObj.reBuildBoundingBoxData()
     emits('select', 'outFile', insertTempObj)
+    markGuideCompleted()
   }
 }
 
@@ -318,7 +392,7 @@ function showHelpModal() {
   background: #e4e6eb;
   cursor: pointer;
   font-size: 16px;
-  width: 50px;
+  min-width: 50px;
   transition: all 0.3s;
 }
 
@@ -657,4 +731,281 @@ function showHelpModal() {
     }
   }
 }
+
+/* ===== 添加引导样式 ===== */
+.addButtonWrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.addButtonGuide {
+  animation: guidePulse 1.6s ease-in-out infinite;
+  background: linear-gradient(135deg, #1890ff 0%, #52c41a 100%);
+  color: white;
+  font-weight: bold;
+  box-shadow: 0 0 0 0 rgba(24, 144, 255, 0.6);
+  position: relative;
+  z-index: 1;
+}
+
+@keyframes guidePulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(24, 144, 255, 0.6);
+    transform: scale(1);
+  }
+
+  50% {
+    box-shadow: 0 0 0 10px rgba(24, 144, 255, 0);
+    transform: scale(1.05);
+  }
+
+  100% {
+    box-shadow: 0 0 0 0 rgba(24, 144, 255, 0);
+    transform: scale(1);
+  }
+}
+
+/* ========== 复杂精美气泡 ========== */
+.guideBubble {
+  top: 45px;
+  left: 110px;
+  height: 122px;
+  position: absolute;
+  bottom: calc(100% + 20px);
+  transform: translateX(-50%);
+  width: 300px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-radius: 16px;
+  padding: 18px 18px 14px 18px;
+  z-index: 999;
+  cursor: default;
+  overflow: hidden;
+  box-shadow:
+    0 20px 50px -10px rgba(102, 126, 234, 0.5),
+    0 10px 30px -5px rgba(118, 75, 162, 0.4),
+    0 0 0 1px rgba(255, 255, 255, 0.15) inset;
+  animation: guideBubbleIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1),
+    guideBubbleFloat 3s ease-in-out infinite 0.5s;
+}
+
+/* 装饰圆形光晕 */
+.guideBubbleDecor {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.guideBubbleDecor1 {
+  width: 140px;
+  height: 140px;
+  right: -50px;
+  top: -60px;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.18) 0%, transparent 70%);
+  animation: guideDecorFloat 6s ease-in-out infinite;
+}
+
+.guideBubbleDecor2 {
+  width: 80px;
+  height: 80px;
+  left: -20px;
+  bottom: -30px;
+  background: radial-gradient(circle, rgba(135, 206, 250, 0.25) 0%, transparent 70%);
+  animation: guideDecorFloat 5s ease-in-out infinite reverse;
+}
+
+@keyframes guideDecorFloat {
+
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.8;
+  }
+
+  50% {
+    transform: translate(6px, -6px) scale(1.08);
+    opacity: 1;
+  }
+}
+
+/* 气泡箭头 */
+.guideBubbleArrow {
+  position: absolute;
+  left: 50%;
+  bottom: -14px;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 14px solid transparent;
+  border-right: 14px solid transparent;
+  border-top: 14px solid transparent;
+  border-top-color: #764ba2;
+  filter: drop-shadow(0 4px 6px rgba(118, 75, 162, 0.35));
+}
+
+/* 关闭按钮 */
+.guideBubbleClose {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: rgba(255, 255, 255, 0.18);
+  color: white;
+  border-radius: 50%;
+  font-size: 16px;
+  line-height: 22px;
+  text-align: center;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s, transform 0.2s;
+  z-index: 2;
+}
+
+.guideBubbleClose:hover {
+  background: rgba(255, 255, 255, 0.32);
+  transform: rotate(90deg);
+}
+
+/* 内容区：图标 + 文字 */
+.guideBubbleContent {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  position: relative;
+  z-index: 1;
+}
+
+.guideBubbleIcon {
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.08) 100%);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.12),
+    0 0 0 1px rgba(255, 255, 255, 0.2) inset;
+  backdrop-filter: blur(4px);
+}
+
+.guideBubbleTextBlock {
+  flex: 1;
+  min-width: 0;
+}
+
+.guideBubbleTitle {
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.3;
+  margin-bottom: 6px;
+  letter-spacing: 0.2px;
+  background: linear-gradient(180deg, #ffffff 0%, #e4e8ff 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+
+.guideBubbleDesc {
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.88);
+  font-weight: 400;
+}
+
+/* 底部：步骤点 + 知道了按钮 */
+.guideBubbleFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 14px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.18);
+  position: relative;
+  z-index: 1;
+}
+
+.guideBubbleStep {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.guideBubbleStepDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transition: all 0.3s;
+}
+
+.guideBubbleStepDot.active {
+  width: 18px;
+  border-radius: 3px;
+  background: linear-gradient(90deg, #ffd86b 0%, #ff9a9e 100%);
+  box-shadow: 0 0 8px rgba(255, 216, 107, 0.5);
+}
+
+.guideBubbleNextBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border: none;
+  background: white;
+  color: #667eea;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 20px;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: all 0.2s;
+}
+
+.guideBubbleNextBtn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+}
+
+.guideBubbleNextBtn:active {
+  transform: translateY(0);
+}
+
+@keyframes guideBubbleIn {
+  0% {
+    opacity: 0;
+    transform: translateX(-50%) translateY(16px) scale(0.85);
+  }
+
+  60% {
+    transform: translateX(-50%) translateY(-4px) scale(1.02);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0) scale(1);
+  }
+}
+
+@keyframes guideBubbleFloat {
+
+  0%,
+  100% {
+    transform: translateX(-50%) translateY(0);
+    filter: drop-shadow(0 10px 20px rgba(102, 126, 234, 0.35));
+  }
+
+  50% {
+    transform: translateX(-50%) translateY(-5px);
+    filter: drop-shadow(0 16px 28px rgba(102, 126, 234, 0.45));
+  }
+}
+
+/* ======================== */
 </style>
