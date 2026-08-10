@@ -24,9 +24,9 @@
                 <span class="label">文件类型：</span>
                 <span class="value file-type">{{ fileType?.toUpperCase() }}</span>
               </div>
-              <div class="info-item">
+              <div class="info-item" v-if="file">
                 <span class="label">文件大小：</span>
-                <span class="value">{{ formattedFileSize }}</span>
+                <span class="value">{{ formattedFileSize(file.size) }}</span>
               </div>
               <div class="info-item">
                 <span class="label">缩放比例：</span>
@@ -67,6 +67,7 @@ import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue'
 import * as THREE from 'three'
 import service from '@/utils/request';
 import OSS from 'ali-oss';
+import message from '@/utils/message';
 
 const props = defineProps<{
   visible: boolean
@@ -156,13 +157,13 @@ const computeFileMD5 = async (file: File): Promise<string> => {
   }
   return md5(chars.join(''))
 }
-const formattedFileSize = computed(() => {
-  if (!props.file) return ''
-  const bytes = props.file.size
+
+function formattedFileSize(bytes: number) {
+  if (bytes <= 0) return '0'
   if (bytes < 1024) return bytes + ' B'
   if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(2) + ' KB'
   return (bytes / (1024 * 1024)).toFixed(2) + ' MB'
-})
+}
 
 const closeModal = () => {
   emit('update:visible', false)
@@ -177,6 +178,13 @@ const handleConfirm = async () => {
   confirmLoading.value = true
   try {
     if (addToMaterialLibrary.value && props.file) {
+      const mySpaceResponse = await service.get('/video/materialLibrary/mySpace');
+      console.log('mySpaceResponse', mySpaceResponse.data)
+      if (mySpaceResponse.data.freeSpace < 0) {
+        const { freeSpace, usedSpace, totalSize } = mySpaceResponse.data
+        message.error(`个人素材库空间不足，当前空间${formattedFileSize(freeSpace * 1000)}，已用空间${formattedFileSize(usedSpace * 1000)}，总空间${formattedFileSize(totalSize * 1000)}`)
+        return;
+      }
       const respnse = await service.get('/video/materialLibrary/getUploadKey');
       const token: {
         AccessKeyId: string,
