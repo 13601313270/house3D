@@ -64,8 +64,8 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue'
 import * as THREE from 'three'
-import axios from 'axios';
 import service from '@/utils/request';
+import OSS from 'ali-oss';
 
 const props = defineProps<{
   visible: boolean
@@ -122,7 +122,7 @@ const handleCancel = () => {
 }
 
 const handleConfirm = async () => {
-  if (addToMaterialLibrary.value) {
+  if (addToMaterialLibrary.value && props.file) {
     const respnse = await service.get('/video/materialLibrary/getUploadKey');
     const token: {
       AccessKeyId: string,
@@ -130,7 +130,6 @@ const handleConfirm = async () => {
       SecurityToken: string,
     } = respnse.data;
     console.log(token)
-    const OSS = require('ali-oss');
     const client = new OSS({
       region: 'oss-cn-shanghai', // 这里需要根据你的bucket实际region填写
       accessKeyId: token.AccessKeyId,
@@ -152,22 +151,6 @@ const handleConfirm = async () => {
       // result.url 就是文件在OSS上的访问地址
     } catch (err) {
       console.error('上传失败:', err);
-    }
-
-    return;
-    const formData = new FormData()
-    formData.append('file', props.file!)
-    formData.append('fileName', fileName.value)
-    formData.append('fileType', fileType.value)
-    formData.append('scaleFactor', String(props.scaleFactor))
-    try {
-      const data = service.post('/video/materialLibrary/upload', formData)
-      console.log('sssss', data)
-      // if (response.data?.code === 0) {
-      //   console.log('添加到素材库成功')
-      // }
-    } catch (error) {
-      console.error('添加到素材库失败:', error)
     }
   }
   emit('confirm')

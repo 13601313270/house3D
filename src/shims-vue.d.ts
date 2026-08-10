@@ -65,6 +65,37 @@ type CreateFFmpegCoreFn = (
     printErr?: (text: string) => void;
   }
 ) => Promise<FFmpegCore>;
+// ali-oss 简单兜底类型声明
+declare module 'ali-oss' {
+  interface OSSOptions {
+    region: string;
+    accessKeyId: string;
+    accessKeySecret: string;
+    stsToken?: string;
+    bucket: string;
+    secure?: boolean;
+    endpoint?: string;
+    internal?: boolean;
+    cname?: boolean;
+    timeout?: string | number;
+  }
+  interface PutOptions {
+    headers?: Record<string, string>;
+    mime?: string;
+  }
+  interface PutResult {
+    url: string;
+    name: string;
+    data?: any;
+    res?: any;
+  }
+  class OSS {
+    constructor(options: OSSOptions);
+    put(name: string, file: File | Blob | Uint8Array | Buffer | string, options?: PutOptions): Promise<PutResult>;
+  }
+  export default OSS;
+}
+
 interface Window {
   createFFmpegCore: CreateFFmpegCoreFn;
 }
