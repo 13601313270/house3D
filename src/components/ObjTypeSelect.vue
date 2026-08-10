@@ -133,7 +133,6 @@
 import { nextTick, onMounted, ref } from 'vue'
 import { ObjOutputFileType } from '@/entities/allObjs';
 import { fileDataKeyToClass, allFileKeysGroup, allPluginByKey, allFileWithGroupId } from '@/entities'
-import axios from 'axios';
 import { OutFileInWallData } from '@/entities/outFileInWall/index.d'
 import { OutFileInWallEntity } from '@/entities/outFileInWall/entity';
 import { OutFileEntity } from '@/entities/outFile/entity';
@@ -141,6 +140,7 @@ import { OutFileData } from '@/entities/outFile/index.d'
 import { BaseEntityClass } from '@/types/baseEntity';
 import PluginType, { DefaultItem } from '@/entities/pluginType';
 import { BaseObjData } from '@/types/map2d';
+import service from '@/utils/request';
 
 defineProps<{
   currentTool: string | 'drag'
@@ -251,7 +251,7 @@ onMounted(async () => {
   } catch (e) {
     // localStorage 不可用时跳过引导
   }
-  const res = await axios.get('https://api.studying1v1.com/video/objectFileType')
+  const res = await service.get('/video/objectFileType')
   const data = res.data as Array<{
     id: number,
     name: string,
@@ -268,7 +268,7 @@ async function changeCurrentToolToOutFile(id: string) {
   activePluginChildList.value = []
   const index = window.worldState.ObjFileTypes.findIndex(item => item.id === id);
   if (index === -1) {
-    const { data } = await axios.get('https://api.studying1v1.com/video/objectFileById/' + id)
+    const { data } = await service.get('/video/objectFileById/' + id)
     const res: ObjOutputFileType = data;
     lastChooseOutFile.value = res;
     window.worldState.ObjFileTypes.push(res)
@@ -321,7 +321,8 @@ async function changeCurrentToolToOutFile(id: string) {
 async function mouseEnterType(event: MouseEvent, type: ObjFileType) {
   if (!type.child || type.child.length === 0) {
     type.child = [];
-    const { data: res } = await axios.get('https://api.studying1v1.com/video/objectFileListByType/' + type.id)
+    const { data: res } = await service.get('/video/objectFileListByType/' + type.id)
+    console.log('res', res)
     res.forEach((v: {
       id: string,
       name: string,
@@ -355,8 +356,8 @@ async function mouseEnterType(event: MouseEvent, type: ObjFileType) {
 
 async function mouseEnterMineObjs(event: MouseEvent) {
   if (mineObjChildList.value.length === 0) {
-    const { data: res } = await axios.get('https://api.studying1v1.com/video/objectFileListByType/1')
-    mineObjChildList.value = res
+    const res = await service.get('/video/materialLibrary/myList')
+    mineObjChildList.value = res.data
   }
   activeObjTypeId.value = 'mineObjs'
   activeObjChildList.value = mineObjChildList.value
@@ -411,6 +412,8 @@ function mouseenterOtherGroup(groupName: string) {
 }
 
 function showHelpModal() {
+  activeObjChildList.value = []
+  activePluginChildList.value = []
   isMouseInCate2.value = false;
   emits('showHelpModal')
 }

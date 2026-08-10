@@ -89,6 +89,8 @@ const previewContainerRef = ref<HTMLDivElement | null>(null)
 const modelSize = ref<THREE.Vector3 | null>(null)
 const meshCount = ref<number | null>(null)
 
+let previewImgFile: File | null = null
+
 const confirmButtonText = computed(() => {
   if (!confirmLoading.value) return '确认导入'
   return addToMaterialLibrary.value ? '正在上传到个人素材库' : '确认导入中'
@@ -205,11 +207,32 @@ const handleConfirm = async () => {
         console.log('上传成功:', result);
         if (result) {
           const { url } = result;
+
+          // 上传预览图（如果存在）
+          let previewImgUrl = ''
+          if (previewImgFile) {
+            try {
+              const previewObjectName = fileMD5 + '_preview.png'
+              const previewResult = await client.put(previewObjectName, previewImgFile, {
+                headers: {
+                  'Content-Type': 'image/png',
+                },
+              });
+              previewImgUrl = previewResult?.url ?? ''
+              console.log('预览图上传成功:', previewResult);
+            } catch (previewErr) {
+              console.error('预览图上传失败:', previewErr);
+            }
+          }
+
           const formData = new FormData()
           formData.append('url', url)
           formData.append('name', fileName.value)
           formData.append('fileType', fileType.value)
           formData.append('scaleFactor', String(props.scaleFactor))
+          if (previewImgUrl) {
+            formData.append('previewImg', previewImgUrl)
+          }
           try {
             const data = service.post('/video/materialLibrary/upload', formData)
             console.log('sssss', data)
@@ -257,7 +280,7 @@ const initPreviewScene = () => {
   camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 10000)
 
   // 创建渲染器
-  renderer = new THREE.WebGLRenderer({ antialias: true })
+  renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true })
   renderer.setPixelRatio(window.devicePixelRatio)
   renderer.setSize(width, height)
   renderer.shadowMap.enabled = true
@@ -316,6 +339,28 @@ const initPreviewScene = () => {
 
   // 开始渲染循环
   animate()
+
+  // 渲染一帧后截图作为预览图（同步生成，避免toBlob回调与用户点击确认的竞态）
+  previewImgFile = null
+  if (renderer && scene && camera) {
+    renderer.render(scene, camera)
+    try {
+      const canvas = renderer.domElement
+      const dataUrl = canvas.toDataURL('image/png', 0.9)
+      const base64 = dataUrl.split(',')[1] ?? ''
+      const binary = atob(base64)
+      const len = binary.length
+      const bytes = new Uint8Array(len)
+      for (let i = 0; i < len; i++) {
+        bytes[i] = binary.charCodeAt(i)
+      }
+      const blob = new Blob([bytes], { type: 'image/png' })
+      const baseName = (props.file?.name ?? 'preview').replace(/\.[^.]+$/, '')
+      previewImgFile = new File([blob], `${baseName}_preview.png`, { type: 'image/png' })
+    } catch (snapErr) {
+      console.error('生成预览图失败:', snapErr)
+    }
+  }
 }
 
 const updateCameraPosition = () => {
@@ -368,6 +413,7 @@ const disposeScene = () => {
 
   camera = null
   previewObject = null
+  previewImgFile = null
   modelSize.value = null
   meshCount.value = null
 }
