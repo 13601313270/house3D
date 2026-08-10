@@ -47,8 +47,14 @@
         </div>
 
         <div class="footer">
-          <button class="btn btn-cancel" @click="handleCancel">取消</button>
-          <button class="btn btn-confirm" @click="handleConfirm">确认导入</button>
+          <label class="checkbox-label">
+            <input type="checkbox" v-model="addToMaterialLibrary" class="custom-checkbox" />
+            <span class="checkbox-text">添加到个人素材库</span>
+          </label>
+          <div class="footer-btns">
+            <button class="btn btn-cancel" @click="handleCancel">取消</button>
+            <button class="btn btn-confirm" @click="handleConfirm">确认导入</button>
+          </div>
         </div>
       </div>
     </div>
@@ -58,6 +64,8 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue'
 import * as THREE from 'three'
+import axios from 'axios';
+import service from '@/utils/request';
 
 const props = defineProps<{
   visible: boolean
@@ -74,6 +82,7 @@ const emit = defineEmits<{
   (e: 'cancel'): void
 }>()
 
+const addToMaterialLibrary = ref(false)
 const previewContainerRef = ref<HTMLDivElement | null>(null)
 const modelSize = ref<THREE.Vector3 | null>(null)
 const meshCount = ref<number | null>(null)
@@ -112,7 +121,55 @@ const handleCancel = () => {
   closeModal()
 }
 
-const handleConfirm = () => {
+const handleConfirm = async () => {
+  if (addToMaterialLibrary.value) {
+    const respnse = await service.get('/video/materialLibrary/getUploadKey');
+    const token: {
+      AccessKeyId: string,
+      AccessKeySecret: string,
+      SecurityToken: string,
+    } = respnse.data;
+    console.log(token)
+    const OSS = require('ali-oss');
+    const client = new OSS({
+      region: 'oss-cn-shanghai', // 这里需要根据你的bucket实际region填写
+      accessKeyId: token.AccessKeyId,
+      accessKeySecret: token.AccessKeySecret,
+      stsToken: token.SecurityToken, // 注意这里参数名是 stsToken
+      bucket: 'video-obj', // 替换为你的bucket名称
+      // secure: true // 推荐使用HTTPS
+    });
+
+    // 3. 执行文件上传
+    try {
+      // 使用 put 方法上传，第一个参数是存储在OSS中的对象名，第二个参数是文件对象
+      const result = await client.put(fileName.value, props.file, {
+        headers: {
+          'Content-Type': fileType.value, // 可选，设置正确的MIME类型
+        }
+      });
+      console.log('上传成功:', result);
+      // result.url 就是文件在OSS上的访问地址
+    } catch (err) {
+      console.error('上传失败:', err);
+    }
+
+    return;
+    const formData = new FormData()
+    formData.append('file', props.file!)
+    formData.append('fileName', fileName.value)
+    formData.append('fileType', fileType.value)
+    formData.append('scaleFactor', String(props.scaleFactor))
+    try {
+      const data = service.post('/video/materialLibrary/upload', formData)
+      console.log('sssss', data)
+      // if (response.data?.code === 0) {
+      //   console.log('添加到素材库成功')
+      // }
+    } catch (error) {
+      console.error('添加到素材库失败:', error)
+    }
+  }
   emit('confirm')
   closeModal()
 }
@@ -497,11 +554,36 @@ onUnmounted(() => {
 
     .footer {
       display: flex;
-      justify-content: flex-end;
-      gap: 12px;
+      align-items: center;
+      justify-content: space-between;
       padding: 16px 24px;
       border-top: 1px solid #f0f0f0;
       flex-shrink: 0;
+
+      .checkbox-label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+        user-select: none;
+
+        .custom-checkbox {
+          width: 18px;
+          height: 18px;
+          accent-color: #1677ff;
+          cursor: pointer;
+        }
+
+        .checkbox-text {
+          font-size: 14px;
+          color: #333;
+        }
+      }
+
+      .footer-btns {
+        display: flex;
+        gap: 12px;
+      }
 
       .btn {
         padding: 10px 24px;

@@ -214,15 +214,9 @@
   <ShowPayModal v-if="showPayModal" @close="showPayModal = false" @paySuccess="handlePaySuccess" />
   <ShowGroupQrModal v-if="showGroupQrModal" @close="showGroupQrModal = false" />
   <ShowVipModal v-if="showVipModal" @close="showVipModal = false" @paySuccess="handleVipPaySuccess" />
-  <ImportModelConfirm
-    v-model:visible="showImportModelConfirm"
-    :object="pendingImportData.object"
-    :file="pendingImportData.file"
-    :type="pendingImportData.type"
-    :scale-factor="pendingImportData.scaleFactor"
-    :position="pendingImportData.position"
-    @confirm="handleImportModelConfirm"
-  />
+  <ImportModelConfirm v-model:visible="showImportModelConfirm" :object="pendingImportData.object"
+    :file="pendingImportData.file" :type="pendingImportData.type" :scale-factor="pendingImportData.scaleFactor"
+    :position="pendingImportData.position" @confirm="handleImportModelConfirm" />
 </template>
 
 <script lang="ts" setup>
