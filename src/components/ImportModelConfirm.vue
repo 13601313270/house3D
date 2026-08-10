@@ -47,21 +47,36 @@
         </div>
 
         <div class="footer">
-          <div>
+          <div style="display: flex;">
             <div class="checkbox-label">
               <input type="checkbox" v-model="addToMaterialLibrary" class="custom-checkbox" />
               <span class="checkbox-text">添加到个人素材库</span>
             </div>
-            <div>
-              <span v-if="mySpaceInfo" class="checkbox-text">
-                已用空间：{{ formattedFileSize(mySpaceInfo?.usedSpace) }}
-              </span>
-              <span v-if="mySpaceInfo" class="checkbox-text">
-                总空间：{{ formattedFileSize(mySpaceInfo?.totalSize) }}
-              </span>
-              <span v-if="mySpaceInfo" class="checkbox-text">
-                可用空间：{{ formattedFileSize(mySpaceInfo?.freeSpace || 0) }}
-              </span>
+            <div v-if="mySpaceInfo && addToMaterialLibrary" class="space-info">
+              <div class="space-info-header">
+                <span class="space-info-label">存储空间</span>
+                <div class="space-progress-bar">
+                  <div class="space-progress-fill" :style="{ width: spaceUsagePercent + '%' }"></div>
+                </div>
+                <span class="space-info-percent">{{ spaceUsagePercent }}%</span>
+              </div>
+              <div class="space-info-items">
+                <div class="space-info-item space-used">
+                  <span class="item-dot"></span>
+                  <span class="item-label">已用</span>
+                  <span class="item-value">{{ formattedFileSize(mySpaceInfo?.usedSpace * 1000) }}</span>
+                </div>
+                <div class="space-info-item space-total">
+                  <span class="item-dot"></span>
+                  <span class="item-label">总计</span>
+                  <span class="item-value">{{ formattedFileSize(mySpaceInfo?.totalSize * 1000) }}</span>
+                </div>
+                <div class="space-info-item space-free">
+                  <span class="item-dot"></span>
+                  <span class="item-label">可用</span>
+                  <span class="item-value">{{ formattedFileSize(mySpaceInfo?.freeSpace * 1000 || 0) }}</span>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -128,6 +143,11 @@ let cameraTarget = new THREE.Vector3(0, 0, 0)
 
 const fileName = computed(() => props.file?.name ?? '')
 const fileType = computed(() => props.type)
+const spaceUsagePercent = computed(() => {
+  if (!mySpaceInfo.value || !mySpaceInfo.value.totalSize) return 0
+  const percent = (mySpaceInfo.value.usedSpace / mySpaceInfo.value.totalSize) * 100
+  return Math.min(100, Math.max(0, Math.round(percent)))
+})
 
 const getFileExtension = (name: string): string => {
   const lastDot = name.lastIndexOf('.')
@@ -547,7 +567,7 @@ onUnmounted(() => {
   justify-content: center;
 
   .import-model-confirm-inner {
-    width: 800px;
+    width: 900px;
     max-width: 90vw;
     max-height: 85vh;
     background: white;
@@ -701,6 +721,7 @@ onUnmounted(() => {
         gap: 8px;
         cursor: pointer;
         user-select: none;
+        margin-bottom: 12px;
 
         .custom-checkbox {
           width: 18px;
@@ -712,6 +733,100 @@ onUnmounted(() => {
         .checkbox-text {
           font-size: 14px;
           color: #333;
+        }
+      }
+
+      .space-info {
+        background: #fafbfc;
+        border: 1px solid #eef0f3;
+        border-radius: 10px;
+        padding: 12px 14px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin-left: 8px;
+
+        .space-info-header {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 8px;
+
+          .space-info-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #444;
+          }
+
+          .space-progress-bar {
+            height: 8px;
+            background: #eef0f3;
+            border-radius: 4px;
+            overflow: hidden;
+            flex-grow: 1;
+
+            .space-progress-fill {
+              height: 100%;
+              background: linear-gradient(90deg, #4096ff 0%, #1677ff 100%);
+              border-radius: 4px;
+              transition: width 0.4s ease;
+            }
+          }
+
+          .space-info-percent {
+            font-size: 13px;
+            font-weight: 700;
+            color: #1677ff;
+            font-variant-numeric: tabular-nums;
+          }
+        }
+
+        .space-info-items {
+          display: flex;
+          align-items: center;
+          gap: 16px;
+          flex-wrap: wrap;
+
+          .space-info-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+
+            .item-dot {
+              width: 8px;
+              height: 8px;
+              border-radius: 50%;
+              flex-shrink: 0;
+            }
+
+            .item-label {
+              font-size: 12px;
+              color: #888;
+            }
+
+            .item-value {
+              font-size: 12px;
+              font-weight: 600;
+              color: #333;
+              font-variant-numeric: tabular-nums;
+            }
+
+            &.space-used .item-dot {
+              background: #1677ff;
+            }
+
+            &.space-total .item-dot {
+              background: #bfbfbf;
+            }
+
+            &.space-free .item-dot {
+              background: #52c41a;
+            }
+
+            &.space-free .item-value {
+              color: #389e0d;
+            }
+          }
         }
       }
 
