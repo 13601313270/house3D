@@ -10,9 +10,9 @@
       <div class="header-right">
         <button class="control-btn" @click="stop">⏹</button>
         <button class="control-btn" @click="togglePlay">{{ isPlaying ? '⏸' : '▶' }}</button>
-        <button class="control-btn" :class="{ recording: isRecording, converting: isConverting }"
-          :disabled="isConverting" @click="recordVideoPlay">{{
-            isConverting ? '转码 ⟳' : (isRecording ? '停止 ■' : '录制 ▶')
+        <button class="control-btn" :class="{ recording: isRecording }"
+          @click="recordVideoPlay">{{
+            isRecording ? '停止 ■' : '录制 ▶'
           }}</button>
         <input type="range" class="speed-control" v-model="playbackSpeed" min="0.1" max="3" step="0.1" />
         <span class="speed-label">{{ playbackSpeed }}倍速</span>
@@ -117,7 +117,6 @@ import DataTypeEditPanel from '../views/DataTypeEditPanel.vue'
 import showContextMenu from '@/utils/contextMenu';
 import evaluateTrack from '@/utils/evaluateTrack';
 import { sleep } from '@/utils/sleep';
-import convertWebmToMp4 from '@/utils/convertWebmToMp4';
 
 const props = defineProps<{
   isVip: boolean
@@ -267,7 +266,6 @@ let isScrubbing = false                       // 空白区域按下拖动（scru
 let scrubClosedPanel = false                  // scrub 时是否关闭了浮动面板（用于 click 后续逻辑）
 
 // ========== 录制相关状态 ==========
-const isConverting = ref(false)                 // 是否正在转码（WebM → MP4）
 let mediaRecorder: MediaRecorder | null = null  // MediaRecorder 实例
 let recordedChunks: Blob[] = []                 // 录制数据块缓存
 
@@ -543,38 +541,29 @@ function stopRecordingAndExport() {
     cancelAnimationFrame(animationFrameId)
     animationFrameId = null
   }
-  // 2) 停止 MediaRecorder
+  // 2) 停止 MediaRecorder → 直接下载浏览器录制的原始文件（不做任何转码/封装，秒出）
+  //    优先 MP4，浏览器不支持就下 WebM。完全砍掉 FFmpeg 转换逻辑。
   if (mediaRecorder && mediaRecorder.state !== 'inactive') {
-    mediaRecorder.onstop = async () => {
+    mediaRecorder.onstop = () => {
       const timestamp = Date.now()
       try {
-        const webmBlob = new Blob(recordedChunks, {
-          type: mediaRecorder?.mimeType || 'video/webm'
-        })
+        const recorderMime = mediaRecorder?.mimeType || 'video/webm'
+        const recordedBlob = new Blob(recordedChunks, { type: recorderMime })
 
         // 先重置录制状态（让按钮恢复可点击）
         isRecording.value = false
 
-        // 空文件判断
-        if (webmBlob.size < 1024) {
+        if (recordedBlob.size < 1024) {
           message.error('录制内容为空，请重试')
           return
         }
-        // 3) 尝试转码为 MP4（H.264），失败则兜底下载原始 WebM
-        try {
-          // downloadBlob(webmBlob, `timeline-recording-${timestamp}.webm`)
-          // await sleep(1000);
-          isConverting.value = true
-          const mp4Blob = await convertWebmToMp4(webmBlob)
-          isConverting.value = false
-          downloadBlob(mp4Blob, `timeline-recording-${timestamp}.mp4`)
-          message.success(`录制完成（MP4），视频大小：${(mp4Blob.size / 1024 / 1024).toFixed(2)} MB`)
-        } catch (convertErr) {
-          isConverting.value = false
-          console.warn('MP4 转码失败，兜底下载 WebM 格式：', convertErr)
-          message.warning('MP4 转码失败，已为您下载原始 WebM 格式，可手动使用 FFmpeg 转码')
-          downloadBlob(webmBlob, `timeline-recording-${timestamp}.webm`)
-        }
+
+        // 按实际容器选扩展名
+        const ext = /^video\/mp4/i.test(recorderMime) ? 'mp4' : 'webm'
+        const sizeMB = (recordedBlob.size / 1024 / 1024).toFixed(2)
+        console.log(`[stopRecordingAndExport] 直接导出 ${ext.toUpperCase()}，编码 =`, recorderMime, `大小 = ${sizeMB} MB`)
+        downloadBlob(recordedBlob, `timeline-recording-${timestamp}.${ext}`)
+        message.success(`录制完成（${ext.toUpperCase()}），视频大小：${sizeMB} MB`)
       } catch (e) {
         console.error('导出录制视频失败', e)
         message.error('导出录制视频失败')
@@ -620,8 +609,22 @@ function recordVideoPlay() {
   const stream = (canvas as any).captureStream(recordFps)
   recordedChunks = []
 
-  // 选择浏览器支持的最优编码
+  // 选择浏览器支持的最优编码（优先级从快到慢）
+  //   1. 直接录 MP4 容器 + H.264/AAC → 0 转码时间，秒出
+  //      Chrome 103+ 桌面端（macOS/Windows/Linux）支持 avc1
+  //   2. 录 WebM 容器但视频用 H.264 → 只需要 -c copy 快速换壳（1~2秒）
+  //   3. VP9 WebM → libx264 重编码兜底（最慢，已用 ultrafast 优化）
+  // 注意：codecs 字符串必须带双引号部分浏览器才识别；avc1.42E01E = H.264 Baseline Profile Level 3.1（兼容性最好）
   const mimeTypes = [
+    // --- Tier 1：直接 MP4 容器 ---
+    'video/mp4;codecs="avc1.42E01E,mp4a.40.2"',  // Chrome 103+ macOS/Win/Linux
+    'video/mp4;codecs="avc1,mp4a.40.2"',         // 宽泛写法
+    'video/mp4',                                   // 兜底：让浏览器自己挑 codec
+    // --- Tier 2：WebM 容器但 H.264 编码 ---
+    'video/webm;codecs="avc1.42E01E,opus"',       // Chrome 支持 WebM 里装 H.264
+    'video/webm;codecs="avc1,opus"',
+    'video/webm;codecs="h264,opus"',
+    // --- Tier 3：VP9 / VP8 兜底（需重编码） ---
     'video/webm;codecs=vp9',
     'video/webm;codecs=vp8',
     'video/webm',
@@ -629,6 +632,7 @@ function recordVideoPlay() {
   const selectedMime = mimeTypes.find(t => {
     try { return MediaRecorder.isTypeSupported(t) } catch { return false }
   })
+  console.log('[recordVideoPlay] 浏览器最终选定 MediaRecorder mimeType =', selectedMime ?? '(默认)')
 
   try {
     mediaRecorder = new MediaRecorder(
