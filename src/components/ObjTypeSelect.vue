@@ -88,7 +88,14 @@
       @mouseleave="leaveObjTypeCate2"
       :style="{ top: enterEventDomPosition?.y + 'px', left: enterEventDomPosition?.x + 'px' }"
       v-if="activeObjChildList.length > 0 || activePluginChildList.length > 0">
-      <div class="childItem help" @click="showHelpModal()">
+      <div class="childItem help" v-if="activeObjTypeId === 'mineObjs'" @click="showMineObjsModal()">
+        <div>
+          <img class="icon" src="@/assets/materialLibrary.png" />
+          <div>管理素材库</div>
+          <!-- <div class="desc">（24小时内添加）</div> -->
+        </div>
+      </div>
+      <div v-else class="childItem help" @click="showHelpModal()">
         <div>
           <div>联系售后添加</div>
           <div class="desc">（24小时内添加）</div>
@@ -123,6 +130,7 @@
       </div>
     </div>
   </teleport>
+  <MaterialLibraryModal v-model:visible="showMaterialLibraryModal" @refresh="refreshMineObjList" />
   <teleport to="#teleport">
     <div v-if="loading" class="loading">
       <img src="../assets/loading_white.svg" alt="loading" />
@@ -144,6 +152,7 @@ import { BaseObjData } from '@/types/map2d';
 import service from '@/utils/request';
 import handleLoadedObject from '@/utils/handleLoadedObject';
 import importOutObj from '@/utils/importOutObj';
+import MaterialLibraryModal from './MaterialLibraryModal.vue';
 
 defineProps<{
   currentTool: string | 'drag'
@@ -188,6 +197,7 @@ const showDefaultValueModal = ref(false)
 const currentDefaultValues = ref<DefaultItem<any>[]>([])
 const currentToolType = ref('')
 const loading = ref(false)
+const showMaterialLibraryModal = ref(false)
 
 // ===== 添加引导相关 =====
 const GUIDE_STORAGE_KEY = 'house3d_add_obj_guide_completed'
@@ -446,6 +456,17 @@ function showHelpModal() {
   isMouseInCate2.value = false;
   emits('showHelpModal')
 }
+function showMineObjsModal() {
+  activeObjChildList.value = []
+  activePluginChildList.value = []
+  isMouseInCate2.value = false;
+  showMaterialLibraryModal.value = true
+}
+async function refreshMineObjList() {
+  mineObjChildList.value = []
+  const res = await service.get('/video/materialLibrary/myList')
+  mineObjChildList.value = res.data
+}
 </script>
 <style lang="less" scoped>
 .toolbar-item {
@@ -665,6 +686,10 @@ function showHelpModal() {
     &.help {
       font-size: 12px;
 
+      .icon {
+        width: 38px;
+      }
+
       .desc {
         font-size: 12px;
       }
@@ -686,7 +711,12 @@ function showHelpModal() {
     .name {
       font-size: 14px;
       color: #2c3e50;
+      // background-color: blue;
+      max-width: 120px;
       padding-right: 8px;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
     }
 
     .desc {
@@ -780,7 +810,7 @@ function showHelpModal() {
   align-items: center;
   justify-content: center;
   background: rgba(0, 0, 0, 0.4);
-  z-index: 100;
+  z-index: 1002;
 
   >img {
     width: 32px;
