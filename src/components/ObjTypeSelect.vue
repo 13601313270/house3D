@@ -87,7 +87,7 @@
     <div class="addOutFileChildList" ref="addOutFileChildListRef" @mouseenter="isMouseInCate2 = true"
       @mouseleave="leaveObjTypeCate2"
       :style="{ top: enterEventDomPosition?.y + 'px', left: enterEventDomPosition?.x + 'px' }"
-      v-if="activeObjChildList.length > 0 || activePluginChildList.length > 0">
+      v-if="activeObjChildList.length > 0 || activePluginChildList.length > 0 || activeObjTypeId === 'mineObjs'">
       <div class="childItem help" v-if="activeObjTypeId === 'mineObjs'" @click="showMineObjsModal()">
         <div>
           <img class="icon" src="@/assets/materialLibrary.png" />
@@ -101,14 +101,15 @@
           <div class="desc">（24小时内添加）</div>
         </div>
       </div>
-      <div v-for="item2 in activePluginChildList" :key="item2.key" class="childItem"
+      <div v-for="item2 in activePluginChildList" :key="'plugin-' + item2.key" class="childItem"
         @click="changeCurrentTool(item2.key), isMouseInCate2 = false">
         <div class="previewImg">
           <img v-if="item2.previewImg" :src="item2.previewImg" alt="" />
         </div>
         <div class="name">{{ item2.name }}</div>
       </div>
-      <div v-for="item2 in activeObjChildList" class="childItem" :key="item2.id"
+      <!-- <div>--2--{{ activeObjChildList.length }}</div> -->
+      <div v-for="item2 in activeObjChildList" class="childItem" :key="'obj-' + item2.id"
         @click="(activeObjTypeId === 'mineObjs' ? changeCurrentToolToImportFile(item2.file!) : changeCurrentToolToOutFile(item2.id)), isMouseInCate2 = false">
         <div class="previewImg">
           <img v-if="item2.previewImg" :src="item2.previewImg" alt="" />
@@ -394,12 +395,16 @@ async function mouseEnterType(event: MouseEvent, type: ObjFileType) {
 }
 
 async function mouseEnterMineObjs(event: MouseEvent) {
+  console.log('sssss-0')
   if (mineObjChildList.value.length === 0) {
+    console.log('sssss-1')
     const res = await service.get('/video/materialLibrary/myList')
     mineObjChildList.value = res.data
   }
+  console.log('sssss-2')
   activeObjTypeId.value = 'mineObjs'
   activeObjChildList.value = mineObjChildList.value
+  console.log('sssss-3', activeObjChildList.value)
   activePluginChildList.value = []
 
   const dom = event.target as HTMLElement;
@@ -436,6 +441,7 @@ function leaveObjTypeCate2() {
   isMouseInCate2.value = false
   activeObjChildList.value = []
   activePluginChildList.value = []
+  activeObjTypeId.value = undefined
 }
 
 function mouseenterGroup(groupName: string) {
@@ -457,12 +463,14 @@ function showHelpModal() {
   emits('showHelpModal')
 }
 function showMineObjsModal() {
+  activeObjTypeId.value = undefined;
   activeObjChildList.value = []
   activePluginChildList.value = []
   isMouseInCate2.value = false;
   showMaterialLibraryModal.value = true
 }
 async function refreshMineObjList() {
+  console.log('sssss-update')
   mineObjChildList.value = []
   const res = await service.get('/video/materialLibrary/myList')
   mineObjChildList.value = res.data
@@ -685,6 +693,7 @@ async function refreshMineObjList() {
 
     &.help {
       font-size: 12px;
+      min-width: 120px;
 
       .icon {
         width: 38px;

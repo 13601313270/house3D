@@ -13,12 +13,19 @@
             <div class="loading-text">加载中...</div>
           </div>
 
-          <div v-else-if="list.length === 0" class="empty-wrapper">
-            <img src="../assets/Empty.png" alt="empty" class="empty-img" />
-            <div class="empty-text">暂无素材</div>
-          </div>
-
           <div v-else class="material-grid">
+            <div class="upload-card" @click="handleUploadCardClick">
+              <div class="upload-icon">
+                <svg viewBox="0 0 24 24" width="44" height="44" fill="none" stroke="currentColor" stroke-width="1.5"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="12" y1="5" x2="12" y2="19"></line>
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+              </div>
+              <div class="upload-text">上传素材</div>
+              <div class="upload-desc">支持 FBX / OBJ / GLB</div>
+            </div>
+
             <div v-for="item in list" :key="item.id" class="material-card"
               :class="{ deleting: deletingId === item.id }">
               <div class="card-preview">
@@ -56,12 +63,21 @@
         </div>
       </div>
     </div>
+
+    <ImportModelConfirm v-model:visible="showImportConfirm" :object="pendingImport.object" :file="pendingImport.file"
+      :type="pendingImport.type" :scale-factor="pendingImport.scaleFactor" :position="pendingImport.position"
+      :default-add-to-library="true" @confirm="handleImportConfirm" />
+
+    <input ref="fileInputRef" type="file" accept=".fbx,.obj,.glb" style="display: none;" @change="handleFileChange" />
   </teleport>
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { ref, reactive, watch } from 'vue'
+import * as THREE from 'three'
 import service from '@/utils/request'
+import importOutObj from '@/utils/importOutObj'
+import ImportModelConfirm from './ImportModelConfirm.vue'
 
 interface MaterialItem {
   id: string
@@ -84,6 +100,23 @@ const list = ref<MaterialItem[]>([])
 const loading = ref(false)
 const deletingId = ref<string | null>(null)
 
+// 文件上传相关
+const fileInputRef = ref<HTMLInputElement | null>(null)
+const showImportConfirm = ref(false)
+const pendingImport = reactive<{
+  object: THREE.Group | THREE.Mesh | null
+  file: File | null
+  type: string
+  scaleFactor: number
+  position: THREE.Vector3
+}>({
+  object: null,
+  file: null,
+  type: '',
+  scaleFactor: 1,
+  position: new THREE.Vector3(),
+})
+
 async function fetchList() {
   loading.value = true
   try {
@@ -105,6 +138,7 @@ async function handleDelete(item: MaterialItem) {
   try {
     await service.delete('/video/materialLibrary/delete/' + item.id)
     fetchList();
+    emit('refresh')
   } catch (error) {
     console.error('删除失败:', error)
     alert('删除失败，请重试')
@@ -115,6 +149,38 @@ async function handleDelete(item: MaterialItem) {
 
 function handleClose() {
   emit('update:visible', false)
+}
+
+// 点击上传素材卡片：唤起文件选择
+function handleUploadCardClick() {
+  if (fileInputRef.value) {
+    fileInputRef.value.value = ''
+    fileInputRef.value.click()
+  }
+}
+
+// 文件选择变化：调用 importOutObj 解析模型，然后打开确认弹窗
+async function handleFileChange(e: Event) {
+  const input = e.target as HTMLInputElement
+  const file = input.files?.[0]
+  if (!file) return
+
+  await importOutObj(file, async (object, file, type, scaleFactor, position) => {
+    pendingImport.object = object
+    pendingImport.file = file
+    pendingImport.type = type
+    pendingImport.scaleFactor = scaleFactor
+    pendingImport.position.copy(position)
+    showImportConfirm.value = true
+  })
+}
+
+// 导入确认完成后：刷新列表
+function handleImportConfirm() {
+  setTimeout(() => {
+    fetchList()
+    emit('refresh')
+  }, 1000)
 }
 
 watch(
@@ -138,7 +204,7 @@ watch(
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 2000;
+  z-index: 1001;
 
   .material-library-modal-inner {
     background: white;
@@ -236,6 +302,55 @@ watch(
         display: grid;
         grid-template-columns: repeat(4, 1fr);
         gap: 16px;
+
+        .upload-card {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          aspect-ratio: auto;
+          min-height: 180px;
+          border: 2px dashed #d9d9d9;
+          border-radius: 6px;
+          cursor: pointer;
+          transition: all 0.2s;
+          background: #fafafa;
+          color: #999;
+          padding: 16px;
+          text-align: center;
+
+          &:hover {
+            border-color: #1890ff;
+            background: #e6f7ff;
+            color: #1890ff;
+            transform: translateY(-2px);
+            box-shadow: 0 2px 12px rgba(24, 144, 255, 0.12);
+          }
+
+          .upload-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+          }
+
+          .upload-text {
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 4px;
+            color: inherit;
+          }
+
+          .upload-desc {
+            font-size: 12px;
+            opacity: 0.8;
+          }
+        }
 
         .material-card {
           display: flex;

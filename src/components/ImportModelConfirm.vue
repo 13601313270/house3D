@@ -48,7 +48,7 @@
 
         <div class="footer">
           <div style="display: flex;">
-            <div class="checkbox-label">
+            <div class="checkbox-label" :style="{ display: defaultAddToLibrary ? 'none' : '' }">
               <input type="checkbox" v-model="addToMaterialLibrary" class="custom-checkbox" />
               <span class="checkbox-text">添加到个人素材库</span>
             </div>
@@ -105,6 +105,7 @@ const props = defineProps<{
   type: string
   scaleFactor: number
   position: THREE.Vector3
+  defaultAddToLibrary?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -113,7 +114,7 @@ const emit = defineEmits<{
   (e: 'cancel'): void
 }>()
 
-const addToMaterialLibrary = ref(false)
+const addToMaterialLibrary = ref(!!props.defaultAddToLibrary)
 const confirmLoading = ref(false)
 const previewContainerRef = ref<HTMLDivElement | null>(null)
 const modelSize = ref<THREE.Vector3 | null>(null)
@@ -232,7 +233,8 @@ const handleConfirm = async () => {
         accessKeySecret: token.AccessKeySecret,
         stsToken: token.SecurityToken, // 注意这里参数名是 stsToken
         bucket: 'video-user-obj', // 替换为你的bucket名称
-        secure: true // 推荐使用HTTPS
+        secure: true, // 推荐使用HTTPS
+        timeout: 240000,// 120 秒
       });
 
       // 3. 计算文件MD5并执行上传
@@ -516,6 +518,7 @@ const handleResize = () => {
 
 watch(() => props.visible, (newVal) => {
   if (newVal) {
+    addToMaterialLibrary.value = !!props.defaultAddToLibrary
     nextTick(() => {
       initPreviewScene()
       // 绑定事件
@@ -561,7 +564,7 @@ onUnmounted(() => {
   width: 100vw;
   height: 100vh;
   background-color: rgba(0, 0, 0, 0.5);
-  z-index: 1000;
+  z-index: 1002;
   display: flex;
   align-items: center;
   justify-content: center;
