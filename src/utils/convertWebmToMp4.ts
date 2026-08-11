@@ -63,7 +63,7 @@ async function convertWebmToMp4(webmBlob: Blob): Promise<Blob> {
   const inputFileName = `input_${timestamp}.webm`;
   const outputFileName = `output_${timestamp}.mp4`;
 
-  console.log('webmBlob', webmBlob)
+  console.log('webmBlob-1', webmBlob)
   try {
     // 4. 将 Blob 写入 FFmpeg 的虚拟文件系统
     await ffmpeg.writeFile(inputFileName, await fetchFile(webmBlob));
@@ -88,10 +88,12 @@ async function convertWebmToMp4(webmBlob: Blob): Promise<Blob> {
 
     // 6. 读取转换后的文件
     const data = await ffmpeg.readFile(outputFileName);
+    console.log('webmBlob-2', data)
 
     // 7. 将 Uint8Array 转换为 Blob
     // @ts-ignore
     const mp4Blob = new Blob([data.buffer], { type: 'video/mp4' });
+    console.log('webmBlob-3', mp4Blob)
     // 8. 清理虚拟文件系统（释放内存）
     try {
       await ffmpeg.deleteFile(inputFileName);
