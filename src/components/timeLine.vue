@@ -772,8 +772,8 @@ function stopDragging() {
 }
 
 function evaluateTimeline(time: number) {
-  const data: any = {}
   timelineState.timelineData.clips.forEach(clip => {
+    const data: any = {}
     const entity = window.worldApi.children.find(v => {
       return v.getOriginalData().id === clip.entityId
     })
