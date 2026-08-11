@@ -64,17 +64,17 @@
                 <div class="space-info-item space-used">
                   <span class="item-dot"></span>
                   <span class="item-label">已用</span>
-                  <span class="item-value">{{ formattedFileSize(mySpaceInfo?.usedSpace * 1000) }}</span>
+                  <span class="item-value">{{ formattedFileSize(mySpaceInfo?.usedSpace * 1024) }}</span>
                 </div>
                 <div class="space-info-item space-total">
                   <span class="item-dot"></span>
                   <span class="item-label">总计</span>
-                  <span class="item-value">{{ formattedFileSize(mySpaceInfo?.totalSize * 1000) }}</span>
+                  <span class="item-value">{{ formattedFileSize(mySpaceInfo?.totalSize * 1024) }}</span>
                 </div>
                 <div class="space-info-item space-free">
                   <span class="item-dot"></span>
                   <span class="item-label">可用</span>
-                  <span class="item-value">{{ formattedFileSize(mySpaceInfo?.freeSpace * 1000 || 0) }}</span>
+                  <span class="item-value">{{ formattedFileSize(mySpaceInfo?.freeSpace * 1024 || 0) }}</span>
                 </div>
               </div>
             </div>

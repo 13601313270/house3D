@@ -103,9 +103,8 @@ async function handleDelete(item: MaterialItem) {
   }
   deletingId.value = item.id
   try {
-    await service.post('/video/materialLibrary/delete', { id: item.id })
-    list.value = list.value.filter(v => v.id !== item.id)
-    emit('refresh')
+    await service.delete('/video/materialLibrary/delete/' + item.id)
+    fetchList();
   } catch (error) {
     console.error('删除失败:', error)
     alert('删除失败，请重试')
