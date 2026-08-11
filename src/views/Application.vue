@@ -237,7 +237,6 @@ import { CameraData } from '@/entities/camera/index.d'
 import { ImportFileType, ObjOutputFileType } from '@/entities/allObjs'
 import ObjTypeSelect from '@/components/ObjTypeSelect.vue'
 import EnvironmentEditor from '@/components/EnvironmentEditor.vue'
-import { ImportFileData } from '@/entities/importFile/index.d';
 import Login from '@/components/Login.vue'
 import { useStore } from 'vuex';
 import { Store } from '@/store';
@@ -264,10 +263,12 @@ import canvas2DSceneManage from '@/utils/canvas2DSceneManage'
 import bindDanvas2DSceneDefaultEvent from '@/utils/bindDanvas2DSceneDefaultEvent';
 import setHoverPoint from '@/utils/setHoverPoint';
 import TimeLine from '@/components/timeLine.vue'
-import { TimelineData, KeyTimePoint, timelineState } from '@/utils/timelineManage';
+import { timelineState } from '@/utils/timelineManage';
 import generateClipId from '@/utils/generateClipId';
 import ImportModelConfirm from '@/components/ImportModelConfirm.vue';
 import handleLoadedObject from '@/utils/handleLoadedObject';
+// @ts-ignore
+import initDefaultData from '@/utils/initDefaultData.json'
 
 const canvas2DRef = ref<HTMLCanvasElement | null>(null)
 const canvas2DActionRef = ref<HTMLCanvasElement | null>(null)
@@ -744,6 +745,11 @@ onMounted(async () => {
 
   // 劫持Ctrl+S保存事件
   window.addEventListener('keydown', handleKeyDown)
+
+  // 初始默认数据
+  console.log('initDefaultData', initDefaultData)
+  await initWorldByData(initDefaultData)
+
   return () => {
     window.removeEventListener('keydown', handleKeyDown)
   }
@@ -793,7 +799,6 @@ const loadProgramFile = () => {
 
 const handleLoadProgramFileChange = async (e: Event) => {
   worldApi.clearAll()
-  timelineState.timelineData = { duration: 30, clips: [] }
   initWorldLoading.value = true
   const input = e.target as HTMLInputElement
   const file = input.files?.[0]
@@ -1177,8 +1182,6 @@ const deleteContextMenuEntity = () => {
 const clearDrawing = () => {
   if (confirm('确定要清空所有绘制内容吗？')) {
     worldApi.clearAll();
-    // timelineData____.value = { duration: 30, clips: [] }
-    timelineState.timelineData = { duration: 30, clips: [] }
     activeToolsIndex.value = -1
   }
 }
@@ -1280,6 +1283,10 @@ function chooseDemo(id: number) {
   axios.get('https://api.studying1v1.com/video/scene/demo/' + id).then(res => {
     console.log('res.data----', res.data.json)
     const initDefaultFile = res.data.json
+
+    worldApi.clearAll();
+    activeToolsIndex.value = -1
+
     initWorldByData(initDefaultFile).finally(() => {
       showDemos.value = false
       demoIniting.value = false

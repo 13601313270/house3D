@@ -1,0 +1,68 @@
+{
+  "people": [
+    {
+      "id": "1786419341952",
+      "x": 62.46484375,
+      "y": -104.5,
+      "z": 0,
+      "angle": 0,
+      "color": "#DEDEDE",
+      "height": 170,
+      "bone": []
+    }
+  ],
+  "camera": [
+    {
+      "id": "1786419346208",
+      "x": -65.53515625,
+      "y": 83.5,
+      "z": 100,
+      "fov": 55,
+      "aspectW": 9,
+      "aspectH": 16,
+      "targetPositionX": 33.46484375,
+      "targetPositionY": -72.5,
+      "targetPositionZ": 100
+    }
+  ],
+  "cube": [
+    {
+      "id": "1786419350564",
+      "x": 121.46484375,
+      "y": -193.5,
+      "z": 0,
+      "width": 110,
+      "height": 180,
+      "depth": 100,
+      "color": "#b1b1b1",
+      "mt": null,
+      "angleY": 0
+    }
+  ],
+  "panOffset": {
+    "x": 196.53515625,
+    "y": 371.5
+  },
+  "zoomLevel": 1,
+  "cameraState": {
+    "targetPositionX": 0,
+    "targetPositionY": 0,
+    "targetPositionZ": 0,
+    "radius": 800,
+    "angleX": 0,
+    "angleY": 0.7853981633974483,
+    "aspectW": 1,
+    "aspectH": 1
+  },
+  "activeCameraIndex": 0,
+  "allImportImgs": [],
+  "environmentConfig": {
+    "skyType": 1,
+    "ambientLightIntensity": 1,
+    "showGround": true
+  },
+  "timelineData": {
+    "duration": 30,
+    "clips": []
+  }
+}

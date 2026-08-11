@@ -9,6 +9,7 @@ import drawAxes from '@/utils/drawAxes'
 import canvas2DSceneManage from '@/utils/canvas2DSceneManage'
 import { PlaneGroupEntity } from '@/entities/planeGroup/entity'
 import { PointCanAngleEntity } from '../pointCanAngleEntity'
+import { timelineState } from '@/utils/timelineManage'
 
 type WorldChangeType = 'add' | 'remove' | 'change'
 
@@ -396,6 +397,7 @@ export abstract class GroupBaseEntity<T extends GroupBaseData> extends PointCanA
     this.reCreate3DMeshAnd2DPreviewIfNeed()
     this.change3DMeshState()
     this._callAllOnChangeCallback('remove', willRemoveList);
+    timelineState.timelineData = { duration: 30, clips: [] }
   }
 
   // 世界变化
