@@ -6,8 +6,34 @@
           <div class="title">个人素材库管理</div>
           <button class="close-btn" @click="handleClose">×</button>
         </div>
-
         <div class="body">
+          <div v-if="mySpaceInfo" class="space-info">
+            <div class="space-info-header">
+              <span class="space-info-label">存储空间</span>
+              <div class="space-progress-bar">
+                <div class="space-progress-fill" :style="{ width: spaceUsagePercent + '%' }"></div>
+              </div>
+              <span class="space-info-percent">{{ spaceUsagePercent }}%</span>
+            </div>
+            <div class="space-info-items">
+              <div class="space-info-item space-used">
+                <span class="item-dot"></span>
+                <span class="item-label">已用</span>
+                <span class="item-value">{{ formattedFileSize(mySpaceInfo?.usedSpace * 1024) }}</span>
+              </div>
+              <div class="space-info-item space-total">
+                <span class="item-dot"></span>
+                <span class="item-label">总计</span>
+                <span class="item-value">{{ formattedFileSize(mySpaceInfo?.totalSize * 1024) }}</span>
+              </div>
+              <div class="space-info-item space-free">
+                <span class="item-dot"></span>
+                <span class="item-label">可用</span>
+                <span class="item-value">{{ formattedFileSize(mySpaceInfo?.freeSpace * 1024 || 0) }}</span>
+              </div>
+            </div>
+          </div>
+
           <div v-if="loading" class="loading-wrapper">
             <img src="../assets/loading_white.svg" alt="loading" class="loading-img" />
             <div class="loading-text">加载中...</div>
@@ -73,7 +99,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, watch } from 'vue'
+import { ref, reactive, watch, computed } from 'vue'
 import * as THREE from 'three'
 import service from '@/utils/request'
 import importOutObj from '@/utils/importOutObj'
@@ -100,6 +126,26 @@ const list = ref<MaterialItem[]>([])
 const loading = ref(false)
 const deletingId = ref<string | null>(null)
 
+const mySpaceInfo = ref<{
+  freeSpace: number,
+  usedSpace: number,
+  totalSize: number,
+}>()
+
+const spaceUsagePercent = computed(() => {
+  if (!mySpaceInfo.value || !mySpaceInfo.value.totalSize) return 0
+  const percent = (mySpaceInfo.value.usedSpace / mySpaceInfo.value.totalSize) * 100
+  return Math.min(100, Math.max(0, Math.round(percent)))
+})
+
+function formattedFileSize(bytes: number) {
+  if (bytes <= 0) return '0'
+  if (bytes < 1024) return bytes + ' B'
+  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(2) + ' KB'
+  if (bytes < 1024 * 1024 * 1024) return (bytes / (1024 * 1024)).toFixed(2) + ' MB'
+  return (bytes / (1024 * 1024 * 1024)).toFixed(2) + ' GB'
+}
+
 // 文件上传相关
 const fileInputRef = ref<HTMLInputElement | null>(null)
 const showImportConfirm = ref(false)
@@ -120,8 +166,12 @@ const pendingImport = reactive<{
 async function fetchList() {
   loading.value = true
   try {
-    const res = await service.get('/video/materialLibrary/myList')
-    list.value = res.data || []
+    const [listRes, spaceRes] = await Promise.all([
+      service.get('/video/materialLibrary/myList'),
+      service.get('/video/materialLibrary/mySpace'),
+    ])
+    list.value = listRes.data || []
+    mySpaceInfo.value = spaceRes.data
   } catch (error) {
     console.error('获取素材库列表失败:', error)
     list.value = []
@@ -257,6 +307,100 @@ watch(
       flex: 1;
       overflow-y: auto;
       padding: 16px 20px;
+
+      .space-info {
+        background: #fafbfc;
+        border: 1px solid #eef0f3;
+        border-radius: 10px;
+        padding: 12px 14px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin-bottom: 16px;
+
+        .space-info-header {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 8px;
+
+          .space-info-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #444;
+          }
+
+          .space-progress-bar {
+            height: 8px;
+            background: #eef0f3;
+            border-radius: 4px;
+            overflow: hidden;
+            flex-grow: 1;
+
+            .space-progress-fill {
+              height: 100%;
+              background: linear-gradient(90deg, #4096ff 0%, #1677ff 100%);
+              border-radius: 4px;
+              transition: width 0.4s ease;
+            }
+          }
+
+          .space-info-percent {
+            font-size: 13px;
+            font-weight: 700;
+            color: #1677ff;
+            font-variant-numeric: tabular-nums;
+          }
+        }
+
+        .space-info-items {
+          display: flex;
+          align-items: center;
+          gap: 16px;
+          flex-wrap: wrap;
+
+          .space-info-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+
+            .item-dot {
+              width: 8px;
+              height: 8px;
+              border-radius: 50%;
+              flex-shrink: 0;
+            }
+
+            .item-label {
+              font-size: 12px;
+              color: #888;
+            }
+
+            .item-value {
+              font-size: 12px;
+              font-weight: 600;
+              color: #333;
+              font-variant-numeric: tabular-nums;
+            }
+
+            &.space-used .item-dot {
+              background: #1677ff;
+            }
+
+            &.space-total .item-dot {
+              background: #bfbfbf;
+            }
+
+            &.space-free .item-dot {
+              background: #52c41a;
+            }
+
+            &.space-free .item-value {
+              color: #389e0d;
+            }
+          }
+        }
+      }
 
       .loading-wrapper {
         display: flex;

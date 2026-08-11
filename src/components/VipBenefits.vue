@@ -55,9 +55,14 @@ const benefits = [
   },
   {
     name: '动画编辑与时间轴功能',
-    normal: '',
+    normal: '不支持',
     vip: '支持',
   },
+  {
+    name: '云存储空间',
+    normal: '300MB',
+    vip: '50GB',
+  }
   // {
   //   name: '新功能优先体验',
   //   normal: '无',
