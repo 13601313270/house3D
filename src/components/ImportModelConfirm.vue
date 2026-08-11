@@ -197,7 +197,8 @@ function formattedFileSize(bytes: number) {
   if (bytes <= 0) return '0'
   if (bytes < 1024) return bytes + ' B'
   if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(2) + ' KB'
-  return (bytes / (1024 * 1024)).toFixed(2) + ' MB'
+  if (bytes < 1024 * 1024 * 1024) return (bytes / (1024 * 1024)).toFixed(2) + ' MB'
+  return (bytes / (1024 * 1024 * 1024)).toFixed(2) + ' GB'
 }
 
 const closeModal = () => {
@@ -221,78 +222,82 @@ const handleConfirm = async () => {
         return;
       }
       const respnse = await service.get('/video/materialLibrary/getUploadKey');
-      const token: {
-        AccessKeyId: string,
-        AccessKeySecret: string,
-        SecurityToken: string,
-      } = respnse.data;
-      console.log(token)
-      const client = new OSS({
-        region: 'oss-cn-beijing', // 这里需要根据你的bucket实际region填写
-        accessKeyId: token.AccessKeyId,
-        accessKeySecret: token.AccessKeySecret,
-        stsToken: token.SecurityToken, // 注意这里参数名是 stsToken
-        bucket: 'video-user-obj', // 替换为你的bucket名称
-        secure: true, // 推荐使用HTTPS
-        timeout: 240000,// 120 秒
-      });
-
-      // 3. 计算文件MD5并执行上传
-      try {
-        const fileMD5 = await computeFileMD5(props.file)
-        const extension = getFileExtension(props.file.name)
-        const ossObjectName = fileMD5 + extension
-        // 使用 put 方法上传，第一个参数是存储在OSS中的对象名（MD5+扩展名），第二个参数是文件对象
-        const result = await client.put(ossObjectName, props.file, {
-          headers: {
-            'Content-Type': fileType.value, // 可选，设置正确的MIME类型
-          },
+      if (respnse.data.result) {
+        const token: {
+          AccessKeyId: string,
+          AccessKeySecret: string,
+          SecurityToken: string,
+        } = respnse.data.data;
+        console.log(token)
+        const client = new OSS({
+          region: 'oss-cn-beijing', // 这里需要根据你的bucket实际region填写
+          accessKeyId: token.AccessKeyId,
+          accessKeySecret: token.AccessKeySecret,
+          stsToken: token.SecurityToken, // 注意这里参数名是 stsToken
+          bucket: 'video-user-obj', // 替换为你的bucket名称
+          secure: true, // 推荐使用HTTPS
+          timeout: 240000,// 120 秒
         });
-        console.log('上传成功:', result);
-        if (result) {
-          const { url } = result;
 
-          // 上传预览图（如果存在）
-          let previewImgUrl = ''
-          if (previewImgFile) {
+        // 3. 计算文件MD5并执行上传
+        try {
+          const fileMD5 = await computeFileMD5(props.file)
+          const extension = getFileExtension(props.file.name)
+          const ossObjectName = fileMD5 + extension
+          // 使用 put 方法上传，第一个参数是存储在OSS中的对象名（MD5+扩展名），第二个参数是文件对象
+          const result = await client.put(ossObjectName, props.file, {
+            headers: {
+              'Content-Type': fileType.value, // 可选，设置正确的MIME类型
+            },
+          });
+          console.log('上传成功:', result);
+          if (result) {
+            const { url } = result;
+
+            // 上传预览图（如果存在）
+            let previewImgUrl = ''
+            if (previewImgFile) {
+              try {
+                const previewObjectName = fileMD5 + '_preview.png'
+                const previewResult = await client.put(previewObjectName, previewImgFile, {
+                  headers: {
+                    'Content-Type': 'image/png',
+                  },
+                });
+                previewImgUrl = previewResult?.url ?? ''
+                console.log('预览图上传成功:', previewResult);
+              } catch (previewErr) {
+                console.error('预览图上传失败:', previewErr);
+              }
+            }
+
+            const formData = new FormData()
+            formData.append('url', url)
+            formData.append('name', fileName.value)
+            formData.append('fileType', fileType.value)
+            formData.append('scaleFactor', String(props.scaleFactor))
+            if (previewImgUrl) {
+              formData.append('previewImg', previewImgUrl)
+            }
             try {
-              const previewObjectName = fileMD5 + '_preview.png'
-              const previewResult = await client.put(previewObjectName, previewImgFile, {
-                headers: {
-                  'Content-Type': 'image/png',
-                },
-              });
-              previewImgUrl = previewResult?.url ?? ''
-              console.log('预览图上传成功:', previewResult);
-            } catch (previewErr) {
-              console.error('预览图上传失败:', previewErr);
+              const data = service.post('/video/materialLibrary/upload', formData)
+              console.log('sssss', data)
+              // if (response.data?.code === 0) {
+              //   console.log('添加到素材库成功')
+              // }
+            } catch (error) {
+              console.error('添加到素材库失败:', error)
             }
           }
-
-          const formData = new FormData()
-          formData.append('url', url)
-          formData.append('name', fileName.value)
-          formData.append('fileType', fileType.value)
-          formData.append('scaleFactor', String(props.scaleFactor))
-          if (previewImgUrl) {
-            formData.append('previewImg', previewImgUrl)
-          }
-          try {
-            const data = service.post('/video/materialLibrary/upload', formData)
-            console.log('sssss', data)
-            // if (response.data?.code === 0) {
-            //   console.log('添加到素材库成功')
-            // }
-          } catch (error) {
-            console.error('添加到素材库失败:', error)
-          }
+        } catch (err) {
+          console.error('上传失败:', err);
         }
-      } catch (err) {
-        console.error('上传失败:', err);
+        emit('confirm')
+        closeModal()
+      } else {
+        message.error(respnse.data.data)
       }
     }
-    emit('confirm')
-    closeModal()
   } finally {
     confirmLoading.value = false
   }
