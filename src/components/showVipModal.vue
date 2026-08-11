@@ -160,6 +160,9 @@ const handlePay = async (payType: 'alipay' | 'wechat') => {
         checkStatus.value = 'checking'
       }
     }
+  } else {
+    closeModal();
+    window.showLoginDialog();
   }
 }
 

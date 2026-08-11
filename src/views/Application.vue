@@ -90,7 +90,7 @@
               </div>
             </div>
           </div>
-          <button v-else type="button" class="login-btn" @click="showLogin = true">
+          <button v-else type="button" class="login-btn" @click="showLoginDialog">
             登录
           </button>
         </div>
@@ -355,6 +355,9 @@ const pendingImportData = ref<{
 })
 
 const isVip = computed(() => {
+  if (!store.state.main.userInfo) {
+    return false;
+  }
   const vipEndDate = store.state.main.userInfo.vipEndDate
   if (!vipEndDate) return false
   return new Date(vipEndDate).getTime() > Date.now()
@@ -1515,6 +1518,10 @@ function handleAddAnimation(data: { typeKey: string; modelValue: Record<string, 
   // timelineState.timelineData.clips.push(newClip);
   contextMenu.value = null
 }
+function showLoginDialog() {
+  showLogin.value = true
+}
+window.showLoginDialog = showLoginDialog;
 </script>
 
 <style scoped lang="less">
