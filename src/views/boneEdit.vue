@@ -34,7 +34,7 @@
           </div>
         </div>
         <div class="optionsSection">
-          <div class="optionGroup">
+          <!-- <div class="optionGroup">
             <div class="optionGroupTitle">导出内容</div>
             <div class="optionRow">
               <label class="radioOption" :class="{ active: exportContent === 'currentFrame' }">
@@ -48,7 +48,7 @@
                 <span>整个动画</span>
               </label>
             </div>
-          </div>
+          </div> -->
           <div class="optionGroup">
             <div class="optionGroupTitle">应用范围</div>
             <div class="optionRow">
