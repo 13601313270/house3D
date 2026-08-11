@@ -528,6 +528,9 @@ export class PeopleEntity extends PointEntityClass<PeopleData> {
   editAnimationDataColumn(column: string, a: any, b: any, t: number) {
     if (column === 'bone') {
       const centerBone: BoneStepItem[] = [];
+      if (a === undefined) {
+        return b;
+      }
       (a as BoneStepItem[]).forEach((aItem, index) => {
         const bItem = b[index];
         centerBone.push({
