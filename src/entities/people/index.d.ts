@@ -1,4 +1,4 @@
-import { PointObjData } from '@/types/map2d'
+import { PointObjData, PointCanAngleObjData } from '@/types/map2d'
 
 export type BoneStepItem = {
   name: string
@@ -11,9 +11,7 @@ export type BoneStepItem = {
     pz: number
   }
 }
-export type PeopleData = PointObjData & {
-  angleY: number// 旋转角度Y
-  // angle: number
+export type PeopleData = PointCanAngleObjData & {
   height: number,// 身高
   color?: string,// 人物颜色
   bone?: Array<BoneStepItem>

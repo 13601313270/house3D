@@ -1,12 +1,10 @@
 import * as THREE from 'three'
 import { HandelInfo, Point } from '@/types/map2d'
 import { ImportFileData } from './index.d'
-import { PointEntityClass } from '@/types/pointEntity'
 import { editItem } from '@/utils/editItem'
 import { MatchRectArea } from '@/utils/matchArea'
 import { OrigionSnapPoint } from '@/types/baseEntity'
 import { isPointInRotatedRect } from '@/utils/isPointInRotatedRect'
-import { angelIcon, moveIcon } from '@/utils/handleImgs'
 import { PointCanAngleEntity } from '@/types/pointCanAngleEntity'
 
 export class ImportFileEntity extends PointCanAngleEntity<ImportFileData> {
@@ -225,7 +223,10 @@ export class ImportFileEntity extends PointCanAngleEntity<ImportFileData> {
 
   showMatchHandel(x: number, y: number) {
     const data = this.getData();
-    const [box, center, angel] = this.getBoundingBoxData()
+    if (!this.boundingBoxData) {
+      return null;
+    }
+    const [box, center, angel] = this.boundingBoxData
     if (isPointInRotatedRect(x, y, {
       x: data.x + center.x,
       y: data.y + center.z,
