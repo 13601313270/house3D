@@ -12,7 +12,8 @@ export type BoneStepItem = {
   }
 }
 export type PeopleData = PointObjData & {
-  angle: number
+  angleY: number// 旋转角度Y
+  // angle: number
   height: number,// 身高
   color?: string,// 人物颜色
   bone?: Array<BoneStepItem>

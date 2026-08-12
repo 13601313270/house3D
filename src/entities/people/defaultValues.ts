@@ -10,7 +10,7 @@ export default function () {
         x: 0,
         y: 0,
         z: 0,
-        angle: 0,
+        angleY: 0,
         color: '#DEDEDE',
         height: 170,
         bone: [],

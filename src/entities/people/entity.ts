@@ -7,6 +7,8 @@ import { editItem } from '@/utils/editItem'
 import { FBXLoader } from 'three/addons/loaders/FBXLoader.js';
 import { MatchCircleArea } from '@/utils/matchArea'
 import { OrigionSnapPoint } from '@/types/baseEntity'
+import { GroupBaseEntity } from '@/types/groupBase/entity'
+import { GroupBaseData } from '@/types/groupBase'
 
 const img = new Image()
 img.src = 'people.png'
@@ -38,11 +40,22 @@ export class PeopleEntity extends PointEntityClass<PeopleData> {
   private circleRadius = 6
   ManClean: THREE.Group | null = null
 
+  constructor(world: GroupBaseEntity<GroupBaseData> | null, data: PeopleData) {
+    // 由于历史代码问题，早期版本people对象的旋转用的是angle，后面全部可旋转对象，统一改叫angleY
+    if ('angle' in data && !('angleY' in data)) {
+      // @ts-ignore
+      data.angleY = data.angle as number
+      // @ts-ignore
+      delete data.angle
+    }
+    super(world, data)
+  }
+
   draw2DPreview(ctx: CanvasRenderingContext2D, zoomLevel: number): void {
     const data = this.getData();
     const screenX = data.x * zoomLevel;
     const screenY = data.y * zoomLevel;
-    const angleY = data.angle
+    const angleY = data.angleY
     const preImgScale = 0.24
     ctx.save(); // 保存当前状态
     const { width, height } = img;
@@ -64,7 +77,7 @@ export class PeopleEntity extends PointEntityClass<PeopleData> {
     zoomLevel: number
   ): void {
     const data = this.getData();
-    const { angle: angleY } = data
+    const { angleY } = data
     const angle = angleY * -1
     const screenX = data.x * zoomLevel
     const screenY = data.y * zoomLevel
@@ -238,7 +251,7 @@ export class PeopleEntity extends PointEntityClass<PeopleData> {
       return [
         new THREE.Vector3(data.height * 2 / 5, boxHeight, data.height / 5),
         new THREE.Vector3(0, boxHeight / 2, 0),
-        new THREE.Vector3(0, data.angle * -1, 0)
+        new THREE.Vector3(0, data.angleY * -1, 0)
       ]
     }
   }
@@ -332,11 +345,11 @@ export class PeopleEntity extends PointEntityClass<PeopleData> {
   change3DMeshState(): void {
     const data = this.getData();
     const singleHeight = 0.213 * 0.0261
-    const { height, angle } = data
+    const { height, angleY } = data
     this.meshList.forEach(v => {
       v.position.set(data.x, data.z, data.y)
       v.scale.set(singleHeight * height, singleHeight * height, singleHeight * height)
-      v.rotation.set(0, angle * -1, 0)
+      v.rotation.set(0, angleY * -1, 0)
     })
     if (this.meshList?.[0]?.children[0] && data.bone && data.bone?.length > 0) {
       const boneListConfig = data.bone
@@ -383,8 +396,7 @@ export class PeopleEntity extends PointEntityClass<PeopleData> {
 
   matchHandelInfo(x: number, y: number) {
     const data = this.getData();
-    const { angle } = data
-    const angleY = angle * -1
+    const angleY = data.angleY * -1
     const dist = Math.hypot(x - data.x, y - data.y)
     if (dist < this.circleRadius + 3) {
       return {
@@ -421,8 +433,7 @@ export class PeopleEntity extends PointEntityClass<PeopleData> {
       // 根据x,y计算angleY
       const angleY = Math.atan2(y - data.y, x - data.x)
       this.setData({
-        // ...this.getData(),
-        angle: angleY,
+        angleY,
       })
     } else {
       return super.matchHandelMoveCallback(position, matchHandelInfo)
@@ -506,7 +517,7 @@ export class PeopleEntity extends PointEntityClass<PeopleData> {
         dataType: 'angle',
         min: -180,
         max: 180,
-        value: data.angle,
+        value: data.angleY,
       },
     ]
   }
