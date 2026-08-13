@@ -5,11 +5,12 @@ import { clone } from 'three/examples/jsm/utils/SkeletonUtils.js'
 import { editItem } from '@/utils/editItem'
 // @ts-ignore
 import { FBXLoader } from 'three/addons/loaders/FBXLoader.js';
-import { MatchCircleArea } from '@/utils/matchArea'
+import { MatchCircleArea, MatchRectArea } from '@/utils/matchArea'
 import { OrigionSnapPoint } from '@/types/baseEntity'
 import { GroupBaseEntity } from '@/types/groupBase/entity'
 import { GroupBaseData } from '@/types/groupBase'
 import { PointCanAngleEntity } from '@/types/pointCanAngleEntity'
+import { isPointInRotatedRect } from '@/utils/isPointInRotatedRect'
 
 const img = new Image()
 img.src = 'people.png'
@@ -92,32 +93,42 @@ export class PeopleEntity extends PointCanAngleEntity<PeopleData> {
     zoomLevel: number
   ): void {
     const data = this.getData();
-    // 控制点
-    super.draw2DActionHandle(ctx, zoomLevel)
 
     // 绘制轮廓
-    const circleArea = new MatchCircleArea({
-      x: data.x,
-      y: data.y,
-      r: data.height * 0.3 + 10
+    // 计算中心点到上下左右哪个边最远
+    const [basicSize] = this.basicBoxData_!
+    const renderBox = this.boundingBoxData;
+
+    // 绘制 轮廓
+    if (!renderBox) return
+    const offset = renderBox[1];
+    const matchArea = new MatchRectArea({
+      x: data.x + offset.x,
+      y: data.y + offset.z,
+      width: basicSize.x,
+      depth: basicSize.z,
+      angleY: data.angleY,
     })
+    const scale = 1;
     ctx.lineWidth = 2
     ctx.strokeStyle = 'red'
     ctx.save(); // 保存当前状态
     ctx.translate(
-      circleArea.data.x * zoomLevel,
-      circleArea.data.y * zoomLevel
-    );
-    ctx.beginPath()
-    ctx.arc(
-      0,
-      0,
-      circleArea.data.r * zoomLevel,
-      0,
-      Math.PI * 2,
+      matchArea.data.x * zoomLevel,
+      matchArea.data.y * zoomLevel
+    ); // 移动原点到目标中心
+    ctx.rotate(matchArea.data.angleY * -1); // 围绕新原点旋转
+    // 绘制一个方块
+    ctx.strokeRect(
+      matchArea.data.width / -2 * zoomLevel * scale,
+      matchArea.data.depth / -2 * zoomLevel * scale,
+      matchArea.data.width * zoomLevel * scale,
+      matchArea.data.depth * zoomLevel * scale,
     )
-    ctx.stroke()
     ctx.restore(); // 恢复原始状态
+
+    // 控制点
+    super.draw2DActionHandle(ctx, zoomLevel)
   }
 
   create3DMesh(): THREE.Group[] {
@@ -351,9 +362,23 @@ export class PeopleEntity extends PointCanAngleEntity<PeopleData> {
   //   }
   // }
 
+  // 当前对象是否需要重新生成3D模型状态
+  create3DUnionKey(): string {
+    const cacheData = {
+      ...this.getData(),
+      x: undefined,
+      y: undefined,
+      z: undefined,
+      height: undefined,
+      angleY: undefined,
+      bone: undefined,
+    }
+
+    return JSON.stringify(cacheData)
+  }
+
   change3DMeshState(): void {
     const data = this.getData();
-    const singleHeight = 0.213 * 0.0261
     const { angleY } = data
     const scale = 1;// data.height * singleHeight;
     this.meshList.forEach(v => {
@@ -376,94 +401,43 @@ export class PeopleEntity extends PointCanAngleEntity<PeopleData> {
     }
   }
 
-  // 当前对象是否需要重新生成3D模型状态
-  create3DUnionKey(): string {
-    const cacheData = {
-      ...this.getData(),
-      x: undefined,
-      y: undefined,
-      z: undefined,
-      height: undefined,
-      angleY: undefined,
-      bone: undefined,
-    }
-
-    return JSON.stringify(cacheData)
-  }
-
   showMatchHandel(x: number, y: number) {
     const data = this.getData();
-    const dist = Math.hypot(x - data.x, y - data.y)
-    // console.log('dist', dist)
-    if (dist < data.height * 0.3 + 10) {
-      return new MatchCircleArea({
-        x: data.x,
-        y: data.y,
-        r: data.height * 0.3 + 10
+    if (!this.boundingBoxData) {
+      return null;
+    }
+    const [box, center, angel] = this.boundingBoxData
+    if (isPointInRotatedRect(x, y, {
+      x: data.x + center.x,
+      y: data.y + center.z,
+      width: box.x,
+      depth: box.z,
+      angleY: angel.y,
+    })) {
+      return new MatchRectArea({
+        x: data.x + center.x,
+        y: data.y + center.z,
+        width: box.x,
+        depth: box.z,
+        angleY: angel.y,
       })
     }
     return null;
   }
-
-  // matchHandelInfo(x: number, y: number) {
-  //   const data = this.getData();
-  //   const angleY = data.angleY
-  //   const dist = Math.hypot(x - data.x, y - data.y)
-  //   if (dist < this.circleRadius + 3) {
-  //     return {
-  //       index: 0,
-  //       type: this.type,
-  //       id: data.id,
-  //       dist,
-  //     }
-  //   }
-  //   // 控制点向着angle角度延伸10个单位后的坐标
-  //   const rotatedXAdd = data.x + Math.cos(angleY) * this.drawAngelLength
-  //   const rotatedYAdd = data.y - Math.sin(angleY) * this.drawAngelLength
-
-  //   const dist2 = Math.hypot(x - rotatedXAdd, y - rotatedYAdd)
-  //   // console.log('dist2', dist2)
-  //   if (dist2 < this.circleRadius + 3) {
-  //     return {
-  //       index: 1,
-  //       type: this.type,
-  //       id: data.id,
-  //       dist: dist2,
-  //     }
-  //   }
-  //   return null;
-  // }
-
-  // matchHandelMoveCallback(position: {
-  //   x: number,
-  //   y: number,
-  // }, matchHandelInfo: HandelInfo) {
-  //   const { x, y } = position
-  //   if (matchHandelInfo.index === 1) {
-  //     const data = this.getData();
-  //     // 根据x,y计算angleY
-  //     const angleY = Math.atan2(y - data.y, x - data.x)
-  //     this.setData({
-  //       angleY,
-  //     })
-  //   } else {
-  //     return super.matchHandelMoveCallback(position, matchHandelInfo)
-  //   }
-  // }
 
   inSceneSnapPointArea() {
     return false
   }
 
   getMineBeSnapPoints(): Array<OrigionSnapPoint> {
-    const data = this.getData();
+    const { x, y } = this.getData()
     return [{
       objType: this.type,
       snapFromType: 'point',
       point: {
         index: 0,
-        x: data.x,
-        y: data.y,
+        x: x,
+        y: y,
       },
     }]
   }

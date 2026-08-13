@@ -58,33 +58,32 @@ export class ImportFileEntity extends PointCanAngleEntity<ImportFileData> {
     const renderBox = this.boundingBoxData;
 
     // 绘制 轮廓
-    (() => {
-      if (!renderBox) return
-      const offset = renderBox[1];
-      const matchArea = new MatchRectArea({
-        x: data.x + offset.x,
-        y: data.y + offset.z,
-        width: basicSize.x,
-        depth: basicSize.z,
-        angleY: data.angleY,
-      })
-      ctx.lineWidth = 2
-      ctx.strokeStyle = 'red'
-      ctx.save(); // 保存当前状态
-      ctx.translate(
-        matchArea.data.x * zoomLevel,
-        matchArea.data.y * zoomLevel
-      ); // 移动原点到目标中心
-      ctx.rotate(matchArea.data.angleY * -1); // 围绕新原点旋转
-      // 绘制一个方块
-      ctx.strokeRect(
-        matchArea.data.width / -2 * zoomLevel * data.scale,
-        matchArea.data.depth / -2 * zoomLevel * data.scale,
-        matchArea.data.width * zoomLevel * data.scale,
-        matchArea.data.depth * zoomLevel * data.scale,
-      )
-      ctx.restore(); // 恢复原始状态
-    })();
+    if (!renderBox) return
+    const offset = renderBox[1];
+    const matchArea = new MatchRectArea({
+      x: data.x + offset.x,
+      y: data.y + offset.z,
+      width: basicSize.x,
+      depth: basicSize.z,
+      angleY: data.angleY,
+    })
+    const { scale } = data;
+    ctx.lineWidth = 2
+    ctx.strokeStyle = 'red'
+    ctx.save(); // 保存当前状态
+    ctx.translate(
+      matchArea.data.x * zoomLevel,
+      matchArea.data.y * zoomLevel
+    ); // 移动原点到目标中心
+    ctx.rotate(matchArea.data.angleY * -1); // 围绕新原点旋转
+    // 绘制一个方块
+    ctx.strokeRect(
+      matchArea.data.width / -2 * zoomLevel * scale,
+      matchArea.data.depth / -2 * zoomLevel * scale,
+      matchArea.data.width * zoomLevel * scale,
+      matchArea.data.depth * zoomLevel * scale,
+    )
+    ctx.restore(); // 恢复原始状态
 
     // 控制点
     super.draw2DActionHandle(ctx, zoomLevel)
@@ -254,11 +253,7 @@ export class ImportFileEntity extends PointCanAngleEntity<ImportFileData> {
   }
 
   getMineBeSnapPoints(): Array<OrigionSnapPoint> {
-    const { x, y, id } = this.getData()
-    // 计算旋转后的点
-    // const rotatedX = x * Math.cos(angleY) - y * Math.sin(angleY)
-    // const rotatedY = x * Math.sin(angleY) + y * Math.cos(angleY)
-
+    const { x, y } = this.getData()
     return [{
       objType: this.type,
       snapFromType: 'point',
