@@ -23,60 +23,7 @@ export class ImportFileEntity extends PointCanAngleEntity<ImportFileData> {
     if (!findObjInfo) { return Promise.resolve() }
     const mesh: THREE.Group | THREE.Mesh = findObjInfo.mesh.clone()
     this.mesh = mesh
-
-    const previewImgMesh = mesh.clone();
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true })
-    const scene = new THREE.Scene()
-    const cameraSize = 600;
-
-    const box = new THREE.Box3().setFromObject(previewImgMesh)
-    const center = box.getCenter(new THREE.Vector3())
-    const size = box.getSize(new THREE.Vector3())
-    const objZoomWidth = cameraSize / (size.x + Math.abs(center.x) * 2)
-    const objZoomHeight = cameraSize / (size.z + Math.abs(center.z) * 2)
-    const objZoom = Math.min(objZoomWidth, objZoomHeight)
-    this.imgBeCreateByScale = objZoom
-    previewImgMesh.scale.set(objZoom, 1, objZoom)
-
-    // 第一个是尺寸，第二个是位置偏移，第三个是旋转角度
-    this.basicBoxData_[0].x = size.x
-    this.basicBoxData_[0].y = size.y
-    this.basicBoxData_[0].z = size.z
-    this.basicBoxData_[1].x = center.x
-    this.basicBoxData_[1].y = center.y
-    this.basicBoxData_[1].z = center.z
-
-    const camera = new THREE.OrthographicCamera(-cameraSize / 2, cameraSize / 2, cameraSize / 2, -cameraSize / 2)
-    scene.background = null
-    const ambientLight = new THREE.AmbientLight(0xffffff, 5)
-    scene.add(ambientLight)
-
-    camera.position.set(0, 2000, 0)
-    camera.lookAt(0, 0, 0)
-
-    renderer.setPixelRatio(1)
-    renderer.shadowMap.enabled = true
-
-    const container = document.createElement('div')
-    const allPanelHeight = cameraSize;
-    container.style.width = `${allPanelHeight}px`
-    container.style.height = `${allPanelHeight}px`
-    renderer.setSize(allPanelHeight, allPanelHeight)
-
-    container.appendChild(renderer.domElement)
-
-    scene.add(previewImgMesh)
-    renderer.render(scene, camera)
-
-    return new Promise((resolve, reject) => {
-      this.img.onload = () => {
-        resolve()
-      }
-      this.img.onerror = () => {
-        reject(new Error('图片加载失败'))
-      }
-      this.img.src = renderer.domElement.toDataURL()
-    })
+    return this.initBasicBoxData_()
   }
 
   draw2DPreview(ctx: CanvasRenderingContext2D, zoomLevel: number): void {
@@ -146,9 +93,8 @@ export class ImportFileEntity extends PointCanAngleEntity<ImportFileData> {
   create3DMesh(): THREE.Group[] {
     const data = this.getData();
     const group = new THREE.Group()
-    const { fileTypeId } = data
     if (!this.mesh) {
-      console.error('未找到对应的文件类型:', fileTypeId)
+      console.error('未找到对应的文件类型:')
       return []
     }
     // @ts-ignore
@@ -172,6 +118,64 @@ export class ImportFileEntity extends PointCanAngleEntity<ImportFileData> {
     new THREE.Vector3(0, 5, 0),
     new THREE.Vector3(0, 0, 0)
   ]
+
+  // 重新构造box基础data和2D预览图
+  initBasicBoxData_(): Promise<void> {
+    if (!this.mesh) { return Promise.resolve() }
+    const previewImgMesh = this.mesh.clone();
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true })
+    const scene = new THREE.Scene()
+    const cameraSize = 600;
+
+    const box = new THREE.Box3().setFromObject(previewImgMesh)
+    const center = box.getCenter(new THREE.Vector3())
+    const size = box.getSize(new THREE.Vector3())
+    const objZoomWidth = cameraSize / (size.x + Math.abs(center.x) * 2)
+    const objZoomHeight = cameraSize / (size.z + Math.abs(center.z) * 2)
+    const objZoom = Math.min(objZoomWidth, objZoomHeight)
+    this.imgBeCreateByScale = objZoom
+    previewImgMesh.scale.set(objZoom, 1, objZoom)
+
+    // 第一个是尺寸，第二个是位置偏移，第三个是旋转角度
+    this.basicBoxData_[0].x = size.x
+    this.basicBoxData_[0].y = size.y
+    this.basicBoxData_[0].z = size.z
+    this.basicBoxData_[1].x = center.x
+    this.basicBoxData_[1].y = center.y
+    this.basicBoxData_[1].z = center.z
+
+    const camera = new THREE.OrthographicCamera(-cameraSize / 2, cameraSize / 2, cameraSize / 2, -cameraSize / 2)
+    scene.background = null
+    const ambientLight = new THREE.AmbientLight(0xffffff, 5)
+    scene.add(ambientLight)
+
+    camera.position.set(0, 2000, 0)
+    camera.lookAt(0, 0, 0)
+
+    renderer.setPixelRatio(1)
+    renderer.shadowMap.enabled = true
+
+    const container = document.createElement('div')
+    const allPanelHeight = cameraSize;
+    container.style.width = `${allPanelHeight}px`
+    container.style.height = `${allPanelHeight}px`
+    renderer.setSize(allPanelHeight, allPanelHeight)
+
+    container.appendChild(renderer.domElement)
+
+    scene.add(previewImgMesh)
+    renderer.render(scene, camera)
+
+    return new Promise((resolve, reject) => {
+      this.img.onload = () => {
+        resolve()
+      }
+      this.img.onerror = () => {
+        reject(new Error('图片加载失败'))
+      }
+      this.img.src = renderer.domElement.toDataURL()
+    })
+  }
 
   // 第一个是尺寸，第二个是位置偏移，第三个是旋转角度
   getBoundingBoxData(): [THREE.Vector3, THREE.Vector3, THREE.Vector3] {

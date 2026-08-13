@@ -1,7 +1,7 @@
 import * as THREE from 'three'
 import { HandelInfo, Point } from '@/types/map2d'
 import { BoneStepItem, PeopleData } from './index.d'
-import { PointEntityClass } from '@/types/pointEntity'
+import { clone } from 'three/examples/jsm/utils/SkeletonUtils.js'
 import { editItem } from '@/utils/editItem'
 // @ts-ignore
 import { FBXLoader } from 'three/addons/loaders/FBXLoader.js';
@@ -39,7 +39,9 @@ export class PeopleEntity extends PointCanAngleEntity<PeopleData> {
   active: boolean = false // 这个不存在数据库里，只是在前端动态调整
   drawAngelLength: number = 40
   private circleRadius = 6
-  ManClean: THREE.Group | null = null
+  mesh: THREE.Group | THREE.Mesh | null = null
+  img: HTMLImageElement = new Image()
+  imgBeCreateByScale: number = 1; // 这个图片是以哪个缩放比例创建的
 
   constructor(world: GroupBaseEntity<GroupBaseData> | null, data: PeopleData) {
     // 由于历史代码问题，早期版本people对象的旋转用的是angle，后面全部可旋转对象，统一改叫angleY
@@ -52,23 +54,35 @@ export class PeopleEntity extends PointCanAngleEntity<PeopleData> {
     super(world, data)
   }
 
+  init(): Promise<void> {
+    return new Promise((resolve) => {
+      const loader = new FBXLoader()
+      loader.load('./ManClean.fbx', (fbxModel: THREE.Mesh) => {
+        this.mesh = fbxModel
+        this.initBasicBoxData_().then(res => {
+          resolve(res)
+        })
+      })
+    })
+  }
+
   draw2DPreview(ctx: CanvasRenderingContext2D, zoomLevel: number): void {
     const data = this.getData();
+    const scale = 1;// data.height * singleHeight;
     const screenX = data.x * zoomLevel;
     const screenY = data.y * zoomLevel;
     const angleY = data.angleY
-    const preImgScale = 0.24
+    const preImgScale = scale / this.imgBeCreateByScale;
     ctx.save(); // 保存当前状态
-    const { width, height } = img;
-    const zoom = data.height / 170
+    const { width, height } = this.img;
     ctx.translate(screenX, screenY); // 移动原点到目标中心
     ctx.rotate(angleY * -1); // 围绕新原点旋转
     ctx.drawImage(
-      img,
-      preImgScale / -2 * width * zoomLevel * zoom,
-      preImgScale / -2 * height * zoomLevel * zoom,
-      preImgScale * width * zoomLevel * zoom,
-      preImgScale * height * zoomLevel * zoom
+      this.img,
+      preImgScale / -2 * width * zoomLevel,
+      preImgScale / -2 * height * zoomLevel,
+      preImgScale * width * zoomLevel,
+      preImgScale * height * zoomLevel
     ); // 以新原点为中心绘制
     ctx.restore(); // 恢复原始状态
   }
@@ -78,7 +92,6 @@ export class PeopleEntity extends PointCanAngleEntity<PeopleData> {
     zoomLevel: number
   ): void {
     const data = this.getData();
-
     // 控制点
     super.draw2DActionHandle(ctx, zoomLevel)
 
@@ -107,65 +120,35 @@ export class PeopleEntity extends PointCanAngleEntity<PeopleData> {
     ctx.restore(); // 恢复原始状态
   }
 
-  init(): Promise<void> {
-    return new Promise((resolve) => {
-      const loader = new FBXLoader()
-      loader.load('./ManClean.fbx', (fbxModel: THREE.Group) => {
-        this.ManClean = fbxModel
-        resolve()
-      })
-    })
-  }
-
   create3DMesh(): THREE.Group[] {
     console.log('00000000')
     const data = this.getData();
     const group = new THREE.Group()
     const { color } = data
-    if (this.ManClean) {
-      const fbxModel = this.ManClean
-
-      fbxModel.rotateX(Math.PI);
-      fbxModel.rotateY(Math.PI)
-      fbxModel.rotateZ(Math.PI);
-      const boneListConfig = data.bone || [];
-      fbxModel.traverse((child: any) => {
-        if (child.isBone) {
-          // console.log(`🦴 发现骨骼: ${child.name}`);
-          const findProp = boneListConfig.find((item) => item.name === child.name)
-          if (findProp) {
-            child.rotation.set(findProp.value.x, findProp.value.y, findProp.value.z)
-          }
-          // console.log(`🦴 发现骨骼-1:${child.name}: ${child.rotation.x}, ${child.rotation.y}, ${child.rotation.z}`);
-        }
-      });
-      // 设置人物颜色
-      fbxModel.traverse((child: any) => {
-        if (child.isMesh) {
-          child.material.color.set(color)
-        }
-      })
-      // const canvas = document.createElement('canvas');
-      // const ctx = canvas.getContext('2d');
-      // ctx!.fillText('标签文字', 10, 20);
-      // const texture = new THREE.CanvasTexture(canvas);
-      // const spriteMaterial = new THREE.SpriteMaterial({ map: texture });
-      // const sprite = new THREE.Sprite(spriteMaterial);
-      // // sprite.position.y = 17 // 在模型上方
-      // // @ts-ignore
-      // window.ssss = sprite
-      // // @ts-ignore
-      // window.ddd = () => {
-      //   sprite.position.y++
-      // }
-      // group.add(sprite);
-
-      group.add(fbxModel)
-      setTimeout(() => {
-        this.initBasicBoxData_();
-        this.reBuildBoundingBoxData();
-      }, 0)
+    if (!this.mesh) {
+      console.error('未找到对应的文件类型:')
+      return []
     }
+    const threeObject = this.mesh
+    const boneListConfig = data.bone || [];
+    threeObject.traverse((child: any) => {
+      if (child.isBone) {
+        // console.log(`🦴 发现骨骼: ${child.name}`);
+        const findProp = boneListConfig.find((item) => item.name === child.name)
+        if (findProp) {
+          child.rotation.set(findProp.value.x, findProp.value.y, findProp.value.z)
+        }
+        // console.log(`🦴 发现骨骼-1:${child.name}: ${child.rotation.x}, ${child.rotation.y}, ${child.rotation.z}`);
+      }
+    });
+    // 设置人物颜色
+    threeObject.traverse((child: any) => {
+      if (child.isMesh) {
+        child.material.color.set(color)
+      }
+    })
+    group.add(threeObject)
+    this.reBuildBoundingBoxData();
     return [
       group
     ]
@@ -178,23 +161,23 @@ export class PeopleEntity extends PointCanAngleEntity<PeopleData> {
     new THREE.Vector3(0, 0, 0)
   ]
 
-  initBasicBoxData_() {
-    // const mesh = fbxModel.clone()
-    const mesh = this.meshList[0].children[0].clone()
+  // 重新构造box基础data和2D预览图
+  initBasicBoxData_(): Promise<void> {
+    if (!this.mesh) { return Promise.resolve() }
+    const previewImgMesh = clone(this.mesh);
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true })
     const scene = new THREE.Scene()
     const cameraSize = 600;
 
-    const box = new THREE.Box3().setFromObject(mesh)
+    const box = new THREE.Box3().setFromObject(previewImgMesh)
     const center = box.getCenter(new THREE.Vector3())
     const size = box.getSize(new THREE.Vector3())
     const objZoomWidth = cameraSize / (size.x + Math.abs(center.x) * 2)
     const objZoomHeight = cameraSize / (size.z + Math.abs(center.z) * 2)
     const objZoom = Math.min(objZoomWidth, objZoomHeight)
-    // this.imgBeCreateByScale = objZoom
-    mesh.scale.set(objZoom, 1, objZoom)
-
-    console.log('objZoom-center', size, center)
+    console.log('objZoom', previewImgMesh.children[1], objZoom)
+    this.imgBeCreateByScale = objZoom
+    previewImgMesh.scale.set(objZoom, 1, objZoom)
 
     // 第一个是尺寸，第二个是位置偏移，第三个是旋转角度
     this.basicBoxData_[0].x = size.x
@@ -203,6 +186,38 @@ export class PeopleEntity extends PointCanAngleEntity<PeopleData> {
     this.basicBoxData_[1].x = center.x
     this.basicBoxData_[1].y = center.y
     this.basicBoxData_[1].z = center.z
+
+    const camera = new THREE.OrthographicCamera(-cameraSize / 2, cameraSize / 2, cameraSize / 2, -cameraSize / 2)
+    scene.background = null
+    const ambientLight = new THREE.AmbientLight(0xffffff, 5)
+    scene.add(ambientLight)
+
+    camera.position.set(0, 2000, 0)
+    camera.lookAt(0, 0, 0)
+
+    renderer.setPixelRatio(1)
+    renderer.shadowMap.enabled = true
+
+    const container = document.createElement('div')
+    const allPanelHeight = cameraSize;
+    container.style.width = `${allPanelHeight}px`
+    container.style.height = `${allPanelHeight}px`
+    renderer.setSize(allPanelHeight, allPanelHeight)
+
+    container.appendChild(renderer.domElement)
+
+    scene.add(previewImgMesh)
+    renderer.render(scene, camera)
+
+    return new Promise((resolve, reject) => {
+      this.img.onload = () => {
+        resolve()
+      }
+      this.img.onerror = () => {
+        reject(new Error('图片加载失败'))
+      }
+      this.img.src = renderer.domElement.toDataURL()
+    })
   }
 
   // 第一个是尺寸，第二个是位置偏移，第三个是旋转角度
@@ -230,7 +245,6 @@ export class PeopleEntity extends PointCanAngleEntity<PeopleData> {
   getBoundingBoxData(): [THREE.Vector3, THREE.Vector3, THREE.Vector3] {
     const { angleY } = this.getData()
     const scale = 1;
-    console.log('objZoom-center----getBoundingBoxData')
     const size = this.basicBoxData_[0].clone();
     size.set(size.x * scale, size.y * scale, size.z * scale)
     const center = this.basicBoxData_[1].clone();
@@ -340,10 +354,11 @@ export class PeopleEntity extends PointCanAngleEntity<PeopleData> {
   change3DMeshState(): void {
     const data = this.getData();
     const singleHeight = 0.213 * 0.0261
-    const { height, angleY } = data
+    const { angleY } = data
+    const scale = 1;// data.height * singleHeight;
     this.meshList.forEach(v => {
       v.position.set(data.x, data.z, data.y)
-      v.scale.set(singleHeight * height, singleHeight * height, singleHeight * height)
+      v.scale.set(scale, scale, scale)
       v.rotation.set(0, angleY, 0)
     })
     if (this.meshList?.[0]?.children[0] && data.bone && data.bone?.length > 0) {
