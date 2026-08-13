@@ -1115,7 +1115,7 @@ const handleContextMenu = (point: {
                 const changeData: any = {};
                 const data = api.getData();// 这个一定不要用上面的data，而是每次都要重新getData。
                 Object.keys(val).forEach(key => {
-                  if (!['isHidden', 'tip', 'tipFontSize', 'isLocked'].includes(key) && typeof val[key] !== 'function') {
+                  if (!['isHidden', 'isLocked'].includes(key) && typeof val[key] !== 'function') {
                     if (JSON.stringify(val[key]) !== JSON.stringify(data[key])) {
                       changeData[key] = val[key];
                     }
