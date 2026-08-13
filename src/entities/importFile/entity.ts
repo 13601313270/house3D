@@ -13,8 +13,7 @@ export class ImportFileEntity extends PointCanAngleEntity<ImportFileData> {
   color: string = '#0c7f25'
   color3D: string = '#0c7f25'
   colorOpacity: string = '#14b737a5'
-  private circleRadius = 6
-
+  mesh: THREE.Group | THREE.Mesh | null = null
   img: HTMLImageElement = new Image()
   imgBeCreateByScale: number = 1; // 这个图片是以哪个缩放比例创建的
 
@@ -22,19 +21,22 @@ export class ImportFileEntity extends PointCanAngleEntity<ImportFileData> {
     const { fileTypeId } = this.getData();
     const findObjInfo = window.worldState.allImportFiles.find(item => item.fileTypeId === fileTypeId)
     if (!findObjInfo) { return Promise.resolve() }
-    const mesh = findObjInfo.mesh.clone()
+    const mesh: THREE.Group | THREE.Mesh = findObjInfo.mesh.clone()
+    this.mesh = mesh
+
+    const previewImgMesh = mesh.clone();
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true })
     const scene = new THREE.Scene()
     const cameraSize = 600;
 
-    const box = new THREE.Box3().setFromObject(mesh)
+    const box = new THREE.Box3().setFromObject(previewImgMesh)
     const center = box.getCenter(new THREE.Vector3())
     const size = box.getSize(new THREE.Vector3())
     const objZoomWidth = cameraSize / (size.x + Math.abs(center.x) * 2)
     const objZoomHeight = cameraSize / (size.z + Math.abs(center.z) * 2)
     const objZoom = Math.min(objZoomWidth, objZoomHeight)
     this.imgBeCreateByScale = objZoom
-    mesh.scale.set(objZoom, 1, objZoom)
+    previewImgMesh.scale.set(objZoom, 1, objZoom)
 
     // 第一个是尺寸，第二个是位置偏移，第三个是旋转角度
     this.basicBoxData_[0].x = size.x
@@ -63,7 +65,7 @@ export class ImportFileEntity extends PointCanAngleEntity<ImportFileData> {
 
     container.appendChild(renderer.domElement)
 
-    scene.add(mesh)
+    scene.add(previewImgMesh)
     renderer.render(scene, camera)
 
     return new Promise((resolve, reject) => {
@@ -145,14 +147,12 @@ export class ImportFileEntity extends PointCanAngleEntity<ImportFileData> {
     const data = this.getData();
     const group = new THREE.Group()
     const { fileTypeId } = data
-    const findObjInfo = window.worldState.allImportFiles.find(item => item.fileTypeId === fileTypeId)
-    if (!findObjInfo) {
+    if (!this.mesh) {
       console.error('未找到对应的文件类型:', fileTypeId)
       return []
     }
     // @ts-ignore
-    const threeObject = findObjInfo.mesh as THREE.Group | undefined;
-
+    const threeObject = this.mesh;
     // 如果有预加载的本地模型对象，直接使用
     if (threeObject) {
       const clonedObject = threeObject.clone()
