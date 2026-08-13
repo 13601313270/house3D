@@ -297,7 +297,12 @@ const handleConfirm = async () => {
       } else {
         message.error(respnse.data.data)
       }
+    } else {
+      emit('confirm')
+      closeModal()
     }
+  } catch (e) {
+    console.log(e)
   } finally {
     confirmLoading.value = false
   }
