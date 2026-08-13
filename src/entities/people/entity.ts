@@ -5,15 +5,12 @@ import { clone } from 'three/examples/jsm/utils/SkeletonUtils.js'
 import { editItem } from '@/utils/editItem'
 // @ts-ignore
 import { FBXLoader } from 'three/addons/loaders/FBXLoader.js';
-import { MatchCircleArea, MatchRectArea } from '@/utils/matchArea'
+import { MatchRectArea } from '@/utils/matchArea'
 import { OrigionSnapPoint } from '@/types/baseEntity'
 import { GroupBaseEntity } from '@/types/groupBase/entity'
 import { GroupBaseData } from '@/types/groupBase'
 import { PointCanAngleEntity } from '@/types/pointCanAngleEntity'
 import { isPointInRotatedRect } from '@/utils/isPointInRotatedRect'
-
-const img = new Image()
-img.src = 'people.png'
 
 /**
  * 角度最短路径线性插值
@@ -32,12 +29,6 @@ function lerpAngle(start: number, end: number, t: number): number {
 export class PeopleEntity extends PointCanAngleEntity<PeopleData> {
   name: string = '人物'
   type: string = 'people'
-  color: string = '#0c7f25'
-  color3D: string = '#0c7f25'
-  color3DActive: string = 'red'
-  colorOpacity: string = '#14b737a5'
-  colorOpacityActive: string = 'red'
-  active: boolean = false // 这个不存在数据库里，只是在前端动态调整
   drawAngelLength: number = 40
   private circleRadius = 6
   mesh: THREE.Group | THREE.Mesh | null = null
@@ -436,8 +427,8 @@ export class PeopleEntity extends PointCanAngleEntity<PeopleData> {
       snapFromType: 'point',
       point: {
         index: 0,
-        x: x,
-        y: y,
+        x,
+        y,
       },
     }]
   }
