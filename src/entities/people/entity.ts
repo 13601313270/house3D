@@ -8,6 +8,7 @@ import { FBXLoader } from 'three/addons/loaders/FBXLoader.js';
 import { GroupBaseEntity } from '@/types/groupBase/entity'
 import { GroupBaseData } from '@/types/groupBase'
 import { ModelFileEntity } from '@/types/modelFileEntity'
+import canvas2DSceneManage from '@/utils/canvas2DSceneManage'
 
 /**
  * 角度最短路径线性插值
@@ -39,6 +40,9 @@ export class PeopleEntity extends ModelFileEntity<PeopleData> {
       // @ts-ignore
       delete data.angle
     }
+    if (data.scale === undefined) {
+      data.scale = 1;
+    }
     super(world, data)
   }
 
@@ -47,7 +51,7 @@ export class PeopleEntity extends ModelFileEntity<PeopleData> {
       const loader = new FBXLoader()
       loader.load('./ManClean.fbx', (fbxModel: THREE.Mesh) => {
         this.mesh = fbxModel
-        this.initBasicBoxData_().then(res => {
+        this.initBasicBoxDataAnd2DPreview().then(res => {
           resolve(res)
         })
       })
@@ -180,9 +184,16 @@ export class PeopleEntity extends ModelFileEntity<PeopleData> {
       console.log('editPropConfig', val)
       if (val.bone) {
         setTimeout(() => {
-          this.initBasicBoxData_();
-          this.reBuildBoundingBoxData();
+          this.initBasicBoxDataAnd2DPreview().then(() => {
+            this.reBuildBoundingBoxData();
+            canvas2DSceneManage.renderPreview()
+          })
         }, 0)
+      }
+      if (val.color) {
+        this.initBasicBoxDataAnd2DPreview().then(() => {
+          canvas2DSceneManage.renderPreview()
+        })
       }
     })
   }

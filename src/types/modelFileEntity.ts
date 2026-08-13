@@ -81,6 +81,7 @@ export abstract class ModelFileEntity<T extends ModelFileData> extends PointCanA
 
   create3DMesh(): THREE.Group[] {
     const data = this.getData();
+    console.log('ddddd-createMesh', data)
     const group = new THREE.Group()
     if (!this.mesh) {
       console.error('未找到对应的文件类型:')
@@ -109,12 +110,13 @@ export abstract class ModelFileEntity<T extends ModelFileData> extends PointCanA
   ]
 
   // 重新构造box基础data和2D预览图
-  initBasicBoxData_(): Promise<void> {
+  initBasicBoxDataAnd2DPreview(): Promise<void> {
     if (!this.mesh) { return Promise.resolve() }
     const previewImgMesh = clone(this.mesh);
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true })
     const scene = new THREE.Scene()
     const cameraSize = 600;
+    // console.log('ddddd-preview')
 
     const box = new THREE.Box3().setFromObject(previewImgMesh)
     const center = box.getCenter(new THREE.Vector3())

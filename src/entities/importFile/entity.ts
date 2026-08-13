@@ -14,7 +14,7 @@ export class ImportFileEntity extends ModelFileEntity<ImportFileData> {
     if (!findObjInfo) { return Promise.resolve() }
     const mesh: THREE.Group | THREE.Mesh = findObjInfo.mesh.clone()
     this.mesh = mesh
-    return this.initBasicBoxData_()
+    return this.initBasicBoxDataAnd2DPreview()
   }
 
   getEditPropConfigData(data: ImportFileData): editItem[] {
