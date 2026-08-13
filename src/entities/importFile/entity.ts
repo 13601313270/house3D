@@ -8,6 +8,15 @@ export class ImportFileEntity extends ModelFileEntity<ImportFileData> {
   name: string = '导入文件'
   type: string = 'importFile'
 
+  init(): Promise<void> {
+    const { fileTypeId } = this.getData();
+    const findObjInfo = window.worldState.allImportFiles.find(item => item.fileTypeId === fileTypeId)
+    if (!findObjInfo) { return Promise.resolve() }
+    const mesh: THREE.Group | THREE.Mesh = findObjInfo.mesh.clone()
+    this.mesh = mesh
+    return this.initBasicBoxData_()
+  }
+
   getEditPropConfigData(data: ImportFileData): editItem[] {
     return [
       {

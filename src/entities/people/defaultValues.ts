@@ -10,6 +10,7 @@ export default function () {
         x: 0,
         y: 0,
         z: 0,
+        scale: 1,
         angleY: 0,
         color: '#DEDEDE',
         height: 170,

@@ -1,33 +1,27 @@
 import * as THREE from 'three'
-import { HandelInfo, Point } from '@/types/map2d'
+import { Point, PointCanAngleObjData } from '@/types/map2d'
 import { editItem } from '@/utils/editItem'
 import { MatchRectArea } from '@/utils/matchArea'
 import { OrigionSnapPoint } from '@/types/baseEntity'
 import { isPointInRotatedRect } from '@/utils/isPointInRotatedRect'
 import { PointCanAngleEntity } from '@/types/pointCanAngleEntity'
-import { ImportFileData } from '@/entities/importFile/index.d'
+import { clone } from 'three/examples/jsm/utils/SkeletonUtils.js'
+
+export type ModelFileData = PointCanAngleObjData & {
+  scale: number,
+}
 
 // 挂载一个模型文件的旋转类
-export abstract class ModelFileEntity<T extends ImportFileData> extends PointCanAngleEntity<T> {
+export abstract class ModelFileEntity<T extends ModelFileData> extends PointCanAngleEntity<T> {
   mesh: THREE.Group | THREE.Mesh | null = null
   img: HTMLImageElement = new Image()
   imgBeCreateByScale: number = 1; // 这个图片是以哪个缩放比例创建的
 
-  init(): Promise<void> {
-    const { fileTypeId } = this.getData();
-    const findObjInfo = window.worldState.allImportFiles.find(item => item.fileTypeId === fileTypeId)
-    if (!findObjInfo) { return Promise.resolve() }
-    const mesh: THREE.Group | THREE.Mesh = findObjInfo.mesh.clone()
-    this.mesh = mesh
-    return this.initBasicBoxData_()
-  }
-
   draw2DPreview(ctx: CanvasRenderingContext2D, zoomLevel: number): void {
     const data = this.getData();
-    const { x, y, scale } = data;
+    const { x, y, scale, angleY } = data;
     const screenX = x * zoomLevel;
     const screenY = y * zoomLevel;
-    const angleY = data.angleY;// * -1 + Math.PI / 2
     const preImgScale = scale / this.imgBeCreateByScale
 
     const { width, height } = this.img;
@@ -117,7 +111,7 @@ export abstract class ModelFileEntity<T extends ImportFileData> extends PointCan
   // 重新构造box基础data和2D预览图
   initBasicBoxData_(): Promise<void> {
     if (!this.mesh) { return Promise.resolve() }
-    const previewImgMesh = this.mesh.clone();
+    const previewImgMesh = clone(this.mesh);
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true })
     const scene = new THREE.Scene()
     const cameraSize = 600;
@@ -213,10 +207,11 @@ export abstract class ModelFileEntity<T extends ImportFileData> extends PointCan
   // 例如：改变位置，旋转角度等，模型本身不变
   change3DMeshState(): void {
     const data = this.getData();
+    const { scale, angleY } = data
     this.meshList.forEach(v => {
       v.position.set(data.x, data.z, data.y)
-      v.rotation.y = data.angleY
-      v.scale.set(data.scale, data.scale, data.scale)
+      v.rotation.set(0, angleY, 0)
+      v.scale.set(scale, scale, scale)
     })
   }
 
@@ -269,7 +264,7 @@ export abstract class ModelFileEntity<T extends ImportFileData> extends PointCan
     return false
   }
 
-  getEditPropConfigData(data: ImportFileData): editItem[] {
+  getEditPropConfigData(data: ModelFileData): editItem[] {
     return [
       {
         id: 'z',
@@ -290,38 +285,5 @@ export abstract class ModelFileEntity<T extends ImportFileData> extends PointCan
         value: data.scale,
       },
     ]
-  }
-
-  editPropConfig(snapPoint: HandelInfo, editShow: (editInfoList: editItem[], callback: (val: any) => void) => void): void {
-    const data = this.getData();
-    const configList: editItem[] = [
-      ...this.getEditPropConfigData(data),
-      {
-        id: 'downLoadFile',
-        label: '下载文件',
-        dataType: 'button',
-        value: () => {
-          const { fileTypeId } = this.getData();
-          const findObjInfo = window.worldState.allImportFiles.find(item => item.fileTypeId === fileTypeId)
-          if (findObjInfo) {
-            const file: File = findObjInfo.file
-            const url = URL.createObjectURL(file)
-            const a = document.createElement('a')
-            a.href = url
-            a.download = file.name
-            document.body.appendChild(a)
-            a.click()
-            document.body.removeChild(a)
-            URL.revokeObjectURL(url)
-          }
-        }
-      },
-    ]
-    editShow(configList, (val) => {
-      this.setData({
-        // ...data,
-        ...val,
-      })
-    })
   }
 }

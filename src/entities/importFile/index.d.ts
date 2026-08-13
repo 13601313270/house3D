@@ -1,6 +1,6 @@
 import { PointObjData, PointCanAngleObjData } from '@/types/map2d'
+import { ModelFileData } from '@/types/modelFileEntity'
 
-export type ImportFileData = PointCanAngleObjData & {
+export type ImportFileData = ModelFileData & {
   fileTypeId: string
-  scale: number,
 }
