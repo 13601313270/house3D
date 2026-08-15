@@ -7,7 +7,7 @@ export interface KeyTimePoint {
 export interface ObjOneColumnData {
   trackType: string
   keyTimePoints: KeyTimePoint[]
-  interpolation?: 'linear' | 'step' | 'bezier'
+  // interpolation?: 'linear' | 'step' | 'bezier'
 }
 
 export interface ObjAllColumnData {
@@ -16,13 +16,6 @@ export interface ObjAllColumnData {
   startTime: number
   endTime: number
   columns: ObjOneColumnData[]
-}
-
-export interface ClipSegment {
-  clip: ObjAllColumnData
-  startTime: number
-  endTime: number
-  rowIndex: number
 }
 
 export interface TimelineData {

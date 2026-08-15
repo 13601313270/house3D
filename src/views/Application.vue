@@ -263,7 +263,7 @@ import canvas2DSceneManage from '@/utils/canvas2DSceneManage'
 import bindDanvas2DSceneDefaultEvent from '@/utils/bindDanvas2DSceneDefaultEvent';
 import setHoverPoint from '@/utils/setHoverPoint';
 import TimeLine from '@/components/timeLine.vue'
-import { timelineState } from '@/utils/timelineManage';
+import { TimelineData, timelineState } from '@/utils/timelineManage';
 import generateClipId from '@/utils/generateClipId';
 import ImportModelConfirm from '@/components/ImportModelConfirm.vue';
 import handleLoadedObject from '@/utils/handleLoadedObject';
@@ -824,21 +824,7 @@ const handleLoadProgramFileChange = async (e: Event) => {
     cameraState: CameraState
     activeCameraIndex: number
     environmentConfig?: EnvironmentConfig
-    timelineData?: {
-      duration: number
-      clips: Array<{
-        entityId: string
-        columns: Array<{
-          trackType: string
-          keyframes: Array<{
-            time: number
-            value: any
-            easing?: string
-          }>
-          interpolation?: string
-        }>
-      }>
-    }
+    timelineData?: TimelineData
   } = JSON.parse(sceneJsonText);
 
   const allFileTypeId: Set<string> = new Set();
@@ -2190,6 +2176,7 @@ button {
 
     .demoItem {
       width: 200px;
+      height: 223px;
       cursor: default;
       font-size: 16px;
       color: #666;

@@ -111,13 +111,19 @@
 import { ref, computed, onUnmounted, onMounted } from 'vue'
 import { message } from '@/utils/message'
 // timelineState 模块：管理时间轴状态，clip/track/keyframe 数据结构，以及全局播放状态标志
-import { ClipSegment, timelineState } from '@/utils/timelineManage';
+import { ObjAllColumnData, timelineState } from '@/utils/timelineManage';
 import editItem from '@/utils/editItem';
 import DataTypeEditPanel from '../views/DataTypeEditPanel.vue'
 import showContextMenu from '@/utils/contextMenu';
 import evaluateTrack from '@/utils/evaluateTrack';
 import { sleep } from '@/utils/sleep';
 
+interface ClipSegment {
+  clip: ObjAllColumnData
+  startTime: number
+  endTime: number
+  rowIndex: number
+}
 const props = defineProps<{
   isVip: boolean
 }>()

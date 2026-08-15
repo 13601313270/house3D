@@ -1,7 +1,6 @@
 import * as THREE from 'three'
 import { HandelInfo } from '@/types/map2d'
 import { BoneStepItem, PeopleData } from './index.d'
-import { clone } from 'three/examples/jsm/utils/SkeletonUtils.js'
 import { editItem } from '@/utils/editItem'
 // @ts-ignore
 import { FBXLoader } from 'three/addons/loaders/FBXLoader.js';
