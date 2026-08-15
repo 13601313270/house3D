@@ -804,6 +804,7 @@ function evaluateTimeline(time: number) {
           const valuePre: number | undefined | null = (entity.getOriginalData() as any)[trackType] as number;
           if (valuePre !== undefined && valuePre !== null) {
             sortedKeyTimePoints.unshift({
+              type: 'point',
               time: clip.startTime,
               value: valuePre,
               easing: 'linear',

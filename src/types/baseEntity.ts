@@ -92,6 +92,7 @@ export abstract class BaseEntityClass<T extends BaseObjData> {
               findTrack.keyTimePoints = keyTimePoints;
             } else {
               keyTimePoints.push({
+                type: 'point',
                 time: timelineState.currentTime,
                 // @ts-ignore
                 value: data[key],
@@ -102,6 +103,7 @@ export abstract class BaseEntityClass<T extends BaseObjData> {
             findClip.columns.push({
               trackType: key,
               keyTimePoints: [{
+                type: 'point',
                 time: timelineState.currentTime,
                 // @ts-ignore
                 value: data[key],

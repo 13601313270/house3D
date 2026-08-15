@@ -1,4 +1,5 @@
 export interface KeyTimePoint {
+  type: 'point'
   time: number
   value: number
   easing?: string

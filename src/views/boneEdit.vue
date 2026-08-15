@@ -909,6 +909,7 @@ async function saveAnimation(boneFilter?: (name: string) => boolean) {
           findTrack.keyTimePoints = keyTimePoints;
         } else {
           keyTimePoints.push({
+            type: 'point',
             time: timeParams.time,
             // @ts-ignore
             value: timeParams.saveVal,
@@ -919,6 +920,7 @@ async function saveAnimation(boneFilter?: (name: string) => boolean) {
         findClip.columns.push({
           trackType: key,
           keyTimePoints: [{
+            type: 'point',
             time: timeParams.time,
             // @ts-ignore
             value: timeParams.saveVal,
