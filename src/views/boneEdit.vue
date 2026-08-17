@@ -161,6 +161,7 @@ import type { BoneStepItem } from '@/entities/people/index.d'
 import { timelineState } from '@/utils/timelineManage'
 import generateClipId from '@/utils/generateClipId'
 import allPeopleAnimate, { AnimationItem } from '@/utils/allPeopleAnimate'
+import { ApplyScope, getBoneFilter } from '@/utils/peopleBones'
 
 const viewportRef = ref<HTMLDivElement | null>(null)
 const containerRef = ref<HTMLDivElement | null>(null)
@@ -179,7 +180,6 @@ type ExportContent = 'currentFrame' | 'wholeAnimation'
 const exportContent = ref<ExportContent>('currentFrame')
 
 // 应用范围：全身 / 上半身 / 下半身 / 头部 / 左臂 / 右臂
-type ApplyScope = 'fullBody' | 'upperBody' | 'lowerBody' | 'head' | 'leftArm' | 'rightArm'
 const applyScope = ref<ApplyScope>('fullBody')
 
 const props = defineProps<{
@@ -629,14 +629,16 @@ onUnmounted(() => {
 //   const bondMesh = scene.getObjectByName(item.name) as THREE.Mesh
 //   bondMesh.rotation[editRotation] = item.value[editRotation]
 // }
-function save(boneFilter?: (name: string) => boolean) {
+function save(bones: string[]) {
   if (currentAction && isPlaying.value) {
     currentAction.paused = true
     isPlaying.value = false
   }
 
   allBones.value.forEach(bone => {
-    if (boneFilter && !boneFilter(bone.name)) return
+    if (!bones.includes(bone.name)) {
+      return
+    }
     const boneObject = scene.getObjectByName(bone.name)
     if (boneObject) {
       bone.value.x = boneObject.rotation.x
@@ -657,31 +659,11 @@ function save(boneFilter?: (name: string) => boolean) {
   emit('update:modelValue', saveVal)
 }
 
-async function saveAnimation(boneFilter?: (name: string) => boolean) {
+async function saveAnimation(applyScope: ApplyScope) {
   if (currentAction && isPlaying.value) {
     currentAction.paused = true
     isPlaying.value = false
   }
-
-  allBones.value.forEach(bone => {
-    if (boneFilter && !boneFilter(bone.name)) return
-    const boneObject = scene.getObjectByName(bone.name)
-    if (boneObject) {
-      bone.value.x = boneObject.rotation.x
-      bone.value.y = boneObject.rotation.y
-      bone.value.z = boneObject.rotation.z
-      bone.value.px = boneObject.position.x
-      bone.value.py = boneObject.position.y
-      bone.value.pz = boneObject.position.z
-    }
-  })
-
-  const saveVal = allBones.value.map(v => {
-    return {
-      name: v.name,
-      value: v.value,
-    }
-  })
   const originalData = window.editPropEntity.getOriginalData();
   let findClip = timelineState.timelineData.clips.find(v => v.entityId === originalData.id);
   if (!findClip) {
@@ -697,27 +679,24 @@ async function saveAnimation(boneFilter?: (name: string) => boolean) {
   console.log('findClip', findClip);
   if (findClip) {
     const key = 'bone';
-    const timeParams = {
-      saveVal: JSON.parse(JSON.stringify(saveVal)),
-      time: timelineState.currentTime,
-    }
     const findTrack = findClip.columns.find(v => v.trackType === key)
     const timeLength = 2;
     console.log('findTrack', findClip.columns, key, findTrack)
     if (findTrack) {
       const keyTimePoints = [...findTrack.keyTimePoints];
-      if (keyTimePoints.find(v => v.time === timeParams.time)) {
-        const index = keyTimePoints.findIndex(v => v.time === timeParams.time)
+      if (keyTimePoints.find(v => v.time === timelineState.currentTime)) {
+        const index = keyTimePoints.findIndex(v => v.time === timelineState.currentTime)
         // @ts-ignore
-        keyTimePoints[index].value = timeParams.saveVal
+        keyTimePoints[index].value = animationKey.value;
         findTrack.keyTimePoints = keyTimePoints;
       } else {
         keyTimePoints.push({
           type: 'animation',
-          time: timeParams.time,
+          time: timelineState.currentTime,
           value: animationKey.value,
           startTime: currentTime.value,
           timeLength,
+          applyScope,
         })
         findTrack.keyTimePoints = keyTimePoints.sort((a, b) => a.time - b.time);
       }
@@ -726,142 +705,34 @@ async function saveAnimation(boneFilter?: (name: string) => boolean) {
         trackType: key,
         keyTimePoints: [{
           type: 'animation',
-          time: timeParams.time,
+          time: timelineState.currentTime,
           value: animationKey.value,
           startTime: currentTime.value,
           timeLength,
+          applyScope,
         }]
       })
     }
 
     // 如果timelineState.currentTime，在findClip.startTime和findClip.endTime之外，那么调整findClip.startTime和findClip.endTime，包括进这个时间
-    if (timeParams.time < findClip.startTime) {
-      findClip.startTime = timeParams.time;
+    if (timelineState.currentTime < findClip.startTime) {
+      findClip.startTime = timelineState.currentTime;
     }
-    if (timeParams.time + timeLength > findClip.endTime) {
-      findClip.endTime = timeParams.time + timeLength;
+    if (timelineState.currentTime + timeLength > findClip.endTime) {
+      findClip.endTime = timelineState.currentTime + timeLength;
     }
-
-    // this.setAnimationData({
-    //   ...this.animationData,
-    //   ...data,
-    // })
-
     timelineState.timelineData = {
       ...timelineState.timelineData
     };
   }
 }
 
-const headBones: string[] = [
-  'mixamorigNeck',
-  'mixamorigHead',
-  'mixamorigHeadTop_End',
-  'mixamorigHeadTop_End_end',
-  'mixamorigHeadTop_End_end_end',
-];
-
-const leftArmBones: string[] = [
-  'mixamorigLeftShoulder',
-  'mixamorigLeftArm',
-  'mixamorigLeftForeArm',
-  'mixamorigLeftHand',
-  'mixamorigLeftHandThumb1',
-  'mixamorigLeftHandThumb2',
-  'mixamorigLeftHandThumb3',
-  'mixamorigLeftHandThumb4',
-  'mixamorigLeftHandPinky1',
-  'mixamorigLeftHandPinky2',
-  'mixamorigLeftHandPinky3',
-  'mixamorigLeftHandPinky4',
-  'mixamorigLeftHandMiddle1',
-  'mixamorigLeftHandMiddle2',
-  'mixamorigLeftHandMiddle3',
-  'mixamorigLeftHandMiddle4',
-  'mixamorigLeftHandRing1',
-  'mixamorigLeftHandRing2',
-  'mixamorigLeftHandRing3',
-  'mixamorigLeftHandRing4',
-  'mixamorigLeftHandPinky1',
-  'mixamorigLeftHandPinky2',
-  'mixamorigLeftHandPinky3',
-  'mixamorigLeftHandPinky4',
-]
-
-const rightArmBones = [
-  'mixamorigRightShoulder',
-  'mixamorigRightArm',
-  'mixamorigRightForeArm',
-  'mixamorigRightHand',
-  'mixamorigRightHandThumb1',
-  'mixamorigRightHandThumb2',
-  'mixamorigRightHandThumb3',
-  'mixamorigRightHandThumb4',
-  'mixamorigRightHandIndex1',
-  'mixamorigRightHandIndex2',
-  'mixamorigRightHandIndex3',
-  'mixamorigRightHandIndex4',
-  'mixamorigRightHandMiddle1',
-  'mixamorigRightHandMiddle2',
-  'mixamorigRightHandMiddle3',
-  'mixamorigRightHandMiddle4',
-  'mixamorigRightHandRing1',
-  'mixamorigRightHandRing2',
-  'mixamorigRightHandRing3',
-  'mixamorigRightHandRing4',
-  'mixamorigRightHandPinky1',
-  'mixamorigRightHandPinky2',
-  'mixamorigRightHandPinky3',
-  'mixamorigRightHandPinky4',
-];
-
-const upperBodyBones = [
-  'mixamorigSpine',
-  'mixamorigSpine1',
-  'mixamorigSpine2',
-  ...headBones,
-  ...leftArmBones,
-  ...rightArmBones,
-]
-const lowerBodyBones = [
-  'mixamorigHips',
-  'mixamorigRightUpLeg',
-  'mixamorigRightLeg',
-  'mixamorigRightFoot',
-  'mixamorigRightToeBase',
-  'mixamorigRightToe_End',
-  'mixamorigLeftUpLeg',
-  'mixamorigLeftLeg',
-  'mixamorigLeftFoot',
-  'mixamorigLeftToeBase',
-  'mixamorigLeftToe_End',
-]
-
-function getBoneFilter(scope: ApplyScope): ((name: string) => boolean) | undefined {
-  switch (scope) {
-    case 'fullBody':
-      return undefined
-    case 'upperBody':
-      return (name: string) => upperBodyBones.includes(name)
-    case 'lowerBody':
-      return (name: string) => lowerBodyBones.includes(name)
-    case 'head':
-      return (name: string) => headBones.includes(name)
-    case 'leftArm':
-      return (name: string) => leftArmBones.includes(name)
-    case 'rightArm':
-      return (name: string) => rightArmBones.includes(name)
-  }
-}
-
 function handleApply() {
-  const boneFilter = getBoneFilter(applyScope.value)
-
   if (exportContent.value === 'currentFrame') {
-    // 当前帧模式：复用现有 save 逻辑
-    save(boneFilter)
+    const bones = getBoneFilter(applyScope.value)
+    save(bones)
   } else {
-    saveAnimation(boneFilter)
+    saveAnimation(applyScope.value)
   }
 }
 const loading = ref(false)

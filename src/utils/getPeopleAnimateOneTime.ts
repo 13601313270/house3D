@@ -1,8 +1,12 @@
 import * as THREE from 'three'
 import allPeopleAnimate from "./allPeopleAnimate";
-import { KeyTimePoint } from "./timelineManage";
+import { KeyTimeAnimation } from "./timelineManage";
 // @ts-ignore
 import { FBXLoader } from 'three/addons/loaders/FBXLoader.js'
+import { getBoneFilter } from './peopleBones';
+import { clone } from 'three/examples/jsm/utils/SkeletonUtils';
+import { BaseEntityClass } from '@/types/baseEntity';
+import { BaseObjData } from '@/types/map2d';
 const fbxLoader = new FBXLoader()
 
 const mixerMap: Map<THREE.Object3D, {
@@ -12,7 +16,7 @@ const mixerMap: Map<THREE.Object3D, {
   }>
 }> = new Map()
 
-function getPeopleAnimateOneTime(keyframe: KeyTimePoint, peopleModel: THREE.Object3D, time: number): Promise<Array<{
+function getPeopleAnimateOneTime(keyframe: KeyTimeAnimation, people: BaseEntityClass<BaseObjData>, time: number): Promise<Array<{
   name: string;
   basicValue: {
     x: number,
@@ -31,8 +35,9 @@ function getPeopleAnimateOneTime(keyframe: KeyTimePoint, peopleModel: THREE.Obje
     pz: number,
   }
 }>> {
+  const peopleModel = clone(people.meshList[0].children[0])
+  const { applyScope } = keyframe
   const findAnimate = allPeopleAnimate.find((item) => item.key === keyframe.value)
-  // if (!findAnimate) return null
   const { file } = findAnimate!
   if (!mixerMap.get(peopleModel)) {
     mixerMap.set(peopleModel, {})
@@ -48,7 +53,7 @@ function getPeopleAnimateOneTime(keyframe: KeyTimePoint, peopleModel: THREE.Obje
           const clip = fbxScene.animations[0]
           const currentAction = mixer.clipAction(clip)
           resolve({
-            mixer: mixer,
+            mixer,
             currentAction,
           })
         }
@@ -63,6 +68,8 @@ function getPeopleAnimateOneTime(keyframe: KeyTimePoint, peopleModel: THREE.Obje
       info.currentAction.enabled = true;// 必须启用 action，即使它没有在播放
       info.mixer.update(0);// 关键：用 update(0) 强制立即刷新一
 
+      const bones = getBoneFilter(applyScope)
+      // console.log('bones---', applyScope, bones)
       // 提取骨骼数据
       const boneData: {
         name: string;
@@ -86,28 +93,30 @@ function getPeopleAnimateOneTime(keyframe: KeyTimePoint, peopleModel: THREE.Obje
       peopleModel.traverse((child) => {
         // @ts-ignore
         if (child.isBone) {
-          boneData.push({
-            name: child.name,
-            basicValue: {
-              x: child.rotation.x,
-              y: child.rotation.y,
-              z: child.rotation.z,
-              px: child.position.x,
-              py: child.position.y,
-              pz: child.position.z,
-            },
-            value: {
-              x: child.rotation.x,
-              y: child.rotation.y,
-              z: child.rotation.z,
-              px: child.position.x,
-              py: child.position.y,
-              pz: child.position.z,
-            }
-          });
+          const findProp = 1;
+          if (bones.includes(child.name)) {
+            boneData.push({
+              name: child.name,
+              basicValue: {
+                x: child.rotation.x,
+                y: child.rotation.y,
+                z: child.rotation.z,
+                px: child.position.x,
+                py: child.position.y,
+                pz: child.position.z,
+              },
+              value: {
+                x: child.rotation.x,
+                y: child.rotation.y,
+                z: child.rotation.z,
+                px: child.position.x,
+                py: child.position.y,
+                pz: child.position.z,
+              }
+            });
+          }
         }
       });
-      console.log('boneData', boneData)
       resolve(boneData)
     })
   })

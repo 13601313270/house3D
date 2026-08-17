@@ -1,29 +1,8 @@
-import * as THREE from 'three'
 import { BaseEntityClass } from "@/types/baseEntity"
 import { KeyTimePoint } from "./timelineManage"
 import { BaseObjData } from "@/types/map2d"
 import allPeopleAnimate from "./allPeopleAnimate"
-// @ts-ignore
-import { FBXLoader } from 'three/addons/loaders/FBXLoader.js'
 import getPeopleAnimateOneTime from './getPeopleAnimateOneTime'
-// applyEasing：缓动函数（以左关键帧 easing 为准）
-//  - linear：t
-//  - easeIn：二次方进入（t²）
-//  - easeOut：二次方退出（2t - t²）
-
-const fbxLoader = new FBXLoader()
-let mixer: THREE.AnimationMixer | null = null
-let currentAction: THREE.AnimationAction | null = null
-
-//  - easeInOut：前段 2t²，后段 2*(2-2t)*t -1
-function applyEasing(t: number, easing: string): number {
-  switch (easing) {
-    case 'easeIn': return t * t
-    case 'easeOut': return t * (2 - t)
-    case 'easeInOut': return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t
-    default: return t
-  }
-}
 
 // evaluateTrack：对单个轨道 + 给定时间进行关键帧插值求值
 //  - 0 个关键帧：null；1 个关键帧：直接取该值（无插值）
@@ -76,7 +55,7 @@ async function evaluateTrack(entity: BaseEntityClass<BaseObjData>, trackType: st
     if (keyframe.type === 'animation') {
       console.log('keyTimePoints', keyframe.time, time, keyframe.timeLength)
       if (time > keyframe.time && time <= keyframe.time + keyframe.timeLength) {
-        const boneData = await getPeopleAnimateOneTime(keyframe, entity.meshList[0].children[0], time)
+        const boneData = await getPeopleAnimateOneTime(keyframe, entity, time)
         return boneData;
       }
     }
@@ -97,19 +76,17 @@ async function evaluateTrack(entity: BaseEntityClass<BaseObjData>, trackType: st
   const leftKeyframe = keyTimePoints[leftIndex]
   let leftValue: any = leftKeyframe.value;
   if (leftKeyframe.type === 'animation') {
-    leftValue = await getPeopleAnimateOneTime(leftKeyframe, entity.meshList[0].children[0], leftKeyframe.timeLength);
+    leftValue = await getPeopleAnimateOneTime(leftKeyframe, entity, leftKeyframe.timeLength);
   }
   const rightKeyframe = keyTimePoints[rightIndex]
 
   let rightValue: any = rightKeyframe.value;
   if (rightKeyframe.type === 'animation') {
-    rightValue = await getPeopleAnimateOneTime(rightKeyframe, entity.meshList[0].children[0], 0);
+    rightValue = await getPeopleAnimateOneTime(rightKeyframe, entity, 0);
   }
-  console.log('左侧，右侧', trackType, keyTimePoints, leftKeyframe, rightKeyframe);
-
-
+  console.log('左侧，右侧', trackType, keyTimePoints, leftValue, rightValue);
   const totalDuration = rightKeyframe.time - leftKeyframe.time
-  let t = (time - leftKeyframe.time) / totalDuration
+  const t = (time - leftKeyframe.time) / totalDuration
 
   // if (leftKeyframe.easing) {
   //   t = applyEasing(t, leftKeyframe.easing)

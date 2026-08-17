@@ -12,7 +12,7 @@
         <button class="control-btn" @click="togglePlay">{{ isPlaying ? '⏸' : '▶' }}</button>
         <button class="control-btn" :class="{ recording: isRecording }" @click="recordVideoPlay">{{
           isRecording ? '停止 ■' : '录制 ▶'
-        }}</button>
+          }}</button>
         <input type="range" class="speed-control" v-model="playbackSpeed" min="0.1" max="3" step="0.1" />
         <span class="speed-label">{{ playbackSpeed }}倍速</span>
         <button class="control-btn" @click="zoomIn">+</button>
@@ -115,7 +115,6 @@ import editItem from '@/utils/editItem';
 import DataTypeEditPanel from '../views/DataTypeEditPanel.vue'
 import showContextMenu from '@/utils/contextMenu';
 import evaluateTrack from '@/utils/evaluateTrack';
-import { sleep } from '@/utils/sleep';
 import getPeopleAnimateOneTime from '@/utils/getPeopleAnimateOneTime';
 
 interface ClipSegment {
@@ -868,7 +867,8 @@ async function evaluateTimeline(time: number) {
               const { trackType } = track;
               const rightVal = last.value
               console.log('sss---2-1', trackType, rightVal)
-              getPeopleAnimateOneTime(last, entity.meshList[0].children[0], last.time + last.timeLength)
+              // getPeopleAnimateOneTime(last, entity, last.time + last.timeLength)
+              return;
             }
           } else {
             if (time > last.time) {

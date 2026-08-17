@@ -1,15 +1,20 @@
-export type KeyTimePoint = {
-  type: 'point'
-  time: number
-  value: number
-  easing?: string
-} | {
+import { ApplyScope } from "./peopleBones"
+
+export type KeyTimeAnimation = {
   type: 'animation'
   time: number
   value: string
   startTime: number // 动画开始时间
   timeLength: number // 动画长度
+  applyScope: ApplyScope,
 }
+
+export type KeyTimePoint = {
+  type: 'point'
+  time: number
+  value: number
+  easing?: string
+} | KeyTimeAnimation
 
 export interface ObjOneColumnData {
   trackType: string

@@ -212,19 +212,35 @@ export class PeopleEntity extends ModelFileEntity<PeopleData> {
         return b;
       }
       (a as BoneStepItem[]).forEach((aItem, index) => {
-        const bItem = b[index];
-        centerBone.push({
-          ...aItem,
-          value: {
-            ...aItem.value,
-            x: lerpAngle(aItem.value.x, bItem.value.x, t),
-            y: lerpAngle(aItem.value.y, bItem.value.y, t),
-            z: lerpAngle(aItem.value.z, bItem.value.z, t),
-            px: lerpAngle(aItem.value.px, bItem.value.px, t),
-            py: lerpAngle(aItem.value.py, bItem.value.py, t),
-            pz: lerpAngle(aItem.value.pz, bItem.value.pz, t),
-          }
-        })
+        const bItem = b.find((v: any) => v.name === a.name);
+        if (bItem === undefined) {
+          centerBone.push({
+            ...aItem,
+            value: {
+              ...aItem.value,
+              x: aItem.value.x,
+              y: aItem.value.y,
+              z: aItem.value.z,
+              px: aItem.value.px,
+              py: aItem.value.py,
+              pz: aItem.value.pz,
+            }
+          })
+        } else {
+          console.log('sssss', aItem, bItem)
+          centerBone.push({
+            ...aItem,
+            value: {
+              ...aItem.value,
+              x: lerpAngle(aItem.value.x, bItem.value.x, t),
+              y: lerpAngle(aItem.value.y, bItem.value.y, t),
+              z: lerpAngle(aItem.value.z, bItem.value.z, t),
+              px: lerpAngle(aItem.value.px, bItem.value.px, t),
+              py: lerpAngle(aItem.value.py, bItem.value.py, t),
+              pz: lerpAngle(aItem.value.pz, bItem.value.pz, t),
+            }
+          })
+        }
       })
       return centerBone;
     } else {
