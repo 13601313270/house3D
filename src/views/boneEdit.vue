@@ -2,13 +2,13 @@
   <div class="viewport-container" ref="viewportRef">
     <div class="topPanel">
       <div class="postList">
-        <div v-for="item in allDemoList.slice(0, 6)" :key="item.file" class="item" @click="playAnimation(item.file)">
+        <div v-for="item in allDemoList.slice(0, 6)" :key="item.file" class="item" @click="playAnimation(item)">
           <div class="name">{{ item.name }}</div>
           <img :src="item.img" alt="animation" />
         </div>
       </div>
       <div class="postList">
-        <div v-for="item in allDemoList.slice(6, 11)" :key="item.file" class="item" @click="playAnimation(item.file)">
+        <div v-for="item in allDemoList.slice(6, 11)" :key="item.file" class="item" @click="playAnimation(item)">
           <div class="name">{{ item.name }}</div>
           <img :src="item.img" alt="animation" />
         </div>
@@ -140,7 +140,7 @@
         <span class="modal-close" @click="showModal = false">×</span>
       </div>
       <div class="modal-body">
-        <div v-for="item in allDemoList" :key="item.file" class="modal-item" @click="handleModalItemClick(item.file)">
+        <div v-for="item in allDemoList" :key="item.file" class="modal-item" @click="handleModalItemClick(item)">
           <img :src="item.img" alt="animation" />
           <span class="modal-item-name">{{ item.name }}</span>
         </div>
@@ -160,6 +160,7 @@ import { sleep } from '@/utils/sleep'
 import type { BoneStepItem } from '@/entities/people/index.d'
 import { timelineState } from '@/utils/timelineManage'
 import generateClipId from '@/utils/generateClipId'
+import allPeopleAnimate, { AnimationItem } from '@/utils/allPeopleAnimate'
 
 const viewportRef = ref<HTMLDivElement | null>(null)
 const containerRef = ref<HTMLDivElement | null>(null)
@@ -185,173 +186,8 @@ const props = defineProps<{
   modelValue: Array<BoneStepItem>
 }>()
 
-const allDemoList = ref<Array<{
-  name: string,
-  img: string,
-  file: string,
-}>>([
-  {
-    name: '垂手站立',
-    img: 'https://d99n9xvb9513w.cloudfront.net/thumbnails/motions/131220901/animated.gif',
-    file: 'standing.fbx',
-  },
-  {
-    name: '走路',
-    img: 'https://d99n9xvb9513w.cloudfront.net/thumbnails/motions/118080901/animated.gif',
-    file: 'walking.fbx',
-  },
-  {
-    name: '趴下',
-    img: 'https://d99n9xvb9513w.cloudfront.net/thumbnails/motions/120040901/animated.gif',
-    file: 'plank.fbx',
-  },
-  {
-    name: '跑',
-    img: 'https://d99n9xvb9513w.cloudfront.net/thumbnails/motions/128630905/animated.gif',
-    file: 'run.fbx',
-  },
-  {
-    name: '躺',
-    img: 'https://d99n9xvb9513w.cloudfront.net/thumbnails/motions/130560901/animated.gif',
-    file: 'laying.fbx',
-  },
-  {
-    name: '游泳',
-    img: 'https://d99n9xvb9513w.cloudfront.net/thumbnails/motions/110800901/animated.gif',
-    file: 'swimming.fbx',
-  },
-  {
-    name: '侧躺',
-    img: 'https://d99n9xvb9513w.cloudfront.net/thumbnails/motions/140400905/animated.gif',
-    file: 'layingPose.fbx',
-  },
-  {
-    name: '坐',
-    img: 'https://d99n9xvb9513w.cloudfront.net/thumbnails/motions/116270901/animated.gif',
-    file: 'sit4.fbx',
-  },
-  {
-    name: '跳跃',
-    img: 'https://d99n9xvb9513w.cloudfront.net/thumbnails/motions/124500902/animated.gif',
-    file: 'jump.fbx',
-  },
-  {
-    name: '翘腿坐',
-    img: 'https://d99n9xvb9513w.cloudfront.net/thumbnails/motions/116560901/animated.gif',
-    file: 'sit2.fbx',
-  },
-  {
-    name: '倚靠坐',
-    img: 'https://d99n9xvb9513w.cloudfront.net/thumbnails/motions/140600901/animated.gif',
-    file: 'sit3.fbx',
-  },
-  {
-    name: '前倾坐',
-    img: 'https://d99n9xvb9513w.cloudfront.net/thumbnails/motions/137570901/animated.gif',
-    file: 'sit.fbx',
-  },
-  {
-    name: '倚靠坐2',
-    img: 'https://d99n9xvb9513w.cloudfront.net/thumbnails/motions/140600908/animated.gif',
-    file: 'femaleSittingPose.fbx',
-  },
-  {
-    name: '蹲下',
-    img: 'https://d99n9xvb9513w.cloudfront.net/thumbnails/motions/137630901/animated.gif',
-    file: 'squat.fbx',
-  },
-  {
-    name: '跪下',
-    img: 'https://d99n9xvb9513w.cloudfront.net/thumbnails/motions/103130903/animated.gif',
-    file: 'praying.fbx',
-  },
-  {
-    name: '拳击',
-    img: 'https://d99n9xvb9513w.cloudfront.net/thumbnails/motions/113930901/animated.gif',
-    file: 'punchingBag.fbx',
-  },
-  {
-    name: '手撑躺',
-    img: 'https://d99n9xvb9513w.cloudfront.net/thumbnails/motions/150400906/animated.gif',
-    file: 'maleLayingPose.fbx',
-  },
-  {
-    name: '单腿俏皮站立',
-    img: 'https://d99n9xvb9513w.cloudfront.net/thumbnails/motions/140700904/animated.gif',
-    file: 'femaleStandingPose.fbx',
-  },
-  {
-    name: '踢人',
-    img: 'https://d99n9xvb9513w.cloudfront.net/thumbnails/motions/124070904/animated.gif',
-    file: 'kick.fbx',
-  },
-  {
-    name: '大摇大摆走',
-    img: 'https://d99n9xvb9513w.cloudfront.net/thumbnails/motions/102230901/animated.gif',
-    file: 'walk.fbx',
-  },
-  {
-    name: '吊',
-    img: 'https://d99n9xvb9513w.cloudfront.net/thumbnails/motions/114390901/animated.gif',
-    file: 'hanging.fbx',
-  },
-  {
-    name: '托马斯',
-    img: 'https://d99n9xvb9513w.cloudfront.net/thumbnails/motions/121780901/animated.gif',
-    file: 'flair.fbx',
-  },
-  {
-    name: '前滚翻',
-    img: 'https://d99n9xvb9513w.cloudfront.net/thumbnails/motions/130030901/animated.gif',
-    file: 'running.fbx',
-  },
-  {
-    name: '射箭',
-    img: 'https://d99n9xvb9513w.cloudfront.net/thumbnails/motions/112390901/animated.gif',
-    file: 'shootingArrow.fbx',
-  },
-  {
-    name: '棒球击打',
-    img: 'https://d99n9xvb9513w.cloudfront.net/thumbnails/motions/125420901/animated.gif',
-    file: 'baseballHit.fbx',
-  },
-  {
-    name: '街舞扫腿',
-    img: 'https://d99n9xvb9513w.cloudfront.net/thumbnails/motions/121890901/animated.gif',
-    file: 'breakdanceFreezeVar3.fbx'
-  },
-  {
-    name: '舞蹈舒展',
-    img: 'https://d99n9xvb9513w.cloudfront.net/thumbnails/motions/140200906/animated.gif',
-    file: 'femaleDancePose.fbx'
-  },
-  {
-    name: '霹雳舞波浪',
-    img: 'https://d99n9xvb9513w.cloudfront.net/thumbnails/motions/101960901/animated.gif',
-    file: 'hipHopDancing.fbx',
-  },
-  {
-    name: '单膝跪',
-    img: 'https://d99n9xvb9513w.cloudfront.net/thumbnails/motions/135940901/animated.gif',
-    file: 'kneelingDown.fbx',
-  },
-  {
-    name: '单膝跪',
-    img: 'https://d99n9xvb9513w.cloudfront.net/thumbnails/motions/120580901/animated.gif',
-    file: 'Salute.fbx',
-  },
-  {
-    name: '抱着盒子',
-    img: 'https://d99n9xvb9513w.cloudfront.net/thumbnails/motions/111220901/animated.gif',
-    file: 'joggingWithBox.fbx',
-  },
-  {
-    name: '挥手',
-    img: 'https://d99n9xvb9513w.cloudfront.net/thumbnails/motions/136290901/animated.gif',
-    file: 'waving.fbx'
-  }
-])
-
+const allDemoList = ref<Array<AnimationItem>>(allPeopleAnimate)
+const animationKey = ref('')
 type ViewportConfig = {
   id: string
   type: 'perspective'
@@ -846,42 +682,6 @@ async function saveAnimation(boneFilter?: (name: string) => boolean) {
       value: v.value,
     }
   })
-  const addTimes = [
-    {
-      saveVal: JSON.parse(JSON.stringify(saveVal)),
-      time: timelineState.currentTime,
-    }
-  ]
-  const timeDiff = 0.5
-  if (currentAction) {
-    currentAction.time += timeDiff;
-  }
-  await sleep(100);
-  (() => {
-    allBones.value.forEach(bone => {
-      if (boneFilter && !boneFilter(bone.name)) return
-      const boneObject = scene.getObjectByName(bone.name)
-      if (boneObject) {
-        bone.value.x = boneObject.rotation.x
-        bone.value.y = boneObject.rotation.y
-        bone.value.z = boneObject.rotation.z
-        bone.value.px = boneObject.position.x
-        bone.value.py = boneObject.position.y
-        bone.value.pz = boneObject.position.z
-      }
-    })
-
-    const saveVal = allBones.value.map(v => {
-      return {
-        name: v.name,
-        value: v.value,
-      }
-    })
-    addTimes.push({
-      saveVal: JSON.parse(JSON.stringify(saveVal)),
-      time: timelineState.currentTime + timeDiff,
-    })
-  })();
   const originalData = window.editPropEntity.getOriginalData();
   let findClip = timelineState.timelineData.clips.find(v => v.entityId === originalData.id);
   if (!findClip) {
@@ -897,45 +697,53 @@ async function saveAnimation(boneFilter?: (name: string) => boolean) {
   console.log('findClip', findClip);
   if (findClip) {
     const key = 'bone';
-    addTimes.forEach(timeParams => {
-      const findTrack = findClip.columns.find(v => v.trackType === key)
-      if (findTrack) {
-        const keyTimePoints = [...findTrack.keyTimePoints];
-        // console.log(222222, keyTimePoints)
-        if (keyTimePoints.find(v => v.time === timeParams.time)) {
-          const index = keyTimePoints.findIndex(v => v.time === timeParams.time)
-          // @ts-ignore
-          keyTimePoints[index].value = timeParams.saveVal
-          findTrack.keyTimePoints = keyTimePoints;
-        } else {
-          keyTimePoints.push({
-            type: 'point',
-            time: timeParams.time,
-            // @ts-ignore
-            value: timeParams.saveVal,
-          })
-          findTrack.keyTimePoints = keyTimePoints.sort((a, b) => a.time - b.time);
-        }
+    const timeParams = {
+      saveVal: JSON.parse(JSON.stringify(saveVal)),
+      time: timelineState.currentTime,
+    }
+    const findTrack = findClip.columns.find(v => v.trackType === key)
+    console.log('ffff', 1, findClip.columns, key)
+    const timeLength = 2;
+    if (findTrack) {
+      console.log('ffff', 2)
+      const keyTimePoints = [...findTrack.keyTimePoints];
+      // console.log(222222, keyTimePoints)
+      if (keyTimePoints.find(v => v.time === timeParams.time)) {
+        console.log('ffff', 3)
+        const index = keyTimePoints.findIndex(v => v.time === timeParams.time)
+        // @ts-ignore
+        keyTimePoints[index].value = timeParams.saveVal
+        findTrack.keyTimePoints = keyTimePoints;
       } else {
-        findClip.columns.push({
-          trackType: key,
-          keyTimePoints: [{
-            type: 'point',
-            time: timeParams.time,
-            // @ts-ignore
-            value: timeParams.saveVal,
-          }]
+        console.log('ffff', 4)
+        keyTimePoints.push({
+          type: 'animation',
+          time: timeParams.time,
+          value: animationKey.value,
+          startTime: currentTime.value,
+          timeLength,
         })
+        findTrack.keyTimePoints = keyTimePoints.sort((a, b) => a.time - b.time);
       }
+    } else {
+      findClip.columns.push({
+        trackType: key,
+        keyTimePoints: [{
+          type: 'point',
+          time: timeParams.time,
+          // @ts-ignore
+          value: timeParams.saveVal,
+        }]
+      })
+    }
 
-      // 如果timelineState.currentTime，在findClip.startTime和findClip.endTime之外，那么调整findClip.startTime和findClip.endTime，包括进这个时间
-      if (timeParams.time < findClip.startTime) {
-        findClip.startTime = timeParams.time;
-      }
-      if (timeParams.time > findClip.endTime) {
-        findClip.endTime = timeParams.time;
-      }
-    })
+    // 如果timelineState.currentTime，在findClip.startTime和findClip.endTime之外，那么调整findClip.startTime和findClip.endTime，包括进这个时间
+    if (timeParams.time < findClip.startTime) {
+      findClip.startTime = timeParams.time;
+    }
+    if (timeParams.time + timeLength > findClip.endTime) {
+      findClip.endTime = timeParams.time + timeLength;
+    }
 
     // this.setAnimationData({
     //   ...this.animationData,
@@ -1060,7 +868,9 @@ function handleApply() {
   }
 }
 const loading = ref(false)
-function playAnimation(file: string) {
+function playAnimation(item: AnimationItem) {
+  const { key, file } = item
+  animationKey.value = key
   loading.value = true
   Promise.all([
     runPostAnimation('./pose/' + file),
@@ -1073,7 +883,7 @@ function playAnimation(file: string) {
   })
 }
 
-function handleModalItemClick(file: string) {
+function handleModalItemClick(file: AnimationItem) {
   playAnimation(file)
   showModal.value = false
 }

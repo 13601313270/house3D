@@ -1,8 +1,14 @@
-export interface KeyTimePoint {
+export type KeyTimePoint = {
   type: 'point'
   time: number
   value: number
   easing?: string
+} | {
+  type: 'animation'
+  time: number
+  value: string
+  startTime: number // 动画开始时间
+  timeLength: number // 动画长度
 }
 
 export interface ObjOneColumnData {

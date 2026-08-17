@@ -10,9 +10,8 @@
       <div class="header-right">
         <button class="control-btn" @click="stop">⏹</button>
         <button class="control-btn" @click="togglePlay">{{ isPlaying ? '⏸' : '▶' }}</button>
-        <button class="control-btn" :class="{ recording: isRecording }"
-          @click="recordVideoPlay">{{
-            isRecording ? '停止 ■' : '录制 ▶'
+        <button class="control-btn" :class="{ recording: isRecording }" @click="recordVideoPlay">{{
+          isRecording ? '停止 ■' : '录制 ▶'
           }}</button>
         <input type="range" class="speed-control" v-model="playbackSpeed" min="0.1" max="3" step="0.1" />
         <span class="speed-label">{{ playbackSpeed }}倍速</span>
@@ -782,6 +781,7 @@ function stopDragging() {
 }
 
 function evaluateTimeline(time: number) {
+  console.log('evaluateTrack-a', 1)
   timelineState.timelineData.clips.forEach(clip => {
     const data: any = {}
     const entity = window.worldApi.children.find(v => {
@@ -789,7 +789,9 @@ function evaluateTimeline(time: number) {
     })
     if (!entity) return;
     const inArea = time >= clip.startTime && time <= clip.endTime
+    console.log('evaluateTrack-a', 2)
     if (inArea) {
+      console.log('evaluateTrack-a', 3)
       // --- 情况1：命中某个 clip 区间 → 对每个轨道执行关键帧插值 ---
       clip.columns.forEach(track => {
         // console.log('evaluateTimeline', track, time)

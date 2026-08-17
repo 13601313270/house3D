@@ -111,16 +111,18 @@ export class PeopleEntity extends ModelFileEntity<PeopleData> {
     const data = this.getData();
     if (this.meshList?.[0]?.children[0] && data.bone && data.bone?.length > 0) {
       const boneListConfig = data.bone
-      this.meshList?.[0]?.children[0].traverse((child: any) => {
-        if (child.isBone) {
-          const findProp = boneListConfig.find((item) => item.name === child.name)
-          if (findProp) {
-            // console.log(`🦴 发现骨骼-1: ${child.name}`, findProp.value);
-            child.rotation.set(findProp.value.x, findProp.value.y, findProp.value.z)
-            child.position.set(findProp.value.px, findProp.value.py, findProp.value.pz)
+      if (boneListConfig) {
+        this.meshList?.[0]?.children[0].traverse((child: any) => {
+          if (child.isBone) {
+            const findProp = boneListConfig.find((item) => item.name === child.name)
+            if (findProp) {
+              // console.log(`🦴 发现骨骼-1: ${child.name}`, findProp.value);
+              child.rotation.set(findProp.value.x, findProp.value.y, findProp.value.z)
+              child.position.set(findProp.value.px, findProp.value.py, findProp.value.pz)
+            }
           }
-        }
-      })
+        })
+      }
     }
   }
 
