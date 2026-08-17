@@ -12,7 +12,7 @@
         <button class="control-btn" @click="togglePlay">{{ isPlaying ? '⏸' : '▶' }}</button>
         <button class="control-btn" :class="{ recording: isRecording }" @click="recordVideoPlay">{{
           isRecording ? '停止 ■' : '录制 ▶'
-          }}</button>
+        }}</button>
         <input type="range" class="speed-control" v-model="playbackSpeed" min="0.1" max="3" step="0.1" />
         <span class="speed-label">{{ playbackSpeed }}倍速</span>
         <button class="control-btn" @click="zoomIn">+</button>
@@ -62,10 +62,10 @@
                   <span class="clip-duration">{{ formatTime(segment.startTime) }} - {{
                     formatTime(segment.endTime) }}</span>
                 </div>
-                <div v-for="time in getAllTimeInSegment(segment)" :key="time" class="keyframe-node"
-                  :style="{ left: `${((time - segment.startTime) / (segment.endTime - segment.startTime || 1)) * 100}%` }"
-                  :class="{ selected: time === currentTime }" @click.stop="onKeyframeClick(time)"
-                  @contextmenu.prevent.stop="toggleClipContentFrame($event, segment, time)"></div>
+                <div v-for="item in getAllTimeInSegment(segment)" :key="item.time" class="keyframe-node"
+                  :style="keyFrameStyle(item, segment)" :class="{ selected: item.time === currentTime }"
+                  @click.stop="onKeyframeClick(item.time)"
+                  @contextmenu.prevent.stop="toggleClipContentFrame($event, segment, item.time)"></div>
               </div>
             </div>
           </div>
@@ -116,6 +116,7 @@ import DataTypeEditPanel from '../views/DataTypeEditPanel.vue'
 import showContextMenu from '@/utils/contextMenu';
 import evaluateTrack from '@/utils/evaluateTrack';
 import { sleep } from '@/utils/sleep';
+import getPeopleAnimateOneTime from '@/utils/getPeopleAnimateOneTime';
 
 interface ClipSegment {
   clip: ObjAllColumnData
@@ -409,16 +410,33 @@ function toggleClipContent(event: MouseEvent, segment: ClipSegment) {
   ])
 }
 
-function getAllTimeInSegment(segment: ClipSegment): number[] {
-  const allTimes: number[] = []
+function keyFrameStyle(item: { time: number, timeLength: number }, segment: ClipSegment) {
+  return {
+    left: `${((item.time - segment.startTime) / (segment.endTime - segment.startTime || 1)) * 100}%`,
+    width: `${(item.timeLength / (segment.endTime - segment.startTime || 1)) * 100}%`
+  }
+}
+function getAllTimeInSegment(segment: ClipSegment): Array<{
+  time: number,
+  timeLength: number,
+}> {
+  const allTimes: Array<number> = []
+  const allReturn: Array<{
+    time: number,
+    timeLength: number,
+  }> = []
   segment.clip.columns.forEach(track => {
     track.keyTimePoints.forEach(kf => {
       if (!allTimes.includes(kf.time)) {
         allTimes.push(kf.time)
+        allReturn.push({
+          time: kf.time,
+          timeLength: kf.type === 'animation' ? kf.timeLength : 0,
+        })
       }
     })
   })
-  return allTimes
+  return allReturn
 }
 
 function toggleClipContentFrame(event: MouseEvent, segment: ClipSegment, time: number) {
@@ -780,9 +798,10 @@ function stopDragging() {
   document.removeEventListener('mouseup', stopDragging)
 }
 
-function evaluateTimeline(time: number) {
+async function evaluateTimeline(time: number) {
   console.log('evaluateTrack-a', 1)
-  timelineState.timelineData.clips.forEach(clip => {
+  for (let i = 0; i < timelineState.timelineData.clips.length; i++) {
+    const clip = timelineState.timelineData.clips[i]
     const data: any = {}
     const entity = window.worldApi.children.find(v => {
       return v.getOriginalData().id === clip.entityId
@@ -793,7 +812,8 @@ function evaluateTimeline(time: number) {
     if (inArea) {
       console.log('evaluateTrack-a', 3)
       // --- 情况1：命中某个 clip 区间 → 对每个轨道执行关键帧插值 ---
-      clip.columns.forEach(track => {
+      for (let j = 0; j < clip.columns.length; j++) {
+        const track = clip.columns[j]
         // console.log('evaluateTimeline', track, time)
         const { keyTimePoints, trackType } = track;
         if (keyTimePoints.length === 0) {
@@ -813,11 +833,11 @@ function evaluateTimeline(time: number) {
             })
           }
         }
-        const value = evaluateTrack(entity, trackType, sortedKeyTimePoints, time)
+        const value = await evaluateTrack(entity, trackType, sortedKeyTimePoints, time)
         if (value !== null) {
           data[trackType] = value;
         }
-      })
+      }
       entity.setAnimationData({
         ...entity.getAnimationData(),
         ...data,
@@ -837,21 +857,36 @@ function evaluateTimeline(time: number) {
           const rightVal = track.keyTimePoints[0].value
           if (track.keyTimePoints[0].time === clip.startTime) {
             const previewVal = entity.editAnimationDataColumn(trackType, leftVal, rightVal, t)
+            console.log('sss---1', trackType, previewVal)
             // @ts-ignore - trackType 为动态字符串，Entity 接口无法穷举
             data[trackType] = previewVal;// entity.getOriginalData()[trackType] as any;
           }
-        } else if (time > track.keyTimePoints[track.keyTimePoints.length - 1].time) {
-          const { trackType } = track;
-          const rightVal = track.keyTimePoints[track.keyTimePoints.length - 1].value
-          data[trackType] = rightVal;
+        } else {
+          const last = track.keyTimePoints[track.keyTimePoints.length - 1];
+          if (last.type === 'animation') {
+            if (time > last.time + last.timeLength) {
+              const { trackType } = track;
+              const rightVal = last.value
+              console.log('sss---2-1', trackType, rightVal)
+              getPeopleAnimateOneTime(last, entity.meshList[0].children[0], last.time + last.timeLength)
+            }
+          } else {
+            if (time > last.time) {
+              const { trackType } = track;
+              const rightVal = last.value
+              console.log('sss---2-2', trackType, rightVal)
+              data[trackType] = rightVal;
+            }
+          }
         }
       })
+      console.log('sss---', data)
       entity.setAnimationData({
         ...entity.getAnimationData(),
         ...data,
       });
     }
-  })
+  }
 
   // // 先尝试查找 time 落在哪些 clip 的 (startTime, endTime) 开区间内
   // const matchIndex = timelineState.timelineData.clips.findIndex(clip => {
@@ -1281,11 +1316,11 @@ onUnmounted(() => {
               .keyframe-node {
                 position: absolute;
                 top: 30px;
-                width: 16px;
+                min-width: 16px;
                 height: 16px;
-                margin-left: -8px;
+                transform: translateX(-8px);
                 margin-top: -6px;
-                border-radius: 50%;
+                border-radius: 8px;
                 background: #4CAF50;
                 border: 2px solid #fff;
                 box-sizing: border-box;
@@ -1293,13 +1328,14 @@ onUnmounted(() => {
                 z-index: 2;
 
                 &:hover {
-                  transform: scale(1.3); // 悬浮放大方便点击
+                  box-shadow: 0 0 0 3px rgba(233, 69, 96, 0.4);
+                  transform: translateX(-8px); // 悬浮放大方便点击
                 }
 
                 // selected 选中态：红色背景 + 更大比例 + 红色外发光
                 &.selected {
                   background: #e94560;
-                  transform: scale(1.4);
+                  transform: translateX(-8px);
                   box-shadow: 0 0 0 3px rgba(233, 69, 96, 0.4);
                 }
               }

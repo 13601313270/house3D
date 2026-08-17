@@ -70,8 +70,10 @@ export class PeopleEntity extends ModelFileEntity<PeopleData> {
     const boneListConfig = data.bone || [];
     threeObject.traverse((child: any) => {
       if (child.isBone) {
+        console.log('boneListConfig', boneListConfig)
         // console.log(`🦴 发现骨骼: ${child.name}`);
         const findProp = boneListConfig.find((item) => item.name === child.name)
+        console.log('boneListConfig-findProp', findProp)
         if (findProp) {
           child.rotation.set(findProp.value.x, findProp.value.y, findProp.value.z)
         }
