@@ -12,7 +12,7 @@
         <button class="control-btn" @click="togglePlay">{{ isPlaying ? '⏸' : '▶' }}</button>
         <button class="control-btn" :class="{ recording: isRecording }" @click="recordVideoPlay">{{
           isRecording ? '停止 ■' : '录制 ▶'
-          }}</button>
+        }}</button>
         <input type="range" class="speed-control" v-model="playbackSpeed" min="0.1" max="3" step="0.1" />
         <span class="speed-label">{{ playbackSpeed }}倍速</span>
         <button class="control-btn" @click="zoomIn">+</button>
@@ -798,7 +798,6 @@ function stopDragging() {
 }
 
 async function evaluateTimeline(time: number) {
-  console.log('evaluateTrack-a', 1)
   for (let i = 0; i < timelineState.timelineData.clips.length; i++) {
     const clip = timelineState.timelineData.clips[i]
     const data: any = {}
@@ -807,9 +806,7 @@ async function evaluateTimeline(time: number) {
     })
     if (!entity) return;
     const inArea = time >= clip.startTime && time <= clip.endTime
-    console.log('evaluateTrack-a', 2)
     if (inArea) {
-      console.log('evaluateTrack-a', 3)
       // --- 情况1：命中某个 clip 区间 → 对每个轨道执行关键帧插值 ---
       for (let j = 0; j < clip.columns.length; j++) {
         const track = clip.columns[j]
@@ -845,7 +842,8 @@ async function evaluateTimeline(time: number) {
       // --- 情况2：time 在所有 clip 之前（还没开始第一个动画） ---
       const data: any = { ...entity.getOriginalData() };
       // console.log('clip.columns', clip, clip.columns)
-      clip.columns.forEach(track => {
+      for (let j = 0; j < clip.columns.length; j++) {
+        const track = clip.columns[j]
         if (time < track.keyTimePoints[0].time) {
           const { trackType } = track;
           const leftTime = 0;
@@ -856,31 +854,29 @@ async function evaluateTimeline(time: number) {
           const rightVal = track.keyTimePoints[0].value
           if (track.keyTimePoints[0].time === clip.startTime) {
             const previewVal = entity.editAnimationDataColumn(trackType, leftVal, rightVal, t)
-            console.log('sss---1', trackType, previewVal)
+            // console.log('sss---1', trackType, previewVal)
             // @ts-ignore - trackType 为动态字符串，Entity 接口无法穷举
             data[trackType] = previewVal;// entity.getOriginalData()[trackType] as any;
           }
+          // console.log('evaluateTrack===2', trackType, data[trackType])
         } else {
           const last = track.keyTimePoints[track.keyTimePoints.length - 1];
           if (last.type === 'animation') {
             if (time > last.time + last.timeLength) {
               const { trackType } = track;
-              const rightVal = last.value
-              console.log('sss---2-1', trackType, rightVal)
-              // getPeopleAnimateOneTime(last, entity, last.time + last.timeLength)
-              return;
+              const boneData = await getPeopleAnimateOneTime(last, entity, last.time + last.timeLength)
+              data[trackType] = boneData;
             }
           } else {
             if (time > last.time) {
               const { trackType } = track;
               const rightVal = last.value
-              console.log('sss---2-2', trackType, rightVal)
               data[trackType] = rightVal;
             }
           }
         }
-      })
-      console.log('sss---', data)
+      }
+      // console.log('sss---', data)
       entity.setAnimationData({
         ...entity.getAnimationData(),
         ...data,

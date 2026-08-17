@@ -10,24 +10,20 @@ import getPeopleAnimateOneTime from './getPeopleAnimateOneTime'
 //  - 其他：二分查找左右相邻 keyframe，根据 easing 计算 t，
 async function evaluateTrack(entity: BaseEntityClass<BaseObjData>, trackType: string, keyTimePoints: KeyTimePoint[], time: number): Promise<null | number | any> {
   if (keyTimePoints.length === 0) {
-    // console.log('evaluateTrack', 1)
     return null
   }
   if (keyTimePoints.length === 1) {
     const firstKeyframe = keyTimePoints[0]
     if (firstKeyframe.type === 'animation') {
       if (time < firstKeyframe.time) {
-        // console.log('evaluateTrack', 2)
         return null
       } else if (time >= firstKeyframe.time + firstKeyframe.timeLength) {
-        // console.log('evaluateTrack', 3)
         return null
       } else {
         const findAnimate = allPeopleAnimate.find((item) => item.key === firstKeyframe.value)
         if (!findAnimate) return null
         // 从动画里提取
         const { file } = findAnimate
-        // console.log('evaluateTrack', 4)
         console.log('ffff', file)
       }
     } else {
@@ -35,9 +31,11 @@ async function evaluateTrack(entity: BaseEntityClass<BaseObjData>, trackType: st
     }
   }
 
-  // console.log('evaluateTrack', 5)
   // 当时间在关键帧范围外时，返回 null 表示该 clip 不应在此时间段内生效
-  if (time < keyTimePoints[0].time) return null
+  if (time < keyTimePoints[0].time) {
+    // console.log('evaluateTrack', 5)
+    return null
+  }
   const lastKeyframe = keyTimePoints[keyTimePoints.length - 1]
   if (lastKeyframe.type === 'animation') {
     if (time > lastKeyframe.time + lastKeyframe.timeLength) {
@@ -48,12 +46,11 @@ async function evaluateTrack(entity: BaseEntityClass<BaseObjData>, trackType: st
     if (time > lastKeyframe.time) return null
   }
 
-  // console.log('evaluateTrack', 6)
   // 如果在一个动画里，直接返回动画值
   for (let i = 0; i < keyTimePoints.length; i++) {
     const keyframe = keyTimePoints[i]
     if (keyframe.type === 'animation') {
-      console.log('keyTimePoints', keyframe.time, time, keyframe.timeLength)
+      // console.log('keyTimePoints', keyframe.time, time, keyframe.timeLength)
       if (time > keyframe.time && time <= keyframe.time + keyframe.timeLength) {
         const boneData = await getPeopleAnimateOneTime(keyframe, entity, time)
         return boneData;
@@ -84,7 +81,7 @@ async function evaluateTrack(entity: BaseEntityClass<BaseObjData>, trackType: st
   if (rightKeyframe.type === 'animation') {
     rightValue = await getPeopleAnimateOneTime(rightKeyframe, entity, 0);
   }
-  console.log('左侧，右侧', trackType, keyTimePoints, leftValue, rightValue);
+  // console.log('左侧，右侧', trackType, keyTimePoints, leftValue, rightValue);
   const totalDuration = rightKeyframe.time - leftKeyframe.time
   const t = (time - leftKeyframe.time) / totalDuration
 

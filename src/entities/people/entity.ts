@@ -70,10 +70,10 @@ export class PeopleEntity extends ModelFileEntity<PeopleData> {
     const boneListConfig = data.bone || [];
     threeObject.traverse((child: any) => {
       if (child.isBone) {
-        console.log('boneListConfig', boneListConfig)
+        // console.log('boneListConfig', boneListConfig)
         // console.log(`🦴 发现骨骼: ${child.name}`);
         const findProp = boneListConfig.find((item) => item.name === child.name)
-        console.log('boneListConfig-findProp', findProp)
+        // console.log('boneListConfig-findProp', findProp)
         if (findProp) {
           child.rotation.set(findProp.value.x, findProp.value.y, findProp.value.z)
         }
@@ -208,11 +208,11 @@ export class PeopleEntity extends ModelFileEntity<PeopleData> {
   editAnimationDataColumn(column: string, a: any, b: any, t: number) {
     if (column === 'bone') {
       const centerBone: BoneStepItem[] = [];
-      if (a === undefined) {
+      if (a === undefined || a.length === 0) {
         return b;
       }
-      (a as BoneStepItem[]).forEach((aItem, index) => {
-        const bItem = b.find((v: any) => v.name === a.name);
+      (a as BoneStepItem[]).forEach((aItem) => {
+        const bItem = b.find((v: any) => v.name === aItem.name);
         if (bItem === undefined) {
           centerBone.push({
             ...aItem,
@@ -227,7 +227,6 @@ export class PeopleEntity extends ModelFileEntity<PeopleData> {
             }
           })
         } else {
-          console.log('sssss', aItem, bItem)
           centerBone.push({
             ...aItem,
             value: {

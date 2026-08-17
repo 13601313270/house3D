@@ -94,7 +94,7 @@ function getPeopleAnimateOneTime(keyframe: KeyTimeAnimation, people: BaseEntityC
         // @ts-ignore
         if (child.isBone) {
           const findProp = 1;
-          if (bones.includes(child.name)) {
+          if (bones.includes(child.name) || true) {
             boneData.push({
               name: child.name,
               basicValue: {
