@@ -81,7 +81,6 @@ async function evaluateTrack(entity: BaseEntityClass<BaseObjData>, trackType: st
       }
     }
   }
-  return null;
 
   let leftIndex = 0
   let rightIndex = keyTimePoints.length - 1
@@ -96,17 +95,27 @@ async function evaluateTrack(entity: BaseEntityClass<BaseObjData>, trackType: st
   }
 
   const leftKeyframe = keyTimePoints[leftIndex]
+  let leftValue: any = leftKeyframe.value;
+  if (leftKeyframe.type === 'animation') {
+    leftValue = await getPeopleAnimateOneTime(leftKeyframe, entity.meshList[0].children[0], leftKeyframe.timeLength);
+  }
   const rightKeyframe = keyTimePoints[rightIndex]
-  // console.log('左侧，右侧', trackType, keyTimePoints, leftKeyframe, rightKeyframe);
+
+  let rightValue: any = rightKeyframe.value;
+  if (rightKeyframe.type === 'animation') {
+    rightValue = await getPeopleAnimateOneTime(rightKeyframe, entity.meshList[0].children[0], 0);
+  }
+  console.log('左侧，右侧', trackType, keyTimePoints, leftKeyframe, rightKeyframe);
+
 
   const totalDuration = rightKeyframe.time - leftKeyframe.time
   let t = (time - leftKeyframe.time) / totalDuration
 
-  if (leftKeyframe.easing) {
-    t = applyEasing(t, leftKeyframe.easing)
-  }
-  return entity.editAnimationDataColumn(trackType, leftKeyframe.value, rightKeyframe.value, t)
-  // return leftKeyframe.value + (rightKeyframe.value - leftKeyframe.value) * t
+  // if (leftKeyframe.easing) {
+  //   t = applyEasing(t, leftKeyframe.easing)
+  // }
+  return entity.editAnimationDataColumn(trackType, leftValue, rightValue, t)
+  // return leftValue + (rightValue - leftValue) * t
 }
 
 export default evaluateTrack

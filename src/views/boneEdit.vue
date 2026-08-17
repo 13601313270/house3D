@@ -702,20 +702,16 @@ async function saveAnimation(boneFilter?: (name: string) => boolean) {
       time: timelineState.currentTime,
     }
     const findTrack = findClip.columns.find(v => v.trackType === key)
-    console.log('ffff', 1, findClip.columns, key)
     const timeLength = 2;
+    console.log('findTrack', findClip.columns, key, findTrack)
     if (findTrack) {
-      console.log('ffff', 2)
       const keyTimePoints = [...findTrack.keyTimePoints];
-      // console.log(222222, keyTimePoints)
       if (keyTimePoints.find(v => v.time === timeParams.time)) {
-        console.log('ffff', 3)
         const index = keyTimePoints.findIndex(v => v.time === timeParams.time)
         // @ts-ignore
         keyTimePoints[index].value = timeParams.saveVal
         findTrack.keyTimePoints = keyTimePoints;
       } else {
-        console.log('ffff', 4)
         keyTimePoints.push({
           type: 'animation',
           time: timeParams.time,
@@ -729,10 +725,11 @@ async function saveAnimation(boneFilter?: (name: string) => boolean) {
       findClip.columns.push({
         trackType: key,
         keyTimePoints: [{
-          type: 'point',
+          type: 'animation',
           time: timeParams.time,
-          // @ts-ignore
-          value: timeParams.saveVal,
+          value: animationKey.value,
+          startTime: currentTime.value,
+          timeLength,
         }]
       })
     }
