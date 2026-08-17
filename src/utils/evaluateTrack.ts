@@ -45,13 +45,12 @@ async function evaluateTrack(entity: BaseEntityClass<BaseObjData>, trackType: st
   } else {
     if (time > lastKeyframe.time) return null
   }
-
   // 如果在一个动画里，直接返回动画值
   for (let i = 0; i < keyTimePoints.length; i++) {
     const keyframe = keyTimePoints[i]
     if (keyframe.type === 'animation') {
       // console.log('keyTimePoints', keyframe.time, time, keyframe.timeLength)
-      if (time > keyframe.time && time <= keyframe.time + keyframe.timeLength) {
+      if (time >= keyframe.time && time <= keyframe.time + keyframe.timeLength) {
         const boneData = await getPeopleAnimateOneTime(keyframe, entity, time)
         return boneData;
       }
@@ -73,13 +72,13 @@ async function evaluateTrack(entity: BaseEntityClass<BaseObjData>, trackType: st
   const leftKeyframe = keyTimePoints[leftIndex]
   let leftValue: any = leftKeyframe.value;
   if (leftKeyframe.type === 'animation') {
-    leftValue = await getPeopleAnimateOneTime(leftKeyframe, entity, leftKeyframe.timeLength);
+    leftValue = await getPeopleAnimateOneTime(leftKeyframe, entity, leftKeyframe.time + leftKeyframe.timeLength);
   }
   const rightKeyframe = keyTimePoints[rightIndex]
 
   let rightValue: any = rightKeyframe.value;
   if (rightKeyframe.type === 'animation') {
-    rightValue = await getPeopleAnimateOneTime(rightKeyframe, entity, 0);
+    rightValue = await getPeopleAnimateOneTime(rightKeyframe, entity, rightKeyframe.time);
   }
   // console.log('左侧，右侧', trackType, keyTimePoints, leftValue, rightValue);
   let leftEndTime = leftKeyframe.time;
