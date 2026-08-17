@@ -851,7 +851,10 @@ async function evaluateTimeline(time: number) {
           const t = (time - leftTime) / (rightTime - leftTime)
           // @ts-ignore - trackType 为动态字符串，Entity 接口无法穷举
           const leftVal = entity.getOriginalData()[trackType] as any;
-          const rightVal = track.keyTimePoints[0].value
+          let rightVal: any = track.keyTimePoints[0].value
+          if (track.keyTimePoints[0].type === 'animation') {
+            rightVal = await getPeopleAnimateOneTime(track.keyTimePoints[0], entity, track.keyTimePoints[0].time);
+          }
           if (track.keyTimePoints[0].time === clip.startTime) {
             const previewVal = entity.editAnimationDataColumn(trackType, leftVal, rightVal, t)
             // console.log('sss---1', trackType, previewVal)
@@ -876,7 +879,6 @@ async function evaluateTimeline(time: number) {
           }
         }
       }
-      // console.log('sss---', data)
       entity.setAnimationData({
         ...entity.getAnimationData(),
         ...data,

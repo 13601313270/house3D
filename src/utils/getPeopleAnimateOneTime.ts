@@ -68,8 +68,7 @@ function getPeopleAnimateOneTime(keyframe: KeyTimeAnimation, people: BaseEntityC
       info.currentAction.enabled = true;// 必须启用 action，即使它没有在播放
       info.mixer.update(0);// 关键：用 update(0) 强制立即刷新一
 
-      const bones = getBoneFilter(applyScope)
-      // console.log('bones---', applyScope, bones)
+      const filterBones = getBoneFilter(applyScope)
       // 提取骨骼数据
       const boneData: {
         name: string;
@@ -94,7 +93,7 @@ function getPeopleAnimateOneTime(keyframe: KeyTimeAnimation, people: BaseEntityC
         // @ts-ignore
         if (child.isBone) {
           const findProp = 1;
-          if (bones.includes(child.name) || true) {
+          if (filterBones.includes(child.name)) {
             boneData.push({
               name: child.name,
               basicValue: {
