@@ -82,14 +82,14 @@ async function evaluateTrack(entity: BaseEntityClass<BaseObjData>, trackType: st
     rightValue = await getPeopleAnimateOneTime(rightKeyframe, entity, 0);
   }
   // console.log('左侧，右侧', trackType, keyTimePoints, leftValue, rightValue);
-  const totalDuration = rightKeyframe.time - leftKeyframe.time
-  const t = (time - leftKeyframe.time) / totalDuration
-
-  // if (leftKeyframe.easing) {
-  //   t = applyEasing(t, leftKeyframe.easing)
-  // }
+  let leftEndTime = leftKeyframe.time;
+  if (leftKeyframe.type === 'animation') {
+    leftEndTime = leftKeyframe.time + leftKeyframe.timeLength
+  }
+  const totalDuration = rightKeyframe.time - leftEndTime
+  const t = (time - leftEndTime) / totalDuration
+  // console.log('在一个动画里', time, t)
   return entity.editAnimationDataColumn(trackType, leftValue, rightValue, t)
-  // return leftValue + (rightValue - leftValue) * t
 }
 
 export default evaluateTrack
