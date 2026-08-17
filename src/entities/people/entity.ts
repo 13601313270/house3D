@@ -22,6 +22,9 @@ function lerpAngle(start: number, end: number, t: number): number {
   }
   return start + diff * t
 }
+function lerpPosition(start: number, end: number, t: number): number {
+  return start + (end - start) * t
+}
 
 export class PeopleEntity extends ModelFileEntity<PeopleData> {
   name: string = '人物'
@@ -234,9 +237,9 @@ export class PeopleEntity extends ModelFileEntity<PeopleData> {
               x: lerpAngle(aItem.value.x, bItem.value.x, t),
               y: lerpAngle(aItem.value.y, bItem.value.y, t),
               z: lerpAngle(aItem.value.z, bItem.value.z, t),
-              px: lerpAngle(aItem.value.px, bItem.value.px, t),
-              py: lerpAngle(aItem.value.py, bItem.value.py, t),
-              pz: lerpAngle(aItem.value.pz, bItem.value.pz, t),
+              px: lerpPosition(aItem.value.px, bItem.value.px, t),
+              py: lerpPosition(aItem.value.py, bItem.value.py, t),
+              pz: lerpPosition(aItem.value.pz, bItem.value.pz, t),
             }
           })
         }
