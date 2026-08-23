@@ -73,17 +73,19 @@
           <div v-if="showLockedArea" class="vip-divider"
             :style="{ left: `${(FREE_DURATION / effectiveDuration) * 100}%` }">
             <div class="vip-divider-line"></div>
-            <div class="vip-divider-label">
+            <!-- <div class="vip-divider-label">
               <span class="vip-icon">👑</span>
               <span>VIP解锁</span>
-            </div>
+            </div> -->
           </div>
           <!-- 未解锁遮罩层：非VIP时10秒以后的区域（与timeline-track-area平级） -->
           <div v-if="showLockedArea" class="locked-overlay"
             :style="{ left: `${(FREE_DURATION / effectiveDuration) * 100}%`, width: `${((effectiveDuration - FREE_DURATION) / effectiveDuration) * 100}%` }">
             <div class="locked-pattern"></div>
             <div class="locked-text" @click="showBuyVip">
-              <span class="locked-big-icon">🔒</span>
+              <span class="locked-big-icon">
+                <img src="@/assets/lock.svg" />
+              </span>
               <span class="locked-message">升级VIP解锁更长时长</span>
             </div>
           </div>
@@ -1011,8 +1013,7 @@ onUnmounted(() => {
 
       .title {
         font-size: 16px;
-        font-weight: bold;
-        color: #e94560; // 品牌红色标题
+        color: black; // 品牌红色标题
       }
 
       // 时间显示：等宽字体，数字对齐不跳动
@@ -1412,20 +1413,23 @@ onUnmounted(() => {
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 8px;
             color: #888;
             white-space: nowrap;
 
             .locked-big-icon {
               font-size: 32px;
               opacity: 0.6;
+
+              >img {
+                width: 30px;
+              }
             }
 
             .locked-message {
               font-size: 12px;
               font-weight: 500;
-              color: #aaa;
-              background: rgba(40, 40, 40, 0.8);
+              color: #F7F7F5;
+              background: #635BFF;
               padding: 4px 12px;
               border-radius: 12px;
               backdrop-filter: blur(4px);

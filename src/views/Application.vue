@@ -128,9 +128,11 @@
         <div class="tools">
           <div style="flex-shrink: 0;">全景图</div>
           <div style="flex-grow: 1;"></div>
-          <button @click="showEnvironmentEditor = true" type="button" v-if="editMode === 'scene'">
-            环境
-          </button>
+          <div class="buttons">
+            <button @click="showEnvironmentEditor = true" type="button" v-if="editMode === 'scene'">
+              环境
+            </button>
+          </div>
         </div>
         <!-- {{ insertTempDoor }} -->
         <div class="center-panel-content">
@@ -1530,13 +1532,14 @@ window.showLoginDialog = showLoginDialog;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: linear-gradient(90deg, #141b44 0%, #190554 100%);
+  background: #0B0D0F;
   padding-right: 8px;
 
   .toolbar {
     display: flex;
     padding: 0;
     width: auto;
+    background-color: transparent;
 
     .icon {
       width: 30px;
@@ -1550,9 +1553,9 @@ window.showLoginDialog = showLoginDialog;
       button {
         padding: 4px 8px;
         border: none;
+        color: #F7F7F5;
         border-radius: 4px;
         background: transparent;
-        color: white;
         cursor: pointer;
         font-size: 16px;
         transition: all 0.3s;
@@ -1713,12 +1716,16 @@ window.showLoginDialog = showLoginDialog;
   display: flex;
   padding: 4px 8px;
   align-items: center;
-  // background: white;
+  background: #F7F7F5;
   gap: 8px;
   height: 40px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   width: 100%;
   box-sizing: border-box;
+
+  button {
+    color: #17181A;
+  }
 
   .toolbar-item {
     position: relative;
@@ -1737,7 +1744,7 @@ window.showLoginDialog = showLoginDialog;
       max-height: 80vh;
 
       &.user {
-        width: 200px;
+        width: 240px;
       }
 
       // overflow: auto;
@@ -1834,7 +1841,8 @@ window.showLoginDialog = showLoginDialog;
 
         &:hover,
         &.active {
-          background-color: #1890ff;
+          background-color: #635bff;
+          color: white;
         }
       }
 
@@ -1947,7 +1955,7 @@ button {
     width: 100%;
     box-sizing: border-box;
     padding: 4px;
-    background-color: white;
+    background-color: #F7F7F5;
     height: 40px;
   }
 
@@ -1970,7 +1978,7 @@ button {
 
 .split-bar {
   width: 4px;
-  background: #141b44;
+  background: #0B0D0F;
   cursor: col-resize;
   transition: background 0.2s;
   z-index: 100;
@@ -2066,6 +2074,7 @@ button {
 
     >button {
       margin-left: 4px;
+      color: #17181A;
     }
   }
 
@@ -2097,7 +2106,7 @@ button {
     border: 1px solid #d9d9d9;
     border-radius: 8px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-    background-color: white;
+    background-color: #F7F7F5;
     padding: 16px;
     box-sizing: border-box;
     position: relative;
@@ -2105,7 +2114,7 @@ button {
     .title {
       font-size: 22px;
       line-height: 40px;
-      color: #666;
+      color: #17181A;
       margin-bottom: 8px;
       display: flex;
       align-items: center;

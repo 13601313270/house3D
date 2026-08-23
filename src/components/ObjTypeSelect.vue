@@ -486,6 +486,7 @@ async function refreshMineObjList() {
   border: none;
   border-radius: 4px;
   background: #e4e6eb;
+  color: #17181A;
   cursor: pointer;
   font-size: 16px;
   min-width: 50px;
