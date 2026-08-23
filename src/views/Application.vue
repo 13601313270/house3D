@@ -2,7 +2,7 @@
   <div class="map2d-app">
     <div class="headTools">
       <div class="toolbar">
-        <img class="icon" src="/favicon.ico" />
+        <img class="icon" src="/favicon256white.png" />
         <div class="toolbar-item" @mouseleave="activeToolsIndex = -1">
           <button type="button" @mouseenter="activeToolsIndex = 0">
             文件
@@ -177,7 +177,7 @@
   </div>
   <div v-if="showDemos" class="allDemosContent">
     <div class="allDemosContentInner">
-      <div class="title"><img class="icon" src="/favicon.ico" />欢迎来到<span class="p">「摄影棚」</span>，请选择创建场景的模板</div>
+      <div class="title"><img class="icon" src="/favicon256.png" />欢迎来到<span class="p">「摄影棚」</span>，请选择创建场景的模板</div>
       <div class="closeBtn" @click="showDemos = false">
         <img src="../assets/close.svg" alt="close" />
       </div>
@@ -2112,6 +2112,7 @@ button {
       justify-content: center;
 
       .icon {
+        width: 54px;
         margin-right: 8px;
         border-radius: 4px;
       }
