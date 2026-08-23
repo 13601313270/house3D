@@ -993,7 +993,7 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column; // 头部 / 标尺 / 轨道 纵向堆叠
   overflow: hidden;
-  font-family: 'Segoe UI', sans-serif;
+  font-family: Inter, "Noto Sans SC", sans-serif;
 
   // 头部控制栏：左侧标题+当前时间，右侧停止/播放/倍速滑块/缩放按钮
   .timeline-header {
@@ -1019,7 +1019,6 @@ onUnmounted(() => {
       .time-display {
         font-size: 14px;
         color: #a8b2d1;
-        font-family: monospace;
       }
     }
 

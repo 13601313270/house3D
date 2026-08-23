@@ -106,7 +106,6 @@ const sendEmail = () => {
 
         .value {
           flex: 1;
-          font-family: monospace;
           color: #1890ff;
           text-align: left;
         }
