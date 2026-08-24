@@ -79,10 +79,10 @@
                 <img src="money.png" />
                 <div class="text">添加微信群，获得<span class="price">20</span>金币</div>
               </div>
-              <div @click="showPayModal = true" class="childItem">
+              <div @click="showPayModal" class="childItem">
                 购买金币
               </div>
-              <div class="childItem" @click="showVipModal = true">
+              <div class="childItem" @click="showVipModal">
                 购买专业版权益
               </div>
               <div @click="logout" class="childItem">
@@ -167,7 +167,7 @@
 
     <div v-if="editMode === 'animation'" class="timeLine" :style="{ height: timeHeight + 'px' }">
       <div class="split-bar-x" @mousedown.prevent="startSplitTimeLine()"></div>
-      <TimeLine :isVip="isVip" @showBuyVip="showVipModal = true" />
+      <TimeLine :isVip="isVip" @showBuyVip="showVipModal" />
     </div>
     <DataTypeEditPanel v-if="contextMenu?.visible && editPropTypeKey" :typeKey="editPropTypeKey"
       :editPropConfigInfo="editPropConfigInfo" v-model="editPropInputInfo"
@@ -213,9 +213,9 @@
       height: aiPicSize.height,
     }" @close="isShowAiPic = false" />
   </teleport>
-  <ShowPayModal v-if="showPayModal" @close="showPayModal = false" @paySuccess="handlePaySuccess" />
+  <ShowPayModal v-if="payModalIsShow" @close="payModalIsShow = false" @paySuccess="handlePaySuccess" />
   <ShowGroupQrModal v-if="showGroupQrModal" @close="showGroupQrModal = false" />
-  <ShowVipModal v-if="showVipModal" @close="showVipModal = false" @paySuccess="handleVipPaySuccess" />
+  <ShowVipModal v-if="vipModalIsShow" @close="vipModalIsShow = false" @paySuccess="handleVipPaySuccess" />
   <ImportModelConfirm v-model:visible="showImportModelConfirm" :object="pendingImportData.object"
     :file="pendingImportData.file" :type="pendingImportData.type" :scale-factor="pendingImportData.scaleFactor"
     :position="pendingImportData.position" @confirm="handleImportModelConfirm" />
@@ -337,9 +337,9 @@ const insertAdding = ref(false)
 const centerPanelCamera = ref(new THREE.PerspectiveCamera(55, aspectRatio2.value, 0.1, 20000));
 const rightPanelCamera = ref<THREE.PerspectiveCamera | THREE.OrthographicCamera>();
 
-const showPayModal = ref(false)
+const payModalIsShow = ref(false)
 const showGroupQrModal = ref(false)
-const showVipModal = ref(false)
+const vipModalIsShow = ref(false)
 
 // 模型导入确认弹窗
 const showImportModelConfirm = ref(false)
@@ -388,6 +388,9 @@ const editMode = ref<'scene' | 'animation'>('scene')
 
 function setEditMode(mode: 'scene' | 'animation') {
   editMode.value = mode
+  if (mode === 'animation') {
+    window.gtag('event', 'editMode', { mode })
+  }
   timelineState.isPlaying = mode === 'animation';
   if (mode === 'scene') {
     console.log('timelineState.timelineData', timelineState.timelineData)
@@ -760,6 +763,7 @@ onMounted(async () => {
 const loadProgramFileInputRef = ref<HTMLInputElement | null>(null)
 
 const triggerImportFile = () => {
+  window.gtag('event', 'triggerImportFile')
   const inputDom = document.createElement('input')
   inputDom.type = 'file'
   inputDom.accept = '.fbx,.obj,.glb'
@@ -1260,6 +1264,7 @@ watch(() => editPropInputInfo.value, () => {
 })
 
 function exportImage() {
+  window.gtag('event', 'exportImageClick')
   if (canvas3DRef2.value) {
     const canvas = canvas3DRef2.value
     canvas.exportImage()
@@ -1426,6 +1431,7 @@ function changeGlobalEditGroup() {
   contextMenu.value = null
 }
 function showAiPic() {
+  window.gtag('event', 'showAiPicClick')
   if (canvas3DRef2.value) {
     const imageData = canvas3DRef2.value.getImageData()
     const initialImage = new Image()
@@ -1442,12 +1448,12 @@ function showAiPic() {
 }
 
 function handlePaySuccess() {
-  showPayModal.value = false
+  payModalIsShow.value = false
   initUserInfo()
 }
 
 function handleVipPaySuccess() {
-  showVipModal.value = false
+  vipModalIsShow.value = false
   initUserInfo()
 }
 
@@ -1515,6 +1521,15 @@ function handleAddAnimation(data: { typeKey: string; modelValue: Record<string, 
 }
 function showLoginDialog() {
   showLogin.value = true
+  window.gtag('event', 'showLoginDialog')
+}
+function showPayModal() {
+  window.gtag('event', 'clickBuyCoinButton')
+  payModalIsShow.value = true
+}
+function showVipModal() {
+  window.gtag('event', 'showVipModal')
+  vipModalIsShow.value = true;
 }
 window.showLoginDialog = showLoginDialog;
 </script>

@@ -369,6 +369,7 @@ const handleLogin = async () => {
     if (result.data.result) {
       localStorage.setItem('token', result.data.token)
       emit('login', email.value, password.value)
+      window.gtag('event', 'loginFinish', { result: true })
     } else {
       errorMsg.value = result.data.msg
       alert(result.data.message)

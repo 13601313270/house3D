@@ -12,5 +12,6 @@ declare global {
     showLoginDialog: () => void,// 弹出登陆窗口
     editPropEntity: BaseEntityClass<BaseObjData>// 正在右键调整属性的对象
     globalEditGroup: GroupBaseEntity<GroupBaseData> // 全局正在编辑状态的组
+    gtag: (type: 'event', action: string, option?: any) => any,
   }
 }
