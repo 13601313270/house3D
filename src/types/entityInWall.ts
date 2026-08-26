@@ -97,6 +97,7 @@ export abstract class EntityClassInWall<T extends ObjInWallData> extends PointEn
         if (entity.associationEntity.includes(this)) {
           entity.associationEntity.splice(entity.associationEntity.indexOf(this), 1)
           entity.markObjectIsDirty()
+          // entity.setData({})
         }
       })
       this.associationEntity = []
@@ -111,6 +112,7 @@ export abstract class EntityClassInWall<T extends ObjInWallData> extends PointEn
       this.associationEntity.forEach(entity => {
         if (entity.associationEntity.includes(this)) {
           entity.reCreate3DMeshAnd2DPreviewIfNeed()
+          entity.setData({})// 如果不加这一行。一个墙上两个门，移动一个，另一个会消失
         }
       });
       this.reCreate3DMeshAnd2DPreviewIfNeed();
