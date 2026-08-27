@@ -12,53 +12,10 @@
   <meta name="keywords"
     content="AI视频工具, AI视频生成工具, AI视频制作工具, AI视频一致性, 视频一致性工具, AI视频镜头控制, AI导演系统, AI影视制作工具, AI分镜工具, AI预演工具, Previs工具, 3D场景编辑器, 虚拟摄影棚, 3D镜头控制, 视频连续性工具, AI视频可控性, three.js编辑器, 虚拟制片工具, AI电影制作工具, AI视频人物一致性, AI视频场景一致性, AI视频如何保持一致, AI视频连续镜头, AI视频分镜工具">
   <meta name="baidu-site-verification" content="codeva-1SPq7M6iui" />
-  <style>
-    body {
-      margin: 0;
-      padding: 0;
-      overflow: hidden;
-      user-select: none;
-      -webkit-user-select: none;
-      -moz-user-select: none;
-      -ms-user-select: none;
-      font-family: Inter, "Noto Sans SC", sans-serif;
-    }
-  </style>
-  <!--
-    FFmpeg.wasm UMD 全局引入（CDN）
-    - 为什么用 UMD 全局引入，不用 npm import？
-      Webpack 5 直接 static import @ffmpeg/core 会编译报错：
-        Can't resolve 'module'（Emscripten 产物用了 Node 内置 module 模块）
-        Can't resolve './'（动态路径拼接，Webpack 静态分析失败）
-      而 @ffmpeg/ffmpeg 的高层类内部又有 new Worker()，Webpack 静态分析会冲突。
-      所以用 UMD 走 <script> 标签全局挂变量：FFmpeg 代码完全在浏览器里执行，
-      不进 Webpack bundle，编译零错误，运行时零路径冲突。
-    - 版本统一：
-      @ffmpeg/ffmpeg@0.12.10（加载器/Worker 管理）
-      @ffmpeg/util@0.12.1（fetchFile 等工具）
-      @ffmpeg/core@0.12.6（Wasm 核心，后续 load 时从 CDN fetch 对应版本）
-  -->
-  <script src="https://unpkg.com/@ffmpeg/ffmpeg@0.12.10/dist/umd/ffmpeg.js"></script>
-  <script src="https://unpkg.com/@ffmpeg/util@0.12.1/dist/umd/index.js"></script>
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-5VKG2P1E8V"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag() { dataLayer.push(arguments); }
-    gtag('js', new Date());
-
-    gtag('config', 'G-5VKG2P1E8V');
-  </script>
 </head>
 
 <body>
-  <noscript>
-    <strong>We're sorry but <%= htmlWebpackPlugin.options.title %> doesn't work properly without JavaScript enabled.
-        Please enable it to continue.</strong>
-  </noscript>
   <div>index</div>
-  <div id="app"></div>
-  <div id="teleport"></div>
-  <!-- built files will be auto injected -->
 </body>
 
 </html>
