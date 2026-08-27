@@ -70,4 +70,18 @@ module.exports = defineConfig({
       //   配合 resolve.fallback.* = false 让这些 Node 分支 require 到空模块，浏览器端不再报错。
     },
   },
+  pages: {
+    // 默认的 index 页面
+    index: {
+      entry: 'src/welcome.ts',          // 入口文件
+      template: 'public/index.html', // 使用的 HTML 模板
+      filename: 'index.html',        // 打包后生成的文件名
+    },
+    // 新增一个 admin 页面
+    admin: {
+      entry: 'src/main.ts',
+      template: 'public/admin.html', // 使用自定义的 admin.html 模板
+      filename: 'admin.html',
+    }
+  }
 })
