@@ -51,33 +51,6 @@
               <div class="upload-text">上传素材</div>
               <div class="upload-desc">支持 FBX / OBJ / GLB</div>
             </div>
-
-            <div v-for="item in create3DList" :key="'hunyuan3D:' + item.id" class="material-card">
-              <div class="card-preview">
-                <img v-if="item.previewImage" :src="item.previewImage" class="preview-img" />
-                <img v-else src="../assets/Empty.png" alt="empty" class="preview-img placeholder" />
-              </div>
-              <div class="card-info">
-                <div class="card-name" :title="item.name">{{ item.name }}</div>
-                <div class="card-meta">
-                  <span style="flex-grow: 1;"></span>
-                  <button class="btn-delete" :disabled="deleting3DId === item.id" @click.stop="handle3DDelete(item)">
-                    <svg v-if="deleting3DId === item.id" class="spin-icon" viewBox="0 0 24 24" fill="none" width="14"
-                      height="14">
-                      <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" stroke-linecap="round"
-                        stroke-dasharray="30 60" />
-                    </svg>
-                    <svg v-else viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor"
-                      stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                      <polyline points="3 6 5 6 21 6"></polyline>
-                      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                    </svg>
-                    <span>{{ deleting3DId === item.id ? '删除中' : '删除' }}</span>
-                  </button>
-                </div>
-              </div>
-            </div>
-
             <div v-for="item in list" :key="'material:' + item.id" class="material-card"
               :class="{ deleting: deletingId === item.id }">
               <div class="card-preview">
@@ -161,7 +134,6 @@ const list = ref<MaterialItem[]>([])
 const loading = ref(false)
 const deleting3DId = ref<number | null>(null)
 const deletingId = ref<string | null>(null)
-const create3DList = ref<hunyuanItem[]>([])
 
 const mySpaceInfo = ref<{
   freeSpace: number,
@@ -203,15 +175,12 @@ const pendingImport = reactive<{
 async function fetchList() {
   loading.value = true
   try {
-    const [listRes, spaceRes, hunyuan3DList] = await Promise.all([
+    const [listRes, spaceRes] = await Promise.all([
       service.get('/video/materialLibrary/myList'),
       service.get('/video/materialLibrary/mySpace'),
-      service.get('/video/hunyuan3D/allHunyuanTo3DRapidJob'),
     ])
     list.value = listRes.data || []
     mySpaceInfo.value = spaceRes.data
-    console.log('hunyuan3DList', hunyuan3DList)
-    create3DList.value = hunyuan3DList.data;
   } catch (error) {
     console.error('获取素材库列表失败:', error)
     list.value = []

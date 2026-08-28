@@ -396,16 +396,11 @@ async function mouseEnterType(event: MouseEvent, type: ObjFileType) {
 }
 
 async function mouseEnterMineObjs(event: MouseEvent) {
-  console.log('sssss-0')
   if (mineObjChildList.value.length === 0) {
-    console.log('sssss-1')
-    const res = await service.get('/video/materialLibrary/myList')
-    mineObjChildList.value = res.data
+    await refreshMineObjList();
   }
-  console.log('sssss-2')
   activeObjTypeId.value = 'mineObjs'
   activeObjChildList.value = mineObjChildList.value
-  console.log('sssss-3', activeObjChildList.value)
   activePluginChildList.value = []
 
   const dom = event.target as HTMLElement;
@@ -473,8 +468,10 @@ function showMineObjsModal() {
 async function refreshMineObjList() {
   console.log('sssss-update')
   mineObjChildList.value = []
-  const res = await service.get('/video/materialLibrary/myList')
-  mineObjChildList.value = res.data
+  const [resUpload] = await Promise.all([
+    service.get('/video/materialLibrary/myList'),
+  ])
+  mineObjChildList.value = resUpload.data
 }
 </script>
 <style lang="less" scoped>

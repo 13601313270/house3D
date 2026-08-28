@@ -2,11 +2,14 @@
   <div class="hunyuan3DItem">
     <img class="PreviewImageUrl" v-if="PreviewImageUrl" :src="PreviewImageUrl" />
     <div class="tools" v-if="Url">
-      <a :href="Url" target="_blank" class="download-btn" download>
+      <!-- <a :href="Url" target="_blank" class="download-btn" download>
         下载模型
-      </a>
+      </a> -->
       <div :href="Url" class="download-btn" @click="useFile">
         使用模型
+      </div>
+      <div :href="Url" class="download-btn" @click="moveModelToPersonalLibrary">
+        迁移到个人素材库
       </div>
     </div>
   </div>
@@ -45,14 +48,18 @@ async function useFile() {
     }
   }
 }
+async function moveModelToPersonalLibrary() {
+  // emits('useFile', object)
+}
 </script>
 <style lang="less">
 .hunyuan3DItem {
-  border: solid 1px black;
-  width: 160px;
+  border: solid 1px rgb(125, 125, 125);
+  border-radius: 8px;
+  width: 300px;
 
   .PreviewImageUrl {
-    width: 160px;
+    width: 300px;
   }
 
   .tools {
@@ -63,7 +70,7 @@ async function useFile() {
 
     .download-btn {
       display: inline-block;
-      padding: 4px 8px;
+      padding: 8px 16px;
       background: linear-gradient(90deg, #1890ff 0%, #096dd9 100%);
       color: white;
       text-decoration: none;

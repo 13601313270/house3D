@@ -7,46 +7,51 @@
           <button class="close-btn" @click="handleClose">&times;</button>
         </div>
         <div class="content">
-          <div class="upload-section">
-            <div class="section-title">上传图片</div>
-            <div class="upload-area" :class="{ 'has-image': imageBase64 }" @click="triggerFileInput"
-              @dragover.prevent="onDragOver" @dragleave="onDragLeave" @drop.prevent="onDrop">
-              <img v-if="imageBase64" :src="imageBase64" class="preview-img" alt="预览" />
-              <div v-else class="upload-hint">
-                <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" stroke-linecap="round" stroke-linejoin="round" />
-                  <polyline points="17 8 12 3 7 8" stroke-linecap="round" stroke-linejoin="round" />
-                  <line x1="12" y1="3" x2="12" y2="15" stroke-linecap="round" />
-                </svg>
-                <span>点击或拖拽上传图片</span>
-                <span class="format-hint">支持 JPG / PNG 等常见格式</span>
-              </div>
-            </div>
-            <input type="file" ref="fileInputRef" accept="image/*" style="display: none" @change="handleFileChange" />
-            <button v-if="imageBase64" class="reupload-btn" @click="triggerFileInput">重新上传</button>
-          </div>
-
-          <div class="action-section">
-            <div class="submit-btn" :class="{ disabled: !imageBase64 || isSubmitting || isQuerying }"
-              @click="handleSubmit">
-              <div v-if="isSubmitting" class="loading-text">提交中...</div>
-              <div v-else-if="isQuerying" class="loading-text">
-                <span class="spinner"></span>生成中...
-              </div>
-              <div v-else>开始生成模型</div>
-            </div>
-          </div>
-
           <div v-if="resultText || isQuerying" class="result-section">
             <div class="section-title">{{ isQuerying ? '生成进度' : '提交结果' }}</div>
             <div class="result-text">{{ resultText }}</div>
             <div v-if="currentJobId && !resultUrl" class="job-id">Job ID：{{ currentJobId }}</div>
             <Hunyuan3DItem :PreviewImageUrl="resultPreviewImgUrl" :Url="resultUrl" @useFile="handleUseFile" />
           </div>
-        </div>
-        <div class="hunyuan3DList">
-          <Hunyuan3DItem v-for="value in exitList" :PreviewImageUrl="value.previewImage" :Url="value.zip"
-            @useFile="handleUseFile" />
+          <div v-else>
+            <div class="upload-section">
+              <div class="section-title">上传图片</div>
+              <div class="upload-area" :class="{ 'has-image': imageBase64 }" @click="triggerFileInput"
+                @dragover.prevent="onDragOver" @dragleave="onDragLeave" @drop.prevent="onDrop">
+                <img v-if="imageBase64" :src="imageBase64" class="preview-img" alt="预览" />
+                <div v-else class="upload-hint">
+                  <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" stroke-linecap="round"
+                      stroke-linejoin="round" />
+                    <polyline points="17 8 12 3 7 8" stroke-linecap="round" stroke-linejoin="round" />
+                    <line x1="12" y1="3" x2="12" y2="15" stroke-linecap="round" />
+                  </svg>
+                  <span>点击或拖拽上传图片</span>
+                  <span class="format-hint">支持 JPG / PNG 等常见格式</span>
+                </div>
+              </div>
+              <input type="file" ref="fileInputRef" accept="image/*" style="display: none" @change="handleFileChange" />
+              <button v-if="imageBase64" class="reupload-btn" @click="triggerFileInput">重新上传</button>
+            </div>
+
+            <div class="action-section">
+              <div class="submit-btn" :class="{ disabled: !imageBase64 || isSubmitting || isQuerying }"
+                @click="handleSubmit">
+                <div v-if="isSubmitting" class="loading-text">提交中...</div>
+                <div v-else-if="isQuerying" class="loading-text">
+                  <span class="spinner"></span>生成中...
+                </div>
+                <div v-else>开始生成模型</div>
+              </div>
+            </div>
+          </div>
+          <div class="list">
+            <div class="section-title" v-if="exitList.length > 0">已完成任务</div>
+            <div class="hunyuan3DList" v-if="exitList.length > 0">
+              <Hunyuan3DItem v-for="value in exitList" :PreviewImageUrl="value.previewImage" :Url="value.zip"
+                @useFile="handleUseFile" />
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -452,10 +457,16 @@ function handleUseFile(object: any) {
           word-break: break-all;
         }
       }
+
+      .list {
+        margin-top: 20px;
+      }
     }
 
     .hunyuan3DList {
-      padding: 10px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
     }
   }
 }
