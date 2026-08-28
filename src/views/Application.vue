@@ -105,6 +105,9 @@
           <button @click="triggerImportFile" type="button" v-if="editMode === 'scene'">
             导入模型
           </button>
+          <button type="button" @click="showAiImageToModel = true" v-if="editMode === 'scene'">
+            AI图生模型
+          </button>
           <button @click="showAllObjSelect = true" type="button" v-if="editMode === 'scene'">
             对象列表({{ allObjCount }})
           </button>
@@ -215,6 +218,7 @@
   </teleport>
   <ShowPayModal v-if="payModalIsShow" @close="payModalIsShow = false" @paySuccess="handlePaySuccess" />
   <ShowGroupQrModal v-if="showGroupQrModal" @close="showGroupQrModal = false" />
+  <AiImageToModel v-if="showAiImageToModel" @close="showAiImageToModel = false" />
   <ShowVipModal v-if="vipModalIsShow" @close="vipModalIsShow = false" @paySuccess="handleVipPaySuccess" />
   <ImportModelConfirm v-model:visible="showImportModelConfirm" :object="pendingImportData.object"
     :file="pendingImportData.file" :type="pendingImportData.type" :scale-factor="pendingImportData.scaleFactor"
@@ -257,6 +261,7 @@ import AiPic from '@/components/aiPic.vue'
 import ShowPayModal from '@/components/showPayModal.vue'
 import ShowGroupQrModal from '@/components/showGroupQrModal.vue'
 import ShowVipModal from '@/components/showVipModal.vue'
+import AiImageToModel from '@/components/AiImageToModel.vue'
 import WorldState from '@/utils/worldState';
 import { editItem } from '@/utils/editItem';
 import WorldGroup, { EnvironmentConfig } from '@/world/world';
@@ -340,6 +345,7 @@ const rightPanelCamera = ref<THREE.PerspectiveCamera | THREE.OrthographicCamera>
 const payModalIsShow = ref(false)
 const showGroupQrModal = ref(false)
 const vipModalIsShow = ref(false)
+const showAiImageToModel = ref(false)
 
 // 模型导入确认弹窗
 const showImportModelConfirm = ref(false)
