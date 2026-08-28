@@ -6,7 +6,7 @@ async function importOutObj(file: File, callback: (object: THREE.Group | THREE.M
   const fileName = file.name.toLowerCase()
 
   // 检查文件类型
-  if (!fileName.endsWith('.fbx') && !fileName.endsWith('.obj') && !fileName.endsWith('.glb')) {
+  if (!fileName.endsWith('.fbx') && !fileName.endsWith('.obj') && !fileName.endsWith('.glb') && !fileName.endsWith('.zip')) {
     alert('请上传 FBX、OBJ 或 GLB 格式的文件')
     return
   }

@@ -6,12 +6,45 @@ import { FBXLoader } from 'three/addons/loaders/FBXLoader.js'
 // @ts-ignore
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
 // import { ImportFileData } from '@/entities/importFile/index.d'
+import JSZip from "jszip"
 
 const processUploadedFile = async (file: File, callback: (object: THREE.Group, file: File, type: string) => void): Promise<void> => {
-  return new Promise((resolve, reject) => {
+  return new Promise(async (resolve, reject) => {
     const fileName = file.name.toLowerCase()
 
-    if (fileName.endsWith('.obj')) {
+    if (fileName.endsWith('.zip')) {
+      const zip = await JSZip.loadAsync(file);
+      const allFileName = Object.keys(zip.files);
+      for (const fileName of allFileName) {
+        const modelFileType = 'obj';
+        if (fileName.endsWith('.' + modelFileType)) {
+          const obj = zip.files[fileName];
+          console.log('objfile', obj)
+          const blob = await obj.async('blob');
+          const fileObj = new File([blob], 'a.' + modelFileType, { type: blob.type || 'application/octet-stream' });
+          const objectUrl = URL.createObjectURL(fileObj)
+          const loader = new OBJLoader()
+          loader.load(
+            objectUrl,
+            (object: THREE.Group) => {
+              callback(object, file, 'obj')
+              URL.revokeObjectURL(objectUrl)
+              resolve()
+            },
+            (xhr: any) => {
+              console.log(`OBJ 加载进度: ${(xhr.loaded / xhr.total * 100).toFixed(2)}%`)
+            },
+            (error: any) => {
+              console.error('OBJ 文件加载失败:', error)
+              URL.revokeObjectURL(objectUrl)
+              reject(error)
+            }
+          )
+          break;
+        }
+      }
+    }
+    else if (fileName.endsWith('.obj')) {
       const objectUrl = URL.createObjectURL(file)
       const loader = new OBJLoader()
       loader.load(
