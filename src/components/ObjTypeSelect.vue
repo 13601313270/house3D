@@ -224,6 +224,7 @@ function markGuideCompleted() {
 
 async function changeCurrentTool(type: string) {
   const ClassName = fileDataKeyToClass[type];
+  console.log('ClassName', ClassName)
   let defaultValue: DefaultItem<BaseObjData>[] | Promise<DefaultItem<BaseObjData>[]> = allPluginByKey[type].defaultValues()
   if (defaultValue instanceof Promise) {
     loading.value = true

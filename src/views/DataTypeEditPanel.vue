@@ -235,7 +235,7 @@ function removeIfOutside() {
 
 // 锁定后，无法被移动
 function LockObj(value: boolean) {
-  console.log('锁定')
+  console.log('锁定', value)
   emit('update:modelValue', {
     ...props.modelValue,
     isLocked: value,

@@ -41,8 +41,12 @@
             <div class="section-title">{{ isQuerying ? '生成进度' : '提交结果' }}</div>
             <div class="result-text">{{ resultText }}</div>
             <div v-if="currentJobId && !resultUrl" class="job-id">Job ID：{{ currentJobId }}</div>
-            <Hunyuan3DItem :PreviewImageUrl="resultPreviewImgUrl" :Type="resultType" :Url="resultUrl" />
+            <Hunyuan3DItem :PreviewImageUrl="resultPreviewImgUrl" :Url="resultUrl" @useFile="handleUseFile" />
           </div>
+        </div>
+        <div class="hunyuan3DList">
+          <Hunyuan3DItem v-for="value in exitList" :PreviewImageUrl="value.previewImage" :Url="value.zip"
+            @useFile="handleUseFile" />
         </div>
       </div>
     </div>
@@ -50,7 +54,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useStore } from 'vuex'
 import { Store } from '@/store'
 import message from '@/utils/message'
@@ -73,7 +77,23 @@ const resultPreviewImgUrl = ref('')
 const resultText = ref('')
 const resultType = ref('')
 const resultUrl = ref('')
+const exitList = ref<Array<{
+  fileSize: number,
+  id: number,
+  jobId: string,
+  name: string,
+  previewImage: string
+  status: number
+  uid: number,
+  zip: string,
+}>>([])
 let stopPolling = false
+onMounted(async () => {
+  const res = await request.get(`/video/hunyuan3D/allHunyuanTo3DRapidJob`)
+  if (res.status === 200) {
+    exitList.value = res.data;
+  }
+})
 
 const handleClose = () => {
   if (isSubmitting.value) {
@@ -227,6 +247,10 @@ const handleSubmit = async () => {
   } finally {
     isSubmitting.value = false
   }
+}
+function handleUseFile(object: any) {
+  console.log('useFile-----1', object)
+  emit('close');
 }
 </script>
 
@@ -428,6 +452,10 @@ const handleSubmit = async () => {
           word-break: break-all;
         }
       }
+    }
+
+    .hunyuan3DList {
+      padding: 10px;
     }
   }
 }
