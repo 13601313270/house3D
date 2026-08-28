@@ -191,173 +191,8 @@
       overflow: hidden;
     }
 
-    .preview-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 14px 20px;
-      background: #0a0a0a;
-      color: #fff;
-    }
-
-    .preview-header-left {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-size: 14px;
-      font-weight: 600;
-    }
-
-    .preview-header-left .logo-icon {
-      width: 16px;
-      height: 16px;
-      color: #fff;
-    }
-
-    .preview-header-tabs {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      font-size: 13px;
-    }
-
-    .preview-tab {
-      padding: 5px 12px;
-      border-radius: 6px;
-      color: #a3a3a3;
-    }
-
-    .preview-tab.active {
-      background: #262626;
-      color: #fff;
-    }
-
-    .preview-tab .new-tag {
-      color: #5b5bd6;
-      font-size: 11px;
-      margin-left: 2px;
-    }
-
-    .preview-header-right {
-      font-size: 12px;
-      color: #a3a3a3;
-      background: #262626;
-      padding: 4px 10px;
-      border-radius: 6px;
-    }
-
-    .preview-body {
-      display: flex;
-      flex-direction: column;
-    }
-
-    .preview-toolbar {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      padding: 10px 16px;
-      border-bottom: 1px solid #f0f0f0;
-      font-size: 12px;
-      color: #737373;
-      background: #fafafa;
-    }
-
-    .preview-toolbar .center-spacer {
-      flex: 1;
-      text-align: center;
-    }
-
-    .preview-toolbar .right-group {
-      display: flex;
-      gap: 6px;
-    }
-
-    .preview-toolbar-btn {
-      padding: 4px 12px;
-      border-radius: 4px;
-      background: transparent;
-      color: #737373;
-      border: none;
-      cursor: pointer;
-      font-size: 12px;
-    }
-
-    .preview-toolbar-btn:hover {
-      background: #f0f0f0;
-    }
-
-    .preview-toolbar-btn.primary {
-      background: #5b5bd6;
-      color: #fff;
-    }
-
-    .preview-toolbar-btn.primary:hover {
-      background: #4c4cc0;
-    }
-
-    .preview-content {
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      min-height: 260px;
-    }
-
-    .preview-panel {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      position: relative;
-    }
-
-    .preview-panel.grid-panel {
-      background: #fff;
-      border-right: 1px solid #f0f0f0;
-    }
-
-    .grid-bg {
+    .hero-preview>img {
       width: 100%;
-      height: 100%;
-      background-image:
-        linear-gradient(to right, #f0f0f0 1px, transparent 1px),
-        linear-gradient(to bottom, #f0f0f0 1px, transparent 1px);
-      background-size: 24px 24px;
-      position: relative;
-    }
-
-    .camera-icon {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-    }
-
-    .camera-triangle {
-      width: 0;
-      height: 0;
-      border-left: 20px solid transparent;
-      border-right: 20px solid transparent;
-      border-bottom: 30px solid rgba(180, 180, 180, 0.6);
-      position: relative;
-    }
-
-    .camera-triangle::after {
-      content: '';
-      position: absolute;
-      bottom: -30px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: #ef4444;
-    }
-
-    .preview-panel.mid-panel {
-      background: linear-gradient(180deg, #d4d4d4 0%, #e8e8e8 100%);
-      border-right: 1px solid #f0f0f0;
-    }
-
-    .preview-panel.right-panel {
-      background: linear-gradient(180deg, #b8c8d8 0%, #d4d4dc 100%);
     }
 
     /* ===== Features ===== */
@@ -640,11 +475,11 @@
         动画编辑现已上线
       </div>
       <h1 class="hero-title">
-        构建场景。<br>
-        让它动起来。
+        构建场景<br>
+        让它动起来
       </h1>
       <p class="hero-desc">
-        Scenelab 是 AI 场景创作环境。在精准空间中构建虚拟场景，用 AI 生成图像，用时间轴让场景动起来。
+        <b>摄影棚</b> 是 AI 场景创作环境。在精准空间中构建虚拟场景，用 AI 生成图像，用时间轴让场景动起来。
       </p>
       <div class="hero-actions">
         <a href="/admin.html" class="btn btn-primary">开始创作</a>
@@ -654,41 +489,7 @@
       <!-- Preview -->
       <a href="/admin.html">
         <div class="hero-preview">
-          <div class="preview-header">
-            <div class="preview-header-left">
-              <img class="logo-icon" src="/favicon256white.png" />
-              摄影棚
-            </div>
-            <div class="preview-header-tabs">
-              <span class="preview-tab active">场景编辑</span>
-              <span class="preview-tab">动画编辑 <span class="new-tag">NEW</span></span>
-            </div>
-            <div class="preview-header-right">AI 点数 12</div>
-          </div>
-          <div class="preview-body">
-            <div class="preview-toolbar">
-              <button class="preview-toolbar-btn">布局图</button>
-              <button class="preview-toolbar-btn">添加</button>
-              <button class="preview-toolbar-btn">导入模型</button>
-              <button class="preview-toolbar-btn">对象列表(3)</button>
-              <span class="center-spacer">全景图</span>
-              <div class="right-group">
-                <button class="preview-toolbar-btn">AI 渲染</button>
-                <button class="preview-toolbar-btn primary">导出图片</button>
-              </div>
-            </div>
-            <div class="preview-content">
-              <div class="preview-panel grid-panel">
-                <div class="grid-bg">
-                  <div class="camera-icon">
-                    <div class="camera-triangle"></div>
-                  </div>
-                </div>
-              </div>
-              <div class="preview-panel mid-panel"></div>
-              <div class="preview-panel right-panel"></div>
-            </div>
-          </div>
+          <img src="/demo.jpg" />
         </div>
       </a>
     </div>
@@ -761,40 +562,40 @@
           <div class="example-card">
             <img class="gradient"
               src="https://yingshijiaoyuimg.oss-cn-beijing.aliyuncs.com/e47b62d9a3767ec7cd5706cd68183c36.png"
-              alt="示例 1" />
-            <span class="label">示例 1</span>
+              alt="厨房" />
+            <span class="label">厨房</span>
           </div>
         </a>
         <a href="/admin.html">
           <div class="example-card">
             <img class="gradient"
               src="https://yingshijiaoyuimg.oss-cn-beijing.aliyuncs.com/61428a3bce2d5cec3dc78bb17abbdef3.png?x-oss-process=image/resize,m_fill,h_300,w_300"
-              alt="示例 2" />
-            <span class="label">示例 2</span>
+              alt="办公室" />
+            <span class="label">办公室</span>
           </div>
         </a>
         <a href="/admin.html">
           <div class="example-card">
             <img class="gradient"
               src="https://yingshijiaoyuimg.oss-cn-beijing.aliyuncs.com/061fe13719bf254d86c6a5a4ea37a6f0.jpg?x-oss-process=image/resize,m_fill,h_300,w_300"
-              alt="示例 3" />
-            <span class="label">示例 3</span>
+              alt="客厅" />
+            <span class="label">客厅</span>
           </div>
         </a>
         <a href="/admin.html">
           <div class="example-card">
             <img class="gradient"
               src="https://yingshijiaoyuimg.oss-cn-beijing.aliyuncs.com/bd806dc3d2aa70679feeaf649cdc22aa.jpg?x-oss-process=image/resize,m_fill,h_300,w_300"
-              alt="示例 4" />
-            <span class="label">示例 4</span>
+              alt="咖啡馆" />
+            <span class="label">咖啡馆</span>
           </div>
         </a>
         <a href="/admin.html">
           <div class="example-card">
             <img class="gradient"
               src="https://yingshijiaoyuimg.oss-cn-beijing.aliyuncs.com/d4034d39bf0d3fc253c4dd7abdb693b0.png?x-oss-process=image/resize,m_fill,h_300,w_300"
-              alt="示例 5" />
-            <span class="label">示例 5</span>
+              alt="小卧室" />
+            <span class="label">小卧室</span>
           </div>
         </a>
       </div>
@@ -805,7 +606,7 @@
   <section class="final-cta">
     <div class="container">
       <h2 class="final-cta-title">开始构建你的场景</h2>
-      <p class="final-cta-desc">免费开始 · 无需安装 · 60秒动画体验</p>
+      <p class="final-cta-desc">免费开始 · 无需安装</p>
       <a href="/admin.html" class="btn btn-primary btn-lg">开始创作</a>
     </div>
   </section>
@@ -814,10 +615,7 @@
   <footer class="footer">
     <div class="footer-inner">
       <a class="logo">
-        <svg class="logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-          stroke-linecap="round" stroke-linejoin="round">
-          <path d="M12 3L3 20h18L12 3z" />
-        </svg>
+        <img class="logo-icon" src="/favicon256white.png" />
         摄影棚
       </a>
       <span class="footer-copy">© 2026 摄影棚</span>
