@@ -27,15 +27,20 @@
           </div>
 
           <div class="action-section">
-            <div class="submit-btn" :class="{ disabled: !imageBase64 || isSubmitting }" @click="handleSubmit">
+            <div class="submit-btn" :class="{ disabled: !imageBase64 || isSubmitting || isQuerying }"
+              @click="handleSubmit">
               <div v-if="isSubmitting" class="loading-text">提交中...</div>
+              <div v-else-if="isQuerying" class="loading-text">
+                <span class="spinner"></span>生成中...
+              </div>
               <div v-else>开始生成模型</div>
             </div>
           </div>
 
-          <div v-if="resultText" class="result-section">
-            <div class="section-title">提交结果</div>
+          <div v-if="resultText || isQuerying" class="result-section">
+            <div class="section-title">{{ isQuerying ? '生成进度' : '提交结果' }}</div>
             <div class="result-text">{{ resultText }}</div>
+            <div v-if="currentJobId && !resultUrl" class="job-id">Job ID：{{ currentJobId }}</div>
             <a v-if="resultUrl" :href="resultUrl" target="_blank" class="download-btn" download>
               下载模型
             </a>
@@ -53,6 +58,7 @@ import { Store } from '@/store'
 import message from '@/utils/message'
 import request from '@/utils/request'
 import { startLoading, stopLoading } from '@/utils/loadingIcon'
+import { sleep } from '@/utils/sleep'
 
 const store = useStore<Store>()
 const emit = defineEmits<{
@@ -62,13 +68,19 @@ const emit = defineEmits<{
 const fileInputRef = ref<HTMLInputElement | null>(null)
 const imageBase64 = ref('')
 const isSubmitting = ref(false)
+const isQuerying = ref(false)
+const currentJobId = ref('')
 const resultText = ref('')
 const resultUrl = ref('')
+let stopPolling = false
 
 const handleClose = () => {
   if (isSubmitting.value) {
     message.warning('正在提交中，请稍候...')
     return
+  }
+  if (isQuerying.value) {
+    stopPolling = true
   }
   emit('close')
 }
@@ -107,6 +119,54 @@ const onDrop = (e: DragEvent) => {
   }
 }
 
+const queryJobStatus = async (jobId: string) => {
+  isQuerying.value = true
+  stopPolling = false
+  const maxAttempts = 75
+  const interval = 4000
+
+  for (let i = 0; i < maxAttempts; i++) {
+    if (stopPolling) {
+      isQuerying.value = false
+      return
+    }
+    await sleep(interval)
+    if (stopPolling) {
+      isQuerying.value = false
+      return
+    }
+    try {
+      const res = await request.get(`/video/hunyuan3D/queryHunyuanTo3DRapidJob/${jobId}`)
+      console.log('query result:', res.data)
+      const response = res.data?.Response
+      if (response) {
+        const status: 'RUN' | 'DONE' = response.Status
+        if (status === 'DONE') {
+          const { PreviewImageUrl, Type, Url } = response.ResultFile3Ds[0];
+          if (Url) {
+            resultUrl.value = Url
+            resultText.value = '模型生成成功，可点击下方链接下载'
+          } else {
+            resultText.value = '模型生成成功'
+          }
+          message.success('模型生成成功', { duration: 6000 })
+          isQuerying.value = false
+          return
+        } else if (status === 'RUN') {
+          resultText.value = `正在生成模型...（已查询 ${i + 1} 次）`
+        }
+      }
+    } catch (error) {
+      console.error('查询任务状态失败:', error)
+    }
+  }
+  if (!stopPolling) {
+    resultText.value = `查询超时，任务可能仍在处理中。Job ID：${jobId}`
+    message.warning('查询超时，任务可能仍在处理中', { duration: 10000 })
+  }
+  isQuerying.value = false
+}
+
 const handleSubmit = async () => {
   if (!imageBase64.value || isSubmitting.value) return
 
@@ -132,12 +192,15 @@ const handleSubmit = async () => {
       const data = response.data
       console.log('=====data======')
       console.log(data)
-      console.log(data.Response.JobId)
-      if (data.Response) {
-        const jobId = data.Response.JobId
+      if (data.result) {
+        const jobId = data.data
         console.log(jobId)
-        resultText.value = `任务已提交，Job ID：${jobId}`
-        message.success('任务提交成功', { duration: 6000 })
+        currentJobId.value = jobId
+        resultText.value = '任务已提交，正在生成模型...'
+        message.success('任务提交成功，正在生成模型', { duration: 6000 })
+        queryJobStatus(jobId)
+      } else {
+        message.error(data.error)
       }
     } else {
       message.error(response.statusText || '提交失败')
@@ -294,8 +357,6 @@ const handleSubmit = async () => {
       }
 
       .action-section {
-        margin-bottom: 20px;
-
         .submit-btn {
           width: 100%;
           padding: 12px;
@@ -324,6 +385,15 @@ const handleSubmit = async () => {
             align-items: center;
             justify-content: center;
             gap: 6px;
+
+            .spinner {
+              width: 14px;
+              height: 14px;
+              border: 2px solid rgba(255, 255, 255, 0.4);
+              border-top-color: #fff;
+              border-radius: 50%;
+              animation: spin 0.8s linear infinite;
+            }
           }
         }
       }
@@ -338,6 +408,13 @@ const handleSubmit = async () => {
           font-size: 14px;
           color: #333;
           line-height: 1.6;
+          margin-bottom: 8px;
+          word-break: break-all;
+        }
+
+        .job-id {
+          font-size: 12px;
+          color: #999;
           margin-bottom: 12px;
           word-break: break-all;
         }
@@ -358,6 +435,12 @@ const handleSubmit = async () => {
         }
       }
     }
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
   }
 }
 </style>
