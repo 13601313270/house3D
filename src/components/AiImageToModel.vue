@@ -427,21 +427,6 @@ const handleSubmit = async () => {
           margin-bottom: 12px;
           word-break: break-all;
         }
-
-        .download-btn {
-          display: inline-block;
-          padding: 8px 16px;
-          background: #52c41a;
-          color: white;
-          text-decoration: none;
-          border-radius: 6px;
-          font-size: 14px;
-          font-weight: 500;
-
-          &:hover {
-            opacity: 0.9;
-          }
-        }
       }
     }
   }
