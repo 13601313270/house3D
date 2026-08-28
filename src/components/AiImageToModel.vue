@@ -41,9 +41,7 @@
             <div class="section-title">{{ isQuerying ? '生成进度' : '提交结果' }}</div>
             <div class="result-text">{{ resultText }}</div>
             <div v-if="currentJobId && !resultUrl" class="job-id">Job ID：{{ currentJobId }}</div>
-            <a v-if="resultUrl" :href="resultUrl" target="_blank" class="download-btn" download>
-              下载模型
-            </a>
+            <Hunyuan3DItem :PreviewImageUrl="resultPreviewImgUrl" :Type="resultType" :Url="resultUrl" />
           </div>
         </div>
       </div>
@@ -59,6 +57,7 @@ import message from '@/utils/message'
 import request from '@/utils/request'
 import { startLoading, stopLoading } from '@/utils/loadingIcon'
 import { sleep } from '@/utils/sleep'
+import Hunyuan3DItem from './hunyuan3DItem.vue'
 
 const store = useStore<Store>()
 const emit = defineEmits<{
@@ -70,7 +69,9 @@ const imageBase64 = ref('')
 const isSubmitting = ref(false)
 const isQuerying = ref(false)
 const currentJobId = ref('')
+const resultPreviewImgUrl = ref('')
 const resultText = ref('')
+const resultType = ref('')
 const resultUrl = ref('')
 let stopPolling = false
 
@@ -93,6 +94,8 @@ const readFileAsBase64 = (file: File) => {
   const reader = new FileReader()
   reader.onload = (e) => {
     imageBase64.value = e.target?.result as string
+    resultPreviewImgUrl.value = ''
+    resultType.value = ''
     resultText.value = ''
     resultUrl.value = ''
   }
@@ -143,16 +146,16 @@ const queryJobStatus = async (jobId: string) => {
         const status: 'RUN' | 'DONE' = response.Status
         if (status === 'DONE') {
           const { PreviewImageUrl, Type, Url } = response.ResultFile3Ds[0];
-          if (Url) {
-            resultUrl.value = Url
-            resultText.value = '模型生成成功，可点击下方链接下载'
-          } else {
-            resultText.value = '模型生成成功'
-          }
+          resultUrl.value = Url
+          resultPreviewImgUrl.value = PreviewImageUrl
+          resultType.value = Type
+          resultText.value = '模型生成成功，可点击下方链接下载'
           message.success('模型生成成功', { duration: 6000 })
           isQuerying.value = false
           return
         } else if (status === 'RUN') {
+          resultPreviewImgUrl.value = ''
+          resultType.value = ''
           resultText.value = `正在生成模型...（已查询 ${i + 1} 次）`
         }
       }
@@ -161,6 +164,8 @@ const queryJobStatus = async (jobId: string) => {
     }
   }
   if (!stopPolling) {
+    resultPreviewImgUrl.value = '';
+    resultType.value = ''
     resultText.value = `查询超时，任务可能仍在处理中。Job ID：${jobId}`
     message.warning('查询超时，任务可能仍在处理中', { duration: 10000 })
   }
@@ -177,6 +182,8 @@ const handleSubmit = async () => {
   }
 
   isSubmitting.value = true
+  resultPreviewImgUrl.value = ''
+  resultType.value = ''
   resultText.value = ''
   resultUrl.value = ''
 
@@ -196,6 +203,8 @@ const handleSubmit = async () => {
         const jobId = data.data
         console.log(jobId)
         currentJobId.value = jobId
+        resultPreviewImgUrl.value = ''
+        resultType.value = ''
         resultText.value = '任务已提交，正在生成模型...'
         message.success('任务提交成功，正在生成模型', { duration: 6000 })
         queryJobStatus(jobId)
