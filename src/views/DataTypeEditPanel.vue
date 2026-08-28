@@ -125,6 +125,7 @@ const emit = defineEmits<{
   (e: 'moveToGroup', id: string): void
   (e: 'changeGlobalEditGroup'): void
   (e: 'addAnimation', data: { typeKey: string; modelValue: Record<string, any> }): void
+  (e: 'lock', value: boolean): void
 }>()
 
 function handleUpdate(id: string, value: any) {
@@ -236,10 +237,7 @@ function removeIfOutside() {
 // 锁定后，无法被移动
 function LockObj(value: boolean) {
   console.log('锁定', value)
-  emit('update:modelValue', {
-    ...props.modelValue,
-    isLocked: value,
-  })
+  emit('lock', value)
   const messageText = (() => {
     if (value) {
       return '锁定成功。如想重新编辑，请去[对象列表]解锁。'

@@ -176,7 +176,7 @@
       :editPropConfigInfo="editPropConfigInfo" v-model="editPropInputInfo"
       :initPosition="{ x: contextMenu.x, y: contextMenu.y }" @deleteContextMenuEntity="deleteContextMenuEntity"
       @close="contextMenu = null" @copyEntity="copyEntity" @moveToGroup="moveToGroup"
-      @changeGlobalEditGroup="changeGlobalEditGroup" @addAnimation="handleAddAnimation" />
+      @changeGlobalEditGroup="changeGlobalEditGroup" @addAnimation="handleAddAnimation" @lock="LockObj" />
     <AllWorldObjSelect v-if="showAllObjSelect" @close="showAllObjSelect = false" />
     <EnvironmentEditor v-if="showEnvironmentEditor" @close="showEnvironmentEditor = false" />
   </div>
@@ -1055,12 +1055,12 @@ const handleContextMenu = (point: {
             editPropTypeKey.value = type
             editPropTypeIndex.value = j
             const modifyConfig: editItem[] = [...propConfig];
-            modifyConfig.push({
-              id: 'isHidden',
-              label: '是否暂时隐藏3D模型',
-              dataType: 'boolean',
-              value: data.isHidden || false,
-            })
+            // modifyConfig.push({
+            //   id: 'isHidden',
+            //   label: '是否暂时隐藏3D模型',
+            //   dataType: 'boolean',
+            //   value: data.isHidden || false,
+            // })
             if (api instanceof PointEntityClass) {
               modifyConfig.push({
                 id: 'tipGroup',
@@ -1536,6 +1536,11 @@ function showPayModal() {
 function showVipModal() {
   window.gtag('event', 'showVipModal')
   vipModalIsShow.value = true;
+}
+function LockObj(value: boolean) {
+  menuEntity?.setData({
+    isLocked: value,
+  })
 }
 window.showLoginDialog = showLoginDialog;
 </script>
