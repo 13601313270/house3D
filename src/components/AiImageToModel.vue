@@ -7,11 +7,12 @@
           <button class="close-btn" @click="handleClose">&times;</button>
         </div>
         <div class="content">
-          <div v-if="resultText || isQuerying" class="result-section">
+          <div v-if="resultText" class="result-section">
             <div class="section-title">{{ isQuerying ? '生成进度' : '提交结果' }}</div>
             <div class="result-text">{{ resultText }}</div>
             <div v-if="currentJobId && !resultUrl" class="job-id">Job ID：{{ currentJobId }}</div>
-            <Hunyuan3DItem :PreviewImageUrl="resultPreviewImgUrl" :Url="resultUrl" @useFile="handleUseFile" />
+            <Hunyuan3DItem v-if="currentJobId" :id="currentJobId" :PreviewImageUrl="resultPreviewImgUrl"
+              :Url="resultUrl" @useFile="handleUseFile" />
           </div>
           <div v-else>
             <div class="upload-section">
@@ -45,11 +46,12 @@
               </div>
             </div>
           </div>
-          <div class="list">
-            <div class="section-title" v-if="exitList.length > 0">已完成任务</div>
-            <div class="hunyuan3DList" v-if="exitList.length > 0">
-              <Hunyuan3DItem v-for="value in exitList" :PreviewImageUrl="value.previewImage" :Url="value.zip"
-                @useFile="handleUseFile" />
+          <div class="list" v-if="exitList.length > 0">
+            <div class="section-title">已完成任务</div>
+            <div class="hunyuan3DList">
+              <Hunyuan3DItem v-for="value in exitList" :key="value.id" :id="value.id"
+                :PreviewImageUrl="value.previewImage" :Url="value.zip" @useFile="handleUseFile"
+                @moveToPersonalLibrary="initList" />
             </div>
           </div>
         </div>
@@ -77,7 +79,7 @@ const fileInputRef = ref<HTMLInputElement | null>(null)
 const imageBase64 = ref('')
 const isSubmitting = ref(false)
 const isQuerying = ref(false)
-const currentJobId = ref('')
+const currentJobId = ref<number>()
 const resultPreviewImgUrl = ref('')
 const resultText = ref('')
 const resultType = ref('')
@@ -93,12 +95,15 @@ const exitList = ref<Array<{
   zip: string,
 }>>([])
 let stopPolling = false
-onMounted(async () => {
+onMounted(() => {
+  initList()
+})
+async function initList() {
   const res = await request.get(`/video/hunyuan3D/allHunyuanTo3DRapidJob`)
   if (res.status === 200) {
     exitList.value = res.data;
   }
-})
+}
 
 const handleClose = () => {
   if (isSubmitting.value) {
@@ -147,7 +152,7 @@ const onDrop = (e: DragEvent) => {
   }
 }
 
-const queryJobStatus = async (jobId: string) => {
+const queryJobStatus = async (id: number) => {
   isQuerying.value = true
   stopPolling = false
   const maxAttempts = 75
@@ -164,19 +169,20 @@ const queryJobStatus = async (jobId: string) => {
       return
     }
     try {
-      const res = await request.get(`/video/hunyuan3D/queryHunyuanTo3DRapidJob/${jobId}`)
+      const res = await request.get(`/video/hunyuan3D/queryHunyuanTo3DRapidJob/${id}`)
       console.log('query result:', res.data)
       const response = res.data?.Response
       if (response) {
         const status: 'RUN' | 'DONE' = response.Status
         if (status === 'DONE') {
           const { PreviewImageUrl, Type, Url } = response.ResultFile3Ds[0];
-          resultUrl.value = Url
-          resultPreviewImgUrl.value = PreviewImageUrl
-          resultType.value = Type
-          resultText.value = '模型生成成功，可点击下方链接下载'
+          // resultUrl.value = Url
+          // resultPreviewImgUrl.value = PreviewImageUrl
+          // resultType.value = Type
+          // resultText.value = '模型生成成功，可点击下方链接下载'
           message.success('模型生成成功', { duration: 6000 })
           isQuerying.value = false
+          initList()
           return
         } else if (status === 'RUN') {
           resultPreviewImgUrl.value = ''
@@ -191,7 +197,7 @@ const queryJobStatus = async (jobId: string) => {
   if (!stopPolling) {
     resultPreviewImgUrl.value = '';
     resultType.value = ''
-    resultText.value = `查询超时，任务可能仍在处理中。Job ID：${jobId}`
+    resultText.value = `查询超时，任务可能仍在处理中。Job ID：${id}`
     message.warning('查询超时，任务可能仍在处理中', { duration: 10000 })
   }
   isQuerying.value = false

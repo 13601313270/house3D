@@ -17,9 +17,12 @@
 <script setup lang="ts">
 import handleLoadedObject from "@/utils/handleLoadedObject";
 import importOutObj from "@/utils/importOutObj";
+import message from "@/utils/message";
+import request from "@/utils/request";
 import JSZip from "jszip"
-const emits = defineEmits(['useFile'])
+const emits = defineEmits(['useFile', 'moveToPersonalLibrary'])
 const props = defineProps<{
+  id: number,
   PreviewImageUrl: string,
   Url: string,
 }>()
@@ -49,7 +52,14 @@ async function useFile() {
   }
 }
 async function moveModelToPersonalLibrary() {
-  // emits('useFile', object)
+  const res = await request.get(`/video/hunyuan3D/moveToMaterialLibrary/${props.id}`)
+  console.log('res', res)
+  if (res.status === 200 && res.data.result) {
+    message.success('迁移成功')
+    emits('moveToPersonalLibrary')
+  } else {
+    message.error(res.data.data)
+  }
 }
 </script>
 <style lang="less">
