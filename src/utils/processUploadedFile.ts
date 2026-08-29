@@ -27,7 +27,7 @@ const processUploadedFile = async (file: File, callback: (object: THREE.Group, f
           loader.load(
             objectUrl,
             (object: THREE.Group) => {
-              callback(object, file, 'obj')
+              callback(object, file, 'zip')
               URL.revokeObjectURL(objectUrl)
               resolve()
             },
