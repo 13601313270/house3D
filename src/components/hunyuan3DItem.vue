@@ -27,28 +27,17 @@ const props = defineProps<{
   Url: string,
 }>()
 async function useFile() {
-  const zipUrl = props.Url;
+  const url = props.Url;
+  // 从url中提取文件名
+  const fileName = url.split('/').pop() || 'model.glb'
   // 根据zipUrl下载文件并转换成File类型变量
-  const response = await fetch(zipUrl);
+  const response = await fetch(url);
   const blob = await response.blob();
-  const file = new File([blob], 'model.zip', { type: blob.type });
-  console.log('file', file)
-  const zip = await JSZip.loadAsync(file);
-  const allFileName = Object.keys(zip.files);
-  console.log('allFileName', allFileName)
-  for (const fileName of allFileName) {
-    const modelFileType = 'obj';
-    if (fileName.endsWith('.' + modelFileType)) {
-      const obj = zip.files[fileName];
-      const blob = await obj.async('blob');
-      const fileObj = new File([blob], 'a.' + modelFileType, { type: blob.type || 'application/octet-stream' });
-      await importOutObj(fileObj, async (object, file, type, scaleFactor, position) => {
-        await handleLoadedObject(object, file, type, scaleFactor, position)
-        emits('useFile', object)
-      })
-      break;
-    }
-  }
+  const file = new File([blob], fileName, { type: blob.type });
+  await importOutObj(file, async (object, file, type, scaleFactor, position) => {
+    await handleLoadedObject(object, file, type, scaleFactor, position)
+    emits('useFile', object)
+  })
 }
 async function moveModelToPersonalLibrary() {
   const res = await request.get(`/video/hunyuan3D/moveToMaterialLibrary/${props.id}`)

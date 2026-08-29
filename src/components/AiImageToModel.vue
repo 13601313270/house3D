@@ -117,16 +117,38 @@ const triggerFileInput = () => {
   fileInputRef.value?.click()
 }
 
-const readFileAsBase64 = (file: File) => {
-  const reader = new FileReader()
-  reader.onload = (e) => {
-    imageBase64.value = e.target?.result as string
-    resultPreviewImgUrl.value = ''
-    resultType.value = ''
-    resultText.value = ''
-    resultUrl.value = ''
+const MAX_IMAGE_WIDTH = 500
+
+const readFileAsBase64 = async (file: File) => {
+  const dataUrl = await new Promise<string>((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = (e) => resolve(e.target?.result as string)
+    reader.onerror = reject
+    reader.readAsDataURL(file)
+  })
+
+  let base64 = dataUrl
+  try {
+    const bitmap = await createImageBitmap(file)
+    if (bitmap.width > MAX_IMAGE_WIDTH) {
+      const scale = MAX_IMAGE_WIDTH / bitmap.width
+      const canvas = document.createElement('canvas')
+      canvas.width = MAX_IMAGE_WIDTH
+      canvas.height = Math.round(bitmap.height * scale)
+      const ctx = canvas.getContext('2d')!
+      ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height)
+      base64 = canvas.toDataURL(file.type || 'image/png')
+    }
+    bitmap.close()
+  } catch (error) {
+    console.error('图片缩放失败，使用原图:', error)
   }
-  reader.readAsDataURL(file)
+
+  imageBase64.value = base64
+  resultPreviewImgUrl.value = ''
+  resultType.value = ''
+  resultText.value = ''
+  resultUrl.value = ''
 }
 
 const handleFileChange = (event: Event) => {
