@@ -11,8 +11,6 @@
             <div class="section-title">{{ isQuerying ? '生成进度' : '提交结果' }}</div>
             <div class="result-text">{{ resultText }}</div>
             <div v-if="currentJobId && !resultUrl" class="job-id">Job ID：{{ currentJobId }}</div>
-            <Hunyuan3DItem v-if="currentJobId" :id="currentJobId" :PreviewImageUrl="resultPreviewImgUrl"
-              :Url="resultUrl" @useFile="handleUseFile" />
           </div>
           <div v-else>
             <div class="upload-section">
@@ -42,7 +40,7 @@
                 <div v-else-if="isQuerying" class="loading-text">
                   <span class="spinner"></span>生成中...
                 </div>
-                <div v-else>开始生成模型</div>
+                <div v-else>开始生成模型(20金币)</div>
               </div>
             </div>
           </div>
@@ -50,8 +48,7 @@
             <div class="section-title">已完成任务</div>
             <div class="hunyuan3DList">
               <Hunyuan3DItem v-for="value in exitList" :key="value.id" :id="value.id"
-                :PreviewImageUrl="value.previewImage" :Url="value.zip" @useFile="handleUseFile"
-                @moveToPersonalLibrary="initList" />
+                :PreviewImageUrl="value.previewImage" :Url="value.zip" @useFile="handleUseFile" />
             </div>
           </div>
         </div>
@@ -187,7 +184,7 @@ const queryJobStatus = async (id: number) => {
         } else if (status === 'RUN') {
           resultPreviewImgUrl.value = ''
           resultType.value = ''
-          resultText.value = `正在生成模型...（已查询 ${i + 1} 次）`
+          resultText.value = `正在生成模型...`
         }
       }
     } catch (error) {
@@ -238,12 +235,23 @@ const handleSubmit = async () => {
         resultType.value = ''
         resultText.value = '任务已提交，正在生成模型...'
         message.success('任务提交成功，正在生成模型', { duration: 6000 })
+
+        // 刷新金币数量
+        request.get('/video/user/info').then(res => {
+          console.log(res)
+          if (res.status === 200) {
+            store.dispatch('main/setUserInfo', res.data)
+          }
+        })
+
         queryJobStatus(jobId)
       } else {
-        message.error(data.error)
+        alert(data.error);
+        // message.error(data.error)
       }
     } else {
-      message.error(response.statusText || '提交失败')
+      alert(response.statusText || '提交失败');
+      // message.error(response.statusText || '提交失败')
     }
   } catch (error: any) {
     console.error('AI图生模型提交失败:', error)

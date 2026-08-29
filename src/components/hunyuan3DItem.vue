@@ -9,7 +9,7 @@
         使用模型
       </div>
       <div :href="Url" class="download-btn" @click="moveModelToPersonalLibrary">
-        迁移到个人素材库
+        迁移到个人素材库并使用
       </div>
     </div>
   </div>
@@ -20,7 +20,7 @@ import importOutObj from "@/utils/importOutObj";
 import message from "@/utils/message";
 import request from "@/utils/request";
 import JSZip from "jszip"
-const emits = defineEmits(['useFile', 'moveToPersonalLibrary'])
+const emits = defineEmits(['useFile'])
 const props = defineProps<{
   id: number,
   PreviewImageUrl: string,
@@ -40,7 +40,6 @@ async function useFile() {
     const modelFileType = 'obj';
     if (fileName.endsWith('.' + modelFileType)) {
       const obj = zip.files[fileName];
-      console.log('objfile', obj)
       const blob = await obj.async('blob');
       const fileObj = new File([blob], 'a.' + modelFileType, { type: blob.type || 'application/octet-stream' });
       await importOutObj(fileObj, async (object, file, type, scaleFactor, position) => {
@@ -56,7 +55,7 @@ async function moveModelToPersonalLibrary() {
   console.log('res', res)
   if (res.status === 200 && res.data.result) {
     message.success('迁移成功')
-    emits('moveToPersonalLibrary')
+    useFile()
   } else {
     message.error(res.data.data)
   }
