@@ -39,7 +39,7 @@ async function evaluateTrack(entity: BaseEntityClass<BaseObjData>, trackType: st
   const lastKeyframe = keyTimePoints[keyTimePoints.length - 1]
   if (lastKeyframe.type === 'animation') {
     if (time > lastKeyframe.time + lastKeyframe.timeLength) {
-      alert(111)
+      console.log(111)
       return null
     }
   } else {
