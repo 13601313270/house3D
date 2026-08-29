@@ -1,14 +1,17 @@
 <template>
   <div class="hunyuan3DItem">
-    <img class="PreviewImageUrl" v-if="PreviewImageUrl" :src="PreviewImageUrl" />
-    <div class="tools" v-if="Url">
+    <div class="PreviewImageUrl">
+      <img v-if="item.previewImage" :src="item.previewImage" />
+      <div v-else-if="item.status === 0">模型生成中</div>
+    </div>
+    <div class="tools" v-if="item.zip">
       <!-- <a :href="Url" target="_blank" class="download-btn" download>
         下载模型
       </a> -->
-      <div :href="Url" class="download-btn" @click="useFile">
+      <div :href="item.zip" class="download-btn" @click="useFile">
         使用模型
       </div>
-      <div :href="Url" class="download-btn" @click="moveModelToPersonalLibrary">
+      <div :href="item.zip" class="download-btn" @click="moveModelToPersonalLibrary">
         迁移到个人素材库并使用
       </div>
     </div>
@@ -22,12 +25,15 @@ import request from "@/utils/request";
 import JSZip from "jszip"
 const emits = defineEmits(['useFile'])
 const props = defineProps<{
-  id: number,
-  PreviewImageUrl: string,
-  Url: string,
+  item: {
+    id: number,
+    previewImage: string,
+    zip: string,
+    status: number,
+  },
 }>()
 async function useFile() {
-  const url = props.Url;
+  const url = props.item.zip;
   // 从url中提取文件名
   const fileName = url.split('/').pop() || 'model.glb'
   // 根据zipUrl下载文件并转换成File类型变量
@@ -40,7 +46,7 @@ async function useFile() {
   })
 }
 async function moveModelToPersonalLibrary() {
-  const res = await request.get(`/video/hunyuan3D/moveToMaterialLibrary/${props.id}`)
+  const res = await request.get(`/video/hunyuan3D/moveToMaterialLibrary/${props.item.id}`)
   console.log('res', res)
   if (res.status === 200 && res.data.result) {
     message.success('迁移成功')
@@ -58,6 +64,17 @@ async function moveModelToPersonalLibrary() {
 
   .PreviewImageUrl {
     width: 300px;
+    height: 300px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    color: #333;
+
+    >img {
+      width: 300px;
+      height: 300px;
+    }
   }
 
   .tools {

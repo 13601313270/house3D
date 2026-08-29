@@ -45,10 +45,12 @@
             </div>
           </div>
           <div class="list" v-if="exitList.length > 0">
-            <div class="section-title">已完成任务</div>
+            <div class="section-title">
+              <span>生成模型任务</span>
+              <button @click="initList">刷新</button>
+            </div>
             <div class="hunyuan3DList">
-              <Hunyuan3DItem v-for="value in exitList" :key="value.id" :id="value.id"
-                :PreviewImageUrl="value.previewImage" :Url="value.zip" @useFile="handleUseFile" />
+              <Hunyuan3DItem v-for="value in exitList" :item="value" :key="value.id" @useFile="handleUseFile" />
             </div>
           </div>
         </div>
@@ -96,6 +98,7 @@ onMounted(() => {
   initList()
 })
 async function initList() {
+  exitList.value = [];
   const res = await request.get(`/video/hunyuan3D/allHunyuanTo3DRapidJob`)
   if (res.status === 200) {
     exitList.value = res.data;
@@ -223,7 +226,7 @@ const queryJobStatus = async (id: number) => {
 }
 
 const handleSubmit = async () => {
-  if (!imageBase64.value || isSubmitting.value) return
+  if (!imageBase64.value || isSubmitting.value || isQuerying.value) return
 
   if (!store.state.main.userInfo) {
     message.warning('请先登录')
@@ -309,7 +312,7 @@ function handleUseFile(object: any) {
   justify-content: center;
 
   .modalInner {
-    width: 420px;
+    width: 520px;
     max-height: 90vh;
     background: white;
     border-radius: 12px;
@@ -354,6 +357,18 @@ function handleUseFile(object: any) {
         font-weight: 600;
         color: #333;
         margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+
+        >button {
+          margin-left: 8px;
+          background-color: #1890ff;
+          color: white;
+          height: 28px;
+          border: none;
+          border-radius: 4px;
+          padding: 4px 8px;
+        }
       }
 
       .upload-section {
@@ -361,6 +376,7 @@ function handleUseFile(object: any) {
 
         .upload-area {
           width: 100%;
+          box-sizing: border-box;
           height: 220px;
           border: 2px dashed #d0d0d0;
           border-radius: 8px;
