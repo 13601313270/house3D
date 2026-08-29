@@ -40,7 +40,7 @@
                 <div v-else-if="isQuerying" class="loading-text">
                   <span class="spinner"></span>生成中...
                 </div>
-                <div v-else>开始生成模型(20金币)</div>
+                <div v-else>开始生成模型(25金币)</div>
               </div>
             </div>
           </div>
