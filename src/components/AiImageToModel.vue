@@ -517,7 +517,7 @@ function handleUseFile(object: any) {
 
     .hunyuan3DList {
       display: flex;
-      flex-wrap: wrap;
+      overflow-x: auto;
       gap: 10px;
     }
   }
