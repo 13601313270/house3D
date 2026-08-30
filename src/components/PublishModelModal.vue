@@ -24,9 +24,10 @@
             <div class="form-item">
               <label class="form-label">缩放尺寸</label>
               <div class="scale-row">
-                <input class="scale-slider" type="range" min="0.1" max="10" step="0.1" v-model.number="form.scale"
+                <input class="scale-slider" type="range" min="0.1" max="200" step="0.1" v-model.number="form.scale"
                   @input="handleScaleChange" />
-                <span class="scale-value">{{ scaleDisplay }}</span>
+                <input class="numberInput" type="number" min="0.1" max="2000" step="0.1" v-model.number="form.scale"
+                  @input="handleScaleChange" />
               </div>
               <div class="form-tip">拖动滑块，右侧预览模型实时缩放</div>
             </div>
@@ -110,8 +111,6 @@ let renderer: THREE.WebGLRenderer | null = null
 let controls: OrbitControls | null = null
 let modelObject: THREE.Group | null = null
 let animationId: number | null = null
-// 模型归一化基准缩放（最大边归一到 100），最终缩放 = baseScale * 用户缩放尺寸
-let baseScale = 1
 
 function handleClose() {
   emit('close', false)
@@ -129,7 +128,7 @@ function clampPrice() {
 function handleScaleChange() {
   if (!scene || !modelObject) return
   const scaleNum = typeof form.scale === 'number' && !isNaN(form.scale) && form.scale > 0 ? form.scale : 1
-  modelObject.scale.setScalar(baseScale * scaleNum)
+  modelObject.scale.setScalar(scaleNum)
 
   const box = new THREE.Box3().setFromObject(modelObject)
   const center = box.getCenter(new THREE.Vector3())
@@ -247,7 +246,7 @@ function initThree() {
   // 带数字刻度的 XYZ 坐标轴（1 单位 = 1cm）
   scene.add(createRulerAxes())
 
-  camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 2000)
+  camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 20000)
   camera.position.set(200, 150, 250)
   camera.lookAt(0, 50, 0)
 
@@ -335,11 +334,13 @@ async function loadModel() {
         }
       })
 
-      // 归一化：最大边缩放到 100（与导入素材逻辑一致），再叠加用户缩放尺寸
-      const box = new THREE.Box3().setFromObject(object)
-      const size = box.getSize(new THREE.Vector3())
-      const maxDim = Math.max(size.x, size.y, size.z)
-      baseScale = maxDim > 0 ? 100 / maxDim : 1
+      if (form.scale === 0) {
+        // 归一化：最大边缩放到 100（与导入素材逻辑一致），再叠加用户缩放尺寸
+        const box = new THREE.Box3().setFromObject(object)
+        const size = box.getSize(new THREE.Vector3())
+        const maxDim = Math.max(size.x, size.y, size.z)
+        form.scale = maxDim > 0 ? 100 / maxDim : 1;
+      }
 
       scene.add(object)
       handleScaleChange()
@@ -509,6 +510,17 @@ onUnmounted(() => {
               font-weight: 600;
               color: #1890ff;
               font-variant-numeric: tabular-nums;
+            }
+
+            .numberInput {
+              box-sizing: border-box;
+              padding: 8px 10px;
+              border: 1px solid #d9d9d9;
+              border-radius: 4px;
+              font-size: 14px;
+              color: #333;
+              outline: none;
+              transition: border-color 0.2s;
             }
           }
         }
