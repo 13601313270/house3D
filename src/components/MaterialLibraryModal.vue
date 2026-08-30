@@ -58,8 +58,10 @@
                 <img v-else src="../assets/Empty.png" alt="empty" class="preview-img placeholder" />
               </div>
               <div class="card-info">
-                <div class="card-name" :title="item.name">{{ item.name }}</div>
+                <div class="card-name">{{ item.name }}</div>
+                <div class="card-fileSize">{{ item.fileSize / 1000 }}M</div>
                 <div class="card-meta">
+                  <button class="btn-public">公开</button>
                   <span style="flex-grow: 1;"></span>
                   <button class="btn-delete" :disabled="deletingId === item.id" @click.stop="handleDelete(item)">
                     <svg v-if="deletingId === item.id" class="spin-icon" viewBox="0 0 24 24" fill="none" width="14"
@@ -107,6 +109,7 @@ import ImportModelConfirm from './ImportModelConfirm.vue'
 interface MaterialItem {
   id: string
   name: string
+  fileSize: number
   type: number
   previewImg?: string
   file?: string
@@ -285,7 +288,7 @@ watch(
   .material-library-modal-inner {
     background: white;
     border-radius: 8px;
-    width: 720px;
+    width: 880px;
     max-width: 90vw;
     max-height: 80vh;
     display: flex;
@@ -569,7 +572,6 @@ watch(
             padding: 10px 12px;
             display: flex;
             flex-direction: column;
-            gap: 8px;
 
             .card-name {
               font-size: 14px;
@@ -581,10 +583,49 @@ watch(
               line-height: 1.4;
             }
 
+            .card-fileSize {
+              font-size: 12px;
+              font-weight: 500;
+              color: #2c3e50;
+              overflow: hidden;
+              white-space: nowrap;
+              text-overflow: ellipsis;
+            }
+
             .card-meta {
               display: flex;
               align-items: center;
               justify-content: space-between;
+              margin-top: 4px;
+
+              .btn-public {
+                display: inline-flex;
+                align-items: center;
+                gap: 3px;
+                padding: 3px 8px;
+                border: 1px solid #1890ff;
+                background: white;
+                color: #1890ff;
+                border-radius: 4px;
+                cursor: pointer;
+                font-size: 12px;
+                transition: all 0.2s;
+
+                &:hover:not(:disabled) {
+                  background: #1890ff;
+                  color: white;
+                  border-color: #1890ff;
+                }
+
+                &:disabled {
+                  cursor: not-allowed;
+                  opacity: 0.7;
+                }
+
+                .spin-icon {
+                  animation: spin 1s linear infinite;
+                }
+              }
 
               .btn-delete {
                 display: inline-flex;
