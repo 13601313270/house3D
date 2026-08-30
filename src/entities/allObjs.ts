@@ -14,6 +14,7 @@ type ObjOutputFileType = {
   materialId: number | null
   materialVec?: [number, number, number]
   drawAngelLength: number
+  type: number
   defaultColor: string
   inWall: boolean
   defaultZ: number

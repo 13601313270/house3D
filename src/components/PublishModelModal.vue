@@ -17,7 +17,8 @@
             <div class="form-item">
               <label class="form-label">是否公开到公开模型库</label>
               <div style="display: flex;align-items: center;color: #333;font-size: 14px;">
-                <input v-model="form.isPublic" :checked="form.isPublic" class="form-input-checkbox" type="checkbox" />
+                <input v-model="form.isPublic" :checked="form.isPublic" @change="initObjectFileTypeList"
+                  class="form-input-checkbox" type="checkbox" />
                 <span>{{ form.isPublic ? '公开' : '不公开' }}</span>
               </div>
               <div class="form-tip">公开后其他用户可以使用</div>
@@ -29,7 +30,17 @@
                 placeholder="0-100" @blur="clampPrice" />
               <div class="form-tip">公开后其他用户使用需付费，最多 100 金币，0 表示免费</div>
             </div>
-
+            <div class="form-item" v-if="form.isPublic">
+              <label class="form-label">公开后所属分类</label>
+              <!-- <div>{{ form.objectFileType }}</div> -->
+              <select v-model="form.objectFileType" class="form-input" required>
+                <option :value="0">请选择分类</option>
+                <option v-for="item in objectFileTypeList" :key="item.id" :value="item.id" :label="item.name">
+                  {{ item.name }}
+                </option>
+                <option :value="-1">其他</option>
+              </select>
+            </div>
             <div class="form-item">
               <label class="form-label">缩放尺寸</label>
               <div class="scale-row">
@@ -67,12 +78,14 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, watch, nextTick, computed, onMounted, onUnmounted } from 'vue'
+import { ref, reactive, nextTick, computed, onMounted, onUnmounted } from 'vue'
 import * as THREE from 'three'
 // @ts-ignore
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 import service from '@/utils/request'
 import processUploadedFile from '@/utils/processUploadedFile'
+import axios from 'axios'
+import message from '@/utils/message'
 
 const props = defineProps<{
   item: {
@@ -82,6 +95,7 @@ const props = defineProps<{
     file?: string
     price: number
     isPublic: boolean,
+    objectFileType: number,
   }
 }>()
 
@@ -95,6 +109,7 @@ const form = reactive({
   price: 0,
   scale: 1,
   isPublic: false,
+  objectFileType: 0,
 })
 
 onMounted(() => {
@@ -102,6 +117,8 @@ onMounted(() => {
   form.price = props.item?.price ?? 0
   form.scale = props.item.initScale;
   form.isPublic = props.item.isPublic
+  form.objectFileType = props.item.objectFileType
+  initObjectFileTypeList();
   nextTick(() => {
     initThree()
     loadModel()
@@ -111,6 +128,10 @@ const viewportRef = ref<HTMLDivElement | null>(null)
 const modelLoading = ref(false)
 const modelError = ref('')
 const submitting = ref(false)
+const objectFileTypeList = ref<Array<{
+  id: number
+  name: string
+}>>([])
 
 const scaleDisplay = computed(() => {
   const n = typeof form.scale === 'number' && !isNaN(form.scale) ? form.scale : 1
@@ -370,13 +391,17 @@ async function loadModel() {
 function handleSubmit() {
   if (!props.item) return
   if (!form.name) {
-    alert('请输入模型名称')
+    message.error('请输入模型名称')
     return
+  }
+  if (form.isPublic && form.objectFileType === 0) {
+    message.error('请选择分类')
+    return;
   }
   clampPrice()
   const scaleNum = typeof form.scale === 'number' && !isNaN(form.scale) && form.scale > 0 ? form.scale : 0
   if (!scaleNum) {
-    alert('请输入有效的缩放尺寸（大于 0）')
+    message.error('请输入有效的缩放尺寸（大于 0）')
     return
   }
   submitting.value = true
@@ -385,6 +410,7 @@ function handleSubmit() {
     price: form.price,
     scale: scaleNum,
     isPublic: form.isPublic,
+    objectFileType: form.objectFileType,
   }).then(() => {
     emit('success')
     handleClose()
@@ -394,6 +420,13 @@ function handleSubmit() {
   }).finally(() => {
     submitting.value = false
   })
+}
+
+async function initObjectFileTypeList() {
+  if (objectFileTypeList.value.length === 0 && form.isPublic) {
+    const { data } = await axios.get('https://api.studying1v1.com/video/objectFileType');
+    objectFileTypeList.value = data;
+  }
 }
 
 onUnmounted(() => {

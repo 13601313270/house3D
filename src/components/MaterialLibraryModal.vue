@@ -118,6 +118,7 @@ interface MaterialItem {
   initScale: number,
   isPublic: boolean,
   price: number,
+  objectFileType: number,
 }
 interface hunyuanItem {
   id: number,

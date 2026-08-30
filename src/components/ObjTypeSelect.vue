@@ -45,7 +45,7 @@
     </button>
     <div class="list insertObjTypeSelect" @mouseenter="isMouseInCate1 = true" v-show="isMouseInCate1 || isMouseInCate2">
       <template v-if="lastChooseOutFile">
-        <div class="childItem" @click="changeCurrentToolToOutFile(lastChooseOutFile.id), isMouseInCate1 = false"
+        <div class="childItem" @click="changeCurrentToolToOutFile(lastChooseOutFile), isMouseInCate1 = false"
           @mouseenter="activeObjTypeId = undefined">
           最近使用：{{ lastChooseOutFile.name }}
         </div>
@@ -110,7 +110,7 @@
       </div>
       <!-- <div>--2--{{ activeObjChildList.length }}</div> -->
       <div v-for="item2 in activeObjChildList" class="childItem" :key="'obj-' + item2.id"
-        @click="(activeObjTypeId === 'mineObjs' ? changeCurrentToolToImportFile(item2) : changeCurrentToolToOutFile(item2.id)), isMouseInCate2 = false">
+        @click="(activeObjTypeId === 'mineObjs' ? changeCurrentToolToImportFile(item2) : changeCurrentToolToOutFile(item2)), isMouseInCate2 = false">
         <div class="previewImg">
           <img v-if="item2.previewImg" :src="item2.previewImg" alt="" />
         </div>
@@ -162,7 +162,16 @@ const emits = defineEmits<{
   (e: 'select', value: string, baseObj: BaseEntityClass<any>): void,
   (e: 'showHelpModal'): void,
 }>()
-const lastChooseOutFile = ref<ObjOutputFileType>()
+
+type activeObjChildItem = {
+  id: string,
+  name: string,
+  type: number,
+  file?: string,
+  previewImg?: string
+  initScale?: number
+}
+const lastChooseOutFile = ref<activeObjChildItem>()
 const isMouseInCate1 = ref(false)
 const isMouseInCate2 = ref(false)
 const enterEventDomPosition = ref<{ x: number, y: number }>()
@@ -188,15 +197,8 @@ const mineObjChildList = ref<Array<{
 const activePluginChildList = ref<Array<PluginType>>([])
 const activeObjTypeId = ref<number | string>()
 
-type activeObjChildItem = {
-  id: string,
-  name: string,
-  type: number,
-  file?: string,
-  previewImg?: string
-  initScale?: number
-}
 const activeObjChildList = ref<Array<activeObjChildItem>>([])
+const activeOtherUserObjChildList = ref<Array<activeObjChildItem>>([])
 
 const showDefaultValueModal = ref(false)
 const currentDefaultValues = ref<DefaultItem<any>[]>([])
@@ -307,10 +309,12 @@ async function changeCurrentToolToImportFile(item: activeObjChildItem) {
     loading.value = false
   }
 }
-async function changeCurrentToolToOutFile(id: string) {
+async function changeCurrentToolToOutFile(item: activeObjChildItem) {
+  const { id } = item;
   if (activeObjTypeId.value === 'mineObjs') {
     return
   }
+  // alert(11)
   activeObjChildList.value = []
   activePluginChildList.value = []
   const index = window.worldState.ObjFileTypes.findIndex(item => item.id === id);
