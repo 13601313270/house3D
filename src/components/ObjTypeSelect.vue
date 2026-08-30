@@ -110,7 +110,7 @@
       </div>
       <!-- <div>--2--{{ activeObjChildList.length }}</div> -->
       <div v-for="item2 in activeObjChildList" class="childItem" :key="'obj-' + item2.id"
-        @click="(activeObjTypeId === 'mineObjs' ? changeCurrentToolToImportFile(item2.file!) : changeCurrentToolToOutFile(item2.id)), isMouseInCate2 = false">
+        @click="(activeObjTypeId === 'mineObjs' ? changeCurrentToolToImportFile(item2) : changeCurrentToolToOutFile(item2.id)), isMouseInCate2 = false">
         <div class="previewImg">
           <img v-if="item2.previewImg" :src="item2.previewImg" alt="" />
         </div>
@@ -182,17 +182,21 @@ const mineObjChildList = ref<Array<{
   id: string,
   name: string,
   type: number,
+  file: string,
   previewImg?: string
 }>>([])
 const activePluginChildList = ref<Array<PluginType>>([])
 const activeObjTypeId = ref<number | string>()
-const activeObjChildList = ref<Array<{
+
+type activeObjChildItem = {
   id: string,
   name: string,
   type: number,
   file?: string,
   previewImg?: string
-}>>([])
+  initScale?: number
+}
+const activeObjChildList = ref<Array<activeObjChildItem>>([])
 
 const showDefaultValueModal = ref(false)
 const currentDefaultValues = ref<DefaultItem<any>[]>([])
@@ -279,7 +283,8 @@ onMounted(async () => {
   }>;
   ObjFileTypes.value = data;
 })
-async function changeCurrentToolToImportFile(fileUrl: string) {
+async function changeCurrentToolToImportFile(item: activeObjChildItem) {
+  const fileUrl = item.file!;
   loading.value = true
   try {
     const response = await fetch(fileUrl)
@@ -289,7 +294,8 @@ async function changeCurrentToolToImportFile(fileUrl: string) {
     const file = new File([blob], fileName, { type: blob.type })
 
     await importOutObj(file, async (object, file, type, scaleFactor, position) => {
-      await handleLoadedObject(object, file, type, scaleFactor, position)
+      console.log('=========', type, scaleFactor, item.initScale || scaleFactor)
+      await handleLoadedObject(object, file, type, item.initScale || scaleFactor, position)
       markGuideCompleted()
       activeObjChildList.value = []
       activePluginChildList.value = []
@@ -400,6 +406,7 @@ async function mouseEnterMineObjs(event: MouseEvent) {
     await refreshMineObjList();
   }
   activeObjTypeId.value = 'mineObjs'
+  console.log('mineObjChildList', mineObjChildList.value);
   activeObjChildList.value = mineObjChildList.value
   activePluginChildList.value = []
 
