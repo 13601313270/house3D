@@ -166,7 +166,6 @@ import { OutFileData } from '@/entities/outFile/index.d'
 import { BaseEntityClass } from '@/types/baseEntity';
 import PluginType, { DefaultItem } from '@/entities/pluginType';
 import { BaseObjData } from '@/types/map2d';
-import service from '@/utils/request';
 import handleLoadedObject from '@/utils/handleLoadedObject';
 import importOutObj from '@/utils/importOutObj';
 import MaterialLibraryModal from './MaterialLibraryModal.vue';
@@ -301,7 +300,7 @@ onMounted(async () => {
   } catch (e) {
     // localStorage 不可用时跳过引导
   }
-  const res = await service.get('/video/objectFileType')
+  const res = await request.get('/video/objectFileType')
   const data = res.data as Array<{
     id: number,
     name: string,
@@ -338,7 +337,7 @@ async function changeCurrentToolToImportFile(item: activeObjChildItem) {
   }
 }
 async function chooseOtherUserObj(item: otherUserObjItem) {
-  const { data: checkCanUseData } = await service.get('/video/otherUserObjectFile/checkCanUse/' + item.id)
+  const { data: checkCanUseData } = await request.get('/video/otherUserObjectFile/checkCanUse/' + item.id)
   console.log('checkCanUseData', checkCanUseData);
   if (checkCanUseData.result === false) {
     if (checkCanUseData.code === 1) {
@@ -346,7 +345,7 @@ async function chooseOtherUserObj(item: otherUserObjItem) {
       if (!isBuy) {
         return
       }
-      const { data: buyResult } = await service.post('/video/otherUserObjectFile/buyItem/' + item.id, {
+      const { data: buyResult } = await request.post('/video/otherUserObjectFile/buyItem/' + item.id, {
         price: item.price,
       })
       if (buyResult.result) {
@@ -367,7 +366,7 @@ async function chooseOtherUserObj(item: otherUserObjItem) {
       return;
     }
   }
-  const { data } = await service.get('/video/otherUserObjectFile/item/' + item.id)
+  const { data } = await request.get('/video/otherUserObjectFile/item/' + item.id)
   if (data.result) {
     const info = data.data;
     const fileUrl = info.file!;
@@ -402,7 +401,7 @@ async function changeCurrentToolToOutFile(item: activeObjChildItem) {
   activePluginChildList.value = []
   const index = window.worldState.ObjFileTypes.findIndex(item => item.id === id);
   if (index === -1) {
-    const { data } = await service.get('/video/objectFileById/' + id)
+    const { data } = await request.get('/video/objectFileById/' + id)
     const res: ObjOutputFileType = data;
     lastChooseOutFile.value = res;
     window.worldState.ObjFileTypes.push(res)
@@ -455,7 +454,7 @@ async function changeCurrentToolToOutFile(item: activeObjChildItem) {
 async function mouseEnterType(event: MouseEvent, type: ObjFileType) {
   if (!type.child || type.child.length === 0) {
     type.child = [];
-    const { data: res } = await service.get('/video/objectFileListByType/' + type.id)
+    const { data: res } = await request.get('/video/objectFileListByType/' + type.id)
     console.log('res', res)
     res.forEach((v: {
       id: string,
@@ -468,7 +467,7 @@ async function mouseEnterType(event: MouseEvent, type: ObjFileType) {
   activeObjTypeId.value = type.id
   activeObjChildList.value = type.child
   activeOtherUserObjChildList.value = []
-  const { data: res2 } = await service.get('/video/otherUserObjectFile/listByType/' + type.id)
+  const { data: res2 } = await request.get('/video/otherUserObjectFile/listByType/' + type.id)
   activeOtherUserObjChildList.value = res2;
   const allFileInThisType = allFileWithGroupId[type.id]
   if (allFileInThisType !== undefined) {
@@ -567,7 +566,7 @@ async function refreshMineObjList() {
   console.log('sssss-update')
   mineObjChildList.value = []
   const [resUpload] = await Promise.all([
-    service.get('/video/materialLibrary/myList'),
+    request.get('/video/materialLibrary/myList'),
   ])
   mineObjChildList.value = resUpload.data
 }
