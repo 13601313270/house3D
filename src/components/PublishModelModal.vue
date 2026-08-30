@@ -1,6 +1,6 @@
 <template>
   <teleport to="#teleport">
-    <div v-if="visible" class="publish-model-modal" @click.self="handleClose">
+    <div class="publish-model-modal" @click.self="handleClose">
       <div class="publish-model-modal-inner">
         <div class="header">
           <div class="title">公开模型</div>
@@ -23,15 +23,18 @@
 
             <div class="form-item">
               <label class="form-label">缩放尺寸</label>
-              <input v-model.number="form.scale" class="form-input" type="number" min="0.01" step="0.1"
-                placeholder="默认 1" @input="handleScaleChange" />
-              <div class="form-tip">右侧预览会按该尺寸实时缩放</div>
+              <div class="scale-row">
+                <input class="scale-slider" type="range" min="0.1" max="10" step="0.1" v-model.number="form.scale"
+                  @input="handleScaleChange" />
+                <span class="scale-value">{{ scaleDisplay }}</span>
+              </div>
+              <div class="form-tip">拖动滑块，右侧预览模型实时缩放</div>
             </div>
 
             <div class="form-actions">
               <button class="btn btn-cancel" @click="handleClose">取消</button>
               <button class="btn btn-confirm" :disabled="submitting" @click="handleSubmit">
-                {{ submitting ? '提交中...' : '确认公开' }}
+                {{ submitting ? '提交中...' : '保存' }}
               </button>
             </div>
           </div>
@@ -45,7 +48,7 @@
             <div v-else-if="modelError" class="preview-mask">
               <div class="mask-text error">{{ modelError }}</div>
             </div>
-            <div class="preview-tips">左键拖拽旋转 · 滚轮缩放</div>
+            <div class="preview-tips">左键拖拽旋转 · 滚轮缩放 · 坐标轴刻度 1 单位 = 1cm</div>
           </div>
         </div>
       </div>
@@ -54,7 +57,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, watch, nextTick } from 'vue'
+import { ref, reactive, watch, nextTick, computed, onMounted, onUnmounted } from 'vue'
 import * as THREE from 'three'
 // @ts-ignore
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
@@ -62,16 +65,16 @@ import service from '@/utils/request'
 import processUploadedFile from '@/utils/processUploadedFile'
 
 const props = defineProps<{
-  visible: boolean
   item: {
     id: string
     name: string
+    initScale: number
     file?: string
-  } | null
+  }
 }>()
 
 const emit = defineEmits<{
-  (e: 'update:visible', value: boolean): void
+  (e: 'close', value: boolean): void
   (e: 'success'): void
 }>()
 
@@ -81,10 +84,24 @@ const form = reactive({
   scale: 1,
 })
 
+onMounted(() => {
+  form.name = props.item?.name ?? ''
+  form.price = 0
+  form.scale = props.item.initScale;
+  nextTick(() => {
+    initThree()
+    loadModel()
+  })
+})
 const viewportRef = ref<HTMLDivElement | null>(null)
 const modelLoading = ref(false)
 const modelError = ref('')
 const submitting = ref(false)
+
+const scaleDisplay = computed(() => {
+  const n = typeof form.scale === 'number' && !isNaN(form.scale) ? form.scale : 1
+  return n.toFixed(1) + 'x'
+})
 
 // three.js 相关
 let scene: THREE.Scene | null = null
@@ -97,7 +114,7 @@ let animationId: number | null = null
 let baseScale = 1
 
 function handleClose() {
-  emit('update:visible', false)
+  emit('close', false)
 }
 
 function clampPrice() {
@@ -108,7 +125,93 @@ function clampPrice() {
   form.price = Math.min(100, Math.max(0, Math.round(form.price)))
 }
 
-// 根据 BoundingSphere 调整相机位置，保证缩放后模型始终在视野内
+// 应用用户输入的缩放尺寸：缩放模型并落到地面上（不重置相机，保证预览中模型真实变大变小）
+function handleScaleChange() {
+  if (!scene || !modelObject) return
+  const scaleNum = typeof form.scale === 'number' && !isNaN(form.scale) && form.scale > 0 ? form.scale : 1
+  modelObject.scale.setScalar(baseScale * scaleNum)
+
+  const box = new THREE.Box3().setFromObject(modelObject)
+  const center = box.getCenter(new THREE.Vector3())
+  modelObject.position.x -= center.x
+  modelObject.position.z -= center.z
+  modelObject.position.y -= box.min.y
+}
+
+// 用 Canvas 生成数字标签 Sprite
+function createLabelSprite(text: string, color: string) {
+  const fontSize = 64
+  const padding = 16
+  const canvas = document.createElement('canvas')
+  const ctx = canvas.getContext('2d')!
+  ctx.font = `bold ${fontSize}px Arial`
+  const textWidth = ctx.measureText(text).width
+  canvas.width = Math.ceil(textWidth + padding * 2)
+  canvas.height = fontSize + padding * 2
+  ctx.font = `bold ${fontSize}px Arial`
+  ctx.fillStyle = color
+  ctx.textBaseline = 'middle'
+  ctx.fillText(text, padding, canvas.height / 2)
+
+  const texture = new THREE.CanvasTexture(canvas)
+  const material = new THREE.SpriteMaterial({ map: texture, transparent: true, depthTest: false })
+  const sprite = new THREE.Sprite(material)
+  const height = 24
+  sprite.scale.set(height * canvas.width / canvas.height, height, 1)
+  sprite.renderOrder = 10
+  return sprite
+}
+
+// 生成带数字刻度的 XYZ 坐标轴，1 单位 = 1cm（X/Z 与网格边缘对齐 500，Y 到 300，每 100cm 一个刻度）
+function createRulerAxes() {
+  const group = new THREE.Group()
+  const step = 100
+  const axisConfigs = [
+    { dir: 'x' as const, length: 500, color: 0xff4d4f, cssColor: '#ff4d4f' },
+    { dir: 'y' as const, length: 300, color: 0x52c41a, cssColor: '#52c41a' },
+    { dir: 'z' as const, length: 500, color: 0x1890ff, cssColor: '#1890ff' },
+  ]
+  const tickSize = 3
+  const labelOffset = 9
+  const labelY = 4
+
+  for (const cfg of axisConfigs) {
+    // 轴线
+    const end = new THREE.Vector3(
+      cfg.dir === 'x' ? cfg.length : 0,
+      cfg.dir === 'y' ? cfg.length : 0,
+      cfg.dir === 'z' ? cfg.length : 0
+    )
+    const lineGeo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, 0, 0), end])
+    group.add(new THREE.Line(lineGeo, new THREE.LineBasicMaterial({ color: cfg.color })))
+
+    // 刻度线 + 数字标签
+    const tickPoints: THREE.Vector3[] = []
+    for (let v = step; v <= cfg.length; v += step) {
+      if (cfg.dir === 'x') {
+        tickPoints.push(new THREE.Vector3(v, -tickSize, 0), new THREE.Vector3(v, tickSize, 0))
+        const label = createLabelSprite(v + 'cm', cfg.cssColor)
+        label.position.set(v, labelY, 0)
+        group.add(label)
+      } else if (cfg.dir === 'y') {
+        tickPoints.push(new THREE.Vector3(-tickSize, v, 0), new THREE.Vector3(tickSize, v, 0))
+        const label = createLabelSprite(v + 'cm', cfg.cssColor)
+        label.position.set(-labelOffset, v, 0)
+        group.add(label)
+      } else {
+        tickPoints.push(new THREE.Vector3(-tickSize, 0, v), new THREE.Vector3(tickSize, 0, v))
+        const label = createLabelSprite(v + 'cm', cfg.cssColor)
+        label.position.set(0, labelY, v)
+        group.add(label)
+      }
+    }
+    const tickGeo = new THREE.BufferGeometry().setFromPoints(tickPoints)
+    group.add(new THREE.LineSegments(tickGeo, new THREE.LineBasicMaterial({ color: cfg.color })))
+  }
+  return group
+}
+
+// 根据包围球初始化相机取景（仅在模型加载完成时调用一次，之后拖动缩放不再重置相机）
 function fitCamera() {
   if (!scene || !camera || !controls || !modelObject) return
   const box = new THREE.Box3().setFromObject(modelObject)
@@ -120,21 +223,6 @@ function fitCamera() {
   camera.position.copy(center).add(dir.multiplyScalar(dist))
   controls.target.copy(center)
   controls.update()
-}
-
-// 应用用户输入的缩放尺寸：缩放模型并落到地面上
-function handleScaleChange() {
-  if (!scene || !modelObject) return
-  const scaleNum = typeof form.scale === 'number' && !isNaN(form.scale) && form.scale > 0 ? form.scale : 1
-  modelObject.scale.setScalar(baseScale * scaleNum)
-
-  const box = new THREE.Box3().setFromObject(modelObject)
-  const center = box.getCenter(new THREE.Vector3())
-  modelObject.position.x -= center.x
-  modelObject.position.z -= center.z
-  modelObject.position.y -= box.min.y
-
-  fitCamera()
 }
 
 function initThree() {
@@ -156,8 +244,8 @@ function initThree() {
   const gridHelper = new THREE.GridHelper(1000, 50, 0xcccccc, 0xeeeeee)
   scene.add(gridHelper)
 
-  const axesHelper = new THREE.AxesHelper(100)
-  scene.add(axesHelper)
+  // 带数字刻度的 XYZ 坐标轴（1 单位 = 1cm）
+  scene.add(createRulerAxes())
 
   camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 2000)
   camera.position.set(200, 150, 250)
@@ -201,13 +289,17 @@ function disposeScene() {
   }
   if (scene) {
     scene.traverse((obj) => {
-      if (obj instanceof THREE.Mesh) {
+      if (obj instanceof THREE.Mesh || obj instanceof THREE.Line) {
         obj.geometry?.dispose()
         if (Array.isArray(obj.material)) {
           obj.material.forEach((m) => m.dispose())
         } else {
           obj.material?.dispose()
         }
+      } else if (obj instanceof THREE.Sprite) {
+        const mat = obj.material as THREE.SpriteMaterial
+        mat.map?.dispose()
+        mat.dispose()
       }
     })
     scene = null
@@ -251,6 +343,7 @@ async function loadModel() {
 
       scene.add(object)
       handleScaleChange()
+      fitCamera()
     })
   } catch (error) {
     console.error('模型加载失败:', error)
@@ -273,8 +366,7 @@ function handleSubmit() {
     return
   }
   submitting.value = true
-  service.post('/video/materialLibrary/publish', {
-    id: props.item.id,
+  service.post(`/video/materialLibrary/update/${props.item.id}`, {
     name: form.name,
     price: form.price,
     scale: scaleNum,
@@ -289,22 +381,9 @@ function handleSubmit() {
   })
 }
 
-watch(
-  () => props.visible,
-  (val) => {
-    if (val) {
-      form.name = props.item?.name ?? ''
-      form.price = 0
-      form.scale = 1
-      nextTick(() => {
-        initThree()
-        loadModel()
-      })
-    } else {
-      disposeScene()
-    }
-  }
-)
+onUnmounted(() => {
+  disposeScene()
+})
 </script>
 
 <style lang="less" scoped>
@@ -409,6 +488,28 @@ watch(
             font-size: 12px;
             color: #999;
             line-height: 1.5;
+          }
+
+          .scale-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+
+            .scale-slider {
+              flex: 1;
+              height: 4px;
+              accent-color: #1890ff;
+              cursor: pointer;
+            }
+
+            .scale-value {
+              min-width: 44px;
+              text-align: right;
+              font-size: 13px;
+              font-weight: 600;
+              color: #1890ff;
+              font-variant-numeric: tabular-nums;
+            }
           }
         }
 

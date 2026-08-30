@@ -61,7 +61,7 @@
                 <div class="card-name">{{ item.name }}</div>
                 <div class="card-fileSize">{{ item.fileSize / 1000 }}M</div>
                 <div class="card-meta">
-                  <button class="btn-public" @click.stop="handlePublish(item)">公开</button>
+                  <button class="btn-public" @click.stop="handlePublish(item)">设置</button>
                   <span style="flex-grow: 1;"></span>
                   <button class="btn-delete" :disabled="deletingId === item.id" @click.stop="handleDelete(item)">
                     <svg v-if="deletingId === item.id" class="spin-icon" viewBox="0 0 24 24" fill="none" width="14"
@@ -95,8 +95,7 @@
       :type="pendingImport.type" :scale-factor="pendingImport.scaleFactor" :position="pendingImport.position"
       :default-add-to-library="true" @confirm="handleImportConfirm" />
 
-    <PublishModelModal v-model:visible="publishVisible" :item="publishItem" @success="fetchList" />
-
+    <PublishModelModal v-if="publishItem && publishVisible" @close="publishVisible = false" :item="publishItem" @success="fetchList" />
     <input ref="fileInputRef" type="file" accept=".fbx,.obj,.glb" style="display: none;" @change="handleFileChange" />
   </teleport>
 </template>
@@ -116,6 +115,7 @@ interface MaterialItem {
   type: number
   previewImg?: string
   file?: string
+  initScale: number,
 }
 interface hunyuanItem {
   id: number,
