@@ -116,6 +116,8 @@ interface MaterialItem {
   previewImg?: string
   file?: string
   initScale: number,
+  isPublic: boolean,
+  price: number,
 }
 interface hunyuanItem {
   id: number,

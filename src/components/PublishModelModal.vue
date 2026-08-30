@@ -15,6 +15,15 @@
             </div>
 
             <div class="form-item">
+              <label class="form-label">是否公开到公开模型库</label>
+              <div style="display: flex;align-items: center;color: #333;font-size: 14px;">
+                <input v-model="form.isPublic" :checked="form.isPublic" class="form-input-checkbox" type="checkbox" />
+                <span>{{ form.isPublic ? '公开' : '不公开' }}</span>
+              </div>
+              <div class="form-tip">公开后其他用户可以使用</div>
+            </div>
+
+            <div class="form-item" v-if="form.isPublic">
               <label class="form-label">收费价格（金币）</label>
               <input v-model.number="form.price" class="form-input" type="number" min="0" max="100" step="1"
                 placeholder="0-100" @blur="clampPrice" />
@@ -71,6 +80,8 @@ const props = defineProps<{
     name: string
     initScale: number
     file?: string
+    price: number
+    isPublic: boolean,
   }
 }>()
 
@@ -83,12 +94,14 @@ const form = reactive({
   name: '',
   price: 0,
   scale: 1,
+  isPublic: false,
 })
 
 onMounted(() => {
   form.name = props.item?.name ?? ''
-  form.price = 0
+  form.price = props.item?.price ?? 0
   form.scale = props.item.initScale;
+  form.isPublic = props.item.isPublic
   nextTick(() => {
     initThree()
     loadModel()
@@ -371,6 +384,7 @@ function handleSubmit() {
     name: form.name,
     price: form.price,
     scale: scaleNum,
+    isPublic: form.isPublic,
   }).then(() => {
     emit('success')
     handleClose()
@@ -458,7 +472,9 @@ onUnmounted(() => {
         flex-direction: column;
 
         .form-item {
-          margin-bottom: 16px;
+          margin-bottom: 12px;
+          padding-bottom: 12px;
+          border-bottom: solid 1px #d8d8d8;
 
           .form-label {
             display: block;
@@ -482,6 +498,11 @@ onUnmounted(() => {
             &:focus {
               border-color: #1890ff;
             }
+          }
+
+          .form-input-checkbox {
+            width: 18px;
+            height: 18px;
           }
 
           .form-tip {
