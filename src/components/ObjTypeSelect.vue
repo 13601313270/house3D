@@ -116,6 +116,22 @@
         </div>
         <div class="name">{{ item2.name }}</div>
       </div>
+      <template v-if="activeObjTypeId !== 'mineObjs'">
+        <div v-for="item2 in activeOtherUserObjChildList" @click="chooseOtherUserObj(item2)" class="childItem"
+          :key="'obj-' + item2.id">
+          <div class="previewImg">
+            <img v-if="item2.previewImg" :src="item2.previewImg" alt="" />
+          </div>
+          <div class="name">11{{ item2.name }}</div>
+          <div class="userUpTip">
+            <span>用户上传</span>
+            <template v-if="item2.price > 0">
+              <img style="margin: 0 2px;" src="money.png" alt="" /><span>{{ item2.price }}金币</span>
+            </template>
+            <span v-else>(免费)</span>
+          </div>
+        </div>
+      </template>
     </div>
     <div class="defaultValueModal" v-if="showDefaultValueModal" @click.self="showDefaultValueModal = false">
       <div class="modalContent">
@@ -154,7 +170,12 @@ import service from '@/utils/request';
 import handleLoadedObject from '@/utils/handleLoadedObject';
 import importOutObj from '@/utils/importOutObj';
 import MaterialLibraryModal from './MaterialLibraryModal.vue';
+import message from '@/utils/message';
+import request from '@/utils/request';
+import { useStore } from 'vuex';
+import { Store } from '@/store/index.js';
 
+const store = useStore<Store>()
 defineProps<{
   currentTool: string | 'drag'
 }>()
@@ -198,7 +219,14 @@ const activePluginChildList = ref<Array<PluginType>>([])
 const activeObjTypeId = ref<number | string>()
 
 const activeObjChildList = ref<Array<activeObjChildItem>>([])
-const activeOtherUserObjChildList = ref<Array<activeObjChildItem>>([])
+
+type otherUserObjItem = {
+  id: string,
+  name: string,
+  previewImg?: string
+  price: number,
+}
+const activeOtherUserObjChildList = ref<Array<otherUserObjItem>>([])
 
 const showDefaultValueModal = ref(false)
 const currentDefaultValues = ref<DefaultItem<any>[]>([])
@@ -309,12 +337,67 @@ async function changeCurrentToolToImportFile(item: activeObjChildItem) {
     loading.value = false
   }
 }
+async function chooseOtherUserObj(item: otherUserObjItem) {
+  const { data: checkCanUseData } = await service.get('/video/otherUserObjectFile/checkCanUse/' + item.id)
+  console.log('checkCanUseData', checkCanUseData);
+  if (checkCanUseData.result === false) {
+    if (checkCanUseData.code === 1) {
+      const isBuy = confirm('是否购买该模型？需要消耗' + item.price + '金币')
+      if (!isBuy) {
+        return
+      }
+      const { data: buyResult } = await service.post('/video/otherUserObjectFile/buyItem/' + item.id, {
+        price: item.price,
+      })
+      if (buyResult.result) {
+        alert('购买成功')
+        // 刷新金币数量
+        request.get('/video/user/info').then(res => {
+          console.log(res)
+          if (res.status === 200) {
+            store.dispatch('main/setUserInfo', res.data)
+          }
+        })
+      } else {
+        message.error(buyResult.msg || '购买失败')
+        return;
+      }
+    } else {
+      message.error(checkCanUseData.msg)
+      return;
+    }
+  }
+  const { data } = await service.get('/video/otherUserObjectFile/item/' + item.id)
+  if (data.result) {
+    const info = data.data;
+    const fileUrl = info.file!;
+    loading.value = true
+    try {
+      const response = await fetch(fileUrl)
+      const blob = await response.blob()
+      const urlPath = new URL(fileUrl).pathname
+      const fileName = urlPath.split('/').pop() || 'model'
+      const file = new File([blob], fileName, { type: blob.type })
+
+      await importOutObj(file, async (object, file, type, scaleFactor, position) => {
+        await handleLoadedObject(object, file, type, info.initScale || scaleFactor, position)
+        markGuideCompleted()
+        activeObjChildList.value = []
+        activePluginChildList.value = []
+      })
+    } catch (error) {
+      console.error('文件下载失败:', error)
+      alert('文件下载失败，请重试')
+    } finally {
+      loading.value = false
+    }
+  }
+}
 async function changeCurrentToolToOutFile(item: activeObjChildItem) {
   const { id } = item;
   if (activeObjTypeId.value === 'mineObjs') {
     return
   }
-  // alert(11)
   activeObjChildList.value = []
   activePluginChildList.value = []
   const index = window.worldState.ObjFileTypes.findIndex(item => item.id === id);
@@ -384,9 +467,13 @@ async function mouseEnterType(event: MouseEvent, type: ObjFileType) {
   }
   activeObjTypeId.value = type.id
   activeObjChildList.value = type.child
-
+  activeOtherUserObjChildList.value = []
+  const { data: res2 } = await service.get('/video/otherUserObjectFile/listByType/' + type.id)
+  activeOtherUserObjChildList.value = res2;
   const allFileInThisType = allFileWithGroupId[type.id]
-  activePluginChildList.value = allFileInThisType;
+  if (allFileInThisType !== undefined) {
+    activePluginChildList.value = allFileInThisType;
+  }
 
   const dom = event.target as HTMLElement;
   const { right, top } = dom.getBoundingClientRect()
@@ -690,6 +777,8 @@ async function refreshMineObjList() {
     justify-content: center;
     box-sizing: border-box;
     height: 113px;
+    position: relative;
+    overflow: hidden;
 
     &:hover {
       background-color: #1890ff;
@@ -720,10 +809,28 @@ async function refreshMineObjList() {
       margin-left: 8px;
       margin-right: 8px;
       background-color: white;
+      position: relative;
 
       >img {
         width: 100%;
         height: 100%;
+      }
+    }
+
+    .userUpTip {
+      font-size: 10px;
+      background-color: #000000;
+      padding: 4px;
+      color: white;
+      position: absolute;
+      top: 0;
+      right: 0;
+      border-bottom-left-radius: 4px;
+      display: flex;
+      align-items: center;
+
+      >img {
+        height: 12px;
       }
     }
 
