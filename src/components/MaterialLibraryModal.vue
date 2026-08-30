@@ -61,7 +61,7 @@
                 <div class="card-name">{{ item.name }}</div>
                 <div class="card-fileSize">{{ item.fileSize / 1000 }}M</div>
                 <div class="card-meta">
-                  <button class="btn-public">公开</button>
+                  <button class="btn-public" @click.stop="handlePublish(item)">公开</button>
                   <span style="flex-grow: 1;"></span>
                   <button class="btn-delete" :disabled="deletingId === item.id" @click.stop="handleDelete(item)">
                     <svg v-if="deletingId === item.id" class="spin-icon" viewBox="0 0 24 24" fill="none" width="14"
@@ -95,6 +95,8 @@
       :type="pendingImport.type" :scale-factor="pendingImport.scaleFactor" :position="pendingImport.position"
       :default-add-to-library="true" @confirm="handleImportConfirm" />
 
+    <PublishModelModal v-model:visible="publishVisible" :item="publishItem" @success="fetchList" />
+
     <input ref="fileInputRef" type="file" accept=".fbx,.obj,.glb" style="display: none;" @change="handleFileChange" />
   </teleport>
 </template>
@@ -105,6 +107,7 @@ import * as THREE from 'three'
 import service from '@/utils/request'
 import importOutObj from '@/utils/importOutObj'
 import ImportModelConfirm from './ImportModelConfirm.vue'
+import PublishModelModal from './PublishModelModal.vue'
 
 interface MaterialItem {
   id: string
@@ -161,6 +164,14 @@ function formattedFileSize(bytes: number) {
 // 文件上传相关
 const fileInputRef = ref<HTMLInputElement | null>(null)
 const showImportConfirm = ref(false)
+// 公开模型浮层
+const publishVisible = ref(false)
+const publishItem = ref<MaterialItem | null>(null)
+
+function handlePublish(item: MaterialItem) {
+  publishItem.value = item
+  publishVisible.value = true
+}
 const pendingImport = reactive<{
   object: THREE.Group | THREE.Mesh | null
   file: File | null
