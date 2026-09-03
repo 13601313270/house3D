@@ -26,6 +26,9 @@ const emit = defineEmits<{
 
 const containerRef = ref<HTMLDivElement | null>(null)
 
+// 当前选中的对象（显示 moveZBox）
+let canvas1SelectedEntity: PointEntityClass<any> | null = null
+
 // let scene: THREE.Scene | null = null
 let camera: THREE.PerspectiveCamera | THREE.OrthographicCamera | null = null
 let renderer: THREE.WebGLRenderer | null = null
@@ -192,6 +195,12 @@ const initThree = () => {
     let canvas1LastMouseX = 0;
     let canvas1LastMouseY = 0;
 
+    // 区分 click 和 drag：mousedown 记录起点和命中对象，mouseup 根据移动距离判定
+    let canvas1PendingClickTarget: PointEntityClass<any> | null = null;
+    let canvas1PendingClickStartX = 0;
+    let canvas1PendingClickStartY = 0;
+    const CLICK_THRESHOLD = 5;
+
     updateCameraAngel()
 
     const emitCameraState = () => {
@@ -260,20 +269,51 @@ const initThree = () => {
           canvas1LastMouseY = e.clientY;
           e.preventDefault();
         } else if (e.button === 0) {
-          const hoveredObject = raycastObjects(window.globalEditGroup.moveZBoxList(), e)
-          if (hoveredObject) {
-            // 移动对象
+          // 先检测是否点击了可见的 moveZBox（只有选中对象的 moveZBox 可见）→ 进入拖动（拖拽不需要 click 判定）
+          const allMoveZBoxList = window.globalEditGroup.moveZBoxList()
+          const visibleMoveZBoxList = allMoveZBoxList.filter(box => box.visible)
+          const moveZBoxHit = raycastObjects(visibleMoveZBoxList, e)
+          if (moveZBoxHit) {
             // @ts-ignore
-            const entity = hoveredObject.entity as BaseEntityClass<any>
+            const entity = moveZBoxHit.entity as BaseEntityClass<any>
             if (entity instanceof PointEntityClass) {
               canvas1IsMouseMoveObj = true;
               canvas1LastMouseX = e.clientX;
               canvas1LastMouseY = e.clientY;
-              canvas1HoveredObject = hoveredObject
+              canvas1HoveredObject = moveZBoxHit
               camera1MouseMoveStartZ = entity.getData().z;
+              // 重置 pending click，因为 moveZBox 拖拽不属于 click 判定
+              canvas1PendingClickTarget = null;
+              canvas1PendingClickStartX = e.clientX;
+              canvas1PendingClickStartY = e.clientY;
             }
           } else {
-            // 移动相机
+            // 先确保所有 boundingBox 可见（raycaster 默认跳过 visible=false 的对象）
+            const allBoundingBox = window.globalEditGroup.boundingBoxList()
+            allBoundingBox.forEach((item) => {
+              item.visible = true
+            })
+            // 检测是否命中 boundingBox/textBox → 记录为 pending click，等待 mouseup 判定
+            const allLastTextBox: any[] = [];
+            allMoveZBoxList.forEach((item) => {
+              allLastTextBox.push(item.children[0]);
+            })
+            const clickedObject = raycastObjects([...allBoundingBox, ...allLastTextBox], e)
+            if (clickedObject) {
+              // @ts-ignore
+              const entity = clickedObject.entity as BaseEntityClass<any>
+              if (entity instanceof PointEntityClass) {
+                canvas1PendingClickTarget = entity
+                canvas1PendingClickStartX = e.clientX
+                canvas1PendingClickStartY = e.clientY
+              }
+            } else {
+              // 点击空白处 → pending click 目标记为 null（mouseup 时若未拖动则取消选中）
+              canvas1PendingClickTarget = null
+              canvas1PendingClickStartX = e.clientX
+              canvas1PendingClickStartY = e.clientY
+            }
+            // 无论点击命中什么，都先进入相机平移模式（如果后续判定为 click，mouseup 会清掉）
             camera1TargetPositionStartX = cameraStateZ.value.targetPositionX;
             camera1TargetPositionStartY = cameraStateZ.value.targetPositionY;
             camera1TargetPositionStartZ = cameraStateZ.value.targetPositionZ;
@@ -317,6 +357,12 @@ const initThree = () => {
           updateCameraAngel()
         } else if (canvas1IsMouseMove) {
           // 移动相机
+          // 超过阈值 → 判定为拖拽而非点击，取消 pending click
+          const totalDeltaX = e.clientX - canvas1PendingClickStartX
+          const totalDeltaY = e.clientY - canvas1PendingClickStartY
+          if (Math.abs(totalDeltaX) > CLICK_THRESHOLD || Math.abs(totalDeltaY) > CLICK_THRESHOLD) {
+            canvas1PendingClickTarget = null
+          }
           const sensitivity = cameraStateZ.value.radius / 450;
           cameraStateZ.value.targetPositionX = camera1TargetPositionStartX - (deltaX * Math.cos(cameraStateZ.value.angleX) - deltaY * Math.sin(cameraStateZ.value.angleX)) * sensitivity;
           cameraStateZ.value.targetPositionZ = camera1TargetPositionStartZ - (deltaX * Math.sin(cameraStateZ.value.angleX) + deltaY * Math.cos(cameraStateZ.value.angleX)) * sensitivity;
@@ -355,6 +401,50 @@ const initThree = () => {
       } else if (e.button === 0) {
         canvas1IsMouseMoveObj = false
         canvas1IsMouseMove = false
+
+        // 判定是否为 click（移动距离未超阈值）
+        const totalDeltaX = e.clientX - canvas1PendingClickStartX
+        const totalDeltaY = e.clientY - canvas1PendingClickStartY
+        const isClick = Math.abs(totalDeltaX) <= CLICK_THRESHOLD && Math.abs(totalDeltaY) <= CLICK_THRESHOLD
+
+        if (isClick && canvas1PendingClickTarget) {
+          // 命中对象的 click → 选中该对象
+          const allMoveZBoxList = window.globalEditGroup.moveZBoxList()
+          const allBoundingBox = window.globalEditGroup.boundingBoxList()
+          // 隐藏所有 moveZBox
+          allMoveZBoxList.forEach((item) => {
+            // @ts-ignore
+            const ent = item.children[0].entity as BaseEntityClass<any>
+            if (ent instanceof PointEntityClass) {
+              ent.moveZBox.visible = false
+            }
+          })
+          // 隐藏所有 boundingBox
+          allBoundingBox.forEach((item) => {
+            item.visible = false
+          })
+          // 显示选中对象的 moveZBox 和 boundingBox
+          canvas1SelectedEntity = canvas1PendingClickTarget
+          // @ts-ignore
+          canvas1PendingClickTarget.moveZBox.visible = true
+          canvas1PendingClickTarget.boundingBox.visible = true
+          canvas1PendingClickTarget.boundingBox.children[1].visible = true
+        } else if (isClick && canvas1PendingClickTarget === null) {
+          // 点击空白处 → 取消选中 + 隐藏所有 boundingBox
+          if (canvas1SelectedEntity) {
+            // @ts-ignore
+            canvas1SelectedEntity.moveZBox.visible = false
+            canvas1SelectedEntity = null
+          }
+          // 隐藏所有 boundingBox（hover 恢复时会重新显示）
+          const allBoundingBox = window.globalEditGroup.boundingBoxList()
+          allBoundingBox.forEach((item) => {
+            item.visible = false
+          })
+        }
+        // 不是 click（移动超阈值）→ 拖拽结束，不做选中操作
+
+        canvas1PendingClickTarget = null
         emitCameraState()
       }
       // }
@@ -362,16 +452,21 @@ const initThree = () => {
     renderer.domElement.addEventListener('mousedown', (e) => {
       mouseDown(e)
       document.addEventListener('mousemove', mouseMove)
-      document.addEventListener('mouseup', (e) => {
+      const mouseUpHandler = (e: MouseEvent) => {
         mouseUp(e)
         document.removeEventListener('mousemove', mouseMove)
-        document.removeEventListener('mouseup', mouseUp)
-      });
+        document.removeEventListener('mouseup', mouseUpHandler)
+      }
+      document.addEventListener('mouseup', mouseUpHandler)
     })
 
     renderer.domElement.addEventListener('mousemove', (e) => {
       if ('radius' in cameraStateZ.value) {
         if (canvas1IsMouseAngel || canvas1IsMouseMove || canvas1IsMouseMoveObj) {
+          return
+        }
+        // 鼠标按键按下时跳过 hover 逻辑，避免点击选中后拖动时 boundingBox 闪烁
+        if (e.buttons !== 0) {
           return
         }
         const allBoundingBox = window.globalEditGroup.boundingBoxList()
@@ -389,6 +484,17 @@ const initThree = () => {
           }
           allLastTextBox.push(item.children[0]);
         })
+
+        // 保持选中对象的 moveZBox 和 boundingBox 可见
+        if (canvas1SelectedEntity) {
+          // @ts-ignore
+          canvas1SelectedEntity.moveZBox.visible = true
+          // @ts-ignore
+          canvas1SelectedEntity.boundingBox.visible = true
+          // @ts-ignore
+          canvas1SelectedEntity.boundingBox.children[1].visible = true
+        }
+
         // @ts-ignore
         const hoveredObject = raycastObjects([...allBoundingBox, ...allLastTextBox], e)
         if (hoveredObject) {
@@ -396,7 +502,7 @@ const initThree = () => {
           // @ts-ignore
           const entity = hoveredObject.entity as BaseEntityClass<any>
           if (entity instanceof PointEntityClass) {
-            entity.moveZBox.visible = true
+            // hover 时只显示 boundingBox 预览，不显示 moveZBox
             entity.boundingBox.visible = true
             entity.boundingBox.children[1].visible = true
           }
@@ -526,12 +632,24 @@ function mouseLeave() {
   allBoundingBox.forEach((item) => {
     item.visible = false
   })
+  // 保持选中对象的 boundingBox 可见
+  if (canvas1SelectedEntity) {
+    // @ts-ignore
+    canvas1SelectedEntity.boundingBox.visible = true
+    // @ts-ignore
+    canvas1SelectedEntity.boundingBox.children[1].visible = true
+  }
   const allMoveZBox = window.globalEditGroup.moveZBoxList()
   allMoveZBox.forEach((item) => {
     // @ts-ignore
     const entity = item.children[0].entity as BaseEntityClass<any>
     if (entity instanceof PointEntityClass) {
-      entity.moveZBox.visible = false
+      // 保持选中对象的 moveZBox 可见
+      if (canvas1SelectedEntity && entity === canvas1SelectedEntity) {
+        entity.moveZBox.visible = true
+      } else {
+        entity.moveZBox.visible = false
+      }
     }
   })
 }
