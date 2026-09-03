@@ -223,6 +223,35 @@
   <ImportModelConfirm v-model:visible="showImportModelConfirm" :object="pendingImportData.object"
     :file="pendingImportData.file" :type="pendingImportData.type" :scale-factor="pendingImportData.scaleFactor"
     :position="pendingImportData.position" @confirm="handleImportModelConfirm" />
+  <div v-if="showExportImageModal" class="exportImageModal" @click.self="showExportImageModal = false">
+    <div class="exportImageModalInner">
+      <div class="closeBtn" @click="showExportImageModal = false">
+        <img src="../assets/close.svg" alt="close" />
+      </div>
+      <div class="title">导出图片</div>
+      <div class="exportSizeList">
+        <div class="exportSizeItem" @click="doExportImage(720)">
+          <div class="sizeLabel">720</div>
+          <div class="sizeDesc">标准</div>
+        </div>
+        <div class="exportSizeItem" @click="doExportImage(1080)">
+          <div class="sizeLabel">1080</div>
+          <div class="sizeDesc">高清</div>
+          <span class="proBadge">专业版</span>
+        </div>
+        <div class="exportSizeItem" @click="doExportImage(2048)">
+          <div class="sizeLabel">2048</div>
+          <div class="sizeDesc">超清</div>
+          <span class="proBadge">专业版</span>
+        </div>
+        <div class="exportSizeItem">
+          <input type="number" max="2048" v-model="exportCustomWidth" placeholder="自定义宽度" class="customInput" />
+          <button class="customExportBtn" @click="doExportCustomImage">导出</button>
+          <span class="proBadge">专业版</span>
+        </div>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script lang="ts" setup>
@@ -346,6 +375,10 @@ const payModalIsShow = ref(false)
 const showGroupQrModal = ref(false)
 const vipModalIsShow = ref(false)
 const showAiImageToModel = ref(false)
+
+// 导出图片弹窗
+const showExportImageModal = ref(false)
+const exportCustomWidth = ref('')
 
 // 模型导入确认弹窗
 const showImportModelConfirm = ref(false)
@@ -1271,10 +1304,32 @@ watch(() => editPropInputInfo.value, () => {
 
 function exportImage() {
   window.gtag('event', 'exportImageClick')
+  exportCustomWidth.value = ''
+  showExportImageModal.value = true
+}
+
+function doExportImage(width?: number) {
+  // 720 及以下为免费，1080/2048 及自定义宽度需专业版
+  if (width && width > 720 && !isVip.value) {
+    showExportImageModal.value = false
+    showVipModal()
+    return
+  }
+  showExportImageModal.value = false
   if (canvas3DRef2.value) {
     const canvas = canvas3DRef2.value
-    canvas.exportImage()
+    canvas.exportImage(width)
   }
+}
+
+function doExportCustomImage() {
+  if (!isVip.value) {
+    showVipModal()
+    return
+  }
+  const width = parseInt(exportCustomWidth.value, 10)
+  if (!width || width <= 0) return
+  doExportImage(width)
 }
 
 function chooseDemo(id: number) {
@@ -2114,6 +2169,130 @@ button {
     justify-content: center;
     width: 100%;
     height: 100%;
+  }
+}
+
+.exportImageModal {
+  position: fixed;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: #00000094;
+  z-index: 1000;
+
+  .exportImageModalInner {
+    width: 420px;
+    max-width: 90vw;
+    border: 1px solid #d9d9d9;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    background-color: #F7F7F5;
+    padding: 24px 20px 20px;
+    box-sizing: border-box;
+    position: relative;
+
+    .closeBtn {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      width: 20px;
+      height: 20px;
+      padding: 6px;
+      cursor: pointer;
+
+      img {
+        height: 100%;
+      }
+    }
+
+    .title {
+      font-size: 20px;
+      color: #17181A;
+      margin-bottom: 16px;
+      text-align: center;
+    }
+
+    .exportSizeList {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .exportSizeItem {
+      position: relative;
+      padding: 18px 8px;
+      border: 1px solid #d9d9d9;
+      border-radius: 8px;
+      background: #fff;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.15s, box-shadow 0.15s;
+
+      &:hover {
+        border-color: #888;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+      }
+
+      .sizeLabel {
+        font-size: 20px;
+        font-weight: bold;
+        color: #17181A;
+      }
+
+      .sizeDesc {
+        font-size: 12px;
+        color: #999;
+        margin-top: 4px;
+      }
+
+      .customInput {
+        flex: 1;
+        height: 34px;
+        padding: 0 10px;
+        border: 1px solid #d9d9d9;
+        border-radius: 6px;
+        font-size: 14px;
+        box-sizing: border-box;
+        outline: none;
+
+        &:focus {
+          border-color: #888;
+        }
+      }
+
+      .customExportBtn {
+        height: 34px;
+        padding: 0 16px;
+        margin-left: 8px;
+        border: none;
+        border-radius: 6px;
+        background: #17181A;
+        color: #fff;
+        font-size: 14px;
+        cursor: pointer;
+
+        &:hover {
+          opacity: 0.85;
+        }
+      }
+    }
+
+    .proBadge {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      font-size: 10px;
+      line-height: 1;
+      padding: 3px 5px;
+      border-radius: 3px;
+      color: #fff;
+      background: linear-gradient(135deg, #f0c040, #e8a317);
+      white-space: nowrap;
+    }
   }
 }
 

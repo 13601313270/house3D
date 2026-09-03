@@ -552,7 +552,7 @@ onMounted(() => {
   window.addEventListener('resize', resize)
 })
 
-const exportImage = () => {
+const exportImage = (targetWidth: number) => {
   if (renderer && renderer.domElement) {
     // 确保渲染器完成当前帧渲染
     const scene = window.worldApi.scene
@@ -566,7 +566,26 @@ const exportImage = () => {
 
     // 使用 preserveDrawingBuffer 确保能正确获取渲染内容
     const canvas = renderer.domElement
-    const dataURL = canvas.toDataURL('image/png')
+
+    let dataURL: string
+    if (targetWidth < canvas.width) {
+      // 按目标宽度等比缩小后导出
+      const scale = targetWidth / canvas.width
+      const targetHeight = Math.round(canvas.height * scale)
+      const tmpCanvas = document.createElement('canvas')
+      tmpCanvas.width = targetWidth
+      tmpCanvas.height = targetHeight
+      const ctx = tmpCanvas.getContext('2d')
+      if (ctx) {
+        ctx.drawImage(canvas, 0, 0, targetWidth, targetHeight)
+        dataURL = tmpCanvas.toDataURL('image/png')
+      } else {
+        dataURL = canvas.toDataURL('image/png')
+      }
+    } else {
+      dataURL = canvas.toDataURL('image/png')
+    }
+
     link.href = dataURL
     link.click()
   }

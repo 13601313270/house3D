@@ -2,6 +2,7 @@
   <teleport to="#teleport">
     <div class="showVipModal" @click.self="closeModal">
       <div class="showVipModalInner">
+        <img class="closeBtn" src="@/assets/close.svg" @click="closeModal" />
         <div class="title">解锁专业版</div>
         <div v-if="checkStatus === 'checking'" class="checkingState">
           <div class="spinner"></div>
@@ -192,6 +193,22 @@ window.addEventListener('focus', handleFocus)
     padding: 24px;
     position: relative;
     margin-top: 20px;
+
+    .closeBtn {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+      opacity: 0.6;
+      padding: 6px;
+      transition: opacity 0.2s;
+
+      &:hover {
+        opacity: 1;
+      }
+    }
 
     .title {
       font-size: 20px;
