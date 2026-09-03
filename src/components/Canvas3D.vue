@@ -167,7 +167,8 @@ const initThree = () => {
   }
 
   renderer = new THREE.WebGLRenderer({ antialias: true })
-  renderer.setPixelRatio(3)
+  // pixelRatio=1：使 canvas.width/height 等于 setSize 传入的逻辑尺寸（固定 2048）
+  renderer.setPixelRatio(1)
   renderer.shadowMap.enabled = true
 
   if (container) {
@@ -455,30 +456,30 @@ const resize = () => {
 
 const updateContainerHeight = (renderer: THREE.WebGLRenderer) => {
   if (!containerRef.value || !renderer || !camera) return
-  if (!containerRef.value || !props.aspectRatio) return
+  if (!props.aspectRatio) return
 
   const containerWidth = containerRef.value.clientWidth
   const containerHeight = containerRef.value.clientHeight
 
   const containerAspectRatio = containerWidth / containerHeight
-  let renderWidth, renderHeight
+  let displayWidth, displayHeight
 
   if (props.aspectRatio > containerAspectRatio) {
-    // Width is the limiting factor
-    renderWidth = containerWidth
-    renderHeight = containerWidth / props.aspectRatio
+    // 宽度受限，按容器宽度计算显示尺寸
+    displayWidth = containerWidth
+    displayHeight = containerWidth / props.aspectRatio
   } else {
-    // Height is the limiting factor
-    renderHeight = containerHeight
-    renderWidth = containerHeight * props.aspectRatio
+    // 高度受限，按容器高度计算显示尺寸
+    displayHeight = containerHeight
+    displayWidth = containerHeight * props.aspectRatio
   }
-  let hasChangeCamera = false;
 
-  const oldSize = renderer.getSize(new THREE.Vector2())
-  if (oldSize.x !== renderWidth || oldSize.y !== renderHeight) {
-    hasChangeCamera = true
-  }
-  const newAspect = renderWidth / renderHeight
+  // canvas 绘制缓冲区固定为 2048 宽（逻辑分辨率），与 CSS 显示尺寸解耦
+  const drawingWidth = 2048
+  const drawingHeight = Math.round(drawingWidth / props.aspectRatio)
+
+  let hasChangeCamera = false
+  const newAspect = drawingWidth / drawingHeight
   if (camera instanceof THREE.PerspectiveCamera) {
     if (camera.aspect !== newAspect) {
       camera.aspect = newAspect
@@ -508,10 +509,15 @@ const updateContainerHeight = (renderer: THREE.WebGLRenderer) => {
     //   }
     // }
   }
+  // 设置绘制缓冲区分辨率（updateStyle=false：不覆盖 CSS 样式，实现与显示尺寸解耦）
+  renderer.setSize(drawingWidth, drawingHeight, false)
+  // CSS 显示尺寸按容器 letterbox，保持宽高比避免拉伸
+  const canvasEl = renderer.domElement
+  canvasEl.style.width = `${displayWidth}px`
+  canvasEl.style.height = `${displayHeight}px`
+
   if (hasChangeCamera) {
-    // console.log('renderWidth', renderWidth, 'renderHeight', renderHeight)
     camera.updateProjectionMatrix()
-    renderer.setSize(renderWidth, renderHeight)
   }
 }
 function mouseLeave() {
