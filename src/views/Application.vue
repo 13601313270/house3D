@@ -42,7 +42,7 @@
               场景编辑
             </button>
             <button :class="{ active: editMode === 'animation' }" @click="setEditMode('animation')">
-              动画编辑
+              动画编辑<span style="margin-left: 8px;font-size: 10px;color: rgb(99, 91, 255);font-weight: bold;">NEW</span>
             </button>
           </div>
         </div>
@@ -2035,6 +2035,8 @@ button {
       flex-shrink: 0;
       margin-right: 0;
       color: #8a8f99;
+      display: flex;
+      align-items: center;
 
       &:not(:last-child) {
         margin-right: 4px;

@@ -317,10 +317,10 @@ const handleDownload = () => {
     align-items: center;
     justify-content: space-between;
     padding: 0 4px;
-    background: linear-gradient(90deg, #141b44 0%, #190554 100%);
+    background: #0B0D0F;
     color: white;
     flex-shrink: 0;
-    height: 40px;
+    height: 44px;
 
     .title {
       font-size: 18px;
