@@ -5,7 +5,7 @@
       <div style="flex: 1;"></div>
       <div class="userInfo" v-if="store.state.main.userInfo">
         <img src="money.png" />
-        <span>{{ store.state.main.userInfo.money }}金币</span>
+        <span>{{ store.state.main.userInfo.money }}积分</span>
       </div>
       <button class="close-btn" @click="handleClose">&times;</button>
     </div>
@@ -67,7 +67,7 @@
           <div v-else style="display: flex; align-items: center;">
             <span>生成图片&nbsp;（</span>
             <img src="money.png" />
-            <span>6金币）</span>
+            <span>6积分）</span>
           </div>
         </div>
       </div>

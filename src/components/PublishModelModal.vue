@@ -25,10 +25,10 @@
             </div>
 
             <div class="form-item" v-if="form.isPublic">
-              <label class="form-label">收费价格（金币）</label>
+              <label class="form-label">收费价格（积分）</label>
               <input v-model.number="form.price" class="form-input" type="number" min="0" max="100" step="1"
                 placeholder="0-100" @blur="clampPrice" />
-              <div class="form-tip">公开后其他用户使用需付费，最多 100 金币，0 表示免费</div>
+              <div class="form-tip">公开后其他用户使用需付费，最多 100 积分，0 表示免费</div>
             </div>
             <div class="form-item" v-if="form.isPublic">
               <label class="form-label">公开后所属分类</label>

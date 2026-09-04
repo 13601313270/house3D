@@ -33,7 +33,7 @@
                 <div class="vipDesc">尊享<span class="number">{{ item.date }}</span>天专业版权益</div>
                 <div class="vipGiveMoney">
                   <img src="money.png" />
-                  <div>包含<span class="number">{{ item.giveMoney }}</span>金币</div>
+                  <div>包含<span class="number">{{ item.giveMoney }}</span>积分</div>
                 </div>
                 <div class="checkMark" v-if="selectedVip === item.id">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">

@@ -40,7 +40,7 @@
                 <div v-else-if="isQuerying" class="loading-text">
                   <span class="spinner"></span>生成中...
                 </div>
-                <div v-else>开始生成模型(25金币)</div>
+                <div v-else>开始生成模型(25积分)</div>
               </div>
             </div>
           </div>
@@ -261,7 +261,7 @@ const handleSubmit = async () => {
         resultText.value = '任务已提交，正在生成模型...'
         message.success('任务提交成功，正在生成模型', { duration: 6000 })
 
-        // 刷新金币数量
+        // 刷新积分数量
         request.get('/video/user/info').then(res => {
           console.log(res)
           if (res.status === 200) {

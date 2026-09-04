@@ -9,6 +9,7 @@ import * as THREE from 'three'
 import { CameraState, OrthographicCamera } from '@/types/camera'
 import { PointEntityClass } from '@/types/pointEntity';
 import { BaseEntityClass } from '@/types/baseEntity';
+import WorldGroup from '@/world/world';
 
 const props = defineProps<{
   cameraState: CameraState,//  | OrthographicCamera,
@@ -462,6 +463,14 @@ const initThree = () => {
 
     renderer.domElement.addEventListener('mousemove', (e) => {
       if ('radius' in cameraStateZ.value) {
+        if (window.globalEditGroup.insertTempObj) {
+          if (window.globalEditGroup instanceof WorldGroup) {
+            console.log(window.globalEditGroup.groundMesh)
+            // @ts-ignore
+            // const hoveredObject = raycastObjects([...allBoundingBox, ...allLastTextBox], e)
+          }
+          return;
+        }
         if (canvas1IsMouseAngel || canvas1IsMouseMove || canvas1IsMouseMoveObj) {
           return
         }

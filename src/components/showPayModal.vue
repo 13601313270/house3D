@@ -22,7 +22,7 @@
                 <div class="amountText">¥ {{ amount }}</div>
                 <div class="coinInfo">
                   <img src="/money.png" class="coinIcon" />
-                  <span class="coinText">{{ amount * 10 }}金币</span>
+                  <span class="coinText">{{ amount * 10 }}积分</span>
                 </div>
               </div>
             </div>

@@ -126,7 +126,7 @@
           <div class="userUpTip">
             <span>用户上传</span>
             <template v-if="item2.price > 0">
-              <img style="margin: 0 2px;" src="money.png" alt="" /><span>{{ item2.price }}金币</span>
+              <img style="margin: 0 2px;" src="money.png" alt="" /><span>{{ item2.price }}积分</span>
             </template>
             <span v-else>(免费)</span>
           </div>
@@ -341,7 +341,7 @@ async function chooseOtherUserObj(item: otherUserObjItem) {
   console.log('checkCanUseData', checkCanUseData);
   if (checkCanUseData.result === false) {
     if (checkCanUseData.code === 1) {
-      const isBuy = confirm('是否购买该模型？需要消耗' + item.price + '金币')
+      const isBuy = confirm('是否购买该模型？需要消耗' + item.price + '积分')
       if (!isBuy) {
         return
       }
@@ -350,7 +350,7 @@ async function chooseOtherUserObj(item: otherUserObjItem) {
       })
       if (buyResult.result) {
         alert('购买成功')
-        // 刷新金币数量
+        // 刷新积分数量
         request.get('/video/user/info').then(res => {
           console.log(res)
           if (res.status === 200) {

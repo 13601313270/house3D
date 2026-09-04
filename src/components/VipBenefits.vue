@@ -49,9 +49,9 @@ const benefits = [
   //   vip: '100G',
   // },
   {
-    name: '赠送金币',
+    name: '赠送积分',
     normal: '0',
-    vip: '金币赠送',
+    vip: '积分赠送',
   },
   {
     name: '动画编辑与时间轴功能',

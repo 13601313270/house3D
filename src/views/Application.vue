@@ -56,12 +56,12 @@
               <span v-if="isVip" class="vipBadgeTop">VIP</span>
               <span>（</span>
               <img src="money.png" />
-              <span>{{ store.state.main.userInfo.money }}金币）</span>
+              <span>{{ store.state.main.userInfo.money }}积分）</span>
             </div>
             <div class="list user" v-show="activeToolsIndex === 2">
               <div class="userMoney">
                 <div class="userMoneyInner">
-                  <span>当前金币：{{ store.state.main.userInfo.money }}</span>
+                  <span>当前积分：{{ store.state.main.userInfo.money }}</span>
                   <img src="money.png" />
                 </div>
               </div>
@@ -77,10 +77,10 @@
               <div class="addGroupAddMoney" v-if="!store.state.main.userInfo.getJoinGroupMoney"
                 @click="showGroupQrModal = true">
                 <img src="money.png" />
-                <div class="text">添加微信群，获得<span class="price">20</span>金币</div>
+                <div class="text">添加微信群，获得<span class="price">20</span>积分</div>
               </div>
               <div @click="showPayModal" class="childItem">
-                购买金币
+                购买积分
               </div>
               <div class="childItem" @click="showVipModal">
                 购买专业版权益
