@@ -196,6 +196,13 @@ const initThree = () => {
     let canvas1LastMouseX = 0;
     let canvas1LastMouseY = 0;
 
+    // 指针锁定：拖拽时鼠标接近视口边缘自动锁定，实现无限循环拖动
+    let isPointerLocked = false
+    let canvas1UsedPointerLock = false // 本次拖拽是否触发过指针锁定（用于区分拖拽与 click）
+    let canvas1LockedDeltaX = 0 // 指针锁定期间累加的 X 总位移（自 mousedown）
+    let canvas1LockedDeltaY = 0 // 指针锁定期间累加的 Y 总位移（自 mousedown）
+    const POINTER_LOCK_EDGE_THRESHOLD = 30 // 距离视口边缘多少像素时触发指针锁定
+
     // 区分 click 和 drag：mousedown 记录起点和命中对象，mouseup 根据移动距离判定
     let canvas1PendingClickTarget: PointEntityClass<any> | null = null;
     let canvas1PendingClickStartX = 0;
@@ -261,6 +268,9 @@ const initThree = () => {
     }
 
     function mouseDown(e: MouseEvent) {
+      canvas1UsedPointerLock = false // 每次 mousedown 重置指针锁定标记
+      canvas1LockedDeltaX = 0 // 重置锁定累加位移
+      canvas1LockedDeltaY = 0
       // if (props.cameraType === 'orthographic') {
       //   if (e.button === 2) {
       //   } else if (e.button === 0) {
@@ -343,8 +353,41 @@ const initThree = () => {
     }
     function mouseMove(e: MouseEvent) {
       if ('radius' in cameraStateZ.value) {
-        const deltaX = e.clientX - canvas1LastMouseX;
-        const deltaY = e.clientY - canvas1LastMouseY;
+        let deltaX: number
+        let deltaY: number
+        if (isPointerLocked) {
+          // 指针锁定后，clientX/clientY 被冻结；movementX/Y 是每帧增量，
+          // 累加到 canvas1LockedDeltaX/Y 得到自 mousedown 以来的总位移，与非锁定模式语义一致
+          canvas1LockedDeltaX += e.movementX
+          canvas1LockedDeltaY += e.movementY
+          deltaX = canvas1LockedDeltaX
+          deltaY = canvas1LockedDeltaY
+        } else {
+          // canvas1LastMouseX/Y 在 mouseDown 时设置，此处不更新，
+          // 因此 deltaX/deltaY 是自 mousedown 以来的总位移（下游 startValue + delta 依赖此语义）
+          deltaX = e.clientX - canvas1LastMouseX
+          deltaY = e.clientY - canvas1LastMouseY
+
+          // 拖拽过程中鼠标接近视口边缘 → 自动请求指针锁定，实现循环无限拖动
+          const isDragging = canvas1IsMouseAngel || canvas1IsMouseMove || canvas1IsMouseMoveObj
+          if (isDragging && renderer) {
+            const nearEdge =
+              e.clientX <= POINTER_LOCK_EDGE_THRESHOLD ||
+              e.clientX >= window.innerWidth - POINTER_LOCK_EDGE_THRESHOLD ||
+              e.clientY <= POINTER_LOCK_EDGE_THRESHOLD ||
+              e.clientY >= window.innerHeight - POINTER_LOCK_EDGE_THRESHOLD
+            if (nearEdge && renderer.domElement.requestPointerLock) {
+              // 用当前总位移初始化累加变量，保证进入锁定后位移连续不跳变
+              canvas1LockedDeltaX = deltaX
+              canvas1LockedDeltaY = deltaY
+              try {
+                renderer.domElement.requestPointerLock()
+              } catch (_) {
+                // 请求失败时忽略，继续使用普通模式
+              }
+            }
+          }
+        }
         if (canvas1IsMouseAngel) {
           // 镜头旋转
           cameraStateZ.value.angleX = camera1AngelStartX + deltaX * 0.01;
@@ -404,6 +447,10 @@ const initThree = () => {
       }
     }
     function mouseUp(e: MouseEvent) {
+      // 拖拽结束，退出指针锁定（如果当前处于锁定状态）
+      if (isPointerLocked && document.pointerLockElement) {
+        document.exitPointerLock()
+      }
       // if (props.cameraType === 'orthographic') {
       //   canvas1IsMouseMove = false
       //   emitCameraState()
@@ -415,10 +462,10 @@ const initThree = () => {
         canvas1IsMouseMoveObj = false
         canvas1IsMouseMove = false
 
-        // 判定是否为 click（移动距离未超阈值）
+        // 判定是否为 click（移动距离未超阈值，且未触发过指针锁定）
         const totalDeltaX = e.clientX - canvas1PendingClickStartX
         const totalDeltaY = e.clientY - canvas1PendingClickStartY
-        const isClick = Math.abs(totalDeltaX) <= CLICK_THRESHOLD && Math.abs(totalDeltaY) <= CLICK_THRESHOLD
+        const isClick = !canvas1UsedPointerLock && Math.abs(totalDeltaX) <= CLICK_THRESHOLD && Math.abs(totalDeltaY) <= CLICK_THRESHOLD
 
         if (isClick && canvas1PendingClickTarget) {
           // 命中对象的 click → 选中该对象
@@ -471,6 +518,19 @@ const initThree = () => {
         document.removeEventListener('mouseup', mouseUpHandler)
       }
       document.addEventListener('mouseup', mouseUpHandler)
+    })
+
+    // 指针锁定状态变化监听：进入锁定时标记本次拖拽使用了指针锁定，mouseup 时按拖拽处理
+    document.addEventListener('pointerlockchange', () => {
+      const wasLocked = isPointerLocked
+      isPointerLocked = document.pointerLockElement === renderer?.domElement
+      if (isPointerLocked && !wasLocked) {
+        canvas1UsedPointerLock = true
+        canvas1PendingClickTarget = null
+      }
+    })
+    document.addEventListener('pointerlockerror', () => {
+      // 指针锁定失败时忽略，继续使用普通拖拽模式
     })
 
     renderer.domElement.addEventListener('mousemove', (e) => {
