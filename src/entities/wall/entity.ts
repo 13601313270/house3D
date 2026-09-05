@@ -238,7 +238,7 @@ export class WallEntity extends LineEntityClass<WallPoint, WallData> {
 
   create3DMesh() {
     const data = this.getData()
-    const meshList: THREE.Group[] = []
+    const wallArr: THREE.Group = new THREE.Group()
     const { points, thickness, cornerType } = data;
     const wallHeight = data.height
     const bottom = data.bottom || 0
@@ -300,7 +300,7 @@ export class WallEntity extends LineEntityClass<WallPoint, WallData> {
         group.add(wallMesh)
         // @ts-ignore
         group.isWall = true
-        meshList.push(group)
+        wallArr.add(group)
       }
     }
 
@@ -328,7 +328,7 @@ export class WallEntity extends LineEntityClass<WallPoint, WallData> {
         floorMesh.position.set(0, floorDepth * -1 + 1 + bottom, 0)
         const group = new THREE.Group()
         group.add(floorMesh)
-        meshList.push(group)
+        wallArr.add(group)
       }
 
       // 盖一个盖子
@@ -347,9 +347,11 @@ export class WallEntity extends LineEntityClass<WallPoint, WallData> {
         topMesh.position.set(0, wallHeight + 1 + bottom, 0)
         const group2 = new THREE.Group()
         group2.add(topMesh)
-        meshList.push(group2)
+        wallArr.add(group2)
       }
     }
+    const meshList: THREE.Group[] = []
+    meshList.push(wallArr)
     return meshList
   }
 
