@@ -129,7 +129,7 @@ export class SectorEntity extends PointEntityClass<SectorData> {
 
   glbObj: THREE.Group | null = null;
 
-  create3DMesh() {
+  create3DMesh(): THREE.Group {
     const data = this.getData();
     const group = new THREE.Group()
 
@@ -152,9 +152,7 @@ export class SectorEntity extends PointEntityClass<SectorData> {
     mesh.rotation.x = -Math.PI / 2;
     group.add(mesh);
 
-    return [
-      group
-    ]
+    return group
   }
 
   getBoundingBoxData(): [THREE.Vector3, THREE.Vector3, THREE.Vector3] {

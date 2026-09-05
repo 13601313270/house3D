@@ -167,9 +167,9 @@ export class StaircaseEntity extends LineEntityClass<StaircasePoint, StaircaseDa
     }
   }
 
-  create3DMesh() {
+  create3DMesh(): THREE.Group {
     const data = this.getData()
-    const meshList: THREE.Group[] = []
+    const meshList: THREE.Group = new THREE.Group()
     const { cornerType, stepType, color } = data
     console.log('stepType', stepType)
     const { data: wallBoxList, countPerPoint: countPerPointPerPoint } = createAllWallFromPoints(data.points, data.thickness, cornerType);
@@ -279,7 +279,7 @@ export class StaircaseEntity extends LineEntityClass<StaircasePoint, StaircaseDa
 
         group.add(wallMesh)
       })
-      meshList.push(group)
+      meshList.add(group)
     }
 
     const points: THREE.Vector2[] = []; // wall.points.map((p) => new THREE.Vector2(p.x, p.y))

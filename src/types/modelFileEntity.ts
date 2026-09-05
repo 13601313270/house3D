@@ -79,13 +79,13 @@ export abstract class ModelFileEntity<T extends ModelFileData> extends PointCanA
     super.draw2DActionHandle(ctx, zoomLevel)
   }
 
-  create3DMesh(): THREE.Group[] {
+  create3DMesh(): THREE.Group {
     const data = this.getData();
     console.log('ddddd-createMesh', data)
     const group = new THREE.Group()
     if (!this.mesh) {
       console.error('未找到对应的文件类型:')
-      return []
+      return group
     }
     // @ts-ignore
     const threeObject = this.mesh;
@@ -94,12 +94,10 @@ export abstract class ModelFileEntity<T extends ModelFileData> extends PointCanA
       const clonedObject = threeObject.clone()
       group.add(clonedObject)
       this.reBuildBoundingBoxData()
-      return [group]
+      return group
     }
 
-    return [
-      group
-    ]
+    return group
   }
 
   // 第一个是尺寸，第二个是位置偏移，第三个是旋转角度

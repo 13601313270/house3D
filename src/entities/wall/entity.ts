@@ -236,7 +236,7 @@ export class WallEntity extends LineEntityClass<WallPoint, WallData> {
     }
   }
 
-  create3DMesh() {
+  create3DMesh(): THREE.Group {
     const data = this.getData()
     const wallArr: THREE.Group = new THREE.Group()
     const { points, thickness, cornerType } = data;
@@ -350,8 +350,8 @@ export class WallEntity extends LineEntityClass<WallPoint, WallData> {
         wallArr.add(group2)
       }
     }
-    const meshList: THREE.Group[] = []
-    meshList.push(wallArr)
+    const meshList: THREE.Group = new THREE.Group()
+    meshList.add(wallArr)
     return meshList
   }
 

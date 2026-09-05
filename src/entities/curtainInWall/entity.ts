@@ -85,7 +85,7 @@ export class CurtainInWallEntity extends EntityClassInWall<CurtainInWallData> {
     ctx.closePath()
   }
 
-  create3DMesh(): THREE.Group[] {
+  create3DMesh(): THREE.Group {
     const data = this.getData();
     const group = new THREE.Group()
     const { wallId, img, width, height, isOuter } = data
@@ -138,9 +138,7 @@ export class CurtainInWallEntity extends EntityClassInWall<CurtainInWallData> {
       planeMesh.rotation.y = 0
     }
     group.add(planeMesh)
-    return [
-      group
-    ]
+    return group
   }
 
   getBoundingBoxData(): [THREE.Vector3, THREE.Vector3, THREE.Vector3] {

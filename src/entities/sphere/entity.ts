@@ -87,7 +87,7 @@ export class SphereEntity extends PointEntityClass<SphereData> {
 
   glbObj: THREE.Group | null = null;
 
-  create3DMesh() {
+  create3DMesh(): THREE.Group {
     const data = this.getData();
     const group = new THREE.Group()
 
@@ -103,9 +103,7 @@ export class SphereEntity extends PointEntityClass<SphereData> {
     mesh.position.setY(data.r)
     group.add(mesh);
 
-    return [
-      group
-    ]
+    return group
   }
 
   getBoundingBoxData(): [THREE.Vector3, THREE.Vector3, THREE.Vector3] {

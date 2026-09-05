@@ -109,7 +109,7 @@ export class CurtainEntity extends PointCanAngleEntity<CurtainData> {
 
   glbObj: THREE.Group | null = null;
 
-  create3DMesh() {
+  create3DMesh(): THREE.Group {
     const data = this.getData();
     const group = new THREE.Group()
     const { width, height, img } = data;
@@ -153,9 +153,7 @@ export class CurtainEntity extends PointCanAngleEntity<CurtainData> {
     planeMesh.position.setY(height / 2)
     group.add(planeMesh)
     group.rotateY(angleY);
-    return [
-      group
-    ]
+    return group
   }
 
   getBoundingBoxData(): [THREE.Vector3, THREE.Vector3, THREE.Vector3] {

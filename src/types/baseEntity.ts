@@ -197,7 +197,7 @@ export abstract class BaseEntityClass<T extends BaseObjData> {
   }
 
   // 生成3D模型
-  abstract create3DMesh(): THREE.Group[]
+  abstract create3DMesh(): THREE.Group
 
   protected cacheKeyStr = '';
   public markObjectIsDirty() {
@@ -262,7 +262,7 @@ export abstract class BaseEntityClass<T extends BaseObjData> {
     if (isHidden) {
       this.meshGroup = new THREE.Group();
     } else {
-      this.meshGroup = this.create3DMesh()[0];
+      this.meshGroup = this.create3DMesh();
     }
     scene.add(this.meshGroup)
     this.cacheKeyStr = newKeyByData;

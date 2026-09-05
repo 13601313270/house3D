@@ -167,11 +167,11 @@ export abstract class GroupBaseEntity<T extends GroupBaseData> extends PointCanA
     ctx.restore()
   }
 
-  create3DMesh(): THREE.Group[] {
+  create3DMesh(): THREE.Group {
     const group = this.group;// as new THREE.Group()
     group.clear()
     this.children.forEach((item) => {
-      item.create3DMesh().forEach(mesh => group.add(mesh))
+      group.add(item.create3DMesh())
     })
     // @ts-ignore
     return [group]

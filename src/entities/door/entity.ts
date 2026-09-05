@@ -112,7 +112,7 @@ export class DoorEntity extends EntityClassInWall<DoorData> {
 
   glbObj: THREE.Group | null = null;
 
-  create3DMesh() {
+  create3DMesh(): THREE.Group {
     const data = this.getData();
     const group = new THREE.Group()
     let wallThickness = 10;
@@ -235,13 +235,9 @@ export class DoorEntity extends EntityClassInWall<DoorData> {
       if (firstMesh) {
         firstMesh.geometry = resultGeometry.geometry
       }
-      return [
-        group,
-      ]
+      return group
     } else {
-      return [
-        group
-      ]
+      return group
     }
   }
 

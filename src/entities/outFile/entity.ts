@@ -160,7 +160,7 @@ export class OutFileEntity extends PointCanAngleEntity<OutFileData> {
     }
   }
 
-  create3DMesh(): THREE.Group[] {
+  create3DMesh(): THREE.Group {
     const data = this.getData();
     const group = new THREE.Group()
     const { fileTypeId, bm, color } = data
@@ -170,7 +170,7 @@ export class OutFileEntity extends PointCanAngleEntity<OutFileData> {
 
     if (!findObjInfo) {
       console.error('未找到对应的文件类型:', fileTypeId)
-      return []
+      return group
     }
     const {
       scaleX,
@@ -287,9 +287,7 @@ export class OutFileEntity extends PointCanAngleEntity<OutFileData> {
       })
     }
 
-    return [
-      group
-    ]
+    return group
   }
 
   getBoundingBoxData(): [THREE.Vector3, THREE.Vector3, THREE.Vector3] | null {

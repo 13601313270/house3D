@@ -155,7 +155,7 @@ export class SignEntity extends PointCanAngleEntity<SignData> {
 
   glbObj: THREE.Group | null = null;
 
-  create3DMesh() {
+  create3DMesh(): THREE.Group {
     const data = this.getData();
     const group = new THREE.Group()
     const { width, height, signZ, img, poleRadius, bgColor, poleColor, shape } = data;
@@ -366,9 +366,7 @@ export class SignEntity extends PointCanAngleEntity<SignData> {
 
     group.add(signMesh);
     group.rotateY(angleY);
-    return [
-      group
-    ]
+    return group
   }
 
   getBoundingBoxData(): [THREE.Vector3, THREE.Vector3, THREE.Vector3] {

@@ -193,7 +193,7 @@ export class CameraEntity extends CameraBase<CameraData> {
     ctx.restore(); // 恢复原始状态
   }
 
-  create3DMesh(): THREE.Group[] {
+  create3DMesh(): THREE.Group {
     const data = this.getData();
     const dx = data.targetPositionX - data.x
     const dy = data.targetPositionY - data.y
@@ -289,9 +289,7 @@ export class CameraEntity extends CameraBase<CameraData> {
     }, (error: any) => {
       console.error('OBJ文件加载失败:', error)
     })
-    return [
-      group
-    ]
+    return group
   }
 
   getBoundingBoxData(): [THREE.Vector3, THREE.Vector3, THREE.Vector3] {

@@ -94,7 +94,7 @@ export class OutFileInWallEntity extends EntityClassInWall<OutFileInWallData> {
     ctx.stroke()
   }
 
-  create3DMesh(): THREE.Group[] {
+  create3DMesh(): THREE.Group {
     const data = this.getData();
     const group = new THREE.Group()
     const { fileTypeId, bm, color, wallId, isOuter } = data
@@ -102,7 +102,7 @@ export class OutFileInWallEntity extends EntityClassInWall<OutFileInWallData> {
 
     if (!findObjInfo) {
       console.error('未找到对应的文件类型:', fileTypeId)
-      return []
+      return group
     }
     let wallThickness = 10;
     if (this.parentEntity) {
@@ -221,9 +221,7 @@ export class OutFileInWallEntity extends EntityClassInWall<OutFileInWallData> {
     }
     // group.position.set(data.x, data.z, data.y)
 
-    return [
-      group
-    ]
+    return group
   }
 
   getBoundingBoxData(): [THREE.Vector3, THREE.Vector3, THREE.Vector3] {

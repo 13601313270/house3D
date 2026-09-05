@@ -87,7 +87,7 @@ export class CirclePlaneEntity extends PointCanAngleEntity<CirclePlaneData> {
 
   glbObj: THREE.Group | null = null;
 
-  create3DMesh() {
+  create3DMesh(): THREE.Group {
     const data = this.getData();
     const group = new THREE.Group()
 
@@ -136,9 +136,7 @@ export class CirclePlaneEntity extends PointCanAngleEntity<CirclePlaneData> {
     mesh.rotation.x = -Math.PI / 2
     group.add(mesh);
     group.rotateY(angleY);
-    return [
-      group
-    ]
+    return group
   }
 
   getBoundingBoxData(): [THREE.Vector3, THREE.Vector3, THREE.Vector3] {

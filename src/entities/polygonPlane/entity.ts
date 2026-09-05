@@ -161,10 +161,10 @@ export class PolygonPlaneEntity extends LineEntityClass<PolygonPlanePoint, Polyg
     }
   }
 
-  create3DMesh() {
+  create3DMesh(): THREE.Group {
     const data = this.getData()
     const { z, color, ds, mt } = data
-    const meshList: THREE.Group[] = []
+    const meshList: THREE.Group = new THREE.Group()
 
     const points: THREE.Vector2[] = []
     data.points.forEach((mesh: Point) => {
@@ -188,7 +188,7 @@ export class PolygonPlaneEntity extends LineEntityClass<PolygonPlanePoint, Polyg
       const group = new THREE.Group()
       group.add(floorMesh)
       group.position.setY(z)
-      meshList.push(group)
+      meshList.add(group)
     }
     return meshList
   }

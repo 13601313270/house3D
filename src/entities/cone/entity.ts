@@ -82,7 +82,7 @@ export class ConeEntity extends PointEntityClass<ConeData> {
     })();
   }
 
-  create3DMesh() {
+  create3DMesh(): THREE.Group {
     const data = this.getData();
     const group = new THREE.Group()
 
@@ -101,9 +101,7 @@ export class ConeEntity extends PointEntityClass<ConeData> {
 
     // group.position.set(data.x, data.r, data.y)
     // group.rotateY(data.angle * -1);
-    return [
-      group
-    ]
+    return group
   }
 
   getBoundingBoxData(): [THREE.Vector3, THREE.Vector3, THREE.Vector3] {

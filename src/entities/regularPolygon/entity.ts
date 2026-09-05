@@ -104,7 +104,7 @@ export class RegularPolygonEntity extends PointCanAngleEntity<RegularPolygonData
 
   glbObj: THREE.Group | null = null;
 
-  create3DMesh() {
+  create3DMesh(): THREE.Group {
     const data = this.getData();
     const group = new THREE.Group()
 
@@ -112,7 +112,7 @@ export class RegularPolygonEntity extends PointCanAngleEntity<RegularPolygonData
 
     const polygonPoints = getAllPointsByN(0, 0, n, r, angleY)
     if (polygonPoints.length < 3) {
-      return [group]
+      return group
     }
 
     const shapePoints: THREE.Vector2[] = polygonPoints.map(p => new THREE.Vector2(p.x, p.y * -1))
@@ -135,9 +135,7 @@ export class RegularPolygonEntity extends PointCanAngleEntity<RegularPolygonData
 
     const mesh = new THREE.Mesh(geometry, materials)
     group.add(mesh);
-    return [
-      group
-    ]
+    return group
   }
 
   getBoundingBoxData(): [THREE.Vector3, THREE.Vector3, THREE.Vector3] {

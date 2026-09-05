@@ -171,7 +171,7 @@ export class WindowEntity extends EntityClassInWall<WindowData> {
     })
   }
 
-  create3DMesh() {
+  create3DMesh(): THREE.Group {
     let wallThickness = 10;
     const data = this.getData();
     const group = new THREE.Group();
@@ -434,14 +434,9 @@ export class WindowEntity extends EntityClassInWall<WindowData> {
       // const resultMesh = new THREE.Mesh(resultGeometry.geometry, material);
       // resultMesh.position.set(wallMesh.position.x, wallMesh.position.y, wallMesh.position.z + 3)
       // resultMesh.rotateY(this.data.angle * -1);
-      return [
-        group,
-        // resultMesh
-      ]
+      return group
     } else {
-      return [
-        group
-      ]
+      return group
     }
   }
 

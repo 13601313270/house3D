@@ -83,12 +83,10 @@ export class CylinderEntity extends PointEntityClass<CylinderData> {
     })();
   }
 
-  create3DMesh() {
+  create3DMesh(): THREE.Group {
     const data = this.getData();
     const group = new THREE.Group()
-
     const { r, h, color, mt } = data;
-
     const geometry = new THREE.CylinderGeometry(
       r,
       r,
@@ -99,12 +97,9 @@ export class CylinderEntity extends PointEntityClass<CylinderData> {
     const mesh = new THREE.Mesh(geometry, material)
     mesh.position.setY(h / 2)
     group.add(mesh);
-
     // group.position.set(data.x, data.r, data.y)
     // group.rotateY(data.angle * -1);
-    return [
-      group
-    ]
+    return group
   }
 
   getBoundingBoxData(): [THREE.Vector3, THREE.Vector3, THREE.Vector3] {

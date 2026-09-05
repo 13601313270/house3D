@@ -60,14 +60,14 @@ export class PeopleEntity extends ModelFileEntity<PeopleData> {
     })
   }
 
-  create3DMesh(): THREE.Group[] {
+  create3DMesh(): THREE.Group {
     console.log('00000000')
     const data = this.getData();
     const group = new THREE.Group()
     const { color } = data
     if (!this.mesh) {
       console.error('未找到对应的文件类型:')
-      return []
+      return group
     }
     const threeObject = this.mesh
     const boneListConfig = data.bone || [];
@@ -91,9 +91,7 @@ export class PeopleEntity extends ModelFileEntity<PeopleData> {
     })
     group.add(threeObject)
     this.reBuildBoundingBoxData();
-    return [
-      group
-    ]
+    return group
   }
 
   // 当前对象是否需要重新生成3D模型状态

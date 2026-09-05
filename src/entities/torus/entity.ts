@@ -85,7 +85,7 @@ export class TorusEntity extends PointEntityClass<TorusData> {
     })();
   }
 
-  create3DMesh() {
+  create3DMesh(): THREE.Group {
     const data = this.getData();
     const group = new THREE.Group()
 
@@ -105,9 +105,7 @@ export class TorusEntity extends PointEntityClass<TorusData> {
     mesh.position.setY(t)
     mesh.rotation.x = -Math.PI / 2
     group.add(mesh);
-    return [
-      group
-    ]
+    return group
   }
 
   getBoundingBoxData(): [THREE.Vector3, THREE.Vector3, THREE.Vector3] {
