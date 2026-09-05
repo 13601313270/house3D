@@ -28,7 +28,7 @@ export abstract class BaseEntityClass<T extends BaseObjData> {
   parentEntity: GroupBaseEntity<GroupBaseData> | null;
   private data: T
   private animationData: Partial<T> // 临时数据，播放动画的时候，动画效果对应的data
-  meshList: THREE.Group[] = []
+  meshList: THREE.Group = new THREE.Group()
   boundingBoxData: [THREE.Vector3, THREE.Vector3, THREE.Vector3] | null = null // 第一个是尺寸，第二个是位置偏移，第三个是旋转角度
   // eslint-disable-next-line
   associationEntity: BaseEntityClass<any>[] = []// 关联对象，就是本对象渲染，需要联动修改的对象。（比如：墙壁上被窗户挖洞，那么墙修改，需要重新挖洞）
@@ -238,7 +238,7 @@ export abstract class BaseEntityClass<T extends BaseObjData> {
     if (!this.parentEntity) return
     const scene: THREE.Scene | THREE.Group = this.parentEntity.group;
     this.markObjectIsDirty()
-    this.meshList.forEach(mesh => scene.remove(mesh))
+    scene.remove(this.meshList)
     if (this.associationEntity.length > 0) {
       this.associationEntity.forEach(entity => {
         const index = entity.associationEntity.indexOf(this)
@@ -258,13 +258,13 @@ export abstract class BaseEntityClass<T extends BaseObjData> {
     if (!this.parentEntity) return
     const { isHidden } = this.getData()
     const scene: THREE.Scene | THREE.Group = this.parentEntity.group;
-    this.meshList.forEach(mesh => scene.remove(mesh))
+    scene.remove(this.meshList)
     if (isHidden) {
-      this.meshList = [];
+      this.meshList = new THREE.Group();
     } else {
-      this.meshList = this.create3DMesh();
+      this.meshList = this.create3DMesh()[0];
     }
-    this.meshList.forEach(mesh => scene.add(mesh))
+    scene.add(this.meshList)
     this.cacheKeyStr = newKeyByData;
   }
 

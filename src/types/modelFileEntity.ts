@@ -210,11 +210,9 @@ export abstract class ModelFileEntity<T extends ModelFileData> extends PointCanA
   change3DMeshState(): void {
     const data = this.getData();
     const { scale, angleY } = data
-    this.meshList.forEach(v => {
-      v.position.set(data.x, data.z, data.y)
-      v.rotation.set(0, angleY, 0)
-      v.scale.set(scale, scale, scale)
-    })
+    this.meshList.position.set(data.x, data.z, data.y)
+    this.meshList.rotation.set(0, angleY, 0)
+    this.meshList.scale.set(scale, scale, scale)
   }
 
   showMatchHandel(x: number, y: number) {

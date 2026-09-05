@@ -360,10 +360,8 @@ export class OutFileEntity extends PointCanAngleEntity<OutFileData> {
   // 例如：改变位置，旋转角度等，模型本身不变
   change3DMeshState(): void {
     const data = this.getData();
-    this.meshList.forEach(v => {
-      v.position.set(data.x, data.z, data.y)
-      v.rotation.y = data.angleY
-    })
+    this.meshList.position.set(data.x, data.z, data.y)
+    this.meshList.rotation.y = data.angleY
   }
 
   showMatchHandel(x: number, y: number) {

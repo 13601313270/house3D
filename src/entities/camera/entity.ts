@@ -307,9 +307,7 @@ export class CameraEntity extends CameraBase<CameraData> {
     const data = this.getData();
     const lastDataStr = JSON.stringify(data)
     if (this.lastChangeStateKey === lastDataStr) {
-      this.meshList.forEach(v => {
-        v.position.set(data.x, data.z, data.y)
-      })
+      this.meshList.position.set(data.x, data.z, data.y)
       return
     }
     this.lastChangeStateKey = lastDataStr
@@ -367,19 +365,17 @@ export class CameraEntity extends CameraBase<CameraData> {
     geometry.computeVertexNormals();
 
     const edges = new THREE.EdgesGeometry(geometry);
-    const oldLine = this.meshList[0].children[0] as THREE.LineSegments
+    const oldLine = this.meshList.children[0] as THREE.LineSegments
     oldLine.geometry = edges
     oldLine.position.set(-data.x, -data.z, -data.y)
 
     // @ts-ignore
-    const object: THREE.Group | undefined = this.meshList[0].children.find(v => v.isCameraObj)
+    const object: THREE.Group | undefined = this.meshList.children.find(v => v.isCameraObj)
 
     if (object) {
       object.lookAt(center);
     }
-    this.meshList.forEach(v => {
-      v.position.set(data.x, data.z, data.y)
-    })
+    this.meshList.position.set(data.x, data.z, data.y)
     if (this.realyCamera) {
       this.realyCamera.position.set(data.x, data.z, data.y)
       this.realyCamera.position.set(

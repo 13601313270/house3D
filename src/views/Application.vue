@@ -1552,7 +1552,7 @@ function handleAddAnimation(data: { typeKey: string; modelValue: Record<string, 
 
   const entityIndex = contextMenu.value.index
   const entity = entityList[entityIndex]
-  if (!entity || entity.meshList.length === 0) return
+  if (!entity || entity.meshList.children.length === 0) return
 
   const entityData = entity.getData()
   const entityId = entityData.id

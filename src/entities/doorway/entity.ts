@@ -147,10 +147,10 @@ export class DoorEntity extends EntityClassInWall<DoorData> {
 
     // group.position.set(data.x, data.height / 2, data.y)
     group.rotateY(data.angle * -1);
-    if (wall && data.wallPointId > -1 && wall.meshList[0].children[data.wallPointId]) {
-      const boxLength = wall.meshList[0].children.filter(v => 'isWall' in v).length;
+    if (wall && data.wallPointId > -1 && wall.meshList.children[data.wallPointId]) {
+      const boxLength = wall.meshList.children.filter(v => 'isWall' in v).length;
       const countPerPoint = wall.getData().points.length === 2 ? 1 : ((boxLength - 1) / (wall.getData().points.length - 2))
-      const wallGroup = wall.meshList[0].children[data.wallPointId * countPerPoint];
+      const wallGroup = wall.meshList.children[data.wallPointId * countPerPoint];
       const subtractGeometry = new THREE.BoxGeometry(
         data.width,
         data.height,
