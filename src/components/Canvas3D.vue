@@ -190,7 +190,7 @@ const initThree = () => {
     let camera1TargetPositionStartZ = 0;
 
     let canvas1IsMouseMoveObj = false;
-    let camera1MouseMoveStartValue = 0;
+    let camera1MouseMoveStartPos: { x: number; y: number; z: number } = { x: 0, y: 0, z: 0 };
     let canvas1HoveredObject: THREE.Object3D<THREE.Object3DEventMap> | null = null;
 
     let canvas1LastMouseX = 0;
@@ -246,21 +246,18 @@ const initThree = () => {
     const container = containerRef.value
     if (!container) return
 
-    // 按当前摄像机姿态，把屏幕位移 (deltaX, deltaY) 投影到水平世界轴上的增量。
+    // 按当前摄像机姿态，把屏幕位移 (deltaX, deltaY) 投影到水平世界面的增量。
     // 屏幕: deltaX 向右为正、deltaY 向下为正；世界偏移 = right*deltaX - up*deltaY (1px = 1 世界单位)。
-    // 坐标映射: data.x -> 3D x，data.y -> 3D z。z 轴(垂直)沿用 deltaY 直觉映射，不在此处理。
-    function computeHorizontalAxisDelta(deltaX: number, deltaY: number, moveType: string): number {
-      if (!camera) return 0
+    // 坐标映射: worldX -> data.x(3D x)，worldZ -> data.y(3D z)。z 轴(垂直)沿用 deltaY 直觉映射，不在此处理。
+    function computeHorizontalPlaneDelta(deltaX: number, deltaY: number): { worldX: number; worldZ: number } {
+      if (!camera) return { worldX: 0, worldZ: 0 }
       camera.updateMatrixWorld()
       const right = new THREE.Vector3().setFromMatrixColumn(camera.matrixWorld, 0)
       const up = new THREE.Vector3().setFromMatrixColumn(camera.matrixWorld, 1)
-      if (moveType === 'x') {
-        return right.x * deltaX - up.x * deltaY
+      return {
+        worldX: right.x * deltaX - up.x * deltaY, // 3D x -> data.x
+        worldZ: right.z * deltaX - up.z * deltaY, // 3D z -> data.y
       }
-      if (moveType === 'y') {
-        return right.z * deltaX - up.z * deltaY
-      }
-      return 0
     }
 
     function mouseDown(e: MouseEvent) {
@@ -299,9 +296,8 @@ const initThree = () => {
               canvas1LastMouseX = e.clientX;
               canvas1LastMouseY = e.clientY;
               canvas1HoveredObject = moveZBoxHit
-              // @ts-ignore
-              const moveType = canvas1HoveredObject.moveType || 'z'
-              camera1MouseMoveStartValue = entity.getData()[moveType];
+              const startPos = entity.getData()
+              camera1MouseMoveStartPos = { x: startPos.x, y: startPos.y, z: startPos.z }
               // 重置 pending click，因为 moveZBox 拖拽不属于 click 判定
               canvas1PendingClickTarget = null;
               canvas1PendingClickStartX = e.clientX;
@@ -380,14 +376,25 @@ const initThree = () => {
             // @ts-ignore
             const entity = canvas1HoveredObject.entity as BaseEntityClass<any>
             if (entity instanceof PointEntityClass) {
-              // z 轴(垂直)沿用屏幕纵向位移；x/y 轴按摄像机姿态把屏幕位移投影到对应世界轴
-              const axisDelta = moveType === 'z'
-                ? (deltaY * -1)
-                : computeHorizontalAxisDelta(deltaX, deltaY, moveType)
-              entity.setData({
-                // ...entity.getData(),
-                [moveType]: camera1MouseMoveStartValue + axisDelta
-              })
+              if (moveType === 'xy') {
+                // x/y 平面：在水平面上自由移动（worldX -> data.x，worldZ -> data.y）
+                const { worldX, worldZ } = computeHorizontalPlaneDelta(deltaX, deltaY)
+                entity.setData({
+                  x: camera1MouseMoveStartPos.x + worldX,
+                  y: camera1MouseMoveStartPos.y + worldZ,
+                })
+              } else if (moveType === 'z') {
+                // z 轴(垂直)：屏幕纵向位移
+                entity.setData({
+                  z: camera1MouseMoveStartPos.z + (deltaY * -1),
+                })
+              } else if (moveType === 'x') {
+                const { worldX } = computeHorizontalPlaneDelta(deltaX, deltaY)
+                entity.setData({ x: camera1MouseMoveStartPos.x + worldX })
+              } else {
+                const { worldZ } = computeHorizontalPlaneDelta(deltaX, deltaY)
+                entity.setData({ y: camera1MouseMoveStartPos.y + worldZ })
+              }
               entity.moveZBox.visible = true
               entity.boundingBox.visible = true
               entity.boundingBox.children[1].visible = true

@@ -5,6 +5,10 @@ import { BaseEntityClass } from './baseEntity'
 import { GroupBaseData } from './groupBase'
 import { moveIcon } from '@/utils/handleImgs'
 
+// x/y 平面拖动面用的移动图标纹理（全实体共享，避免重复加载）
+const movePlaneTexture = new THREE.TextureLoader().load('/icons/move.png')
+movePlaneTexture.colorSpace = THREE.SRGBColorSpace
+
 export abstract class PointEntityClass<T extends PointObjData> extends BaseEntityClass<T> {
   boundingBox: THREE.Group
   moveZBox: THREE.Group
@@ -45,14 +49,14 @@ export abstract class PointEntityClass<T extends PointObjData> extends BaseEntit
         const material = new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 1 });
         material.depthTest = false;
         material.depthWrite = false;
-        const shaftMesh = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), material);
+        const shaftMesh = new THREE.Mesh(new THREE.BoxGeometry(0.3, 1, 0.3), material);
         shaftMesh.layers.set(2)
         // @ts-ignore
         shaftMesh.entity = this
         // @ts-ignore
         shaftMesh.moveType = moveType;
 
-        const arrowheadMesh = new THREE.Mesh(new THREE.ConeGeometry(1.5, 0.7, 4), material);
+        const arrowheadMesh = new THREE.Mesh(new THREE.ConeGeometry(0.75, 0.5, 4), material);
         arrowheadMesh.layers.set(2)
         arrowheadMesh.rotation.y = Math.PI / 4;
         arrowheadMesh.position.y = 0.7;
@@ -93,6 +97,19 @@ export abstract class PointEntityClass<T extends PointObjData> extends BaseEntit
       // children[3] / children[4]: y 轴两个方向（data.y -> 3D z 轴）
       outerGroup.add(createArrow('y', 1, 0x00ff00))
       outerGroup.add(createArrow('y', -1, 0x00ff00))
+
+      // children[5]: x/y 平面拖动面（水平方形），拖动可在 x/y 两轴自由移动
+      const planeMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.9, side: THREE.DoubleSide, map: movePlaneTexture });
+      planeMaterial.depthTest = false;
+      planeMaterial.depthWrite = false;
+      const planeMesh = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), planeMaterial);
+      planeMesh.layers.set(2)
+      planeMesh.rotation.x = -Math.PI / 2 // 平铺到水平面（朝上）
+      // @ts-ignore
+      planeMesh.entity = this
+      // @ts-ignore
+      planeMesh.moveType = 'xy'
+      outerGroup.add(planeMesh)
 
       this.moveZBox = outerGroup;
       if (this.parentEntity) {
@@ -297,6 +314,10 @@ export abstract class PointEntityClass<T extends PointObjData> extends BaseEntit
         setArrow(3, ox, oy, halfBoxZ + height / 2 + oz)
         // children[4]: y- 箭头（data.y -> 3D -z），位于 -z 侧面
         setArrow(4, ox, oy, -halfBoxZ - height / 2 + oz)
+        // children[5]: x/y 平面拖动面（水平方形），平铺在盒子底部
+        const planeSide = radio * 5
+        this.moveZBox!.children[5].scale.set(planeSide, planeSide, 1)
+        this.moveZBox!.children[5].position.set(ox, oy - halfBoxY, oz)
         // this.moveZBox.visible = false
       }
     } else {
