@@ -1524,7 +1524,7 @@ function groupExit() {
   allBoundingBox.forEach((item) => {
     item.visible = false
   })
-  const allMoveZBox = window.globalEditGroup.moveZBoxList()
+  const allMoveZBox = window.globalEditGroup.moveXYZBoxList()
   allMoveZBox.forEach((item) => {
     // @ts-ignore
     const entity = item.children[0].entity as BaseEntityClass<any>

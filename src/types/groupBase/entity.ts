@@ -195,14 +195,14 @@ export abstract class GroupBaseEntity<T extends GroupBaseData> extends PointCanA
     return boundingBoxList
   }
 
-  moveZBoxList(): THREE.Group[] {
-    const boundingBoxList: THREE.Group[] = []
+  moveXYZBoxList(): THREE.Group[] {
+    const moveZBoxList: THREE.Group[] = []
     this.children.forEach((item) => {
       if (item instanceof PointEntityClass && item.moveZBox && !item.getData().isLocked && !item.getData().isHidden) {
-        boundingBoxList.push(item.moveZBox)
+        moveZBoxList.push(item.moveZBox)
       }
     });
-    return boundingBoxList
+    return moveZBoxList
   }
 
   getBoundingBoxData(): [THREE.Vector3, THREE.Vector3, THREE.Vector3] | null {

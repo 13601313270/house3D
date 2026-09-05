@@ -52,19 +52,29 @@ export abstract class PointEntityClass<T extends PointObjData> extends BaseEntit
       arrowheadMesh.position.y = 0.7;
 
       const group = new THREE.Group()
+      const moveType = 'z'
       group.add(shaftMesh);
       // @ts-ignore
       shaftMesh.entity = this
       // @ts-ignore
+      shaftMesh.moveType = moveType;
+      // @ts-ignore
       arrowheadMesh.entity = this
+      // @ts-ignore
+      arrowheadMesh.moveType = moveType;
       group.add(arrowheadMesh);
       // @ts-ignore
       group.entity = this
+      // @ts-ignore
+      group.moveType = moveType;
       const group2 = new THREE.Group()
       group2.visible = false
       group2.add(group)
       // @ts-ignore
       group2.entity = this
+      // @ts-ignore
+      group2.moveType = moveType;
+      console.log('moveZBoxHit cc', group2)
       this.moveZBox = group2;
       if (this.parentEntity) {
         this.parentEntity.group.add(group2)
