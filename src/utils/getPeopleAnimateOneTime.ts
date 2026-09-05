@@ -35,7 +35,7 @@ function getPeopleAnimateOneTime(keyframe: KeyTimeAnimation, people: BaseEntityC
     pz: number,
   }
 }>> {
-  const peopleModel = clone(people.meshList.children[0])
+  const peopleModel = clone(people.meshGroup.children[0])
   const { applyScope } = keyframe
   const findAnimate = allPeopleAnimate.find((item) => item.key === keyframe.value)
   const { file } = findAnimate!

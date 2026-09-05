@@ -399,10 +399,10 @@ export class WindowEntity extends EntityClassInWall<WindowData> {
     })();
     // group.position.set(data.x, data.height / 2 + (data.bottom || 0), data.y)
     group.rotateY(data.angle * -1);
-    if (wall && data.wallPointId > -1 && wall.meshList.children[data.wallPointId]) {
-      const boxLength = wall.meshList.children.filter(v => 'isWall' in v).length;
+    if (wall && data.wallPointId > -1 && wall.meshGroup.children[data.wallPointId]) {
+      const boxLength = wall.meshGroup.children.filter(v => 'isWall' in v).length;
       const countPerPoint = wall.getData().points.length === 2 ? 1 : ((boxLength - 1) / (wall.getData().points.length - 2))
-      const wallGroup = wall.meshList.children[data.wallPointId * countPerPoint];
+      const wallGroup = wall.meshGroup.children[data.wallPointId * countPerPoint];
       console.log('window,2', wallGroup)
       const subtractGeometry = new THREE.BoxGeometry(
         data.width,

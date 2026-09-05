@@ -114,10 +114,10 @@ export class PeopleEntity extends ModelFileEntity<PeopleData> {
   change3DMeshState(): void {
     super.change3DMeshState();
     const data = this.getData();
-    if (this.meshList?.children[0] && data.bone && data.bone?.length > 0) {
+    if (this.meshGroup?.children[0] && data.bone && data.bone?.length > 0) {
       const boneListConfig = data.bone
       if (boneListConfig) {
-        this.meshList?.children[0].traverse((child: any) => {
+        this.meshGroup?.children[0].traverse((child: any) => {
           if (child.isBone) {
             const findProp = boneListConfig.find((item) => item.name === child.name)
             if (findProp) {

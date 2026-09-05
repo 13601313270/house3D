@@ -320,7 +320,7 @@ export class DirectionCameraEntity extends CameraBase<DirectionCameraData> {
     const data = this.getData();
     const lastDataStr = JSON.stringify(data)
     if (this.lastChangeStateKey === lastDataStr) {
-      this.meshList.position.set(data.x, data.z, data.y)
+      this.meshGroup.position.set(data.x, data.z, data.y)
       return
     }
     this.lastChangeStateKey = lastDataStr
@@ -382,17 +382,17 @@ export class DirectionCameraEntity extends CameraBase<DirectionCameraData> {
     geometry.computeVertexNormals();
 
     const edges = new THREE.EdgesGeometry(geometry);
-    const oldLine = this.meshList.children[0] as THREE.LineSegments
+    const oldLine = this.meshGroup.children[0] as THREE.LineSegments
     oldLine.geometry = edges
     oldLine.position.set(-data.x, -data.z, -data.y)
 
     // @ts-ignore
-    const object: THREE.Group | undefined = this.meshList.children.find(v => v.isCameraObj)
+    const object: THREE.Group | undefined = this.meshGroup.children.find(v => v.isCameraObj)
 
     if (object) {
       object.lookAt(center);
     }
-    this.meshList.position.set(data.x, data.z, data.y)
+    this.meshGroup.position.set(data.x, data.z, data.y)
     if (this.realyCamera) {
       this.realyCamera.position.set(data.x, data.z, data.y)
       this.realyCamera.position.set(

@@ -279,8 +279,8 @@ export class OutFileInWallEntity extends EntityClassInWall<OutFileInWallData> {
   // 例如：改变位置，旋转角度等，模型本身不变
   change3DMeshState(): void {
     const data = this.getData();
-    this.meshList.position.set(data.x, data.z, data.y)
-    this.meshList.rotation.y = data.angle * -1
+    this.meshGroup.position.set(data.x, data.z, data.y)
+    this.meshGroup.rotation.y = data.angle * -1
   }
 
   showMatchHandel(x: number, y: number) {

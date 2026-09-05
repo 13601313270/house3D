@@ -292,7 +292,7 @@ export class RegularPolygonEntity extends PointCanAngleEntity<RegularPolygonData
   // 例如：改变位置，旋转角度等，模型本身不变
   change3DMeshState(): void {
     const data = this.getData();
-    this.meshList.position.set(data.x, data.z, data.y)
-    this.meshList.rotation.y = data.angleY
+    this.meshGroup.position.set(data.x, data.z, data.y)
+    this.meshGroup.rotation.y = data.angleY
   }
 }

@@ -189,7 +189,7 @@ export abstract class PointEntityClass<T extends PointObjData> extends BaseEntit
   // 例如：改变位置，旋转角度等
   change3DMeshState(): void {
     const data = this.getData();
-    this.meshList.position.set(data.x, data.z, data.y)
+    this.meshGroup.position.set(data.x, data.z, data.y)
   }
 
   matchHandelInfo(x: number, y: number) {
