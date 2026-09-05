@@ -350,9 +350,7 @@ export class WallEntity extends LineEntityClass<WallPoint, WallData> {
         wallArr.add(group2)
       }
     }
-    const meshList: THREE.Group = new THREE.Group()
-    meshList.add(wallArr)
-    return meshList
+    return wallArr
   }
 
   showMatchHandel(x: number, y: number) {

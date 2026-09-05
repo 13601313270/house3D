@@ -399,41 +399,38 @@ export class WindowEntity extends EntityClassInWall<WindowData> {
     })();
     // group.position.set(data.x, data.height / 2 + (data.bottom || 0), data.y)
     group.rotateY(data.angle * -1);
-    if (wall && data.wallPointId > -1 && wall.meshGroup.children[data.wallPointId]) {
+    if (wall && data.wallPointId > -1 && wall.meshGroup.children.length) {
       const boxLength = wall.meshGroup.children.filter(v => 'isWall' in v).length;
       const countPerPoint = wall.getData().points.length === 2 ? 1 : ((boxLength - 1) / (wall.getData().points.length - 2))
       const wallGroup = wall.meshGroup.children[data.wallPointId * countPerPoint];
-      console.log('window,2', wallGroup)
-      const subtractGeometry = new THREE.BoxGeometry(
-        data.width,
-        data.height,
-        wallThickness + 10
-      );
-      subtractGeometry.rotateY(data.angle * -1);
-      const cylinderBrush = new Brush(subtractGeometry);
-      cylinderBrush.position.set(data.x, data.height / 2 - 1 + (data.bottom || 0) + data.z, data.y)
-      cylinderBrush.updateMatrixWorld()
-      // console.log('dddddddd', countPerPoint, wallGroup)
-      const firstMesh = wallGroup.children.find(child => child instanceof THREE.Mesh) as THREE.Mesh;
-      const boxBrush = new Brush(firstMesh.geometry.clone());// 主体
-      boxBrush.position.set(
-        wallGroup.position.x,
-        wallGroup.position.y,
-        wallGroup.position.z
-      )
-      // 3. 执行布尔运算 (立方体减去圆柱体)
-      const evaluator = new Evaluator();
-      // 注意：这里 SUBTRACTION 的顺序很重要：主体减去洞模型
-      const resultGeometry = evaluator.evaluate(boxBrush, cylinderBrush, SUBTRACTION);
+      if (wallGroup) {
+        console.log('window,2', wallGroup)
+        const subtractGeometry = new THREE.BoxGeometry(
+          data.width,
+          data.height,
+          wallThickness + 10
+        );
+        subtractGeometry.rotateY(data.angle * -1);
+        const cylinderBrush = new Brush(subtractGeometry);
+        cylinderBrush.position.set(data.x, data.height / 2 - 1 + (data.bottom || 0) + data.z, data.y)
+        cylinderBrush.updateMatrixWorld()
+        // console.log('dddddddd', countPerPoint, wallGroup)
+        const firstMesh = wallGroup.children.find(child => child instanceof THREE.Mesh) as THREE.Mesh;
+        const boxBrush = new Brush(firstMesh.geometry.clone());// 主体
+        boxBrush.position.set(
+          wallGroup.position.x,
+          wallGroup.position.y,
+          wallGroup.position.z
+        )
+        // 3. 执行布尔运算 (立方体减去圆柱体)
+        const evaluator = new Evaluator();
+        // 注意：这里 SUBTRACTION 的顺序很重要：主体减去洞模型
+        const resultGeometry = evaluator.evaluate(boxBrush, cylinderBrush, SUBTRACTION);
 
-      if (firstMesh) {
-        firstMesh.geometry = resultGeometry.geometry;
+        if (firstMesh) {
+          firstMesh.geometry = resultGeometry.geometry;
+        }
       }
-      // // 4. 创建最终的网格
-      // const material = new THREE.MeshStandardMaterial({ color: 0x00aaff, side: THREE.DoubleSide });
-      // const resultMesh = new THREE.Mesh(resultGeometry.geometry, material);
-      // resultMesh.position.set(wallMesh.position.x, wallMesh.position.y, wallMesh.position.z + 3)
-      // resultMesh.rotateY(this.data.angle * -1);
       return group
     } else {
       return group
