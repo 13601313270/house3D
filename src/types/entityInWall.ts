@@ -27,11 +27,11 @@ export abstract class EntityClassInWall<T extends ObjInWallData> extends PointEn
 
       this.setData({
         ...this.getData(),
-        wallId: nearest.wall.id,
-        wallPointId: nearest.lineIndex,
         x: wallScreenX,
         y: wallScreenY,
         angle,
+        wallId: nearest.wall.id,
+        wallPointId: nearest.lineIndex,
       })
 
       // 双向去除原有的关联对象
@@ -50,9 +50,31 @@ export abstract class EntityClassInWall<T extends ObjInWallData> extends PointEn
         nearest.wallEntity.associationEntity.push(this)
       }
       this.markObjectIsDirty()
-
+      this.associationEntity.forEach(entity => {
+        if (entity.associationEntity.includes(this)) {
+          entity.reCreate3DMeshAnd2DPreviewIfNeed()
+          entity.setData({})// 如果不加这一行。一个墙上两个门，移动一个，另一个会消失
+        }
+      });
+      this.reCreate3DMeshAnd2DPreviewIfNeed();
+      this.associationEntity.forEach(entity => {
+        if (entity.associationEntity.includes(this)) {
+          entity.change3DMeshState()
+        }
+      });
+      this.change3DMeshState()
       return [];
     } else {
+      // 双向去除原有的关联对象
+      this.associationEntity.forEach(entity => {
+        if (entity.associationEntity.includes(this)) {
+          entity.associationEntity.splice(entity.associationEntity.indexOf(this), 1)
+          entity.markObjectIsDirty()
+          entity.setData({})// 如果不加这一行。一个墙上两个门，移动一个，另一个会消失
+        }
+      })
+      this.associationEntity = []
+      this.markObjectIsDirty()
       const newData: T = {
         ...this.getData(),
         x,
