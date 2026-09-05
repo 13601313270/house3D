@@ -190,7 +190,7 @@ const initThree = () => {
     let camera1TargetPositionStartZ = 0;
 
     let canvas1IsMouseMoveObj = false;
-    let camera1MouseMoveStartZ = 0;
+    let camera1MouseMoveStartValue = 0;
     let canvas1HoveredObject: THREE.Object3D<THREE.Object3DEventMap> | null = null;
 
     let canvas1LastMouseX = 0;
@@ -246,6 +246,23 @@ const initThree = () => {
     const container = containerRef.value
     if (!container) return
 
+    // 按当前摄像机姿态，把屏幕位移 (deltaX, deltaY) 投影到水平世界轴上的增量。
+    // 屏幕: deltaX 向右为正、deltaY 向下为正；世界偏移 = right*deltaX - up*deltaY (1px = 1 世界单位)。
+    // 坐标映射: data.x -> 3D x，data.y -> 3D z。z 轴(垂直)沿用 deltaY 直觉映射，不在此处理。
+    function computeHorizontalAxisDelta(deltaX: number, deltaY: number, moveType: string): number {
+      if (!camera) return 0
+      camera.updateMatrixWorld()
+      const right = new THREE.Vector3().setFromMatrixColumn(camera.matrixWorld, 0)
+      const up = new THREE.Vector3().setFromMatrixColumn(camera.matrixWorld, 1)
+      if (moveType === 'x') {
+        return right.x * deltaX - up.x * deltaY
+      }
+      if (moveType === 'y') {
+        return right.z * deltaX - up.z * deltaY
+      }
+      return 0
+    }
+
     function mouseDown(e: MouseEvent) {
       // if (props.cameraType === 'orthographic') {
       //   if (e.button === 2) {
@@ -284,7 +301,7 @@ const initThree = () => {
               canvas1HoveredObject = moveZBoxHit
               // @ts-ignore
               const moveType = canvas1HoveredObject.moveType || 'z'
-              camera1MouseMoveStartZ = entity.getData()[moveType];
+              camera1MouseMoveStartValue = entity.getData()[moveType];
               // 重置 pending click，因为 moveZBox 拖拽不属于 click 判定
               canvas1PendingClickTarget = null;
               canvas1PendingClickStartX = e.clientX;
@@ -360,13 +377,16 @@ const initThree = () => {
             })
             // @ts-ignore
             const moveType = canvas1HoveredObject.moveType || 'z'
-            console.log('moveType', moveType)
             // @ts-ignore
             const entity = canvas1HoveredObject.entity as BaseEntityClass<any>
             if (entity instanceof PointEntityClass) {
+              // z 轴(垂直)沿用屏幕纵向位移；x/y 轴按摄像机姿态把屏幕位移投影到对应世界轴
+              const axisDelta = moveType === 'z'
+                ? (deltaY * -1)
+                : computeHorizontalAxisDelta(deltaX, deltaY, moveType)
               entity.setData({
                 // ...entity.getData(),
-                [moveType]: camera1MouseMoveStartZ + (deltaY * -1)
+                [moveType]: camera1MouseMoveStartValue + axisDelta
               })
               entity.moveZBox.visible = true
               entity.boundingBox.visible = true
