@@ -39,45 +39,64 @@ export abstract class PointEntityClass<T extends PointObjData> extends BaseEntit
       }
     })();
     (() => {
-      const shaftGeometry = new THREE.BoxGeometry(1, 1, 1);
-      const material = new THREE.MeshBasicMaterial({ color: 0x0000ff, transparent: true, opacity: 1 });
-      const shaftMesh = new THREE.Mesh(shaftGeometry, material);
-      shaftMesh.layers.set(2)
-      material.depthTest = false;
-      material.depthWrite = false;
-      const arrowheadGeometry = new THREE.ConeGeometry(1.5, 0.7, 4);
-      const arrowheadMesh = new THREE.Mesh(arrowheadGeometry, material);
-      arrowheadMesh.layers.set(2)
-      arrowheadMesh.rotation.y = Math.PI / 4;
-      arrowheadMesh.position.y = 0.7;
+      // 创建一个方向轴箭头。base 箭头默认指向 +y（向上），通过旋转对齐到指定轴与方向。
+      // moveType: 'z' -> 3D y 轴（上），'x' -> 3D x 轴，'y' -> data.y 即 3D z 轴
+      const createArrow = (moveType: 'x' | 'y' | 'z', direction: 1 | -1, color: number) => {
+        const material = new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 1 });
+        material.depthTest = false;
+        material.depthWrite = false;
+        const shaftMesh = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), material);
+        shaftMesh.layers.set(2)
+        // @ts-ignore
+        shaftMesh.entity = this
+        // @ts-ignore
+        shaftMesh.moveType = moveType;
 
-      const group = new THREE.Group()
-      const moveType = 'z'
-      group.add(shaftMesh);
+        const arrowheadMesh = new THREE.Mesh(new THREE.ConeGeometry(1.5, 0.7, 4), material);
+        arrowheadMesh.layers.set(2)
+        arrowheadMesh.rotation.y = Math.PI / 4;
+        arrowheadMesh.position.y = 0.7;
+        // @ts-ignore
+        arrowheadMesh.entity = this
+        // @ts-ignore
+        arrowheadMesh.moveType = moveType;
+
+        const group = new THREE.Group()
+        group.add(shaftMesh);
+        group.add(arrowheadMesh);
+        // @ts-ignore
+        group.entity = this
+        // @ts-ignore
+        group.moveType = moveType;
+
+        // 将默认 +y 方向的箭头旋转到目标轴
+        if (moveType === 'x') {
+          group.rotation.z = -direction * Math.PI / 2
+        } else if (moveType === 'y') {
+          group.rotation.x = direction * Math.PI / 2
+        }
+        return group
+      }
+
+      const outerGroup = new THREE.Group()
+      outerGroup.visible = false
       // @ts-ignore
-      shaftMesh.entity = this
+      outerGroup.entity = this
       // @ts-ignore
-      shaftMesh.moveType = moveType;
-      // @ts-ignore
-      arrowheadMesh.entity = this
-      // @ts-ignore
-      arrowheadMesh.moveType = moveType;
-      group.add(arrowheadMesh);
-      // @ts-ignore
-      group.entity = this
-      // @ts-ignore
-      group.moveType = moveType;
-      const group2 = new THREE.Group()
-      group2.visible = false
-      group2.add(group)
-      // @ts-ignore
-      group2.entity = this
-      // @ts-ignore
-      group2.moveType = moveType;
-      console.log('moveZBoxHit cc', group2)
-      this.moveZBox = group2;
+      outerGroup.moveType = 'z'
+
+      // children[0]: z 轴箭头（向上）
+      outerGroup.add(createArrow('z', 1, 0x0000ff))
+      // children[1] / children[2]: x 轴两个方向
+      outerGroup.add(createArrow('x', 1, 0xff0000))
+      outerGroup.add(createArrow('x', -1, 0xff0000))
+      // children[3] / children[4]: y 轴两个方向（data.y -> 3D z 轴）
+      outerGroup.add(createArrow('y', 1, 0x00ff00))
+      outerGroup.add(createArrow('y', -1, 0x00ff00))
+
+      this.moveZBox = outerGroup;
       if (this.parentEntity) {
-        this.parentEntity.group.add(group2)
+        this.parentEntity.group.add(outerGroup)
       }
     })();
     this.updateBoundingBoxState();
@@ -256,12 +275,28 @@ export abstract class PointEntityClass<T extends PointObjData> extends BaseEntit
         // const height = Math.max(Math.min(40, boxVector3.y), 20);
         const radio = Math.max(Math.min(boxVector3.x / 8, boxVector3.z / 8, 20), 8);
         const height = radio * 3;
-        this.moveZBox.children[0].scale.set(
-          radio,
-          height,
-          radio
-        )
-        this.moveZBox.children[0].position.set(offsetVector3.x, boxVector3.y / 2 + height / 2 + offsetVector3.y, offsetVector3.z)
+        const ox = offsetVector3.x;
+        const oy = offsetVector3.y;
+        const oz = offsetVector3.z;
+        const halfBoxX = boxVector3.x / 2;
+        const halfBoxY = boxVector3.y / 2;
+        const halfBoxZ = boxVector3.z / 2;
+
+        const setArrow = (index: number, px: number, py: number, pz: number) => {
+          this.moveZBox!.children[index].scale.set(radio, height, radio)
+          this.moveZBox!.children[index].position.set(px, py, pz)
+        }
+
+        // children[0]: z 轴箭头（向上），位于盒子顶部
+        setArrow(0, ox, halfBoxY + height / 2 + oy, oz)
+        // children[1]: x+ 箭头，位于 +x 侧面，指向 +x
+        setArrow(1, halfBoxX + height / 2 + ox, oy, oz)
+        // children[2]: x- 箭头，位于 -x 侧面，指向 -x
+        setArrow(2, -halfBoxX - height / 2 + ox, oy, oz)
+        // children[3]: y+ 箭头（data.y -> 3D +z），位于 +z 侧面
+        setArrow(3, ox, oy, halfBoxZ + height / 2 + oz)
+        // children[4]: y- 箭头（data.y -> 3D -z），位于 -z 侧面
+        setArrow(4, ox, oy, -halfBoxZ - height / 2 + oz)
         // this.moveZBox.visible = false
       }
     } else {

@@ -282,7 +282,9 @@ const initThree = () => {
               canvas1LastMouseX = e.clientX;
               canvas1LastMouseY = e.clientY;
               canvas1HoveredObject = moveZBoxHit
-              camera1MouseMoveStartZ = entity.getData().z;
+              // @ts-ignore
+              const moveType = canvas1HoveredObject.moveType || 'z'
+              camera1MouseMoveStartZ = entity.getData()[moveType];
               // 重置 pending click，因为 moveZBox 拖拽不属于 click 判定
               canvas1PendingClickTarget = null;
               canvas1PendingClickStartX = e.clientX;
