@@ -287,10 +287,8 @@ let isKeyframeDragging = false               // keyframe-node（关键帧节点�
 let keyframeDragMoved = false                // 本次按下后是否真正发生了拖拽（用于抑制随后的 click）
 let keyframeDragStartX = 0                   // 拖拽起始鼠标 X 坐标
 let keyframeDragOriginTime = 0               // 拖拽起始的关键帧时间（秒）
-let keyframeDragLastTime = 0                 // 拖拽过程中最后应用的关键帧时间（秒，松开时用于扩大 clip 边界）
 let keyframeDragMode: 'move' | 'trim-start' | 'trim-end' = 'move' // 拖拽模式：整体移动 / 左句柄调起点 / 右句柄调时长
 let keyframeDragOriginEnd = 0                // 拖拽起始时动画区间的结束时间（time + timeLength）
-let keyframeDragLastEnd = 0                  // 拖拽过程中最后应用的区间结束时间（trim-end 松开时用于扩大 clip 边界）
 let keyframeDragOriginEnds: number[] = []    // 每个被拖拽动画点的原始结束时间（trim-start 时锚定终点不动）
 let keyframeDragSegment: ClipSegment | null = null  // 拖拽的关键帧所属 segment
 let keyframeDragPoints: KeyTimePoint[] = []  // 本次拖拽要移动的关键帧点（同一时刻跨轨道共享的所有点）
@@ -561,7 +559,7 @@ function onKeyframeClick(time: number) {
 //   - 'trim-end'   ：右句柄，改 item.timeLength（起点 time 锚定不动）
 //  - trim 模式只作用于 animation 类型点（range 宽度来自动画时长）；普通 point 点不受句柄影响
 //  - 时间对齐到帧网格（snapTimeToFrame），拖拽允许超出所属 clip 范围（仅限制在时间轴 [0, effectiveDuration] 内）
-//  - 鼠标松开时若超出 clip 范围 → 重新计算并扩大 clip 的 startTime/endTime
+//  - 鼠标松开时无论是否超出范围，都按 clip 内全部关键帧重新计算边界：最左关键帧 = startTime，最右（含动画时长）= endTime
 //  - 拖拽过程中播放头跟随，实时 evaluateTimeline 预览场景效果
 function startKeyframeDrag(
   event: MouseEvent,
@@ -573,7 +571,6 @@ function startKeyframeDrag(
   keyframeDragMode = mode
   keyframeDragStartX = event.clientX
   keyframeDragOriginTime = time
-  keyframeDragLastTime = time
   keyframeDragSegment = segment
   keyframeDragPoints = []
   keyframeDragOriginEnds = []
@@ -589,7 +586,6 @@ function startKeyframeDrag(
   })
   if (keyframeDragPoints.length === 0) return
   keyframeDragOriginEnd = Math.max(...keyframeDragOriginEnds)
-  keyframeDragLastEnd = keyframeDragOriginEnd
   isKeyframeDragging = true
   document.addEventListener('mousemove', onKeyframeDrag)
   document.addEventListener('mouseup', stopKeyframeDrag)
@@ -614,7 +610,7 @@ function onKeyframeDrag(event: MouseEvent) {
   const deltaTime = ((event.clientX - keyframeDragStartX) / rect.width) * effectiveDuration.value
   // 动画段最小时长：对齐一帧（避免拖成 0 或负值）
   const minLen = targetFps.value > 0 ? 1 / targetFps.value : 0.05
-  // 允许拖出 clip 范围，仅限制在时间轴 [0, effectiveDuration] 内；松开后由 stopKeyframeDrag 扩大 clip 边界
+  // 允许拖出 clip 范围，仅限制在时间轴 [0, effectiveDuration] 内；松开后由 stopKeyframeDrag 按关键帧重算 clip 边界
   let previewTime = keyframeDragOriginTime
 
   if (keyframeDragMode === 'move') {
@@ -622,7 +618,6 @@ function onKeyframeDrag(event: MouseEvent) {
     keyframeDragPoints.forEach(kf => {
       kf.time = newTime
     })
-    keyframeDragLastTime = newTime
     previewTime = newTime
   } else if (keyframeDragMode === 'trim-start') {
     // 终点锚定不动，拖动起点：newTime 上限为终点 - minLen
@@ -633,7 +628,6 @@ function onKeyframeDrag(event: MouseEvent) {
         kf.timeLength = Math.max(0, keyframeDragOriginEnds[i] - newTime)
       }
     })
-    keyframeDragLastTime = newTime
     previewTime = newTime
   } else {
     // trim-end：起点锚定不动，拖动终点改 timeLength：newEnd 下限为起点 + minLen
@@ -643,7 +637,6 @@ function onKeyframeDrag(event: MouseEvent) {
         kf.timeLength = Math.max(0, newEnd - kf.time)
       }
     })
-    keyframeDragLastEnd = newEnd
     previewTime = newEnd
   }
 
@@ -655,32 +648,28 @@ function onKeyframeDrag(event: MouseEvent) {
 }
 
 function stopKeyframeDrag() {
-  // 拖拽超出 clip 范围后松开 → 重新计算并扩大 clip 边界，把调整后的区间包进去
+  // 任何拖拽结束后都重新计算 clip 边界：
+  // 最左侧关键帧的时间 = clip.startTime；最右侧（动画段含 timeLength）= clip.endTime
+  // 因此 clip 边界既会随关键帧外拖而扩大，也会随关键帧内拖而收缩
   if (isKeyframeDragging && keyframeDragMoved && keyframeDragSegment) {
     const clip = keyframeDragSegment.clip
-    let newStart = clip.startTime
-    let newEnd = clip.endTime
-    if (keyframeDragMode === 'move') {
-      newStart = Math.min(clip.startTime, keyframeDragLastTime)
-      newEnd = Math.max(clip.endTime, keyframeDragLastTime)
-      keyframeDragPoints.forEach(kf => {
-        if (kf.type === 'animation' && kf.time + kf.timeLength > newEnd) {
-          newEnd = kf.time + kf.timeLength
-        }
+    let newStart = Infinity
+    let newEnd = -Infinity
+    clip.columns.forEach(track => {
+      track.keyTimePoints.forEach(kf => {
+        newStart = Math.min(newStart, kf.time)
+        newEnd = Math.max(newEnd, kf.type === 'animation' ? kf.time + kf.timeLength : kf.time)
       })
-    } else if (keyframeDragMode === 'trim-start') {
-      // 左句柄只可能把起点拖到 clip 起点之前
-      newStart = Math.min(clip.startTime, keyframeDragLastTime)
-    } else {
-      // 右句柄只可能把终点拖到 clip 终点之后
-      newEnd = Math.max(clip.endTime, keyframeDragLastEnd)
-    }
-    if (newStart !== clip.startTime || newEnd !== clip.endTime) {
-      clip.startTime = newStart
-      clip.endTime = newEnd
-      timelineState.triggerChange()
-      // 以扩大后的区间重新评估当前播放头位置
-      evaluateTimeline(timelineState.currentTime)
+    })
+    if (newEnd >= 0) {
+      newStart = Math.max(0, newStart)
+      if (newStart !== clip.startTime || newEnd !== clip.endTime) {
+        clip.startTime = newStart
+        clip.endTime = newEnd
+        timelineState.triggerChange()
+        // 以重算后的区间重新评估当前播放头位置
+        evaluateTimeline(timelineState.currentTime)
+      }
     }
   }
   isKeyframeDragging = false
