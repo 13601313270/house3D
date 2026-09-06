@@ -4,6 +4,7 @@
       <img v-if="item.previewImage" :src="item.previewImage" />
       <div v-else-if="item.status === 0">模型生成中</div>
     </div>
+    <div class="delete-btn" @click="deleteTask">删除</div>
     <div class="tools" v-if="item.zip">
       <!-- <a :href="Url" target="_blank" class="download-btn" download>
         下载模型
@@ -22,8 +23,7 @@ import handleLoadedObject from "@/utils/handleLoadedObject";
 import importOutObj from "@/utils/importOutObj";
 import message from "@/utils/message";
 import request from "@/utils/request";
-import JSZip from "jszip"
-const emits = defineEmits(['useFile'])
+const emits = defineEmits(['useFile', 'delete'])
 const props = defineProps<{
   item: {
     id: number,
@@ -55,12 +55,46 @@ async function moveModelToPersonalLibrary() {
     message.error(res.data.data)
   }
 }
+function deleteTask() {
+  if (!confirm(`确定要删除这个任务以及模型吗？`)) {
+    return
+  }
+  request.delete(`/video/hunyuan3D/delete/${props.item.id}`).then(res => {
+    console.log('res', res);
+    if (res.status === 200 && res.data) {
+      message.success('删除成功')
+      emits('delete')
+    } else {
+      message.error(res.data)
+    }
+  })
+}
 </script>
 <style lang="less">
 .hunyuan3DItem {
+  position: relative;
   border: solid 1px rgb(125, 125, 125);
   border-radius: 8px;
   width: 300px;
+  overflow: hidden;
+
+  .delete-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 1;
+    padding: 4px 12px;
+    background: rgba(0, 0, 0, 0.55);
+    color: #fff;
+    font-size: 13px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.2s;
+
+    &:hover {
+      background: #ff4d4f;
+    }
+  }
 
   .PreviewImageUrl {
     width: 300px;

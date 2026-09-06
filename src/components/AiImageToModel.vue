@@ -50,7 +50,8 @@
               <button @click="initList">刷新</button>
             </div>
             <div class="hunyuan3DList">
-              <Hunyuan3DItem v-for="value in exitList" :item="value" :key="value.id" @useFile="handleUseFile" />
+              <Hunyuan3DItem v-for="value in exitList" :item="value" :key="value.id" @useFile="handleUseFile"
+                @delete="handleDelete" />
             </div>
           </div>
         </div>
@@ -197,14 +198,10 @@ const queryJobStatus = async (id: number) => {
       if (response) {
         const status: 'RUN' | 'DONE' = response.Status
         if (status === 'DONE') {
-          const { PreviewImageUrl, Type, Url } = response.ResultFile3Ds[0];
-          // resultUrl.value = Url
-          // resultPreviewImgUrl.value = PreviewImageUrl
-          // resultType.value = Type
-          // resultText.value = '模型生成成功，可点击下方链接下载'
+          await initList()
+          resultText.value = ''
           message.success('模型生成成功', { duration: 6000 })
           isQuerying.value = false
-          initList()
           return
         } else if (status === 'RUN') {
           resultPreviewImgUrl.value = ''
@@ -292,9 +289,11 @@ const handleSubmit = async () => {
     isSubmitting.value = false
   }
 }
-function handleUseFile(object: any) {
-  console.log('useFile-----1', object)
+function handleUseFile() {
   emit('close');
+}
+function handleDelete() {
+  initList()
 }
 </script>
 
