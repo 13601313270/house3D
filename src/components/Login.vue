@@ -1,114 +1,118 @@
 <template>
   <div class="login-modal-overlay" @click.self="handleClose">
     <div class="login-modal">
+      <button class="close-btn" @click="handleClose" aria-label="关闭">
+        <svg width="13" height="13" viewBox="0 0 18 18" fill="none">
+          <path d="M3 3 L15 15 M15 3 L3 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+        </svg>
+      </button>
+
       <!-- 登录表单 -->
-      <div v-if="!isRegister && !isForgotPassword">
-        <div class="login-header">
-          <h2>登录</h2>
-          <button class="close-btn" @click="handleClose">&times;</button>
+      <div v-if="!isRegister && !isForgotPassword" class="login-panel">
+        <div class="login-brand">
+          <img src="/favicon256.png" class="brand-icon" />
         </div>
-        <div class="login-content">
+        <h2 class="login-title">登录</h2>
+        <p class="login-subtitle">完成登录后，你的场景将自动保存。</p>
+
+        <div class="login-form">
           <div class="form-item">
             <label for="email">邮箱</label>
-            <input type="email" id="email" v-model="email" placeholder="请输入邮箱" />
+            <input type="email" id="email" v-model="email" placeholder="your@email.com" />
           </div>
           <div class="form-item">
             <label for="password">密码</label>
             <input type="password" id="password" v-model="password" placeholder="请输入密码" />
+            <button class="forgot-link" @click="toggleForgotPassword">忘记密码？</button>
           </div>
           <div class="error-message" v-if="errorMsg">{{ errorMsg }}</div>
+          <button class="btn-primary" @click="handleLogin">登录并保存</button>
         </div>
-        <div class="login-footer">
-          <button class="btn-cancel" @click="handleClose">取消</button>
-          <button class="btn-login" @click="handleLogin">登录</button>
-        </div>
+
         <div class="login-switch">
-          <span>还没有账号？</span>
-          <button class="switch-btn" @click="toggleMode">立即注册</button>
-        </div>
-        <div class="forgot-password">
-          <button class="forgot-btn" @click="toggleForgotPassword">忘记密码？</button>
+          <span>还没有账户？</span>
+          <button class="switch-btn" @click="goRegister">注册</button>
         </div>
       </div>
 
       <!-- 注册表单 -->
-      <div v-else-if="isRegister">
-        <div class="login-header">
-          <h2>注册</h2>
-          <button class="close-btn" @click="handleClose">&times;</button>
+      <div v-else-if="isRegister" class="login-panel">
+        <div class="login-brand">
+          <img src="/favicon256.png" class="brand-icon" />
         </div>
-        <div class="login-content">
+        <h2 class="login-title">注册账号</h2>
+        <p class="login-subtitle">注册后，你的场景将自动保存。</p>
+
+        <div class="login-form">
           <div class="form-item">
-            <label for="email">邮箱</label>
-            <input type="email" id="email" v-model="email" placeholder="请输入邮箱" />
+            <label for="reg-email">邮箱</label>
+            <input type="email" id="reg-email" v-model="email" placeholder="your@email.com" />
           </div>
           <div class="form-item">
-            <label for="password">密码</label>
-            <input type="password" id="password" v-model="password" placeholder="请输入密码" />
+            <label for="reg-password">密码</label>
+            <input type="password" id="reg-password" v-model="password" placeholder="请输入密码（至少6位）" />
           </div>
           <div class="form-item">
-            <label for="confirmPassword">确认密码</label>
-            <input type="password" id="confirmPassword" v-model="confirmPassword" placeholder="请再次输入密码" />
+            <label for="reg-confirmPassword">确认密码</label>
+            <input type="password" id="reg-confirmPassword" v-model="confirmPassword" placeholder="请再次输入密码" />
           </div>
           <div class="form-item">
-            <label for="captcha">验证码</label>
+            <label for="reg-captcha">验证码</label>
             <div class="captcha-container">
-              <input type="text" id="captcha" v-model="captcha" placeholder="请输入验证码" />
+              <input type="text" id="reg-captcha" v-model="captcha" placeholder="请输入6位验证码" />
               <button class="captcha-btn" :disabled="!canSendCaptcha || countdown > 0" @click="sendRegisterCaptcha">
-                {{ countdown > 0 ? `${countdown}秒` : '发送验证码' }}
+                {{ countdown > 0 ? `${countdown}秒后重发` : '发送验证码' }}
               </button>
             </div>
           </div>
           <div class="error-message" v-if="errorMsg">{{ errorMsg }}</div>
+          <button class="btn-primary" @click="handleRegister">注册</button>
         </div>
-        <div class="login-footer">
-          <button class="btn-cancel" @click="handleClose">取消</button>
-          <button class="btn-login" @click="handleRegister">注册</button>
-        </div>
+
         <div class="login-switch">
           <span>已有账号？</span>
-          <button class="switch-btn" @click="toggleMode">立即登录</button>
+          <button class="switch-btn" @click="backToLogin">立即登录</button>
         </div>
       </div>
 
       <!-- 忘记密码表单 -->
-      <div v-else-if="isForgotPassword">
-        <div class="login-header">
-          <h2>忘记密码</h2>
-          <button class="close-btn" @click="handleClose">&times;</button>
+      <div v-else-if="isForgotPassword" class="login-panel">
+        <div class="login-brand">
+          <img src="/favicon256.png" class="brand-icon" />
         </div>
-        <div class="login-content">
+        <h2 class="login-title">重置密码</h2>
+        <p class="login-subtitle">通过邮箱验证码重置你的登录密码。</p>
+
+        <div class="login-form">
           <div class="form-item">
-            <label for="email">邮箱</label>
-            <input type="email" id="email" v-model="email" placeholder="请输入邮箱" />
+            <label for="reset-email">邮箱</label>
+            <input type="email" id="reset-email" v-model="email" placeholder="your@email.com" />
           </div>
           <div class="form-item">
-            <label for="password">新密码</label>
-            <input type="password" id="password" v-model="password" placeholder="请输入新密码" />
+            <label for="reset-password">新密码</label>
+            <input type="password" id="reset-password" v-model="password" placeholder="请输入新密码（至少6位）" />
           </div>
           <div class="form-item">
-            <label for="confirmPassword">确认密码</label>
-            <input type="password" id="confirmPassword" v-model="confirmPassword" placeholder="请再次输入密码" />
+            <label for="reset-confirmPassword">确认密码</label>
+            <input type="password" id="reset-confirmPassword" v-model="confirmPassword" placeholder="请再次输入密码" />
           </div>
           <div class="form-item">
-            <label for="captcha">验证码</label>
+            <label for="reset-captcha">验证码</label>
             <div class="captcha-container">
-              <input type="text" id="captcha" v-model="captcha" placeholder="请输入验证码" />
+              <input type="text" id="reset-captcha" v-model="captcha" placeholder="请输入8位验证码" />
               <button class="captcha-btn" :disabled="!canSendCaptcha || countdown > 0"
                 @click="sendResetPasswordCaptcha">
-                {{ countdown > 0 ? `${countdown}秒` : '发送验证码' }}
+                {{ countdown > 0 ? `${countdown}秒后重发` : '发送验证码' }}
               </button>
             </div>
           </div>
           <div class="error-message" v-if="errorMsg">{{ errorMsg }}</div>
+          <button class="btn-primary" @click="handleResetPassword">重置密码</button>
         </div>
-        <div class="login-footer">
-          <button class="btn-cancel" @click="handleClose">取消</button>
-          <button class="btn-login" @click="handleResetPassword">修改密码</button>
-        </div>
+
         <div class="login-switch">
           <span>想起密码了？</span>
-          <button class="switch-btn" @click="toggleMode">立即登录</button>
+          <button class="switch-btn" @click="backToLogin">立即登录</button>
         </div>
       </div>
     </div>
@@ -171,14 +175,21 @@ const handleClose = () => {
   emit('close')
 }
 
-const toggleMode = () => {
+const goRegister = () => {
   resetForm()
-  isRegister.value = !isRegister.value
+  isRegister.value = true
+  isForgotPassword.value = false
+}
+
+const backToLogin = () => {
+  resetForm()
+  isRegister.value = false
   isForgotPassword.value = false
 }
 
 const toggleForgotPassword = () => {
   resetForm()
+  isRegister.value = false
   isForgotPassword.value = true
 }
 
@@ -189,6 +200,16 @@ const resetForm = () => {
   captcha.value = ''
   errorMsg.value = ''
   countdown.value = 0
+}
+
+const startCountdown = () => {
+  countdown.value = 60
+  const timer = setInterval(() => {
+    countdown.value--
+    if (countdown.value <= 0) {
+      clearInterval(timer)
+    }
+  }, 1000)
 }
 
 const sendRegisterCaptcha = async () => {
@@ -211,13 +232,7 @@ const sendRegisterCaptcha = async () => {
   }
   console.log('发送注册验证码结果:', result)
 
-  countdown.value = 60
-  const timer = setInterval(() => {
-    countdown.value--
-    if (countdown.value <= 0) {
-      clearInterval(timer)
-    }
-  }, 1000)
+  startCountdown()
 }
 
 const sendResetPasswordCaptcha = async () => {
@@ -240,45 +255,31 @@ const sendResetPasswordCaptcha = async () => {
   }
   console.log('发送重置密码验证码结果:', result)
 
-  countdown.value = 60
-  const timer = setInterval(() => {
-    countdown.value--
-    if (countdown.value <= 0) {
-      clearInterval(timer)
-    }
-  }, 1000)
+  startCountdown()
 }
 
 const handleRegister = async () => {
-  console.log('email.value', 0)
   if (!email.value.trim()) {
-    console.log('email.value', 1)
     errorMsg.value = '请输入邮箱'
     return
   }
   if (!validateEmail(email.value)) {
-    console.log('email.value', 2)
     errorMsg.value = '请输入有效的邮箱地址'
     return
   }
   if (!password.value) {
-    console.log('email.value', 3)
     errorMsg.value = '请输入密码'
     return
   }
   if (password.value.length < 6) {
-    console.log('email.value', 4)
     errorMsg.value = '密码长度至少为6位'
     return
   }
   if (!validateConfirmPassword()) return
   if (!validateCaptcha(6)) return
-  console.log('email.value', 5)
   errorMsg.value = ''
 
-  console.log('email.value', 5.1)
   const { default: md5 } = await import('md5')
-  console.log('email.value', 6)
   const result = await axios.post('https://api.studying1v1.com/video/register/register', {
     email: email.value,
     password: md5(password.value),
@@ -289,8 +290,7 @@ const handleRegister = async () => {
   if (result.status === 200) {
     if (result.data.success) {
       alert(result.data.message)
-      isRegister.value = false
-      resetForm()
+      backToLogin()
     } else {
       errorMsg.value = result.data.msg
       alert(result.data.message)
@@ -331,8 +331,7 @@ const handleResetPassword = async () => {
   if (result.status === 200) {
     if (result.data.success) {
       alert(result.data.message)
-      isForgotPassword.value = false
-      resetForm()
+      backToLogin()
     } else {
       errorMsg.value = result.data.msg
       alert(result.data.message)
@@ -386,76 +385,118 @@ const handleLogin = async () => {
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 1000;
+  padding: 24px;
 }
 
 .login-modal {
+  position: relative;
   background: #fff;
   border-radius: 8px;
-  width: 360px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-}
-
-.login-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 16px 20px;
-  border-bottom: 1px solid #eee;
-}
-
-.login-header h2 {
-  margin: 0;
-  font-size: 18px;
-  color: #333;
+  width: 388px;
+  max-width: 100%;
+  max-height: 92vh;
+  overflow-y: auto;
+  padding: 24px;
+  box-sizing: border-box;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.25);
 }
 
 .close-btn {
-  background: none;
-  border: none;
-  font-size: 24px;
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 26px;
+  height: 26px;
+  border: 1.5px solid #e6e6ea;
+  border-radius: 4px;
+  background: rgb(247, 247, 245);
+  color: #555;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
-  color: #999;
   padding: 0;
-  line-height: 1;
+  transition: border-color 0.2s, color 0.2s;
 }
 
 .close-btn:hover {
-  color: #333;
+  border-color: #cfcfd6;
+  color: #1d1d1f;
 }
 
-.login-content {
-  padding: 20px;
+.login-panel {
+  text-align: center;
+}
+
+.login-brand {
+  display: flex;
+  justify-content: center;
+}
+
+.brand-icon {
+  width: 54px;
+  display: block;
+}
+
+.login-title {
+  margin: 20px 0 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: #1d1d1f;
+  letter-spacing: 1px;
+}
+
+.login-subtitle {
+  margin: 5px 0 0;
+  font-size: 12px;
+  color: rgb(104, 107, 112);
+}
+
+.login-form {
+  margin-top: 24px;
+  text-align: left;
 }
 
 .form-item {
-  margin-bottom: 16px;
+  margin-bottom: 14px;
 }
 
 .form-item label {
   display: block;
-  margin-bottom: 6px;
-  font-size: 14px;
-  color: #666;
+  margin-bottom: 10px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #1d1d1f;
 }
 
 .form-item input {
   width: 100%;
-  height: 36px;
-  padding: 0 12px;
-  border: 1px solid #ddd;
+  height: 38px;
+  padding: 0px 12px;
+  background: rgb(255, 255, 255);
+  border: 1px solid rgb(232, 232, 229);
   border-radius: 4px;
-  font-size: 14px;
+  font-size: 13px;
+  color: rgb(23, 24, 26);
+  font-family: inherit;
+  outline: none;
   box-sizing: border-box;
+}
+
+.form-item input::placeholder {
+  color: #b5b5bd;
 }
 
 .form-item input:focus {
   outline: none;
-  border-color: #409eff;
+  border-color: #7b6cff;
 }
 
 .captcha-container {
@@ -465,106 +506,111 @@ const handleLogin = async () => {
 
 .captcha-container input {
   flex: 1;
+  min-width: 0;
 }
 
 .captcha-btn {
-  padding: 0 16px;
-  height: 36px;
-  border: 1px solid #409eff;
+  height: 38px;
+  padding: 0 18px;
+  border: 1.5px solid #7b6cff;
   border-radius: 4px;
   background: #fff;
-  color: #409eff;
-  font-size: 14px;
+  color: #7b6cff;
+  font-size: 15px;
+  font-weight: 500;
   cursor: pointer;
   white-space: nowrap;
+  transition: background 0.2s, opacity 0.2s;
 }
 
 .captcha-btn:hover:not(:disabled) {
-  background: #f0f5ff;
+  background: #f3f1ff;
 }
 
 .captcha-btn:disabled {
-  opacity: 0.5;
+  border-color: #e6e6ea;
+  color: #b5b5bd;
   cursor: not-allowed;
+}
+
+.forgot-link {
+  display: block;
+  margin: 10px 2px 0 0;
+  padding: 0;
+  background: none;
+  border: none;
+  text-align: right;
+  font-size: 13px;
+  color: #59595e;
+  cursor: pointer;
+}
+
+.forgot-link:hover {
+  color: #7b6cff;
 }
 
 .error-message {
   color: #f56c6c;
-  font-size: 12px;
-  margin-top: 8px;
+  font-size: 13px;
+  margin: -6px 0 14px;
 }
 
-.login-footer {
-  display: flex;
-  justify-content: flex-end;
-  gap: 12px;
-  padding: 16px 20px;
-  border-top: 1px solid #eee;
-}
-
-.login-footer button {
-  padding: 8px 20px;
-  border-radius: 4px;
-  font-size: 14px;
-  cursor: pointer;
+.btn-primary {
+  width: 100%;
+  height: 40px;
   border: none;
-}
-
-.btn-cancel {
-  background: #fff;
-  border: 1px solid #dcdfe6;
-  color: #606266;
-}
-
-.btn-cancel:hover {
-  border-color: #c0c4cc;
-}
-
-.btn-login {
-  background: #409eff;
+  border-radius: 4px;
+  background: #7b6cff;
   color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s;
 }
 
-.btn-login:hover {
-  background: #66b1ff;
+.btn-primary:hover {
+  background: #6a59f0;
+}
+
+.btn-primary:active {
+  transform: scale(0.99);
 }
 
 .login-switch {
-  padding: 12px 20px;
+  margin-top: 28px;
   text-align: center;
-  font-size: 14px;
-  color: #666;
-  border-top: 1px solid #eee;
+  font-size: 15px;
+  color: #9a9aa2;
 }
 
 .switch-btn {
   background: none;
   border: none;
-  color: #409eff;
+  color: #7b6cff;
   cursor: pointer;
   padding: 0;
-  font-size: 14px;
+  margin-left: 6px;
+  font-size: 15px;
+  font-weight: 600;
 }
 
 .switch-btn:hover {
   text-decoration: underline;
 }
 
-.forgot-password {
-  padding: 8px 20px;
-  text-align: center;
-}
+@media (max-width: 600px) {
+  .login-modal {
+    padding: 28px 24px 32px;
+    border-radius: 16px;
+  }
 
-.forgot-btn {
-  background: none;
-  border: none;
-  color: #409eff;
-  cursor: pointer;
-  padding: 0;
-  font-size: 13px;
-}
+  .login-title {
+    font-size: 24px;
+  }
 
-.forgot-btn:hover {
-  text-decoration: underline;
+  .login-subtitle {
+    font-size: 14px;
+  }
 }
 </style>

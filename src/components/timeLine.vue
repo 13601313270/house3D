@@ -8,15 +8,15 @@
         <span class="time-display">{{ formatTime(currentTime) }} / {{ formatTime(effectiveDuration) }}</span>
       </div>
       <div class="header-right">
-        <button class="control-btn" @click="stop">⏹</button>
-        <button class="control-btn" @click="togglePlay">{{ isPlaying ? '⏸' : '▶' }}</button>
-        <button class="control-btn" :class="{ recording: isRecording }" @click="recordVideoPlay">{{
-          isRecording ? '停止 ■' : '录制 ▶'
-        }}</button>
+        <div class="control-btn" @click="stop">⏹</div>
+        <div class="control-btn" @click="togglePlay">{{ isPlaying ? '⏸' : '▶' }}</div>
+        <div class="control-btn" :class="{ recording: isRecording }" @click="recordVideoPlay">
+          <span class="rec-icon" :class="isRecording ? 'stop' : 'record'"></span>{{ isRecording ? '停止' : '录制' }}
+        </div>
         <input type="range" class="speed-control" v-model="playbackSpeed" min="0.1" max="3" step="0.1" />
         <span class="speed-label">{{ playbackSpeed }}倍速</span>
-        <button class="control-btn" @click="zoomIn">+</button>
-        <button class="control-btn" @click="zoomOut">−</button>
+        <div class="control-btn" @click="zoomIn">+</div>
+        <div class="control-btn" @click="zoomOut">−</div>
         <span class="speed-label">{{ Math.round(zoomLevel * 100) }}%</span>
       </div>
     </div>
@@ -1180,6 +1180,7 @@ onUnmounted(() => {
     align-items: center;
     padding: 4px 8px;
     border-bottom: 1px solid #0f3460; // 与标尺区域的分隔线
+    background: rgb(247, 247, 245);
 
     // 左侧区域：标题 + 当前时间 / 总时长
     .header-left {
@@ -1207,28 +1208,41 @@ onUnmounted(() => {
 
       // 通用方形控制按钮（停止 / 播放 / 缩放加减）
       .control-btn {
-        min-width: 32px;
         height: 32px;
-        border: none;
-        border-radius: 6px;
-        background: #0f3460;
-        color: #fff;
+        padding: 0 10px;
+        box-sizing: border-box;
+        border-radius: 3px;
+        background: rgb(255, 255, 255);
+        border: 1px solid rgb(232, 232, 229);
+        color: rgb(23, 24, 26);
         font-size: 14px;
         cursor: pointer;
         transition: background 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
 
         &:hover {
           background: #1a4d7a; // 悬浮时稍亮的蓝色
         }
 
-        // 录制中状态：红色 + 脉冲动画
-        &.recording {
-          background: #e74c3c;
-          animation: recordingPulse 1s ease-in-out infinite;
+        // 录制按钮图标：录制时红色小圆圈，停止时红色方块
+        .rec-icon {
+          display: inline-block;
+          width: 9px;
+          height: 9px;
+          margin-right: 5px;
+          vertical-align: middle;
+          background: rgb(239, 68, 68);
 
-          &:hover {
-            background: #c0392b;
+          &.record {
+            border-radius: 50%; // 圆形
           }
+        }
+
+        // 录制中状态：保留脉冲动画，背景保持白色以突出红色方块图标
+        &.recording {
+          animation: recordingPulse 1s ease-in-out infinite;
         }
 
         // 转码中状态：紫色 + 不允许点击
@@ -1258,13 +1272,47 @@ onUnmounted(() => {
         width: 80px;
         height: 6px;
         cursor: pointer;
+        appearance: none;
+        -webkit-appearance: none;
+        background: rgb(99, 91, 255);
+        border-radius: 3px;
+        outline: none;
+
+        // 滑块圆点
+        &::-webkit-slider-thumb {
+          appearance: none;
+          -webkit-appearance: none;
+          width: 16px;
+          height: 16px;
+          border-radius: 50%;
+          background: rgb(99, 91, 255);
+          // border: 2px solid #fff;
+          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+          cursor: pointer;
+        }
+
+        &::-moz-range-thumb {
+          width: 12px;
+          height: 12px;
+          border-radius: 50%;
+          background: rgb(99, 91, 255);
+          border: 2px solid #fff;
+          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+          cursor: pointer;
+        }
+
+        &::-moz-range-track {
+          height: 6px;
+          background: rgb(99, 91, 255);
+          border-radius: 3px;
+        }
       }
 
       // 倍速 / 缩放百分比标签
       .speed-label {
+        min-width: 42px;
         font-size: 12px;
         color: #a8b2d1;
-        min-width: 30px; // 防止倍速 0.x 和 3.x 抖动宽度
       }
     }
   }

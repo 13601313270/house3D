@@ -2145,8 +2145,8 @@ button {
       }
 
       &.active {
-        background-color: #1890ff;
-        border: solid 1px #1890ff;
+        background-color: rgb(99, 91, 255);
+        border: solid 1px rgb(99, 91, 255);
         color: white;
       }
     }
