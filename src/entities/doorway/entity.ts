@@ -311,9 +311,9 @@ export class DoorEntity extends EntityClassInWall<DoorData> {
     const data = this.getData();
     editShow(this.getEditPropConfigData(data), (val) => {
       this.setData({
-        // ...data,
         ...val,
       })
+      this.reBuildWall()
     })
   }
 }

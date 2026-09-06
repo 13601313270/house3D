@@ -10,6 +10,7 @@ import { CameraState, OrthographicCamera } from '@/types/camera'
 import { PointEntityClass } from '@/types/pointEntity';
 import { BaseEntityClass } from '@/types/baseEntity';
 import WorldGroup from '@/world/world';
+import { EntityClassInWall } from '@/types/entityInWall';
 // import { EntityClassInWall } from '@/types/entityInWall';
 
 const props = defineProps<{
@@ -273,19 +274,6 @@ const initThree = () => {
       canvas1UsedPointerLock = false // 每次 mousedown 重置指针锁定标记
       canvas1LockedDeltaX = 0 // 重置锁定累加位移
       canvas1LockedDeltaY = 0
-      // if (props.cameraType === 'orthographic') {
-      //   if (e.button === 2) {
-      //   } else if (e.button === 0) {
-      //     // 移动
-      //     camera1TargetPositionStartX = cameraStateZ.value.targetPositionX;
-      //     camera1TargetPositionStartY = cameraStateZ.value.targetPositionY;
-      //     camera1TargetPositionStartZ = cameraStateZ.value.targetPositionZ;
-      //     canvas1IsMouseMove = true;
-      //     canvas1LastMouseX = e.clientX;
-      //     canvas1LastMouseY = e.clientY;
-      //     e.preventDefault();
-      //   }
-      // }
       if ('radius' in cameraStateZ.value) {
         if (e.button === 2) {
           // 旋转
@@ -429,17 +417,29 @@ const initThree = () => {
                   x: camera1MouseMoveStartPos.x + worldX,
                   y: camera1MouseMoveStartPos.y + worldZ,
                 })
+                if (entity instanceof EntityClassInWall) {
+                  entity.reBuildWall()
+                }
               } else if (moveType === 'z') {
                 // z 轴(垂直)：屏幕纵向位移
                 entity.setData({
                   z: camera1MouseMoveStartPos.z + (deltaY * -1),
                 })
+                if (entity instanceof EntityClassInWall) {
+                  entity.reBuildWall()
+                }
               } else if (moveType === 'x') {
                 const { worldX } = computeHorizontalPlaneDelta(deltaX, deltaY)
                 entity.setData({ x: camera1MouseMoveStartPos.x + worldX })
+                if (entity instanceof EntityClassInWall) {
+                  entity.reBuildWall()
+                }
               } else {
                 const { worldZ } = computeHorizontalPlaneDelta(deltaX, deltaY)
                 entity.setData({ y: camera1MouseMoveStartPos.y + worldZ })
+                if (entity instanceof EntityClassInWall) {
+                  entity.reBuildWall()
+                }
               }
             }
           }
@@ -451,10 +451,6 @@ const initThree = () => {
       if (isPointerLocked && document.pointerLockElement) {
         document.exitPointerLock()
       }
-      // if (props.cameraType === 'orthographic') {
-      //   canvas1IsMouseMove = false
-      //   emitCameraState()
-      // } else {
       if (e.button === 2) {
         canvas1IsMouseAngel = false
         emitCameraState()

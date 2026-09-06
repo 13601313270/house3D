@@ -104,6 +104,26 @@ export abstract class EntityClassInWall<T extends ObjInWallData> extends PointEn
     return false
   }
 
+  setData(data: Partial<T>) {
+    super.setData(data)
+  }
+
+  // 重构墙
+  reBuildWall() {
+    this.associationEntity.forEach(entity => {
+      if (entity.associationEntity.includes(this)) {
+        // 双向规定原有的关联对象dirty
+        entity.associationEntity.forEach(associationEntity => {
+          if (associationEntity.associationEntity.includes(entity)) {
+            associationEntity.markObjectIsDirty()
+            associationEntity.reCreate3DMeshAnd2DPreviewIfNeed()
+            associationEntity.change3DMeshState()
+          }
+        })
+      }
+    });
+  }
+
   inSceneSnapLineArea(obj: BaseEntityClass<BaseObjData>, line: [Point, Point], point: Point) {
     if (obj.type === 'wall') {
       const p1 = line[0]

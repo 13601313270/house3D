@@ -302,7 +302,6 @@ export class DoorEntity extends EntityClassInWall<DoorData> {
   }) {
     const { x, y } = position
     this.setData({
-      // ...this.getData(),
       x,
       y,
     })
@@ -400,19 +399,7 @@ export class DoorEntity extends EntityClassInWall<DoorData> {
       this.setData({
         ...val,
       })
-      // 重构墙
-      this.associationEntity.forEach(entity => {
-        if (entity.associationEntity.includes(this)) {
-          // 双向规定原有的关联对象dirty
-          entity.associationEntity.forEach(associationEntity => {
-            if (associationEntity.associationEntity.includes(entity)) {
-              associationEntity.markObjectIsDirty()
-              associationEntity.reCreate3DMeshAnd2DPreviewIfNeed()
-              associationEntity.change3DMeshState()
-            }
-          })
-        }
-      });
+      this.reBuildWall()
     })
   }
 }
