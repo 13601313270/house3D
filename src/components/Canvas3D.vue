@@ -441,9 +441,6 @@ const initThree = () => {
                 const { worldZ } = computeHorizontalPlaneDelta(deltaX, deltaY)
                 entity.setData({ y: camera1MouseMoveStartPos.y + worldZ })
               }
-              entity.all3DActionHandel.visible = true
-              entity.boundingBox.visible = true
-              entity.boundingBox.children[1].visible = true
             }
           }
         }
@@ -562,21 +559,11 @@ const initThree = () => {
         allMoveXYZBox.forEach((item) => {
           // @ts-ignore
           const entity = item.children[0].entity as BaseEntityClass<any>
-          if (entity instanceof PointEntityClass) {
-            entity.all3DActionHandel.visible = false
-          }
+          // if (entity instanceof PointEntityClass) {
+          //   entity.all3DActionHandel.visible = false
+          // }
           allLastTextBox.push(item.children[0]);
         })
-
-        // 保持选中对象的 all3DActionHandel 和 boundingBox 可见
-        if (canvas1SelectedEntity) {
-          // @ts-ignore
-          canvas1SelectedEntity.all3DActionHandel.visible = true
-          // @ts-ignore
-          canvas1SelectedEntity.boundingBox.visible = true
-          // @ts-ignore
-          canvas1SelectedEntity.boundingBox.children[1].visible = true
-        }
 
         // @ts-ignore
         const hoveredObject = raycastObjects([...allBoundingBox, ...allLastTextBox], e)
@@ -722,19 +709,6 @@ function mouseLeave() {
     // @ts-ignore
     canvas1SelectedEntity.boundingBox.children[1].visible = true
   }
-  const allMoveZBox = window.globalEditGroup.moveXYZBoxList()
-  allMoveZBox.forEach((item) => {
-    // @ts-ignore
-    const entity = item.children[0].entity as BaseEntityClass<any>
-    if (entity instanceof PointEntityClass) {
-      // 保持选中对象的 all3DActionHandel 可见
-      if (canvas1SelectedEntity && entity === canvas1SelectedEntity) {
-        entity.all3DActionHandel.visible = true
-      } else {
-        entity.all3DActionHandel.visible = false
-      }
-    }
-  })
 }
 
 onMounted(() => {
