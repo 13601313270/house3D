@@ -10,6 +10,7 @@ import { CameraState, OrthographicCamera } from '@/types/camera'
 import { PointEntityClass } from '@/types/pointEntity';
 import { BaseEntityClass } from '@/types/baseEntity';
 import WorldGroup from '@/world/world';
+import { EntityClassInWall } from '@/types/entityInWall';
 
 const props = defineProps<{
   cameraState: CameraState,//  | OrthographicCamera,
@@ -328,7 +329,7 @@ const initThree = () => {
             if (clickedObject) {
               // @ts-ignore
               const entity = clickedObject.entity as BaseEntityClass<any>
-              if (entity instanceof PointEntityClass) {
+              if (entity instanceof PointEntityClass && !(entity instanceof EntityClassInWall)) {
                 canvas1PendingClickTarget = entity
                 canvas1PendingClickStartX = e.clientX
                 canvas1PendingClickStartY = e.clientY
@@ -485,7 +486,6 @@ const initThree = () => {
           })
           // 显示选中对象的 moveZBox 和 boundingBox
           canvas1SelectedEntity = canvas1PendingClickTarget
-          // @ts-ignore
           canvas1PendingClickTarget.moveZBox.visible = true
           canvas1PendingClickTarget.boundingBox.visible = true
           canvas1PendingClickTarget.boundingBox.children[1].visible = true

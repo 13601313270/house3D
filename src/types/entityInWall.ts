@@ -132,9 +132,6 @@ export abstract class EntityClassInWall<T extends ObjInWallData> extends PointEn
       this.markObjectIsDirty()
       this.associationEntity.forEach(entity => {
         if (entity.associationEntity.includes(this)) {
-
-
-
           // 双向规定原有的关联对象dirty
           entity.associationEntity.forEach(associationEntity => {
             if (associationEntity.associationEntity.includes(entity)) {
@@ -143,8 +140,6 @@ export abstract class EntityClassInWall<T extends ObjInWallData> extends PointEn
               associationEntity.change3DMeshState()
             }
           })
-
-
         }
       });
       this.reCreate3DMeshAnd2DPreviewIfNeed();
