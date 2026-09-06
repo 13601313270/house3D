@@ -177,16 +177,16 @@ export abstract class BaseEntityClass<T extends BaseObjData> {
     this.reCreate3DMeshAnd2DPreviewIfNeed()
     this.change3DMeshState()
     this.reBuildBoundingBoxData();
-    // 双向去除原有的关联对象
-    this.associationEntity.forEach(entity => {
-      if (entity.associationEntity.includes(this)) {
-        entity.markObjectIsDirty()
+    // 双向规定原有的关联对象dirty
+    this.associationEntity.forEach(associationEntity => {
+      if (associationEntity.associationEntity.includes(this)) {
+        associationEntity.markObjectIsDirty()
       }
     })
-    this.associationEntity.forEach(entity => {
-      if (entity.associationEntity.includes(this)) {
-        entity.reCreate3DMeshAnd2DPreviewIfNeed()
-        entity.change3DMeshState()
+    this.associationEntity.forEach(associationEntity => {
+      if (associationEntity.associationEntity.includes(this)) {
+        associationEntity.reCreate3DMeshAnd2DPreviewIfNeed()
+        associationEntity.change3DMeshState()
       }
     })
     if (this.parentEntity) {

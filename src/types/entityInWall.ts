@@ -132,8 +132,19 @@ export abstract class EntityClassInWall<T extends ObjInWallData> extends PointEn
       this.markObjectIsDirty()
       this.associationEntity.forEach(entity => {
         if (entity.associationEntity.includes(this)) {
-          entity.reCreate3DMeshAnd2DPreviewIfNeed()
-          entity.setData({})// 如果不加这一行。一个墙上两个门，移动一个，另一个会消失
+
+
+
+          // 双向规定原有的关联对象dirty
+          entity.associationEntity.forEach(associationEntity => {
+            if (associationEntity.associationEntity.includes(entity)) {
+              associationEntity.markObjectIsDirty()
+              associationEntity.reCreate3DMeshAnd2DPreviewIfNeed()
+              associationEntity.change3DMeshState()
+            }
+          })
+
+
         }
       });
       this.reCreate3DMeshAnd2DPreviewIfNeed();

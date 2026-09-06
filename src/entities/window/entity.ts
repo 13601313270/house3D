@@ -404,7 +404,6 @@ export class WindowEntity extends EntityClassInWall<WindowData> {
       const countPerPoint = wall.getData().points.length === 2 ? 1 : ((boxLength - 1) / (wall.getData().points.length - 2))
       const wallGroup = wall.meshGroup.children[data.wallPointId * countPerPoint];
       if (wallGroup) {
-        console.log('window,2', wallGroup)
         const subtractGeometry = new THREE.BoxGeometry(
           data.width,
           data.height,
@@ -561,9 +560,21 @@ export class WindowEntity extends EntityClassInWall<WindowData> {
     const data = this.getData();
     editShow(this.getEditPropConfigData(data), (val) => {
       this.setData({
-        // ...data,
         ...val,
       })
+      // 重构墙
+      this.associationEntity.forEach(entity => {
+        if (entity.associationEntity.includes(this)) {
+          // 双向规定原有的关联对象dirty
+          entity.associationEntity.forEach(associationEntity => {
+            if (associationEntity.associationEntity.includes(entity)) {
+              associationEntity.markObjectIsDirty()
+              associationEntity.reCreate3DMeshAnd2DPreviewIfNeed()
+              associationEntity.change3DMeshState()
+            }
+          })
+        }
+      });
     })
   }
 }
