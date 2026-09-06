@@ -1,8 +1,13 @@
+import * as THREE from 'three'
 import { WallData } from "@/entities/wall/index.d";
 import { PointEntityClass } from "./pointEntity";
 import { ObjInWallData, Point, BaseObjData } from "./map2d";
 import { BaseEntityClass, MatchSnapPoint } from "./baseEntity";
 import getNearestWall from "@/utils/getNearestWall";
+
+// x/y 平面拖动面用的移动图标纹理（全实体共享，避免重复加载）
+const movePlaneTexture = new THREE.TextureLoader().load('/icons/move.png')
+movePlaneTexture.colorSpace = THREE.SRGBColorSpace
 
 export interface NearestWallResult {
   wallEntity: BaseEntityClass<WallData>
@@ -13,6 +18,10 @@ export interface NearestWallResult {
 }
 
 export abstract class EntityClassInWall<T extends ObjInWallData> extends PointEntityClass<T> {
+  getHandelList(): Array<'+x' | '-x' | '+y' | '-y' | '+z' | 'xy'> {
+    return ['+z']
+  }
+
   // 待添加状态（鼠标新增悬浮的时候）
   setPrepareState(x: number, y: number): string[] {
     if (!this.parentEntity) {

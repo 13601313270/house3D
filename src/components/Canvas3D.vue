@@ -10,7 +10,7 @@ import { CameraState, OrthographicCamera } from '@/types/camera'
 import { PointEntityClass } from '@/types/pointEntity';
 import { BaseEntityClass } from '@/types/baseEntity';
 import WorldGroup from '@/world/world';
-import { EntityClassInWall } from '@/types/entityInWall';
+// import { EntityClassInWall } from '@/types/entityInWall';
 
 const props = defineProps<{
   cameraState: CameraState,//  | OrthographicCamera,
@@ -330,7 +330,7 @@ const initThree = () => {
             if (clickedObject) {
               // @ts-ignore
               const entity = clickedObject.entity as BaseEntityClass<any>
-              if (entity instanceof PointEntityClass && !(entity instanceof EntityClassInWall)) {
+              if (entity instanceof PointEntityClass) {
                 canvas1PendingClickTargetTypeList = ['x', 'z']
                 canvas1PendingClickTarget = entity
                 canvas1PendingClickStartX = e.clientX

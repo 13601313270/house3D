@@ -11,7 +11,7 @@ movePlaneTexture.colorSpace = THREE.SRGBColorSpace
 
 export abstract class PointEntityClass<T extends PointObjData> extends BaseEntityClass<T> {
   boundingBox: THREE.Group
-  all3DActionHandel: THREE.Group
+  all3DActionHandel!: THREE.Group
   spriteGroup: THREE.Group | null = null
 
   constructor(world: GroupBaseEntity<GroupBaseData> | null, data: T) {
@@ -42,81 +42,100 @@ export abstract class PointEntityClass<T extends PointObjData> extends BaseEntit
         this.parentEntity.group.add(group)
       }
     })();
-    (() => {
-      // 创建一个方向轴箭头。base 箭头默认指向 +y（向上），通过旋转对齐到指定轴与方向。
-      // moveType: 'z' -> 3D y 轴（上），'x' -> 3D x 轴，'y' -> data.y 即 3D z 轴
-      const createArrow = (moveType: 'x' | 'y' | 'z', direction: 1 | -1, color: number) => {
-        const material = new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 1 });
-        material.depthTest = false;
-        material.depthWrite = false;
-        const shaftMesh = new THREE.Mesh(new THREE.BoxGeometry(0.3, 1, 0.3), material);
-        shaftMesh.layers.set(2)
-        // @ts-ignore
-        shaftMesh.entity = this
-        // @ts-ignore
-        shaftMesh.moveType = moveType;
-
-        const arrowheadMesh = new THREE.Mesh(new THREE.ConeGeometry(0.75, 0.5, 4), material);
-        arrowheadMesh.layers.set(2)
-        arrowheadMesh.rotation.y = Math.PI / 4;
-        arrowheadMesh.position.y = 0.7;
-        // @ts-ignore
-        arrowheadMesh.entity = this
-        // @ts-ignore
-        arrowheadMesh.moveType = moveType;
-
-        const group = new THREE.Group()
-        group.add(shaftMesh);
-        group.add(arrowheadMesh);
-        // @ts-ignore
-        group.entity = this
-        // @ts-ignore
-        group.moveType = moveType;
-
-        // 将默认 +y 方向的箭头旋转到目标轴
-        if (moveType === 'x') {
-          group.rotation.z = -direction * Math.PI / 2
-        } else if (moveType === 'y') {
-          group.rotation.x = direction * Math.PI / 2
-        }
-        return group
-      }
-
-      const outerGroup = new THREE.Group()
-      outerGroup.visible = false
-      // @ts-ignore
-      outerGroup.entity = this
-      // @ts-ignore
-      outerGroup.moveType = 'z'
-
-      // children[0]: z 轴箭头（向上）
-      outerGroup.add(createArrow('z', 1, 0x0000ff))
-      // children[1] / children[2]: x 轴两个方向
-      outerGroup.add(createArrow('x', 1, 0xff0000))
-      outerGroup.add(createArrow('x', -1, 0xff0000))
-      // children[3] / children[4]: y 轴两个方向（data.y -> 3D z 轴）
-      outerGroup.add(createArrow('y', 1, 0x00ff00))
-      outerGroup.add(createArrow('y', -1, 0x00ff00))
-
-      // children[5]: x/y 平面拖动面（水平方形），拖动可在 x/y 两轴自由移动
-      const planeMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.9, side: THREE.DoubleSide, map: movePlaneTexture });
-      planeMaterial.depthTest = false;
-      planeMaterial.depthWrite = false;
-      const planeMesh = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), planeMaterial);
-      planeMesh.layers.set(2)
-      planeMesh.rotation.x = -Math.PI / 2 // 平铺到水平面（朝上）
-      // @ts-ignore
-      planeMesh.entity = this
-      // @ts-ignore
-      planeMesh.moveType = 'xy'
-      outerGroup.add(planeMesh)
-
-      this.all3DActionHandel = outerGroup;
-      if (this.parentEntity) {
-        this.parentEntity.group.add(outerGroup)
-      }
-    })();
+    this.initActionHandle();
     this.updateBoundingBoxState();
+  }
+
+  getHandelList(): Array<'+x' | '-x' | '+y' | '-y' | '+z' | 'xy'> {
+    return ['+x', '-x', '+y', '-y', '+z', 'xy']
+  }
+
+  initActionHandle() {
+    // 创建一个方向轴箭头。base 箭头默认指向 +y（向上），通过旋转对齐到指定轴与方向。
+    // moveType: 'z' -> 3D y 轴（上），'x' -> 3D x 轴，'y' -> data.y 即 3D z 轴
+    const createArrow = (moveType: 'x' | 'y' | 'z', direction: 1 | -1, color: number) => {
+      const material = new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 1 });
+      material.depthTest = false;
+      material.depthWrite = false;
+      const shaftMesh = new THREE.Mesh(new THREE.BoxGeometry(0.3, 1, 0.3), material);
+      shaftMesh.layers.set(2)
+      // @ts-ignore
+      shaftMesh.entity = this
+      // @ts-ignore
+      shaftMesh.moveType = moveType;
+
+      const arrowheadMesh = new THREE.Mesh(new THREE.ConeGeometry(0.75, 0.5, 4), material);
+      arrowheadMesh.layers.set(2)
+      arrowheadMesh.rotation.y = Math.PI / 4;
+      arrowheadMesh.position.y = 0.7;
+      // @ts-ignore
+      arrowheadMesh.entity = this
+      // @ts-ignore
+      arrowheadMesh.moveType = moveType;
+
+      const group = new THREE.Group()
+      group.add(shaftMesh);
+      group.add(arrowheadMesh);
+      // @ts-ignore
+      group.entity = this
+      // @ts-ignore
+      group.moveType = moveType;
+
+      // 将默认 +y 方向的箭头旋转到目标轴
+      if (moveType === 'x') {
+        group.rotation.z = -direction * Math.PI / 2
+      } else if (moveType === 'y') {
+        group.rotation.x = direction * Math.PI / 2
+      }
+      return group
+    }
+
+    const outerGroup = new THREE.Group()
+    outerGroup.visible = false
+    // @ts-ignore
+    outerGroup.entity = this
+    // @ts-ignore
+    outerGroup.moveType = 'z'
+
+    const handelList = this.getHandelList()
+    console.log('handelList', handelList)
+
+    handelList.forEach(key => {
+      if (key === '+z') {
+        outerGroup.add(createArrow('z', 1, 0x0000ff))
+      }
+      if (key === '+x') {
+        outerGroup.add(createArrow('x', 1, 0xff0000))
+      }
+      if (key === '-x') {
+        outerGroup.add(createArrow('x', -1, 0xff0000))
+      }
+      if (key === '+y') {
+        outerGroup.add(createArrow('y', 1, 0x00ff00))
+      }
+      if (key === '-y') {
+        outerGroup.add(createArrow('y', -1, 0x00ff00))
+      }
+      if (key === 'xy') {
+        // children[5]: x/y 平面拖动面（水平方形），拖动可在 x/y 两轴自由移动
+        const planeMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.9, side: THREE.DoubleSide, map: movePlaneTexture });
+        planeMaterial.depthTest = false;
+        planeMaterial.depthWrite = false;
+        const planeMesh = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), planeMaterial);
+        planeMesh.layers.set(2)
+        planeMesh.rotation.x = -Math.PI / 2 // 平铺到水平面（朝上）
+        // @ts-ignore
+        planeMesh.entity = this
+        // @ts-ignore
+        planeMesh.moveType = 'xy'
+        outerGroup.add(planeMesh)
+      }
+    })
+
+    this.all3DActionHandel = outerGroup;
+    if (this.parentEntity) {
+      this.parentEntity.group.add(outerGroup)
+    }
   }
 
   protected circleRadius_ = 8
@@ -304,21 +323,34 @@ export abstract class PointEntityClass<T extends PointObjData> extends BaseEntit
           this.all3DActionHandel!.children[index].position.set(px, py, pz)
         }
 
-        // children[0]: z 轴箭头（向上），位于盒子顶部
-        setArrow(0, ox, halfBoxY + height / 2 + oy, oz)
-        // children[1]: x+ 箭头，位于 +x 侧面，指向 +x
-        setArrow(1, halfBoxX + height / 2 + ox, oy, oz)
-        // children[2]: x- 箭头，位于 -x 侧面，指向 -x
-        setArrow(2, -halfBoxX - height / 2 + ox, oy, oz)
-        // children[3]: y+ 箭头（data.y -> 3D +z），位于 +z 侧面
-        setArrow(3, ox, oy, halfBoxZ + height / 2 + oz)
-        // children[4]: y- 箭头（data.y -> 3D -z），位于 -z 侧面
-        setArrow(4, ox, oy, -halfBoxZ - height / 2 + oz)
-        // children[5]: x/y 平面拖动面（水平方形），平铺在盒子底部
-        const planeSide = radio * 5
-        this.all3DActionHandel!.children[5].scale.set(planeSide, planeSide, 1)
-        this.all3DActionHandel!.children[5].position.set(ox, oy - halfBoxY, oz)
-        // this.all3DActionHandel.visible = false
+        const handelList = this.getHandelList()
+
+        if (handelList.includes('+z')) {
+          // children[0]: z 轴箭头（向上），位于盒子顶部
+          setArrow(handelList.indexOf('+z'), ox, halfBoxY + height / 2 + oy, oz)
+        }
+        if (handelList.includes('+x')) {
+          // children[1]: x+ 箭头，位于 +x 侧面，指向 +x
+          setArrow(handelList.indexOf('+x'), halfBoxX + height / 2 + ox, oy, oz)
+        }
+        if (handelList.includes('-x')) {
+          // children[2]: x- 箭头，位于 -x 侧面，指向 -x
+          setArrow(handelList.indexOf('-x'), -halfBoxX - height / 2 + ox, oy, oz)
+        }
+        if (handelList.includes('+y')) {
+          // children[3]: y+ 箭头（data.y -> 3D +z），位于 +z 侧面
+          setArrow(handelList.indexOf('+y'), ox, oy, halfBoxZ + height / 2 + oz)
+        }
+        if (handelList.includes('-y')) {
+          // children[4]: y- 箭头（data.y -> 3D -z），位于 -z 侧面
+          setArrow(handelList.indexOf('-y'), ox, oy, -halfBoxZ - height / 2 + oz)
+        }
+        if (handelList.includes('xy')) {
+          // children[5]: x/y 平面拖动面（水平方形），平铺在盒子底部
+          const planeSide = radio * 5
+          this.all3DActionHandel!.children[handelList.indexOf('xy')].scale.set(planeSide, planeSide, 1)
+          this.all3DActionHandel!.children[handelList.indexOf('xy')].position.set(ox, oy - halfBoxY, oz)
+        }
       }
     } else {
       // this.boundingBox.visible = false
