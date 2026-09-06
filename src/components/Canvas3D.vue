@@ -206,6 +206,7 @@ const initThree = () => {
 
     // 区分 click 和 drag：mousedown 记录起点和命中对象，mouseup 根据移动距离判定
     let canvas1PendingClickTarget: PointEntityClass<any> | null = null;
+    let canvas1PendingClickTargetTypeList: string[] = [];// 
     let canvas1PendingClickStartX = 0;
     let canvas1PendingClickStartY = 0;
     const CLICK_THRESHOLD = 5;
@@ -295,7 +296,7 @@ const initThree = () => {
           canvas1LastMouseY = e.clientY;
           e.preventDefault();
         } else if (e.button === 0) {
-          // 先检测是否点击了可见的 moveZBox（只有选中对象的 moveZBox 可见）→ 进入拖动（拖拽不需要 click 判定）
+          // 先检测是否点击了可见的 moveZBox（只有选中对象的 all3DActionHandel 可见）→ 进入拖动（拖拽不需要 click 判定）
           const allMoveZBoxList = window.globalEditGroup.moveXYZBoxList()
           const visibleMoveZBoxList = allMoveZBoxList.filter(box => box.visible)
           const moveZBoxHit = raycastObjects(visibleMoveZBoxList, e)
@@ -309,7 +310,7 @@ const initThree = () => {
               canvas1HoveredObject = moveZBoxHit
               const startPos = entity.getData()
               camera1MouseMoveStartPos = { x: startPos.x, y: startPos.y, z: startPos.z }
-              // 重置 pending click，因为 moveZBox 拖拽不属于 click 判定
+              // 重置 pending click，因为 all3DActionHandel 拖拽不属于 click 判定
               canvas1PendingClickTarget = null;
               canvas1PendingClickStartX = e.clientX;
               canvas1PendingClickStartY = e.clientY;
@@ -330,6 +331,7 @@ const initThree = () => {
               // @ts-ignore
               const entity = clickedObject.entity as BaseEntityClass<any>
               if (entity instanceof PointEntityClass && !(entity instanceof EntityClassInWall)) {
+                canvas1PendingClickTargetTypeList = ['x', 'z']
                 canvas1PendingClickTarget = entity
                 canvas1PendingClickStartX = e.clientX
                 canvas1PendingClickStartY = e.clientY
@@ -439,7 +441,7 @@ const initThree = () => {
                 const { worldZ } = computeHorizontalPlaneDelta(deltaX, deltaY)
                 entity.setData({ y: camera1MouseMoveStartPos.y + worldZ })
               }
-              entity.moveZBox.visible = true
+              entity.all3DActionHandel.visible = true
               entity.boundingBox.visible = true
               entity.boundingBox.children[1].visible = true
             }
@@ -477,23 +479,23 @@ const initThree = () => {
             // @ts-ignore
             const ent = item.children[0].entity as BaseEntityClass<any>
             if (ent instanceof PointEntityClass) {
-              ent.moveZBox.visible = false
+              ent.all3DActionHandel.visible = false
             }
           })
           // 隐藏所有 boundingBox
           allBoundingBox.forEach((item) => {
             item.visible = false
           })
-          // 显示选中对象的 moveZBox 和 boundingBox
+          // 显示选中对象的 all3DActionHandel 和 boundingBox
           canvas1SelectedEntity = canvas1PendingClickTarget
-          canvas1PendingClickTarget.moveZBox.visible = true
+          canvas1PendingClickTarget.all3DActionHandel.visible = true
           canvas1PendingClickTarget.boundingBox.visible = true
           canvas1PendingClickTarget.boundingBox.children[1].visible = true
         } else if (isClick && canvas1PendingClickTarget === null) {
           // 点击空白处 → 取消选中 + 隐藏所有 boundingBox
           if (canvas1SelectedEntity) {
             // @ts-ignore
-            canvas1SelectedEntity.moveZBox.visible = false
+            canvas1SelectedEntity.all3DActionHandel.visible = false
             canvas1SelectedEntity = null
           }
           // 隐藏所有 boundingBox（hover 恢复时会重新显示）
@@ -561,15 +563,15 @@ const initThree = () => {
           // @ts-ignore
           const entity = item.children[0].entity as BaseEntityClass<any>
           if (entity instanceof PointEntityClass) {
-            entity.moveZBox.visible = false
+            entity.all3DActionHandel.visible = false
           }
           allLastTextBox.push(item.children[0]);
         })
 
-        // 保持选中对象的 moveZBox 和 boundingBox 可见
+        // 保持选中对象的 all3DActionHandel 和 boundingBox 可见
         if (canvas1SelectedEntity) {
           // @ts-ignore
-          canvas1SelectedEntity.moveZBox.visible = true
+          canvas1SelectedEntity.all3DActionHandel.visible = true
           // @ts-ignore
           canvas1SelectedEntity.boundingBox.visible = true
           // @ts-ignore
@@ -583,7 +585,7 @@ const initThree = () => {
           // @ts-ignore
           const entity = hoveredObject.entity as BaseEntityClass<any>
           if (entity instanceof PointEntityClass) {
-            // hover 时只显示 boundingBox 预览，不显示 moveZBox
+            // hover 时只显示 boundingBox 预览，不显示 all3DActionHandel
             entity.boundingBox.visible = true
             entity.boundingBox.children[1].visible = true
           }
@@ -725,11 +727,11 @@ function mouseLeave() {
     // @ts-ignore
     const entity = item.children[0].entity as BaseEntityClass<any>
     if (entity instanceof PointEntityClass) {
-      // 保持选中对象的 moveZBox 可见
+      // 保持选中对象的 all3DActionHandel 可见
       if (canvas1SelectedEntity && entity === canvas1SelectedEntity) {
-        entity.moveZBox.visible = true
+        entity.all3DActionHandel.visible = true
       } else {
-        entity.moveZBox.visible = false
+        entity.all3DActionHandel.visible = false
       }
     }
   })

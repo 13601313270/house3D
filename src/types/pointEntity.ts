@@ -11,7 +11,7 @@ movePlaneTexture.colorSpace = THREE.SRGBColorSpace
 
 export abstract class PointEntityClass<T extends PointObjData> extends BaseEntityClass<T> {
   boundingBox: THREE.Group
-  moveZBox: THREE.Group
+  all3DActionHandel: THREE.Group
   spriteGroup: THREE.Group | null = null
 
   constructor(world: GroupBaseEntity<GroupBaseData> | null, data: T) {
@@ -111,7 +111,7 @@ export abstract class PointEntityClass<T extends PointObjData> extends BaseEntit
       planeMesh.moveType = 'xy'
       outerGroup.add(planeMesh)
 
-      this.moveZBox = outerGroup;
+      this.all3DActionHandel = outerGroup;
       if (this.parentEntity) {
         this.parentEntity.group.add(outerGroup)
       }
@@ -287,8 +287,8 @@ export abstract class PointEntityClass<T extends PointObjData> extends BaseEntit
         this.spriteGroup.position.set(data.x, data.z, data.y)
         this.spriteGroup.children[0].position.set(0, boxVector3.y / 2 + offsetVector3.y + 12, 0)
       }
-      if (this.moveZBox) {
-        this.moveZBox.position.set(data.x, data.z, data.y)
+      if (this.all3DActionHandel) {
+        this.all3DActionHandel.position.set(data.x, data.z, data.y)
         // const height = Math.max(Math.min(40, boxVector3.y), 20);
         const radio = Math.max(Math.min(boxVector3.x / 8, boxVector3.z / 8, 20), 8);
         const height = radio * 3;
@@ -300,8 +300,8 @@ export abstract class PointEntityClass<T extends PointObjData> extends BaseEntit
         const halfBoxZ = boxVector3.z / 2;
 
         const setArrow = (index: number, px: number, py: number, pz: number) => {
-          this.moveZBox!.children[index].scale.set(radio, height, radio)
-          this.moveZBox!.children[index].position.set(px, py, pz)
+          this.all3DActionHandel!.children[index].scale.set(radio, height, radio)
+          this.all3DActionHandel!.children[index].position.set(px, py, pz)
         }
 
         // children[0]: z 轴箭头（向上），位于盒子顶部
@@ -316,9 +316,9 @@ export abstract class PointEntityClass<T extends PointObjData> extends BaseEntit
         setArrow(4, ox, oy, -halfBoxZ - height / 2 + oz)
         // children[5]: x/y 平面拖动面（水平方形），平铺在盒子底部
         const planeSide = radio * 5
-        this.moveZBox!.children[5].scale.set(planeSide, planeSide, 1)
-        this.moveZBox!.children[5].position.set(ox, oy - halfBoxY, oz)
-        // this.moveZBox.visible = false
+        this.all3DActionHandel!.children[5].scale.set(planeSide, planeSide, 1)
+        this.all3DActionHandel!.children[5].position.set(ox, oy - halfBoxY, oz)
+        // this.all3DActionHandel.visible = false
       }
     } else {
       // this.boundingBox.visible = false
@@ -361,8 +361,8 @@ export abstract class PointEntityClass<T extends PointObjData> extends BaseEntit
     if (this.boundingBox) {
       scene.remove(this.boundingBox)
     }
-    if (this.moveZBox) {
-      scene.remove(this.moveZBox)
+    if (this.all3DActionHandel) {
+      scene.remove(this.all3DActionHandel)
     }
     if (this.spriteGroup) {
       scene.remove(this.spriteGroup)

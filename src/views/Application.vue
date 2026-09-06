@@ -1529,7 +1529,7 @@ function groupExit() {
     // @ts-ignore
     const entity = item.children[0].entity as BaseEntityClass<any>
     if (entity instanceof PointEntityClass) {
-      entity.moveZBox.visible = false
+      entity.all3DActionHandel.visible = false
     }
   })
   if (window.globalEditGroup instanceof PlaneGroupEntity) {

@@ -198,8 +198,8 @@ export abstract class GroupBaseEntity<T extends GroupBaseData> extends PointCanA
   moveXYZBoxList(): THREE.Group[] {
     const moveZBoxList: THREE.Group[] = []
     this.children.forEach((item) => {
-      if (item instanceof PointEntityClass && item.moveZBox && !item.getData().isLocked && !item.getData().isHidden) {
-        moveZBoxList.push(item.moveZBox)
+      if (item instanceof PointEntityClass && item.all3DActionHandel && !item.getData().isLocked && !item.getData().isHidden) {
+        moveZBoxList.push(item.all3DActionHandel)
       }
     });
     return moveZBoxList
