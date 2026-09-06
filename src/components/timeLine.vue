@@ -12,7 +12,7 @@
         <button class="control-btn" @click="togglePlay">{{ isPlaying ? '⏸' : '▶' }}</button>
         <button class="control-btn" :class="{ recording: isRecording }" @click="recordVideoPlay">{{
           isRecording ? '停止 ■' : '录制 ▶'
-        }}</button>
+          }}</button>
         <input type="range" class="speed-control" v-model="playbackSpeed" min="0.1" max="3" step="0.1" />
         <span class="speed-label">{{ playbackSpeed }}倍速</span>
         <button class="control-btn" @click="zoomIn">+</button>
@@ -66,6 +66,7 @@
                   :style="keyFrameStyle(item, segment)"
                   :class="{ selected: item.time === currentTime, range: item.timeLength > 0 }"
                   @click.stop="onKeyframeClick(item.time)"
+                  @mousedown.stop.prevent="startKeyframeDrag($event, segment, item.time)"
                   @contextmenu.prevent.stop="toggleClipContentFrame($event, segment, item.time)">
                 </div>
               </div>
@@ -114,7 +115,7 @@
 import { ref, computed, onUnmounted, onMounted } from 'vue'
 import { message } from '@/utils/message'
 // timelineState 模块：管理时间轴状态，clip/track/keyframe 数据结构，以及全局播放状态标志
-import { ObjAllColumnData, timelineState } from '@/utils/timelineManage';
+import { ObjAllColumnData, timelineState, KeyTimePoint } from '@/utils/timelineManage';
 import editItem from '@/utils/editItem';
 import DataTypeEditPanel from '../views/DataTypeEditPanel.vue'
 import showContextMenu from '@/utils/contextMenu';
@@ -273,6 +274,13 @@ let frameAccumulator = 0                     // 帧率控制累积器（秒）�
 let isDragging = false                       // playhead-line（红色竖线）拖拽中标志
 let isScrubbing = false                       // 空白区域按下拖动（scrub）播放头标志
 let scrubClosedPanel = false                  // scrub 时是否关闭了浮动面板（用于 click 后续逻辑）
+let isKeyframeDragging = false               // keyframe-node（关键帧节点）拖拽中标志
+let keyframeDragMoved = false                // 本次按下后是否真正发生了拖拽（用于抑制随后的 click）
+let keyframeDragStartX = 0                   // 拖拽起始鼠标 X 坐标
+let keyframeDragOriginTime = 0               // 拖拽起始的关键帧时间（秒）
+let keyframeDragLastTime = 0                 // 拖拽过程中最后应用的关键帧时间（秒，松开时用于扩大 clip 边界）
+let keyframeDragSegment: ClipSegment | null = null  // 拖拽的关键帧所属 segment
+let keyframeDragPoints: KeyTimePoint[] = []  // 本次拖拽要移动的关键帧点（同一时刻跨轨道共享的所有点）
 
 // ========== 录制相关状态 ==========
 let mediaRecorder: MediaRecorder | null = null  // MediaRecorder 实例
@@ -520,12 +528,101 @@ const contextMenu = ref<{
 // 5) 读取 entity.getEditPropConfigData，过滤出当前 trackType 对应的 editItem，打开 DataTypeEditPanel
 // 6) 设置 selectedKeyframe（用于样式高亮红色选中态）
 function onKeyframeClick(time: number) {
+  // 若刚结束一次关键帧拖拽 → 本次 click 不生效（避免拖拽后播放头被重置/暂停逻辑重复触发）
+  if (keyframeDragMoved) {
+    keyframeDragMoved = false
+    return
+  }
   // 播放中操作关键帧 → 自动暂停，避免播放与编辑冲突
   if (isPlaying.value) {
     togglePlay()
   }
   timelineState.currentTime = snapTimeToFrame(time);
   evaluateTimeline(timelineState.currentTime)
+}
+
+// startKeyframeDrag / onKeyframeDrag / stopKeyframeDrag：关键帧节点拖拽
+//  - 拖拽目的：修改 item.time，调整关键帧在时间轴上的位置
+//  - 同一时刻在 clip 内所有轨道上共享的关键帧点（getAllTimeInSegment 去重合并显示的节点）一起移动，
+//    因此 mousedown 时先按时间收集引用（keyframeDragPoints），拖拽中直接改这些点，避免按时间匹配误伤其它关键帧
+//  - 时间对齐到帧网格（snapTimeToFrame），拖拽允许超出所属 clip 的 [startTime, endTime]（仅限制在时间轴范围内）
+//  - 鼠标松开时若超出 clip 范围 → 重新计算并扩大 clip 的 startTime/endTime，把关键帧新位置包进区间
+//  - 拖拽过程中播放头跟随关键帧，实时 evaluateTimeline 预览场景效果
+function startKeyframeDrag(event: MouseEvent, segment: ClipSegment, time: number) {
+  keyframeDragMoved = false
+  keyframeDragStartX = event.clientX
+  keyframeDragOriginTime = time
+  keyframeDragLastTime = time
+  keyframeDragSegment = segment
+  keyframeDragPoints = []
+  segment.clip.columns.forEach(track => {
+    track.keyTimePoints.forEach(kf => {
+      if (kf.time === time) {
+        keyframeDragPoints.push(kf)
+      }
+    })
+  })
+  if (keyframeDragPoints.length === 0) return
+  isKeyframeDragging = true
+  document.addEventListener('mousemove', onKeyframeDrag)
+  document.addEventListener('mouseup', stopKeyframeDrag)
+}
+
+function onKeyframeDrag(event: MouseEvent) {
+  if (!isKeyframeDragging || !keyframeDragSegment) return
+  // 3px 阈值内不算拖拽，避免轻微抖动误触
+  if (!keyframeDragMoved && Math.abs(event.clientX - keyframeDragStartX) < 3) return
+  if (!keyframeDragMoved) {
+    keyframeDragMoved = true
+    // 拖拽中操作关键帧 → 自动暂停，避免播放推进与拖拽冲突
+    if (isPlaying.value) {
+      togglePlay()
+    }
+  }
+  const wrapper = document.querySelector('.timeline-content-wrapper') as HTMLElement
+  if (!wrapper) return
+
+  const rect = wrapper.getBoundingClientRect()
+  // 鼠标位移换算为时间增量（wrapper 宽度对应 effectiveDuration 秒）
+  const deltaTime = ((event.clientX - keyframeDragStartX) / rect.width) * effectiveDuration.value
+  // 允许拖出 clip 范围，仅限制在时间轴 [0, effectiveDuration] 内；松开后由 stopKeyframeDrag 扩大 clip 边界
+  const newTime = snapTimeToFrame(Math.max(0, Math.min(keyframeDragOriginTime + deltaTime, effectiveDuration.value)))
+
+  keyframeDragPoints.forEach(kf => {
+    kf.time = newTime
+  })
+  keyframeDragLastTime = newTime
+  // timelineData 非响应式，通过 triggerChange 触发 updateRef 重新渲染节点位置
+  timelineState.triggerChange()
+  // 播放头跟随被拖拽的关键帧，实时预览
+  timelineState.currentTime = newTime
+  evaluateTimeline(newTime)
+}
+
+function stopKeyframeDrag() {
+  // 拖拽超出 clip 范围后松开 → 重新计算并扩大 clip 边界，把关键帧新位置（含动画时长）包进区间
+  if (isKeyframeDragging && keyframeDragMoved && keyframeDragSegment) {
+    const clip = keyframeDragSegment.clip
+    const newStart = Math.min(clip.startTime, keyframeDragLastTime)
+    let newEnd = Math.max(clip.endTime, keyframeDragLastTime)
+    keyframeDragPoints.forEach(kf => {
+      if (kf.type === 'animation' && kf.time + kf.timeLength > newEnd) {
+        newEnd = kf.time + kf.timeLength
+      }
+    })
+    if (newStart !== clip.startTime || newEnd !== clip.endTime) {
+      clip.startTime = newStart
+      clip.endTime = newEnd
+      timelineState.triggerChange()
+      // 以扩大后的区间重新评估当前播放头位置
+      evaluateTimeline(keyframeDragLastTime)
+    }
+  }
+  isKeyframeDragging = false
+  keyframeDragSegment = null
+  keyframeDragPoints = []
+  document.removeEventListener('mousemove', onKeyframeDrag)
+  document.removeEventListener('mouseup', stopKeyframeDrag)
 }
 
 // togglePlay：播放/暂停切换按钮点击处理
@@ -977,6 +1074,8 @@ onUnmounted(() => {
   }
   document.removeEventListener('mousemove', onDrag)
   document.removeEventListener('mouseup', stopDragging)
+  document.removeEventListener('mousemove', onKeyframeDrag)
+  document.removeEventListener('mouseup', stopKeyframeDrag)
 })
 </script>
 
@@ -1326,12 +1425,21 @@ onUnmounted(() => {
                 box-sizing: border-box;
                 transition: transform 0.15s, background 0.15s;
                 z-index: 2;
+                cursor: grab; // 提示可拖拽调整位置
+
+                &:active {
+                  cursor: grabbing;
+                }
 
                 &.range {
                   border-radius: 4px;
                   transform: none;
 
                   &:hover {
+                    transform: none;
+                  }
+
+                  &.selected {
                     transform: none;
                   }
                 }
