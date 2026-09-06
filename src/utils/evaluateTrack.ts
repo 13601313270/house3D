@@ -24,7 +24,7 @@ async function evaluateTrack(entity: BaseEntityClass<BaseObjData>, trackType: st
         if (!findAnimate) return null
         // 从动画里提取
         const { file } = findAnimate
-        console.log('ffff', file)
+        // console.log('ffff', file)
       }
     } else {
       return firstKeyframe.value

@@ -63,9 +63,11 @@
                     formatTime(segment.endTime) }}</span>
                 </div>
                 <div v-for="item in getAllTimeInSegment(segment)" :key="item.time" class="keyframe-node"
-                  :style="keyFrameStyle(item, segment)" :class="{ selected: item.time === currentTime }"
+                  :style="keyFrameStyle(item, segment)"
+                  :class="{ selected: item.time === currentTime, range: item.timeLength > 0 }"
                   @click.stop="onKeyframeClick(item.time)"
-                  @contextmenu.prevent.stop="toggleClipContentFrame($event, segment, item.time)"></div>
+                  @contextmenu.prevent.stop="toggleClipContentFrame($event, segment, item.time)">
+                </div>
               </div>
             </div>
           </div>
@@ -1320,10 +1322,19 @@ onUnmounted(() => {
                 margin-top: -6px;
                 border-radius: 8px;
                 background: #4CAF50;
-                border: 2px solid #fff;
+                border: 1px solid #000000;
                 box-sizing: border-box;
                 transition: transform 0.15s, background 0.15s;
                 z-index: 2;
+
+                &.range {
+                  border-radius: 4px;
+                  transform: none;
+
+                  &:hover {
+                    transform: none;
+                  }
+                }
 
                 &:hover {
                   box-shadow: 0 0 0 3px rgba(233, 69, 96, 0.4);

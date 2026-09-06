@@ -12,6 +12,7 @@ const fbxLoader = new FBXLoader()
 const mixerMap: Map<THREE.Object3D, {
   [key in string]: Promise<{
     mixer: THREE.AnimationMixer,
+    duration: number,
     currentAction: THREE.AnimationAction,
   }>
 }> = new Map()
@@ -46,6 +47,7 @@ function getPeopleAnimateOneTime(keyframe: KeyTimeAnimation, people: BaseEntityC
     mixerMap.get(peopleModel)![file] = new Promise<{
       mixer: THREE.AnimationMixer,
       currentAction: THREE.AnimationAction,
+      duration: number,
     }>((resolve) => {
       fbxLoader.load('./pose/' + file, (fbxScene: any) => {
         if (fbxScene.animations && fbxScene.animations.length > 0) {
@@ -54,6 +56,7 @@ function getPeopleAnimateOneTime(keyframe: KeyTimeAnimation, people: BaseEntityC
           const currentAction = mixer.clipAction(clip)
           resolve({
             mixer,
+            duration: clip.duration,
             currentAction,
           })
         }
@@ -64,7 +67,7 @@ function getPeopleAnimateOneTime(keyframe: KeyTimeAnimation, people: BaseEntityC
     mixerMap.get(peopleModel)![file].then((info) => {
       info.currentAction.stop();
       info.currentAction.play()
-      info.currentAction.time = time - keyframe.time;
+      info.currentAction.time = (time - keyframe.time) % info.duration;
       info.currentAction.enabled = true;// 必须启用 action，即使它没有在播放
       info.mixer.update(0);// 关键：用 update(0) 强制立即刷新一
 
@@ -92,7 +95,6 @@ function getPeopleAnimateOneTime(keyframe: KeyTimeAnimation, people: BaseEntityC
       peopleModel.traverse((child) => {
         // @ts-ignore
         if (child.isBone) {
-          const findProp = 1;
           if (filterBones.includes(child.name)) {
             boneData.push({
               name: child.name,
