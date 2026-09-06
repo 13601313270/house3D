@@ -12,7 +12,7 @@
       </div>
       <div class="configItemList">
         <div class="configItem" v-for="item in allObjList" :key="item.id">
-          <div class="objInfo" @mouseenter="handleEnter(worldGroup, item)">
+          <div class="objInfo" @mouseenter="handleEnter(worldGroup, item.id)">
             <img class="icon" :src="item.icon" alt="previewImg" />
             <div class="nameInfo">
               <span>{{ item.name }}</span>
@@ -25,7 +25,7 @@
               <div v-else class="toolItem" @click="handleUnLock(worldGroup, item, true)">
                 <img class="img" src="@/assets/unLock.svg" alt="unLock" />
               </div>
-              <div class="toolItem" @click="handleLocation(worldGroup, item)">
+              <div class="toolItem" @click="handleLocation(worldGroup, item.id)">
                 <img class="img" src="@/assets/location.svg" alt="location" />
               </div>
               <!-- <div class="toolItem" @click="openEditPanel(item.id)">
@@ -41,7 +41,7 @@
           </div>
           <div v-if="item.children" class="children">
             <div v-for="child in item.children" :key="child.id" class="childItem objInfo"
-              @mouseenter="handleEnter(map.get(item.id), child)">
+              @mouseenter="handleEnter(map.get(item.id), child.id)">
               <img class="icon" :src="child.icon" alt="previewImg" />
               <div class="nameInfo">
                 <span>{{ child.name }}</span>
@@ -54,7 +54,7 @@
                 <div v-else class="toolItem" @click="handleUnLock(map.get(item.id), child, true)">
                   <img class="img" src="@/assets/unLock.svg" alt="unLock" />
                 </div>
-                <div class="toolItem" @click="handleLocation(map.get(item.id), child)">
+                <div class="toolItem" @click="handleLocation(map.get(item.id), child.id)">
                   <img class="img" src="@/assets/location.svg" alt="location" />
                 </div>
 

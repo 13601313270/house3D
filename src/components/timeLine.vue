@@ -12,7 +12,7 @@
         <button class="control-btn" @click="togglePlay">{{ isPlaying ? '⏸' : '▶' }}</button>
         <button class="control-btn" :class="{ recording: isRecording }" @click="recordVideoPlay">{{
           isRecording ? '停止 ■' : '录制 ▶'
-          }}</button>
+        }}</button>
         <input type="range" class="speed-control" v-model="playbackSpeed" min="0.1" max="3" step="0.1" />
         <span class="speed-label">{{ playbackSpeed }}倍速</span>
         <button class="control-btn" @click="zoomIn">+</button>
@@ -33,10 +33,10 @@
           </div>
         </div>
         <!-- 标尺上的VIP标记：非VIP时在10秒位置显示 -->
-        <div v-if="showLockedArea" class="ruler-vip-marker"
+        <!-- <div v-if="showLockedArea" class="ruler-vip-marker"
           :style="{ left: `${(FREE_DURATION / effectiveDuration) * 100}%` }">
           <span class="ruler-vip-icon">👑</span>
-        </div>
+        </div> -->
       </div>
     </div>
 
@@ -61,6 +61,7 @@
                   <span class="clip-name">{{ segment.clip.entityId }}</span>
                   <span class="clip-duration">{{ formatTime(segment.startTime) }} - {{
                     formatTime(segment.endTime) }}</span>
+                  <span @click="findObjInMap(segment)">找</span>
                 </div>
                 <div v-for="item in getAllTimeInSegment(segment)" :key="item.time" class="keyframe-node"
                   :style="keyFrameStyle(item, segment)"
@@ -128,6 +129,7 @@ import DataTypeEditPanel from '../views/DataTypeEditPanel.vue'
 import showContextMenu from '@/utils/contextMenu';
 import evaluateTrack from '@/utils/evaluateTrack';
 import getPeopleAnimateOneTime from '@/utils/getPeopleAnimateOneTime';
+import { handleLocation, Item } from '@/utils/handleLocation';
 
 interface ClipSegment {
   clip: ObjAllColumnData
@@ -1129,6 +1131,15 @@ async function evaluateTimeline(time: number) {
 
 function showBuyVip() {
   emits('showBuyVip')
+}
+function findObjInMap(item: ClipSegment) {
+  const { entityId } = item.clip
+  console.log('item', entityId)
+  const entity = window.worldApi.children.find(v => {
+    return v.getOriginalData().id === entityId
+  })
+  if (!entity) return;
+  handleLocation(window.worldApi, entityId)
 }
 
 // onUnmounted：组件卸载时清理动画帧与事件监听，避免内存泄漏

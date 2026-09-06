@@ -17,15 +17,10 @@ export type Item = {
 
 export function handleEnter(
   group: GroupBaseEntity<GroupBaseData> | undefined,
-  item: {
-    id: string,
-    name: string,
-    type: string,
-    isLocked: boolean,
-  }
+  itemId: string
 ) {
   if (!group) return
-  const thisObj = group.children.find(v => v.getData().id === item.id)
+  const thisObj = group.children.find(v => v.getData().id === itemId)
   if (thisObj) {
     const zoom2DLevel = canvas2DSceneManage.list[0].level;
     const worldData = group.getData();
@@ -55,9 +50,9 @@ export function handleLocationPosition(position: { x: number, y: number }) {
   })
 }
 
-export function handleLocation(group: GroupBaseEntity<GroupBaseData> | undefined, item: Item) {
+export function handleLocation(group: GroupBaseEntity<GroupBaseData> | undefined, itemId: string) {
   if (!group) return
-  const api = group.children.find(v => v.getData().id === item.id)
+  const api = group.children.find(v => v.getData().id === itemId)
   if (!api) return
   if (api instanceof PointEntityClass) {
     const { x, y } = api.getData()
@@ -66,7 +61,7 @@ export function handleLocation(group: GroupBaseEntity<GroupBaseData> | undefined
       y: y + group.getData().y,
     })
     setTimeout(() => {
-      handleEnter(group, item)
+      handleEnter(group, itemId)
     }, 0)
   } else if (api instanceof LineEntityClass) {
     const points: Array<{ x: number, y: number }> = api.getData().points
@@ -74,7 +69,7 @@ export function handleLocation(group: GroupBaseEntity<GroupBaseData> | undefined
     const centerY = points.reduce((acc, cur) => acc + cur.y, 0) / points.length
     handleLocationPosition({ x: centerX, y: centerY })
     setTimeout(() => {
-      handleEnter(group, item)
+      handleEnter(group, itemId)
     }, 0)
   }
 }
