@@ -31,9 +31,10 @@ export abstract class GroupBaseEntity<T extends GroupBaseData> extends PointCanA
   // 锁定状态的对象列表
   lockedObjList: BaseEntityClass<BaseObjData>[] = []
 
+  initData: T// 因为getData进行了重置，所以需要保存原始数据用于初始化
   constructor(parent: GroupBaseEntity<T> | null, data: T) {
     super(parent, data)
-
+    this.initData = data
     this.gridHelper = new THREE.GridHelper(1000, 50, 0xcccccc, 0xeeeeee)
     this.gridHelper.layers.set(2)
     this.gridHelper.visible = false;
@@ -51,7 +52,7 @@ export abstract class GroupBaseEntity<T extends GroupBaseData> extends PointCanA
   }
 
   async init() {
-    const data = this.getData()
+    const data = this.initData
     const apiList = [];
     for (const item of data.childrenData) {
       const type = item.type

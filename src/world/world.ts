@@ -1,9 +1,7 @@
 import * as THREE from 'three'
 import { GroupBaseEntity } from '@/types/groupBase/entity';
-import { BaseObjData, HandelInfo, Point } from '@/types/map2d';
+import { HandelInfo } from '@/types/map2d';
 import { GroupBaseData } from '@/types/groupBase';
-import { BaseEntityClass } from '@/types/baseEntity';
-import { PointEntityClass } from '@/types/pointEntity';
 import drawAxes from '@/utils/drawAxes';
 
 type WorldData = GroupBaseData & {
