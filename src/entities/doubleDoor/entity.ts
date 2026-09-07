@@ -103,7 +103,7 @@ export class DoubleDoorEntity extends EntityClassInWall<DoubleDoorData> {
     ctx.lineWidth = 2
     ctx.strokeStyle = 'red'
     ctx.save();
- // 保存当前状态
+    // 保存当前状态
     ctx.translate(
       matchArea.data.x * zoomLevel,
       matchArea.data.y * zoomLevel
