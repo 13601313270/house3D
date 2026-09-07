@@ -149,13 +149,13 @@ export class DoubleDoorEntity extends EntityClassInWall<DoubleDoorData> {
           // 内开
           this.leftGlbObj.position.set(data.width / -2.1, data.height / -2, wallThickness / 2);
           this.leftGlbObj.scale.set(panelWidth * 0.23, data.height * 0.11, wallThickness * 2);
-          this.leftGlbObj.rotation.y = THREE.MathUtils.degToRad(data.openAngle * -1 || 0);
+          this.leftGlbObj.rotation.y = THREE.MathUtils.degToRad(data.leftOpenAngle * -1 || 0);
         }
         else if (data.openType === 2) {
           // 外开
           this.leftGlbObj.position.set(data.width / -2.1, data.height / -2, wallThickness / -2);
           this.leftGlbObj.scale.set(panelWidth * 0.23, data.height * 0.11, wallThickness * -2);
-          this.leftGlbObj.rotation.y = THREE.MathUtils.degToRad(data.openAngle || 0);
+          this.leftGlbObj.rotation.y = THREE.MathUtils.degToRad(data.leftOpenAngle || 0);
         }
       }
       if (this.rightGlbObj) {
@@ -169,13 +169,13 @@ export class DoubleDoorEntity extends EntityClassInWall<DoubleDoorData> {
           // 内开
           this.rightGlbObj.position.set(data.width / 2.1, data.height / -2, wallThickness / 2);
           this.rightGlbObj.scale.set(panelWidth * -0.23, data.height * 0.11, wallThickness * 2);
-          this.rightGlbObj.rotation.y = THREE.MathUtils.degToRad(data.openAngle || 0);
+          this.rightGlbObj.rotation.y = THREE.MathUtils.degToRad(data.rightOpenAngle || 0);
         }
         else if (data.openType === 2) {
           // 外开
           this.rightGlbObj.position.set(data.width / 2.1, data.height / -2, wallThickness / -2);
           this.rightGlbObj.scale.set(panelWidth * -0.23, data.height * 0.11, wallThickness * -2);
-          this.rightGlbObj.rotation.y = THREE.MathUtils.degToRad(data.openAngle * -1 || 0);
+          this.rightGlbObj.rotation.y = THREE.MathUtils.degToRad(data.rightOpenAngle * -1 || 0);
         }
       }
     }
@@ -233,17 +233,6 @@ export class DoubleDoorEntity extends EntityClassInWall<DoubleDoorData> {
       const doorMeshTop = new THREE.Mesh(geometryTop, borderMaterial)
       doorMeshTop.position.setY(data.height)
       group.add(doorMeshTop);
-
-      // 中梃（两扇门之间的竖框，对开门特有）
-      const geometryCenter = new THREE.BoxGeometry(
-        border,
-        data.height * 1,
-        wallThickness + 4
-      );
-      const doorMeshCenter = new THREE.Mesh(geometryCenter, borderMaterial)
-      doorMeshCenter.position.setX(0)
-      doorMeshCenter.position.setY(data.height / 2)
-      group.add(doorMeshCenter);
     })();
     if (this.leftGlbObj && this.rightGlbObj) {
       changeBLBState()
@@ -408,17 +397,26 @@ export class DoubleDoorEntity extends EntityClassInWall<DoubleDoorData> {
         value: data.hasBorder,
       },
       {
-        id: 'openAngle',
-        label: '门打开的角度',
+        id: 'leftOpenAngle',
+        label: '左门打开角度',
         dataType: 'number',
         min: 0,
         max: 180,
         step: 15,
-        value: data.openAngle,
+        value: data.leftOpenAngle,
+      },
+      {
+        id: 'rightOpenAngle',
+        label: '右门打开角度',
+        dataType: 'number',
+        min: 0,
+        max: 180,
+        step: 15,
+        value: data.rightOpenAngle,
       },
       {
         id: 'openType',
-        label: '开门方式(1内开 2外开)',
+        label: '开门方式',
         dataType: 'enum',
         enumList: [
           {
@@ -465,7 +463,8 @@ export class DoubleDoorEntity extends EntityClassInWall<DoubleDoorData> {
       mt: '材质', // 门材质
       hasBorder: '是否有门框', // 是否有门框
       openType: '开门方式', // 开门方式 1内开 2外开
-      openAngle: '门打开的角度',// 门打开的角度
+      leftOpenAngle: '左门打开角度',// 左扇门打开的角度
+      rightOpenAngle: '右门打开角度',// 右扇门打开的角度
     }
   }
 
@@ -475,7 +474,8 @@ export class DoubleDoorEntity extends EntityClassInWall<DoubleDoorData> {
       ...super.canEditAnimationDataColumn(),
       'width',
       'height',
-      'openAngle',
+      'leftOpenAngle',
+      'rightOpenAngle',
     ];
   }
 }

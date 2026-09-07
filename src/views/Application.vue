@@ -1565,6 +1565,7 @@ function handleAddAnimation(data: { typeKey: string; modelValue: Record<string, 
     entityId,
     startTime,
     endTime,
+    isFold: false,
     columns: []
   }
 
