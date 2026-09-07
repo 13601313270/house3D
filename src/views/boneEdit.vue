@@ -804,9 +804,9 @@ function showModelPanel() {
   flex-direction: column;
   flex-wrap: wrap;
   gap: 6px;
-  // height: 100%;
   padding: 6px;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
   position: relative;
   flex-wrap: nowrap;
 }
@@ -874,6 +874,8 @@ function showModelPanel() {
   box-sizing: border-box;
   border-radius: 8px;
   overflow: hidden;
+  height: 485px;
+  flex-shrink: 0;
 
   .loading {
     position: absolute;

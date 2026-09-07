@@ -616,7 +616,7 @@ const animate = () => {
   const scene = window.worldApi.scene
   if (renderer && scene && camera) {
     renderer.render(scene, camera)
-    // requestAnimationFrame(animate)
+    requestAnimationFrame(animate)
   }
 }
 

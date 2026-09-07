@@ -38,7 +38,7 @@
 
     <!-- 滚动容器：控制轨道区域横向与纵向滚动，onScroll 同步 scrollLeft 状态 -->
     <div class="timeline-scroll-container">
-      <div class="left">
+      <div class="left" id="timeLeft" @scroll="onScrollLeft">
         <div class="timeline-content">
           <div class="timeline-track-area">
             <div v-for="(segment, rowIndex) in rowsByIndex" :key="`time-row-${rowIndex}`" class="timeline-row">
@@ -56,7 +56,7 @@
         </div>
       </div>
       <!-- timeInfo：使用 CSS Grid 叠加两层（timeline-content-wrapper + playhead-container），使播放头贯穿整个区域 -->
-      <div class="timeInfo" @contextmenu.stop.prevent :style="{ paddingLeft: (moreLeft + 4) + 'px' }"
+      <div class="timeInfo" id="timeInfo" @contextmenu.stop.prevent :style="{ paddingLeft: (moreLeft + 4) + 'px' }"
         @mousedown="handleTimeInfoMouseDown" @scroll="onScroll">
         <div class="timeline-content-wrapper" :style="{ width: `${effectiveDuration * zoomLevel * 50}px` }">
           <div class="timeline-track-area">
@@ -69,10 +69,10 @@
                 <div v-for="item in segment.clip.columns" class="keyframe-nodeLine">
                   <div class="keyframe-node" :style="keyFrameStyleNew(item, segment)">
                     <div v-for="keyTimePoint in item.keyTimePoints" class="keyframe-node2"
-                      :style="keyFrameStyleNew2(keyTimePoint, segment)">
-                      <div v-if="keyTimePoint.type === 'animation'">
-                        {{ keyTimePoint.timeLength }}
-                      </div>
+                      :class="{ range: keyTimePoint.type === 'animation' }"
+                      :style="keyFrameStyleNew2(keyTimePoint, segment)"
+                      @mousedown.stop.prevent="startKeyframeDrag($event, segment, keyTimePoint, 'move')">
+                      <div v-if="keyTimePoint.type === 'animation'"></div>
                     </div>
                   </div>
                 </div>
@@ -245,6 +245,7 @@ const playbackSpeed = ref(1)                // 播放倍速（0.1x ~ 3x）
 const targetFps = ref(20)                       // 目标帧率（0=不限制，跟随显示器刷新率；例如24=每秒24帧）
 const zoomLevel = ref(1)                       // 时间轴横向缩放级别（0.2x ~ 5x）
 const scrollLeft = ref(0)                     // 当前横向滚动位置
+const scrollTop = ref(0)                      // 当前纵向滚动位置
 const collapsedClips = ref<Set<string>>(new Set()) // 折叠的对象轨道集合（预留）
 const activeClipId = ref<string | null>(null) // 当前展开浮动面板的 clipId
 const activeSegment = ref<ClipSegment | null>(null) // 当前展开浮动面板的 segment（含 startTime/endTime/rowIndex）
@@ -356,8 +357,19 @@ function stopScrub() {
 // onScroll：timeline-scroll-container 滚动事件 → 同步 scrollLeft 状态（预留，用于未来缩放时定位对齐）
 function onScroll(event: Event) {
   const target = event.target as HTMLElement
-  // console.log('target.scrollLeft', target.scrollLeft)
   scrollLeft.value = target.scrollLeft
+  scrollTop.value = target.scrollTop
+  console.log(1)
+  if (document.getElementById('timeLeft')) {
+    (document.getElementById('timeLeft') as any).scrollTop = scrollTop.value;
+  }
+}
+function onScrollLeft(event: Event) {
+  const target = event.target as HTMLElement
+  if (document.getElementById('timeInfo')) {
+    console.log(2);
+    (document.getElementById('timeInfo') as any).scrollTop = target.scrollTop;
+  }
 }
 
 // toggleClipContent：track-item 点击时，切换浮动面板显示/隐藏
@@ -403,10 +415,17 @@ function keyFrameStyleNew(item: ObjOneColumnData, segment: ClipSegment) {
   }
 }
 function keyFrameStyleNew2(startTime: KeyTimePoint, segment: ClipSegment) {
-  const left1 = `${((startTime.time - segment.startTime) / (segment.endTime - segment.startTime || 1)) * 100}%`;
-  // const left1 = `${(startTime.time / effectiveDuration.value) * 100}%`;
-  return {
-    left: left1,
+  const left = `${((startTime.time - segment.startTime) / (segment.endTime - segment.startTime || 1)) * 100}%`;
+  if (startTime.type === 'animation') {
+    const width = `${(startTime.timeLength / (segment.endTime - segment.startTime || 1)) * 100}%`;
+    return {
+      left,
+      width
+    }
+  } else {
+    return {
+      left,
+    }
   }
 }
 function getAllTimeInSegment(segment: ClipSegment): Array<{
@@ -535,26 +554,38 @@ function onKeyframeClick(time: number) {
 function startKeyframeDrag(
   event: MouseEvent,
   segment: ClipSegment,
-  time: number,
+  keypoint: KeyTimePoint,
   mode: 'move' | 'trim-start' | 'trim-end' = 'move'
 ) {
+  const time = keypoint.time
   keyframeDragMoved = false
   keyframeDragMode = mode
   keyframeDragStartX = event.clientX
   keyframeDragOriginTime = time
   keyframeDragSegment = segment
   keyframeDragPoints = []
-  keyframeDragOriginEnds = []
-  segment.clip.columns.forEach(track => {
-    track.keyTimePoints.forEach(kf => {
-      if (kf.time !== time) return
-      // move 模式收集同时刻所有点；trim 模式只收集动画段点（句柄属于 range）
-      if (mode === 'move' || kf.type === 'animation') {
-        keyframeDragPoints.push(kf)
-        keyframeDragOriginEnds.push(kf.type === 'animation' ? kf.time + kf.timeLength : kf.time)
-      }
-    })
-  })
+  keyframeDragOriginEnds = [];
+
+  (() => {
+    const kf = keypoint
+    if (kf.time !== time) return
+    // move 模式收集同时刻所有点；trim 模式只收集动画段点（句柄属于 range）
+    if (mode === 'move' || kf.type === 'animation') {
+      keyframeDragPoints.push(kf)
+      keyframeDragOriginEnds.push(kf.type === 'animation' ? kf.time + kf.timeLength : kf.time)
+    }
+  })();
+
+  // segment.clip.columns.forEach(track => {
+  //   track.keyTimePoints.forEach(kf => {
+  //     if (kf.time !== time) return
+  //     // move 模式收集同时刻所有点；trim 模式只收集动画段点（句柄属于 range）
+  //     if (mode === 'move' || kf.type === 'animation') {
+  //       keyframeDragPoints.push(kf)
+  //       keyframeDragOriginEnds.push(kf.type === 'animation' ? kf.time + kf.timeLength : kf.time)
+  //     }
+  //   })
+  // })
   if (keyframeDragPoints.length === 0) return
   keyframeDragOriginEnd = Math.max(...keyframeDragOriginEnds)
   isKeyframeDragging = true
@@ -1297,6 +1328,14 @@ onUnmounted(() => {
       height: 100%;
       overflow: auto;
       z-index: 101;
+      scrollbar-width: none;
+
+      /* Firefox 隐藏滚动条 */
+      /* 隐藏滚动条 */
+      &::-webkit-scrollbar {
+        width: 0;
+        height: 0;
+      }
 
       .timeline-content {
         position: relative;
@@ -1522,30 +1561,25 @@ onUnmounted(() => {
                   min-width: 16px;
                   height: 16px;
                   position: relative;
-                  background: #4CAF50;
-                  border: 1px solid #000000;
+                  background: #635cff38;
                   box-sizing: border-box;
                   transition: transform 0.15s, background 0.15s;
                   z-index: 2;
                   cursor: grab; // 提示可拖拽调整位置
                   margin: 2px 0 1px 0;
 
-                  &:active {
-                    cursor: grabbing;
-                  }
+                  // &.range {
+                  //   border-radius: 4px;
+                  //   transform: none;
 
-                  &.range {
-                    border-radius: 4px;
-                    transform: none;
+                  //   &:hover {
+                  //     transform: none;
+                  //   }
 
-                    &:hover {
-                      transform: none;
-                    }
-
-                    &.selected {
-                      transform: none;
-                    }
-                  }
+                  //   &.selected {
+                  //     transform: none;
+                  //   }
+                  // }
 
                   // keyframe-handle：range 节点左右两侧的边界调整句柄
                   // 默认半透明可见（不依赖父级 hover），hover 时提亮；pointer-events 默认 auto 可命中
@@ -1575,28 +1609,17 @@ onUnmounted(() => {
                       background: rgba(255, 255, 255, 0.7);
                     }
                   }
-
-                  &:hover {
-                    box-shadow: 0 0 0 3px rgba(233, 69, 96, 0.4);
-                  }
-
-                  // selected 选中态：红色背景 + 更大比例 + 红色外发光
-                  &.selected {
-                    background: #e94560;
-                    transform: translateX(-8px);
-                    box-shadow: 0 0 0 3px rgba(233, 69, 96, 0.4);
-                  }
                 }
 
                 .keyframe-node2 {
                   position: absolute;
                   top: 7px;
-                  min-width: 6px;
-                  height: 6px;
-                  transform: translateX(-3px);
-                  margin-top: -3px;
-                  border-radius: 3px;
-                  background: #ff0000;
+                  min-width: 12px;
+                  height: 12px;
+                  transform: translateX(-6px);
+                  margin-top: -4px;
+                  border-radius: 6px;
+                  background: #635cff;
                   border: 1px solid #000000;
                   box-sizing: border-box;
                   transition: transform 0.15s, background 0.15s;
@@ -1651,7 +1674,6 @@ onUnmounted(() => {
 
                   &:hover {
                     box-shadow: 0 0 0 3px rgba(233, 69, 96, 0.4);
-                    transform: translateX(-8px); // 悬浮放大方便点击
                   }
 
                   // selected 选中态：红色背景 + 更大比例 + 红色外发光
