@@ -72,7 +72,14 @@
                       :class="{ range: keyTimePoint.type === 'animation' }"
                       :style="keyFrameStyleNew2(keyTimePoint, segment)"
                       @mousedown.stop.prevent="startKeyframeDrag($event, segment, keyTimePoint, 'move')">
-                      <div v-if="keyTimePoint.type === 'animation'"></div>
+                      <template v-if="keyTimePoint.type === 'animation' && keyTimePoint.timeLength > 0">
+                        <div class="keyframe-handle handle-left"
+                          @mousedown.stop.prevent="startKeyframeDrag($event, segment, keyTimePoint, 'trim-start')">
+                        </div>
+                        <div class="keyframe-handle handle-right"
+                          @mousedown.stop.prevent="startKeyframeDrag($event, segment, keyTimePoint, 'trim-end')">
+                        </div>
+                      </template>
                     </div>
                   </div>
                 </div>
