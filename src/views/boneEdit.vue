@@ -42,7 +42,8 @@
                 <span class="radioDot"></span>
                 <span>当前帧</span>
               </label>
-              <label class="radioOption" :class="{ active: exportContent === 'wholeAnimation' }">
+              <label class="radioOption" v-if="editMode === 'animation'"
+                :class="{ active: exportContent === 'wholeAnimation' }">
                 <input type="radio" v-model="exportContent" value="wholeAnimation" hidden />
                 <span class="radioDot"></span>
                 <span>整个动画</span>
@@ -149,7 +150,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, nextTick } from 'vue'
+import { ref, onMounted, onUnmounted, nextTick, computed, watch } from 'vue'
 import * as THREE from 'three'
 // @ts-ignore
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
@@ -162,6 +163,10 @@ import { timelineState } from '@/utils/timelineManage'
 import generateClipId from '@/utils/generateClipId'
 import allPeopleAnimate, { AnimationItem } from '@/utils/allPeopleAnimate'
 import { ApplyScope, getBoneFilter } from '@/utils/peopleBones'
+import { EditMode, Store } from '@/store'
+import { useStore } from 'vuex'
+
+const store = useStore<Store>()
 
 const viewportRef = ref<HTMLDivElement | null>(null)
 const containerRef = ref<HTMLDivElement | null>(null)
@@ -188,6 +193,8 @@ const props = defineProps<{
 
 const allDemoList = ref<Array<AnimationItem>>(allPeopleAnimate)
 const animationKey = ref('')
+const editMode = computed<EditMode>(() => store.state.main.editMode)
+
 type ViewportConfig = {
   id: string
   type: 'perspective'
@@ -797,6 +804,12 @@ function runPostAnimation(file: string): Promise<void> {
 function showModelPanel() {
   showModal.value = true
 }
+
+watch(editMode, (newVal) => {
+  if (newVal === 'scene') {
+    exportContent.value = 'currentFrame'
+  }
+})
 </script>
 <style scoped lang="less">
 .viewport-container {

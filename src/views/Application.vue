@@ -274,7 +274,7 @@ import ObjTypeSelect from '@/components/ObjTypeSelect.vue'
 import EnvironmentEditor from '@/components/EnvironmentEditor.vue'
 import Login from '@/components/Login.vue'
 import { useStore } from 'vuex';
-import { Store } from '@/store';
+import { EditMode, Store } from '@/store';
 import Help from '@/components/help.vue'
 import processUploadedFile from '@/utils/processUploadedFile';
 import DataTypeEditPanel from './DataTypeEditPanel.vue'
@@ -423,10 +423,10 @@ const vipRemainingDays = computed(() => {
   return Math.ceil(diff / (1000 * 60 * 60 * 24))
 })
 
-const editMode = ref<'scene' | 'animation'>('scene')
+const editMode = computed<EditMode>(() => store.state.main.editMode)
 
-function setEditMode(mode: 'scene' | 'animation') {
-  editMode.value = mode
+function setEditMode(mode: EditMode) {
+  store.dispatch('main/setEditMode', mode)
   if (mode === 'animation') {
     window.gtag('event', 'editMode', { mode })
   }
@@ -507,7 +507,6 @@ const worldApi = new WorldGroup(null, {
   z: 0,
   angleY: 0,
   name: '世界',
-  temp: false,
 })
 window.worldApi = worldApi
 const showGroupExit = ref<boolean>(false)
