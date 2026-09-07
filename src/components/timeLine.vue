@@ -21,7 +21,7 @@
       </div>
     </div>
 
-    <div class="timeline-ruler-leftPanel"></div>
+    <div class="timeline-ruler-leftPanel">对象</div>
     <!-- 时间标尺：显示主/次刻度，宽度随缩放级别变化，与内容宽度保持一致 -->
     <div class="timeline-ruler" :style="{ marginLeft: (scrollLeft * -1 + moreLeft + 4) + 'px' }" ref="timelineRuler"
       @scroll.prevent.stop>
@@ -44,10 +44,11 @@
             <div v-for="(segment, rowIndex) in rowsByIndex" :key="`time-row-${rowIndex}`" class="timeline-row">
               <div class="track-header-bar">
                 <div class="headTool">
-                  <span class="clip-name">{{ segment.typeName }}</span>
-                  <img class="location" src="@/assets/location.svg" @click.stop.prevent="findObjInMap(segment)" />
+
                 </div>
                 <img class="typeImg" v-if="segment.typeImg" :src="segment.typeImg" alt="">
+                <span class="clip-name">{{ segment.typeName }}</span>
+                <img class="location" src="@/assets/location.svg" @click.stop.prevent="findObjInMap(segment)" />
               </div>
               <div :key="segment.clip.clipId" class="track-item">
                 <div v-for="item in segment.clip.columns" class="keyframe-node">
@@ -63,14 +64,18 @@
         @mousedown="handleTimeInfoMouseDown" @scroll="onScroll">
         <div class="timeline-content-wrapper" :style="{ width: `${effectiveDuration * zoomLevel * 50}px` }">
           <div class="timeline-track-area">
-            <!-- timeline-row：一行可以放多个互不时间冲突的 track-item（由区间图着色算法分配行号） -->
             <div v-for="(segment, rowIndex) in rowsByIndex" :key="`time-row-${rowIndex}`" class="timeline-row">
+              <div class="head">
+              </div>
               <div :key="segment.clip.clipId" class="track-item" :class="{
                 active: activeClipId === segment.clip.clipId,
                 locked: !props.isVip && segment.startTime >= FREE_DURATION
               }" @contextmenu.stop.prevent="toggleClipContent($event, segment)">
                 <div v-for="item in segment.clip.columns" class="keyframe-nodeLine">
-                  <div class="keyframe-node" :style="keyFrameStyleNew(item, segment)">
+                  <div class="lineBetweenPoint" v-if="item.keyTimePoints.length >= 2"
+                    :style="keyPointLineStyleNew(item, segment)">
+                  </div>
+                  <div class="keyframe-node">
                     <div v-for="keyTimePoint in item.keyTimePoints" class="keyframe-node2"
                       :class="{ range: keyTimePoint.type === 'animation' }"
                       :style="keyFrameStyleNew2(keyTimePoint, segment)" @click="clickKeyframePoint(keyTimePoint)"
@@ -408,22 +413,17 @@ function toggleClipContent(event: MouseEvent, segment: ClipSegment) {
   // ])
 }
 
-function keyFrameStyle(item: { time: number, timeLength: number }, segment: ClipSegment) {
+function keyPointLineStyleNew(item: ObjOneColumnData, segment: ClipSegment) {
+  const width = (item.keyTimePoints[item.keyTimePoints.length - 1].time - item.keyTimePoints[0].time) / (effectiveDuration.value || 1)
   return {
-    left: `${((item.time - segment.startTime) / (segment.endTime - segment.startTime || 1)) * 100}%`,
-    width: `${(item.timeLength / (segment.endTime - segment.startTime || 1)) * 100}%`
-  }
-}
-function keyFrameStyleNew(item: ObjOneColumnData, segment: ClipSegment) {
-  return {
-    left: `${(segment.startTime / effectiveDuration.value) * 100}%`,
-    width: `${((segment.endTime - segment.startTime) / effectiveDuration.value) * 100}%`
+    left: `${((item.keyTimePoints[0].time) / effectiveDuration.value) * 100}%`,
+    width: `${width * 100}%`,
   }
 }
 function keyFrameStyleNew2(startTime: KeyTimePoint, segment: ClipSegment) {
-  const left = `${((startTime.time - segment.startTime) / (segment.endTime - segment.startTime || 1)) * 100}%`;
+  const left = `${((startTime.time) / effectiveDuration.value) * 100}%`;
   if (startTime.type === 'animation') {
-    const width = `${(startTime.timeLength / (segment.endTime - segment.startTime || 1)) * 100}%`;
+    const width = `${startTime.timeLength / effectiveDuration.value * 100}%`;
     return {
       left,
       width
@@ -1199,7 +1199,7 @@ onUnmounted(() => {
     justify-content: space-between;
     align-items: center;
     padding: 4px 8px;
-    border-bottom: 1px solid #0f3460; // 与标尺区域的分隔线
+    border-bottom: 1px solid rgb(209, 209, 206); // 与标尺区域的分隔线
     background: rgb(247, 247, 245);
 
     // 左侧区域：标题 + 当前时间 / 总时长
@@ -1348,11 +1348,11 @@ onUnmounted(() => {
     align-items: start;
 
     .left {
-      width: 174px;
+      width: 173px; // 比174小了1像素，避免与时间滚动条重叠
       flex-shrink: 0;
       position: absolute;
       background: #ffffff;
-      border-right: 1px solid #0f3460;
+      border-right: 1px solid rgb(232, 232, 229);
       height: 100%;
       overflow: auto;
       z-index: 103;
@@ -1370,7 +1370,6 @@ onUnmounted(() => {
         display: flex;
         flex-direction: column;
 
-        // timeline-track-area：所有 timeline-row 的父容器
         .timeline-track-area {
           padding-bottom: 32px;
           overflow-y: auto;
@@ -1380,46 +1379,38 @@ onUnmounted(() => {
 
           .timeline-row {
             position: relative;
-            border-bottom: 2px solid rgb(99 92 255);
+            border-bottom: 2px solid #e8e8e5;
             display: flex;
-            flex-direction: row;
+            flex-direction: column;
 
             .track-header-bar {
               display: flex;
               align-items: center;
-              width: 80px;
-              height: 100%;
-              gap: 8px;
+              width: 100%;
+              height: 34px;
+              gap: 5px;
               overflow: hidden;
-              flex-direction: column;
+              flex-direction: row;
               flex-shrink: 0;
               position: relative;
+              background-color: #eeeeea;
+              border-bottom: 1px solid rgb(232, 232, 229);
 
-              .headTool {
-                padding: 1px 2px 1px 4px;
-                width: 100%;
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                position: absolute;
-                background: #ffffff99;
+              .clip-name {
+                font-size: 15px;
+                line-height: 20px;
+                color: #000000;
+                font-weight: bold;
+              }
 
-                .clip-name {
-                  font-size: 14px;
-                  line-height: 20px;
-                  color: #000000;
-                  font-weight: bold;
-                }
-
-                .location {
-                  width: 20px;
-                  height: 20px;
-                }
+              .location {
+                width: 20px;
+                height: 20px;
               }
 
               .typeImg {
-                width: 100%;
-                margin-top: 12px;
+                width: 18px;
+                height: 18px;
               }
             }
 
@@ -1437,15 +1428,15 @@ onUnmounted(() => {
 
               .keyframe-node {
                 min-width: 16px;
-                height: 19px;
+                height: 22px;
                 position: relative;
-                border-bottom: 1px solid rgba(105, 68, 68, 0.35);
+                border-bottom: 1px solid rgb(232, 232, 229);
                 transition: transform 0.15s, background 0.15s;
                 z-index: 2;
                 font-size: 14px;
-                line-height: 14px;
-                text-align: right;
-                padding-right: 8px;
+                line-height: 22px;
+                text-align: left;
+                padding-left: 8px;
               }
             }
           }
@@ -1508,12 +1499,15 @@ onUnmounted(() => {
           box-sizing: border-box;
           position: relative;
 
-          // timeline-row：每一行 35px，绝对定位 track-item 的基准容器
-          // 同一行内的多个 clip 时间互不冲突（由区间图着色算法保证）
+          .head {
+            height: 34px;
+            background-color: #eeeeea;
+            border-bottom: 1px solid rgb(232, 232, 229);
+          }
+
           .timeline-row {
             position: relative;
-            border-bottom: 2px solid rgb(99 92 255);
-            min-height: 92px;
+            border-bottom: 2px solid #e8e8e5;
 
             // track-item：单个 clip 的视觉表示，绝对定位 left / width 按百分比占 timeline-row
             .track-item {
@@ -1604,11 +1598,26 @@ onUnmounted(() => {
               }
 
               .keyframe-nodeLine {
-                border-bottom: solid 1px rgba(105, 68, 68, 0.35);
+                border-bottom: 1px solid rgb(232, 232, 229);
+                height: 22px;
+                position: relative;
+
+                .lineBetweenPoint {
+                  position: absolute;
+                  left: 0;
+                  top: 0;
+                  background: black;
+                  height: 2px;
+                  top: 8px;
+                  background: rgba(99, 91, 255, 0.48);
+                  z-index: 0;
+                }
 
                 .keyframe-node {
+                  position: absolute;
+                  left: 0;
+                  top: 0;
                   min-width: 16px;
-                  height: 19px;
                   position: relative;
                   background: #635cff38;
                   box-sizing: border-box;
@@ -1653,8 +1662,8 @@ onUnmounted(() => {
                   transform: translateX(-6px);
                   margin-top: -4px;
                   border-radius: 6px;
-                  background: #635cff;
-                  border: 1px solid #000000;
+                  background: rgb(180, 177, 255);
+                  border: 1px solid rgb(99, 91, 255);
                   box-sizing: border-box;
                   transition: transform 0.15s, background 0.15s;
                   z-index: 2;
@@ -1828,9 +1837,10 @@ onUnmounted(() => {
     z-index: 101;
     position: absolute;
     top: 41px;
-    background: white;
-    border-bottom: 1px solid #0f3460;
-    border-right: solid 1px #0f3460;
+    background: #f7f7f5;
+    border-bottom: 1px solid rgb(209, 209, 206);
+    border-right: solid 1px rgb(209, 209, 206);
+    color: rgb(154, 157, 162);
   }
 
   // .timeline-ruler：顶部时间刻度标尺，高度 24px，与轨道区域独立（不参与内部滚动）
@@ -1841,7 +1851,8 @@ onUnmounted(() => {
     position: relative;
     overflow-x: hidden; // 隐藏标尺自身的横向滚动条（用 timeline-scroll-container 统一滚动）
     margin-left: 4px;
-    border-bottom: 1px solid #0f3460;
+    border-bottom: 1px solid rgb(209, 209, 206);
+    background: #f7f7f5;
 
     // 隐藏 webkit 滚动条，避免双滚动条视觉
     &::-webkit-scrollbar {
