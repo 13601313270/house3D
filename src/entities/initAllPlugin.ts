@@ -3,6 +3,7 @@ import { allFileKeys, allFileKeysGroup, allFileKeysName, allFileKeysObjType, all
 import wallPlugin from './wall'
 import windowPlugin from './window'
 import doorPlugin from './door'
+import doubleDoorPlugin from './doubleDoor'
 import doorwayPlugin from './doorway'
 import cameraPlugin from './camera'
 import directionCameraPlugin from './directionCamera'
@@ -57,6 +58,7 @@ export default function () {
   [
     wallPlugin,
     doorPlugin,
+    doubleDoorPlugin,
     doorwayPlugin,
     windowPlugin,
     cameraPlugin,
