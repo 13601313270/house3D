@@ -42,15 +42,16 @@
         <div class="timeline-content">
           <div class="timeline-track-area">
             <div v-for="(segment, rowIndex) in rowsByIndex" :key="`time-row-${rowIndex}`" class="timeline-row">
-              <div class="track-header-bar">
-                <div class="headTool">
-
-                </div>
+              <div class="track-header-bar" @click="toggleFold(segment)">
                 <img class="typeImg" v-if="segment.typeImg" :src="segment.typeImg" alt="">
                 <span class="clip-name">{{ segment.typeName }}</span>
                 <img class="location" src="@/assets/location.svg" @click.stop.prevent="findObjInMap(segment)" />
+                <div style="flex-grow: 1;"></div>
+                <img class="fold" :class="{ rotated: segment.clip.isFold }" src="@/assets/fold.svg"
+                  @click.stop.prevent="toggleFold(segment)" />
               </div>
-              <div :key="segment.clip.clipId" class="track-item">
+              <div :key="segment.clip.clipId" class="track-item"
+                :style="{ display: segment.clip.isFold ? 'none' : 'block' }">
                 <div v-for="item in segment.clip.columns" class="keyframe-node">
                   {{ getName(segment.clip.entityId, item.trackType) }}
                 </div>
@@ -66,11 +67,26 @@
           <div class="timeline-track-area">
             <div v-for="(segment, rowIndex) in rowsByIndex" :key="`time-row-${rowIndex}`" class="timeline-row">
               <div class="head">
+                <template v-if="segment.clip.isFold">
+                  <!-- {{ segment.clip.isFold ? '展开' : '收起' }} -->
+                  <div v-for="item in segment.clip.columns" class="keyframe-nodeLine">
+                    <div class="lineBetweenPoint" v-if="item.keyTimePoints.length >= 2"
+                      :style="keyPointLineStyleNew(item, segment)">
+                    </div>
+                    <div class="keyframe-node">
+                      <div v-for="keyTimePoint in item.keyTimePoints" class="keyframe-node2"
+                        :class="{ range: keyTimePoint.type === 'animation' }"
+                        :style="keyFrameStyleNew2(keyTimePoint, segment)" @click="toggleFold(segment)">
+                      </div>
+                    </div>
+                  </div>
+                </template>
               </div>
-              <div :key="segment.clip.clipId" class="track-item" :class="{
+              <div class="track-item" :class="{
                 active: activeClipId === segment.clip.clipId,
                 locked: !props.isVip && segment.startTime >= FREE_DURATION
-              }" @contextmenu.stop.prevent="toggleClipContent($event, segment)">
+              }" @contextmenu.stop.prevent="toggleClipContent($event, segment)"
+                :style="{ display: segment.clip.isFold ? 'none' : 'block' }">
                 <div v-for="item in segment.clip.columns" class="keyframe-nodeLine">
                   <div class="lineBetweenPoint" v-if="item.keyTimePoints.length >= 2"
                     :style="keyPointLineStyleNew(item, segment)">
@@ -1163,6 +1179,10 @@ function getName(entityId: string, type: string) {
   return type
 }
 
+function toggleFold(segment: ClipSegment) {
+  segment.clip.isFold = !segment.clip.isFold
+}
+
 // onUnmounted：组件卸载时清理动画帧与事件监听，避免内存泄漏
 onUnmounted(() => {
   if (animationFrameId) {
@@ -1412,6 +1432,18 @@ onUnmounted(() => {
                 width: 18px;
                 height: 18px;
               }
+
+              .fold {
+                width: 24px;
+                height: 24px;
+                cursor: pointer;
+                transform: rotate(180deg);
+                transition: transform 0.2s ease;
+
+                &.rotated {
+                  transform: rotate(90deg);
+                }
+              }
             }
 
             .track-item {
@@ -1499,10 +1531,130 @@ onUnmounted(() => {
           box-sizing: border-box;
           position: relative;
 
+
+
           .head {
             height: 34px;
             background-color: #eeeeea;
             border-bottom: 1px solid rgb(232, 232, 229);
+
+            .keyframe-nodeLine {
+              height: 22px;
+              width: 100%;
+              position: absolute;
+              left: 0;
+              top: 9px;
+
+              .lineBetweenPoint {
+                position: absolute;
+                left: 0;
+                top: 0;
+                background: black;
+                height: 2px;
+                top: 8px;
+                background: rgba(99, 91, 255, 0.48);
+                z-index: 0;
+              }
+
+              .keyframe-node {
+                position: absolute;
+                left: 0;
+                top: 0;
+                min-width: 16px;
+                position: relative;
+                background: #635cff38;
+                box-sizing: border-box;
+                transition: transform 0.15s, background 0.15s;
+                z-index: 2;
+
+                // keyframe-handle：range 节点左右两侧的边界调整句柄
+                // 默认半透明可见（不依赖父级 hover），hover 时提亮；pointer-events 默认 auto 可命中
+                .keyframe-handle {
+                  position: absolute;
+                  top: 0;
+                  height: 100%;
+                  width: 6px;
+                  z-index: 3;
+                  background: rgba(255, 255, 255, 0.35);
+                  transition: background 0.15s;
+                }
+              }
+
+              .keyframe-node2 {
+                position: absolute;
+                top: 7px;
+                min-width: 12px;
+                height: 12px;
+                transform: translateX(-6px);
+                margin-top: -4px;
+                border-radius: 6px;
+                background: rgb(180, 177, 255);
+                border: 1px solid rgb(99, 91, 255);
+                box-sizing: border-box;
+                transition: transform 0.15s, background 0.15s;
+                z-index: 2;
+
+                &:active {
+                  cursor: grabbing;
+                }
+
+                &.range {
+                  border-radius: 4px;
+                  transform: none;
+
+                  &:hover {
+                    transform: none;
+                  }
+
+                  &.selected {
+                    transform: none;
+                  }
+                }
+
+                // keyframe-handle：range 节点左右两侧的边界调整句柄
+                // 默认半透明可见（不依赖父级 hover），hover 时提亮；pointer-events 默认 auto 可命中
+                .keyframe-handle {
+                  position: absolute;
+                  top: 0;
+                  height: 100%;
+                  width: 6px;
+                  z-index: 3;
+                  background: rgba(255, 255, 255, 0.35);
+                  transition: background 0.15s;
+
+                  &.handle-left {
+                    left: 0;
+                    border-radius: 4px 0 0 4px;
+                    cursor: ew-resize; // 左句柄：调整起点 item.time
+                  }
+
+                  &.handle-right {
+                    right: 0;
+                    border-radius: 0 4px 4px 0;
+                    cursor: ew-resize; // 右句柄：调整时长 item.timeLength
+                  }
+
+                  &:hover,
+                  &:active {
+                    background: rgba(255, 255, 255, 0.7);
+                  }
+                }
+
+                &:hover {
+                  box-shadow: 0 0 0 3px rgba(233, 69, 96, 0.4);
+                }
+
+                // selected 选中态：红色背景 + 更大比例 + 红色外发光
+                &.selected {
+                  background: #e94560;
+                  transform: translateX(-8px);
+                  box-shadow: 0 0 0 3px rgba(233, 69, 96, 0.4);
+                }
+              }
+            }
+
+
+
           }
 
           .timeline-row {

@@ -71,6 +71,7 @@ export abstract class BaseEntityClass<T extends BaseObjData> {
       let findClip = timelineState.timelineData.clips.find(v => v.entityId === this.data.id);
       if (!findClip) {
         timelineState.timelineData.clips.push({
+          isFold: false,
           entityId: this.data.id,
           clipId: generateClipId(),
           startTime: timelineState.currentTime,

@@ -25,6 +25,7 @@ export interface ObjOneColumnData {
 export interface ObjAllColumnData {
   clipId: string
   entityId: string
+  isFold: boolean
   startTime: number
   endTime: number
   columns: ObjOneColumnData[]
