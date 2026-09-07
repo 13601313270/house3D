@@ -627,4 +627,13 @@ export class DirectionCameraEntity extends CameraBase<DirectionCameraData> {
       aspectH: '高度比',
     }
   }
+
+  // 可以动画编辑的列
+  canEditAnimationDataColumn(): string[] {
+    return [
+      ...super.canEditAnimationDataColumn(),
+      'angleY',
+      'fov',
+    ];
+  }
 }

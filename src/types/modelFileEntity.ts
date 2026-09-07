@@ -291,4 +291,11 @@ export abstract class ModelFileEntity<T extends ModelFileData> extends PointCanA
       scale: '缩放',
     }
   }
+
+  canEditAnimationDataColumn(): string[] {
+    return [
+      ...super.canEditAnimationDataColumn(),
+      'scale',
+    ];
+  }
 }

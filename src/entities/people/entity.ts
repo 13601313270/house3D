@@ -202,10 +202,6 @@ export class PeopleEntity extends ModelFileEntity<PeopleData> {
     })
   }
 
-  canEditAnimationDataColumn() {
-    return [...super.canEditAnimationDataColumn(), 'boneEditButton']
-  }
-
   editAnimationDataColumn(column: string, a: any, b: any, t: number) {
     if (column === 'bone') {
       const centerBone: BoneStepItem[] = [];
@@ -255,6 +251,15 @@ export class PeopleEntity extends ModelFileEntity<PeopleData> {
       color: '颜色',
       bone: '骨骼',
     }
+  }
+
+  // 可以动画编辑的列
+  canEditAnimationDataColumn() {
+    return [
+      ...super.canEditAnimationDataColumn(),
+      'height',
+      'boneEditButton'
+    ]
   }
 }
 

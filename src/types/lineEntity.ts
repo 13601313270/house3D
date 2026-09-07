@@ -64,4 +64,11 @@ export abstract class LineEntityClass<V, T extends LineObjData<V>> extends BaseE
   getBoundingBoxData(): [THREE.Vector3, THREE.Vector3, THREE.Vector3] | null {
     return null
   }
+
+  getDataMeta(): { [key: string]: string } {
+    return {
+      ...super.getDataMeta(),
+      points: '所有点',
+    }
+  }
 }

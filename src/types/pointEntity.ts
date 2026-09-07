@@ -413,4 +413,13 @@ export abstract class PointEntityClass<T extends PointObjData> extends BaseEntit
       z: 'z坐标',
     }
   }
+
+  canEditAnimationDataColumn(): string[] {
+    return [
+      ...super.canEditAnimationDataColumn(),
+      'x',
+      'y',
+      'z',
+    ];
+  }
 }

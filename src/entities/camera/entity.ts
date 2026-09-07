@@ -603,4 +603,15 @@ export class CameraEntity extends CameraBase<CameraData> {
       aspectH: '高度比',
     }
   }
+
+  // 可以动画编辑的列
+  canEditAnimationDataColumn(): string[] {
+    return [
+      ...super.canEditAnimationDataColumn(),
+      'targetPositionX',
+      'targetPositionY',
+      'targetPositionZ',
+      'fov',
+    ];
+  }
 }

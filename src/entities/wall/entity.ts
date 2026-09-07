@@ -832,4 +832,13 @@ export class WallEntity extends LineEntityClass<WallPoint, WallData> {
       cornerType: '转角类型',
     }
   }
+
+  canEditAnimationDataColumn(): string[] {
+    return [
+      ...super.canEditAnimationDataColumn(),
+      'thickness',
+      'height',
+      'bottom',
+    ];
+  }
 }

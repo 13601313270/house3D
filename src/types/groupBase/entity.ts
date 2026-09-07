@@ -493,4 +493,12 @@ export abstract class GroupBaseEntity<T extends GroupBaseData> extends PointCanA
   showAxesHelper() {
     this.axesHelper.visible = true;
   }
+
+  getDataMeta(): { [key: string]: string } {
+    return {
+      ...super.getDataMeta(),
+      childrenData: '子对象',
+      name: '组名称',
+    }
+  }
 }

@@ -304,4 +304,14 @@ export class CubeEntity extends PointCanAngleEntity<CubeData> {
       mt: '材质',
     }
   }
+
+  // 可以动画编辑的列
+  canEditAnimationDataColumn(): string[] {
+    return [
+      ...super.canEditAnimationDataColumn(),
+      'width',
+      'height',
+      'depth',
+    ];
+  }
 }

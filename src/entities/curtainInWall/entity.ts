@@ -364,4 +364,13 @@ export class CurtainInWallEntity extends EntityClassInWall<CurtainInWallData> {
       isOuter: '是否挂在外墙',
     }
   }
+
+  // 可以动画编辑的列
+  canEditAnimationDataColumn(): string[] {
+    return [
+      ...super.canEditAnimationDataColumn(),
+      'width',
+      'height',
+    ];
+  }
 }

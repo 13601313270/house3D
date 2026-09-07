@@ -245,4 +245,12 @@ export class ConeEntity extends PointEntityClass<ConeData> {
       mt: '材质',
     }
   }
+
+  canEditAnimationDataColumn(): string[] {
+    return [
+      ...super.canEditAnimationDataColumn(),
+      'r',
+      'h',
+    ];
+  }
 }

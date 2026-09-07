@@ -82,10 +82,8 @@ export abstract class BaseEntityClass<T extends BaseObjData> {
       if (findClip) {
         Object.keys(data).forEach((key) => {
           const findTrack = findClip.columns.find(v => v.trackType === key)
-          // const canEditColumn = this.canEditAnimationDataColumn()
-          // console.log('canEditColumn', canEditColumn);
-
-          if (key === 'tip' || key === 'tipFontSize') {
+          const canEditColumn = this.canEditAnimationDataColumn()
+          if (!canEditColumn.includes(key)) {
             return
           }
           if (findTrack) {
@@ -302,11 +300,6 @@ export abstract class BaseEntityClass<T extends BaseObjData> {
     dragHandelInfo: HandelInfo,
   ): boolean;
 
-  // 可以设置动画的属性(可计算差值)
-  canEditAnimationDataColumn(): string[] {
-    return [];
-  }
-
   // 创建属性补间动画值
   editAnimationDataColumn(column: string, a: any, b: any, time: number): any | undefined {
     if (typeof a === 'number' && typeof b === 'number') {
@@ -322,6 +315,11 @@ export abstract class BaseEntityClass<T extends BaseObjData> {
       isLocked: '是否锁定',
       isHidden: '是否隐藏',
     }
+  }
+
+  // 可以设置动画的属性(可计算差值)
+  canEditAnimationDataColumn(): string[] {
+    return ['tipFontSize', 'isHidden'];
   }
 }
 

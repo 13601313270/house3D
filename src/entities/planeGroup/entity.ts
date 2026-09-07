@@ -260,4 +260,12 @@ export class PlaneGroupEntity extends GroupBaseEntity<PlaneGroupData> {
       height: '高度',
     }
   }
+
+  canEditAnimationDataColumn(): string[] {
+    return [
+      ...super.canEditAnimationDataColumn(),
+      'width',
+      'height',
+    ];
+  }
 }

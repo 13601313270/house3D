@@ -530,4 +530,12 @@ export class PolygonEntity extends LineEntityClass<PolygonPoint, PolygonData> {
       height: '高度',
     }
   }
+
+  canEditAnimationDataColumn(): string[] {
+    return [
+      ...super.canEditAnimationDataColumn(),
+      'z',
+      'height',
+    ];
+  }
 }

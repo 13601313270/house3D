@@ -386,4 +386,15 @@ export class RegularPolygon2Entity extends PointCanAngleEntity<RegularPolygon2Da
       color: '颜色',
     }
   }
+
+  // 可以动画编辑的列
+  canEditAnimationDataColumn(): string[] {
+    return [
+      ...super.canEditAnimationDataColumn(),
+      'n',
+      'r',
+      'r2',
+      'h',
+    ];
+  }
 }

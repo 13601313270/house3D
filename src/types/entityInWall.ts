@@ -207,4 +207,22 @@ export abstract class EntityClassInWall<T extends ObjInWallData> extends PointEn
       return true;
     }
   }
+
+  getDataMeta(): { [key: string]: string } {
+    return {
+      ...super.getDataMeta(),
+      wallId: '所属墙',
+      wallPointId: '门在墙上的点的索引',
+      bottom: '距离地面',
+      angle: '旋转角度',
+    }
+  }
+
+  canEditAnimationDataColumn(): string[] {
+    return [
+      ...super.canEditAnimationDataColumn(),
+      'bottom',
+      'angle',
+    ];
+  }
 }

@@ -174,4 +174,11 @@ export abstract class PointCanAngleEntity<T extends PointCanAngleObjData> extend
       angleY: 'y旋转角度',
     }
   }
+
+  canEditAnimationDataColumn(): string[] {
+    return [
+      ...super.canEditAnimationDataColumn(),
+      'angleY',
+    ];
+  }
 }

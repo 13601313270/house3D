@@ -282,4 +282,13 @@ export class CirclePlaneEntity extends PointCanAngleEntity<CirclePlaneData> {
       ds: '是否双面可见', // 是否双面可见
     }
   }
+
+  // 可以动画编辑的列
+  canEditAnimationDataColumn(): string[] {
+    return [
+      ...super.canEditAnimationDataColumn(),
+      'r',
+      'ds',
+    ];
+  }
 }

@@ -8,7 +8,4 @@ export type GroupBaseData = PointCanAngleObjData & {
     value: BaseObjData,
   }>,
   name: string,
-  x: number
-  y: number
-  z: number,
 }

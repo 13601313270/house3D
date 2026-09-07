@@ -391,4 +391,13 @@ export class CurtainEntity extends PointCanAngleEntity<CurtainData> {
       img: '图片',
     }
   }
+
+  // 可以动画编辑的列
+  canEditAnimationDataColumn(): string[] {
+    return [
+      ...super.canEditAnimationDataColumn(),
+      'width',
+      'height',
+    ];
+  }
 }

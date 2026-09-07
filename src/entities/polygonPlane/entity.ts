@@ -533,4 +533,12 @@ export class PolygonPlaneEntity extends LineEntityClass<PolygonPlanePoint, Polyg
       mt: '材质',
     }
   }
+
+  canEditAnimationDataColumn(): string[] {
+    return [
+      ...super.canEditAnimationDataColumn(),
+      'z',
+      'ds',
+    ];
+  }
 }

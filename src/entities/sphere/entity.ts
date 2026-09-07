@@ -237,4 +237,11 @@ export class SphereEntity extends PointEntityClass<SphereData> {
       mt: '材质',
     }
   }
+
+  canEditAnimationDataColumn(): string[] {
+    return [
+      ...super.canEditAnimationDataColumn(),
+      'r',
+    ];
+  }
 }

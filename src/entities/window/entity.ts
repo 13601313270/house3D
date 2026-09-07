@@ -582,4 +582,15 @@ export class WindowEntity extends EntityClassInWall<WindowData> {
       leftOpenAngle: '左窗打开角度'
     }
   }
+
+  // 可以动画编辑的列
+  canEditAnimationDataColumn() {
+    return [
+      ...super.canEditAnimationDataColumn(),
+      'height',
+      'width',
+      'rightOpenAngle',
+      'leftOpenAngle',
+    ]
+  }
 }

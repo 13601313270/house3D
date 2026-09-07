@@ -400,4 +400,14 @@ export class SectorEntity extends PointEntityClass<SectorData> {
       endAngle: '结束角度',
     }
   }
+
+  canEditAnimationDataColumn(): string[] {
+    return [
+      ...super.canEditAnimationDataColumn(),
+      'r',
+      'h',
+      'startAngle',
+      'endAngle',
+    ];
+  }
 }

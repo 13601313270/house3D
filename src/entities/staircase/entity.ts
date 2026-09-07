@@ -628,6 +628,13 @@ export class StaircaseEntity extends LineEntityClass<StaircasePoint, StaircaseDa
       stepType: '台阶类型',
     }
   }
+
+  canEditAnimationDataColumn(): string[] {
+    return [
+      ...super.canEditAnimationDataColumn(),
+      'thickness',
+    ];
+  }
 }
 
 const defaultStaircaseData: StaircaseData = {

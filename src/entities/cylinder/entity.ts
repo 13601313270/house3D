@@ -241,4 +241,12 @@ export class CylinderEntity extends PointEntityClass<CylinderData> {
       mt: '材质',
     }
   }
+
+  canEditAnimationDataColumn(): string[] {
+    return [
+      ...super.canEditAnimationDataColumn(),
+      'r',
+      'h',
+    ];
+  }
 }

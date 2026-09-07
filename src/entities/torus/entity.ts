@@ -280,4 +280,15 @@ export class TorusEntity extends PointEntityClass<TorusData> {
       mt: '材质',
     }
   }
+
+  canEditAnimationDataColumn(): string[] {
+    return [
+      ...super.canEditAnimationDataColumn(),
+      'r',
+      't',
+      'arc',
+      'thetaStart',
+      'thetaLength',
+    ];
+  }
 }

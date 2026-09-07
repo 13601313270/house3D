@@ -598,4 +598,14 @@ export class SignEntity extends PointCanAngleEntity<SignData> {
       img: '图案',
     }
   }
+
+  canEditAnimationDataColumn(): string[] {
+    return [
+      ...super.canEditAnimationDataColumn(),
+      'width',
+      'height',
+      'signZ',
+      'poleRadius',
+    ];
+  }
 }

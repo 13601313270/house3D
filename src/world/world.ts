@@ -4,9 +4,7 @@ import { HandelInfo } from '@/types/map2d';
 import { GroupBaseData } from '@/types/groupBase';
 import drawAxes from '@/utils/drawAxes';
 
-type WorldData = GroupBaseData & {
-  temp: boolean,
-}
+type WorldData = GroupBaseData
 
 export interface EnvironmentConfig {
   skyType: number

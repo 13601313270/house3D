@@ -307,4 +307,14 @@ export class PlaneEntity extends PointCanAngleEntity<PlaneData> {
       mt: '材质',
     }
   }
+
+  // 可以动画编辑的列
+  canEditAnimationDataColumn(): string[] {
+    return [
+      ...super.canEditAnimationDataColumn(),
+      'width',
+      'length',
+      'z',
+    ];
+  }
 }

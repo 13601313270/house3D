@@ -461,4 +461,14 @@ export class SectorPlaneEntity extends PointEntityClass<SectorPlaneData> {
       imgAngelY: '图片角度Y',
     }
   }
+
+  canEditAnimationDataColumn(): string[] {
+    return [
+      ...super.canEditAnimationDataColumn(),
+      'r',
+      'startAngle',
+      'endAngle',
+      'ds',
+    ];
+  }
 }

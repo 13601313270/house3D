@@ -327,4 +327,13 @@ export class DoorEntity extends EntityClassInWall<DoorData> {
       hasBorder: '是否有门框',
     }
   }
+
+  // 可以动画编辑的列
+  canEditAnimationDataColumn(): string[] {
+    return [
+      ...super.canEditAnimationDataColumn(),
+      'width',
+      'height',
+    ];
+  }
 }

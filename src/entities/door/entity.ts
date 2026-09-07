@@ -415,4 +415,14 @@ export class DoorEntity extends EntityClassInWall<DoorData> {
       openAngle: '门打开的角度',// 门打开的角度
     }
   }
+
+  // 可以动画编辑的列
+  canEditAnimationDataColumn(): string[] {
+    return [
+      ...super.canEditAnimationDataColumn(),
+      'width',
+      'height',
+      'openAngle',
+    ];
+  }
 }

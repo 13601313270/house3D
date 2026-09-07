@@ -569,4 +569,12 @@ export class OutFileEntity extends PointCanAngleEntity<OutFileData> {
       data: '数据',
     }
   }
+
+  // 可以动画编辑的列
+  canEditAnimationDataColumn(): string[] {
+    return [
+      ...super.canEditAnimationDataColumn(),
+      'zoom',
+    ];
+  }
 }
