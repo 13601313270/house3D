@@ -21,6 +21,7 @@
       </div>
     </div>
 
+    <div class="timeline-ruler-leftPanel"></div>
     <!-- 时间标尺：显示主/次刻度，宽度随缩放级别变化，与内容宽度保持一致 -->
     <div class="timeline-ruler" :style="{ marginLeft: (scrollLeft * -1 + moreLeft + 4) + 'px' }" ref="timelineRuler"
       @scroll.prevent.stop>
@@ -32,51 +33,62 @@
             <span v-if="mark.major" class="mark-label">{{ formatTime(mark.time) }}</span>
           </div>
         </div>
-        <!-- 标尺上的VIP标记：非VIP时在10秒位置显示 -->
-        <!-- <div v-if="showLockedArea" class="ruler-vip-marker"
-          :style="{ left: `${(FREE_DURATION / effectiveDuration) * 100}%` }">
-          <span class="ruler-vip-icon">👑</span>
-        </div> -->
       </div>
     </div>
 
     <!-- 滚动容器：控制轨道区域横向与纵向滚动，onScroll 同步 scrollLeft 状态 -->
     <div class="timeline-scroll-container">
+      <div class="left">
+        <div class="timeline-content">
+          <div class="timeline-track-area">
+            <div v-for="(segment, rowIndex) in rowsByIndex" :key="`time-row-${rowIndex}`" class="timeline-row">
+              <div class="track-header-bar">
+                <span @mousedown.stop.prevent @click.stop.prevent="findObjInMap(segment)">找</span>
+                <!-- <span class="clip-name">{{ segment.clip.entityId }}</span> -->
+              </div>
+              <div :key="segment.clip.clipId" class="track-item">
+                <div v-for="item in segment.clip.columns" class="keyframe-node">
+                  {{ item.trackType }}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
       <!-- timeInfo：使用 CSS Grid 叠加两层（timeline-content-wrapper + playhead-container），使播放头贯穿整个区域 -->
       <div class="timeInfo" @contextmenu.stop.prevent :style="{ paddingLeft: (moreLeft + 4) + 'px' }"
         @mousedown="handleTimeInfoMouseDown" @scroll="onScroll">
-        <!-- 轨道内容层：承载所有 timeline-row + track-item，宽度随 zoomLevel 放大 -->
         <div class="timeline-content-wrapper" :style="{ width: `${effectiveDuration * zoomLevel * 50}px` }">
           <div class="timeline-track-area">
             <!-- timeline-row：一行可以放多个互不时间冲突的 track-item（由区间图着色算法分配行号） -->
-            <div v-for="(row, rowIndex) in rowsByIndex" :key="`time-row-${rowIndex}`" class="timeline-row">
-              <div v-for="segment in row" :key="segment.clip.clipId" class="track-item" :class="{
+            <div v-for="(segment, rowIndex) in rowsByIndex" :key="`time-row-${rowIndex}`" class="timeline-row">
+              <div :key="segment.clip.clipId" class="track-item" :class="{
                 active: activeClipId === segment.clip.clipId,
                 locked: !props.isVip && segment.startTime >= FREE_DURATION
-              }" :style="{
-                left: `${(segment.startTime / effectiveDuration) * 100}%`,
-                width: `${((segment.endTime - segment.startTime) / effectiveDuration) * 100}%`
               }" @contextmenu.stop.prevent="toggleClipContent($event, segment)">
-                <div class="track-header-bar">
-                  <span class="clip-name">{{ segment.clip.entityId }}</span>
-                  <span class="clip-duration">{{ formatTime(segment.startTime) }} - {{
-                    formatTime(segment.endTime) }}</span>
-                  <span @click="findObjInMap(segment)">找</span>
+                <div v-for="item in segment.clip.columns" class="keyframe-nodeLine">
+                  <div class="keyframe-node" :style="keyFrameStyleNew(item, segment)">
+                    <div v-for="keyTimePoint in item.keyTimePoints" class="keyframe-node2"
+                      :style="keyFrameStyleNew2(keyTimePoint, segment)">
+                      <div v-if="keyTimePoint.type === 'animation'">
+                        {{ keyTimePoint.timeLength }}
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <div v-for="item in getAllTimeInSegment(segment)" :key="item.time" class="keyframe-node"
+                <!-- <div v-for="item in getAllTimeInSegment(segment)" :key="item.time" class="keyframe-node"
                   :style="keyFrameStyle(item, segment)"
                   :class="{ selected: item.time === currentTime, range: item.timeLength > 0 }"
                   @click.stop="onKeyframeClick(item.time)"
                   @mousedown.stop.prevent="startKeyframeDrag($event, segment, item.time, 'move')"
                   @contextmenu.prevent.stop="toggleClipContentFrame($event, segment, item.time)">
-                  <!-- range 节点（动画段）左右句柄：左调起点 item.time（终点锚定），右调时长 item.timeLength（起点锚定） -->
                   <template v-if="item.timeLength > 0">
                     <div class="keyframe-handle handle-left"
                       @mousedown.stop.prevent="startKeyframeDrag($event, segment, item.time, 'trim-start')"></div>
                     <div class="keyframe-handle handle-right"
                       @mousedown.stop.prevent="startKeyframeDrag($event, segment, item.time, 'trim-end')"></div>
                   </template>
-                </div>
+</div> -->
               </div>
             </div>
           </div>
@@ -123,7 +135,7 @@
 import { ref, computed, onUnmounted, onMounted } from 'vue'
 import { message } from '@/utils/message'
 // timelineState 模块：管理时间轴状态，clip/track/keyframe 数据结构，以及全局播放状态标志
-import { ObjAllColumnData, timelineState, KeyTimePoint } from '@/utils/timelineManage';
+import { ObjAllColumnData, timelineState, KeyTimePoint, ObjOneColumnData } from '@/utils/timelineManage';
 import editItem from '@/utils/editItem';
 import DataTypeEditPanel from '../views/DataTypeEditPanel.vue'
 import showContextMenu from '@/utils/contextMenu';
@@ -135,7 +147,6 @@ interface ClipSegment {
   clip: ObjAllColumnData
   startTime: number
   endTime: number
-  rowIndex: number
 }
 const props = defineProps<{
   isVip: boolean
@@ -145,11 +156,8 @@ const rulerMarks = ref<{
   time: number;
   major: boolean;
 }[]>([])
-const clipSegments = ref<ClipSegment[]>([])
-
-const moreLeft = 70;
-const moreRight = 40;
-const moreWidth = moreLeft + moreRight; // 额外预留10px
+// const clipSegments = ref<ClipSegment[]>([])
+const moreLeft = 170;
 const FREE_DURATION = 10; // 非VIP免费时长（秒）
 
 // 可编辑的最大时间：VIP时不受限制，非VIP时限制在FREE_DURATION
@@ -195,50 +203,16 @@ onMounted(() => {
       return marks
     })()
 
-    // clipSegments：将 clips 包装成渲染用的 ClipSegment 列表
-    //  核心逻辑：区间图着色（Interval Graph Coloring）贪心算法，按 startTime 排序，
-    // 每个 segment 分配到最早可用的 row（rowEndTimes[r] <= segment.startTime 时占用该行），
-    // 时间冲突时新增一行，实现多 clip 时间不冲突的共用一行，减少垂直占用
-    clipSegments.value = (() => {
-      const segments: ClipSegment[] = []
-
-      if (timelineState.timelineData.clips) {
-        for (const clip of timelineState.timelineData.clips) {
-          segments.push({
-            clip,
-            startTime: clip.startTime,
-            endTime: clip.endTime,
-            rowIndex: 0
-          })
-        }
-      }
-
-      segments.sort((a, b) => a.startTime - b.startTime)
-
-      const rowEndTimes: number[] = []
-
-      for (const segment of segments) {
-        let assignedRow = -1
-
-        for (let r = 0; r < rowEndTimes.length; r++) {
-          if (rowEndTimes[r] <= segment.startTime) {
-            assignedRow = r
-            break
-          }
-        }
-
-        if (assignedRow === -1) {
-          assignedRow = rowEndTimes.length
-          rowEndTimes.push(segment.endTime)
-        } else {
-          rowEndTimes[assignedRow] = segment.endTime
-        }
-
-        segment.rowIndex = assignedRow
-      }
-
-      return segments
-    })();
+    const rows: ClipSegment[] = []
+    for (let i = 0; i < timelineState.timelineData.clips.length; i++) {
+      const clip = timelineState.timelineData.clips[i]
+      rows.push({
+        clip,
+        startTime: clip.startTime,
+        endTime: clip.endTime,
+      })
+    }
+    rowsByIndex.value = rows
   }
   updateRef()
   timelineState.onChange(() => {
@@ -297,23 +271,7 @@ let keyframeDragPoints: KeyTimePoint[] = []  // 本次拖拽要移动的关键�
 let mediaRecorder: MediaRecorder | null = null  // MediaRecorder 实例
 let recordedChunks: Blob[] = []                 // 录制数据块缓存
 
-// totalRows：实际使用的总行数（= 最大 rowIndex + 1）
-const totalRows = computed(() => {
-  if (clipSegments.value.length === 0) return 0
-  return Math.max(...clipSegments.value.map(s => s.rowIndex)) + 1
-})
-
-// rowsByIndex：按行号聚合 segment 段二维数组，供 v-for 渲染 timeline-row
-const rowsByIndex = computed(() => {
-  const rows: ClipSegment[][] = []
-  for (let i = 0; i < totalRows.value; i++) {
-    rows.push([])
-  }
-  for (const segment of clipSegments.value) {
-    rows[segment.rowIndex].push(segment)
-  }
-  return rows
-})
+const rowsByIndex = ref<ClipSegment[]>([])
 
 // formatTime：秒 → "08:30"（秒:厘秒），保留两位小数用于紧凑显示
 function formatTime(time: number): string {
@@ -436,6 +394,19 @@ function keyFrameStyle(item: { time: number, timeLength: number }, segment: Clip
   return {
     left: `${((item.time - segment.startTime) / (segment.endTime - segment.startTime || 1)) * 100}%`,
     width: `${(item.timeLength / (segment.endTime - segment.startTime || 1)) * 100}%`
+  }
+}
+function keyFrameStyleNew(item: ObjOneColumnData, segment: ClipSegment) {
+  return {
+    left: `${(segment.startTime / effectiveDuration.value) * 100}%`,
+    width: `${((segment.endTime - segment.startTime) / effectiveDuration.value) * 100}%`
+  }
+}
+function keyFrameStyleNew2(startTime: KeyTimePoint, segment: ClipSegment) {
+  const left1 = `${((startTime.time - segment.startTime) / (segment.endTime - segment.startTime || 1)) * 100}%`;
+  // const left1 = `${(startTime.time / effectiveDuration.value) * 100}%`;
+  return {
+    left: left1,
   }
 }
 function getAllTimeInSegment(segment: ClipSegment): Array<{
@@ -1161,6 +1132,7 @@ onUnmounted(() => {
   flex-direction: column; // 头部 / 标尺 / 轨道 纵向堆叠
   overflow: hidden;
   font-family: Inter, "Noto Sans SC", sans-serif;
+  position: relative;
 
   // 头部控制栏：左侧标题+当前时间，右侧停止/播放/倍速滑块/缩放按钮
   .timeline-header {
@@ -1316,6 +1288,84 @@ onUnmounted(() => {
     flex-direction: row;
     align-items: start;
 
+    .left {
+      width: 174px;
+      flex-shrink: 0;
+      position: absolute;
+      background: #ffffff;
+      border-right: 1px solid #0f3460;
+      height: 100%;
+      overflow: auto;
+      z-index: 101;
+
+      .timeline-content {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+
+        // timeline-track-area：所有 timeline-row 的父容器
+        .timeline-track-area {
+          padding-bottom: 8px;
+          overflow-y: auto;
+          box-sizing: border-box;
+          position: relative;
+
+          .timeline-row {
+            position: relative;
+            border-bottom: 1px solid rgb(105 68 68 / 35%);
+            display: flex;
+            flex-direction: row;
+
+            .track-header-bar {
+              display: flex;
+              align-items: center;
+              width: 40px;
+              height: 100%;
+              padding: 0 8px;
+              gap: 8px;
+              font-size: 12px;
+              overflow: hidden;
+
+              .clip-name {
+                font-weight: 500;
+                color: #e94560;
+                flex-shrink: 0;
+                max-width: 100px;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap; // 过长 entityId 截断成 ...
+              }
+            }
+
+            .track-item {
+              position: relative;
+              overflow: visible; // warning-badge 要溢出右上角
+              box-sizing: border-box; // 包含 border/padding 入宽度，与 track-item 计算宽度一致
+              min-width: 20px; // 极端缩放下仍能点击
+              z-index: 5;
+              top: 0;
+              transition: box-shadow 0.15s;
+              flex-grow: 1;
+
+              .keyframe-node {
+                min-width: 16px;
+                height: 20px;
+                position: relative;
+                border-bottom: 1px solid rgba(105, 68, 68, 0.35);
+                box-sizing: border-box;
+                transition: transform 0.15s, background 0.15s;
+                z-index: 2;
+                cursor: grab;
+                font-size: 14px;
+                line-height: 14px;
+              }
+            }
+          }
+        }
+      }
+
+    }
+
     // timeInfo：核心「双层叠加」区域，使用 CSS Grid 让 content / playhead 占同一格
     // 两层互不干扰，content 负责点击/拖拽 track-item，playhead 贯穿显示红色竖线
     .timeInfo {
@@ -1327,7 +1377,6 @@ onUnmounted(() => {
       display: grid;
       grid-template-areas: "layer"; // 同名列，两个子元素都占 layer 实现叠加
 
-      // === 第一层：轨道内容层（承载所有 timeline-row + track-item + keyTimePoints） ===
       .timeline-content-wrapper {
         grid-area: layer;
         position: relative;
@@ -1368,48 +1417,26 @@ onUnmounted(() => {
 
         // timeline-track-area：所有 timeline-row 的父容器
         .timeline-track-area {
-          padding-top: 8px;
           padding-bottom: 8px;
           overflow-y: auto;
           box-sizing: border-box;
           position: relative;
 
-          .track-list {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-          }
-
           // timeline-row：每一行 35px，绝对定位 track-item 的基准容器
           // 同一行内的多个 clip 时间互不冲突（由区间图着色算法保证）
           .timeline-row {
             position: relative;
-            height: 50px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.03); // 行间极细分割线
+            border-bottom: 1px solid rgb(105 68 68 / 35%);
 
             // track-item：单个 clip 的视觉表示，绝对定位 left / width 按百分比占 timeline-row
             .track-item {
-              position: absolute;
-              border-radius: 6px;
+              position: relative;
               overflow: visible; // warning-badge 要溢出右上角
-              border: 1px solid #1a4d7a; // 深蓝边框
               box-sizing: border-box; // 包含 border/padding 入宽度，与 track-item 计算宽度一致
               min-width: 20px; // 极端缩放下仍能点击
               z-index: 5;
-              height: 50px;
               top: 0;
-              background: rgba(15, 52, 96, 0.4); // 深蓝半透明背景
               transition: box-shadow 0.15s;
-
-              &:hover {
-                box-shadow: 0 0 0 1px rgba(233, 69, 96, 0.5); // 悬浮红色描边高亮
-              }
-
-              // active：当前打开了浮动编辑面板的 clip，更亮的红色边框 + 更高 z-index
-              &.active {
-                box-shadow: inset 0 0 0 1px #e94560;
-                z-index: 50;
-              }
 
               // warning：同一 entityId 多个 clip 时间重叠时，替换为橙色 + 脉冲动画
               &.warning {
@@ -1432,14 +1459,6 @@ onUnmounted(() => {
 
                 &:hover {
                   box-shadow: none; // 锁定状态下无hover高亮
-                }
-
-                .track-header-bar {
-
-                  .clip-name,
-                  .clip-duration {
-                    color: #888;
-                  }
                 }
               }
 
@@ -1496,105 +1515,151 @@ onUnmounted(() => {
                 }
               }
 
-              // track-header-bar：track-item 内部紧凑信息行（对象名 + 时间范围），高度 35px 居中
-              .track-header-bar {
-                display: flex;
-                align-items: center;
-                height: 20px;
-                padding: 0 8px;
-                gap: 8px;
-                color: white;
-                font-size: 12px;
-                overflow: hidden;
+              .keyframe-nodeLine {
+                border-bottom: solid 1px rgba(105, 68, 68, 0.35);
 
-                .clip-name {
-                  font-weight: 500;
-                  color: #e94560;
-                  flex-shrink: 0;
-                  max-width: 100px;
-                  overflow: hidden;
-                  text-overflow: ellipsis;
-                  white-space: nowrap; // 过长 entityId 截断成 ...
-                }
+                .keyframe-node {
+                  min-width: 16px;
+                  height: 16px;
+                  position: relative;
+                  background: #4CAF50;
+                  border: 1px solid #000000;
+                  box-sizing: border-box;
+                  transition: transform 0.15s, background 0.15s;
+                  z-index: 2;
+                  cursor: grab; // 提示可拖拽调整位置
+                  margin: 2px 0 1px 0;
 
-                .clip-duration {
-                  color: #023068;
-                  font-size: 10px; // 时间范围小一号
-                  white-space: nowrap;
-                }
-              }
+                  &:active {
+                    cursor: grabbing;
+                  }
 
-              .keyframe-node {
-                position: absolute;
-                top: 30px;
-                min-width: 16px;
-                height: 16px;
-                transform: translateX(-8px);
-                margin-top: -6px;
-                border-radius: 8px;
-                background: #4CAF50;
-                border: 1px solid #000000;
-                box-sizing: border-box;
-                transition: transform 0.15s, background 0.15s;
-                z-index: 2;
-                cursor: grab; // 提示可拖拽调整位置
+                  &.range {
+                    border-radius: 4px;
+                    transform: none;
 
-                &:active {
-                  cursor: grabbing;
-                }
+                    &:hover {
+                      transform: none;
+                    }
 
-                &.range {
-                  border-radius: 4px;
-                  transform: none;
+                    &.selected {
+                      transform: none;
+                    }
+                  }
+
+                  // keyframe-handle：range 节点左右两侧的边界调整句柄
+                  // 默认半透明可见（不依赖父级 hover），hover 时提亮；pointer-events 默认 auto 可命中
+                  .keyframe-handle {
+                    position: absolute;
+                    top: 0;
+                    height: 100%;
+                    width: 6px;
+                    z-index: 3;
+                    background: rgba(255, 255, 255, 0.35);
+                    transition: background 0.15s;
+
+                    &.handle-left {
+                      left: 0;
+                      border-radius: 4px 0 0 4px;
+                      cursor: ew-resize; // 左句柄：调整起点 item.time
+                    }
+
+                    &.handle-right {
+                      right: 0;
+                      border-radius: 0 4px 4px 0;
+                      cursor: ew-resize; // 右句柄：调整时长 item.timeLength
+                    }
+
+                    &:hover,
+                    &:active {
+                      background: rgba(255, 255, 255, 0.7);
+                    }
+                  }
 
                   &:hover {
-                    transform: none;
+                    box-shadow: 0 0 0 3px rgba(233, 69, 96, 0.4);
                   }
 
+                  // selected 选中态：红色背景 + 更大比例 + 红色外发光
                   &.selected {
-                    transform: none;
+                    background: #e94560;
+                    transform: translateX(-8px);
+                    box-shadow: 0 0 0 3px rgba(233, 69, 96, 0.4);
                   }
                 }
 
-                // keyframe-handle：range 节点左右两侧的边界调整句柄
-                // 默认半透明可见（不依赖父级 hover），hover 时提亮；pointer-events 默认 auto 可命中
-                .keyframe-handle {
+                .keyframe-node2 {
                   position: absolute;
-                  top: 0;
-                  height: 100%;
-                  width: 6px;
-                  z-index: 3;
-                  background: rgba(255, 255, 255, 0.35);
-                  transition: background 0.15s;
+                  top: 7px;
+                  min-width: 6px;
+                  height: 6px;
+                  transform: translateX(-3px);
+                  margin-top: -3px;
+                  border-radius: 3px;
+                  background: #ff0000;
+                  border: 1px solid #000000;
+                  box-sizing: border-box;
+                  transition: transform 0.15s, background 0.15s;
+                  z-index: 2;
+                  cursor: grab; // 提示可拖拽调整位置
 
-                  &.handle-left {
-                    left: 0;
-                    border-radius: 4px 0 0 4px;
-                    cursor: ew-resize; // 左句柄：调整起点 item.time
-                  }
-
-                  &.handle-right {
-                    right: 0;
-                    border-radius: 0 4px 4px 0;
-                    cursor: ew-resize; // 右句柄：调整时长 item.timeLength
-                  }
-
-                  &:hover,
                   &:active {
-                    background: rgba(255, 255, 255, 0.7);
+                    cursor: grabbing;
                   }
-                }
 
-                &:hover {
-                  box-shadow: 0 0 0 3px rgba(233, 69, 96, 0.4);
-                  transform: translateX(-8px); // 悬浮放大方便点击
-                }
+                  &.range {
+                    border-radius: 4px;
+                    transform: none;
 
-                // selected 选中态：红色背景 + 更大比例 + 红色外发光
-                &.selected {
-                  background: #e94560;
-                  transform: translateX(-8px);
-                  box-shadow: 0 0 0 3px rgba(233, 69, 96, 0.4);
+                    &:hover {
+                      transform: none;
+                    }
+
+                    &.selected {
+                      transform: none;
+                    }
+                  }
+
+                  // keyframe-handle：range 节点左右两侧的边界调整句柄
+                  // 默认半透明可见（不依赖父级 hover），hover 时提亮；pointer-events 默认 auto 可命中
+                  .keyframe-handle {
+                    position: absolute;
+                    top: 0;
+                    height: 100%;
+                    width: 6px;
+                    z-index: 3;
+                    background: rgba(255, 255, 255, 0.35);
+                    transition: background 0.15s;
+
+                    &.handle-left {
+                      left: 0;
+                      border-radius: 4px 0 0 4px;
+                      cursor: ew-resize; // 左句柄：调整起点 item.time
+                    }
+
+                    &.handle-right {
+                      right: 0;
+                      border-radius: 0 4px 4px 0;
+                      cursor: ew-resize; // 右句柄：调整时长 item.timeLength
+                    }
+
+                    &:hover,
+                    &:active {
+                      background: rgba(255, 255, 255, 0.7);
+                    }
+                  }
+
+                  &:hover {
+                    box-shadow: 0 0 0 3px rgba(233, 69, 96, 0.4);
+                    transform: translateX(-8px); // 悬浮放大方便点击
+                  }
+
+                  // selected 选中态：红色背景 + 更大比例 + 红色外发光
+                  &.selected {
+                    background: #e94560;
+                    transform: translateX(-8px);
+                    box-shadow: 0 0 0 3px rgba(233, 69, 96, 0.4);
+                  }
                 }
               }
             }
@@ -1698,6 +1763,18 @@ onUnmounted(() => {
         }
       }
     }
+  }
+
+  .timeline-ruler-leftPanel {
+    width: 174px;
+    height: 23px;
+    overflow: auto;
+    z-index: 101;
+    position: absolute;
+    top: 41px;
+    background: white;
+    border-bottom: 1px solid #0f3460;
+    border-right: solid 1px #0f3460;
   }
 
   // .timeline-ruler：顶部时间刻度标尺，高度 24px，与轨道区域独立（不参与内部滚动）
@@ -1860,7 +1937,6 @@ onUnmounted(() => {
     }
   }
 
-  // track-row：每个属性轨道一行（左 label + 右 timeline）高度 35px 与 timeline-row 一致
   .track-row {
     display: flex;
     flex-direction: row;
