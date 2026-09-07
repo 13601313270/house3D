@@ -250,8 +250,7 @@ export abstract class PointEntityClass<T extends PointObjData> extends BaseEntit
     return JSON.stringify(cacheData)
   }
 
-  // 改变3D模型的状态
-  // 例如：改变位置，旋转角度等
+  // 改变3D模型的状态，例如：改变位置，旋转角度等
   change3DMeshState(): void {
     const data = this.getData();
     this.meshGroup.position.set(data.x, data.z, data.y)
@@ -404,5 +403,14 @@ export abstract class PointEntityClass<T extends PointObjData> extends BaseEntit
 
   inAreaHoverText() {
     return this.name
+  }
+
+  getDataMeta(): { [key: string]: string } {
+    return {
+      ...super.getDataMeta(),
+      x: 'x坐标',
+      y: 'y坐标',
+      z: 'z坐标',
+    }
   }
 }

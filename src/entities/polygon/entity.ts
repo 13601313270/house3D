@@ -521,4 +521,13 @@ export class PolygonEntity extends LineEntityClass<PolygonPoint, PolygonData> {
       })
     }
   }
+
+  getDataMeta(): { [key: string]: string; } {
+    return {
+      ...super.getDataMeta(),
+      color: '颜色',
+      z: 'Z轴',
+      height: '高度',
+    }
+  }
 }

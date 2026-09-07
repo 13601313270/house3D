@@ -557,4 +557,16 @@ export class OutFileEntity extends PointCanAngleEntity<OutFileData> {
       })
     })
   }
+
+  getDataMeta(): { [key: string]: string; } {
+    return {
+      ...super.getDataMeta(),
+      fileTypeId: '文件类型',
+      bm: '材质',
+      color: '颜色',
+      canAngelZ: '是否可以旋转Z轴角度',
+      zoom: '缩放',
+      data: '数据',
+    }
+  }
 }

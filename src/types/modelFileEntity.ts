@@ -284,4 +284,11 @@ export abstract class ModelFileEntity<T extends ModelFileData> extends PointCanA
       },
     ]
   }
+
+  getDataMeta(): { [key: string]: string } {
+    return {
+      ...super.getDataMeta(),
+      scale: '缩放',
+    }
+  }
 }

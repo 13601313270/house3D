@@ -617,6 +617,17 @@ export class StaircaseEntity extends LineEntityClass<StaircasePoint, StaircaseDa
       })
     }
   }
+
+  getDataMeta(): { [key: string]: string; } {
+    return {
+      ...super.getDataMeta(),
+      thickness: '楼梯宽度',
+      color: '楼梯颜色',
+      wmt: '楼梯材质',
+      cornerType: '转角类型',
+      stepType: '台阶类型',
+    }
+  }
 }
 
 const defaultStaircaseData: StaircaseData = {

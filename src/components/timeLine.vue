@@ -51,7 +51,7 @@
               </div>
               <div :key="segment.clip.clipId" class="track-item">
                 <div v-for="item in segment.clip.columns" class="keyframe-node">
-                  {{ item.trackType }}
+                  {{ getName(segment.clip.entityId, item.trackType) }}
                 </div>
               </div>
             </div>
@@ -533,8 +533,7 @@ const contextMenu = ref<{
 // 2) 播放中 → 自动 togglePlay() 暂停
 // 3) 找到 worldApi 中的 entity 实例
 // 4) 写 editPropConfigEditCallback：DataTypeEditPanel 输入变化时回写 keyframe.value
-// 5) 读取 entity.getEditPropConfigData，过滤出当前 trackType 对应的 editItem，打开 DataTypeEditPanel
-// 6) 设置 selectedKeyframe（用于样式高亮红色选中态）
+// 5) 设置 selectedKeyframe（用于样式高亮红色选中态）
 function onKeyframeClick(time: number) {
   // 若刚结束一次关键帧拖拽 → 本次 click 不生效（避免拖拽后播放头被重置/暂停逻辑重复触发）
   if (keyframeDragMoved) {
@@ -1150,6 +1149,18 @@ function clickKeyframePoint(keyTimePoint: KeyTimePoint) {
   console.log(11, keyTimePoint.time)
   timelineState.currentTime = snapTimeToFrame(keyTimePoint.time);
   evaluateTimeline(keyTimePoint.time)
+}
+
+function getName(entityId: string, type: string) {
+  const entity = window.worldApi.children.find(vv => {
+    return vv.getOriginalData().id === entityId
+  })
+  if (entity) {
+    const meta = entity.getDataMeta();
+    const name: string = meta[type]
+    if (name) return name
+  }
+  return type
 }
 
 // onUnmounted：组件卸载时清理动画帧与事件监听，避免内存泄漏

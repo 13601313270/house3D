@@ -388,4 +388,16 @@ export class SectorEntity extends PointEntityClass<SectorData> {
   inSceneSnapLineArea() {
     return false
   }
+
+  getDataMeta(): { [key: string]: string; } {
+    return {
+      ...super.getDataMeta(),
+      r: '半径',
+      h: '高度',
+      color: '颜色',
+      mt: '材质',
+      startAngle: '开始角度',
+      endAngle: '结束角度',
+    }
+  }
 }

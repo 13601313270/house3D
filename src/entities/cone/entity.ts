@@ -235,4 +235,14 @@ export class ConeEntity extends PointEntityClass<ConeData> {
   inSceneSnapLineArea() {
     return false
   }
+
+  getDataMeta(): { [key: string]: string } {
+    return {
+      ...super.getDataMeta(),
+      r: '半径',
+      h: '高度',
+      color: '颜色',
+      mt: '材质',
+    }
+  }
 }

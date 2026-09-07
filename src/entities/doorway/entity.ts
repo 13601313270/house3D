@@ -316,4 +316,15 @@ export class DoorEntity extends EntityClassInWall<DoorData> {
       this.reBuildWall()
     })
   }
+
+  getDataMeta(): { [key: string]: string; } {
+    return {
+      ...super.getDataMeta(),
+      width: '宽度',
+      height: '高度',
+      color: '颜色',
+      mt: '材质',
+      hasBorder: '是否有门框',
+    }
+  }
 }

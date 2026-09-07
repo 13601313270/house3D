@@ -247,6 +247,15 @@ export class PeopleEntity extends ModelFileEntity<PeopleData> {
       return super.editAnimationDataColumn(column, a, b, t)
     }
   }
+
+  getDataMeta(): { [key: string]: string } {
+    return {
+      ...super.getDataMeta(),
+      height: '身高',
+      color: '颜色',
+      bone: '骨骼',
+    }
+  }
 }
 
 export function changePeopleBone(gltfScene: THREE.Group, boneListConfig: Array<{

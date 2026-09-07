@@ -72,4 +72,11 @@ export class ImportFileEntity extends ModelFileEntity<ImportFileData> {
       })
     })
   }
+
+  getDataMeta(): { [key: string]: string; } {
+    return {
+      ...super.getDataMeta(),
+      fileTypeId: '文件类型',
+    }
+  }
 }

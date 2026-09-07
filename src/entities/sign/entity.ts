@@ -584,4 +584,18 @@ export class SignEntity extends PointCanAngleEntity<SignData> {
   inSceneSnapLineArea() {
     return false
   }
+
+  getDataMeta(): { [key: string]: string; } {
+    return {
+      ...super.getDataMeta(),
+      width: '牌子宽度',
+      height: '牌子高度',
+      signZ: '牌子离地高度',
+      poleRadius: '柱子半径',
+      bgColor: '牌子背景色',
+      poleColor: '柱子颜色',
+      shape: '形状',
+      img: '图案',
+    }
+  }
 }

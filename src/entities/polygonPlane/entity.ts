@@ -523,4 +523,14 @@ export class PolygonPlaneEntity extends LineEntityClass<PolygonPlanePoint, Polyg
       })
     }
   }
+
+  getDataMeta(): { [key: string]: string; } {
+    return {
+      ...super.getDataMeta(),
+      color: '颜色',
+      z: 'Z轴',
+      ds: '是否双面可见',
+      mt: '材质',
+    }
+  }
 }

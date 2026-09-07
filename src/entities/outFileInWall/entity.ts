@@ -471,4 +471,15 @@ export class OutFileInWallEntity extends EntityClassInWall<OutFileInWallData> {
       return true;
     }
   }
+
+  getDataMeta(): { [key: string]: string; } {
+    return {
+      ...super.getDataMeta(),
+      fileTypeId: '文件类型',
+      bm: '材质',
+      color: '颜色',
+      isOuter: '是否挂在外墙',
+      canAngelZ: '是否可以旋转Z轴角度',
+    }
+  }
 }

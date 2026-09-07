@@ -228,4 +228,13 @@ export class SphereEntity extends PointEntityClass<SphereData> {
   inSceneSnapLineArea() {
     return false
   }
+
+  getDataMeta(): { [key: string]: string; } {
+    return {
+      ...super.getDataMeta(),
+      r: '半径',
+      color: '颜色',
+      mt: '材质',
+    }
+  }
 }

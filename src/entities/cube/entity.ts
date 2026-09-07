@@ -293,4 +293,15 @@ export class CubeEntity extends PointCanAngleEntity<CubeData> {
     this.meshGroup.position.set(data.x, data.z, data.y)
     this.meshGroup.rotation.y = data.angleY
   }
+
+  getDataMeta(): { [key: string]: string } {
+    return {
+      ...super.getDataMeta(),
+      width: '长度',
+      height: '宽度',
+      depth: '高度',
+      color: '颜色',
+      mt: '材质',
+    }
+  }
 }

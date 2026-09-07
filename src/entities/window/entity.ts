@@ -565,4 +565,21 @@ export class WindowEntity extends EntityClassInWall<WindowData> {
       this.reBuildWall()
     })
   }
+
+  getDataMeta(): { [key: string]: string; } {
+    return {
+      ...super.getDataMeta(),
+      width: '宽度',
+      height: '高度',
+      bqc: '包墙颜色',
+      bmt: '包墙材质',
+      tc: '门框颜色',
+      tmt: '门框材质',
+      ic: '玻璃框颜色',
+      icmt: '玻璃框材质',
+      hasBorder: '是否有门框',
+      rightOpenAngle: '右窗打开角度',
+      leftOpenAngle: '左窗打开角度'
+    }
+  }
 }

@@ -293,4 +293,14 @@ export class RegularPolygonEntity extends PointCanAngleEntity<RegularPolygonData
     this.meshGroup.position.set(data.x, data.z, data.y)
     this.meshGroup.rotation.y = data.angleY
   }
+
+  getDataMeta(): { [key: string]: string; } {
+    return {
+      ...super.getDataMeta(),
+      n: '边数',
+      r: '半径',
+      h: '高度',
+      color: '颜色',
+    }
+  }
 }

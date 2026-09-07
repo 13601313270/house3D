@@ -402,4 +402,17 @@ export class DoorEntity extends EntityClassInWall<DoorData> {
       this.reBuildWall()
     })
   }
+
+  getDataMeta(): { [key: string]: string; } {
+    return {
+      ...super.getDataMeta(),
+      width: '宽度',
+      height: '高度',
+      color: '颜色',
+      mt: '材质', // 门材质
+      hasBorder: '是否有门框', // 是否有门框
+      openType: '开门方式', // 开门方式 1内左开 2内右开 3外左开 4外右开
+      openAngle: '门打开的角度',// 门打开的角度
+    }
+  }
 }

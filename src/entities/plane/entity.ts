@@ -296,4 +296,15 @@ export class PlaneEntity extends PointCanAngleEntity<PlaneData> {
   inSceneSnapLineArea() {
     return false
   }
+
+  getDataMeta(): { [key: string]: string; } {
+    return {
+      ...super.getDataMeta(),
+      width: '宽度',
+      length: '长度',
+      color: '颜色',
+      img: '图片',
+      mt: '材质',
+    }
+  }
 }

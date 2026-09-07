@@ -82,6 +82,12 @@ export abstract class BaseEntityClass<T extends BaseObjData> {
       if (findClip) {
         Object.keys(data).forEach((key) => {
           const findTrack = findClip.columns.find(v => v.trackType === key)
+          // const canEditColumn = this.canEditAnimationDataColumn()
+          // console.log('canEditColumn', canEditColumn);
+
+          if (key === 'tip' || key === 'tipFontSize') {
+            return
+          }
           if (findTrack) {
             const keyTimePoints = [...findTrack.keyTimePoints];
             // console.log(222222, keyTimePoints)
@@ -308,15 +314,15 @@ export abstract class BaseEntityClass<T extends BaseObjData> {
     }
   }
 
-  // getDataMeta(): Partial<Record<keyof T, string>> {
-  //   return {
-  //     id: 'id 唯一标识',
-  //     tip: '提示标记',
-  //     tipFontSize: '提示信息字号',
-  //     isLocked: '是否锁定',
-  //     isHidden: '是否隐藏',
-  //   }
-  // }
+  getDataMeta(): { [key: string]: string } {
+    return {
+      id: 'id 唯一标识',
+      tip: '提示标记',
+      tipFontSize: '标记字号',
+      isLocked: '是否锁定',
+      isHidden: '是否隐藏',
+    }
+  }
 }
 
 export type EntityConstructor = new (world: GroupBaseEntity<GroupBaseData>, data: BaseObjData) => BaseEntityClass<any>;

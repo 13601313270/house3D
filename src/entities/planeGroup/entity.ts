@@ -252,4 +252,12 @@ export class PlaneGroupEntity extends GroupBaseEntity<PlaneGroupData> {
     }
     return null;
   }
+
+  getDataMeta(): { [key: string]: string; } {
+    return {
+      ...super.getDataMeta(),
+      width: '宽度',
+      height: '高度',
+    }
+  }
 }

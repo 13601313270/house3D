@@ -267,4 +267,17 @@ export class TorusEntity extends PointEntityClass<TorusData> {
   inSceneSnapLineArea() {
     return false
   }
+
+  getDataMeta(): { [key: string]: string; } {
+    return {
+      ...super.getDataMeta(),
+      r: '半径',
+      t: '管道半径',
+      arc: '弧度',
+      thetaStart: '开始角度',
+      thetaLength: '结束角度',
+      color: '颜色',
+      mt: '材质',
+    }
+  }
 }

@@ -167,4 +167,11 @@ export abstract class PointCanAngleEntity<T extends PointCanAngleObjData> extend
     }
     return super.matchHandelMoveCallback(position, matchHandelInfo)
   }
+
+  getDataMeta(): { [key: string]: string } {
+    return {
+      ...super.getDataMeta(),
+      angleY: 'y旋转角度',
+    }
+  }
 }

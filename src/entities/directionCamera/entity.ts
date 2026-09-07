@@ -617,4 +617,14 @@ export class DirectionCameraEntity extends CameraBase<DirectionCameraData> {
       })
     })
   }
+
+  getDataMeta(): { [key: string]: string; } {
+    return {
+      ...super.getDataMeta(),
+      angleY: 'y旋转角度',
+      fov: '广角角度',
+      aspectW: '宽度比',
+      aspectH: '高度比',
+    }
+  }
 }

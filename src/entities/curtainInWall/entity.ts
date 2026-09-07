@@ -354,4 +354,14 @@ export class CurtainInWallEntity extends EntityClassInWall<CurtainInWallData> {
       return true;
     }
   }
+
+  getDataMeta(): { [key: string]: string; } {
+    return {
+      ...super.getDataMeta(),
+      width: '宽度',
+      height: '高度',
+      img: '图片',
+      isOuter: '是否挂在外墙',
+    }
+  }
 }

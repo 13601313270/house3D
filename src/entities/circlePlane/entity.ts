@@ -271,4 +271,15 @@ export class CirclePlaneEntity extends PointCanAngleEntity<CirclePlaneData> {
   inSceneSnapLineArea() {
     return false
   }
+
+  getDataMeta(): { [key: string]: string } {
+    return {
+      ...super.getDataMeta(),
+      r: '半径',
+      color: '颜色',
+      img: '图片', // 图片
+      mt: '材质', // 方块材质
+      ds: '是否双面可见', // 是否双面可见
+    }
+  }
 }

@@ -382,4 +382,13 @@ export class CurtainEntity extends PointCanAngleEntity<CurtainData> {
     const data = this.getData();
     return this.name + `(${Math.round(data.width).toString()}cm×${Math.round(data.height).toString()}cm)`
   }
+
+  getDataMeta(): { [key: string]: string; } {
+    return {
+      ...super.getDataMeta(),
+      width: '宽度',
+      height: '高度',
+      img: '图片',
+    }
+  }
 }

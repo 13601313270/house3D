@@ -813,4 +813,23 @@ export class WallEntity extends LineEntityClass<WallPoint, WallData> {
       })
     }
   }
+
+  getDataMeta(): { [key: string]: string; } {
+    return {
+      ...super.getDataMeta(),
+      thickness: '墙体宽度',
+      color: '墙体颜色',
+      height: '墙体高度',
+      wmt: '墙体材质',
+      hb: '是否有地板',
+      bc: '地板颜色',
+      bmt: '地板材质',
+      ht: '是否有天花板',
+      tc: '天花板颜色',
+      tmt: '天花板材质',
+      td: '是否双面',
+      bottom: '距离地面距离',
+      cornerType: '转角类型',
+    }
+  }
 }

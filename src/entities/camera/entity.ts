@@ -591,4 +591,16 @@ export class CameraEntity extends CameraBase<CameraData> {
       })
     })
   }
+
+  getDataMeta(): { [key: string]: string } {
+    return {
+      ...super.getDataMeta(),
+      targetPositionX: '目标X轴',
+      targetPositionY: '目标Y轴',
+      targetPositionZ: '目标Z轴',
+      fov: '角度',
+      aspectW: '宽度比',
+      aspectH: '高度比',
+    }
+  }
 }
