@@ -43,8 +43,11 @@
           <div class="timeline-track-area">
             <div v-for="(segment, rowIndex) in rowsByIndex" :key="`time-row-${rowIndex}`" class="timeline-row">
               <div class="track-header-bar">
-                <span @mousedown.stop.prevent @click.stop.prevent="findObjInMap(segment)">找</span>
-                <!-- <span class="clip-name">{{ segment.clip.entityId }}</span> -->
+                <div class="headTool">
+                  <span class="clip-name">{{ segment.typeName }}</span>
+                  <img class="location" src="@/assets/location.svg" @click.stop.prevent="findObjInMap(segment)" />
+                </div>
+                <img class="typeImg" v-if="segment.typeImg" :src="segment.typeImg" alt="">
               </div>
               <div :key="segment.clip.clipId" class="track-item">
                 <div v-for="item in segment.clip.columns" class="keyframe-node">
@@ -70,32 +73,20 @@
                   <div class="keyframe-node" :style="keyFrameStyleNew(item, segment)">
                     <div v-for="keyTimePoint in item.keyTimePoints" class="keyframe-node2"
                       :class="{ range: keyTimePoint.type === 'animation' }"
-                      :style="keyFrameStyleNew2(keyTimePoint, segment)"
-                      @mousedown.stop.prevent="startKeyframeDrag($event, segment, keyTimePoint, 'move')">
+                      :style="keyFrameStyleNew2(keyTimePoint, segment)" @click="clickKeyframePoint(keyTimePoint)"
+                      @mousedown.stop.prevent="startKeyframeDrag($event, segment, item, keyTimePoint, 'move')"
+                      @contextmenu.prevent.stop="toggleClipContentFrame($event, segment, keyTimePoint)">
                       <template v-if="keyTimePoint.type === 'animation' && keyTimePoint.timeLength > 0">
                         <div class="keyframe-handle handle-left"
-                          @mousedown.stop.prevent="startKeyframeDrag($event, segment, keyTimePoint, 'trim-start')">
+                          @mousedown.stop.prevent="startKeyframeDrag($event, segment, item, keyTimePoint, 'trim-start')">
                         </div>
                         <div class="keyframe-handle handle-right"
-                          @mousedown.stop.prevent="startKeyframeDrag($event, segment, keyTimePoint, 'trim-end')">
+                          @mousedown.stop.prevent="startKeyframeDrag($event, segment, item, keyTimePoint, 'trim-end')">
                         </div>
                       </template>
                     </div>
                   </div>
                 </div>
-                <!-- <div v-for="item in getAllTimeInSegment(segment)" :key="item.time" class="keyframe-node"
-                  :style="keyFrameStyle(item, segment)"
-                  :class="{ selected: item.time === currentTime, range: item.timeLength > 0 }"
-                  @click.stop="onKeyframeClick(item.time)"
-                  @mousedown.stop.prevent="startKeyframeDrag($event, segment, item.time, 'move')"
-                  @contextmenu.prevent.stop="toggleClipContentFrame($event, segment, item.time)">
-                  <template v-if="item.timeLength > 0">
-                    <div class="keyframe-handle handle-left"
-                      @mousedown.stop.prevent="startKeyframeDrag($event, segment, item.time, 'trim-start')"></div>
-                    <div class="keyframe-handle handle-right"
-                      @mousedown.stop.prevent="startKeyframeDrag($event, segment, item.time, 'trim-end')"></div>
-                  </template>
-</div> -->
               </div>
             </div>
           </div>
@@ -124,8 +115,7 @@
         <!-- 播放头容器层：与 timeline-content-wrapper 同区域但 z-index 更高（pointer-events:none），
              仅 playhead-line 自身响应 mousedown 进行拖拽定位 -->
         <div class="playhead-container" :style="{ width: `${effectiveDuration * zoomLevel * 50}px` }">
-          <div class="playhead-line" :style="{ left: `${(currentTime / effectiveDuration) * 100}%` }"
-            @mousedown="startDragging"></div>
+          <div class="playhead-line" :style="{ left: `${(currentTime / effectiveDuration) * 100}%` }"></div>
         </div>
       </div>
     </div>
@@ -149,10 +139,14 @@ import showContextMenu from '@/utils/contextMenu';
 import evaluateTrack from '@/utils/evaluateTrack';
 import getPeopleAnimateOneTime from '@/utils/getPeopleAnimateOneTime';
 import { handleLocation, Item } from '@/utils/handleLocation';
+import { allPluginByKey } from '@/entities/index';
 
 interface ClipSegment {
   clip: ObjAllColumnData
+  typeName: string,
+  type: string,
   startTime: number
+  typeImg: string,
   endTime: number
 }
 const props = defineProps<{
@@ -213,8 +207,17 @@ onMounted(() => {
     const rows: ClipSegment[] = []
     for (let i = 0; i < timelineState.timelineData.clips.length; i++) {
       const clip = timelineState.timelineData.clips[i]
+      // console.log('clip=====', clip)
+      const entity = window.worldApi.children.find(vv => {
+        return vv.getOriginalData().id === clip.entityId
+      })
+      const plugin = allPluginByKey[entity?.type || '']
+      // console.log('plugin=====', plugin?.previewImg)
       rows.push({
         clip,
+        type: entity?.type || '',
+        typeName: entity?.name || '',
+        typeImg: plugin?.previewImg || '',
         startTime: clip.startTime,
         endTime: clip.endTime,
       })
@@ -262,7 +265,6 @@ const isShowTrackDropdown = ref(false)        // 「添加属性」下拉菜单�
 let animationFrameId: number | null = null   // requestAnimationFrame id，用于播放循环
 let lastTimestamp = 0                        // 上一帧时间戳，计算 deltaTime
 let frameAccumulator = 0                     // 帧率控制累积器（秒），targetFps>0 时生效
-let isDragging = false                       // playhead-line（红色竖线）拖拽中标志
 let isScrubbing = false                       // 空白区域按下拖动（scrub）播放头标志
 let scrubClosedPanel = false                  // scrub 时是否关闭了浮动面板（用于 click 后续逻辑）
 let isKeyframeDragging = false               // keyframe-node（关键帧节点）拖拽中标志
@@ -322,13 +324,9 @@ function getTimeFromMouseEvent(event: MouseEvent): number {
   return snapTimeToFrame(Math.max(0, Math.min(time, effectiveDuration.value)))
 }
 
-// handleTimeInfoMouseDown：timeInfo 区域 mousedown 统一分发
-// 1) 点击在 track-item / track-timeline / keyframe-node / playhead-line 上 → 忽略，让具体元素自行处理
-// 2) 当前有浮动面板打开 → 先关闭面板（点击空白收起）
-// 3) 其余空白 → 进入 scrub 模式（按下+移动=实时拖动播放头，按下+立即松开=跳转时间）
 function handleTimeInfoMouseDown(event: MouseEvent) {
   const target = event.target as HTMLElement
-  if (target.closest('.keyframe-node') || target.closest('.track-timeline') || target.closest('.track-header') || target.closest('.playhead-line')) {
+  if (target.closest('.track-timeline') || target.closest('.track-header') || target.closest('.playhead-line')) {
     return
   }
 
@@ -384,29 +382,30 @@ function onScrollLeft(event: Event) {
 // 打开面板时：暂停播放（正在播放时），并根据 track-item DOM 位置计算面板 left/top/width
 // 非VIP限制：不能编辑10秒以后的clip
 function toggleClipContent(event: MouseEvent, segment: ClipSegment) {
-  // 非VIP限制：禁止打开10秒以后的clip编辑面板
-  if (!props.isVip && segment.startTime >= FREE_DURATION) {
-    message.warning('升级VIP解锁更长时长编辑功能')
-    return
-  }
+  // 暂时关闭
+  // // 非VIP限制：禁止打开10秒以后的clip编辑面板
+  // if (!props.isVip && segment.startTime >= FREE_DURATION) {
+  //   message.warning('升级VIP解锁更长时长编辑功能')
+  //   return
+  // }
 
-  if (activeClipId.value === segment.clip.clipId) {
-    closeClipContent()
-    return
-  }
+  // if (activeClipId.value === segment.clip.clipId) {
+  //   closeClipContent()
+  //   return
+  // }
 
-  if (isPlaying.value) {
-    togglePlay()
-  }
+  // if (isPlaying.value) {
+  //   togglePlay()
+  // }
 
-  showContextMenu(event, [
-    {
-      title: '删除动画',
-      icon: '🗑',
-      danger: true,
-      callback: () => deleteClip(segment.clip.clipId),
-    },
-  ])
+  // showContextMenu(event, [
+  //   {
+  //     title: '删除动画',
+  //     icon: '🗑',
+  //     danger: true,
+  //     callback: () => deleteClip(segment.clip.clipId),
+  //   },
+  // ])
 }
 
 function keyFrameStyle(item: { time: number, timeLength: number }, segment: ClipSegment) {
@@ -458,7 +457,8 @@ function getAllTimeInSegment(segment: ClipSegment): Array<{
   return allReturn
 }
 
-function toggleClipContentFrame(event: MouseEvent, segment: ClipSegment, time: number) {
+function toggleClipContentFrame(event: MouseEvent, segment: ClipSegment, keyTimePoint: KeyTimePoint) {
+  const time = keyTimePoint.time
   // 播放中操作关键帧 → 自动暂停，避免播放与编辑冲突
   if (isPlaying.value) {
     togglePlay()
@@ -474,7 +474,7 @@ function toggleClipContentFrame(event: MouseEvent, segment: ClipSegment, time: n
         segment.clip.columns.forEach(track => {
           track.keyTimePoints.forEach(kf => {
             if (kf.time === time) {
-              track.keyTimePoints = track.keyTimePoints.filter(k => k.time !== time)
+              track.keyTimePoints = track.keyTimePoints.filter(k => k !== keyTimePoint)
             }
           })
         })
@@ -549,7 +549,7 @@ function onKeyframeClick(time: number) {
   evaluateTimeline(timelineState.currentTime)
 }
 
-// startKeyframeDrag / onKeyframeDrag / stopKeyframeDrag：关键帧节点拖拽
+// 关键帧节点拖拽
 //  三种模式（mode）：
 //   - 'move'       ：拖动节点整体，改 item.time（timeLength 不变），同时刻跨轨道的所有点一起移动
 //   - 'trim-start' ：左句柄，改 item.time，动画区间终点锚定不动（timeLength 随动）
@@ -561,6 +561,7 @@ function onKeyframeClick(time: number) {
 function startKeyframeDrag(
   event: MouseEvent,
   segment: ClipSegment,
+  column: ObjOneColumnData,
   keypoint: KeyTimePoint,
   mode: 'move' | 'trim-start' | 'trim-end' = 'move'
 ) {
@@ -574,12 +575,49 @@ function startKeyframeDrag(
   keyframeDragOriginEnds = [];
 
   (() => {
-    const kf = keypoint
-    if (kf.time !== time) return
+    if (keypoint.time !== time) return
     // move 模式收集同时刻所有点；trim 模式只收集动画段点（句柄属于 range）
-    if (mode === 'move' || kf.type === 'animation') {
-      keyframeDragPoints.push(kf)
-      keyframeDragOriginEnds.push(kf.type === 'animation' ? kf.time + kf.timeLength : kf.time)
+    if (mode === 'move' || keypoint.type === 'animation') {
+      keyframeDragPoints.push(keypoint)
+      // 把x和y绑定起来
+      if (column.trackType === 'x') {
+        const ySegment = segment.clip.columns.find(track => track.trackType === 'y')
+        if (ySegment) {
+          const yKeyPoint = ySegment.keyTimePoints.find(kf => kf.time === time)
+          if (yKeyPoint) {
+            keyframeDragPoints.push(yKeyPoint)
+          }
+        }
+      }
+      if (column.trackType === 'y') {
+        const xSegment = segment.clip.columns.find(track => track.trackType === 'x')
+        if (xSegment) {
+          const xKeyPoint = xSegment.keyTimePoints.find(kf => kf.time === time)
+          if (xKeyPoint) {
+            keyframeDragPoints.push(xKeyPoint)
+          }
+        }
+      }
+      // hack专门为摄像机的target坐标准备
+      if (column.trackType === 'targetPositionX') {
+        const targetPositionYSegment = segment.clip.columns.find(track => track.trackType === 'targetPositionY')
+        if (targetPositionYSegment) {
+          const targetPositionYKeyPoint = targetPositionYSegment.keyTimePoints.find(kf => kf.time === time)
+          if (targetPositionYKeyPoint) {
+            keyframeDragPoints.push(targetPositionYKeyPoint)
+          }
+        }
+      }
+      if (column.trackType === 'targetPositionY') {
+        const targetPositionXSegment = segment.clip.columns.find(track => track.trackType === 'targetPositionX')
+        if (targetPositionXSegment) {
+          const targetPositionXKeyPoint = targetPositionXSegment.keyTimePoints.find(kf => kf.time === time)
+          if (targetPositionXKeyPoint) {
+            keyframeDragPoints.push(targetPositionXKeyPoint)
+          }
+        }
+      }
+      keyframeDragOriginEnds.push(keypoint.type === 'animation' ? keypoint.time + keypoint.timeLength : keypoint.time)
     }
   })();
 
@@ -931,37 +969,6 @@ function playLoop() {
   animationFrameId = requestAnimationFrame(playLoop)
 }
 
-// startDragging / onDrag / stopDragging：playhead-line（红色竖线）拖拽
-//  - onDrag：基于 timeline-content-wrapper 宽度 换算 time，clamp 在 [0, effectiveDuration]
-function startDragging(e: MouseEvent) {
-  isDragging = true
-  document.addEventListener('mousemove', onDrag)
-  document.addEventListener('mouseup', stopDragging)
-  onDrag(e)
-}
-
-function onDrag(e: MouseEvent) {
-  if (!isDragging) return
-
-  const wrapper = document.querySelector('.timeline-content-wrapper') as HTMLElement
-  if (!wrapper) return
-
-  const rect = wrapper.getBoundingClientRect()
-  const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width))
-  const time = (x / rect.width) * effectiveDuration.value
-
-  // 非VIP限制：播放头不能超过免费时长
-  const maxTime = props.isVip ? effectiveDuration.value : Math.min(FREE_DURATION, effectiveDuration.value)
-  timelineState.currentTime = snapTimeToFrame(Math.max(0, Math.min(time, maxTime)))
-  evaluateTimeline(timelineState.currentTime)
-}
-
-function stopDragging() {
-  isDragging = false
-  document.removeEventListener('mousemove', onDrag)
-  document.removeEventListener('mouseup', stopDragging)
-}
-
 async function evaluateTimeline(time: number) {
   for (let i = 0; i < timelineState.timelineData.clips.length; i++) {
     const clip = timelineState.timelineData.clips[i]
@@ -1139,14 +1146,17 @@ function findObjInMap(item: ClipSegment) {
   if (!entity) return;
   handleLocation(window.worldApi, entityId)
 }
+function clickKeyframePoint(keyTimePoint: KeyTimePoint) {
+  console.log(11, keyTimePoint.time)
+  timelineState.currentTime = snapTimeToFrame(keyTimePoint.time);
+  evaluateTimeline(keyTimePoint.time)
+}
 
 // onUnmounted：组件卸载时清理动画帧与事件监听，避免内存泄漏
 onUnmounted(() => {
   if (animationFrameId) {
     cancelAnimationFrame(animationFrameId)
   }
-  document.removeEventListener('mousemove', onDrag)
-  document.removeEventListener('mouseup', stopDragging)
   document.removeEventListener('mousemove', onKeyframeDrag)
   document.removeEventListener('mouseup', stopKeyframeDrag)
 })
@@ -1334,7 +1344,7 @@ onUnmounted(() => {
       border-right: 1px solid #0f3460;
       height: 100%;
       overflow: auto;
-      z-index: 101;
+      z-index: 103;
       scrollbar-width: none;
 
       /* Firefox 隐藏滚动条 */
@@ -1351,59 +1361,80 @@ onUnmounted(() => {
 
         // timeline-track-area：所有 timeline-row 的父容器
         .timeline-track-area {
-          padding-bottom: 8px;
+          padding-bottom: 32px;
           overflow-y: auto;
+          overflow-x: hidden;
           box-sizing: border-box;
           position: relative;
 
           .timeline-row {
             position: relative;
-            border-bottom: 1px solid rgb(105 68 68 / 35%);
+            border-bottom: 2px solid rgb(99 92 255);
             display: flex;
             flex-direction: row;
 
             .track-header-bar {
               display: flex;
               align-items: center;
-              width: 40px;
+              width: 80px;
               height: 100%;
-              padding: 0 8px;
               gap: 8px;
-              font-size: 12px;
               overflow: hidden;
+              flex-direction: column;
+              flex-shrink: 0;
+              position: relative;
 
-              .clip-name {
-                font-weight: 500;
-                color: #e94560;
-                flex-shrink: 0;
-                max-width: 100px;
-                overflow: hidden;
-                text-overflow: ellipsis;
-                white-space: nowrap; // 过长 entityId 截断成 ...
+              .headTool {
+                padding: 1px 2px 1px 4px;
+                width: 100%;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                position: absolute;
+                background: #ffffff99;
+
+                .clip-name {
+                  font-size: 14px;
+                  line-height: 20px;
+                  color: #000000;
+                  font-weight: bold;
+                }
+
+                .location {
+                  width: 20px;
+                  height: 20px;
+                }
+              }
+
+              .typeImg {
+                width: 100%;
+                margin-top: 12px;
               }
             }
 
             .track-item {
               position: relative;
-              overflow: visible; // warning-badge 要溢出右上角
-              box-sizing: border-box; // 包含 border/padding 入宽度，与 track-item 计算宽度一致
-              min-width: 20px; // 极端缩放下仍能点击
+              overflow: visible;
+              box-sizing: border-box;
+              min-width: 20px;
               z-index: 5;
               top: 0;
               transition: box-shadow 0.15s;
               flex-grow: 1;
+              border-left: 1px solid rgba(105, 68, 68, 0.35);
+              margin-bottom: -1px;
 
               .keyframe-node {
                 min-width: 16px;
-                height: 20px;
+                height: 19px;
                 position: relative;
                 border-bottom: 1px solid rgba(105, 68, 68, 0.35);
-                box-sizing: border-box;
                 transition: transform 0.15s, background 0.15s;
                 z-index: 2;
-                cursor: grab;
                 font-size: 14px;
                 line-height: 14px;
+                text-align: right;
+                padding-right: 8px;
               }
             }
           }
@@ -1450,8 +1481,7 @@ onUnmounted(() => {
           margin-left: -1px;
           height: 100%;
           background: rgba(233, 69, 96, 0.6);
-          cursor: ew-resize; // 左右箭头光标，提示可拖拽
-          pointer-events: auto; // 单独开启事件（覆盖父级的 none）
+          pointer-events: none;
           box-shadow: 0 0 6px rgba(233, 69, 96, 0.3);
         }
       }
@@ -1461,9 +1491,8 @@ onUnmounted(() => {
         display: flex;
         flex-direction: column;
 
-        // timeline-track-area：所有 timeline-row 的父容器
         .timeline-track-area {
-          padding-bottom: 8px;
+          padding-bottom: 32px;
           overflow-y: auto;
           box-sizing: border-box;
           position: relative;
@@ -1472,7 +1501,8 @@ onUnmounted(() => {
           // 同一行内的多个 clip 时间互不冲突（由区间图着色算法保证）
           .timeline-row {
             position: relative;
-            border-bottom: 1px solid rgb(105 68 68 / 35%);
+            border-bottom: 2px solid rgb(99 92 255);
+            min-height: 92px;
 
             // track-item：单个 clip 的视觉表示，绝对定位 left / width 按百分比占 timeline-row
             .track-item {
@@ -1483,6 +1513,7 @@ onUnmounted(() => {
               z-index: 5;
               top: 0;
               transition: box-shadow 0.15s;
+              margin-bottom: -1px;
 
               // warning：同一 entityId 多个 clip 时间重叠时，替换为橙色 + 脉冲动画
               &.warning {
@@ -1566,27 +1597,12 @@ onUnmounted(() => {
 
                 .keyframe-node {
                   min-width: 16px;
-                  height: 16px;
+                  height: 19px;
                   position: relative;
                   background: #635cff38;
                   box-sizing: border-box;
                   transition: transform 0.15s, background 0.15s;
                   z-index: 2;
-                  cursor: grab; // 提示可拖拽调整位置
-                  margin: 2px 0 1px 0;
-
-                  // &.range {
-                  //   border-radius: 4px;
-                  //   transform: none;
-
-                  //   &:hover {
-                  //     transform: none;
-                  //   }
-
-                  //   &.selected {
-                  //     transform: none;
-                  //   }
-                  // }
 
                   // keyframe-handle：range 节点左右两侧的边界调整句柄
                   // 默认半透明可见（不依赖父级 hover），hover 时提亮；pointer-events 默认 auto 可命中

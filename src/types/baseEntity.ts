@@ -307,6 +307,16 @@ export abstract class BaseEntityClass<T extends BaseObjData> {
       return a + (b - a) * time
     }
   }
+
+  // getDataMeta(): Partial<Record<keyof T, string>> {
+  //   return {
+  //     id: 'id 唯一标识',
+  //     tip: '提示标记',
+  //     tipFontSize: '提示信息字号',
+  //     isLocked: '是否锁定',
+  //     isHidden: '是否隐藏',
+  //   }
+  // }
 }
 
 export type EntityConstructor = new (world: GroupBaseEntity<GroupBaseData>, data: BaseObjData) => BaseEntityClass<any>;
