@@ -1531,8 +1531,6 @@ onUnmounted(() => {
           box-sizing: border-box;
           position: relative;
 
-
-
           .head {
             height: 34px;
             background-color: #eeeeea;
@@ -1652,9 +1650,6 @@ onUnmounted(() => {
                 }
               }
             }
-
-
-
           }
 
           .timeline-row {
