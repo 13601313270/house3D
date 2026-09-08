@@ -679,7 +679,7 @@ onMounted(async () => {
   const canvasRect = canvasContainer.getBoundingClientRect()
   const dx = canvasRect.width / 2
   const dy = canvasRect.height / 2
-  scene2D = canvas2DSceneManage.addScene(
+  window.scene2D = canvas2DSceneManage.addScene(
     [
       canvas2DRef.value!,
       canvas2DActionRef.value!,
@@ -693,16 +693,16 @@ onMounted(async () => {
       y: dy,
     }
   );
-  bindDanvas2DSceneDefaultEvent(scene2D)
-  scene2D.onClick(() => {
+  bindDanvas2DSceneDefaultEvent(window.scene2D)
+  window.scene2D.onClick(() => {
     contextMenu.value = null
   })
-  scene2D.onMouseDown((point) => {
+  window.scene2D.onMouseDown((point) => {
     contextMenu.value = null;
     if (window.globalEditGroup.insertTempObj) return;
     isMenuing.value = point.button === 2
   })
-  scene2D.onMouseUp((point) => {
+  window.scene2D.onMouseUp((point) => {
     if (isMenuing.value) {
       handleContextMenu(point)
       canvas2DSceneManage.list[0].isPaningAngel = false
@@ -713,7 +713,7 @@ onMounted(async () => {
     canvas2DSceneManage.list[0].matchedHandelInfo = null
     canvas2DSceneManage.list[0].isPanningScreen = false
   })
-  scene2D.onInsertAdding((value) => {
+  window.scene2D.onInsertAdding((value) => {
     insertAdding.value = value
   })
 
@@ -1420,15 +1420,14 @@ function changeObjTypeSelect(type: string, baseObj: BaseEntityClass<any>) {
 
     (() => {
       if (window.globalEditGroup.insertTempObj instanceof PointEntityClass) {
-        const sense = scene2D
-        sense.matchHandelObj = window.globalEditGroup.insertTempObj
-        sense.matchedHandelInfo = {
+        window.scene2D.matchHandelObj = window.globalEditGroup.insertTempObj
+        window.scene2D.matchedHandelInfo = {
           id: window.globalEditGroup.insertTempObj.getData().id, // 对象ID
           type: window.globalEditGroup.insertTempObj.type,
           index: 0,
           dist: 0,
         }
-        sense.matchHandelStartPoint = { x: 0, y: 0 }
+        window.scene2D.matchHandelStartPoint = { x: 0, y: 0 }
       }
     })();
     currentTool.value = type
