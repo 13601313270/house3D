@@ -11,11 +11,12 @@ import { OrigionSnapPoint } from '@/types/baseEntity'
 import { GroupBaseEntity } from '@/types/groupBase/entity'
 import { GroupBaseData } from '@/types/groupBase';
 import { PointEntityClass } from '@/types/pointEntity';
+import { PointWithTargetEntityClass } from '@/types/pointWithTargetEntity';
 
 const img = new Image()
 img.src = kamera || ''
 
-export class CameraEntity extends PointEntityClass<CameraData> {
+export class CameraEntity extends PointWithTargetEntityClass<CameraData> {
   name: string = '相机'
   type: string = 'camera'
   color: string = '#0c7f25'
