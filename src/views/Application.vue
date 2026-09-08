@@ -267,7 +267,7 @@ import { CameraState } from '@/types/camera'
 import { allFileKeys } from '@/entities'
 import initAllPlugin from '@/entities/initAllPlugin'
 import { PointEntityClass } from '@/types/pointEntity'
-import { BaseObjData, HandelInfo, LineObjData } from '@/types/map2d'
+import { BaseObjData, HandelInfo, LineObjData, PointObjData } from '@/types/map2d'
 import { CameraData } from '@/entities/camera/index.d'
 import { ImportFileType, ObjOutputFileType } from '@/entities/allObjs'
 import ObjTypeSelect from '@/components/ObjTypeSelect.vue'
@@ -283,7 +283,6 @@ import { LineEntityClass } from '@/types/lineEntity';
 import AllWorldObjSelect from '@/components/AllWorldObjSelect.vue'
 import message from '@/utils/message';
 import importOutObj from '@/utils/importOutObj';
-import { CameraBase } from '@/types/CameraBase';
 import { sleep } from '@/utils/sleep';
 import saveWorld, { fileData } from '@/utils/saveWorld';
 import AiPic from '@/components/aiPic.vue'
@@ -518,16 +517,15 @@ const activeCameraIndex = ref(0)
 async function changeCamera2(activeIndex: number = 0) {
   const allCameraTypeKey = ['camera', 'directionCamera'];
   const allTypesCameraList: CameraData[] = []
-  const allTypesCameraObjList: CameraBase<CameraData>[] = []
+  const allTypesCameraObjList: PointEntityClass<PointObjData>[] = []
   allCameraTypeKey.forEach(typeKey => {
     if (worldApi.getTypeListEntity(typeKey)) {
       worldApi.getTypeListEntity(typeKey).forEach(item => {
-        if (item instanceof CameraBase) {
+        if (item instanceof PointEntityClass && item.realyCamera) {
           allTypesCameraObjList.push(item);
         }
       })
     }
-    console.log('typeKey=======', typeKey, worldApi.getTypeObjectsData(typeKey))
     allTypesCameraList.push(...worldApi.getTypeObjectsData(typeKey) as CameraData[]);
   })
 
@@ -659,7 +657,9 @@ onMounted(async () => {
       }
     }
     lockObjCount.value = worldApi.lockedObjList.length
-    const findCamera = objList.find((item) => item instanceof CameraBase)
+    const findCamera = objList.find((item) => {
+      return item instanceof PointEntityClass && item.realyCamera;
+    })
     if (findCamera) {
       if (type === 'remove' && activeCameraIndex.value === allCamera.value.length - 1) {
         activeCameraIndex.value = 0;

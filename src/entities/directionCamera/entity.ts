@@ -8,14 +8,14 @@ import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
 import kamera from './kamera.png'
 import { MatchCircleArea } from '@/utils/matchArea'
 import { OrigionSnapPoint } from '@/types/baseEntity'
-import { CameraBase } from '@/types/CameraBase'
 import { GroupBaseEntity } from '@/types/groupBase/entity';
 import { GroupBaseData } from '@/types/groupBase';
+import { PointEntityClass } from '@/types/pointEntity';
 
 const img = new Image()
 img.src = kamera || ''
 
-export class DirectionCameraEntity extends CameraBase<DirectionCameraData> {
+export class DirectionCameraEntity extends PointEntityClass<DirectionCameraData> {
   name: string = '相机(相机位置+方向)'
   type: string = 'directionCamera'
   color: string = '#0c7f25'
