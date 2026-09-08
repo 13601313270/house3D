@@ -51,7 +51,7 @@ export abstract class EntityInWallWithSubtract<T extends ObjInWallWithSubtractDa
     );
     subtractGeometry.rotateY(data.angle * -1);
     const cylinderBrush = new Brush(subtractGeometry);
-    cylinderBrush.position.set(data.x, height / 2 + data.z, data.y)
+    cylinderBrush.position.set(data.x, height / 2 + (data.bottom || 0) + data.z, data.y)
     cylinderBrush.updateMatrixWorld()
     const firstMesh = wallGroup.children.find(child => child instanceof THREE.Mesh) as THREE.Mesh;
     const boxBrush = new Brush(firstMesh.geometry.clone());// 主体

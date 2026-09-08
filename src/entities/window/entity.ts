@@ -443,13 +443,13 @@ export class WindowEntity extends EntityInWallWithSubtract<WindowData> {
   getEditPropConfigData(data: WindowData): editItem[] {
     return [
       {
-        id: 'bottom',
+        id: 'z',
         label: '距离地面',
         dataType: 'number',
-        min: 0,
-        max: Infinity,
+        min: -100,
+        max: 100,
         step: 1,
-        value: data.bottom,
+        value: data.z,
       },
       {
         id: 'width',

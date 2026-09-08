@@ -10,7 +10,7 @@ export default function (): DefaultItem<DoubleDoorData>[] {
     z: 0,
     width: 200,
     height: 210,
-    bottom: 0,
+    bottom: 0, // 不推荐使用，建议使用z轴高度
     leftOpenAngle: 0,
     rightOpenAngle: 0,
     angle: 0,

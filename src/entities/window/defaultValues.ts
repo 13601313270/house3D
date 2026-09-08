@@ -8,11 +8,11 @@ export default function (): DefaultItem<WindowData>[] {
     wallId: '',
     x: 0,
     y: 0,
-    z: 0,
+    z: 40,
     width: 120,
     height: 120,
     angle: 0,
-    bottom: 40,
+    bottom: 0, // 不推荐使用，建议使用z轴高度
     bqc: '#3498db',
     bmt: 1,
     tc: '#3498db',

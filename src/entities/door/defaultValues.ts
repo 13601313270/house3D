@@ -10,7 +10,7 @@ export default function (): DefaultItem<DoorData>[] {
     z: 0,
     width: 110,
     height: 180,
-    bottom: 0,
+    bottom: 0, // 不推荐使用，建议使用z轴高度
     openAngle: 0,
     angle: 0,
     hasBorder: true,
