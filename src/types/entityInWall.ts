@@ -57,7 +57,6 @@ export abstract class EntityInWall<T extends ObjInWallData> extends PointEntityC
       this.associationEntity.forEach(entity => {
         if (entity.associationEntity.includes(this)) {
           entity.associationEntity.splice(entity.associationEntity.indexOf(this), 1)
-          entity.markObjectIsDirty()
         }
       })
       this.associationEntity = []
@@ -68,25 +67,24 @@ export abstract class EntityInWall<T extends ObjInWallData> extends PointEntityC
       if (!obj.associationEntity.includes(this)) {
         obj.associationEntity.push(this)
       }
-      this.markObjectIsDirty()
-      this.associationEntity.forEach(entity => {
-        if (entity.associationEntity.includes(this)) {
-          // 双向规定原有的关联对象dirty
-          entity.associationEntity.forEach(associationEntity => {
-            if (associationEntity.associationEntity.includes(entity)) {
-              associationEntity.markObjectIsDirty()
-              associationEntity.reCreate3DMeshAnd2DPreviewIfNeed()
-              associationEntity.change3DMeshState()
-            }
-          })
-        }
-      });
+      // this.associationEntity.forEach(entity => {
+      //   if (entity.associationEntity.includes(this)) {
+      //     // 双向规定原有的关联对象dirty
+      //     entity.associationEntity.forEach(associationEntity => {
+      //       if (associationEntity.associationEntity.includes(entity)) {
+      //         associationEntity.markObjectIsDirty()
+      //         associationEntity.reCreate3DMeshAnd2DPreviewIfNeed()
+      //         associationEntity.change3DMeshState()
+      //       }
+      //     })
+      //   }
+      // });
       this.reCreate3DMeshAnd2DPreviewIfNeed();
-      this.associationEntity.forEach(entity => {
-        if (entity.associationEntity.includes(this)) {
-          entity.change3DMeshState()
-        }
-      });
+      // this.associationEntity.forEach(entity => {
+      //   if (entity.associationEntity.includes(this)) {
+      //     entity.change3DMeshState()
+      //   }
+      // });
       this.change3DMeshState()
       return true;
     }
@@ -107,13 +105,13 @@ export abstract class EntityInWall<T extends ObjInWallData> extends PointEntityC
       this.associationEntity.forEach(entity => {
         if (entity.associationEntity.includes(this)) {
           entity.associationEntity.splice(entity.associationEntity.indexOf(this), 1)
-          entity.markObjectIsDirty()
-          entity.setData({})// 如果不加这一行。一个墙上两个门，移动一个，另一个会消失
+          // entity.markObjectIsDirty()
+          // entity.setData({})// 如果不加这一行。一个墙上两个门，移动一个，另一个会消失
         }
       })
       this.associationEntity = []
       // 双向添加新的关联对象
-      this.markObjectIsDirty()
+      // this.markObjectIsDirty()
       return true;
     }
   }

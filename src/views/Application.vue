@@ -568,14 +568,14 @@ async function changeCamera2(activeIndex: number = 0) {
           if (cameraItem.active === false) {
             // @ts-ignore
             cameraItem.active = true
-            cameraItem.markObjectIsDirty()
+            // cameraItem.markObjectIsDirty()
           }
         } else {
           // @ts-ignore
           if (cameraItem.active === true) {
             // @ts-ignore
             cameraItem.active = false
-            cameraItem.markObjectIsDirty()
+            // cameraItem.markObjectIsDirty()
           }
         }
       })

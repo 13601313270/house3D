@@ -232,14 +232,14 @@ export abstract class PointEntityClass<T extends PointObjData> extends BaseEntit
     })();
   }
 
-  public markObjectIsDirty() {
-    // 这里注意防止死循环
-    super.markObjectIsDirty()
-    if (this.spriteGroup && this.parentEntity) {
-      this.parentEntity.group.remove(this.spriteGroup)
-      this.spriteGroup = null
-    }
-  }
+  // public markObjectIsDirty() {
+  //   // 这里注意防止死循环
+  //   super.markObjectIsDirty()
+  //   if (this.spriteGroup && this.parentEntity) {
+  //     this.parentEntity.group.remove(this.spriteGroup)
+  //     this.spriteGroup = null
+  //   }
+  // }
 
   // 当前对象是否需要重新生成3D模型状态
   create3DUnionKey(): string {

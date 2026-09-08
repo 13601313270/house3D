@@ -3,11 +3,6 @@ import { LineObjData, Point } from './map2d'
 import { BaseEntityClass } from './baseEntity'
 
 export abstract class LineEntityClass<V, T extends LineObjData<V>> extends BaseEntityClass<T> {
-  public markObjectIsDirty() {
-    // 这里注意防止死循环
-    super.markObjectIsDirty()
-  }
-
   // 当前对象是否需要重新生成3D模型状态
   create3DUnionKey(): string {
     const cacheData = {

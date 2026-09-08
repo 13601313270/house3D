@@ -19,6 +19,8 @@ export class WallEntity extends LineEntityClass<WallPoint, WallData> {
   name: string = '墙'
   type: string = 'wall'
   private circleRadius = 6
+  // bindEntityInWallWithSubtractChanged 防抖定时器（每个墙实例独立持有，互不干扰）
+  private bindEntityInWallWithSubtractChangedTimer: ReturnType<typeof setTimeout> | null = null
 
   constructor(world: GroupBaseEntity<GroupBaseData>, data: WallData) {
     if (data.cornerType === undefined) {
@@ -456,7 +458,7 @@ export class WallEntity extends LineEntityClass<WallPoint, WallData> {
       y,
     } = position
     if (matchHandelInfo.index !== undefined) {
-      this.markObjectIsDirty()
+      // this.markObjectIsDirty()
       if (matchHandelInfo.index % 2 === 0) {
         // 拖拽点
         const index = matchHandelInfo.index / 2;
@@ -520,7 +522,21 @@ export class WallEntity extends LineEntityClass<WallPoint, WallData> {
   }
 
   bindEntityInWallWithSubtractChanged() {
-    console.log('bindEntityInWallWithSubtractChanged=========3')
+    // 防抖：300ms 内重复调用会重置计时，仅在最后一次调用 300ms 后执行一次，避免高频触发
+    if (this.bindEntityInWallWithSubtractChangedTimer) {
+      clearTimeout(this.bindEntityInWallWithSubtractChangedTimer)
+    }
+    this.bindEntityInWallWithSubtractChangedTimer = setTimeout(() => {
+      this.bindEntityInWallWithSubtractChangedTimer = null
+      this.doBindEntityInWallWithSubtractChanged()
+    }, 300)
+  }
+
+  private doBindEntityInWallWithSubtractChanged() {
+    // this.reCreate3DMeshAnd2DPreviewIfNeed()
+    console.trace('bindEntityInWallWithSubtractChanged=========3')
+    this.markObjectIsDirty()
+    this.reCreate3DMeshAnd2DPreviewIfNeed()
     const allHole: Array<{
       x: number,
       y: number,
@@ -810,7 +826,7 @@ export class WallEntity extends LineEntityClass<WallPoint, WallData> {
         },
         ...configList,
       ], (val) => {
-        this.markObjectIsDirty()
+        // this.markObjectIsDirty()
         this.setData({
           // ...data,
           ...val,
@@ -859,7 +875,7 @@ export class WallEntity extends LineEntityClass<WallPoint, WallData> {
         },
         ...wallBaseConfig
       ], (val) => {
-        this.markObjectIsDirty()
+        // this.markObjectIsDirty()
         const points = [...data.points]
         points[pointIndex] = {
           ...points[pointIndex],

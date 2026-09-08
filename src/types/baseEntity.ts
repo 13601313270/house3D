@@ -182,18 +182,18 @@ export abstract class BaseEntityClass<T extends BaseObjData> {
     this.reCreate3DMeshAnd2DPreviewIfNeed()
     this.change3DMeshState()
     this.reBuildBoundingBoxData();
-    // 双向规定原有的关联对象dirty
-    this.associationEntity.forEach(associationEntity => {
-      if (associationEntity.associationEntity.includes(this)) {
-        associationEntity.markObjectIsDirty()
-      }
-    })
-    this.associationEntity.forEach(associationEntity => {
-      if (associationEntity.associationEntity.includes(this)) {
-        associationEntity.reCreate3DMeshAnd2DPreviewIfNeed()
-        associationEntity.change3DMeshState()
-      }
-    })
+    // // 双向规定原有的关联对象dirty
+    // this.associationEntity.forEach(associationEntity => {
+    //   if (associationEntity.associationEntity.includes(this)) {
+    //     associationEntity.markObjectIsDirty()
+    //   }
+    // })
+    // this.associationEntity.forEach(associationEntity => {
+    //   if (associationEntity.associationEntity.includes(this)) {
+    //     associationEntity.reCreate3DMeshAnd2DPreviewIfNeed()
+    //     associationEntity.change3DMeshState()
+    //   }
+    // })
     if (this.parentEntity) {
       this.parentEntity._callObjDataChange(this)
     }
@@ -207,13 +207,12 @@ export abstract class BaseEntityClass<T extends BaseObjData> {
   protected cacheKeyStr = '';
   public markObjectIsDirty() {
     if (this.cacheKeyStr) {
-      console.log(1)
       this.cacheKeyStr = ''
-      if (this.associationEntity.length > 0) {
-        this.associationEntity.forEach(entity => {
-          entity.markObjectIsDirty()
-        })
-      }
+      // if (this.associationEntity.length > 0) {
+      //   this.associationEntity.forEach(entity => {
+      //     entity.markObjectIsDirty()
+      //   })
+      // }
     }
   }
 
@@ -243,7 +242,7 @@ export abstract class BaseEntityClass<T extends BaseObjData> {
   beforeRemove() {
     if (!this.parentEntity) return
     const scene: THREE.Scene | THREE.Group = this.parentEntity.group;
-    this.markObjectIsDirty()
+    // this.markObjectIsDirty()
     scene.remove(this.meshGroup)
     if (this.associationEntity.length > 0) {
       this.associationEntity.forEach(entity => {
