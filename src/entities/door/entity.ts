@@ -3,7 +3,6 @@ import { HandelInfo, Point } from '@/types/map2d'
 // @ts-ignore
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { DoorData } from './index.d'
-import { Brush, Evaluator, SUBTRACTION } from 'three-bvh-csg';
 import { editItem } from '@/utils/editItem';
 import { getMaterialById } from '@/material';
 import { MatchRectArea } from '@/utils/matchArea';
@@ -214,40 +213,9 @@ export class DoorEntity extends EntityInWallWithSubtract<DoorData> {
     // group.position.set(data.x, data.height / 2, data.y)
     group.rotateY(data.angle * -1);
     if (wall && data.wallPointId > -1 && wall.meshGroup.children[data.wallPointId]) {
-      const boxLength = wall.meshGroup.children.filter(v => 'isWall' in v).length;
-      const countPerPoint = wall.getData().points.length === 2 ? 1 : ((boxLength - 1) / (wall.getData().points.length - 2))
-      const wallGroup = wall.meshGroup.children[data.wallPointId * countPerPoint];
-      // console.log('wallGroup', wallGroup.children)
-
-      const { width, height, depth } = this.getSubtract()
-      const subtractGeometry = new THREE.BoxGeometry(
-        width,
-        height,
-        depth === -1 ? wallThickness + 10 : depth
-      );
-      subtractGeometry.rotateY(data.angle * -1);
-      // subtractGeometry.position.set(data.x, data.height / 2 - 1, data.y)
-      const cylinderBrush = new Brush(subtractGeometry);
-      cylinderBrush.position.set(data.x, data.height / 2 + data.z, data.y)
-      cylinderBrush.updateMatrixWorld()
-      const firstMesh = wallGroup.children.find(child => child instanceof THREE.Mesh) as THREE.Mesh;
-      const boxBrush = new Brush(firstMesh.geometry.clone());// 主体
-      boxBrush.position.set(
-        wallGroup.position.x,
-        wallGroup.position.y,
-        wallGroup.position.z
-      )
-      // 3. 执行布尔运算 (立方体减去圆柱体)
-      const evaluator = new Evaluator();
-      // 注意：这里 SUBTRACTION 的顺序很重要：主体减去洞模型
-      const resultGeometry = evaluator.evaluate(boxBrush, cylinderBrush, SUBTRACTION);
-      if (firstMesh) {
-        firstMesh.geometry = resultGeometry.geometry
-      }
-      return group
-    } else {
-      return group
+      this.subWall()
     }
+    return group
   }
 
   getBoundingBoxData(): [THREE.Vector3, THREE.Vector3, THREE.Vector3] {
