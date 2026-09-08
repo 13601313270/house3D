@@ -538,7 +538,6 @@ export class WindowEntity extends EntityInWallWithSubtract<WindowData> {
       this.setData({
         ...val,
       })
-      this.reBuildWall()
     })
   }
 

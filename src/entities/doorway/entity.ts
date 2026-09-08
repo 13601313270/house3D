@@ -292,7 +292,6 @@ export class DoorWayEntity extends EntityInWallWithSubtract<DoorData> {
       this.setData({
         ...val,
       })
-      this.reBuildWall()
     })
   }
 

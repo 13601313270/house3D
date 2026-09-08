@@ -416,29 +416,17 @@ const initThree = () => {
                   x: camera1MouseMoveStartPos.x + worldX,
                   y: camera1MouseMoveStartPos.y + worldZ,
                 })
-                if (entity instanceof EntityInWall) {
-                  entity.reBuildWall()
-                }
               } else if (moveType === 'z') {
                 // z 轴(垂直)：屏幕纵向位移
                 entity.setData({
                   z: camera1MouseMoveStartPos.z + (deltaY * -1),
                 })
-                if (entity instanceof EntityInWall) {
-                  entity.reBuildWall()
-                }
               } else if (moveType === 'x') {
                 const { worldX } = computeHorizontalPlaneDelta(deltaX, deltaY)
                 entity.setData({ x: camera1MouseMoveStartPos.x + worldX })
-                if (entity instanceof EntityInWall) {
-                  entity.reBuildWall()
-                }
               } else {
                 const { worldZ } = computeHorizontalPlaneDelta(deltaX, deltaY)
                 entity.setData({ y: camera1MouseMoveStartPos.y + worldZ })
-                if (entity instanceof EntityInWall) {
-                  entity.reBuildWall()
-                }
               }
             }
           }

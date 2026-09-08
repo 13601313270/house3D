@@ -430,7 +430,6 @@ export class DoubleDoorEntity extends EntityInWallWithSubtract<DoubleDoorData> {
       this.setData({
         ...val,
       })
-      this.reBuildWall()
     })
   }
 

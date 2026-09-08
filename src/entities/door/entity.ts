@@ -376,7 +376,6 @@ export class DoorEntity extends EntityInWallWithSubtract<DoorData> {
       this.setData({
         ...val,
       })
-      this.reBuildWall()
     })
   }
 
