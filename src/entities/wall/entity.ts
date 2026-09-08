@@ -532,11 +532,10 @@ export class WallEntity extends LineEntityClass<WallPoint, WallData> {
     }, 300)
   }
 
+  private cacheAllHoleKey = ''
   private doBindEntityInWallWithSubtractChanged() {
     // this.reCreate3DMeshAnd2DPreviewIfNeed()
-    console.trace('bindEntityInWallWithSubtractChanged=========3')
-    this.markObjectIsDirty()
-    this.reCreate3DMeshAnd2DPreviewIfNeed()
+
     const allHole: Array<{
       x: number,
       y: number,
@@ -566,6 +565,15 @@ export class WallEntity extends LineEntityClass<WallPoint, WallData> {
         })
       }
     })
+
+    const newKey = JSON.stringify(allHole);
+    if (this.cacheAllHoleKey === newKey) {
+      return;
+    }
+    this.cacheAllHoleKey = newKey
+    console.trace('bindEntityInWallWithSubtractChanged=========3')
+    this.markObjectIsDirty()
+    this.reCreate3DMeshAnd2DPreviewIfNeed()
     // const data = this.getData();
     const wallThickness = this.getData().thickness;
     const boxLength = this.meshGroup.children.filter(v => 'isWall' in v).length;
