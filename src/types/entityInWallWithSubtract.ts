@@ -7,6 +7,8 @@ import { BaseEntityClass, MatchSnapPoint } from "./baseEntity";
 import getNearestWall from "@/utils/getNearestWall";
 import { EntityInWall } from './entityInWall';
 import { WallEntity } from '@/entities/wall/entity';
+import { GroupBaseEntity } from './groupBase/entity';
+import { GroupBaseData } from './groupBase';
 
 // x/y 平面拖动面用的移动图标纹理（全实体共享，避免重复加载）
 const movePlaneTexture = new THREE.TextureLoader().load('/icons/move.png')
@@ -21,6 +23,18 @@ export interface NearestWallResult {
 }
 
 export abstract class EntityInWallWithSubtract<T extends ObjInWallWithSubtractData> extends EntityInWall<T> {
+  constructor(world: GroupBaseEntity<GroupBaseData>, data: T) {
+    super(world, data)
+    if (data && data.wallId && this.parentEntity) {
+      const wall = this.parentEntity.getTypeListEntity('wall').find((entity) => entity.getData().id === data.wallId);
+      if (wall && wall instanceof WallEntity) {
+        this.associationEntity.push(wall)
+        wall.associationEntity.push(this)
+        wall.bindEntityInWallWithSubtractChanged()
+      }
+    }
+  }
+
   abstract getSubtract(): {
     width: number,
     height: number,

@@ -534,8 +534,6 @@ export class WallEntity extends LineEntityClass<WallPoint, WallData> {
 
   private cacheAllHoleKey = ''
   private doBindEntityInWallWithSubtractChanged() {
-    // this.reCreate3DMeshAnd2DPreviewIfNeed()
-
     const allHole: Array<{
       x: number,
       y: number,

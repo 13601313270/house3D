@@ -18,17 +18,6 @@ export class DoubleDoorEntity extends EntityInWallWithSubtract<DoubleDoorData> {
   type: string = 'doubleDoor'
   private circleRadius = 6
 
-  constructor(world: GroupBaseEntity<GroupBaseData>, door: DoubleDoorData) {
-    super(world, door)
-    if (door && door.wallId && this.parentEntity) {
-      const wall = this.parentEntity.getTypeListEntity('wall').find((entity) => entity.getData().id === door.wallId);
-      if (wall) {
-        this.associationEntity.push(wall)
-        wall.associationEntity.push(this)
-      }
-    }
-  }
-
   draw2DPreview(ctx: CanvasRenderingContext2D, zoomLevel: number): void {
     const data = this.getData();
     let wallThickness = 10;

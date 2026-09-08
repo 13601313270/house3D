@@ -18,17 +18,6 @@ export class DoorEntity extends EntityInWallWithSubtract<DoorData> {
   type: string = 'door'
   private circleRadius = 6
 
-  constructor(world: GroupBaseEntity<GroupBaseData>, door: DoorData) {
-    super(world, door)
-    if (door && door.wallId && this.parentEntity) {
-      const wall = this.parentEntity.getTypeListEntity('wall').find((entity) => entity.getData().id === door.wallId);
-      if (wall) {
-        this.associationEntity.push(wall)
-        wall.associationEntity.push(this)
-      }
-    }
-  }
-
   draw2DPreview(ctx: CanvasRenderingContext2D, zoomLevel: number): void {
     const data = this.getData();
     let wallThickness = 10;

@@ -117,7 +117,7 @@
         <div class="canvas-container" :style="{ opacity: (isSplitting || isSplitTimeLine) ? 0 : 1 }">
           <canvas ref="canvas2DRef" class="drawing-canvas" />
           <canvas ref="canvas2DActionRef" class="drawing-canvas" />
-          <div ref="handelMouse2D" class="drawing-canvas" style="background-color: #ff00004a;"></div>
+          <div ref="handelMouse2D" class="drawing-canvas"></div>
 
           <!-- <img v-if="isPaningAngel && isPaningAngelMoved" class="protractor" src="protractor.png"
             :style="{ left: panningScreenCenter.x + 'px', top: panningScreenCenter.y + 'px' }" /> -->

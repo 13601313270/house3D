@@ -16,19 +16,6 @@ export class WindowEntity extends EntityInWallWithSubtract<WindowData> {
   type: string = 'window'
   private circleRadius = 6
 
-  constructor(world: GroupBaseEntity<GroupBaseData>, window: WindowData) {
-    super(world, window)
-    if (window && window.wallId && this.parentEntity) {
-      const wall = this.parentEntity.getTypeListEntity('wall').find((entity) => {
-        return entity.getData().id === window.wallId
-      });
-      if (wall) {
-        this.associationEntity.push(wall)
-        wall.associationEntity.push(this)
-      }
-    }
-  }
-
   draw2DPreview(ctx: CanvasRenderingContext2D, zoomLevel: number): void {
     const data = this.getData();
     let wallThickness = 10;
