@@ -453,50 +453,6 @@ export class CameraEntity extends PointWithTargetEntityClass<CameraData> {
     return null;
   }
 
-  matchHandelInfo(x: number, y: number) {
-    const data = this.getData();
-    const dist = Math.hypot(x - data.x, y - data.y)
-    if (dist < this.circleRadius + 3) {
-      return {
-        index: 0,
-        type: this.type,
-        id: data.id,
-        dist,
-      }
-    }
-    const distToTarget = Math.hypot(x - data.targetPositionX, y - data.targetPositionY)
-    if (distToTarget < this.circleRadius + 3) {
-      return {
-        index: 1,
-        type: this.type,
-        id: data.id,
-        dist: distToTarget,
-      }
-    }
-    return null;
-  }
-
-  matchHandelMoveCallback(position: {
-    x: number,
-    y: number,
-  }, matchHandelInfo: HandelInfo) {
-    const { x, y } = position
-    const data = this.getData();
-    if (matchHandelInfo.index === 1) {
-      this.setData({
-        // ...data,
-        targetPositionX: x,
-        targetPositionY: y,
-      })
-    } else {
-      this.setData({
-        // ...data,
-        x,
-        y,
-      })
-    }
-  }
-
   inSceneSnapPointArea() {
     return false
   }

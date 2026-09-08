@@ -33,7 +33,9 @@ export interface PointObjData extends BaseObjData {
 
 // 点状对象，带有一个角度属性数据类
 export interface PointWithTargetObjData extends PointObjData {
-
+  targetPositionX: number
+  targetPositionY: number
+  targetPositionZ: number
 }
 
 export interface PointCanAngleObjData extends PointObjData {
