@@ -1,5 +1,6 @@
 import * as THREE from 'three'
-import { Point, HandelInfo } from '@/types/map2d'
+import { Brush, Evaluator, SUBTRACTION } from 'three-bvh-csg';
+import { Point, HandelInfo, ObjInWallWithSubtractData } from '@/types/map2d'
 import { WallData, WallPoint } from './index.d'
 import { createAllWallFromPoints } from '@/utils/createAllWallFromPoints'
 import { editItem } from '@/utils/editItem'
@@ -12,6 +13,7 @@ import { allSnapFromType, MatchSnapPoint, OrigionSnapPoint } from '@/types/baseE
 import { LineEntityClass } from '@/types/lineEntity'
 import { GroupBaseEntity } from '@/types/groupBase/entity'
 import { GroupBaseData } from '@/types/groupBase'
+import { EntityInWallWithSubtract } from '@/types/entityInWallWithSubtract'
 
 export class WallEntity extends LineEntityClass<WallPoint, WallData> {
   name: string = '墙'
@@ -517,10 +519,70 @@ export class WallEntity extends LineEntityClass<WallPoint, WallData> {
     }
   }
 
-  // markObjectIsDirty() {
-  //   console.log('markObjectIsDirty---wall')
-  //   super.markObjectIsDirty()
-  // }
+  bindEntityInWallWithSubtractChanged() {
+    console.log('bindEntityInWallWithSubtractChanged=========3')
+    const allHole: Array<{
+      x: number,
+      y: number,
+      z: number,
+      angle: number,
+      bottom: number,
+      width: number,
+      height: number,
+      depth: number,
+      wallPointId: number,
+    }> = []
+    this.associationEntity.forEach(subEntity => {
+      if (subEntity.associationEntity.includes(this) && subEntity instanceof EntityInWallWithSubtract) {
+        const subData: ObjInWallWithSubtractData = subEntity.getData()
+        const paramsPos = {
+          x: subData.x,
+          y: subData.y,
+          z: subData.z,
+          angle: subData.angle,
+          bottom: subData.bottom,
+          wallPointId: subData.wallPointId
+        };
+        const paramSize = subEntity.getSubtract()
+        allHole.push({
+          ...paramsPos,
+          ...paramSize,
+        })
+      }
+    })
+    // const data = this.getData();
+    const wallThickness = this.getData().thickness;
+    const boxLength = this.meshGroup.children.filter(v => 'isWall' in v).length;
+    const countPerPoint = this.getData().points.length === 2 ? 1 : ((boxLength - 1) / (this.getData().points.length - 2))
+    allHole.forEach(v => {
+      console.log('bindEntityInWallWithSubtractChanged---3', v)
+      const wallGroup = this.meshGroup.children[v.wallPointId * countPerPoint];
+      const { width, height, depth } = v
+      const subtractGeometry = new THREE.BoxGeometry(
+        width,
+        height,
+        depth === -1 ? wallThickness + 10 : depth
+      );
+      subtractGeometry.rotateY(v.angle * -1);
+      const cylinderBrush = new Brush(subtractGeometry);
+      cylinderBrush.position.set(v.x, height / 2 + (v.bottom || 0) + v.z, v.y)
+      cylinderBrush.updateMatrixWorld()
+      const firstMesh = wallGroup.children.find(child => child instanceof THREE.Mesh) as THREE.Mesh;
+      const boxBrush = new Brush(firstMesh.geometry.clone());// 主体
+      boxBrush.position.set(
+        wallGroup.position.x,
+        wallGroup.position.y,
+        wallGroup.position.z
+      )
+      // 3. 执行布尔运算 (立方体减去圆柱体)
+      const evaluator = new Evaluator();
+      // 注意：这里 SUBTRACTION 的顺序很重要：主体减去洞模型
+      const resultGeometry = evaluator.evaluate(boxBrush, cylinderBrush, SUBTRACTION);
+      if (firstMesh) {
+        firstMesh.geometry = resultGeometry.geometry
+      }
+    })
+  }
 
   // 本对象某个HandelInfo进入一个吸附对象的区域
   inSceneSnapPointArea(

@@ -419,11 +419,6 @@ export class StaircaseEntity extends LineEntityClass<StaircasePoint, StaircaseDa
     }
   }
 
-  // markObjectIsDirty() {
-  //   console.log('markObjectIsDirty---wall')
-  //   super.markObjectIsDirty()
-  // }
-
   inSceneSnapPointArea() {
     return false;
   }
