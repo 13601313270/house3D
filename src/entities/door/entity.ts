@@ -4,7 +4,6 @@ import { HandelInfo, Point } from '@/types/map2d'
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { DoorData } from './index.d'
 import { Brush, Evaluator, SUBTRACTION } from 'three-bvh-csg';
-import { EntityInWall } from '@/types/entityInWall'
 import { editItem } from '@/utils/editItem';
 import { getMaterialById } from '@/material';
 import { MatchRectArea } from '@/utils/matchArea';
@@ -113,6 +112,14 @@ export class DoorEntity extends EntityInWallWithSubtract<DoorData> {
 
   glbObj: THREE.Group | null = null;
 
+  getSubtract() {
+    return {
+      width: this.getData().width,
+      height: this.getData().height,
+      depth: -1,
+    }
+  }
+
   create3DMesh(): THREE.Group {
     const data = this.getData();
     const group = new THREE.Group()
@@ -211,10 +218,12 @@ export class DoorEntity extends EntityInWallWithSubtract<DoorData> {
       const countPerPoint = wall.getData().points.length === 2 ? 1 : ((boxLength - 1) / (wall.getData().points.length - 2))
       const wallGroup = wall.meshGroup.children[data.wallPointId * countPerPoint];
       // console.log('wallGroup', wallGroup.children)
+
+      const { width, height, depth } = this.getSubtract()
       const subtractGeometry = new THREE.BoxGeometry(
-        data.width,
-        data.height,
-        wallThickness + 10
+        width,
+        height,
+        depth === -1 ? wallThickness + 10 : depth
       );
       subtractGeometry.rotateY(data.angle * -1);
       // subtractGeometry.position.set(data.x, data.height / 2 - 1, data.y)

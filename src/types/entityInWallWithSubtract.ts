@@ -19,4 +19,9 @@ export interface NearestWallResult {
 }
 
 export abstract class EntityInWallWithSubtract<T extends ObjInWallWithSubtractData> extends EntityInWall<T> {
+  abstract getSubtract(): {
+    width: number,
+    height: number,
+    depth: number, // -1代表贯穿墙
+  }
 }

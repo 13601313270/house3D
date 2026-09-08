@@ -99,6 +99,14 @@ export class DoorEntity extends EntityInWallWithSubtract<DoorData> {
     ctx.restore(); // 恢复原始状态
   }
 
+  getSubtract() {
+    return {
+      width: this.getData().width,
+      height: this.getData().height,
+      depth: -1,
+    }
+  }
+
   create3DMesh(): THREE.Group {
     const data = this.getData();
     const group = new THREE.Group()
@@ -152,10 +160,12 @@ export class DoorEntity extends EntityInWallWithSubtract<DoorData> {
       const boxLength = wall.meshGroup.children.filter(v => 'isWall' in v).length;
       const countPerPoint = wall.getData().points.length === 2 ? 1 : ((boxLength - 1) / (wall.getData().points.length - 2))
       const wallGroup = wall.meshGroup.children[data.wallPointId * countPerPoint];
+
+      const { width, height, depth } = this.getSubtract()
       const subtractGeometry = new THREE.BoxGeometry(
-        data.width,
-        data.height,
-        wallThickness + 10
+        width,
+        height,
+        depth === -1 ? wallThickness + 10 : depth
       );
       subtractGeometry.rotateY(data.angle * -1);
       // subtractGeometry.position.set(data.x, data.height / 2 - 1, data.y)

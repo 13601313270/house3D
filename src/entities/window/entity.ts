@@ -172,6 +172,14 @@ export class WindowEntity extends EntityInWallWithSubtract<WindowData> {
     })
   }
 
+  getSubtract() {
+    return {
+      width: this.getData().width,
+      height: this.getData().height,
+      depth: -1,
+    }
+  }
+
   create3DMesh(): THREE.Group {
     let wallThickness = 10;
     const data = this.getData();
@@ -405,10 +413,11 @@ export class WindowEntity extends EntityInWallWithSubtract<WindowData> {
       const countPerPoint = wall.getData().points.length === 2 ? 1 : ((boxLength - 1) / (wall.getData().points.length - 2))
       const wallGroup = wall.meshGroup.children[data.wallPointId * countPerPoint];
       if (wallGroup) {
+        const { width, height, depth } = this.getSubtract()
         const subtractGeometry = new THREE.BoxGeometry(
-          data.width,
-          data.height,
-          wallThickness + 10
+          width,
+          height,
+          depth === -1 ? wallThickness + 10 : depth
         );
         subtractGeometry.rotateY(data.angle * -1);
         const cylinderBrush = new Brush(subtractGeometry);
