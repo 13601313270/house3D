@@ -1,4 +1,4 @@
-import { DoorEntity } from "./entity"
+import { DoorWayEntity } from "./entity"
 import PluginType from "../pluginType"
 import defaultValues from "./defaultValues"
 
@@ -6,7 +6,7 @@ const DoorwayPlugin: PluginType = {
   name: '洞',
   key: 'doorway',
   type: 'house',
-  entity: DoorEntity,
+  entity: DoorWayEntity,
   objType: 'point',
   defaultValues,
   previewImg: '/toolType/doorway.png',

@@ -11,7 +11,7 @@ import { GroupBaseEntity } from '@/types/groupBase/entity';
 import { GroupBaseData } from '@/types/groupBase';
 import { EntityInWallWithSubtract } from '@/types/entityInWallWithSubtract';
 
-export class DoorEntity extends EntityInWallWithSubtract<DoorData> {
+export class DoorWayEntity extends EntityInWallWithSubtract<DoorData> {
   name: string = '洞'
   type: string = 'doorway'
   private circleRadius = 6
