@@ -303,7 +303,6 @@ function bindDanvas2DSceneDefaultEvent(sense: Canvas2DScene) {
         //     dist: 0,
         //   }
         //   sense.matchHandelStartPoint = { x: xInGroup, y: yInGroup }
-        //   // tipTexts = window.globalEditGroup.insertTempObj.setPrepareState(xInGroup, yInGroup)
         // } else {
         //   window.globalEditGroup.insertTempObj.matchHandelMoveCallback({
         //     x: xInGroup,
@@ -714,27 +713,6 @@ function bindDanvas2DSceneDefaultEvent(sense: Canvas2DScene) {
   //         // }
   //         // sense.matchHandelStartPoint = { x: xInGroup, y: yInGroup }
   //         // document.addEventListener('mousemove', mouseMove)
-  //         // if (window.globalEditGroup.insertTempObj instanceof EntityClassInWall) {
-  //         //   sense.matchHandelObj = window.globalEditGroup.insertTempObj
-  //         //   sense.matchedHandelInfo = {
-  //         //     id: window.globalEditGroup.insertTempObj.getData().id, // 对象ID
-  //         //     type: window.globalEditGroup.insertTempObj.type,
-  //         //     index: 0, // 移动
-  //         //     dist: 0,
-  //         //   }
-  //         //   sense.matchHandelStartPoint = { x: xInGroup, y: yInGroup }
-  //         //   // tipTexts = window.globalEditGroup.insertTempObj.setPrepareState(xInGroup, yInGroup)
-  //         // } else {
-  //         //   window.globalEditGroup.insertTempObj.matchHandelMoveCallback({
-  //         //     x: xInGroup,
-  //         //     y: yInGroup
-  //         //   }, {
-  //         //     id: window.globalEditGroup.insertTempObj.getData().id, // 对象ID
-  //         //     type: window.globalEditGroup.insertTempObj.type,
-  //         //     index: 0, // 移动
-  //         //     dist: 0,
-  //         //   })
-  //         // }
 
   //         if (tipTexts && tipTexts.length > 0) {
   //           const canvasAction = sense.canvasList[0]!;
