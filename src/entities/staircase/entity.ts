@@ -454,9 +454,6 @@ export class StaircaseEntity extends LineEntityClass<StaircasePoint, StaircaseDa
     return false;
   }
 
-  setPrepareState(): void {
-  }
-
   getEditPropConfigData(data: StaircaseData): editItem[] {
     return [
       {

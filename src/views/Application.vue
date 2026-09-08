@@ -602,24 +602,27 @@ window.get3DCanvas = () => {
 }
 
 onMounted(async () => {
-  const res = await axios.get('https://api.studying1v1.com/video/objectFileType')
-  const data = res.data as Array<{
-    id: number,
-    name: string,
-    child: {
-      id: string,
+  try {
+    const res = await axios.get('https://api.studying1v1.com/video/objectFileType')
+    const data = res.data as Array<{
+      id: number,
       name: string,
-      type: number,
-    }[]
-  }>;
-  axios.get('https://api.studying1v1.com/video/scene/demoList').then(res => {
-    console.log('res.data', res.data)
-    allDemos.value = res.data
-    if (res.data.length) {
-      showDemos.value = true
-    }
-  })
-  ObjFileTypes.value = data;
+      child: {
+        id: string,
+        name: string,
+        type: number,
+      }[]
+    }>;
+    axios.get('https://api.studying1v1.com/video/scene/demoList').then(res => {
+      console.log('res.data', res.data)
+      allDemos.value = res.data
+      if (res.data.length) {
+        showDemos.value = true
+      }
+    })
+    ObjFileTypes.value = data;
+  } catch (e) {
+  }
 
   worldApi.onWorldChange((type, objList) => {
     if (['add', 'remove'].includes(type)) {

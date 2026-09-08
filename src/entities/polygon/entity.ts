@@ -344,11 +344,6 @@ export class PolygonEntity extends LineEntityClass<PolygonPoint, PolygonData> {
     }
   }
 
-  // markObjectIsDirty() {
-  //   console.log('markObjectIsDirty---wall')
-  //   super.markObjectIsDirty()
-  // }
-
   // 本对象某个HandelInfo进入一个吸附对象的区域
   inSceneSnapPointArea(
     newPosition: MatchSnapPoint,
