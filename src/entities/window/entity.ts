@@ -1,6 +1,6 @@
 import * as THREE from 'three'
 import { Point, HandelInfo } from '@/types/map2d'
-import { EntityClassInWall } from '@/types/entityInWall'
+import { EntityInWall } from '@/types/entityInWall'
 import { WindowData } from './index.d'
 import { Brush, Evaluator, SUBTRACTION } from 'three-bvh-csg';
 import { GroupBaseEntity } from '@/types/groupBase/entity';
@@ -11,8 +11,9 @@ import { isPointInRotatedRect } from '@/utils/isPointInRotatedRect'
 import { allSnapFromType } from '@/types/baseEntity';
 import { WallEntity } from '../wall/entity';
 import { GroupBaseData } from '@/types/groupBase';
+import { EntityInWallWithSubtract } from '@/types/entityInWallWithSubtract';
 
-export class WindowEntity extends EntityClassInWall<WindowData> {
+export class WindowEntity extends EntityInWallWithSubtract<WindowData> {
   name: string = '窗户'
   type: string = 'window'
   private circleRadius = 6

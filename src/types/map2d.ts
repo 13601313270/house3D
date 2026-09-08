@@ -53,3 +53,7 @@ export interface ObjInWallData extends PointObjData {
   bottom: number // 距离地面
   angle: number
 }
+
+export interface ObjInWallWithSubtractData extends ObjInWallData {
+
+}

@@ -4,7 +4,7 @@ import { HandelInfo, Point } from '@/types/map2d'
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { DoubleDoorData } from './index.d'
 import { Brush, Evaluator, SUBTRACTION } from 'three-bvh-csg';
-import { EntityClassInWall } from '@/types/entityInWall'
+import { EntityInWall } from '@/types/entityInWall'
 import { editItem } from '@/utils/editItem';
 import { getMaterialById } from '@/material';
 import { MatchRectArea } from '@/utils/matchArea';
@@ -13,8 +13,9 @@ import { allSnapFromType } from '@/types/baseEntity';
 import { WallEntity } from '../wall/entity';
 import { GroupBaseEntity } from '@/types/groupBase/entity';
 import { GroupBaseData } from '@/types/groupBase';
+import { EntityInWallWithSubtract } from '@/types/entityInWallWithSubtract';
 
-export class DoubleDoorEntity extends EntityClassInWall<DoubleDoorData> {
+export class DoubleDoorEntity extends EntityInWallWithSubtract<DoubleDoorData> {
   name: string = '对开门'
   type: string = 'doubleDoor'
   private circleRadius = 6

@@ -13,7 +13,7 @@ import canvas2DSceneManage from "./canvas2DSceneManage";
 import setHoverPoint from "./setHoverPoint";
 import { getHandleInAreaInfoByXY, getHandleInfoByXY } from "./getHandleInfoByXY";
 import { PlaneGroupEntity } from "@/entities/planeGroup/entity";
-import { EntityClassInWall } from "@/types/entityInWall";
+import { EntityInWall } from "@/types/entityInWall";
 import { PointWithTargetEntityClass } from "@/types/pointWithTargetEntity";
 
 function getTempPointInsertDataLastAngel(sense: Canvas2DScene) {
@@ -294,7 +294,7 @@ function bindDanvas2DSceneDefaultEvent(sense: Canvas2DScene) {
         //     dist: 0,
         //   })
         // }
-        // if (window.globalEditGroup.insertTempObj instanceof EntityClassInWall) {
+        // if (window.globalEditGroup.insertTempObj instanceof EntityInWall) {
         //   sense.matchHandelObj = window.globalEditGroup.insertTempObj
         //   sense.matchedHandelInfo = {
         //     id: window.globalEditGroup.insertTempObj.getData().id, // 对象ID

@@ -1,6 +1,6 @@
-import { ObjInWallData } from '@/types/map2d'
+import { ObjInWallWithSubtractData } from '@/types/map2d'
 
-export type WindowData = ObjInWallData & {
+export type WindowData = ObjInWallWithSubtractData & {
   width: number
   height: number
   bqc: string // 包墙颜色

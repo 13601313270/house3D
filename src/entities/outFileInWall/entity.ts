@@ -10,14 +10,14 @@ import { MTLLoader } from 'three/addons/loaders/MTLLoader.js';
 // @ts-ignore
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { getMaterialById } from '@/material'
-import { EntityClassInWall } from '@/types/entityInWall'
+import { EntityInWall } from '@/types/entityInWall'
 import { MatchCircleArea, MatchRectArea } from '@/utils/matchArea'
 import { isPointInRotatedRect } from '@/utils/isPointInRotatedRect'
 import { OrigionSnapPoint } from '@/types/baseEntity'
 import { WallEntity } from '../wall/entity'
 import { modify3DMesh, outFileDataExtension } from '@/outFilePlus'
 
-export class OutFileInWallEntity extends EntityClassInWall<OutFileInWallData> {
+export class OutFileInWallEntity extends EntityInWall<OutFileInWallData> {
   name: string = '外部文件'
   type: string = 'outFileInWall'
   color: string = '#0c7f25'

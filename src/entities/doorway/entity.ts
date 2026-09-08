@@ -2,7 +2,7 @@ import * as THREE from 'three'
 import { HandelInfo, Point } from '@/types/map2d'
 import { DoorData } from './index.d'
 import { Brush, Evaluator, SUBTRACTION } from 'three-bvh-csg';
-import { EntityClassInWall } from '@/types/entityInWall'
+import { EntityInWall } from '@/types/entityInWall'
 import { editItem } from '@/utils/editItem';
 import { getMaterialById } from '@/material';
 import { MatchRectArea } from '@/utils/matchArea';
@@ -11,8 +11,9 @@ import { allSnapFromType } from '@/types/baseEntity';
 import { WallEntity } from '../wall/entity';
 import { GroupBaseEntity } from '@/types/groupBase/entity';
 import { GroupBaseData } from '@/types/groupBase';
+import { EntityInWallWithSubtract } from '@/types/entityInWallWithSubtract';
 
-export class DoorEntity extends EntityClassInWall<DoorData> {
+export class DoorEntity extends EntityInWallWithSubtract<DoorData> {
   name: string = '洞'
   type: string = 'doorway'
   private circleRadius = 6

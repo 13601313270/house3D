@@ -17,7 +17,7 @@ export interface NearestWallResult {
   angle: number
 }
 
-export abstract class EntityClassInWall<T extends ObjInWallData> extends PointEntityClass<T> {
+export abstract class EntityInWall<T extends ObjInWallData> extends PointEntityClass<T> {
   getHandelList(): Array<'+x' | '-x' | '+y' | '-y' | '+z' | 'xy'> {
     return ['+z']
   }

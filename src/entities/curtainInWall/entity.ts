@@ -3,14 +3,14 @@ import { HandelInfo, PointObjData, Point } from '@/types/map2d'
 import { CurtainInWallData } from './index.d'
 import { PointEntityClass } from '@/types/pointEntity'
 import { editItem } from '@/utils/editItem'
-import { EntityClassInWall } from '@/types/entityInWall'
+import { EntityInWall } from '@/types/entityInWall'
 import { MatchRectArea } from '@/utils/matchArea'
 import { isPointInRotatedRect } from '@/utils/isPointInRotatedRect'
 import { importImgFileHead } from '../allObjs'
 import { OrigionSnapPoint } from '@/types/baseEntity'
 import { WallEntity } from '../wall/entity'
 
-export class CurtainInWallEntity extends EntityClassInWall<CurtainInWallData> {
+export class CurtainInWallEntity extends EntityInWall<CurtainInWallData> {
   name: string = '方形幕布(挂在墙上)'
   type: string = 'curtainInWall'
   color: string = '#0c7f25'

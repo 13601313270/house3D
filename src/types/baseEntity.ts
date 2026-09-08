@@ -207,6 +207,7 @@ export abstract class BaseEntityClass<T extends BaseObjData> {
   protected cacheKeyStr = '';
   public markObjectIsDirty() {
     if (this.cacheKeyStr) {
+      console.log(1)
       this.cacheKeyStr = ''
       if (this.associationEntity.length > 0) {
         this.associationEntity.forEach(entity => {

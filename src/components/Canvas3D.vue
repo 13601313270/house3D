@@ -10,8 +10,7 @@ import { CameraState, OrthographicCamera } from '@/types/camera'
 import { PointEntityClass } from '@/types/pointEntity';
 import { BaseEntityClass } from '@/types/baseEntity';
 import WorldGroup from '@/world/world';
-import { EntityClassInWall } from '@/types/entityInWall';
-// import { EntityClassInWall } from '@/types/entityInWall';
+import { EntityInWall } from '@/types/entityInWall';
 
 const props = defineProps<{
   cameraState: CameraState,//  | OrthographicCamera,
@@ -417,7 +416,7 @@ const initThree = () => {
                   x: camera1MouseMoveStartPos.x + worldX,
                   y: camera1MouseMoveStartPos.y + worldZ,
                 })
-                if (entity instanceof EntityClassInWall) {
+                if (entity instanceof EntityInWall) {
                   entity.reBuildWall()
                 }
               } else if (moveType === 'z') {
@@ -425,19 +424,19 @@ const initThree = () => {
                 entity.setData({
                   z: camera1MouseMoveStartPos.z + (deltaY * -1),
                 })
-                if (entity instanceof EntityClassInWall) {
+                if (entity instanceof EntityInWall) {
                   entity.reBuildWall()
                 }
               } else if (moveType === 'x') {
                 const { worldX } = computeHorizontalPlaneDelta(deltaX, deltaY)
                 entity.setData({ x: camera1MouseMoveStartPos.x + worldX })
-                if (entity instanceof EntityClassInWall) {
+                if (entity instanceof EntityInWall) {
                   entity.reBuildWall()
                 }
               } else {
                 const { worldZ } = computeHorizontalPlaneDelta(deltaX, deltaY)
                 entity.setData({ y: camera1MouseMoveStartPos.y + worldZ })
-                if (entity instanceof EntityClassInWall) {
+                if (entity instanceof EntityInWall) {
                   entity.reBuildWall()
                 }
               }
