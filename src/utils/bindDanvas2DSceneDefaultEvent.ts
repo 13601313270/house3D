@@ -14,6 +14,7 @@ import setHoverPoint from "./setHoverPoint";
 import { getHandleInAreaInfoByXY, getHandleInfoByXY } from "./getHandleInfoByXY";
 import { PlaneGroupEntity } from "@/entities/planeGroup/entity";
 import { EntityClassInWall } from "@/types/entityInWall";
+import { PointWithTargetEntityClass } from "@/types/pointWithTargetEntity";
 
 function getTempPointInsertDataLastAngel(sense: Canvas2DScene) {
   const tempPointInsertData = sense.tempPointInsertData
@@ -44,6 +45,7 @@ function bindDanvas2DSceneDefaultEvent(sense: Canvas2DScene) {
     document.removeEventListener('mouseup', mouseUp)
   }
   function mouseMove(e: MouseEvent) {
+    console.log('ddddraw')
     const rect = sense.canvasList[0].getBoundingClientRect()
     const mouseXInCanvas = Math.round(e.clientX - rect.left)
     const mouseYInCanvas = Math.round(e.clientY - rect.top)
@@ -325,7 +327,7 @@ function bindDanvas2DSceneDefaultEvent(sense: Canvas2DScene) {
       }
       const handleInfoList = getHandleInfoByXY(window.globalEditGroup, xInGroup, yInGroup)
       if (handleInfoList) {
-        const { classInfo, handle, startPoint } = handleInfoList
+        const { classInfo, handle } = handleInfoList
         if (!classInfo.getData().isLocked) {
           sense.matchHandelObj = classInfo
           sense.matchedHandelInfo = handle
@@ -462,9 +464,39 @@ function bindDanvas2DSceneDefaultEvent(sense: Canvas2DScene) {
         } else {
           setHoverPoint(null)
         }
-        let tipTexts: string[] = []
+        const tipTexts: string[] = []
         if (window.globalEditGroup.insertTempObj instanceof PointEntityClass) {
-          tipTexts = window.globalEditGroup.insertTempObj.setPrepareState(xInGroup, yInGroup)
+          // sense.matchHandelObj = window.globalEditGroup.insertTempObj
+          // sense.matchedHandelInfo = {
+          //   id: window.globalEditGroup.insertTempObj.getData().id, // 对象ID
+          //   type: window.globalEditGroup.insertTempObj.type,
+          //   index: 0, // 移动
+          //   dist: 0,
+          // }
+          // sense.matchHandelStartPoint = { x: xInGroup, y: yInGroup }
+          // document.addEventListener('mousemove', mouseMove)
+          // if (window.globalEditGroup.insertTempObj instanceof EntityClassInWall) {
+          //   sense.matchHandelObj = window.globalEditGroup.insertTempObj
+          //   sense.matchedHandelInfo = {
+          //     id: window.globalEditGroup.insertTempObj.getData().id, // 对象ID
+          //     type: window.globalEditGroup.insertTempObj.type,
+          //     index: 0, // 移动
+          //     dist: 0,
+          //   }
+          //   sense.matchHandelStartPoint = { x: xInGroup, y: yInGroup }
+          //   // tipTexts = window.globalEditGroup.insertTempObj.setPrepareState(xInGroup, yInGroup)
+          // } else {
+          //   window.globalEditGroup.insertTempObj.matchHandelMoveCallback({
+          //     x: xInGroup,
+          //     y: yInGroup
+          //   }, {
+          //     id: window.globalEditGroup.insertTempObj.getData().id, // 对象ID
+          //     type: window.globalEditGroup.insertTempObj.type,
+          //     index: 0, // 移动
+          //     dist: 0,
+          //   })
+          // }
+
           if (tipTexts && tipTexts.length > 0) {
             const canvasAction = sense.canvasList[0]!;
             const ctxAction = canvasAction.getContext('2d')!
@@ -641,13 +673,8 @@ function bindDanvas2DSceneDefaultEvent(sense: Canvas2DScene) {
       } else if (window.globalEditGroup.insertTempObj instanceof PointEntityClass) {
         if (sense.insertAdding === false) {
           sense.triggerInsertAdding(true)
-          if (window.globalEditGroup.insertTempObj instanceof EntityClassInWall) {
-            sense.insertAdding = true
-            await window.globalEditGroup.add(window.globalEditGroup.insertTempObj.type, [window.globalEditGroup.insertTempObj.getData()])
-          } else {
-            sense.insertAdding = true
-            await window.globalEditGroup.add(window.globalEditGroup.insertTempObj.type, [window.globalEditGroup.insertTempObj.getData()])
-          }
+          sense.insertAdding = true
+          await window.globalEditGroup.add(window.globalEditGroup.insertTempObj.type, [window.globalEditGroup.insertTempObj.getData()])
           window.globalEditGroup.insertTempObj.beforeRemove()
           window.globalEditGroup.insertTempObj = null;
           setTimeout(() => {

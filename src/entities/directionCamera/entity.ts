@@ -544,20 +544,6 @@ export class DirectionCameraEntity extends PointEntityClass<DirectionCameraData>
     return false;
   }
 
-  setPrepareState(x: number, y: number): string[] {
-    // const targetPosition = this.getTargetPosition();
-    const angleY = 0;// Math.atan2(y - data.y, x - data.x)
-    this.setData({
-      // ...this.getData(),
-      x,
-      y,
-      angleY,
-      // targetPositionX: x + 100,
-      // targetPositionY: y,
-    })
-    return [];
-  }
-
   getEditPropConfigData(data: DirectionCameraData): editItem[] {
     return [
       {

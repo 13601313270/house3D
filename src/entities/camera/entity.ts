@@ -478,17 +478,6 @@ export class CameraEntity extends PointWithTargetEntityClass<CameraData> {
     return false;
   }
 
-  setPrepareState(x: number, y: number): string[] {
-    this.setData({
-      // ...this.getData(),
-      x,
-      y,
-      targetPositionX: x + 100,
-      targetPositionY: y,
-    })
-    return [];
-  }
-
   getEditPropConfigData(data: CameraData): editItem[] {
     return [
       {

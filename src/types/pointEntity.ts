@@ -378,15 +378,6 @@ export abstract class PointEntityClass<T extends PointObjData> extends BaseEntit
   // 当前对象不在任何一根吸附线的区域
   notInSceneSnapLineArea(): void { }
 
-  // 待添加状态（鼠标新增悬浮的时候）
-  setPrepareState(x: number, y: number): string[] {
-    this.setData({
-      x,
-      y,
-    } as Partial<T>)
-    return [];
-  }
-
   beforeRemove() {
     super.beforeRemove()
     if (!this.parentEntity) return

@@ -304,6 +304,7 @@ import ImportModelConfirm from '@/components/ImportModelConfirm.vue';
 import handleLoadedObject from '@/utils/handleLoadedObject';
 // @ts-ignore
 import initDefaultData from '@/utils/initDefaultData.json'
+import Canvas2DScene from '@/utils/canvas2DScene';
 
 const canvas2DRef = ref<HTMLCanvasElement | null>(null)
 const canvas2DActionRef = ref<HTMLCanvasElement | null>(null)
@@ -599,6 +600,8 @@ window.get3DCanvas = () => {
   }
 }
 
+let scene2D: Canvas2DScene
+
 onMounted(async () => {
   try {
     const res = await axios.get('https://api.studying1v1.com/video/objectFileType')
@@ -673,7 +676,7 @@ onMounted(async () => {
   const canvasRect = canvasContainer.getBoundingClientRect()
   const dx = canvasRect.width / 2
   const dy = canvasRect.height / 2
-  const scene2D = canvas2DSceneManage.addScene(
+  scene2D = canvas2DSceneManage.addScene(
     [
       canvas2DRef.value!,
       canvas2DActionRef.value!,
@@ -1409,7 +1412,20 @@ function changeObjTypeSelect(type: string, baseObj: BaseEntityClass<any>) {
     window.globalEditGroup.insertTempObj = null
   }
   if (allFileKeys.includes(type as any)) {
-    window.globalEditGroup.insertTempObj = baseObj
+    window.globalEditGroup.insertTempObj = baseObj;
+
+    // (() => {
+    //   const sense = scene2D
+    //   sense.matchHandelObj = window.globalEditGroup.insertTempObj
+    //   sense.matchedHandelInfo = {
+    //     id: window.globalEditGroup.insertTempObj.getData().id, // 对象ID
+    //     type: window.globalEditGroup.insertTempObj.type,
+    //     index: 0, // 移动
+    //     dist: 0,
+    //   }
+    //   sense.matchHandelStartPoint = { x: 0, y: 0 }
+    //   document.addEventListener('mousemove', mouseMove)
+    // })();
     currentTool.value = type
   }
 }

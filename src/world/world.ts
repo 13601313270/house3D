@@ -126,10 +126,6 @@ class WorldGroup extends GroupBaseEntity<WorldData> {
     return null;
   }
 
-  setPrepareState(x: number, y: number): string[] {
-    return [];
-  }
-
   draw2DActionHandle(
     ctx: CanvasRenderingContext2D,
     zoomLevel: number,
