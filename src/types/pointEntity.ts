@@ -13,6 +13,8 @@ export abstract class PointEntityClass<T extends PointObjData> extends BaseEntit
   boundingBox: THREE.Group
   all3DActionHandel!: THREE.Group
   spriteGroup: THREE.Group | null = null
+  // 对应真实场景中的相机对象
+  realyCamera: THREE.PerspectiveCamera | THREE.OrthographicCamera | null = null
 
   constructor(world: GroupBaseEntity<GroupBaseData> | null, data: T) {
     super(world, data);
