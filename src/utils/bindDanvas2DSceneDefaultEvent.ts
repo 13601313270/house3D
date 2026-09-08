@@ -44,11 +44,12 @@ function bindDanvas2DSceneDefaultEvent(sense: Canvas2DScene) {
     document.removeEventListener('mousemove', mouseMove)
     document.removeEventListener('mouseup', mouseUp)
   }
-  function mouseMove(e: MouseEvent) {
-    console.log('ddddraw')
-    const rect = sense.canvasList[0].getBoundingClientRect()
-    const mouseXInCanvas = Math.round(e.clientX - rect.left)
-    const mouseYInCanvas = Math.round(e.clientY - rect.top)
+  function mouseMove(point: {
+    x: number,
+    y: number,
+  }) {
+    const mouseXInCanvas = point.x
+    const mouseYInCanvas = point.y
     const self = sense;
     const worldData = window.worldApi.getData();
     const angleY = worldData.angleY;// + groupAngle;
@@ -259,6 +260,242 @@ function bindDanvas2DSceneDefaultEvent(sense: Canvas2DScene) {
           ctxAction.fillText(v, hoverScreenX, startY + 15 * index + 13)
         })
       }
+      if (window.globalEditGroup.insertTempObj && window.globalEditGroup.insertTempObj instanceof PointEntityClass) {
+        const nearest = getNearestWall(window.globalEditGroup, { x: xInGroup, y: yInGroup })
+        if (nearest) {
+          // console.log('nearest', nearest)
+          setHoverPoint(nearest.pointOnWall)
+        } else {
+          setHoverPoint(null)
+        }
+        const tipTexts: string[] = []
+        if (window.globalEditGroup.insertTempObj instanceof PointWithTargetEntityClass) {
+          window.globalEditGroup.insertTempObj.setData({
+            targetPositionX: xInGroup + 100,
+            targetPositionY: yInGroup,
+          })
+        }
+        // sense.matchHandelObj = window.globalEditGroup.insertTempObj
+        // sense.matchedHandelInfo = {
+        //   id: window.globalEditGroup.insertTempObj.getData().id, // 对象ID
+        //   type: window.globalEditGroup.insertTempObj.type,
+        //   index: 0, // 移动
+        //   dist: 0,
+        // }
+        // sense.matchHandelStartPoint = { x: xInGroup, y: yInGroup }
+        // if (window.globalEditGroup.insertTempObj instanceof PointWithTargetEntityClass) {
+        //   window.globalEditGroup.insertTempObj.matchHandelMoveCallback({
+        //     x: window.globalEditGroup.insertTempObj.getData().x + 100,
+        //     y: yInGroup
+        //   }, {
+        //     id: window.globalEditGroup.insertTempObj.getData().id, // 对象ID
+        //     type: window.globalEditGroup.insertTempObj.type,
+        //     index: 1, // 移动
+        //     dist: 0,
+        //   })
+        // }
+        // if (window.globalEditGroup.insertTempObj instanceof EntityClassInWall) {
+        //   sense.matchHandelObj = window.globalEditGroup.insertTempObj
+        //   sense.matchedHandelInfo = {
+        //     id: window.globalEditGroup.insertTempObj.getData().id, // 对象ID
+        //     type: window.globalEditGroup.insertTempObj.type,
+        //     index: 0, // 移动
+        //     dist: 0,
+        //   }
+        //   sense.matchHandelStartPoint = { x: xInGroup, y: yInGroup }
+        //   // tipTexts = window.globalEditGroup.insertTempObj.setPrepareState(xInGroup, yInGroup)
+        // } else {
+        //   window.globalEditGroup.insertTempObj.matchHandelMoveCallback({
+        //     x: xInGroup,
+        //     y: yInGroup
+        //   }, {
+        //     id: window.globalEditGroup.insertTempObj.getData().id, // 对象ID
+        //     type: window.globalEditGroup.insertTempObj.type,
+        //     index: 0, // 移动
+        //     dist: 0,
+        //   })
+        // }
+
+        if (tipTexts && tipTexts.length > 0) {
+          const canvasAction = sense.canvasList[0]!;
+          const ctxAction = canvasAction.getContext('2d')!
+
+          const hoverScreenX = xInWorld___ * sense.level + sense.panOffset.x
+          const hoverScreenY = yInWorld___ * sense.level + sense.panOffset.y
+          const startY = hoverScreenY + 14;
+          // 绘制一个背景矩形
+          ctxAction.fillStyle = 'rgba(0, 0, 0, 0.5)'
+          ctxAction.fillRect(hoverScreenX - 50, startY, 100, 8 + 15 * tipTexts.length);
+          ctxAction.font = '14px Arial'
+          ctxAction.textBaseline = 'middle'
+          ctxAction.strokeStyle = 'white'
+          ctxAction.fillStyle = 'white'
+          ctxAction.textAlign = 'center'
+          tipTexts.forEach((v, index) => {
+            ctxAction.fillText(v, hoverScreenX, startY + 15 * index + 13)
+          })
+        }
+      }
+    } else if (window.globalEditGroup.insertTempObj && window.globalEditGroup.insertTempObj instanceof LineEntityClass) {
+      const tempPointInsertData = sense.tempPointInsertData;
+      if (tempPointInsertData && tempPointInsertData.length > 0) {
+        const last = tempPointInsertData[tempPointInsertData.length - 1]
+        // 收集所有点（包括临时折线和已绘制的墙上的点）
+        const allPoints = [...tempPointInsertData];
+        (window.globalEditGroup.getTypeObjectsData(window.globalEditGroup.insertTempObj.type) as LineObjData<any>[]).forEach((item: LineObjData<any>) => {
+          item.points.forEach((point: any) => {
+            allPoints.push(point)
+          })
+        })
+        const snapAngles = [0, 45, 90, 135, 180, -135, -90, -45]
+        snapAngles.push(...getTempPointInsertDataLastAngel(sense))
+        let snappedPoint44 = getSnapPointAndLine(
+          { x: xInGroup, y: yInGroup },
+          [{
+            objType: window.globalEditGroup.insertTempObj.type,
+            snapFromType: 'point',
+            point: last
+          }],
+          snapAngles,
+          allPoints.map(v => ({
+            objType: window.globalEditGroup.insertTempObj!.type,
+            snapFromType: 'point',
+            point: v
+          })),
+        )
+        if (snappedPoint44 === null) {
+          // console.log('===dist---find', snappedPoint44)
+          snappedPoint44 = {
+            objType: window.globalEditGroup.insertTempObj.type,
+            snapFromType: 'point',
+            point: { x: xInGroup, y: yInGroup },
+            xAxisSnappedY: yInGroup,
+            yAxisSnappedX: xInGroup,
+          }
+          sense.xAxisSnappedY = null
+          sense.yAxisSnappedX = null
+        } else {
+          sense.xAxisSnappedY = snappedPoint44.xAxisSnappedY
+          sense.yAxisSnappedX = snappedPoint44.yAxisSnappedX
+        }
+        const points = [...tempPointInsertData]
+        if (!(Math.abs(snappedPoint44.point.x - last.x) < 3 && Math.abs(snappedPoint44.point.y - last.y) < 3)) {
+          points.push(snappedPoint44.point)
+        } else {
+          // console.log('match point 99999', snappedPoint44.point.x, last.x, snappedPoint44.point.y, last.y)
+        }
+        const tipTexts = window.globalEditGroup.insertTempObj.setPreparePoint(points)
+        setHoverPoint({
+          x: snappedPoint44.point.x,
+          y: snappedPoint44.point.y,
+        })
+        canvas2DSceneManage.renderPreview()
+        const hoverScreenX = sense.hoverPoint!.x * sense.level + sense.panOffset.x
+        const hoverScreenY = sense.hoverPoint!.y * sense.level + sense.panOffset.y
+        const canvasAction = sense.canvasList[0]!;
+        const ctxAction = canvasAction.getContext('2d')!
+        const startY = snappedPoint44.point.y > last.y ? hoverScreenY + 14 : hoverScreenY - 15 * tipTexts.length - 22;
+        if (tipTexts.length > 0) {
+          // 绘制一个背景矩形
+          ctxAction.fillStyle = 'rgba(0, 0, 0, 0.5)'
+          ctxAction.fillRect(hoverScreenX - 50, startY, 100, 8 + 15 * tipTexts.length);
+          ctxAction.font = '14px Arial'
+          ctxAction.textBaseline = 'middle'
+          ctxAction.strokeStyle = 'white'
+          ctxAction.fillStyle = 'white'
+          ctxAction.textAlign = 'center'
+          tipTexts.forEach((v, index) => {
+            ctxAction.fillText(v, hoverScreenX, startY + 15 * index + 13)
+          })
+        }
+      }
+    } else if (sense.beCopyEntity) {
+
+    } else {
+      // 鼠标浮动而过
+      ctxAction.clearRect(0, 0, canvasAction.width, canvasAction.height)
+      const handleInfo = getHandleInAreaInfoByXY(window.globalEditGroup, xInGroup, yInGroup)
+      if (handleInfo) {
+        const { classInfo, matchArea } = handleInfo;
+        (() => {
+          // 暂无操作句柄
+          // 先平移，再旋转，再缩放
+          const worldData__ = window.worldApi.getData(); // window.globalEditGroup
+          ctxAction.save()
+          ctxAction.translate(
+            worldData__.x + sense.panOffset.x,
+            worldData__.y + sense.panOffset.y
+          )
+          ctxAction.rotate(worldData__.angleY * -1)
+          // ctxAction.scale(sense.level, sense.level)
+          if (window.globalEditGroup !== window.worldApi) {
+            const groupData = window.globalEditGroup.getData()
+            ctxAction.translate(
+              groupData.x * sense.level,
+              groupData.y * sense.level,
+            )
+            ctxAction.rotate(
+              groupData.angleY * -1,
+            )
+            drawFUnc()
+          } else {
+            drawFUnc()
+          }
+          function drawFUnc() {
+            if (matchArea instanceof MatchRectArea) {
+              ctxAction.lineWidth = 2
+              ctxAction.strokeStyle = 'yellow'
+              ctxAction.save()
+              ctxAction.translate(
+                matchArea.data.x * self.level,
+                matchArea.data.y * self.level
+              ); // 移动原点到目标中心
+              ctxAction.rotate(matchArea.data.angleY * -1);
+              // 绘制一个方块
+              ctxAction.strokeRect(
+                matchArea.data.width / -2 * self.level,
+                matchArea.data.depth / -2 * self.level,
+                matchArea.data.width * self.level,
+                matchArea.data.depth * self.level,
+              )
+              ctxAction.restore()
+            } else if (matchArea instanceof MatchCircleArea) {
+              ctxAction.lineWidth = 2
+              ctxAction.strokeStyle = 'yellow'
+              // 绘制一个圆
+              ctxAction.beginPath()
+              ctxAction.arc(
+                matchArea.data.x * self.level,
+                matchArea.data.y * self.level,
+                matchArea.data.r * self.level,
+                0,
+                Math.PI * 2,
+              )
+              ctxAction.stroke()
+            }
+            classInfo.draw2DActionHandle(ctxAction, self.level)
+          }
+          ctxAction.restore()
+          if (classInfo instanceof PointEntityClass) {
+            ctxAction.font = `${Math.max(14 * self.level, 14)}px '微软雅黑'`
+            ctxAction.textAlign = 'center'
+            ctxAction.strokeStyle = 'white'
+            ctxAction.lineWidth = 2
+            const text = classInfo.inAreaHoverText()
+            ctxAction.strokeText(
+              text,
+              mouseXInCanvas,
+              mouseYInCanvas - 10,
+            )
+            ctxAction.fillStyle = 'black'
+            ctxAction.fillText(
+              `${text}`,
+              mouseXInCanvas,
+              mouseYInCanvas - 10,
+            )
+          }
+        })();
+      }
     }
     document.addEventListener('mouseup', mouseUp)
   }
@@ -267,7 +504,7 @@ function bindDanvas2DSceneDefaultEvent(sense: Canvas2DScene) {
     const canvas = sense.canvasList[0]
     const mouseXInCanvas = point.x
     const mouseYInCanvas = point.y
-    document.addEventListener('mousemove', mouseMove)
+    // document.addEventListener('mousemove', mouseMove)
     if (point.button === 2) {
       sense.isPaningAngel = true
       sense.isPaningAngelMoved = false;
@@ -356,268 +593,187 @@ function bindDanvas2DSceneDefaultEvent(sense: Canvas2DScene) {
     }
   })
 
-  sense.onMouseMove((point) => {
-    const mouseXInCanvas = point.x
-    const mouseYInCanvas = point.y
-    const self = sense;
-    const worldData = window.worldApi.getData();
-    const angleY = worldData.angleY;// + groupAngle;
-    const dx = mouseXInCanvas - sense.panOffset.x
-    const dy = mouseYInCanvas - sense.panOffset.y
-    const cos = Math.cos(angleY * -1)
-    const sin = Math.sin(angleY * -1)
-    const xInWorld___ = (dx * cos + dy * sin) / sense.level;// - groupX
-    const yInWorld___ = (-dx * sin + dy * cos) / sense.level;// - groupY
-    let xInGroup = xInWorld___;
-    let yInGroup = yInWorld___;
-    const canvasAction = sense.canvasList[1]!;
-    const ctxAction = canvasAction.getContext('2d')!
-    // 先平移，再旋转，再缩放
-    if (window.globalEditGroup !== window.worldApi) {
-      const { x: groupX, y: groupY, angleY: groupAngle } = window.globalEditGroup.getData()
-      const dx2 = xInWorld___ - groupX
-      const dy2 = yInWorld___ - groupY
-      const cosGroup = Math.cos(groupAngle * -1)
-      const sinGroup = Math.sin(groupAngle * -1)
-      xInGroup = dx2 * cosGroup + dy2 * sinGroup
-      yInGroup = -dx2 * sinGroup + dy2 * cosGroup
-    }
-    if (window.globalEditGroup.insertTempObj) {
-      if (window.globalEditGroup.insertTempObj instanceof LineEntityClass) {
-        const tempPointInsertData = sense.tempPointInsertData;
-        if (tempPointInsertData && tempPointInsertData.length > 0) {
-          const last = tempPointInsertData[tempPointInsertData.length - 1]
-          // 收集所有点（包括临时折线和已绘制的墙上的点）
-          const allPoints = [...tempPointInsertData];
-          (window.globalEditGroup.getTypeObjectsData(window.globalEditGroup.insertTempObj.type) as LineObjData<any>[]).forEach((item: LineObjData<any>) => {
-            item.points.forEach((point: any) => {
-              allPoints.push(point)
-            })
-          })
-          const snapAngles = [0, 45, 90, 135, 180, -135, -90, -45]
-          snapAngles.push(...getTempPointInsertDataLastAngel(sense))
-          let snappedPoint44 = getSnapPointAndLine(
-            { x: xInGroup, y: yInGroup },
-            [{
-              objType: window.globalEditGroup.insertTempObj.type,
-              snapFromType: 'point',
-              point: last
-            }],
-            snapAngles,
-            allPoints.map(v => ({
-              objType: window.globalEditGroup.insertTempObj!.type,
-              snapFromType: 'point',
-              point: v
-            })),
-          )
-          if (snappedPoint44 === null) {
-            // console.log('===dist---find', snappedPoint44)
-            snappedPoint44 = {
-              objType: window.globalEditGroup.insertTempObj.type,
-              snapFromType: 'point',
-              point: { x: xInGroup, y: yInGroup },
-              xAxisSnappedY: yInGroup,
-              yAxisSnappedX: xInGroup,
-            }
-            sense.xAxisSnappedY = null
-            sense.yAxisSnappedX = null
-          } else {
-            sense.xAxisSnappedY = snappedPoint44.xAxisSnappedY
-            sense.yAxisSnappedX = snappedPoint44.yAxisSnappedX
-          }
-          const points = [...tempPointInsertData]
-          if (!(Math.abs(snappedPoint44.point.x - last.x) < 3 && Math.abs(snappedPoint44.point.y - last.y) < 3)) {
-            points.push(snappedPoint44.point)
-          } else {
-            // console.log('match point 99999', snappedPoint44.point.x, last.x, snappedPoint44.point.y, last.y)
-          }
-          const tipTexts = window.globalEditGroup.insertTempObj.setPreparePoint(points)
-          setHoverPoint({
-            x: snappedPoint44.point.x,
-            y: snappedPoint44.point.y,
-          })
-          canvas2DSceneManage.renderPreview()
-          const hoverScreenX = sense.hoverPoint!.x * sense.level + sense.panOffset.x
-          const hoverScreenY = sense.hoverPoint!.y * sense.level + sense.panOffset.y
-          const canvasAction = sense.canvasList[0]!;
-          const ctxAction = canvasAction.getContext('2d')!
-          const startY = snappedPoint44.point.y > last.y ? hoverScreenY + 14 : hoverScreenY - 15 * tipTexts.length - 22;
-          if (tipTexts.length > 0) {
-            // 绘制一个背景矩形
-            ctxAction.fillStyle = 'rgba(0, 0, 0, 0.5)'
-            ctxAction.fillRect(hoverScreenX - 50, startY, 100, 8 + 15 * tipTexts.length);
-            ctxAction.font = '14px Arial'
-            ctxAction.textBaseline = 'middle'
-            ctxAction.strokeStyle = 'white'
-            ctxAction.fillStyle = 'white'
-            ctxAction.textAlign = 'center'
-            tipTexts.forEach((v, index) => {
-              ctxAction.fillText(v, hoverScreenX, startY + 15 * index + 13)
-            })
-          }
-        }
-      } else {
-        const nearest = getNearestWall(window.globalEditGroup, { x: xInGroup, y: yInGroup })
-        if (nearest) {
-          // console.log('nearest', nearest)
-          setHoverPoint(nearest.pointOnWall)
-        } else {
-          setHoverPoint(null)
-        }
-        const tipTexts: string[] = []
-        if (window.globalEditGroup.insertTempObj instanceof PointEntityClass) {
-          // sense.matchHandelObj = window.globalEditGroup.insertTempObj
-          // sense.matchedHandelInfo = {
-          //   id: window.globalEditGroup.insertTempObj.getData().id, // 对象ID
-          //   type: window.globalEditGroup.insertTempObj.type,
-          //   index: 0, // 移动
-          //   dist: 0,
-          // }
-          // sense.matchHandelStartPoint = { x: xInGroup, y: yInGroup }
-          // document.addEventListener('mousemove', mouseMove)
-          // if (window.globalEditGroup.insertTempObj instanceof EntityClassInWall) {
-          //   sense.matchHandelObj = window.globalEditGroup.insertTempObj
-          //   sense.matchedHandelInfo = {
-          //     id: window.globalEditGroup.insertTempObj.getData().id, // 对象ID
-          //     type: window.globalEditGroup.insertTempObj.type,
-          //     index: 0, // 移动
-          //     dist: 0,
-          //   }
-          //   sense.matchHandelStartPoint = { x: xInGroup, y: yInGroup }
-          //   // tipTexts = window.globalEditGroup.insertTempObj.setPrepareState(xInGroup, yInGroup)
-          // } else {
-          //   window.globalEditGroup.insertTempObj.matchHandelMoveCallback({
-          //     x: xInGroup,
-          //     y: yInGroup
-          //   }, {
-          //     id: window.globalEditGroup.insertTempObj.getData().id, // 对象ID
-          //     type: window.globalEditGroup.insertTempObj.type,
-          //     index: 0, // 移动
-          //     dist: 0,
-          //   })
-          // }
+  sense.onMouseMove(mouseMove);
 
-          if (tipTexts && tipTexts.length > 0) {
-            const canvasAction = sense.canvasList[0]!;
-            const ctxAction = canvasAction.getContext('2d')!
+  // sense.onMouseMove((point) => {
+  //   const mouseXInCanvas = point.x
+  //   const mouseYInCanvas = point.y
+  //   const self = sense;
+  //   const worldData = window.worldApi.getData();
+  //   const angleY = worldData.angleY;// + groupAngle;
+  //   const dx = mouseXInCanvas - sense.panOffset.x
+  //   const dy = mouseYInCanvas - sense.panOffset.y
+  //   const cos = Math.cos(angleY * -1)
+  //   const sin = Math.sin(angleY * -1)
+  //   const xInWorld___ = (dx * cos + dy * sin) / sense.level;// - groupX
+  //   const yInWorld___ = (-dx * sin + dy * cos) / sense.level;// - groupY
+  //   let xInGroup = xInWorld___;
+  //   let yInGroup = yInWorld___;
+  //   const canvasAction = sense.canvasList[1]!;
+  //   const ctxAction = canvasAction.getContext('2d')!
+  //   // 先平移，再旋转，再缩放
+  //   if (window.globalEditGroup !== window.worldApi) {
+  //     const { x: groupX, y: groupY, angleY: groupAngle } = window.globalEditGroup.getData()
+  //     const dx2 = xInWorld___ - groupX
+  //     const dy2 = yInWorld___ - groupY
+  //     const cosGroup = Math.cos(groupAngle * -1)
+  //     const sinGroup = Math.sin(groupAngle * -1)
+  //     xInGroup = dx2 * cosGroup + dy2 * sinGroup
+  //     yInGroup = -dx2 * sinGroup + dy2 * cosGroup
+  //   }
+  //   if (window.globalEditGroup.insertTempObj) {
+  //     if (window.globalEditGroup.insertTempObj instanceof LineEntityClass) {
+  //       const tempPointInsertData = sense.tempPointInsertData;
+  //       if (tempPointInsertData && tempPointInsertData.length > 0) {
+  //         const last = tempPointInsertData[tempPointInsertData.length - 1]
+  //         // 收集所有点（包括临时折线和已绘制的墙上的点）
+  //         const allPoints = [...tempPointInsertData];
+  //         (window.globalEditGroup.getTypeObjectsData(window.globalEditGroup.insertTempObj.type) as LineObjData<any>[]).forEach((item: LineObjData<any>) => {
+  //           item.points.forEach((point: any) => {
+  //             allPoints.push(point)
+  //           })
+  //         })
+  //         const snapAngles = [0, 45, 90, 135, 180, -135, -90, -45]
+  //         snapAngles.push(...getTempPointInsertDataLastAngel(sense))
+  //         let snappedPoint44 = getSnapPointAndLine(
+  //           { x: xInGroup, y: yInGroup },
+  //           [{
+  //             objType: window.globalEditGroup.insertTempObj.type,
+  //             snapFromType: 'point',
+  //             point: last
+  //           }],
+  //           snapAngles,
+  //           allPoints.map(v => ({
+  //             objType: window.globalEditGroup.insertTempObj!.type,
+  //             snapFromType: 'point',
+  //             point: v
+  //           })),
+  //         )
+  //         if (snappedPoint44 === null) {
+  //           // console.log('===dist---find', snappedPoint44)
+  //           snappedPoint44 = {
+  //             objType: window.globalEditGroup.insertTempObj.type,
+  //             snapFromType: 'point',
+  //             point: { x: xInGroup, y: yInGroup },
+  //             xAxisSnappedY: yInGroup,
+  //             yAxisSnappedX: xInGroup,
+  //           }
+  //           sense.xAxisSnappedY = null
+  //           sense.yAxisSnappedX = null
+  //         } else {
+  //           sense.xAxisSnappedY = snappedPoint44.xAxisSnappedY
+  //           sense.yAxisSnappedX = snappedPoint44.yAxisSnappedX
+  //         }
+  //         const points = [...tempPointInsertData]
+  //         if (!(Math.abs(snappedPoint44.point.x - last.x) < 3 && Math.abs(snappedPoint44.point.y - last.y) < 3)) {
+  //           points.push(snappedPoint44.point)
+  //         } else {
+  //           // console.log('match point 99999', snappedPoint44.point.x, last.x, snappedPoint44.point.y, last.y)
+  //         }
+  //         const tipTexts = window.globalEditGroup.insertTempObj.setPreparePoint(points)
+  //         setHoverPoint({
+  //           x: snappedPoint44.point.x,
+  //           y: snappedPoint44.point.y,
+  //         })
+  //         canvas2DSceneManage.renderPreview()
+  //         const hoverScreenX = sense.hoverPoint!.x * sense.level + sense.panOffset.x
+  //         const hoverScreenY = sense.hoverPoint!.y * sense.level + sense.panOffset.y
+  //         const canvasAction = sense.canvasList[0]!;
+  //         const ctxAction = canvasAction.getContext('2d')!
+  //         const startY = snappedPoint44.point.y > last.y ? hoverScreenY + 14 : hoverScreenY - 15 * tipTexts.length - 22;
+  //         if (tipTexts.length > 0) {
+  //           // 绘制一个背景矩形
+  //           ctxAction.fillStyle = 'rgba(0, 0, 0, 0.5)'
+  //           ctxAction.fillRect(hoverScreenX - 50, startY, 100, 8 + 15 * tipTexts.length);
+  //           ctxAction.font = '14px Arial'
+  //           ctxAction.textBaseline = 'middle'
+  //           ctxAction.strokeStyle = 'white'
+  //           ctxAction.fillStyle = 'white'
+  //           ctxAction.textAlign = 'center'
+  //           tipTexts.forEach((v, index) => {
+  //             ctxAction.fillText(v, hoverScreenX, startY + 15 * index + 13)
+  //           })
+  //         }
+  //       }
+  //     } else {
+  //       const nearest = getNearestWall(window.globalEditGroup, { x: xInGroup, y: yInGroup })
+  //       if (nearest) {
+  //         // console.log('nearest', nearest)
+  //         setHoverPoint(nearest.pointOnWall)
+  //       } else {
+  //         setHoverPoint(null)
+  //       }
+  //       const tipTexts: string[] = []
+  //       if (window.globalEditGroup.insertTempObj instanceof PointEntityClass) {
+  //         // sense.matchHandelObj = window.globalEditGroup.insertTempObj
+  //         // sense.matchedHandelInfo = {
+  //         //   id: window.globalEditGroup.insertTempObj.getData().id, // 对象ID
+  //         //   type: window.globalEditGroup.insertTempObj.type,
+  //         //   index: 0, // 移动
+  //         //   dist: 0,
+  //         // }
+  //         // sense.matchHandelStartPoint = { x: xInGroup, y: yInGroup }
+  //         // document.addEventListener('mousemove', mouseMove)
+  //         // if (window.globalEditGroup.insertTempObj instanceof EntityClassInWall) {
+  //         //   sense.matchHandelObj = window.globalEditGroup.insertTempObj
+  //         //   sense.matchedHandelInfo = {
+  //         //     id: window.globalEditGroup.insertTempObj.getData().id, // 对象ID
+  //         //     type: window.globalEditGroup.insertTempObj.type,
+  //         //     index: 0, // 移动
+  //         //     dist: 0,
+  //         //   }
+  //         //   sense.matchHandelStartPoint = { x: xInGroup, y: yInGroup }
+  //         //   // tipTexts = window.globalEditGroup.insertTempObj.setPrepareState(xInGroup, yInGroup)
+  //         // } else {
+  //         //   window.globalEditGroup.insertTempObj.matchHandelMoveCallback({
+  //         //     x: xInGroup,
+  //         //     y: yInGroup
+  //         //   }, {
+  //         //     id: window.globalEditGroup.insertTempObj.getData().id, // 对象ID
+  //         //     type: window.globalEditGroup.insertTempObj.type,
+  //         //     index: 0, // 移动
+  //         //     dist: 0,
+  //         //   })
+  //         // }
 
-            const hoverScreenX = xInWorld___ * sense.level + sense.panOffset.x
-            const hoverScreenY = yInWorld___ * sense.level + sense.panOffset.y
-            const startY = hoverScreenY + 14;
-            // 绘制一个背景矩形
-            ctxAction.fillStyle = 'rgba(0, 0, 0, 0.5)'
-            ctxAction.fillRect(hoverScreenX - 50, startY, 100, 8 + 15 * tipTexts.length);
-            ctxAction.font = '14px Arial'
-            ctxAction.textBaseline = 'middle'
-            ctxAction.strokeStyle = 'white'
-            ctxAction.fillStyle = 'white'
-            ctxAction.textAlign = 'center'
-            tipTexts.forEach((v, index) => {
-              ctxAction.fillText(v, hoverScreenX, startY + 15 * index + 13)
-            })
-          }
-        }
-      }
-    } else if (sense.beCopyEntity) {
-      if (sense.beCopyEntity instanceof PointEntityClass) {
-        sense.beCopyEntity.setData({
-          ...sense.beCopyEntity.getData(),
-          x: xInGroup,
-          y: yInGroup,
-        })
-      } else if (sense.beCopyEntity instanceof LineEntityClass) {
-        if (sense.beCopyEntityHandelInfo) {
-          sense.beCopyEntity.offset.x = xInGroup - sense.beCopyEntityHandelInfo.x
-          sense.beCopyEntity.offset.y = yInGroup - sense.beCopyEntityHandelInfo.y
-        }
-      }
-    } else {
-      // 鼠标浮动而过
-      ctxAction.clearRect(0, 0, canvasAction.width, canvasAction.height)
-      const handleInfo = getHandleInAreaInfoByXY(window.globalEditGroup, xInGroup, yInGroup)
-      if (handleInfo) {
-        const { classInfo, matchArea } = handleInfo;
-        (() => {
-          // 暂无操作句柄
-          // 先平移，再旋转，再缩放
-          const worldData__ = window.worldApi.getData(); // window.globalEditGroup
-          ctxAction.save()
-          ctxAction.translate(
-            worldData__.x + sense.panOffset.x,
-            worldData__.y + sense.panOffset.y
-          )
-          ctxAction.rotate(worldData__.angleY * -1)
-          // ctxAction.scale(sense.level, sense.level)
-          if (window.globalEditGroup !== window.worldApi) {
-            const groupData = window.globalEditGroup.getData()
-            ctxAction.translate(
-              groupData.x * sense.level,
-              groupData.y * sense.level,
-            )
-            ctxAction.rotate(
-              groupData.angleY * -1,
-            )
-            drawFUnc()
-          } else {
-            drawFUnc()
-          }
-          function drawFUnc() {
-            if (matchArea instanceof MatchRectArea) {
-              ctxAction.lineWidth = 2
-              ctxAction.strokeStyle = 'yellow'
-              ctxAction.save()
-              ctxAction.translate(
-                matchArea.data.x * self.level,
-                matchArea.data.y * self.level
-              ); // 移动原点到目标中心
-              ctxAction.rotate(matchArea.data.angleY * -1);
-              // 绘制一个方块
-              ctxAction.strokeRect(
-                matchArea.data.width / -2 * self.level,
-                matchArea.data.depth / -2 * self.level,
-                matchArea.data.width * self.level,
-                matchArea.data.depth * self.level,
-              )
-              ctxAction.restore()
-            } else if (matchArea instanceof MatchCircleArea) {
-              ctxAction.lineWidth = 2
-              ctxAction.strokeStyle = 'yellow'
-              // 绘制一个圆
-              ctxAction.beginPath()
-              ctxAction.arc(
-                matchArea.data.x * self.level,
-                matchArea.data.y * self.level,
-                matchArea.data.r * self.level,
-                0,
-                Math.PI * 2,
-              )
-              ctxAction.stroke()
-            }
-            classInfo.draw2DActionHandle(ctxAction, self.level)
-          }
-          ctxAction.restore()
-          if (classInfo instanceof PointEntityClass) {
-            ctxAction.font = `${Math.max(14 * self.level, 14)}px '微软雅黑'`
-            ctxAction.textAlign = 'center'
-            ctxAction.strokeStyle = 'white'
-            ctxAction.lineWidth = 2
-            const text = classInfo.inAreaHoverText()
-            ctxAction.strokeText(
-              text,
-              mouseXInCanvas,
-              mouseYInCanvas - 10,
-            )
-            ctxAction.fillStyle = 'black'
-            ctxAction.fillText(
-              `${text}`,
-              mouseXInCanvas,
-              mouseYInCanvas - 10,
-            )
-          }
-        })();
-      }
-    }
-  })
+  //         if (tipTexts && tipTexts.length > 0) {
+  //           const canvasAction = sense.canvasList[0]!;
+  //           const ctxAction = canvasAction.getContext('2d')!
+
+  //           const hoverScreenX = xInWorld___ * sense.level + sense.panOffset.x
+  //           const hoverScreenY = yInWorld___ * sense.level + sense.panOffset.y
+  //           const startY = hoverScreenY + 14;
+  //           // 绘制一个背景矩形
+  //           ctxAction.fillStyle = 'rgba(0, 0, 0, 0.5)'
+  //           ctxAction.fillRect(hoverScreenX - 50, startY, 100, 8 + 15 * tipTexts.length);
+  //           ctxAction.font = '14px Arial'
+  //           ctxAction.textBaseline = 'middle'
+  //           ctxAction.strokeStyle = 'white'
+  //           ctxAction.fillStyle = 'white'
+  //           ctxAction.textAlign = 'center'
+  //           tipTexts.forEach((v, index) => {
+  //             ctxAction.fillText(v, hoverScreenX, startY + 15 * index + 13)
+  //           })
+  //         }
+  //       }
+  //     }
+  //   } else if (sense.beCopyEntity) {
+  //     if (sense.beCopyEntity instanceof PointEntityClass) {
+  //       sense.beCopyEntity.setData({
+  //         ...sense.beCopyEntity.getData(),
+  //         x: xInGroup,
+  //         y: yInGroup,
+  //       })
+  //     } else if (sense.beCopyEntity instanceof LineEntityClass) {
+  //       if (sense.beCopyEntityHandelInfo) {
+  //         sense.beCopyEntity.offset.x = xInGroup - sense.beCopyEntityHandelInfo.x
+  //         sense.beCopyEntity.offset.y = yInGroup - sense.beCopyEntityHandelInfo.y
+  //       }
+  //     }
+  //   } else {
+  //     
+  //   }
+  // })
 
   sense.onClick(async (point) => {
     if (sense.beCopyEntity) {

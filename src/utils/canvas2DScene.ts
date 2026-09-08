@@ -4,7 +4,8 @@ import { HandelInfo, Point } from "@/types/map2d";
 class Canvas2DScene {
   canvasList: [
     HTMLCanvasElement,
-    HTMLCanvasElement
+    HTMLCanvasElement,
+    HTMLDivElement
   ];
 
   width: number;
@@ -56,7 +57,8 @@ class Canvas2DScene {
   constructor(
     canvasList: [
       HTMLCanvasElement,
-      HTMLCanvasElement
+      HTMLCanvasElement,
+      HTMLDivElement
     ],
     width: number,
     height: number,
@@ -72,14 +74,14 @@ class Canvas2DScene {
     this.level = level
     this.panOffset = panOffset
 
-    canvasList[1].addEventListener('mouseleave', (e) => {
+    canvasList[2].addEventListener('mouseleave', (e) => {
       e.preventDefault()
       const canvasAction = canvasList[1];
       const ctxAction = canvasAction.getContext('2d')!
       ctxAction.clearRect(0, 0, canvasAction.width, canvasAction.height)
     })
 
-    canvasList[1].addEventListener('contextmenu', (e) => {
+    canvasList[2].addEventListener('contextmenu', (e) => {
       e.preventDefault()
       e.stopPropagation()
     })
@@ -122,7 +124,7 @@ class Canvas2DScene {
     x: number,
     y: number,
   }) => void) {
-    this.canvasList[1].addEventListener('click', (e) => {
+    this.canvasList[2].addEventListener('click', (e) => {
       const rect = this.canvasList[0].getBoundingClientRect()
       const mouseXInCanvas = Math.round(e.clientX - rect.left)
       const mouseYInCanvas = Math.round(e.clientY - rect.top)
@@ -138,7 +140,7 @@ class Canvas2DScene {
     x: number,
     y: number,
   }) => void) {
-    this.canvasList[1].addEventListener('mousedown', (e) => {
+    this.canvasList[2].addEventListener('mousedown', (e) => {
       e.preventDefault()
       const rect = this.canvasList[0].getBoundingClientRect()
       const mouseXInCanvas = Math.round(e.clientX - rect.left)
@@ -148,6 +150,14 @@ class Canvas2DScene {
         x: mouseXInCanvas,
         y: mouseYInCanvas,
       })
+      this.canvasList[2].classList.add('fixed')
+      // 鼠标移动出页面，移除fixed类名
+      document.addEventListener('mouseleave', () => {
+        this.canvasList[2].classList.remove('fixed')
+      })
+      document.addEventListener('mouseup', () => {
+        this.canvasList[2].classList.remove('fixed')
+      })
     })
   }
 
@@ -155,7 +165,7 @@ class Canvas2DScene {
     x: number,
     y: number,
   }) => void) {
-    this.canvasList[1].addEventListener('mousemove', (e) => {
+    this.canvasList[2].addEventListener('mousemove', (e) => {
       const rect = this.canvasList[0].getBoundingClientRect()
       const mouseXInCanvas = Math.round(e.clientX - rect.left)
       const mouseYInCanvas = Math.round(e.clientY - rect.top)
@@ -170,12 +180,13 @@ class Canvas2DScene {
     x: number,
     y: number,
   }) => void) {
-    this.canvasList[1].addEventListener('mouseleave', (e) => {
+    this.canvasList[2].addEventListener('mouseleave', (e) => {
       e.preventDefault()
       callBack({
         x: 0,
         y: 0,
       })
+      this.canvasList[2].classList.remove('fixed')
     })
   }
 
@@ -184,7 +195,7 @@ class Canvas2DScene {
     x: number,
     y: number,
   }) => void) {
-    this.canvasList[1].addEventListener('mouseup', (e) => {
+    this.canvasList[2].addEventListener('mouseup', (e) => {
       const rect = this.canvasList[0].getBoundingClientRect()
       const mouseXInCanvas = Math.round(e.clientX - rect.left)
       const mouseYInCanvas = Math.round(e.clientY - rect.top)
@@ -193,6 +204,7 @@ class Canvas2DScene {
         x: mouseXInCanvas,
         y: mouseYInCanvas,
       })
+      this.canvasList[2].classList.remove('fixed')
     })
   }
 
@@ -201,7 +213,7 @@ class Canvas2DScene {
     x: number,
     y: number,
   }) => void) {
-    this.canvasList[1].addEventListener('wheel', (e) => {
+    this.canvasList[2].addEventListener('wheel', (e) => {
       const rect = this.canvasList[0].getBoundingClientRect()
       const mouseXInCanvas = Math.round(e.clientX - rect.left)
       const mouseYInCanvas = Math.round(e.clientY - rect.top)

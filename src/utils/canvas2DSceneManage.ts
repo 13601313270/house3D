@@ -10,7 +10,8 @@ class Canvas2DSceneManage {
   addScene(
     canvasList: [
       HTMLCanvasElement,
-      HTMLCanvasElement
+      HTMLCanvasElement,
+      HTMLDivElement
     ],
     width: number,
     height: number,
@@ -70,12 +71,10 @@ class Canvas2DSceneManage {
       canvas2DSceneItem.height = height;
 
       if (width > 0 && height > 0) {
-        ctxList.forEach(ctx => {
-          if (ctx) {
-            ctx.width = width
-            ctx.height = height
-          }
-        })
+        ctxList[0].width = width
+        ctxList[0].height = height
+        ctxList[1].width = width
+        ctxList[1].height = height
       }
       canvas2DSceneItem.draw2DPreview()
     })

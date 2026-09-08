@@ -117,6 +117,8 @@
         <div class="canvas-container" :style="{ opacity: (isSplitting || isSplitTimeLine) ? 0 : 1 }">
           <canvas ref="canvas2DRef" class="drawing-canvas" />
           <canvas ref="canvas2DActionRef" class="drawing-canvas" />
+          <div ref="handelMouse2D" class="drawing-canvas" style="background-color: #ff00004a;"></div>
+
           <!-- <img v-if="isPaningAngel && isPaningAngelMoved" class="protractor" src="protractor.png"
             :style="{ left: panningScreenCenter.x + 'px', top: panningScreenCenter.y + 'px' }" /> -->
           <div class="showGroupExit" v-if="showGroupExit">
@@ -308,6 +310,7 @@ import Canvas2DScene from '@/utils/canvas2DScene';
 
 const canvas2DRef = ref<HTMLCanvasElement | null>(null)
 const canvas2DActionRef = ref<HTMLCanvasElement | null>(null)
+const handelMouse2D = ref<HTMLDivElement | null>(null)
 const canvas3DRefCenter = ref<typeof Canvas3D | null>(null)
 const canvas3DRef2 = ref<typeof Canvas3D | null>(null)
 const activeToolsIndex = ref(-1)
@@ -680,6 +683,7 @@ onMounted(async () => {
     [
       canvas2DRef.value!,
       canvas2DActionRef.value!,
+      handelMouse2D.value!,
     ],
     canvasRect.width,
     canvasRect.height,
@@ -1414,18 +1418,19 @@ function changeObjTypeSelect(type: string, baseObj: BaseEntityClass<any>) {
   if (allFileKeys.includes(type as any)) {
     window.globalEditGroup.insertTempObj = baseObj;
 
-    // (() => {
-    //   const sense = scene2D
-    //   sense.matchHandelObj = window.globalEditGroup.insertTempObj
-    //   sense.matchedHandelInfo = {
-    //     id: window.globalEditGroup.insertTempObj.getData().id, // 对象ID
-    //     type: window.globalEditGroup.insertTempObj.type,
-    //     index: 0, // 移动
-    //     dist: 0,
-    //   }
-    //   sense.matchHandelStartPoint = { x: 0, y: 0 }
-    //   document.addEventListener('mousemove', mouseMove)
-    // })();
+    (() => {
+      if (window.globalEditGroup.insertTempObj instanceof PointEntityClass) {
+        const sense = scene2D
+        sense.matchHandelObj = window.globalEditGroup.insertTempObj
+        sense.matchedHandelInfo = {
+          id: window.globalEditGroup.insertTempObj.getData().id, // 对象ID
+          type: window.globalEditGroup.insertTempObj.type,
+          index: 0,
+          dist: 0,
+        }
+        sense.matchHandelStartPoint = { x: 0, y: 0 }
+      }
+    })();
     currentTool.value = type
   }
 }
@@ -2017,12 +2022,20 @@ button {
 }
 
 .drawing-canvas {
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   cursor: crosshair;
   width: 100%;
   height: 100%;
   position: absolute;
   top: 0;
+
+  &.fixed {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 100;
+  }
 }
 
 .left-panel {
