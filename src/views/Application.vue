@@ -1429,12 +1429,14 @@ function changeObjTypeSelect(type: string, baseObj: BaseEntityClass<any>) {
     (() => {
       if (window.globalEditGroup.insertTempObj instanceof PointEntityClass) {
         window.scene2D.matchHandelObj = window.globalEditGroup.insertTempObj
-        window.scene2D.matchedHandelInfo = {
-          id: window.globalEditGroup.insertTempObj.getData().id, // 对象ID
-          type: window.globalEditGroup.insertTempObj.type,
-          index: 0,
-          dist: 0,
-        }
+        const handle = window.globalEditGroup.insertTempObj.matchHandelInfo(0, 0)
+        // const handle = {
+        //   id: window.globalEditGroup.insertTempObj.getData().id, // 对象ID
+        //   type: window.globalEditGroup.insertTempObj.type,
+        //   index: 0,
+        //   dist: 0,
+        // };
+        window.scene2D.matchedHandelInfo = handle;
         window.scene2D.matchHandelStartPoint = { x: 0, y: 0 }
       }
     })();
