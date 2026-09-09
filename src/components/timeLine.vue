@@ -41,6 +41,13 @@
       <div class="left" id="timeLeft" @scroll="onScrollLeft">
         <div class="timeline-content">
           <div class="timeline-track-area">
+            <div v-if="activeCameraIndexTimeList.length > 0" key="activeCameraIndexTimeList" class="timeline-row">
+              <div class="track-header-bar">
+                <!-- <img class="typeImg"> -->
+                <span class="clip-name">激活摄像机</span>
+                <div style="flex-grow: 1;"></div>
+              </div>
+            </div>
             <div v-for="(segment, rowIndex) in rowsByIndex" :key="`time-row-${rowIndex}`" class="timeline-row">
               <div class="track-header-bar" @click="toggleFold(segment)">
                 <img class="typeImg" v-if="segment.typeImg" :src="segment.typeImg" alt="">
@@ -65,6 +72,12 @@
         @mousedown="handleTimeInfoMouseDown" @scroll="onScroll">
         <div class="timeline-content-wrapper" :style="{ width: `${effectiveDuration * zoomLevel * 50}px` }">
           <div class="timeline-track-area">
+            <div v-if="activeCameraIndexTimeList.length > 0" key="activeCameraIndexTimeList" class="timeline-row">
+              <div class="head">
+                <div class="activeCameraPanel" v-for="item in activeCameraIndexTimeListDataModify()"
+                  :style="{ width: item.width, left: item.left }">{{ item.index + 1 }}</div>
+              </div>
+            </div>
             <div v-for="(segment, rowIndex) in rowsByIndex" :key="`time-row-${rowIndex}`" class="timeline-row">
               <div class="head">
                 <template v-if="segment.clip.isFold">
@@ -159,7 +172,7 @@ import DataTypeEditPanel from '../views/DataTypeEditPanel.vue'
 import showContextMenu from '@/utils/contextMenu';
 import evaluateTrack from '@/utils/evaluateTrack';
 import getPeopleAnimateOneTime from '@/utils/getPeopleAnimateOneTime';
-import { handleLocation, Item } from '@/utils/handleLocation';
+import { handleLocation } from '@/utils/handleLocation';
 import { allPluginByKey } from '@/entities/index';
 
 interface ClipSegment {
@@ -244,6 +257,7 @@ onMounted(() => {
       })
     }
     rowsByIndex.value = rows
+    activeCameraIndexTimeList.value = timelineState.activeCameraIndex
   }
   updateRef()
   timelineState.onChange(() => {
@@ -302,6 +316,10 @@ let keyframeDragPoints: KeyTimePoint[] = []  // 本次拖拽要移动的关键�
 let mediaRecorder: MediaRecorder | null = null  // MediaRecorder 实例
 let recordedChunks: Blob[] = []                 // 录制数据块缓存
 
+const activeCameraIndexTimeList = ref<{
+  index: number,
+  time: number,
+}[]>([])
 const rowsByIndex = ref<ClipSegment[]>([])
 
 // formatTime：秒 → "08:30"（秒:厘秒），保留两位小数用于紧凑显示
@@ -1183,6 +1201,23 @@ function toggleFold(segment: ClipSegment) {
   segment.clip.isFold = !segment.clip.isFold
 }
 
+function activeCameraIndexTimeListDataModify(): Array<{
+  index: number,
+  left: string,
+  width: string,
+}> {
+  const returnArr = [];
+  for (let i = 0; i < activeCameraIndexTimeList.value.length; i++) {
+    const nextItem = activeCameraIndexTimeList.value[i + 1]
+    returnArr.push({
+      index: activeCameraIndexTimeList.value[i].index,
+      left: (activeCameraIndexTimeList.value[i].time / effectiveDuration.value * 100) + '%',
+      width: (nextItem ? ((nextItem.time - activeCameraIndexTimeList.value[i].time) / effectiveDuration.value * 100) : 999) + '%',
+    })
+  }
+  return returnArr;
+}
+
 // onUnmounted：组件卸载时清理动画帧与事件监听，避免内存泄漏
 onUnmounted(() => {
   if (animationFrameId) {
@@ -1649,6 +1684,15 @@ onUnmounted(() => {
                   box-shadow: 0 0 0 3px rgba(233, 69, 96, 0.4);
                 }
               }
+            }
+
+            .activeCameraPanel {
+              background-color: red;
+              height: 34px;
+              overflow: hidden;
+              border: solid 1px black;
+              box-sizing: border-box;
+              position: absolute;
             }
           }
 

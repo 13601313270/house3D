@@ -554,6 +554,12 @@ async function changeCamera2(activeIndex: number = 0) {
     cameraRightState.value = allCameraList[activeIndex]
     activeCameraIndex.value = activeIndex
     worldState.activeCameraIndex = activeIndex
+    if (timelineState.isPlaying) {
+      timelineState.activeCameraIndex.push({
+        index: activeIndex,
+        time: timelineState.currentTime,
+      })
+    }
     const allCameraObjList: BaseEntityClass<BaseObjData>[] = [];
     allCameraTypeKey.forEach(typeKey => {
       const typeItemList = worldApi.getTypeListEntity(typeKey);

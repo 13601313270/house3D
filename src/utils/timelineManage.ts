@@ -55,6 +55,12 @@ class TimelineStateClass {
     this.triggerChangeCurrentTime()
   }
 
+  activeCameraIndex: Array<{
+    index: number,
+    time: number,
+  }> = [
+    ];
+
   set timelineData(value: TimelineData) {
     this.timelineData_ = value
     this.triggerChange()
