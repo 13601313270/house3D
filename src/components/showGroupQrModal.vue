@@ -41,7 +41,7 @@ const closeModal = () => {
     border-radius: 12px;
     padding: 24px;
     position: relative;
-    margin-top: 80px;
+    margin-top: 20px;
     display: flex;
     flex-direction: column;
     align-items: center;

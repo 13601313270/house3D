@@ -1,6 +1,7 @@
 <template>
   <div class="aiPic">
     <div class="header">
+      <button class="cancel-btn" @click="handleClose">返回工作台</button>
       <div class="title">AI渲染</div>
       <div style="flex: 1;"></div>
       <div class="userInfo" v-if="store.state.main.userInfo">
@@ -321,6 +322,26 @@ const handleDownload = () => {
     color: white;
     flex-shrink: 0;
     height: 44px;
+
+    .cancel-btn {
+      height: 32px;
+      margin-left: 8px;
+      padding: 0 16px;
+      border: none;
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      font-size: 14px;
+      border-radius: 4px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s;
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.3);
+      }
+    }
 
     .title {
       font-size: 18px;
