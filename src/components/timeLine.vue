@@ -210,6 +210,7 @@ const emits = defineEmits(['showBuyVip'])
 
 onMounted(() => {
   function updateRef() {
+    console.log('updateRef')
     effectiveDuration.value = (() => {
       if (timelineState.timelineData.clips) {
         let maxTime = timelineState.timelineData.duration
@@ -257,7 +258,7 @@ onMounted(() => {
       })
     }
     rowsByIndex.value = rows
-    activeCameraIndexTimeList.value = timelineState.activeCameraIndex
+    activeCameraIndexTimeList.value = timelineState.timelineData.activeCameraIndex222
   }
   updateRef()
   timelineState.onChange(() => {
