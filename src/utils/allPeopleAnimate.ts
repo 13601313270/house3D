@@ -196,6 +196,12 @@ const allPeopleAnimate: Array<AnimationItem> = [
     name: '挥手',
     img: 'https://d99n9xvb9513w.cloudfront.net/thumbnails/motions/136290901/animated.gif',
     file: 'waving.fbx'
+  },
+  {
+    key: 'defeat',
+    name: '捂脸',
+    img: 'https://d99n9xvb9513w.cloudfront.net/thumbnails/motions/110550901/animated.gif',
+    file: 'defeat.fbx',
   }
 ]
 export default allPeopleAnimate
