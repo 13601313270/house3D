@@ -52,7 +52,7 @@ class Canvas2DScene {
     y: number
   }> = [];
 
-  hoverPoint: Point | null = null;
+  hoverPoint: Point | symbol | null = null;
 
   constructor(
     canvasList: [

@@ -519,7 +519,6 @@ const initThree = () => {
       if ('radius' in cameraStateZ.value) {
         if (window.globalEditGroup.insertTempObj) {
           if (window.globalEditGroup instanceof WorldGroup) {
-            console.log(window.globalEditGroup.groundMesh)
             // @ts-ignore
             // const hoveredObject = raycastObjects([...allBoundingBox, ...allLastTextBox], e)
           }

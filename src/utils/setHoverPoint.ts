@@ -1,7 +1,9 @@
 import { Point } from "@/types";
 import canvas2DSceneManage from "./canvas2DSceneManage";
 
-function setHoverPoint(point: Point | null) {
+export const symCantPutPoint = Symbol('cantPutPoint'); // 可以加描述，方便调试
+
+function setHoverPoint(point: Point | symbol | null) {
   canvas2DSceneManage.list[0].hoverPoint = point
   const canvasAction = canvas2DSceneManage.list[0].canvasList[1]!;
   if (!canvasAction) return

@@ -10,7 +10,7 @@ import getNearestWall, { snapThreshold } from "./getNearestWall";
 import { MatchCircleArea, MatchRectArea } from "./matchArea";
 import { LineObjData } from "@/types/map2d";
 import canvas2DSceneManage from "./canvas2DSceneManage";
-import setHoverPoint from "./setHoverPoint";
+import setHoverPoint, { symCantPutPoint } from "./setHoverPoint";
 import { getHandleInAreaInfoByXY, getHandleInfoByXY } from "./getHandleInfoByXY";
 import { PlaneGroupEntity } from "@/entities/planeGroup/entity";
 import { EntityInWall } from "@/types/entityInWall";
@@ -378,34 +378,41 @@ function bindDanvas2DSceneDefaultEvent(sense: Canvas2DScene) {
           sense.yAxisSnappedX = snappedPoint44.yAxisSnappedX
         }
         const points = [...tempPointInsertData]
-        if (!(Math.abs(snappedPoint44.point.x - last.x) < 3 && Math.abs(snappedPoint44.point.y - last.y) < 3)) {
+        let tipTexts = [];
+        if (!(Math.abs(snappedPoint44.point.x - last.x) < 10 && Math.abs(snappedPoint44.point.y - last.y) < 10)) {
           points.push(snappedPoint44.point)
-        } else {
-          // console.log('match point 99999', snappedPoint44.point.x, last.x, snappedPoint44.point.y, last.y)
-        }
-        const tipTexts = window.globalEditGroup.insertTempObj.setPreparePoint(points)
-        setHoverPoint({
-          x: snappedPoint44.point.x,
-          y: snappedPoint44.point.y,
-        })
-        canvas2DSceneManage.renderPreview()
-        const hoverScreenX = sense.hoverPoint!.x * sense.level + sense.panOffset.x
-        const hoverScreenY = sense.hoverPoint!.y * sense.level + sense.panOffset.y
-        const canvasAction = sense.canvasList[0]!;
-        const ctxAction = canvasAction.getContext('2d')!
-        const startY = snappedPoint44.point.y > last.y ? hoverScreenY + 14 : hoverScreenY - 15 * tipTexts.length - 22;
-        if (tipTexts.length > 0) {
-          // 绘制一个背景矩形
-          ctxAction.fillStyle = 'rgba(0, 0, 0, 0.5)'
-          ctxAction.fillRect(hoverScreenX - 50, startY, 100, 8 + 15 * tipTexts.length);
-          ctxAction.font = '14px Arial'
-          ctxAction.textBaseline = 'middle'
-          ctxAction.strokeStyle = 'white'
-          ctxAction.fillStyle = 'white'
-          ctxAction.textAlign = 'center'
-          tipTexts.forEach((v, index) => {
-            ctxAction.fillText(v, hoverScreenX, startY + 15 * index + 13)
+          setHoverPoint({
+            x: snappedPoint44.point.x,
+            y: snappedPoint44.point.y,
           })
+          tipTexts = window.globalEditGroup.insertTempObj.setPreparePoint(points)
+          canvas2DSceneManage.renderPreview()
+          if (typeof sense.hoverPoint !== 'symbol' && sense.hoverPoint !== null) {
+            const hoverScreenX = (sense.hoverPoint as Point).x * sense.level + sense.panOffset.x
+            const hoverScreenY = (sense.hoverPoint as Point).y * sense.level + sense.panOffset.y
+            const canvasAction = sense.canvasList[0]!;
+            const ctxAction = canvasAction.getContext('2d')!
+            const startY = snappedPoint44.point.y > last.y ? hoverScreenY + 14 : hoverScreenY - 15 * tipTexts.length - 22;
+            if (tipTexts.length > 0) {
+              // 绘制一个背景矩形
+              ctxAction.fillStyle = 'rgba(0, 0, 0, 0.5)'
+              ctxAction.fillRect(hoverScreenX - 50, startY, 100, 8 + 15 * tipTexts.length);
+              ctxAction.font = '14px Arial'
+              ctxAction.textBaseline = 'middle'
+              ctxAction.strokeStyle = 'white'
+              ctxAction.fillStyle = 'white'
+              ctxAction.textAlign = 'center'
+              tipTexts.forEach((v, index) => {
+                ctxAction.fillText(v, hoverScreenX, startY + 15 * index + 13)
+              })
+            }
+          }
+        } else {
+          console.log('setHoverPoint', 'null')
+          setHoverPoint(symCantPutPoint)
+          tipTexts = window.globalEditGroup.insertTempObj.setPreparePoint(points)
+          canvas2DSceneManage.renderPreview()
+          return;
         }
       }
     } else if (sense.beCopyEntity) {
@@ -503,7 +510,6 @@ function bindDanvas2DSceneDefaultEvent(sense: Canvas2DScene) {
     const canvas = sense.canvasList[0]
     const mouseXInCanvas = point.x
     const mouseYInCanvas = point.y
-    // document.addEventListener('mousemove', mouseMove)
     if (point.button === 2) {
       sense.isPaningAngel = true
       sense.isPaningAngelMoved = false;
@@ -768,9 +774,18 @@ function bindDanvas2DSceneDefaultEvent(sense: Canvas2DScene) {
         const tempPointInsertData = canvas2DSceneManage.list[0].tempPointInsertData;
         const data = window.globalEditGroup.insertTempObj.getData()
         if (canvas2DSceneManage.list[0].hoverPoint) {
+          if (typeof canvas2DSceneManage.list[0].hoverPoint === 'symbol') {
+            return;
+          }
+          console.log('setHoverPoint', 'you')
+          // 计算canvas2DSceneManage.list[0].hoverPoint和tempPointInsertData最后一项点的距离
+          // const lastPoint = tempPointInsertData[tempPointInsertData.length - 1]
+          // const dx = (canvas2DSceneManage.list[0].hoverPoint as Point).x - lastPoint.x
+          // const dy = (canvas2DSceneManage.list[0].hoverPoint as Point).y - lastPoint.y
+          // const dist = Math.sqrt(dx * dx + dy * dy)
           tempPointInsertData.push({
-            x: Math.round(canvas2DSceneManage.list[0].hoverPoint.x),
-            y: Math.round(canvas2DSceneManage.list[0].hoverPoint.y)
+            x: Math.round((canvas2DSceneManage.list[0].hoverPoint as Point).x),
+            y: Math.round((canvas2DSceneManage.list[0].hoverPoint as Point).y)
           })
         } else {
           const mouseXInCanvas = point.x
