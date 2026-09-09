@@ -398,7 +398,7 @@ export abstract class GroupBaseEntity<T extends GroupBaseData> extends PointCanA
     this.reCreate3DMeshAnd2DPreviewIfNeed()
     this.change3DMeshState()
     this._callAllOnChangeCallback('remove', willRemoveList);
-    timelineState.timelineData = { duration: 30, clips: [], activeCameraIndex222: [] }
+    timelineState.timelineData = { duration: 30, clips: [], activeCameraIndexTimes: [] }
   }
 
   // 世界变化

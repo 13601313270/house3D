@@ -34,7 +34,7 @@ export interface ObjAllColumnData {
 export interface TimelineData {
   duration: number
   clips: ObjAllColumnData[]
-  activeCameraIndex222: Array<{
+  activeCameraIndexTimes: Array<{
     index: number,
     time: number,
   }>
@@ -46,7 +46,7 @@ class TimelineStateClass {
   private timelineData_: TimelineData = {
     duration: 30,
     clips: [],
-    activeCameraIndex222: [],
+    activeCameraIndexTimes: [],
   };
 
   currentTime_: number = 0;

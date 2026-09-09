@@ -555,7 +555,7 @@ async function changeCamera2(activeIndex: number = 0) {
     activeCameraIndex.value = activeIndex
     worldState.activeCameraIndex = activeIndex
     if (timelineState.isPlaying) {
-      timelineState.timelineData.activeCameraIndex222.push({
+      timelineState.timelineData.activeCameraIndexTimes.push({
         index: activeIndex,
         time: timelineState.currentTime,
       })
@@ -954,7 +954,7 @@ const handleLoadProgramFileChange = async (e: Event) => {
       timelineState.timelineData = sceneData.timelineData as any
     } else {
       // timelineData____.value = { duration: 30, clips: [] }
-      timelineState.timelineData = { duration: 30, clips: [], activeCameraIndex222: [] }
+      timelineState.timelineData = { duration: 30, clips: [], activeCameraIndexTimes: [] }
     }
   } catch (error) {
     initWorldLoading.value = false

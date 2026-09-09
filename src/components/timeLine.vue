@@ -258,7 +258,7 @@ onMounted(() => {
       })
     }
     rowsByIndex.value = rows
-    activeCameraIndexTimeList.value = timelineState.timelineData.activeCameraIndex222
+    activeCameraIndexTimeList.value = timelineState.timelineData.activeCameraIndexTimes
   }
   updateRef()
   timelineState.onChange(() => {
