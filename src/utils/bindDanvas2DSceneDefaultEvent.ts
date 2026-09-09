@@ -451,12 +451,7 @@ function bindDanvas2DSceneDefaultEvent(sense: Canvas2DScene) {
       if (sense.beCopyEntityHandelInfo) {
         if (sense.beCopyEntity instanceof LineEntityClass) {
           const { x, y } = sense.beCopyEntityHandelInfo;
-          // sense.beCopyEntity.matchHandelMoveCallback({
-          //   x: xInGroup,
-          //   y: yInGroup,
-          //   startX: sense.matchHandelStartPoint ? sense.matchHandelStartPoint.x : undefined,
-          //   startY: sense.matchHandelStartPoint ? sense.matchHandelStartPoint.y : undefined,
-          // }, sense.beCopyEntityHandelInfo)
+          sense.beCopyEntity.markObjectIsDirty()
           sense.beCopyEntity.offset = {
             x: xInGroup - x,
             y: yInGroup - y,

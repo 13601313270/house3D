@@ -246,7 +246,13 @@ export class WallEntity extends LineEntityClass<WallPoint, WallData> {
     const { points, thickness, cornerType } = data;
     const wallHeight = data.height
     const bottom = data.bottom || 0
-    const pointsTemp = [...points];
+    const pointsTemp = [...points.map(v => {
+      return {
+        ...v,
+        x: v.x + this.offset.x,
+        y: v.y + this.offset.y,
+      }
+    })];
     const isEndByStart = points.length > 2 && points[0].x === points[points.length - 1].x && points[0].y === points[points.length - 1].y;// 是否首尾衔接
     // 如果首尾衔接，需要处理拐角，两头各自增加一个点，这样会多绘制两个面，生成完成后，再把多生成的两个面裁切掉
     if (isEndByStart) {
@@ -256,8 +262,8 @@ export class WallEntity extends LineEntityClass<WallPoint, WallData> {
         snw: points[points.length - 1].snw
       })
       pointsTemp.push({
-        x: points[1].x,
-        y: points[1].y,
+        x: points[1].x + this.offset.x,
+        y: points[1].y + this.offset.y,
         snw: points[1].snw
       })
     }

@@ -783,6 +783,14 @@ onMounted(async () => {
           window.globalEditGroup.insertTempObj = null;
           canvas2DSceneManage.renderPreview()
         }
+      } else if (window.scene2D.beCopyEntity) {
+        if (window.scene2D.beCopyEntity instanceof LineEntityClass) {
+          window.scene2D.beCopyEntity.applyOffsetToData()
+        }
+        window.scene2D.beCopyEntity = null
+        window.scene2D.beCopyEntityHandelInfo = null
+        window.scene2D.matchHandelObj = null
+        canvas2DSceneManage.renderPreview()
       } else if (window.globalEditGroup !== worldApi) {
         groupExit()
       }
