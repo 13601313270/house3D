@@ -61,7 +61,6 @@ export class PeopleEntity extends ModelFileEntity<PeopleData> {
   }
 
   create3DMesh(): THREE.Group {
-    console.log('00000000')
     const data = this.getData();
     const group = new THREE.Group()
     const { color } = data

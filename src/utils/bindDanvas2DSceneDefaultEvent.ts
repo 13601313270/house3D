@@ -52,7 +52,7 @@ function bindDanvas2DSceneDefaultEvent(sense: Canvas2DScene) {
       sense.isPaningAngel = true
       sense.isPaningAngelMoved = false;
       sense.panStartAngel = window.worldApi.getData().angleY
-      console.log('panStartAngel', canvas.height / 2, mouseYInCanvas)
+      // console.log('panStartAngel', canvas.height / 2, mouseYInCanvas)
       let xTemp = 0;
       let yTemp = 0;
       const yDiff = canvas.height / 2 - mouseYInCanvas;

@@ -260,7 +260,7 @@ const handleSubmit = async () => {
 
         // 刷新积分数量
         request.get('/video/user/info').then(res => {
-          console.log(res)
+          // console.log(res)
           if (res.status === 200) {
             store.dispatch('main/setUserInfo', res.data)
           }

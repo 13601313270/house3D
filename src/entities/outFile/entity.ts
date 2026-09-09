@@ -165,7 +165,7 @@ export class OutFileEntity extends PointCanAngleEntity<OutFileData> {
     const group = new THREE.Group()
     const { fileTypeId, bm, color } = data
     const zoom = data.zoom || 1
-    console.log('zoomzoomzoom', zoom)
+    // console.log('zoomzoomzoom', zoom)
     const findObjInfo = window.worldState.ObjFileTypes.find(item => item.id === fileTypeId)
 
     if (!findObjInfo) {

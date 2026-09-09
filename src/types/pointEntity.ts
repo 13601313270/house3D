@@ -100,7 +100,6 @@ export abstract class PointEntityClass<T extends PointObjData> extends BaseEntit
     outerGroup.moveType = 'z'
 
     const handelList = this.getHandelList()
-    console.log('handelList', handelList)
 
     handelList.forEach(key => {
       if (key === '+z') {
