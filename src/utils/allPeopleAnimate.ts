@@ -202,6 +202,18 @@ const allPeopleAnimate: Array<AnimationItem> = [
     name: '捂脸',
     img: 'https://d99n9xvb9513w.cloudfront.net/thumbnails/motions/110550901/animated.gif',
     file: 'defeat.fbx',
+  },
+  {
+    key: 'shooting',
+    name: '手枪射击',
+    img: 'https://d99n9xvb9513w.cloudfront.net/thumbnails/motions/130780901/animated.gif',
+    file: 'shooting.fbx',
+  },
+  {
+    key: 'climbing',
+    name: '上爬',
+    img: 'https://d99n9xvb9513w.cloudfront.net/thumbnails/motions/114370901/animated.gif',
+    file: 'climbing.fbx',
   }
 ]
 export default allPeopleAnimate
