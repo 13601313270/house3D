@@ -284,6 +284,7 @@ function initThree() {
   camera.position.set(200, 150, 250)
   camera.lookAt(0, 50, 0)
 
+  console.log('new THREE.WebGLRenderer', 3)
   renderer = new THREE.WebGLRenderer({ antialias: true })
   renderer.setPixelRatio(window.devicePixelRatio)
   renderer.setSize(width, height)
@@ -314,6 +315,7 @@ function disposeScene() {
   controls?.dispose()
   controls = null
   if (renderer) {
+    renderer.forceContextLoss();
     renderer.dispose()
     if (renderer.domElement.parentNode) {
       renderer.domElement.parentNode.removeChild(renderer.domElement)

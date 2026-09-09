@@ -111,6 +111,7 @@ export abstract class ModelFileEntity<T extends ModelFileData> extends PointCanA
   initBasicBoxDataAnd2DPreview(): Promise<void> {
     if (!this.mesh) { return Promise.resolve() }
     const previewImgMesh = clone(this.mesh);
+    console.log('new THREE.WebGLRenderer', 4)
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true })
     const scene = new THREE.Scene()
     const cameraSize = 600;
@@ -163,6 +164,12 @@ export abstract class ModelFileEntity<T extends ModelFileData> extends PointCanA
         reject(new Error('图片加载失败'))
       }
       this.img.src = renderer.domElement.toDataURL()
+      // 释放渲染器，避免 WebGL 上下文泄漏
+      console.log('new THREE.WebGLRenderer--销毁', 4)
+      renderer.forceContextLoss();
+      renderer.dispose()
+      container.removeChild(renderer.domElement);
+      container.remove()
     })
   }
 

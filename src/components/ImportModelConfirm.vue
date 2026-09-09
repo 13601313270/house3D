@@ -340,6 +340,7 @@ const initPreviewScene = async () => {
   camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 10000)
 
   // 创建渲染器
+  console.log('new THREE.WebGLRenderer', 2)
   renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true })
   renderer.setPixelRatio(window.devicePixelRatio)
   renderer.setSize(width, height)
@@ -454,6 +455,7 @@ const disposeScene = () => {
   }
 
   if (renderer) {
+    renderer.forceContextLoss();
     renderer.dispose()
     if (renderer.domElement.parentNode) {
       renderer.domElement.parentNode.removeChild(renderer.domElement)

@@ -255,58 +255,6 @@ function seekTo(event: MouseEvent) {
   currentAction.time = newTime
 }
 
-// async function applyPreset() {
-//   if (['stand', 'sit', 'walk'].includes(preset.name)) {
-//     // const json = await import(`./peoplePose/${preset.name}.json`)
-//     // const jsonDefault = JSON.parse(JSON.stringify(json.default))
-//     // if (jsonDefault) {
-//     //   allBones.value.forEach(v => {
-//     //     const find = jsonDefault.find((item: any) => item.name === v.name)
-//     //     if (find) {
-//     //       v.value = find.value
-//     //       changeBoneValue(v, 'x', v.value.x)
-//     //       changeBoneValue(v, 'y', v.value.y)
-//     //       changeBoneValue(v, 'z', v.value.z)
-//     //     }
-//     //   })
-//     // }
-//   } else {
-//     allBones.value.forEach(v => {
-//       const find = preset.bones.find((item: any) => item.name === v.name)
-//       if (find) {
-//         v.value = find.value
-//         changeBoneValue(v, 'x', v.value.x)
-//         changeBoneValue(v, 'y', v.value.y)
-//         changeBoneValue(v, 'z', v.value.z)
-//       }
-//     })
-//     // allBones.value = preset.bones.map(v => {
-//     //   const bondMesh = scene.getObjectByName(v.name) as THREE.Mesh
-//     //   bondMesh.rotation.x = v.value.x
-//     //   bondMesh.rotation.y = v.value.y
-//     //   bondMesh.rotation.z = v.value.z
-
-//     //   return {
-//     //     name: v.name,
-//     //     basicValue: v.value,
-//     //     value: v.value,
-//     //   }
-//     // });
-//   }
-//   const newBones = [];
-//   preset.bones.forEach(boneData => {
-//     newBones.push({
-//       ...allBones.value.find(b => b.name === boneData.name),
-//       value: boneData.value,
-//     })
-//     // if (bone) {
-//     //   changeBoneValue(bone, 'x', boneData.value.x)
-//     //   changeBoneValue(bone, 'y', boneData.value.y)
-//     //   changeBoneValue(bone, 'z', boneData.value.z)
-//     // }
-//   })
-// }
-
 const allBones = ref<Array<{
   name: string,
   basicValue: {
@@ -336,103 +284,6 @@ const allBones = ref<Array<{
   }
 }))
 
-// const nameToConfig = ref<{
-//   [key: string]: {
-//     title: string,
-//     minX: number,
-//     maxX: number,
-//     minY?: number,
-//     maxY?: number,
-//   }
-// }>({
-//   'spine': {
-//     title: '整个身体',
-//     minX: -3.14,
-//     maxX: 3.14,
-//   },
-//   'spine001': {
-//     title: '腰',
-//     minX: -3.14,
-//     maxX: 3.14,
-//   },
-//   'spine005': {
-//     title: '脖子',
-//     minX: -3.14,
-//     maxX: 3.14,
-//   },
-//   'thighR': {
-//     title: '大腿(左)',
-//     minX: 0,
-//     maxX: 6.28,
-//   },
-//   'shinR': {
-//     title: '小腿(左)',
-//     minX: -3.14,
-//     maxX: 3.14,
-//   },
-//   'footR': {
-//     title: '脚踝(左)',
-//     minX: -3.14,
-//     maxX: 3.14,
-//   },
-//   'shoulderL': {
-//     title: '肩头(右)',
-//     minX: -3.14,
-//     maxX: 3.14,
-//     minY: -3.14,
-//     maxY: 3.14,
-//   },
-//   'shoulderR': {
-//     title: '肩头(左)',
-//     minX: -3.14,
-//     maxX: 3.14,
-//   },
-//   'upper_armL': {
-//     title: '大臂(右)',
-//     minX: -3.14,
-//     maxX: 3.14,
-//   },
-//   'upper_armR': {
-//     title: '大臂(左)',
-//     minX: -3.14,
-//     maxX: 3.14,
-//   },
-//   'forearmL': {
-//     title: '小臂(右)',
-//     minX: -3.14,
-//     maxX: 3.14,
-//   },
-//   'forearmR': {
-//     title: '小臂(左)',
-//     minX: -3.14,
-//     maxX: 3.14,
-//   },
-//   'handL': {
-//     title: '手腕(右)',
-//     minX: -3.14,
-//     maxX: 3.14,
-//   },
-//   'handR': {
-//     title: '手腕(左)',
-//     minX: -3.14,
-//     maxX: 3.14,
-//   },
-//   'thighL': {
-//     title: '大腿(右)',
-//     minX: 0,
-//     maxX: 6.28,
-//   },
-//   'shinL': {
-//     title: '小腿(右)',
-//     minX: -3.14,
-//     maxX: 3.14,
-//   },
-//   'footL': {
-//     title: '脚踝(右)',
-//     minX: -3.14,
-//     maxX: 3.14,
-//   },
-// })
 const viewportConfigs: ViewportConfig = {
   id: 'main',
   type: 'perspective',
@@ -453,6 +304,7 @@ const allPanelHeight = ref(0)
 const fbxLoader = new FBXLoader()
 let peopleModel: THREE.Group | null = null
 
+let renderer: THREE.WebGLRenderer
 function initThree() {
   scene = new THREE.Scene()
   scene.background = new THREE.Color(0xf0f0f0)
@@ -473,7 +325,8 @@ function initThree() {
   const camera: THREE.Camera = new THREE.PerspectiveCamera(config.fov || 45, config.aspect || 1, 0.1, 2000)
   camera.position.set(...config.position)
   camera.lookAt(0, 100, 0)
-  const renderer = new THREE.WebGLRenderer({ antialias: true })
+  console.log('new THREE.WebGLRenderer', 5)
+  renderer = new THREE.WebGLRenderer({ antialias: true })
   renderer.setPixelRatio(window.devicePixelRatio)
   renderer.shadowMap.enabled = true
 
@@ -495,7 +348,7 @@ function initThree() {
   }
 
   fbxLoader.load('/ManClean.fbx', (fbxModel_: any) => {
-    console.log('FBX模型加载成功:', fbxModel_)
+    // console.log('FBX模型加载成功:', fbxModel_)
     peopleModel = fbxModel_ as THREE.Group
 
     const allBonesData: Array<{
@@ -519,15 +372,15 @@ function initThree() {
     }> = [];
     peopleModel.traverse((child: any) => {
       if (child.isMesh) {
-        console.log('对象:', child.name, '材质:', child.material)
+        // console.log('对象:', child.name, '材质:', child.material)
         if (!child.material || child.material.type === 'MeshBasicMaterial') {
           child.material = new THREE.MeshNormalMaterial()
         }
       }
       if (child.isBone) {
-        if (child.name === 'mixamorigHips') {
-          console.log(`🦴 骨骼: ${child.name}`, child.rotation)
-        }
+        // if (child.name === 'mixamorigHips') {
+        //   console.log(`🦴 骨骼: ${child.name}`, child.rotation)
+        // }
         const findProp = allBones.value.find((item) => item.name === child.name)
         allBonesData.push({
           name: child.name,
@@ -550,18 +403,18 @@ function initThree() {
         })
       }
     })
-    console.log('所有骨骼:', allBonesData)
+    // console.log('所有骨骼:', allBonesData)
     allBones.value = allBonesData;
 
     const box = new THREE.Box3().setFromObject(peopleModel)
     const center = box.getCenter(new THREE.Vector3())
     const size = box.getSize(new THREE.Vector3())
-    console.log('模型包围盒 - 中心:', center, '尺寸:', size)
+    // console.log('模型包围盒 - 中心:', center, '尺寸:', size)
 
     const maxDim = Math.max(size.x, size.y, size.z)
     const scale = 200 / maxDim
     peopleModel.scale.set(scale, scale, scale)
-    console.log('模型缩放:', scale)
+    // console.log('模型缩放:', scale)
 
     rootBone = peopleModel.getObjectByName('Armature') || peopleModel.children[0]
     originalPosition.copy(rootBone.position)
@@ -615,6 +468,12 @@ onUnmounted(() => {
   mixer = null;
   controls?.dispose()
   allPanel.renderer.dispose()
+  console.log('new THREE.WebGLRenderer--销毁', 5)
+  renderer.forceContextLoss();
+  renderer.dispose()
+  if (renderer.domElement && renderer.domElement.parentNode) {
+    renderer.domElement.parentNode.removeChild(renderer.domElement);
+  }
 })
 // function changeBoneValue(item: {
 //   name: string,
@@ -677,6 +536,7 @@ async function saveAnimation(applyScope: ApplyScope) {
     timelineState.timelineData.clips.push({
       entityId: originalData.id,
       clipId: generateClipId(),
+      isFold: false,
       startTime: timelineState.currentTime,
       endTime: timelineState.currentTime + 1,
       columns: [],
@@ -763,7 +623,7 @@ function handleModalItemClick(file: AnimationItem) {
   showModal.value = false
 }
 function runPostAnimation(file: string): Promise<void> {
-  console.log('runPostAnimation', file)
+  // console.log('runPostAnimation', file)
   if (currentAction) {
     currentAction.stop()
   }

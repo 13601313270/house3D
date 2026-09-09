@@ -171,6 +171,7 @@ const initThree = () => {
     camera.layers.disable(2);
   }
 
+  console.log('new THREE.WebGLRenderer', 1)
   renderer = new THREE.WebGLRenderer({ antialias: true })
   // pixelRatio=1：使 canvas.width/height 等于 setSize 传入的逻辑尺寸（固定 2048）
   renderer.setPixelRatio(1)
@@ -598,10 +599,16 @@ const initThree = () => {
   })();
 }
 
+let animateSkip = false
 const animate = () => {
   const scene = window.worldApi.scene
   if (renderer && scene && camera) {
-    renderer.render(scene, camera)
+    if (animateSkip) {
+      animateSkip = false
+    } else {
+      renderer.render(scene, camera)
+      animateSkip = true
+    }
     requestAnimationFrame(animate)
   }
 }
@@ -752,7 +759,11 @@ onUnmounted(() => {
   window.removeEventListener('resize', resize)
 
   if (renderer) {
+    renderer.forceContextLoss();
     renderer.dispose()
+    if (containerRef.value) {
+      containerRef.value.removeChild(renderer.domElement)
+    }
   }
 })
 
