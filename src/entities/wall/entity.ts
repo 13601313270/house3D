@@ -569,7 +569,7 @@ export class WallEntity extends LineEntityClass<WallPoint, WallData> {
       return;
     }
     this.cacheAllHoleKey = newKey
-    console.trace('bindEntityInWallWithSubtractChanged=========3')
+    // console.trace('bindEntityInWallWithSubtractChanged=========3')
     this.markObjectIsDirty()
     this.reCreate3DMeshAnd2DPreviewIfNeed()
     // const data = this.getData();
