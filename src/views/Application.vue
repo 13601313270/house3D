@@ -523,7 +523,11 @@ const activeCameraIndexOfTimeline = ref(0)
 
 const activeCameraIndex = computed(() => {
   if (editMode.value === 'animation') {
-    return activeCameraIndexOfTimeline.value
+    if (activeCameraIndexOfTimeline.value === -1) {
+      return activeCameraIndexOfWorldState.value
+    } else {
+      return activeCameraIndexOfTimeline.value
+    }
   } else {
     return activeCameraIndexOfWorldState.value
   }
