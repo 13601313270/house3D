@@ -864,6 +864,7 @@ onMounted(async () => {
 
   timelineState.onChangeCurrentTime(() => {
     activeCameraIndexOfTimeline.value = timelineState.getAnimationCameraIndexAtCurrentTime();
+    // console.log('kkkkk', activeCameraIndexOfTimeline.value)
     // console.log('activeCameraIndexOfTimeline.value', activeCameraIndexOfTimeline.value)
     if (allCamera.value[activeCameraIndexOfTimeline.value]) {
       const activeIndex = activeCameraIndexOfTimeline.value
@@ -883,8 +884,10 @@ onMounted(async () => {
         rightPanelCamera.value = allTypesCameraObjList[activeIndex].realyCamera
       }
     }
-    canvas3DRefCenter.value?.reRender()
-    canvas3DRef2.value?.reRender()
+    nextTick(() => {
+      canvas3DRefCenter.value?.reRender()
+      canvas3DRef2.value?.reRender()
+    })
   })
 
   return () => {

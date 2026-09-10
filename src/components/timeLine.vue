@@ -272,6 +272,9 @@ onMounted(() => {
     currentTime.value = timelineState.currentTime
   })
   evaluateTimeline(timelineState.currentTime)
+  setTimeout(() => {
+    timelineState.triggerChangeCurrentTime()
+  }, 0)
 })
 
 // effectiveDuration（计算实际显示总时长
@@ -381,8 +384,10 @@ function handleTimeInfoMouseDown(event: MouseEvent) {
 
   isScrubbing = true
   scrubClosedPanel = false
-  timelineState.currentTime = getTimeFromMouseEvent(event)
-  evaluateTimeline(timelineState.currentTime)
+  const turnToTime = getTimeFromMouseEvent(event);
+  evaluateTimeline(turnToTime).then(() => {
+    timelineState.currentTime = turnToTime
+  })
 
   document.addEventListener('mousemove', onScrubDrag)
   document.addEventListener('mouseup', stopScrub)
@@ -392,8 +397,10 @@ function handleTimeInfoMouseDown(event: MouseEvent) {
 // 非VIP限制：不能超过免费时长
 function onScrubDrag(event: MouseEvent) {
   if (!isScrubbing) return
-  timelineState.currentTime = getTimeFromMouseEvent(event)
-  evaluateTimeline(timelineState.currentTime)
+  const turnToTime = getTimeFromMouseEvent(event);
+  evaluateTimeline(turnToTime).then(() => {
+    timelineState.currentTime = turnToTime
+  })
 }
 
 function stopScrub() {
@@ -472,28 +479,6 @@ function keyFrameStyleNew2(startTime: KeyTimePoint, segment: ClipSegment) {
     }
   }
 }
-function getAllTimeInSegment(segment: ClipSegment): Array<{
-  time: number,
-  timeLength: number,
-}> {
-  const allTimes: Array<number> = []
-  const allReturn: Array<{
-    time: number,
-    timeLength: number,
-  }> = []
-  segment.clip.columns.forEach(track => {
-    track.keyTimePoints.forEach(kf => {
-      if (!allTimes.includes(kf.time)) {
-        allTimes.push(kf.time)
-        allReturn.push({
-          time: kf.time,
-          timeLength: kf.type === 'animation' ? kf.timeLength : 0,
-        })
-      }
-    })
-  })
-  return allReturn
-}
 
 function toggleClipContentFrame(event: MouseEvent, segment: ClipSegment, keyTimePoint: KeyTimePoint) {
   const time = keyTimePoint.time
@@ -501,8 +486,10 @@ function toggleClipContentFrame(event: MouseEvent, segment: ClipSegment, keyTime
   if (isPlaying.value) {
     togglePlay()
   }
-  timelineState.currentTime = snapTimeToFrame(time);
-  evaluateTimeline(timelineState.currentTime)
+  const turnToTime = snapTimeToFrame(time);
+  evaluateTimeline(turnToTime).then(() => {
+    timelineState.currentTime = turnToTime;
+  })
   showContextMenu(event, [
     {
       title: '删除节点',
@@ -681,8 +668,9 @@ function onKeyframeDrag(event: MouseEvent) {
   // timelineData 非响应式，通过 triggerChange 触发 updateRef 重新渲染节点位置/宽度
   timelineState.triggerChange()
   // 播放头跟随被拖拽的边，实时预览
-  timelineState.currentTime = previewTime
-  evaluateTimeline(previewTime)
+  evaluateTimeline(previewTime).then(() => {
+    timelineState.currentTime = previewTime
+  })
 }
 
 function stopKeyframeDrag() {

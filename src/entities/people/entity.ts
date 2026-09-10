@@ -113,7 +113,7 @@ export class PeopleEntity extends ModelFileEntity<PeopleData> {
     const data = this.getData();
     if (this.meshGroup?.children[0] && data.bone && data.bone?.length > 0) {
       const boneListConfig = data.bone
-      if (boneListConfig) {
+      if (boneListConfig && typeof boneListConfig !== 'string') {
         this.meshGroup?.children[0].traverse((child: any) => {
           if (child.isBone) {
             const findProp = boneListConfig.find((item) => item.name === child.name)
