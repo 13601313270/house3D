@@ -150,9 +150,10 @@
       <div class="right-panel" :style="{ width: (1 - panel1SplitWidthPer - panel2SplitWidthPer) * 100 + '%' }">
         <div class="tools">
           <div style="flex-shrink: 0;">摄像机：</div>
+          <!-- <span>{{ activeCameraIndexOfTimeline }}&{{ activeCameraIndex }}</span> -->
           <div class="cameraList">
             <div v-for="(item, index) in allCamera" @click="changeCamera2(index)"
-              :class="{ active: activeCameraIndexOfWorldState === index }" class="cameraItem">{{ index + 1 }}
+              :class="{ active: activeCameraIndex === index }" class="cameraItem">{{ index + 1 }}
             </div>
           </div>
           <div class="buttons" v-if="allCamera.length && cameraRightState">
@@ -518,6 +519,16 @@ window.globalEditGroup = worldApi
 allObjCount.value = worldApi.getAllObjectCount()
 
 const activeCameraIndexOfWorldState = ref(0)
+const activeCameraIndexOfTimeline = ref(0)
+
+const activeCameraIndex = computed(() => {
+  if (editMode.value === 'animation') {
+    return activeCameraIndexOfTimeline.value
+  } else {
+    return activeCameraIndexOfWorldState.value
+  }
+})
+
 async function initCameraList() {
   // console.log('timelineState.currentTime', timelineState.currentTime)
   const allCameraTypeKey = ['camera', 'directionCamera'];
@@ -603,6 +614,7 @@ async function changeCamera2(activeIndex: number = 0) {
         }
       }
       timelineState.triggerChange()
+      activeCameraIndexOfTimeline.value = timelineState.getAnimationCameraIndexAtCurrentTime();
     } else {
       activeCameraIndexOfWorldState.value = activeIndex
       worldState.activeCameraIndex = activeIndex
@@ -718,6 +730,7 @@ onMounted(async () => {
     })
     if (findCamera) {
       if (type === 'remove' && activeCameraIndexOfWorldState.value === allCamera.value.length - 1) {
+        worldState.activeCameraIndex = 0
         activeCameraIndexOfWorldState.value = 0;
       }
       if (timelineState.isPlaying) {
@@ -866,6 +879,10 @@ onMounted(async () => {
   // 初始默认数据
   console.log('initDefaultData', initDefaultData)
   await initWorldByData(initDefaultData)
+
+  timelineState.onChangeCurrentTime(() => {
+    activeCameraIndexOfTimeline.value = timelineState.getAnimationCameraIndexAtCurrentTime();
+  })
 
   return () => {
     window.removeEventListener('keydown', handleKeyDown)

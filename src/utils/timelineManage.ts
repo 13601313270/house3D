@@ -87,6 +87,17 @@ class TimelineStateClass {
   public triggerChangeCurrentTime() {
     this.onChangeCurrentTimeCallbacks.forEach(callback => callback())
   }
+
+  getAnimationCameraIndexAtCurrentTime() {
+    // 计算当前时间对应的摄像机索引
+    const activeCameraIndexOfTimeLine = [...this.timelineData_.activeCameraIndexTimes]
+      .sort((a, b) => b.time - a.time)
+      .find(clip => {
+        return clip.time <= this.currentTime_
+      })
+    // console.log('activeCameraIndexOfTimeLine', activeCameraIndexOfTimeLine)
+    return activeCameraIndexOfTimeLine ? activeCameraIndexOfTimeLine.index : -1;
+  }
 }
 const api = new TimelineStateClass()
 
