@@ -155,11 +155,6 @@
         </div>
       </div>
     </div>
-
-    <!-- 关键帧属性编辑面板：由 onKeyframeClick 打开，读取 entity 的编辑配置动态渲染 -->
-    <DataTypeEditPanel v-if="editPropConfigInfo.length && contextMenu" :typeKey="editPropTypeKey || ''"
-      :editPropConfigInfo="editPropConfigInfo" v-model="editPropInputInfo"
-      :initPosition="{ x: contextMenu.x, y: contextMenu.y }" @close="editPropConfigInfo = []" />
   </div>
 </template>
 
@@ -170,7 +165,6 @@ import { message } from '@/utils/message'
 // timelineState 模块：管理时间轴状态，clip/track/keyframe 数据结构，以及全局播放状态标志
 import { ObjAllColumnData, timelineState, KeyTimePoint, ObjOneColumnData } from '@/utils/timelineManage';
 import editItem from '@/utils/editItem';
-import DataTypeEditPanel from '../views/DataTypeEditPanel.vue'
 import showContextMenu from '@/utils/contextMenu';
 import evaluateTrack from '@/utils/evaluateTrack';
 import getPeopleAnimateOneTime from '@/utils/getPeopleAnimateOneTime';
@@ -546,52 +540,6 @@ function deleteClip(clipId: string) {
   timelineState.timelineData = { ...timelineState.timelineData, clips: newClips }
   closeClipContent()
 }
-
-// toggleCollapse：对象轨道折叠/展开（预留功能，未来每对象多轨道时可头部点击折叠展开；TS 未使用提示不影响）
-// 切换 collapsedClips Set：存在则删除，不存在则添加
-function toggleCollapse(entityId: string) {
-  const next = new Set(collapsedClips.value)
-  if (next.has(entityId)) {
-    next.delete(entityId)
-  } else {
-    next.add(entityId)
-  }
-  collapsedClips.value = next
-}
-
-// ========== 关键帧属性编辑：调用 entity.getEditPropConfigData 动态构造 DataTypeEditPanel ==========
-const editPropConfigInfo = ref<editItem[]>([])
-const editPropInputInfo = ref<any>({})
-const editPropTypeKey = ref<string>()
-// contextMenu：编辑面板弹出位置（mouseX/mouseY）
-const contextMenu = ref<{
-  visible: boolean;
-  x: number;
-  y: number;
-} | null>(null)
-// editPropConfigEditCallback：DataTypeEditPanel 面板输入变化的回写回调
-
-// onKeyframeClick：点击关键帧节点时触发
-// 执行顺序：
-// 1) 若本次是拖拽结束（dragMoved=true）→ 不触发 click 逻辑，直接返回
-// 2) 播放中 → 自动 togglePlay() 暂停
-// 3) 找到 worldApi 中的 entity 实例
-// 4) 写 editPropConfigEditCallback：DataTypeEditPanel 输入变化时回写 keyframe.value
-// 5) 设置 selectedKeyframe（用于样式高亮红色选中态）
-function onKeyframeClick(time: number) {
-  // 若刚结束一次关键帧拖拽 → 本次 click 不生效（避免拖拽后播放头被重置/暂停逻辑重复触发）
-  if (keyframeDragMoved) {
-    keyframeDragMoved = false
-    return
-  }
-  // 播放中操作关键帧 → 自动暂停，避免播放与编辑冲突
-  if (isPlaying.value) {
-    togglePlay()
-  }
-  timelineState.currentTime = snapTimeToFrame(time);
-  evaluateTimeline(timelineState.currentTime)
-}
-
 // 关键帧节点拖拽
 //  三种模式（mode）：
 //   - 'move'       ：拖动节点整体，改 item.time（timeLength 不变），同时刻跨轨道的所有点一起移动
