@@ -207,6 +207,9 @@ export class PeopleEntity extends ModelFileEntity<PeopleData> {
       if (a === undefined || a.length === 0) {
         return b;
       }
+      if (b === undefined || b.length === 0 || typeof b === 'string') {
+        return a;
+      }
       (a as BoneStepItem[]).forEach((aItem) => {
         const bItem = b.find((v: any) => v.name === aItem.name);
         if (bItem === undefined) {
