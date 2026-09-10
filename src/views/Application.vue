@@ -152,7 +152,7 @@
           <div style="flex-shrink: 0;">摄像机：</div>
           <div class="cameraList">
             <div v-for="(item, index) in allCamera" @click="changeCamera2(index)"
-              :class="{ active: activeCameraIndex === index }" class="cameraItem">{{ index + 1 }}
+              :class="{ active: activeCameraIndexOfWorldState === index }" class="cameraItem">{{ index + 1 }}
             </div>
           </div>
           <div class="buttons" v-if="allCamera.length && cameraRightState">
@@ -517,7 +517,7 @@ window.globalEditGroup = worldApi
 
 allObjCount.value = worldApi.getAllObjectCount()
 
-const activeCameraIndex = ref(0)
+const activeCameraIndexOfWorldState = ref(0)
 async function initCameraList() {
   // console.log('timelineState.currentTime', timelineState.currentTime)
   const allCameraTypeKey = ['camera', 'directionCamera'];
@@ -604,7 +604,7 @@ async function changeCamera2(activeIndex: number = 0) {
       }
       timelineState.triggerChange()
     } else {
-      activeCameraIndex.value = activeIndex
+      activeCameraIndexOfWorldState.value = activeIndex
       worldState.activeCameraIndex = activeIndex
     }
     const allCameraObjList: BaseEntityClass<BaseObjData>[] = [];
@@ -634,10 +634,7 @@ async function changeCamera2(activeIndex: number = 0) {
       })
       canvas2DSceneManage.renderPreview()
     }
-    // console.trace('ddddddd')
-    // console.log('cameraRightPanel---1', cameraRightPanel.value)
     if (allTypesCameraObjList[activeIndex] && allTypesCameraObjList[activeIndex].realyCamera) {
-      // console.log('cameraRightPanel---2', cameraRightPanel.value)
       rightPanelCamera.value = allTypesCameraObjList[activeIndex].realyCamera
     }
   } else {
@@ -720,15 +717,15 @@ onMounted(async () => {
       return item instanceof PointEntityClass && item.realyCamera;
     })
     if (findCamera) {
-      if (type === 'remove' && activeCameraIndex.value === allCamera.value.length - 1) {
-        activeCameraIndex.value = 0;
+      if (type === 'remove' && activeCameraIndexOfWorldState.value === allCamera.value.length - 1) {
+        activeCameraIndexOfWorldState.value = 0;
       }
       if (timelineState.isPlaying) {
         // changeCamera2(activeCameraIndex.value)
       } else {
         initCameraList();
-        if (worldState.activeCameraIndex !== activeCameraIndex.value) {
-          changeCamera2(activeCameraIndex.value)
+        if (worldState.activeCameraIndex !== activeCameraIndexOfWorldState.value) {
+          changeCamera2(activeCameraIndexOfWorldState.value)
         }
       }
     }
@@ -909,7 +906,7 @@ const saveDrawing = async () => {
     canvas2DSceneManage.list[0].panOffset,
     canvas2DSceneManage.list[0].level,
     cameraStateCenter.value,
-    activeCameraIndex.value,
+    activeCameraIndexOfWorldState.value,
   )
 }
 
