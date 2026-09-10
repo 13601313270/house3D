@@ -618,36 +618,36 @@ async function changeCamera2(activeIndex: number = 0) {
     } else {
       activeCameraIndexOfWorldState.value = activeIndex
       worldState.activeCameraIndex = activeIndex
-    }
-    const allCameraObjList: BaseEntityClass<BaseObjData>[] = [];
-    allCameraTypeKey.forEach(typeKey => {
-      const typeItemList = worldApi.getTypeListEntity(typeKey);
-      if (typeItemList) {
-        allCameraObjList.push(...typeItemList);
-      }
-    })
-    if (allCameraObjList) {
-      allCameraObjList.forEach((cameraItem, index) => {
-        if (index === activeIndex) {
-          // @ts-ignore
-          if (cameraItem.active === false) {
-            // @ts-ignore
-            cameraItem.active = true
-            // cameraItem.markObjectIsDirty()
-          }
-        } else {
-          // @ts-ignore
-          if (cameraItem.active === true) {
-            // @ts-ignore
-            cameraItem.active = false
-            // cameraItem.markObjectIsDirty()
-          }
+      const allCameraObjList: BaseEntityClass<BaseObjData>[] = [];
+      allCameraTypeKey.forEach(typeKey => {
+        const typeItemList = worldApi.getTypeListEntity(typeKey);
+        if (typeItemList) {
+          allCameraObjList.push(...typeItemList);
         }
       })
-      canvas2DSceneManage.renderPreview()
-    }
-    if (allTypesCameraObjList[activeIndex] && allTypesCameraObjList[activeIndex].realyCamera) {
-      rightPanelCamera.value = allTypesCameraObjList[activeIndex].realyCamera
+      if (allCameraObjList) {
+        allCameraObjList.forEach((cameraItem, index) => {
+          if (index === activeIndex) {
+            // @ts-ignore
+            if (cameraItem.active === false) {
+              // @ts-ignore
+              cameraItem.active = true
+              // cameraItem.markObjectIsDirty()
+            }
+          } else {
+            // @ts-ignore
+            if (cameraItem.active === true) {
+              // @ts-ignore
+              cameraItem.active = false
+              // cameraItem.markObjectIsDirty()
+            }
+          }
+        })
+        canvas2DSceneManage.renderPreview()
+      }
+      if (allTypesCameraObjList[activeIndex] && allTypesCameraObjList[activeIndex].realyCamera) {
+        rightPanelCamera.value = allTypesCameraObjList[activeIndex].realyCamera
+      }
     }
   } else {
     allCamera.value = []
@@ -882,6 +882,10 @@ onMounted(async () => {
 
   timelineState.onChangeCurrentTime(() => {
     activeCameraIndexOfTimeline.value = timelineState.getAnimationCameraIndexAtCurrentTime();
+    if (allCamera.value[activeCameraIndexOfTimeline.value]) {
+      console.log('activeCameraIndexOfTimeline.value', activeCameraIndexOfTimeline.value, allCamera.value[activeCameraIndexOfTimeline.value])
+      cameraRightState.value = allCamera.value[activeCameraIndexOfTimeline.value]
+    }
   })
 
   return () => {
