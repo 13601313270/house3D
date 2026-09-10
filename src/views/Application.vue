@@ -563,7 +563,6 @@ async function initCameraList() {
 async function changeCamera2(activeIndex: number = 0) {
   // console.log('timelineState.currentTime', timelineState.currentTime)
   const allCameraTypeKey = ['camera', 'directionCamera'];
-  const allTypesCameraList: CameraData[] = []
   const allTypesCameraObjList: PointEntityClass<PointObjData>[] = []
   allCameraTypeKey.forEach(typeKey => {
     if (worldApi.getTypeListEntity(typeKey)) {
@@ -573,85 +572,65 @@ async function changeCamera2(activeIndex: number = 0) {
         }
       })
     }
-    allTypesCameraList.push(...worldApi.getTypeObjectsData(typeKey) as CameraData[]);
   })
 
-  if (allTypesCameraList) {
-    // cameraRightPanel.value = allTypesCameraList[activeIndex];
-    await sleep(10);
-    const allCameraList: CameraState[] = [];
-    (allTypesCameraList as CameraData[]).forEach(cameraData => {
-      allCameraList.push({
-        targetPositionX: cameraData.targetPositionX,
-        targetPositionY: cameraData.targetPositionY,
-        targetPositionZ: cameraData.targetPositionZ,
-        positionX: cameraData.x,
-        positionY: cameraData.y,
-        positionZ: cameraData.z,
-        fov: cameraData.fov,
-        aspectW: cameraData.aspectW,
-        aspectH: cameraData.aspectH,
-      });
-    })
-    cameraRightState.value = allCameraList[activeIndex]
-    if (timelineState.isPlaying) {
-      const originTimes = timelineState.timelineData.activeCameraIndexTimes;
-      // 如果有恰好命中的，直接更新index
-      for (let i = 0; i < originTimes.length; i++) {
-        const item = originTimes[i]
-        if (item.time === timelineState.currentTime) {
-          item.index = activeIndex
-        }
-      }
-      originTimes.push({
-        index: activeIndex,
-        time: timelineState.currentTime,
-      })
-      originTimes.sort((a, b) => a.time - b.time)
-      for (let i = originTimes.length - 1; i >= 0; i--) {
-        if (originTimes[i - 1] && originTimes[i - 1].index === originTimes[i].index) {
-          originTimes.splice(i, 1)
-        }
-      }
-      timelineState.triggerChange()
-      activeCameraIndexOfTimeline.value = timelineState.getAnimationCameraIndexAtCurrentTime();
-    } else {
-      activeCameraIndexOfWorldState.value = activeIndex
-      worldState.activeCameraIndex = activeIndex
-      const allCameraObjList: BaseEntityClass<BaseObjData>[] = [];
-      allCameraTypeKey.forEach(typeKey => {
-        const typeItemList = worldApi.getTypeListEntity(typeKey);
-        if (typeItemList) {
-          allCameraObjList.push(...typeItemList);
-        }
-      })
-      if (allCameraObjList) {
-        allCameraObjList.forEach((cameraItem, index) => {
-          if (index === activeIndex) {
-            // @ts-ignore
-            if (cameraItem.active === false) {
-              // @ts-ignore
-              cameraItem.active = true
-              // cameraItem.markObjectIsDirty()
-            }
-          } else {
-            // @ts-ignore
-            if (cameraItem.active === true) {
-              // @ts-ignore
-              cameraItem.active = false
-              // cameraItem.markObjectIsDirty()
-            }
-          }
-        })
-        canvas2DSceneManage.renderPreview()
-      }
-      if (allTypesCameraObjList[activeIndex] && allTypesCameraObjList[activeIndex].realyCamera) {
-        rightPanelCamera.value = allTypesCameraObjList[activeIndex].realyCamera
+  // cameraRightPanel.value = allTypesCameraList[activeIndex];
+  await sleep(10);
+  cameraRightState.value = allCamera.value[activeIndex]
+  if (timelineState.isPlaying) {
+    const originTimes = timelineState.timelineData.activeCameraIndexTimes;
+    // 如果有恰好命中的，直接更新index
+    for (let i = 0; i < originTimes.length; i++) {
+      const item = originTimes[i]
+      if (item.time === timelineState.currentTime) {
+        item.index = activeIndex
       }
     }
+    originTimes.push({
+      index: activeIndex,
+      time: timelineState.currentTime,
+    })
+    originTimes.sort((a, b) => a.time - b.time)
+    for (let i = originTimes.length - 1; i >= 0; i--) {
+      if (originTimes[i - 1] && originTimes[i - 1].index === originTimes[i].index) {
+        originTimes.splice(i, 1)
+      }
+    }
+    timelineState.triggerChange()
+    activeCameraIndexOfTimeline.value = timelineState.getAnimationCameraIndexAtCurrentTime();
   } else {
-    allCamera.value = []
-    cameraRightState.value = null
+    activeCameraIndexOfWorldState.value = activeIndex
+    worldState.activeCameraIndex = activeIndex
+    const allCameraObjList: BaseEntityClass<BaseObjData>[] = [];
+    allCameraTypeKey.forEach(typeKey => {
+      const typeItemList = worldApi.getTypeListEntity(typeKey);
+      if (typeItemList) {
+        allCameraObjList.push(...typeItemList);
+      }
+    })
+    if (allCameraObjList) {
+      allCameraObjList.forEach((cameraItem, index) => {
+        if (index === activeIndex) {
+          // @ts-ignore
+          if (cameraItem.active === false) {
+            // @ts-ignore
+            cameraItem.active = true
+            // cameraItem.markObjectIsDirty()
+          }
+        } else {
+          // @ts-ignore
+          if (cameraItem.active === true) {
+            // @ts-ignore
+            cameraItem.active = false
+            // cameraItem.markObjectIsDirty()
+          }
+        }
+      })
+      canvas2DSceneManage.renderPreview()
+    }
+    if (allTypesCameraObjList[activeIndex] && allTypesCameraObjList[activeIndex].realyCamera) {
+      rightPanelCamera.value = allTypesCameraObjList[activeIndex].realyCamera
+    }
   }
 }
 
@@ -883,8 +862,22 @@ onMounted(async () => {
   timelineState.onChangeCurrentTime(() => {
     activeCameraIndexOfTimeline.value = timelineState.getAnimationCameraIndexAtCurrentTime();
     if (allCamera.value[activeCameraIndexOfTimeline.value]) {
-      console.log('activeCameraIndexOfTimeline.value', activeCameraIndexOfTimeline.value, allCamera.value[activeCameraIndexOfTimeline.value])
-      cameraRightState.value = allCamera.value[activeCameraIndexOfTimeline.value]
+      const activeIndex = activeCameraIndexOfTimeline.value
+      cameraRightState.value = allCamera.value[activeIndex]
+      const allCameraTypeKey = ['camera', 'directionCamera'];
+      const allTypesCameraObjList: PointEntityClass<PointObjData>[] = []
+      allCameraTypeKey.forEach(typeKey => {
+        if (worldApi.getTypeListEntity(typeKey)) {
+          worldApi.getTypeListEntity(typeKey).forEach(item => {
+            if (item instanceof PointEntityClass && item.realyCamera) {
+              allTypesCameraObjList.push(item);
+            }
+          })
+        }
+      })
+      if (allTypesCameraObjList[activeIndex] && allTypesCameraObjList[activeIndex].realyCamera) {
+        rightPanelCamera.value = allTypesCameraObjList[activeIndex].realyCamera
+      }
     }
   })
 
@@ -1394,6 +1387,33 @@ watch(() => editPropInputInfo.value, () => {
   }
 }, {
   deep: true
+})
+watch(() => editMode.value, () => {
+  function update(activeIndex: number) {
+    cameraRightState.value = allCamera.value[activeIndex]
+    const allCameraTypeKey = ['camera', 'directionCamera'];
+    const allTypesCameraObjList: PointEntityClass<PointObjData>[] = []
+    allCameraTypeKey.forEach(typeKey => {
+      if (worldApi.getTypeListEntity(typeKey)) {
+        worldApi.getTypeListEntity(typeKey).forEach(item => {
+          if (item instanceof PointEntityClass && item.realyCamera) {
+            allTypesCameraObjList.push(item);
+          }
+        })
+      }
+    })
+    if (allTypesCameraObjList[activeIndex] && allTypesCameraObjList[activeIndex].realyCamera) {
+      rightPanelCamera.value = allTypesCameraObjList[activeIndex].realyCamera
+    }
+  }
+  if (editMode.value === 'scene') {
+    update(activeCameraIndexOfWorldState.value)
+  } else {
+    activeCameraIndexOfTimeline.value = timelineState.getAnimationCameraIndexAtCurrentTime();
+    if (allCamera.value[activeCameraIndexOfTimeline.value]) {
+      update(activeCameraIndexOfTimeline.value)
+    }
+  }
 })
 
 function exportImage() {
