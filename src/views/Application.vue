@@ -675,8 +675,10 @@ onMounted(async () => {
   }
 
   worldApi.onWorldChange((type, objList) => {
+    console.log('xxxxxx')
     if (['add', 'remove'].includes(type)) {
       allObjCount.value = worldApi.getAllObjectCount();
+      setTimeout(reRender3D, 30)
     } else if (type === 'change') {
       // console.log('contextMenu', objList)
       if (contextMenu.value && contextMenu.value.visible) {
@@ -707,6 +709,7 @@ onMounted(async () => {
           })
         }
       }
+      nextTick(reRender3D)
     }
     lockObjCount.value = worldApi.lockedObjList.length
     const findCamera = objList.find((item) => {
@@ -884,10 +887,7 @@ onMounted(async () => {
         rightPanelCamera.value = allTypesCameraObjList[activeIndex].realyCamera
       }
     }
-    nextTick(() => {
-      canvas3DRefCenter.value?.reRender()
-      canvas3DRef2.value?.reRender()
-    })
+    nextTick(reRender3D)
   })
 
   return () => {
@@ -1121,6 +1121,11 @@ async function initWorldByData(data: fileData & {
   if (data.environmentConfig) {
     worldApi.setEnvironMent(data.environmentConfig)
   }
+}
+
+function reRender3D() {
+  canvas3DRefCenter.value?.reRender()
+  canvas3DRef2.value?.reRender()
 }
 
 const handleContextMenu = (point: {

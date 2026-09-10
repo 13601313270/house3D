@@ -81,28 +81,6 @@ function raycastObjects(list: THREE.Group[], event: MouseEvent): THREE.Object3D 
 }
 
 function updateCameraAngel() {
-  // if (props.cameraType === 'orthographic') {
-  //   if ('size' in cameraStateZ.value) {
-  //     if (camera instanceof THREE.OrthographicCamera) {
-  //       camera.left = -cameraStateZ.value.size * props.aspectRatio;
-  //       camera.right = cameraStateZ.value.size * props.aspectRatio;
-  //       camera.top = cameraStateZ.value.size;
-  //       camera.bottom = -cameraStateZ.value.size;
-  //       camera.updateProjectionMatrix()
-  //       camera.position.set(
-  //         cameraStateZ.value.targetPositionX,
-  //         cameraStateZ.value.targetPositionZ + cameraStateZ.value.length,
-  //         cameraStateZ.value.targetPositionY,
-  //       );
-  //       camera.lookAt(
-  //         cameraStateZ.value.targetPositionX,
-  //         cameraStateZ.value.targetPositionZ,
-  //         cameraStateZ.value.targetPositionY
-  //       );
-  //       camera.updateProjectionMatrix()
-  //     }
-  //   }
-  // }
   if ('radius' in cameraStateZ.value && cameraStateZ.value.radius) {
     const camera1X = cameraStateZ.value.radius * Math.sin(cameraStateZ.value.angleX) * Math.cos(cameraStateZ.value.angleY) * -1;
     const camera1Y = cameraStateZ.value.radius * Math.sin(cameraStateZ.value.angleY);
@@ -119,6 +97,7 @@ function updateCameraAngel() {
         cameraStateZ.value.targetPositionY,
         cameraStateZ.value.targetPositionZ
       );
+      reRender()
     }
   } else if ('fov' in cameraStateZ.value) {
     if (camera) {
@@ -133,6 +112,7 @@ function updateCameraAngel() {
       //   cameraStateZ.value.targetPositionY
       // );
       camera.updateProjectionMatrix()
+      reRender()
     }
   }
 }
@@ -429,6 +409,7 @@ const initThree = () => {
                 const { worldZ } = computeHorizontalPlaneDelta(deltaX, deltaY)
                 entity.setData({ y: camera1MouseMoveStartPos.y + worldZ })
               }
+              reRender()
             }
           }
         }
@@ -541,7 +522,7 @@ const initThree = () => {
         const allLastTextBox: any[] = [];
         allMoveXYZBox.forEach((item) => {
           // @ts-ignore
-          const entity = item.children[0].entity as BaseEntityClass<any>
+          // const entity = item.children[0].entity as BaseEntityClass<any>
           // if (entity instanceof PointEntityClass) {
           //   entity.all3DActionHandel.visible = false
           // }
@@ -560,6 +541,7 @@ const initThree = () => {
             entity.boundingBox.children[1].visible = true
           }
         }
+        reRender();
       }
     })
 
@@ -600,13 +582,11 @@ const initThree = () => {
 }
 
 const animate = () => {
-  const scene = window.worldApi.scene
-  if (renderer && scene && camera) {
-    if (!timelineState.isPlaying) {
-      renderer.render(scene, camera)
-    }
-    requestAnimationFrame(animate)
-  }
+  // 不要自动运行了。
+  // const scene = window.worldApi.scene
+  // if (renderer && scene && camera) {
+  //   requestAnimationFrame(animate)
+  // }
 }
 const reRender = () => {
   const scene = window.worldApi.scene
