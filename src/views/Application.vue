@@ -675,7 +675,6 @@ onMounted(async () => {
   }
 
   worldApi.onWorldChange((type, objList) => {
-    console.log('xxxxxx')
     if (['add', 'remove'].includes(type)) {
       allObjCount.value = worldApi.getAllObjectCount();
       setTimeout(reRender3D, 30)
@@ -1123,9 +1122,15 @@ async function initWorldByData(data: fileData & {
   }
 }
 
+let reRender3DTimer: ReturnType<typeof setTimeout> | null = null
 function reRender3D() {
-  canvas3DRefCenter.value?.reRender()
-  canvas3DRef2.value?.reRender()
+  if (reRender3DTimer) clearTimeout(reRender3DTimer)
+  reRender3DTimer = setTimeout(() => {
+    reRender3DTimer = null
+    console.log('xxxxxx')
+    canvas3DRefCenter.value?.reRender()
+    canvas3DRef2.value?.reRender()
+  }, 200)
 }
 
 const handleContextMenu = (point: {
