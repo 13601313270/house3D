@@ -883,6 +883,8 @@ onMounted(async () => {
         rightPanelCamera.value = allTypesCameraObjList[activeIndex].realyCamera
       }
     }
+    canvas3DRefCenter.value?.reRender()
+    canvas3DRef2.value?.reRender()
   })
 
   return () => {

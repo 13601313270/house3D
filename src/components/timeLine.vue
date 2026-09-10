@@ -955,9 +955,9 @@ function playLoop() {
     timelineState.currentTime = 0
   }
 
-  evaluateTimeline(timelineState.currentTime)
-
-  animationFrameId = requestAnimationFrame(playLoop)
+  evaluateTimeline(timelineState.currentTime).then(() => {
+    animationFrameId = requestAnimationFrame(playLoop)
+  })
 }
 
 async function evaluateTimeline(time: number) {

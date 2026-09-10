@@ -10,7 +10,7 @@ import { CameraState, OrthographicCamera } from '@/types/camera'
 import { PointEntityClass } from '@/types/pointEntity';
 import { BaseEntityClass } from '@/types/baseEntity';
 import WorldGroup from '@/world/world';
-import { EntityInWall } from '@/types/entityInWall';
+import { timelineState } from '@/utils/timelineManage';
 
 const props = defineProps<{
   cameraState: CameraState,//  | OrthographicCamera,
@@ -599,17 +599,19 @@ const initThree = () => {
   })();
 }
 
-let animateSkip = false
 const animate = () => {
   const scene = window.worldApi.scene
   if (renderer && scene && camera) {
-    if (animateSkip) {
-      animateSkip = false
-    } else {
+    if (!timelineState.isPlaying) {
       renderer.render(scene, camera)
-      animateSkip = true
     }
     requestAnimationFrame(animate)
+  }
+}
+const reRender = () => {
+  const scene = window.worldApi.scene
+  if (renderer && scene && camera) {
+    renderer.render(scene, camera)
   }
 }
 
@@ -807,7 +809,8 @@ defineExpose({
   resize,
   exportImage,
   getImageData,
-  getCanvas: () => renderer?.domElement ?? null
+  getCanvas: () => renderer?.domElement ?? null,
+  reRender,
 })
 function calcVerticalFovByHorizontalFov(hFov: number, aspect: number) {
   const vFov = 2 * Math.atan(Math.tan((hFov * Math.PI / 180) / 2) / aspect)
