@@ -1101,6 +1101,14 @@ async function evaluateTimeline(time: number) {
     }
   }
 
+  // 计算当前时间对应的摄像机索引
+  const activeCameraIndexOfTimeLine = [...timelineState.timelineData.activeCameraIndexTimes]
+    .sort((a, b) => b.time - a.time)
+    .find(clip => {
+      return clip.time <= time
+    })
+  console.log('activeCameraIndex', activeCameraIndexOfTimeLine?.index)
+
   // // 先尝试查找 time 落在哪些 clip 的 (startTime, endTime) 开区间内
   // const matchIndex = timelineState.timelineData.clips.findIndex(clip => {
   //   return time > clip.startTime && time < clip.endTime
