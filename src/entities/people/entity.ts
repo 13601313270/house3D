@@ -256,6 +256,7 @@ export class PeopleEntity extends ModelFileEntity<PeopleData> {
   canEditAnimationDataColumn() {
     return [
       ...super.canEditAnimationDataColumn(),
+      'bone',
       'height',
       'boneEditButton'
     ]

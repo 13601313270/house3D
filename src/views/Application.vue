@@ -601,7 +601,8 @@ async function changeCamera2(activeIndex: number = 0) {
       }
     }
     timelineState.triggerChange()
-    activeCameraIndexOfTimeline.value = timelineState.getAnimationCameraIndexAtCurrentTime();
+    timelineState.triggerChangeCurrentTime()
+    // activeCameraIndexOfTimeline.value = timelineState.getAnimationCameraIndexAtCurrentTime();
   } else {
     activeCameraIndexOfWorldState.value = activeIndex
     worldState.activeCameraIndex = activeIndex
@@ -863,6 +864,7 @@ onMounted(async () => {
 
   timelineState.onChangeCurrentTime(() => {
     activeCameraIndexOfTimeline.value = timelineState.getAnimationCameraIndexAtCurrentTime();
+    // console.log('activeCameraIndexOfTimeline.value', activeCameraIndexOfTimeline.value)
     if (allCamera.value[activeCameraIndexOfTimeline.value]) {
       const activeIndex = activeCameraIndexOfTimeline.value
       cameraRightState.value = allCamera.value[activeIndex]
@@ -1241,7 +1243,6 @@ const handleContextMenu = (point: {
                     }
                   }
                 })
-
                 callback(changeData)
               }
               nextTick(() => {
