@@ -910,25 +910,18 @@ function playLoop() {
   lastTimestamp = now
 
   // targetFps > 0 时启用帧率控制：累积 deltaTime，达到目标帧间隔才推进评估
-  if (targetFps.value > 0) {
-    const frameInterval = 1 / targetFps.value
-    frameAccumulator += deltaTime * playbackSpeed.value
+  const frameInterval = 1 / targetFps.value
+  frameAccumulator += deltaTime * playbackSpeed.value
 
-    if (frameAccumulator >= frameInterval) {
-      // 一次性消费掉整数倍的帧间隔，避免长时间后台切换后雪崩式更新
-      const steps = Math.floor(frameAccumulator / frameInterval)
-      const steppedTime = steps * frameInterval
-      timelineState.currentTime += steppedTime
-      frameAccumulator -= steppedTime
-    } else {
-      // 未达到目标帧间隔，直接请求下一帧，不做评估
-      animationFrameId = requestAnimationFrame(playLoop)
-      return
-    }
-  } else {
-    // targetFps = 0：不限制，按显示器刷新率推进
-    timelineState.currentTime += deltaTime * playbackSpeed.value
+  if (frameAccumulator < frameInterval) {
+    // 未达到目标帧间隔，直接请求下一帧，不做评估
+    animationFrameId = requestAnimationFrame(playLoop)
+    return
   }
+  // 一次性消费掉整数倍的帧间隔，避免长时间后台切换后雪崩式更新
+  const steps = Math.floor(frameAccumulator / frameInterval)
+  const steppedTime = steps * frameInterval
+  frameAccumulator -= steppedTime
 
   // 录制模式：到达最大可录制时长 → 自动停止录制并导出（不循环）
   if (isRecording.value && timelineState.currentTime >= editableMaxTime.value) {
@@ -950,12 +943,12 @@ function playLoop() {
     message.warning('升级VIP解锁更长时长播放功能')
     return
   }
-
-  if (timelineState.currentTime >= effectiveDuration.value) {
-    timelineState.currentTime = 0
-  }
-
-  evaluateTimeline(timelineState.currentTime).then(() => {
+  const turnToTime = timelineState.currentTime + steppedTime
+  evaluateTimeline(turnToTime).then(() => {
+    timelineState.currentTime = turnToTime
+    if (timelineState.currentTime >= effectiveDuration.value) {
+      timelineState.currentTime = 0
+    }
     animationFrameId = requestAnimationFrame(playLoop)
   })
 }
