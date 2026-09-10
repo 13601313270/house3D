@@ -720,9 +720,7 @@ onMounted(async () => {
         // changeCamera2(activeCameraIndex.value)
       } else {
         initCameraList();
-        if (worldState.activeCameraIndex !== activeCameraIndexOfWorldState.value) {
-          changeCamera2(activeCameraIndexOfWorldState.value)
-        }
+        changeCamera2(activeCameraIndexOfWorldState.value)
       }
     }
   })
