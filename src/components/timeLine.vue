@@ -41,11 +41,11 @@
       <div class="left" id="timeLeft" @scroll="onScrollLeft">
         <div class="timeline-content">
           <div class="timeline-track-area">
-            <div v-if="activeCameraIndexTimeList.length > 0" key="activeCameraIndexTimeList" class="timeline-row">
+            <div v-if="activeCameraIndexTimeList.length > 0" key="activeCameraIndexTimeList"
+              class="timeline-row camera">
               <div class="track-header-bar">
                 <!-- <img class="typeImg"> -->
                 <span class="clip-name">激活摄像机</span>
-                <div style="flex-grow: 1;"></div>
               </div>
             </div>
             <div v-for="(segment, rowIndex) in rowsByIndex" :key="`time-row-${rowIndex}`" class="timeline-row">
@@ -72,10 +72,12 @@
         @mousedown="handleTimeInfoMouseDown" @scroll="onScroll">
         <div class="timeline-content-wrapper" :style="{ width: `${effectiveDuration * zoomLevel * 50}px` }">
           <div class="timeline-track-area">
-            <div v-if="activeCameraIndexTimeList.length > 0" key="activeCameraIndexTimeList" class="timeline-row">
+            <div v-if="activeCameraIndexTimeList.length > 0" key="activeCameraIndexTimeList"
+              class="timeline-row camera">
               <div class="head">
                 <div class="activeCameraPanel" v-for="item in activeCameraIndexTimeListDataModify()"
-                  :style="{ width: item.width, left: item.left }">{{ item.index + 1 }}</div>
+                  :style="{ width: item.width, left: item.left }"><span class="bold">{{ item.index + 1 }}</span>号摄像机
+                </div>
               </div>
             </div>
             <div v-for="(segment, rowIndex) in rowsByIndex" :key="`time-row-${rowIndex}`" class="timeline-row">
@@ -1446,6 +1448,14 @@ onUnmounted(() => {
             display: flex;
             flex-direction: column;
 
+            &.camera {
+              border-bottom: 3px solid #868686;
+
+              .track-header-bar {
+                padding: 6px;
+              }
+            }
+
             .track-header-bar {
               display: flex;
               align-items: center;
@@ -1695,18 +1705,32 @@ onUnmounted(() => {
             }
 
             .activeCameraPanel {
-              background-color: red;
+              background-color: #b4b1ff;
               height: 34px;
               overflow: hidden;
-              border: solid 1px black;
+              border: solid 1px #635bff;
+              border-radius: 4px;
               box-sizing: border-box;
               position: absolute;
+              display: flex;
+              align-items: center;
+              text-wrap: nowrap;
+              padding-left: 2px;
+
+              .bold {
+                font-weight: bold;
+              }
             }
           }
 
           .timeline-row {
             position: relative;
             border-bottom: 2px solid #e8e8e5;
+
+            &.camera {
+              border-bottom: 3px solid #868686;
+              padding: 6px 0;
+            }
 
             // track-item：单个 clip 的视觉表示，绝对定位 left / width 按百分比占 timeline-row
             .track-item {
