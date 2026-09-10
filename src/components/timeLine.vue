@@ -258,7 +258,14 @@ onMounted(() => {
       })
     }
     rowsByIndex.value = rows
-    activeCameraIndexTimeList.value = timelineState.timelineData.activeCameraIndexTimes
+    const tempList = timelineState.timelineData.activeCameraIndexTimes.sort((a, b) => a.time - b.time);
+    if (tempList.length > 0 && tempList[0].time !== 0) {
+      tempList.unshift({
+        index: 0,
+        time: 0,
+      })
+    }
+    activeCameraIndexTimeList.value = tempList;
   }
   updateRef()
   timelineState.onChange(() => {
@@ -1213,7 +1220,7 @@ function activeCameraIndexTimeListDataModify(): Array<{
     returnArr.push({
       index: activeCameraIndexTimeList.value[i].index,
       left: (activeCameraIndexTimeList.value[i].time / effectiveDuration.value * 100) + '%',
-      width: (nextItem ? ((nextItem.time - activeCameraIndexTimeList.value[i].time) / effectiveDuration.value * 100) : 999) + '%',
+      width: (((nextItem ? nextItem.time : effectiveDuration.value) - activeCameraIndexTimeList.value[i].time) / effectiveDuration.value * 100) + '%',
     })
   }
   return returnArr;

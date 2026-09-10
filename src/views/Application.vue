@@ -518,7 +518,39 @@ window.globalEditGroup = worldApi
 allObjCount.value = worldApi.getAllObjectCount()
 
 const activeCameraIndex = ref(0)
+async function initCameraList() {
+  // console.log('timelineState.currentTime', timelineState.currentTime)
+  const allCameraTypeKey = ['camera', 'directionCamera'];
+  const allTypesCameraList: CameraData[] = []
+  const allTypesCameraObjList: PointEntityClass<PointObjData>[] = []
+  allCameraTypeKey.forEach(typeKey => {
+    if (worldApi.getTypeListEntity(typeKey)) {
+      worldApi.getTypeListEntity(typeKey).forEach(item => {
+        if (item instanceof PointEntityClass && item.realyCamera) {
+          allTypesCameraObjList.push(item);
+        }
+      })
+    }
+    allTypesCameraList.push(...worldApi.getTypeObjectsData(typeKey) as CameraData[]);
+  });
+  const allCameraList: CameraState[] = [];
+  (allTypesCameraList as CameraData[]).forEach(cameraData => {
+    allCameraList.push({
+      targetPositionX: cameraData.targetPositionX,
+      targetPositionY: cameraData.targetPositionY,
+      targetPositionZ: cameraData.targetPositionZ,
+      positionX: cameraData.x,
+      positionY: cameraData.y,
+      positionZ: cameraData.z,
+      fov: cameraData.fov,
+      aspectW: cameraData.aspectW,
+      aspectH: cameraData.aspectH,
+    });
+  })
+  allCamera.value = allCameraList
+}
 async function changeCamera2(activeIndex: number = 0) {
+  // console.log('timelineState.currentTime', timelineState.currentTime)
   const allCameraTypeKey = ['camera', 'directionCamera'];
   const allTypesCameraList: CameraData[] = []
   const allTypesCameraObjList: PointEntityClass<PointObjData>[] = []
@@ -550,16 +582,30 @@ async function changeCamera2(activeIndex: number = 0) {
         aspectH: cameraData.aspectH,
       });
     })
-    allCamera.value = allCameraList
     cameraRightState.value = allCameraList[activeIndex]
-    activeCameraIndex.value = activeIndex
-    worldState.activeCameraIndex = activeIndex
     if (timelineState.isPlaying) {
-      timelineState.timelineData.activeCameraIndexTimes.push({
+      const originTimes = timelineState.timelineData.activeCameraIndexTimes;
+      // 如果有恰好命中的，直接更新index
+      for (let i = 0; i < originTimes.length; i++) {
+        const item = originTimes[i]
+        if (item.time === timelineState.currentTime) {
+          item.index = activeIndex
+        }
+      }
+      originTimes.push({
         index: activeIndex,
         time: timelineState.currentTime,
       })
+      originTimes.sort((a, b) => a.time - b.time)
+      for (let i = originTimes.length - 1; i >= 0; i--) {
+        if (originTimes[i - 1] && originTimes[i - 1].index === originTimes[i].index) {
+          originTimes.splice(i, 1)
+        }
+      }
       timelineState.triggerChange()
+    } else {
+      activeCameraIndex.value = activeIndex
+      worldState.activeCameraIndex = activeIndex
     }
     const allCameraObjList: BaseEntityClass<BaseObjData>[] = [];
     allCameraTypeKey.forEach(typeKey => {
@@ -677,8 +723,14 @@ onMounted(async () => {
       if (type === 'remove' && activeCameraIndex.value === allCamera.value.length - 1) {
         activeCameraIndex.value = 0;
       }
-      // console.log('allCamera-d', allCamera.value.length, activeCameraIndex.value)
-      changeCamera2(activeCameraIndex.value)
+      if (timelineState.isPlaying) {
+        // changeCamera2(activeCameraIndex.value)
+      } else {
+        initCameraList();
+        if (worldState.activeCameraIndex !== activeCameraIndex.value) {
+          changeCamera2(activeCameraIndex.value)
+        }
+      }
     }
   })
   const canvasContainer = document.querySelector('.canvas-container')!
