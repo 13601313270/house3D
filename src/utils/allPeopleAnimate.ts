@@ -214,6 +214,12 @@ const allPeopleAnimate: Array<AnimationItem> = [
     name: '上爬',
     img: 'https://d99n9xvb9513w.cloudfront.net/thumbnails/motions/114370901/animated.gif',
     file: 'climbing.fbx',
+  },
+  {
+    key: 'shakingHands',
+    name: '握手',
+    img: 'https://d99n9xvb9513w.cloudfront.net/thumbnails/motions/119070901/animated.gif',
+    file: 'shakingHands.fbx',
   }
 ]
 export default allPeopleAnimate

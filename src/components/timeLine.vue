@@ -816,7 +816,7 @@ function recordVideoPlay() {
   }
 
   // 1) 重置到起始位置，保证从 0 秒开始录制
-  timelineState.currentTime = 0
+  // timelineState.currentTime = 0
   frameAccumulator = 0
   evaluateTimeline(0)
 
