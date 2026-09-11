@@ -273,16 +273,18 @@ const allBones = ref<Array<{
     py: number,
     pz: number,
   },
-}>>((props.modelValue || []).map(item => {
-  if (item.name === 'spine001') {
-    console.log('初始化数据--1', item.value)
+}>>((() => {
+  if (typeof props.modelValue === 'string') {
+    return [];
   }
-  return {
-    ...item,
-    basicValue: item.value,
-    value: item.value,
-  }
-}))
+  return (props.modelValue || []).map(item => {
+    return {
+      ...item,
+      basicValue: item.value,
+      value: item.value,
+    }
+  })
+})())
 
 const viewportConfigs: ViewportConfig = {
   id: 'main',

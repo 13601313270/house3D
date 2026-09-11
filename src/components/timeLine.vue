@@ -286,7 +286,6 @@ onMounted(() => {
 //   }
 //   return Math.max(maxTime + 5, 30)
 // })
-
 // ========== 响应式状态（播放控制） ==========
 // timelineRuler：标尺 DOM 引用（预留，未来用于标尺与轨道 scrollLeft 同步；TS 提示未使用不影响功能）
 // 变量由模板中的 ref="timelineRuler" 绑定实际注入

@@ -187,7 +187,7 @@ export class PeopleEntity extends ModelFileEntity<PeopleData> {
   editAnimationDataColumn(column: string, a: any, b: any, t: number) {
     if (column === 'bone') {
       const centerBone: BoneStepItem[] = [];
-      if (a === undefined || a.length === 0) {
+      if (a === undefined || a.length === 0 || typeof a === 'string') {
         return b;
       }
       if (b === undefined || b.length === 0 || typeof b === 'string') {
