@@ -9,23 +9,6 @@ import { GroupBaseData } from '@/types/groupBase'
 import { ModelFileEntity } from '@/types/modelFileEntity'
 import canvas2DSceneManage from '@/utils/canvas2DSceneManage'
 
-/**
- * 角度最短路径线性插值
- * 确保从 start 到 end 走的是圆周上较近的旋转方向
- */
-function lerpAngle(start: number, end: number, t: number): number {
-  let diff = end - start
-  if (diff > Math.PI) {
-    diff -= Math.PI * 2
-  } else if (diff < -Math.PI) {
-    diff += Math.PI * 2
-  }
-  return start + diff * t
-}
-function lerpPosition(start: number, end: number, t: number): number {
-  return start + (end - start) * t
-}
-
 export class PeopleEntity extends ModelFileEntity<PeopleData> {
   name: string = '人物'
   type: string = 'people'
@@ -266,21 +249,19 @@ export class PeopleEntity extends ModelFileEntity<PeopleData> {
   }
 }
 
-export function changePeopleBone(gltfScene: THREE.Group, boneListConfig: Array<{
-  name: string
-  value: {
-    x: number
-    y: number
-    z: number
+/**
+ * 角度最短路径线性插值
+ * 确保从 start 到 end 走的是圆周上较近的旋转方向
+ */
+function lerpAngle(start: number, end: number, t: number): number {
+  let diff = end - start
+  if (diff > Math.PI) {
+    diff -= Math.PI * 2
+  } else if (diff < -Math.PI) {
+    diff += Math.PI * 2
   }
-}>): void {
-  gltfScene.traverse((child: any) => {
-    if (child.isBone) {
-      // console.log(`🦴 发现骨骼: ${child.name}`)
-      const findProp = boneListConfig.find((item) => item.name === child.name)
-      if (findProp) {
-        child.rotation.set(findProp.value.x, findProp.value.y, findProp.value.z)
-      }
-    }
-  })
+  return start + diff * t
+}
+function lerpPosition(start: number, end: number, t: number): number {
+  return start + (end - start) * t
 }
