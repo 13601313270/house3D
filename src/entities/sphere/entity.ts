@@ -9,7 +9,6 @@ import { allSnapFromType } from '@/types/baseEntity';
 import { resize } from '@/utils/handleImgs';
 
 export class SphereEntity extends PointEntityClass<SphereData> {
-  name: string = '球体'
   type: string = 'sphere'
 
   draw2DPreview(ctx: CanvasRenderingContext2D, zoomLevel: number): void {

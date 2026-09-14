@@ -11,7 +11,6 @@ import getMatchRectAreaBySector from '@/utils/getMatchRectAreaBySector';
 import { resize } from '@/utils/handleImgs';
 
 export class SectorPlaneEntity extends PointEntityClass<SectorPlaneData> {
-  name: string = '扇形平面'
   type: string = 'sectorPlane'
   private circleRadius = 5
   private static textureLoader = new THREE.TextureLoader();

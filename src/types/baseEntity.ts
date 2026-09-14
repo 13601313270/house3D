@@ -23,7 +23,6 @@ export type MatchSnapPoint = OrigionSnapPoint | {
 }
 
 export abstract class BaseEntityClass<T extends BaseObjData> {
-  abstract name: string
   abstract type: string
   parentEntity: GroupBaseEntity<GroupBaseData> | null;
   private data: T

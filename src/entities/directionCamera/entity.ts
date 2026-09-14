@@ -16,7 +16,6 @@ const img = new Image()
 img.src = kamera || ''
 
 export class DirectionCameraEntity extends PointEntityClass<DirectionCameraData> {
-  name: string = '相机(相机位置+方向)'
   type: string = 'directionCamera'
   color: string = '#0c7f25'
   color3D: string = '#0c7f25'

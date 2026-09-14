@@ -10,7 +10,6 @@ import getMatchRectAreaBySector from '@/utils/getMatchRectAreaBySector';
 import { resize } from '@/utils/handleImgs';
 
 export class SectorEntity extends PointEntityClass<SectorData> {
-  name: string = '扇形体'
   type: string = 'sector'
   private circleRadius = 3
 

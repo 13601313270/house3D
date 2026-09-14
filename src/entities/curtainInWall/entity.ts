@@ -11,7 +11,6 @@ import { OrigionSnapPoint } from '@/types/baseEntity'
 import { WallEntity } from '../wall/entity'
 
 export class CurtainInWallEntity extends EntityInWall<CurtainInWallData> {
-  name: string = '方形幕布(挂在墙上)'
   type: string = 'curtainInWall'
   color: string = '#0c7f25'
   color3D: string = '#0c7f25'

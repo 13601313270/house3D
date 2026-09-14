@@ -17,7 +17,7 @@ import { outFileDataExtension, modify3DMesh } from '@/outFilePlus/index'
 import { PointCanAngleEntity } from '@/types/pointCanAngleEntity'
 
 export class OutFileEntity extends PointCanAngleEntity<OutFileData> {
-  name: string = '外部文件'
+  name: string = ''
   type: string = 'outFile'
   color: string = '#0c7f25'
   color3D: string = '#0c7f25'
@@ -544,6 +544,10 @@ export class OutFileEntity extends PointCanAngleEntity<OutFileData> {
         resolve(configList)
       });
     })
+  }
+
+  inAreaHoverText() {
+    return this.name;
   }
 
   editPropConfig(snapPoint: HandelInfo, editShow: (editInfoList: editItem[], callback: (val: any) => void) => void): void {

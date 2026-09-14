@@ -9,7 +9,6 @@ import { importImgFileHead } from '../allObjs';
 import { PointCanAngleEntity } from '@/types/pointCanAngleEntity';
 
 export class CurtainEntity extends PointCanAngleEntity<CurtainData> {
-  name: string = '垂直方形幕布'
   type: string = 'curtain'
   private circleRadius = 6
   private depth = 5
@@ -380,7 +379,7 @@ export class CurtainEntity extends PointCanAngleEntity<CurtainData> {
 
   inAreaHoverText() {
     const data = this.getData();
-    return this.name + `(${Math.round(data.width).toString()}cm×${Math.round(data.height).toString()}cm)`
+    return '垂直方形幕布' + `(${Math.round(data.width).toString()}cm×${Math.round(data.height).toString()}cm)`
   }
 
   getDataMeta(): { [key: string]: string; } {

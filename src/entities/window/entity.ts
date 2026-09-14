@@ -12,7 +12,6 @@ import { GroupBaseData } from '@/types/groupBase';
 import { EntityInWallWithSubtract } from '@/types/entityInWallWithSubtract';
 
 export class WindowEntity extends EntityInWallWithSubtract<WindowData> {
-  name: string = '窗户'
   type: string = 'window'
   private circleRadius = 6
 

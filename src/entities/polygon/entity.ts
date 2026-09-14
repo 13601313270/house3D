@@ -10,7 +10,6 @@ import { LineEntityClass } from '@/types/lineEntity'
 import { PolygonPoint, PolygonData } from './index.d'
 
 export class PolygonEntity extends LineEntityClass<PolygonPoint, PolygonData> {
-  name: string = '折线体'
   type: string = 'polygon'
   private circleRadius = 6
   private thickness = 10

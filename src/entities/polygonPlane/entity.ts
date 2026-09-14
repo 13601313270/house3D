@@ -11,7 +11,6 @@ import { LineEntityClass } from '@/types/lineEntity'
 import { PolygonPlanePoint, PolygonPlaneData } from './index.d'
 
 export class PolygonPlaneEntity extends LineEntityClass<PolygonPlanePoint, PolygonPlaneData> {
-  name: string = '折线平面'
   type: string = 'polygonPlane'
   private thickness = 10
 

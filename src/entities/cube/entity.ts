@@ -9,7 +9,6 @@ import { allSnapFromType } from '@/types/baseEntity';
 import { PointCanAngleEntity } from '@/types/pointCanAngleEntity';
 
 export class CubeEntity extends PointCanAngleEntity<CubeData> {
-  name: string = '方块'
   type: string = 'cube'
 
   draw2DPreview(ctx: CanvasRenderingContext2D, zoomLevel: number): void {

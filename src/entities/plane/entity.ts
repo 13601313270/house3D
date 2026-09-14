@@ -11,7 +11,6 @@ import { allSnapFromType } from '@/types/baseEntity';
 import { PointCanAngleEntity } from '@/types/pointCanAngleEntity';
 
 export class PlaneEntity extends PointCanAngleEntity<PlaneData> {
-  name: string = '方形平面'
   type: string = 'plane'
   private circleRadius = 6
   private static textureLoader = new THREE.TextureLoader();

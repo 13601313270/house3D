@@ -17,7 +17,6 @@ const img = new Image()
 img.src = kamera || ''
 
 export class CameraEntity extends PointWithTargetEntityClass<CameraData> {
-  name: string = '相机'
   type: string = 'camera'
   color: string = '#0c7f25'
   color3D: string = '#0c7f25'

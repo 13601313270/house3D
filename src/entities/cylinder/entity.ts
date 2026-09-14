@@ -9,7 +9,6 @@ import { allSnapFromType } from '@/types/baseEntity';
 import { resize } from '@/utils/handleImgs';
 
 export class CylinderEntity extends PointEntityClass<CylinderData> {
-  name: string = '圆柱体'
   type: string = 'cylinder'
   private circleRadius = 6
   public radialSegments = 32

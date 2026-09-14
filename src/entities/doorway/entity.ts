@@ -7,12 +7,9 @@ import { MatchRectArea } from '@/utils/matchArea';
 import { isPointInRotatedRect } from '@/utils/isPointInRotatedRect';
 import { allSnapFromType } from '@/types/baseEntity';
 import { WallEntity } from '../wall/entity';
-import { GroupBaseEntity } from '@/types/groupBase/entity';
-import { GroupBaseData } from '@/types/groupBase';
 import { EntityInWallWithSubtract } from '@/types/entityInWallWithSubtract';
 
 export class DoorWayEntity extends EntityInWallWithSubtract<DoorData> {
-  name: string = '洞'
   type: string = 'doorway'
   private circleRadius = 6
 

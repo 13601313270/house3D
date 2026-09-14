@@ -381,6 +381,10 @@ export class OutFileInWallEntity extends EntityInWall<OutFileInWallData> {
     }]
   }
 
+  inAreaHoverText() {
+    return this.name;
+  }
+
   getMineBeSnapLines(): [Point, Point][] {
     return []
   }

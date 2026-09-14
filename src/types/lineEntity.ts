@@ -1,6 +1,8 @@
 import * as THREE from 'three'
 import { LineObjData, Point } from './map2d'
 import { BaseEntityClass } from './baseEntity'
+import { allPluginByKey } from '@/entities'
+import { lang } from '@/i18n'
 
 export abstract class LineEntityClass<V, T extends LineObjData<V>> extends BaseEntityClass<T> {
   // 当前对象是否需要重新生成3D模型状态
@@ -24,7 +26,14 @@ export abstract class LineEntityClass<V, T extends LineObjData<V>> extends BaseE
   }
 
   inAreaHoverText() {
-    return this.name
+    const plugin = allPluginByKey[this.type]
+    if (lang.value === 'zh') {
+      return plugin.name
+    } else if (lang.value === 'en') {
+      return plugin.enName
+    } else {
+      return ''
+    }
   }
 
   // 待添加状态（鼠标新增悬浮的时候的点）

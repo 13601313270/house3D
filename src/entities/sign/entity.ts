@@ -11,7 +11,6 @@ import { loadImage as globalLoadImage } from '@/utils/imageCache'
 import { PointCanAngleEntity } from '@/types/pointCanAngleEntity';
 
 export class SignEntity extends PointCanAngleEntity<SignData> {
-  name: string = '交通标识'
   type: string = 'sign'
 
   async init() {

@@ -10,7 +10,6 @@ import { PointCanAngleEntity } from '@/types/pointCanAngleEntity';
 import { resize } from '@/utils/handleImgs';
 
 export class CirclePlaneEntity extends PointCanAngleEntity<CirclePlaneData> {
-  name: string = '圆形平面'
   type: string = 'circlePlane'
   private circleRadius = 6
   private static textureLoader = new THREE.TextureLoader();

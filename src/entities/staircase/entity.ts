@@ -14,7 +14,6 @@ import { GroupBaseEntity } from '@/types/groupBase/entity'
 import { GroupBaseData } from '@/types/groupBase'
 
 export class StaircaseEntity extends LineEntityClass<StaircasePoint, StaircaseData> {
-  name: string = '楼梯'
   type: string = 'staircase'
   private circleRadius = 6
 

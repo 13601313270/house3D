@@ -11,7 +11,6 @@ import { angelIcon, moveIcon } from '@/utils/handleImgs'
 
 export class PlaneGroupEntity extends GroupBaseEntity<PlaneGroupData> {
   type: string = 'planeGroup'
-  name: string = '组'
   // width: number = 0;
   // height: number = 0;
   private circleRadius = 12

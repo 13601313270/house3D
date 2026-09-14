@@ -10,7 +10,6 @@ import { ModelFileEntity } from '@/types/modelFileEntity'
 import canvas2DSceneManage from '@/utils/canvas2DSceneManage'
 
 export class PeopleEntity extends ModelFileEntity<PeopleData> {
-  name: string = '人物'
   type: string = 'people'
   drawAngelLength: number = 40
   mesh: THREE.Group | THREE.Mesh | null = null

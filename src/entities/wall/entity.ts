@@ -16,7 +16,6 @@ import { GroupBaseData } from '@/types/groupBase'
 import { EntityInWallWithSubtract } from '@/types/entityInWallWithSubtract'
 
 export class WallEntity extends LineEntityClass<WallPoint, WallData> {
-  name: string = '墙'
   type: string = 'wall'
   private circleRadius = 6
   // bindEntityInWallWithSubtractChanged 防抖定时器（每个墙实例独立持有，互不干扰）

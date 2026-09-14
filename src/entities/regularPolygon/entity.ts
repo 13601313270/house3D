@@ -25,7 +25,6 @@ function getAllPointsByN(x: number, y: number, n: number, r: number, angle: numb
 }
 
 export class RegularPolygonEntity extends PointCanAngleEntity<RegularPolygonData> {
-  name: string = 'N边形体'
   type: string = 'regularPolygon';
 
   draw2DPreview(ctx: CanvasRenderingContext2D, zoomLevel: number): void {

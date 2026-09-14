@@ -9,7 +9,6 @@ import { allSnapFromType } from '@/types/baseEntity';
 import { resize } from '@/utils/handleImgs';
 
 export class TorusEntity extends PointEntityClass<TorusData> {
-  name: string = '环体'
   type: string = 'torus'
   public radialSegments = 32
 

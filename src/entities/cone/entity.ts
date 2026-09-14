@@ -9,7 +9,6 @@ import { allSnapFromType } from '@/types/baseEntity';
 import { resize } from '@/utils/handleImgs';
 
 export class ConeEntity extends PointEntityClass<ConeData> {
-  name: string = '圆锥体'
   type: string = 'cone'
   public radialSegments = 32
 

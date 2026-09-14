@@ -5,7 +5,6 @@ import { editItem } from '@/utils/editItem'
 import { ModelFileEntity } from '@/types/modelFileEntity'
 
 export class ImportFileEntity extends ModelFileEntity<ImportFileData> {
-  name: string = '导入文件'
   type: string = 'importFile'
 
   init(): Promise<void> {
