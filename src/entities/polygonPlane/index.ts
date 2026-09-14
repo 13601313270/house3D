@@ -4,6 +4,7 @@ import defaultValues from "./defaultValues"
 
 const polygonPlanePlugin: PluginType = {
   name: '折线平面',
+  enName: 'Polyline Plane',
   key: 'polygonPlane',
   type: 'base',
   entity: PolygonPlaneEntity,

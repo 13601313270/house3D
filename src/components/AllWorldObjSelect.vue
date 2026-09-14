@@ -74,32 +74,23 @@
   </div>
 </template>
 <script setup lang="ts">
-import { nextTick, onMounted, ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import message from '@/utils/message'
-import { PointEntityClass } from '@/types/pointEntity'
-import { LineEntityClass } from '@/types/lineEntity'
-import canvas2DSceneManage from '@/utils/canvas2DSceneManage'
 import { GroupBaseEntity } from '@/types/groupBase/entity'
 import { GroupBaseData } from '@/types/groupBase'
-import { BaseEntityClass } from '@/types/baseEntity'
-import { BaseObjData } from '@/types/map2d'
 import { allPluginByKey } from '@/entities'
 import { ImportFileEntity } from '@/entities/importFile/entity'
 import { OutFileEntity } from '@/entities/outFile/entity'
-import { handleEnter, handleLocation, handleLocationPosition, Item } from '@/utils/handleLocation'
-import { t, tPluginName } from '@/i18n'
+import { handleEnter, handleLocation, Item } from '@/utils/handleLocation'
+import { lang, t } from '@/i18n'
 
 // 对象名翻译：若名称以该类型的默认名为前缀（如"立方体1"），替换前缀并保留后缀；自定义名称保持原样
 function tName(item: { name: string, type: string }): string {
+  const safd = lang.value;
   const plugin = allPluginByKey[item.type]
-  const defaultName = plugin?.name || ''
-  const translated = tPluginName(item.type, defaultName)
-  if (translated === defaultName) return item.name
-  if (item.name === defaultName) return translated
-  if (defaultName && item.name.startsWith(defaultName)) {
-    return translated + item.name.slice(defaultName.length)
-  }
-  return item.name
+  if (safd === 'en') return plugin.enName
+  if (safd === 'zh') return plugin.name
+  return '';
 }
 
 const allObjCount = ref(0)

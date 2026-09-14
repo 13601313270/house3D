@@ -4,6 +4,7 @@ import defaultValues from "./defaultValues"
 
 const CameraPlugin: PluginType = {
   name: '相机 (相机位置+目标位置)',
+  enName: 'Camera',
   key: 'camera',
   type: 'camera',
   entity: CameraEntity,

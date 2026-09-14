@@ -1,7 +1,8 @@
 import { ref, computed } from 'vue'
 import zh from './locales/zh'
 import en from './locales/en'
-import { pluginNameMap, categoryNameMap, propertyLabelMap } from './pluginNames'
+import { categoryNameMap, propertyLabelMap } from './pluginNames'
+import { allPluginByKey } from '@/entities'
 
 export type Lang = 'zh' | 'en'
 
@@ -63,8 +64,15 @@ export function toggleLang() {
  * Falls back to the original name if no mapping exists.
  */
 export function tPluginName(key: string, fallback: string): string {
-  const map = pluginNameMap[lang.value]
-  return map[key] ?? fallback
+  const plugin = allPluginByKey[key]
+  console.log('plugin', plugin)
+  if (lang.value === 'zh') {
+    return plugin.name
+  } else if (lang.value === 'en') {
+    return plugin.enName
+  } else {
+    return ''
+  }
 }
 
 /**

@@ -4,6 +4,7 @@ import defaultValues from "./defaultValues"
 
 const DoorwayPlugin: PluginType = {
   name: '洞',
+  enName: 'Doorway',
   key: 'doorway',
   type: 'house',
   entity: DoorWayEntity,

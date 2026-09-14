@@ -4,6 +4,7 @@ import defaultValues from "./defaultValues"
 
 const ImportFilePlugin: PluginType = {
   name: '导入模型文件',
+  enName: 'Imported File',
   key: 'importFile',
   type: 'other',
   entity: ImportFileEntity,

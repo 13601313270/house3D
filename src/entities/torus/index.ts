@@ -4,6 +4,7 @@ import defaultValues from "./defaultValues"
 
 const TorusPlugin: PluginType = {
   name: '环体',
+  enName: 'Torus',
   key: 'torus',
   type: 'base',
   entity: TorusEntity,

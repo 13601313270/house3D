@@ -4,6 +4,7 @@ import defaultValues from "./defaultValues"
 
 const SectorPlugin: PluginType = {
   name: '扇形平面',
+  enName: 'Sector Plane',
   key: 'sectorPlane',
   type: 'base',
   entity: SectorPlaneEntity,

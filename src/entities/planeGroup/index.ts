@@ -4,6 +4,7 @@ import defaultValues from "./defaultValues"
 
 const GroupPlugin: PluginType = {
   name: '组',
+  enName: 'Group',
   key: 'planeGroup',
   type: 'other',
   entity: PlaneGroupEntity,

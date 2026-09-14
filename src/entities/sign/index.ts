@@ -6,6 +6,7 @@ import signImg from './sign.jpg'
 
 const SignPlugin: PluginType = {
   name: '交通标识',
+  enName: 'Sign',
   key: 'sign',
   type: 10,
   entity: SignEntity,

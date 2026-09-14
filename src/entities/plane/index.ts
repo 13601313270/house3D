@@ -4,6 +4,7 @@ import defaultValues from "./defaultValues"
 
 const PlanePlugin: PluginType = {
   name: '方形平面',
+  enName: 'Square Plane',
   key: 'plane',
   type: 'base',
   entity: PlaneEntity,

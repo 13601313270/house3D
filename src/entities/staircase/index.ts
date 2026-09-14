@@ -4,6 +4,7 @@ import defaultValues from "./defaultValues"
 
 const staircasePlugin: PluginType = {
   name: '楼梯/台阶',
+  enName: 'Staircase',
   key: 'staircase',
   type: 'house',
   entity: StaircaseEntity,

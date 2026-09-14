@@ -4,6 +4,7 @@ import defaultValues from "./defaultValues"
 
 const CurtainPlugin: PluginType = {
   name: '垂直方形幕布',
+  enName: 'Curtain',
   key: 'curtain',
   type: 'curtain',
   entity: CurtainEntity,

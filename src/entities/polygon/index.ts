@@ -4,6 +4,7 @@ import defaultValues from "./defaultValues"
 
 const polygonPlugin: PluginType = {
   name: '折线体',
+  enName: 'Polyline Solid',
   key: 'polygon',
   type: 'base',
   entity: PolygonEntity,

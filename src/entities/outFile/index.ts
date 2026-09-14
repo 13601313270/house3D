@@ -4,6 +4,7 @@ import defaultValues from "./defaultValues"
 
 const OutFilePlugin: PluginType = {
   name: '外部文件',
+  enName: 'Model',
   key: 'outFile',
   type: 'other',
   entity: OutFileEntity,

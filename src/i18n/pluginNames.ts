@@ -1,56 +1,5 @@
 import type { Lang } from './index'
 
-/**
- * Display name translations for object (plugin) types, keyed by plugin key.
- * The fallback (Chinese) name comes from each entity's index.ts.
- */
-export const pluginNameMap: Record<Lang, Record<string, string>> = {
-  zh: {},
-  en: {
-    // Basic Shapes
-    cube: 'Cube',
-    sphere: 'Sphere',
-    cylinder: 'Cylinder',
-    cone: 'Cone',
-    plane: 'Square Plane',
-    circlePlane: 'Circular Plane',
-    sector: 'Sector Solid',
-    sectorPlane: 'Sector Plane',
-    polygonPlane: 'Polyline Plane',
-    polygon: 'Polyline Solid',
-    regularPolygon: 'N-gon Solid',
-    regularPolygon2: 'N-gon Pyramid',
-    torus: 'Torus',
-
-    // Floor Plan / Walls
-    wall: 'Wall',
-    door: 'Door',
-    doubleDoor: 'Double Door',
-    doorway: 'Doorway',
-    window: 'Window',
-    staircase: 'Staircase',
-
-    // Curtain / Image
-    curtain: 'Curtain',
-    curtainInWall: 'Curtain (In Wall)',
-
-    // Camera
-    camera: 'Camera',
-    directionCamera: 'Direction Camera',
-
-    // Other
-    people: 'Character',
-    outFile: 'Model',
-    outFileInWall: 'Model (In Wall)',
-    importFile: 'Imported File',
-    sign: 'Sign',
-    planeGroup: 'Group',
-  },
-}
-
-/**
- * Display name translations for sidebar categories, keyed by group id.
- */
 export const categoryNameMap: Record<Lang, Record<string, string>> = {
   zh: {},
   en: {

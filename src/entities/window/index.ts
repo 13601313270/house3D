@@ -4,6 +4,7 @@ import defaultValues from "./defaultValues"
 
 const windowPlugin: PluginType = {
   name: '窗户',
+  enName: 'Window',
   key: 'window',
   type: 'house',
   entity: WindowEntity,

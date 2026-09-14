@@ -4,6 +4,7 @@ import defaultValues from "./defaultValues"
 
 const OutFileInWallPlugin: PluginType = {
   name: '外部文件(墙上)',
+  enName: 'Model (In Wall)',
   key: 'outFileInWall',
   type: 'other',
   entity: OutFileInWallEntity,

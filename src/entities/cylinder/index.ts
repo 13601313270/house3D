@@ -4,6 +4,7 @@ import defaultValues from "./defaultValues"
 
 const CylinderPlugin: PluginType = {
   name: '圆柱体',
+  enName: 'Cylinder',
   key: 'cylinder',
   type: 'base',
   entity: CylinderEntity,

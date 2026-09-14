@@ -4,6 +4,8 @@ import { GroupBaseEntity } from '@/types/groupBase/entity'
 import { BaseEntityClass } from './baseEntity'
 import { GroupBaseData } from './groupBase'
 import { moveIcon } from '@/utils/handleImgs'
+import { allPluginByKey } from '@/entities'
+import { lang } from '@/i18n'
 
 // x/y 平面拖动面用的移动图标纹理（全实体共享，避免重复加载）
 const movePlaneTexture = new THREE.TextureLoader().load('/icons/move.png')
@@ -394,7 +396,14 @@ export abstract class PointEntityClass<T extends PointObjData> extends BaseEntit
   }
 
   inAreaHoverText() {
-    return this.name
+    const plugin = allPluginByKey[this.type]
+    if (lang.value === 'zh') {
+      return plugin.name
+    } else if (lang.value === 'en') {
+      return plugin.enName
+    } else {
+      return ''
+    }
   }
 
   getDataMeta(): { [key: string]: string } {

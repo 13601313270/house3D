@@ -11,6 +11,7 @@ export type DefaultItem<T extends BaseObjData = BaseObjData> = {
 
 type PluginType = {
   name: string,
+  enName: string,
   key: string,
   type: 'base' | 'house' | 'camera' | 'curtain' | 'other' | number, // number的时候，代表归属在分类中，值就是ID
   entity: EntityConstructor,

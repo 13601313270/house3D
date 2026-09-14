@@ -4,6 +4,7 @@ import defaultValues from "./defaultValues"
 
 const spherePlugin: PluginType = {
   name: '球体',
+  enName: 'Sphere',
   key: 'sphere',
   type: 'base',
   entity: SphereEntity,

@@ -4,6 +4,7 @@ import defaultValues from "./defaultValues"
 
 const PeoplePlugin: PluginType = {
   name: '人物',
+  enName: 'Character',
   key: 'people',
   type: 'other',
   entity: PeopleEntity,

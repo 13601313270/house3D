@@ -4,6 +4,7 @@ import defaultValues from "./defaultValues"
 
 const wallPlugin: PluginType = {
   name: '墙体',
+  enName: 'Wall',
   key: 'wall',
   type: 'house',
   entity: WallEntity,

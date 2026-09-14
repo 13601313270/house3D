@@ -4,6 +4,7 @@ import defaultValues from "./defaultValues"
 
 const RegularPolygonPlugin: PluginType = {
   name: 'N边形锥',
+  enName: 'N-gon Pyramid',
   key: 'regularPolygon2',
   type: 'base',
   entity: RegularPolygon2Entity,

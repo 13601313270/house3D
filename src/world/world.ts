@@ -14,6 +14,7 @@ export interface EnvironmentConfig {
 
 class WorldGroup extends GroupBaseEntity<WorldData> {
   name: string = 'world'
+  enName: string = 'World'
   type: string = 'world'
   // parentEntity: null;
   scene: THREE.Scene = new THREE.Scene()

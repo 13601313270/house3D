@@ -4,6 +4,7 @@ import defaultValues from "./defaultValues"
 
 const DoubleDoorPlugin: PluginType = {
   name: '对开门',
+  enName: 'Double Door',
   key: 'doubleDoor',
   type: 'house',
   entity: DoubleDoorEntity,

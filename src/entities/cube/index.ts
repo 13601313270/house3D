@@ -4,6 +4,7 @@ import defaultValues from "./defaultValues"
 
 const CubePlugin: PluginType = {
   name: '方块',
+  enName: 'Cube',
   key: 'cube',
   type: 'base',
   entity: CubeEntity,

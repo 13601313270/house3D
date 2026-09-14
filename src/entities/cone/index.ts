@@ -4,6 +4,7 @@ import defaultValues from "./defaultValues"
 
 const ConePlugin: PluginType = {
   name: '圆锥体',
+  enName: 'Cone',
   key: 'cone',
   type: 'base',
   entity: ConeEntity,

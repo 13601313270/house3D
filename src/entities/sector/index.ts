@@ -4,6 +4,7 @@ import defaultValues from "./defaultValues"
 
 const SectorPlugin: PluginType = {
   name: '扇形体',
+  enName: 'Sector Solid',
   key: 'sector',
   type: 'base',
   entity: SectorEntity,

@@ -4,6 +4,7 @@ import defaultValues from "./defaultValues"
 
 const DirectionCameraPlugin: PluginType = {
   name: '相机 (相机位置+方向)',
+  enName: 'Direction Camera',
   key: 'directionCamera',
   type: 'camera',
   entity: DirectionCameraEntity,
