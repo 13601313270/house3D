@@ -2,25 +2,26 @@
   <div class="help-modal" @click.self="emits('close')">
     <div class="help-modal-content">
       <div class="help-modal-header">
-        <span>帮助支持</span>
+        <span>{{ t('help.title') }}</span>
         <button class="close-btn" @click="emits('close')">×</button>
       </div>
       <div class="help-modal-body">
         <div class="help-item">
-          <label>微信号：</label>
+          <label>{{ t('help.wechat') }}</label>
           <span class="value">{{ wechatNumber }}</span>
-          <button class="btn" @click="copyWechat">复制</button>
+          <button class="btn" @click="copyWechat">{{ t('help.copy') }}</button>
         </div>
         <div class="help-item">
-          <label>邮箱：</label>
+          <label>{{ t('help.email') }}</label>
           <span class="value">{{ emailAddress }}</span>
-          <button class="btn" @click="sendEmail">发送邮件</button>
+          <button class="btn" @click="sendEmail">{{ t('help.sendEmail') }}</button>
         </div>
       </div>
     </div>
   </div>
 </template>
 <script lang="ts" setup>
+import { t } from '@/i18n'
 const wechatNumber = 'w309568486'
 const emailAddress = '309568486@qq.com'
 const emits = defineEmits(['close'])
@@ -28,7 +29,7 @@ const emits = defineEmits(['close'])
 const copyWechat = async () => {
   try {
     await navigator.clipboard.writeText(wechatNumber)
-    alert('微信号已复制')
+    alert(t('help.copied'))
   } catch (err) {
     console.error('复制失败:', err)
   }

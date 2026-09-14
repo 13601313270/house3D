@@ -2,15 +2,15 @@
   <div class="vip-benefits">
     <!-- 表头 -->
     <div class="benefit-header">
-      <div class="benefit-name">权益</div>
+      <div class="benefit-name">{{ t('benefits.header') }}</div>
 
       <div class="benefit-plan normal-plan">
-        <div class="plan-title">基础版</div>
+        <div class="plan-title">{{ t('benefits.basic') }}</div>
       </div>
 
       <div class="benefit-plan vip-plan">
         <div class="vip-badge">Pro</div>
-        <div class="plan-title">专业版</div>
+        <div class="plan-title">{{ t('benefits.pro') }}</div>
       </div>
     </div>
 
@@ -42,24 +42,27 @@
 </template>
 
 <script setup>
-const benefits = [
+import { computed } from 'vue'
+import { t } from '@/i18n'
+
+const benefits = computed(() => [
   // {
   //   name: '云存储空间',
   //   normal: '5G',
   //   vip: '100G',
   // },
   {
-    name: '赠送积分',
+    name: t('benefits.giftCredits'),
     normal: '0',
-    vip: '积分赠送',
+    vip: t('benefits.giftCreditsVip'),
   },
   {
-    name: '动画编辑与时间轴功能',
-    normal: '不支持',
-    vip: '支持',
+    name: t('benefits.animation'),
+    normal: t('benefits.notSupported'),
+    vip: t('benefits.supported'),
   },
   {
-    name: '云存储空间',
+    name: t('benefits.storage'),
     normal: '300MB',
     vip: '50GB',
   }
@@ -78,7 +81,7 @@ const benefits = [
   //   normal: '',
   //   vip: '支持',
   // },
-]
+])
 </script>
 
 <style scoped>

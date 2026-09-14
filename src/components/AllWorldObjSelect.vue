@@ -5,7 +5,7 @@
         <div class="moveIcon">
           <img src="../assets/move2.svg" alt="move" @mousedown.prevent />
         </div>
-        <div class="title">对象列表({{ allObjCount }})</div>
+        <div class="title">{{ t('panel.objectList') }}({{ allObjCount }})</div>
         <div class="closeIcon" @mousedown.stop @click="emit('close')">
           <img @mousedown.prevent.stop src="../assets/closeWhite.svg" alt="close" />
         </div>
@@ -15,7 +15,7 @@
           <div class="objInfo" @mouseenter="handleEnter(worldGroup, item.id)">
             <img class="icon" :src="item.icon" alt="previewImg" />
             <div class="nameInfo">
-              <span>{{ item.name }}</span>
+              <span>{{ tName(item) }}</span>
               <span class="tip" v-if="item.tip">({{ item.tip }})</span>
             </div>
             <div class="tools">
@@ -44,7 +44,7 @@
               @mouseenter="handleEnter(map.get(item.id), child.id)">
               <img class="icon" :src="child.icon" alt="previewImg" />
               <div class="nameInfo">
-                <span>{{ child.name }}</span>
+                <span>{{ tName(child) }}</span>
                 <span class="tip" v-if="child.tip">({{ child.tip }})</span>
               </div>
               <div class="tools">
@@ -87,6 +87,20 @@ import { allPluginByKey } from '@/entities'
 import { ImportFileEntity } from '@/entities/importFile/entity'
 import { OutFileEntity } from '@/entities/outFile/entity'
 import { handleEnter, handleLocation, handleLocationPosition, Item } from '@/utils/handleLocation'
+import { t, tPluginName } from '@/i18n'
+
+// 对象名翻译：若名称以该类型的默认名为前缀（如"立方体1"），替换前缀并保留后缀；自定义名称保持原样
+function tName(item: { name: string, type: string }): string {
+  const plugin = allPluginByKey[item.type]
+  const defaultName = plugin?.name || ''
+  const translated = tPluginName(item.type, defaultName)
+  if (translated === defaultName) return item.name
+  if (item.name === defaultName) return translated
+  if (defaultName && item.name.startsWith(defaultName)) {
+    return translated + item.name.slice(defaultName.length)
+  }
+  return item.name
+}
 
 const allObjCount = ref(0)
 
@@ -217,7 +231,7 @@ function handleUnLock(group: GroupBaseEntity<GroupBaseData> | undefined, item: I
       isLocked,
     })
     item.isLocked = isLocked
-    message.success(isLocked ? '锁定成功' : '解锁成功', { position: 'top-center' })
+    message.success(isLocked ? t('obj.lockSuccess') : t('obj.unlockSuccess'), { position: 'top-center' })
     // emit('onChange', thisObj)
   }
 }

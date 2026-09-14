@@ -2,18 +2,18 @@
   <div class="hunyuan3DItem">
     <div class="PreviewImageUrl">
       <img v-if="item.previewImage" :src="item.previewImage" />
-      <div v-else-if="item.status === 0">模型生成中</div>
+      <div v-else-if="item.status === 0">{{ t('hunyuan.generating') }}</div>
     </div>
-    <div class="delete-btn" @click="deleteTask">删除</div>
+    <div class="delete-btn" @click="deleteTask">{{ t('common.delete') }}</div>
     <div class="tools" v-if="item.zip">
       <!-- <a :href="Url" target="_blank" class="download-btn" download>
         下载模型
       </a> -->
       <div :href="item.zip" class="download-btn" @click="useFile">
-        使用模型
+        {{ t('hunyuan.useModel') }}
       </div>
       <div :href="item.zip" class="download-btn" @click="moveModelToPersonalLibrary">
-        迁移到个人素材库并使用
+        {{ t('hunyuan.moveToLibrary') }}
       </div>
     </div>
   </div>
@@ -23,6 +23,7 @@ import handleLoadedObject from "@/utils/handleLoadedObject";
 import importOutObj from "@/utils/importOutObj";
 import message from "@/utils/message";
 import request from "@/utils/request";
+import { t } from "@/i18n";
 const emits = defineEmits(['useFile', 'delete'])
 const props = defineProps<{
   item: {
@@ -49,20 +50,20 @@ async function moveModelToPersonalLibrary() {
   const res = await request.get(`/video/hunyuan3D/moveToMaterialLibrary/${props.item.id}`)
   console.log('res', res)
   if (res.status === 200 && res.data.result) {
-    message.success('迁移成功')
+    message.success(t('hunyuan.moveSuccess'))
     useFile()
   } else {
     message.error(res.data.data)
   }
 }
 function deleteTask() {
-  if (!confirm(`确定要删除这个任务以及模型吗？`)) {
+  if (!confirm(t('hunyuan.deleteConfirm'))) {
     return
   }
   request.delete(`/video/hunyuan3D/delete/${props.item.id}`).then(res => {
     console.log('res', res);
     if (res.status === 200 && res.data) {
-      message.success('删除成功')
+      message.success(t('hunyuan.deleteSuccess'))
       emits('delete')
     } else {
       message.error(res.data)

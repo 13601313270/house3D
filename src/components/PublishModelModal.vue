@@ -3,59 +3,60 @@
     <div class="publish-model-modal" @click.self="handleClose">
       <div class="publish-model-modal-inner">
         <div class="header">
-          <div class="title">公开模型</div>
+          <div class="title">{{ t('publish.title') }}</div>
           <button class="close-btn" @click="handleClose">×</button>
         </div>
 
         <div class="body">
           <div class="form-section">
             <div class="form-item">
-              <label class="form-label">模型名称</label>
-              <input v-model.trim="form.name" class="form-input" type="text" maxlength="30" placeholder="请输入模型名称" />
+              <label class="form-label">{{ t('publish.name') }}</label>
+              <input v-model.trim="form.name" class="form-input" type="text" maxlength="30"
+                :placeholder="t('publish.namePlaceholder')" />
             </div>
 
             <div class="form-item">
-              <label class="form-label">是否公开到公开模型库</label>
+              <label class="form-label">{{ t('publish.isPublic') }}</label>
               <div style="display: flex;align-items: center;color: #333;font-size: 14px;">
                 <input v-model="form.isPublic" :checked="form.isPublic" @change="initObjectFileTypeList"
                   class="form-input-checkbox" type="checkbox" />
-                <span>{{ form.isPublic ? '公开' : '不公开' }}</span>
+                <span>{{ form.isPublic ? t('publish.public') : t('publish.private') }}</span>
               </div>
-              <div class="form-tip">公开后其他用户可以使用</div>
+              <div class="form-tip">{{ t('publish.publicTip') }}</div>
             </div>
 
             <div class="form-item" v-if="form.isPublic">
-              <label class="form-label">收费价格（积分）</label>
+              <label class="form-label">{{ t('publish.price') }}</label>
               <input v-model.number="form.price" class="form-input" type="number" min="0" max="100" step="1"
                 placeholder="0-100" @blur="clampPrice" />
-              <div class="form-tip">公开后其他用户使用需付费，最多 100 积分，0 表示免费</div>
+              <div class="form-tip">{{ t('publish.priceTip') }}</div>
             </div>
             <div class="form-item" v-if="form.isPublic">
-              <label class="form-label">公开后所属分类</label>
+              <label class="form-label">{{ t('publish.category') }}</label>
               <!-- <div>{{ form.objectFileType }}</div> -->
               <select v-model="form.objectFileType" class="form-input" required>
-                <option :value="0">请选择分类</option>
-                <option v-for="item in objectFileTypeList" :key="item.id" :value="item.id" :label="item.name">
-                  {{ item.name }}
+                <option :value="0">{{ t('publish.selectCategory') }}</option>
+                <option v-for="item in objectFileTypeList" :key="item.id" :value="item.id" :label="tLabel(item.name)">
+                  {{ tLabel(item.name) }}
                 </option>
-                <option :value="-1">其他</option>
+                <option :value="-1">{{ t('publish.other') }}</option>
               </select>
             </div>
             <div class="form-item">
-              <label class="form-label">缩放尺寸</label>
+              <label class="form-label">{{ t('publish.scale') }}</label>
               <div class="scale-row">
                 <input class="scale-slider" type="range" min="0.1" max="200" step="0.1" v-model.number="form.scale"
                   @input="handleScaleChange" />
                 <input class="numberInput" type="number" min="0.1" max="2000" step="0.1" v-model.number="form.scale"
                   @input="handleScaleChange" />
               </div>
-              <div class="form-tip">拖动滑块，右侧预览模型实时缩放</div>
+              <div class="form-tip">{{ t('publish.scaleTip') }}</div>
             </div>
 
             <div class="form-actions">
-              <button class="btn btn-cancel" @click="handleClose">取消</button>
+              <button class="btn btn-cancel" @click="handleClose">{{ t('common.cancel') }}</button>
               <button class="btn btn-confirm" :disabled="submitting" @click="handleSubmit">
-                {{ submitting ? '提交中...' : '保存' }}
+                {{ submitting ? t('publish.saving') : t('file.save') }}
               </button>
             </div>
           </div>
@@ -64,12 +65,12 @@
             <div class="preview-container" ref="viewportRef"></div>
             <div v-if="modelLoading" class="preview-mask">
               <img src="../assets/loading_white.svg" alt="loading" class="loading-img" />
-              <div class="mask-text">模型加载中...</div>
+              <div class="mask-text">{{ t('publish.modelLoading') }}</div>
             </div>
             <div v-else-if="modelError" class="preview-mask">
               <div class="mask-text error">{{ modelError }}</div>
             </div>
-            <div class="preview-tips">左键拖拽旋转 · 滚轮缩放 · 坐标轴刻度 1 单位 = 1cm</div>
+            <div class="preview-tips">{{ t('publish.previewTips') }}</div>
           </div>
         </div>
       </div>
@@ -86,6 +87,7 @@ import service from '@/utils/request'
 import processUploadedFile from '@/utils/processUploadedFile'
 import axios from 'axios'
 import message from '@/utils/message'
+import { t, tLabel } from '@/i18n'
 
 const props = defineProps<{
   item: {
@@ -351,7 +353,7 @@ async function loadModel() {
   try {
     const fileUrl = props.item?.file
     if (!fileUrl) {
-      modelError.value = '该素材缺少模型文件，无法预览'
+      modelError.value = t('publish.noFile')
       return
     }
     const response = await fetch(fileUrl)
@@ -384,7 +386,7 @@ async function loadModel() {
     })
   } catch (error) {
     console.error('模型加载失败:', error)
-    modelError.value = '模型加载失败，请重试'
+    modelError.value = t('publish.loadFailed')
   } finally {
     modelLoading.value = false
   }
@@ -393,17 +395,17 @@ async function loadModel() {
 function handleSubmit() {
   if (!props.item) return
   if (!form.name) {
-    message.error('请输入模型名称')
+    message.error(t('publish.nameRequired'))
     return
   }
   if (form.isPublic && form.objectFileType === 0) {
-    message.error('请选择分类')
+    message.error(t('publish.categoryRequired'))
     return;
   }
   clampPrice()
   const scaleNum = typeof form.scale === 'number' && !isNaN(form.scale) && form.scale > 0 ? form.scale : 0
   if (!scaleNum) {
-    message.error('请输入有效的缩放尺寸（大于 0）')
+    message.error(t('publish.scaleInvalid'))
     return
   }
   submitting.value = true
@@ -418,7 +420,7 @@ function handleSubmit() {
     handleClose()
   }).catch((error: any) => {
     console.error('公开失败:', error)
-    alert('公开失败，请重试')
+    alert(t('publish.saveFailed'))
   }).finally(() => {
     submitting.value = false
   })

@@ -3,37 +3,37 @@
     <div class="showVipModal" @click.self="closeModal">
       <div class="showVipModalInner">
         <img class="closeBtn" src="@/assets/close.svg" @click="closeModal" />
-        <div class="title">解锁专业版</div>
+        <div class="title">{{ t('vip.title') }}</div>
         <div v-if="checkStatus === 'checking'" class="checkingState">
           <div class="spinner"></div>
-          <div class="checkingText">正在验证支付状态...</div>
+          <div class="checkingText">{{ t('vip.checking') }}</div>
         </div>
         <div v-else-if="checkStatus === 'unpaid'" class="unpaidState">
           <div class="unpaidIcon"></div>
-          <div class="unpaidText">支付未完成</div>
-          <button class="retryButton" @click="checkPaymentStatus">重新验证</button>
-          <button class="cancelButton" @click="closeModal">取消</button>
+          <div class="unpaidText">{{ t('vip.unpaid') }}</div>
+          <button class="retryButton" @click="checkPaymentStatus">{{ t('vip.retry') }}</button>
+          <button class="cancelButton" @click="closeModal">{{ t('vip.cancel') }}</button>
         </div>
         <div v-else>
           <div class="vipSection">
             <div class="sectionTitle">
-              <span>选择套餐</span>
-              <span class="desc">(价格锁定12个月)</span>
+              <span>{{ t('vip.choosePlan') }}</span>
+              <span class="desc">{{ t('vip.priceLocked') }}</span>
             </div>
             <div class="vipList">
               <div class="vipItem" :class="{ active: selectedVip === item.id, recommend: item.recommend }"
                 v-for="item in vipPrices" :key="item.id" @click="selectedVip = item.id">
-                <div class="recommendTag" v-if="item.recommend">推荐</div>
+                <div class="recommendTag" v-if="item.recommend">{{ t('vip.recommend') }}</div>
                 <div class="vipBadge">{{ item.title }}</div>
                 <div class="vipPrice">
                   <span class="currency">¥</span>
                   <span class="amount">{{ item.price }}</span>
                   <span class="unit">/{{ item.priceUnit }}</span>
                 </div>
-                <div class="vipDesc">尊享<span class="number">{{ item.date }}</span>天专业版权益</div>
+                <div class="vipDesc">{{ t('vip.daysBenefits') }}<span class="number">{{ item.date }}</span>{{ t('vip.daysBenefits2') }}</div>
                 <div class="vipGiveMoney">
                   <img src="money.png" />
-                  <div>包含<span class="number">{{ item.giveMoney }}</span>积分</div>
+                  <div>{{ t('vip.includes') }}<span class="number">{{ item.giveMoney }}</span>{{ t('vip.credits') }}</div>
                 </div>
                 <div class="checkMark" v-if="selectedVip === item.id">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
@@ -44,13 +44,13 @@
             </div>
           </div>
           <div class="vipSection">
-            <div class="sectionTitle">专业版权益</div>
+            <div class="sectionTitle">{{ t('vip.benefits') }}</div>
             <div>
               <vip-benefits />
             </div>
           </div>
           <div class="paySection">
-            <div class="sectionTitle">支付方式</div>
+            <div class="sectionTitle">{{ t('vip.payMethod') }}</div>
             <div class="payList">
               <div class="payItem" :class="{ active: selectedPay === 'alipay' }" @click="handlePay('alipay')">
                 <div class="payIcon">
@@ -73,6 +73,7 @@ import request from '@/utils/request';
 import { onMounted, onUnmounted, ref } from 'vue'
 import { useStore } from 'vuex';
 import VipBenefits from './VipBenefits.vue';
+import { t } from '@/i18n';
 
 const store = useStore<Store>()
 
@@ -138,7 +139,7 @@ const checkPaymentStatus = async () => {
     console.log('checkVipPaymentStatus data', data)
 
     if (data && data.status && data.isPay) {
-      message.success('专业版权益购买成功！')
+      message.success(t('vip.paySuccess'))
       emit('paySuccess')
     } else {
       checkStatus.value = 'unpaid'

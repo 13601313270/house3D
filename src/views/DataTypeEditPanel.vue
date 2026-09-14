@@ -5,7 +5,7 @@
         <div class="moveIcon">
           <img src="../assets/move2.svg" alt="move" @mousedown.prevent />
         </div>
-        <div class="title">骨骼姿势编辑</div>
+        <div class="title">{{ t('prop.boneEdit') }}</div>
         <div class="closeIcon" @mousedown.stop @click="boneEditIsShow = false, emit('close')">
           <img @mousedown.prevent.stop src="../assets/closeWhite.svg" alt="close" />
         </div>
@@ -17,7 +17,7 @@
         <div class="moveIcon">
           <img src="../assets/move2.svg" alt="move" @mousedown.prevent />
         </div>
-        <div class="title">移动到组</div>
+        <div class="title">{{ t('prop.moveToGroup') }}</div>
         <div class="closeIcon" @mousedown.stop @click="showGroupSelect = false">
           <img @mousedown.stop.prevent src="../assets/closeWhite.svg" alt="close" />
         </div>
@@ -29,7 +29,7 @@
         <div class="moveIcon">
           <img src="../assets/move2.svg" alt="move" @mousedown.prevent />
         </div>
-        <div class="title">{{ allFileKeysName[typeKey] }}</div>
+        <div class="title">{{ tPluginName(typeKey, allFileKeysName[typeKey]) }}</div>
         <div class="closeIcon" @mousedown.stop @click="emit('close')">
           <img @mousedown.stop.prevent src="../assets/closeWhite.svg" alt="close" />
         </div>
@@ -40,13 +40,13 @@
           :class="{ 'title': item.dataType === 'title' }"
           :style="{ display: item.dataType === 'hidden' ? 'none' : 'flex' }">
           <div class="label title" v-if="item.dataType === 'title'">
-            {{ item.label }}
+            {{ tLabel(item.label) }}
           </div>
           <div class="label" v-else-if="'label' in item">
-            {{ item.label }}
+            {{ tLabel(item.label) }}
           </div>
           <div v-if="item.dataType === 'button'" class="edit">
-            <button class="actionButton" @click="item.value">{{ item.label }}</button>
+            <button class="actionButton" @click="item.value">{{ tLabel(item.label) }}</button>
           </div>
           <DataTypeEdit v-else-if="item.dataType !== 'title'" :item="item" :modelValue="modelValue[item.id]"
             :record="modelValue" @update:modelValue="handleUpdate(item.id, $event)" />
@@ -54,14 +54,14 @@
       </div>
       <div class="buttonGroup" v-if="!isTimelineStatePlaying">
         <div class="leftGroup">
-          <button @click="LockObj(!modelValue.isLocked)">{{ modelValue.isLocked ? '解锁' : '锁定' }}</button>
-          <button @click="copyEntity">复制</button>
-          <button @click="moveToGroup" v-if="!['planeGroup'].includes(typeKey)">移动到组</button>
-          <button @click="changeGlobalEditGroup" v-else-if="['planeGroup'].includes(typeKey)">编辑组</button>
+          <button @click="LockObj(!modelValue.isLocked)">{{ modelValue.isLocked ? t('prop.unlock') : t('prop.lock') }}</button>
+          <button @click="copyEntity">{{ t('prop.copy') }}</button>
+          <button @click="moveToGroup" v-if="!['planeGroup'].includes(typeKey)">{{ t('prop.moveToGroup') }}</button>
+          <button @click="changeGlobalEditGroup" v-else-if="['planeGroup'].includes(typeKey)">{{ t('prop.editGroup') }}</button>
           <!-- <button @click="addAnimation">添加动画</button> -->
         </div>
         <div style="flex-grow: 1;"></div>
-        <button class="deleteButton" @click="deleteContextMenuEntity">删除</button>
+        <button class="deleteButton" @click="deleteContextMenuEntity">{{ t('prop.delete') }}</button>
       </div>
     </div>
   </div>
@@ -76,6 +76,7 @@ import BoneEdit from './boneEdit.vue'
 import message from '@/utils/message';
 import GroupSelect from './groupSelect.vue';
 import { timelineState } from '@/utils/timelineManage';
+import { t, tPluginName, tLabel } from '@/i18n';
 
 const props = defineProps<{
   typeKey: string
@@ -240,9 +241,9 @@ function LockObj(value: boolean) {
   emit('lock', value)
   const messageText = (() => {
     if (value) {
-      return '锁定成功。如想重新编辑，请去[对象列表]解锁。'
+      return t('obj.lockedHint')
     } else {
-      return '解锁成功。'
+      return t('obj.unlockSuccess')
     }
   })();
   message.success(messageText, {

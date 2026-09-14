@@ -3,8 +3,8 @@
     <!-- <input type="range" :value="modelValue" @input="updateEditPropInputNumberInfo"
       :min="item.min === -Infinity ? -500 : item.min" :max="item.max === Infinity ? 500 : item.max" :step="item.step"
       class="numberInputRange" /> -->
-    <div class="angleStr" v-if="modelValue !== undefined">弧度：{{ modelValue.toFixed(2) || '' }}</div>
-    <div class="angleNumberTitle">角度：</div>
+    <div class="angleStr" v-if="modelValue !== undefined">{{ t('angle.radian') }}{{ modelValue.toFixed(2) || '' }}</div>
+    <div class="angleNumberTitle">{{ t('angle.angle') }}</div>
     <div class="numberInputContainer">
       <input type="number" :value="inputNumber" :min="item.min" :max="item.max" @change="updateEditPropInputNumberInfo"
         :step="1" class="numberInput" />
@@ -15,6 +15,7 @@
 <script setup lang="ts">
 import { editItem } from '@/utils/editItem';
 import { computed } from 'vue';
+import { t } from '@/i18n';
 const props = defineProps<{
   item: editItem,
   modelValue: number,

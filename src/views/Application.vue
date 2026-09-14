@@ -5,32 +5,32 @@
         <img class="icon" src="/favicon256white.png" />
         <div class="toolbar-item" @mouseleave="activeToolsIndex = -1">
           <button type="button" @mouseenter="activeToolsIndex = 0">
-            文件
+            {{ t('nav.file') }}
           </button>
           <div class="list" v-show="activeToolsIndex === 0">
             <div @click="saveDrawing" class="childItem">
-              保存
+              {{ t('file.save') }}
             </div>
             <div @click="loadProgramFile" class="childItem">
-              加载
+              {{ t('file.open') }}
             </div>
             <div @click="clearDrawing" class="childItem">
-              清空
+              {{ t('file.clearScene') }}
             </div>
           </div>
         </div>
         <div class="toolbar-item" @click="onlyDemos = true, showDemos = true">
           <button type="button">
-            示例
+            {{ t('nav.examples') }}
           </button>
         </div>
         <div class="toolbar-item" @mouseleave="activeToolsIndex = -1">
           <button type="button" @mouseenter="activeToolsIndex = 3">
-            帮助
+            {{ t('nav.help') }}
           </button>
           <div class="list" v-show="activeToolsIndex === 3">
             <div @click="showHelpModal = true" class="childItem">
-              支持
+              {{ t('nav.support') }}
             </div>
           </div>
         </div>
@@ -39,29 +39,36 @@
         <div>
           <div class="timeLineTitle">
             <button :class="{ active: editMode === 'scene' }" @click="setEditMode('scene')">
-              场景编辑
+              {{ t('editMode.scene') }}
             </button>
             <button :class="{ active: editMode === 'animation' }" @click="setEditMode('animation')">
-              动画编辑<span style="margin-left: 8px;font-size: 10px;color: rgb(99, 91, 255);font-weight: bold;">NEW</span>
+              {{ t('editMode.animation') }}<span
+                style="margin-left: 8px;font-size: 10px;color: rgb(99, 91, 255);font-weight: bold;">NEW</span>
             </button>
           </div>
         </div>
       </div>
       <div style="flex-grow: 1;"></div>
       <div class="toolbar right">
+        <div class="toolbar-item">
+          <button type="button" class="lang-switch-btn" @click="toggleLang"
+            :title="lang === 'zh' ? 'Switch to English' : '切换到中文'">
+            {{ lang === 'zh' ? 'EN' : '中' }}
+          </button>
+        </div>
         <div class="toolbar-item" @mouseleave="activeToolsIndex = -1">
           <div v-if="store.state.main.userInfo">
             <div class="userInfo" @mouseenter="activeToolsIndex = 2">
-              <span>欢迎登录：{{ store.state.main.userInfo.email }}</span>
-              <span v-if="isVip" class="vipBadgeTop">VIP</span>
+              <span>{{ t('user.welcome') }}{{ store.state.main.userInfo.email }}</span>
+              <span v-if="isVip" class="vipBadgeTop">{{ t('user.vip') }}</span>
               <span>（</span>
               <img src="money.png" />
-              <span>{{ store.state.main.userInfo.money }}积分）</span>
+              <span>{{ store.state.main.userInfo.money }}{{ t('user.credits') }}）</span>
             </div>
             <div class="list user" v-show="activeToolsIndex === 2">
               <div class="userMoney">
                 <div class="userMoneyInner">
-                  <span>当前积分：{{ store.state.main.userInfo.money }}</span>
+                  <span>{{ t('user.currentCredits') }}{{ store.state.main.userInfo.money }}</span>
                   <img src="money.png" />
                 </div>
               </div>
@@ -69,29 +76,31 @@
                 <div class="userVipInner">
                   <div class="vipCrown">👑</div>
                   <div class="vipInfo">
-                    <div class="vipTitle">尊贵VIP会员</div>
-                    <div class="vipSubtitle">到期：{{ formattedVipEndDate }}（剩{{ vipRemainingDays }}天）</div>
+                    <div class="vipTitle">{{ t('user.vipTitle') }}</div>
+                    <div class="vipSubtitle">{{ t('user.vipExpire') }}{{ formattedVipEndDate }}{{ t('user.vipRemaining')
+                      }}{{ vipRemainingDays }}{{ t('user.vipDays') }}</div>
                   </div>
                 </div>
               </div>
               <div class="addGroupAddMoney" v-if="!store.state.main.userInfo.getJoinGroupMoney"
                 @click="showGroupQrModal = true">
                 <img src="money.png" />
-                <div class="text">添加微信群，获得<span class="price">20</span>积分</div>
+                <div class="text">{{ t('user.joinGroup') }}<span class="price">20</span>{{ t('user.joinGroupCredits') }}
+                </div>
               </div>
               <div @click="showPayModal" class="childItem">
-                购买积分
+                {{ t('user.buyCredits') }}
               </div>
               <div class="childItem" @click="showVipModal">
-                购买专业版权益
+                {{ t('user.upgradePro') }}
               </div>
               <div @click="logout" class="childItem">
-                退出
+                {{ t('user.logout') }}
               </div>
             </div>
           </div>
           <button v-else type="button" class="login-btn" @click="showLoginDialog">
-            登录
+            {{ t('user.login') }}
           </button>
         </div>
       </div>
@@ -99,17 +108,17 @@
     <div class="map2d-container" @dragover.prevent="onDragOver" @dragleave="onDragLeave" @drop.prevent="onDrop">
       <div class="left-panel" :style="{ width: panel1SplitWidthPer * 100 + '%' }">
         <div class="toolbar">
-          <div style="flex-shrink: 0;">布局图</div>
+          <div style="flex-shrink: 0;">{{ t('panel.layout') }}</div>
           <ObjTypeSelect :currentTool="currentTool" @select="changeObjTypeSelect" @showHelpModal="showHelpModal = true"
             v-if="editMode === 'scene'" />
           <button @click="triggerImportFile" type="button" v-if="editMode === 'scene'">
-            导入模型
+            {{ t('panel.importModel') }}
           </button>
           <button type="button" @click="showAiImageToModel = true" v-if="editMode === 'scene'">
-            AI图生模型
+            {{ t('panel.aiImageToModel') }}
           </button>
           <button @click="showAllObjSelect = true" type="button" v-if="editMode === 'scene'">
-            对象列表({{ allObjCount }})
+            {{ t('panel.objectList') }}({{ allObjCount }})
           </button>
           <input type="file" id="fileInput" ref="loadProgramFileInputRef" accept=".devt" style="display: none"
             @change="handleLoadProgramFileChange" />
@@ -122,7 +131,7 @@
           <!-- <img v-if="isPaningAngel && isPaningAngelMoved" class="protractor" src="protractor.png"
             :style="{ left: panningScreenCenter.x + 'px', top: panningScreenCenter.y + 'px' }" /> -->
           <div class="showGroupExit" v-if="showGroupExit">
-            <div class="showGroupExitButton" @click="groupExit">退出组编辑</div>
+            <div class="showGroupExitButton" @click="groupExit">{{ t('scene.exitGroupEdit') }}</div>
           </div>
         </div>
       </div>
@@ -131,11 +140,11 @@
 
       <div class="right-panel" :style="{ width: panel2SplitWidthPer * 100 + '%' }">
         <div class="tools">
-          <div style="flex-shrink: 0;">全景图</div>
+          <div style="flex-shrink: 0;">{{ t('panel.panorama') }}</div>
           <div style="flex-grow: 1;"></div>
           <div class="buttons">
             <button @click="showEnvironmentEditor = true" type="button" v-if="editMode === 'scene'">
-              环境
+              {{ t('panel.environment') }}
             </button>
           </div>
         </div>
@@ -149,7 +158,7 @@
       <div class="split-bar" @mousedown.prevent="startSplit(2)"></div>
       <div class="right-panel" :style="{ width: (1 - panel1SplitWidthPer - panel2SplitWidthPer) * 100 + '%' }">
         <div class="tools">
-          <div style="flex-shrink: 0;">摄像机：</div>
+          <div style="flex-shrink: 0;">{{ t('panel.cameraLabel') }}</div>
           <!-- <span>{{ activeCameraIndexOfTimeline }}&{{ activeCameraIndex }}</span> -->
           <div class="cameraList">
             <div v-for="(item, index) in allCamera" @click="changeCamera2(index)"
@@ -157,8 +166,8 @@
             </div>
           </div>
           <div class="buttons" v-if="allCamera.length && cameraRightState">
-            <button type="button" @click="showAiPic">AI渲染</button>
-            <button type="button" @click="exportImage">导出图片</button>
+            <button type="button" @click="showAiPic">{{ t('panel.aiGeneration') }}</button>
+            <button type="button" @click="exportImage">{{ t('panel.exportImage') }}</button>
           </div>
         </div>
         <div class="right-panel-content">
@@ -166,7 +175,7 @@
             :camera="rightPanelCamera" :cameraState="cameraRightState"
             :aspectRatio="cameraRightState.aspectW / cameraRightState.aspectH" :showCamera="false"
             cameraType="perspective" />
-          <div v-else class="noCamera">请至少在场景中添加一个摄像机</div>
+          <div v-else class="noCamera">{{ t('panel.addCameraHint') }}</div>
         </div>
       </div>
     </div>
@@ -185,17 +194,17 @@
   </div>
   <div v-if="showDemos" class="allDemosContent">
     <div class="allDemosContentInner">
-      <div class="title"><img class="icon" src="/favicon256.png" />欢迎来到<span class="p">「摄影棚」</span>，请选择创建场景的模板</div>
+      <div class="title"><img class="icon" src="/favicon256.png" />{{ t('welcome.title') }}</div>
       <div class="closeBtn" @click="showDemos = false">
         <img src="../assets/close.svg" alt="close" />
       </div>
       <div class="demoList">
         <div v-if="demoIniting" class="loading">...</div>
         <div class="demoItem" v-if="!onlyDemos" @click="showDemos = false">
-          <div>新建空场景</div>
+          <div>{{ t('welcome.newEmpty') }}</div>
         </div>
         <div class="demoItem" v-if="!onlyDemos" @click="showDemos = false, loadProgramFile()">
-          <div>加载文件</div>
+          <div>{{ t('welcome.openFile') }}</div>
         </div>
         <div v-for="item in allDemos" :key="item.id" class="demoItem" @click="chooseDemo(item.id)">
           <div>{{ item.name }}</div>
@@ -231,26 +240,27 @@
       <div class="closeBtn" @click="showExportImageModal = false">
         <img src="../assets/close.svg" alt="close" />
       </div>
-      <div class="title">导出图片</div>
+      <div class="title">{{ t('export.title') }}</div>
       <div class="exportSizeList">
         <div class="exportSizeItem" @click="doExportImage(720)">
           <div class="sizeLabel">720</div>
-          <div class="sizeDesc">标准</div>
+          <div class="sizeDesc">{{ t('export.standard') }}</div>
         </div>
         <div class="exportSizeItem" @click="doExportImage(1080)">
           <div class="sizeLabel">1080</div>
-          <div class="sizeDesc">高清</div>
-          <span class="proBadge">专业版</span>
+          <div class="sizeDesc">{{ t('export.hd') }}</div>
+          <span class="proBadge">{{ t('export.pro') }}</span>
         </div>
         <div class="exportSizeItem" @click="doExportImage(2048)">
           <div class="sizeLabel">2048</div>
-          <div class="sizeDesc">超清</div>
-          <span class="proBadge">专业版</span>
+          <div class="sizeDesc">{{ t('export.ultraHd') }}</div>
+          <span class="proBadge">{{ t('export.pro') }}</span>
         </div>
         <div class="exportSizeItem">
-          <input type="number" max="2048" v-model="exportCustomWidth" placeholder="自定义宽度" class="customInput" />
-          <button class="customExportBtn" @click="doExportCustomImage">导出</button>
-          <span class="proBadge">专业版</span>
+          <input type="number" max="2048" v-model="exportCustomWidth" :placeholder="t('export.customWidth')"
+            class="customInput" />
+          <button class="customExportBtn" @click="doExportCustomImage">{{ t('export.export') }}</button>
+          <span class="proBadge">{{ t('export.pro') }}</span>
         </div>
       </div>
     </div>
@@ -259,6 +269,7 @@
 
 <script lang="ts" setup>
 import { ref, onMounted, onUnmounted, nextTick, watch, computed } from 'vue'
+import { t, lang, toggleLang } from '@/i18n'
 import axios from 'axios'
 import * as THREE from 'three'
 import JSZip from 'jszip';
@@ -329,7 +340,12 @@ const showDemos = ref(false)
 const onlyDemos = ref(false)
 const showHelpModal = ref(false)
 const initWorldLoading = ref(false)
-const allDemos = ref<any[]>([])
+const allDemos = ref<{
+  id: number,
+  img: string,
+  name: string,
+  enName: string,
+}[]>([])
 const demoIniting = ref(false)
 
 // 拖拽上传相关状态
@@ -510,7 +526,7 @@ const worldApi = new WorldGroup(null, {
   y: 0,
   z: 0,
   angleY: 0,
-  name: '世界',
+  name: t('scene.world'),
 })
 window.worldApi = worldApi
 const showGroupExit = ref<boolean>(false)
@@ -803,7 +819,7 @@ onMounted(async () => {
             canvas2DSceneManage.list[0].tempPointInsertData = []
             lastPoint.value = null
             setHoverPoint(null)
-            message.info('退出绘制')
+            message.info(t('scene.exitDrawing'))
           } else {
             // tempPointInsertData去掉最后一项
             tempPointInsertData.pop()
@@ -920,7 +936,7 @@ const triggerImportFile = () => {
 
 const saveDrawing = async () => {
   if (!store.state.main.userInfo) {
-    alert('请先登录')
+    alert(t('scene.pleaseLogin'))
     showLogin.value = true
     return
   }
@@ -1183,7 +1199,7 @@ const handleContextMenu = (point: {
           menuEntiryHandelInfo = snapPoint;
           const data = api.getData()
           if (data.isLocked) {
-            message.warning('锁定对象不能编辑，请去[对象列表]解锁', { position: 'top-center' })
+            message.warning(t('scene.lockedObjWarn'), { position: 'top-center' })
             continue
           }
           api.editPropConfig(snapPoint, (propConfig, callback) => {
@@ -1204,18 +1220,18 @@ const handleContextMenu = (point: {
             if (api instanceof PointEntityClass) {
               modifyConfig.push({
                 id: 'tipGroup',
-                label: '提示信息',
+                label: t('edit.messageLabel'),
                 dataType: 'title',
               })
               modifyConfig.push({
                 id: 'tip',
-                label: '提示信息',
+                label: t('edit.messageLabel'),
                 dataType: 'string',
                 value: data.tip || '',
               })
               modifyConfig.push({
                 id: 'tipFontSize',
-                label: '提示信息字号',
+                label: t('edit.messageFontSize'),
                 dataType: 'number',
                 min: 1,
                 max: 120,
@@ -1317,7 +1333,7 @@ const deleteContextMenuEntity = () => {
 }
 
 const clearDrawing = () => {
-  if (confirm('确定要清空所有绘制内容吗？')) {
+  if (confirm(t('scene.clearConfirm'))) {
     worldApi.clearAll();
     activeToolsIndex.value = -1
   }
@@ -1527,7 +1543,7 @@ const onDrop = async (e: DragEvent) => {
 }
 
 function logout() {
-  if (confirm('确定要退出登录吗？')) {
+  if (confirm(t('scene.logoutConfirm'))) {
     store.dispatch('main/setUserInfo', null)
     localStorage.removeItem('token')
   }
@@ -2104,6 +2120,19 @@ button {
 .toolbar button.active {
   background: #1890ff;
   color: white;
+}
+
+.lang-switch-btn {
+  padding: 4px 10px;
+  min-width: 40px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #17181A;
+  background: #e4e6eb;
+}
+
+.lang-switch-btn:hover {
+  background: #d9d9d9;
 }
 
 .canvas-container {

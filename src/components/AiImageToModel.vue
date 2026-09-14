@@ -3,21 +3,21 @@
     <div class="aiImageToModel" @click.self="handleClose">
       <div class="modalInner">
         <div class="header">
-          <div class="title">AI图生模型</div>
+          <div class="title">{{ t('ai3d.title') }}</div>
           <button class="close-btn" @click="handleClose">&times;</button>
         </div>
         <div class="content">
           <div v-if="resultText" class="result-section">
-            <div class="section-title">{{ isQuerying ? '生成进度' : '提交结果' }}</div>
+            <div class="section-title">{{ isQuerying ? t('ai3d.genProgress') : t('ai3d.submitResult') }}</div>
             <div class="result-text">{{ resultText }}</div>
-            <div v-if="currentJobId && !resultUrl" class="job-id">Job ID：{{ currentJobId }}</div>
+            <div v-if="currentJobId && !resultUrl" class="job-id">{{ t('ai3d.jobId') }}{{ currentJobId }}</div>
           </div>
           <div v-else>
             <div class="upload-section">
-              <div class="section-title">上传图片</div>
+              <div class="section-title">{{ t('ai3d.uploadImage') }}</div>
               <div class="upload-area" :class="{ 'has-image': imageBase64 }" @click="triggerFileInput"
                 @dragover.prevent="onDragOver" @dragleave="onDragLeave" @drop.prevent="onDrop">
-                <img v-if="imageBase64" :src="imageBase64" class="preview-img" alt="预览" />
+                <img v-if="imageBase64" :src="imageBase64" class="preview-img" alt="preview" />
                 <div v-else class="upload-hint">
                   <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" stroke-linecap="round"
@@ -25,29 +25,29 @@
                     <polyline points="17 8 12 3 7 8" stroke-linecap="round" stroke-linejoin="round" />
                     <line x1="12" y1="3" x2="12" y2="15" stroke-linecap="round" />
                   </svg>
-                  <span>点击或拖拽上传图片</span>
-                  <span class="format-hint">支持 JPG / PNG 等常见格式</span>
+                  <span>{{ t('ai3d.uploadHint') }}</span>
+                  <span class="format-hint">{{ t('ai3d.formatHint') }}</span>
                 </div>
               </div>
               <input type="file" ref="fileInputRef" accept="image/*" style="display: none" @change="handleFileChange" />
-              <button v-if="imageBase64" class="reupload-btn" @click="triggerFileInput">重新上传</button>
+              <button v-if="imageBase64" class="reupload-btn" @click="triggerFileInput">{{ t('ai3d.reupload') }}</button>
             </div>
 
             <div class="action-section">
               <div class="submit-btn" :class="{ disabled: !imageBase64 || isSubmitting || isQuerying }"
                 @click="handleSubmit">
-                <div v-if="isSubmitting" class="loading-text">提交中...</div>
+                <div v-if="isSubmitting" class="loading-text">{{ t('ai3d.submitting') }}</div>
                 <div v-else-if="isQuerying" class="loading-text">
-                  <span class="spinner"></span>生成中...
+                  <span class="spinner"></span>{{ t('ai3d.generating') }}
                 </div>
-                <div v-else>开始生成模型(25积分)</div>
+                <div v-else>{{ t('ai3d.submitBtn') }}</div>
               </div>
             </div>
           </div>
           <div class="list" v-if="exitList.length > 0">
             <div class="section-title">
-              <span>生成模型任务</span>
-              <button @click="initList">刷新</button>
+              <span>{{ t('ai3d.taskList') }}</span>
+              <button @click="initList">{{ t('ai3d.refresh') }}</button>
             </div>
             <div class="hunyuan3DList">
               <Hunyuan3DItem v-for="value in exitList" :item="value" :key="value.id" @useFile="handleUseFile"
@@ -69,6 +69,7 @@ import request from '@/utils/request'
 import { startLoading, stopLoading } from '@/utils/loadingIcon'
 import { sleep } from '@/utils/sleep'
 import Hunyuan3DItem from './hunyuan3DItem.vue'
+import { t } from '@/i18n'
 
 const store = useStore<Store>()
 const emit = defineEmits<{
@@ -108,7 +109,7 @@ async function initList() {
 
 const handleClose = () => {
   if (isSubmitting.value) {
-    message.warning('正在提交中，请稍候...')
+    message.warning(t('ai3d.submittingWait'))
     return
   }
   if (isQuerying.value) {
@@ -171,7 +172,7 @@ const onDrop = (e: DragEvent) => {
   if (file && file.type.startsWith('image/')) {
     readFileAsBase64(file)
   } else {
-    message.error('请上传图片文件')
+    message.error(t('ai3d.uploadImageFile'))
   }
 }
 
@@ -200,13 +201,13 @@ const queryJobStatus = async (id: number) => {
         if (status === 'DONE') {
           await initList()
           resultText.value = ''
-          message.success('模型生成成功', { duration: 6000 })
+          message.success(t('ai3d.genSuccess'), { duration: 6000 })
           isQuerying.value = false
           return
         } else if (status === 'RUN') {
           resultPreviewImgUrl.value = ''
           resultType.value = ''
-          resultText.value = `正在生成模型...`
+          resultText.value = t('ai3d.generatingModel')
         }
       }
     } catch (error) {
@@ -216,8 +217,8 @@ const queryJobStatus = async (id: number) => {
   if (!stopPolling) {
     resultPreviewImgUrl.value = '';
     resultType.value = ''
-    resultText.value = `查询超时，任务可能仍在处理中。Job ID：${id}`
-    message.warning('查询超时，任务可能仍在处理中', { duration: 10000 })
+    resultText.value = `${t('ai3d.queryTimeout')}. ${t('ai3d.jobId')}${id}`
+    message.warning(t('ai3d.queryTimeout'), { duration: 10000 })
   }
   isQuerying.value = false
 }
@@ -226,7 +227,7 @@ const handleSubmit = async () => {
   if (!imageBase64.value || isSubmitting.value || isQuerying.value) return
 
   if (!store.state.main.userInfo) {
-    message.warning('请先登录')
+    message.warning(t('scene.pleaseLogin'))
     window.showLoginDialog()
     return
   }
@@ -255,8 +256,8 @@ const handleSubmit = async () => {
         currentJobId.value = jobId
         resultPreviewImgUrl.value = ''
         resultType.value = ''
-        resultText.value = '任务已提交，正在生成模型...'
-        message.success('任务提交成功，正在生成模型', { duration: 6000 })
+        resultText.value = t('ai3d.taskSubmitted')
+        message.success(t('ai3d.submitSuccess'), { duration: 6000 })
 
         // 刷新积分数量
         request.get('/video/user/info').then(res => {
@@ -272,16 +273,16 @@ const handleSubmit = async () => {
         // message.error(data.error)
       }
     } else {
-      alert(response.statusText || '提交失败');
+      alert(response.statusText || t('ai3d.submitFailed'));
       // message.error(response.statusText || '提交失败')
     }
   } catch (error: any) {
     console.error('AI图生模型提交失败:', error)
     if (error?.response?.status === 401) {
-      message.error('请先登录')
+      message.error(t('scene.pleaseLogin'))
       window.showLoginDialog()
     } else {
-      message.error(error?.response?.data?.message || error?.message || '提交失败，请稍后重试', {
+      message.error(error?.response?.data?.message || error?.message || t('ai3d.submitFailedRetry'), {
         duration: 10000,
       })
     }

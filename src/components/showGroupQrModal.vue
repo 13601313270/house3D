@@ -2,17 +2,18 @@
   <teleport to="#teleport">
     <div class="showGroupQrModal" @click.self="closeModal">
       <div class="showGroupQrModalInner">
-        <div class="title">添加微信群领取积分</div>
+        <div class="title">{{ t('qr.title') }}</div>
         <div class="qrSection">
           <img src="/84142.jpg" class="qrImage" />
         </div>
-        <div class="tipText">扫描上方二维码添加客服微信，领取20积分</div>
-        <button class="closeButton" @click="closeModal">我知道了</button>
+        <div class="tipText">{{ t('qr.tip') }}</div>
+        <button class="closeButton" @click="closeModal">{{ t('qr.gotIt') }}</button>
       </div>
     </div>
   </teleport>
 </template>
 <script setup lang="ts">
+import { t } from '@/i18n'
 
 const emit = defineEmits<{
   (e: 'close'): void

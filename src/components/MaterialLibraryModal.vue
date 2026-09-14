@@ -3,13 +3,13 @@
     <div v-if="visible" class="material-library-modal" @click.self="handleClose">
       <div class="material-library-modal-inner">
         <div class="header">
-          <div class="title">个人素材库管理</div>
+          <div class="title">{{ t('material.title') }}</div>
           <button class="close-btn" @click="handleClose">×</button>
         </div>
         <div class="body">
           <div v-if="mySpaceInfo" class="space-info">
             <div class="space-info-header">
-              <span class="space-info-label">存储空间</span>
+              <span class="space-info-label">{{ t('material.storage') }}</span>
               <div class="space-progress-bar">
                 <div class="space-progress-fill" :style="{ width: spaceUsagePercent + '%' }"></div>
               </div>
@@ -18,17 +18,17 @@
             <div class="space-info-items">
               <div class="space-info-item space-used">
                 <span class="item-dot"></span>
-                <span class="item-label">已用</span>
+                <span class="item-label">{{ t('material.used') }}</span>
                 <span class="item-value">{{ formattedFileSize(mySpaceInfo?.usedSpace * 1024) }}</span>
               </div>
               <div class="space-info-item space-total">
                 <span class="item-dot"></span>
-                <span class="item-label">总计</span>
+                <span class="item-label">{{ t('material.total') }}</span>
                 <span class="item-value">{{ formattedFileSize(mySpaceInfo?.totalSize * 1024) }}</span>
               </div>
               <div class="space-info-item space-free">
                 <span class="item-dot"></span>
-                <span class="item-label">可用</span>
+                <span class="item-label">{{ t('material.free') }}</span>
                 <span class="item-value">{{ formattedFileSize(mySpaceInfo?.freeSpace * 1024 || 0) }}</span>
               </div>
             </div>
@@ -36,7 +36,7 @@
 
           <div v-if="loading" class="loading-wrapper">
             <img src="../assets/loading_white.svg" alt="loading" class="loading-img" />
-            <div class="loading-text">加载中...</div>
+            <div class="loading-text">{{ t('common.loading') }}</div>
           </div>
 
           <div v-else class="material-grid">
@@ -48,8 +48,8 @@
                   <line x1="5" y1="12" x2="19" y2="12"></line>
                 </svg>
               </div>
-              <div class="upload-text">上传素材</div>
-              <div class="upload-desc">支持 FBX / OBJ / GLB</div>
+              <div class="upload-text">{{ t('material.upload') }}</div>
+              <div class="upload-desc">{{ t('material.uploadDesc') }}</div>
             </div>
             <div v-for="item in list" :key="'material:' + item.id" class="material-card"
               :class="{ deleting: deletingId === item.id }">
@@ -61,7 +61,7 @@
                 <div class="card-name">{{ item.name }}</div>
                 <div class="card-fileSize">{{ item.fileSize / 1000 }}M</div>
                 <div class="card-meta">
-                  <button class="btn-public" @click.stop="handlePublish(item)">设置</button>
+                  <button class="btn-public" @click.stop="handlePublish(item)">{{ t('material.settings') }}</button>
                   <span style="flex-grow: 1;"></span>
                   <button class="btn-delete" :disabled="deletingId === item.id" @click.stop="handleDelete(item)">
                     <svg v-if="deletingId === item.id" class="spin-icon" viewBox="0 0 24 24" fill="none" width="14"
@@ -74,7 +74,7 @@
                       <polyline points="3 6 5 6 21 6"></polyline>
                       <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
                     </svg>
-                    <span>{{ deletingId === item.id ? '删除中' : '删除' }}</span>
+                    <span>{{ deletingId === item.id ? t('material.deleting') : t('material.delete') }}</span>
                   </button>
                 </div>
               </div>
@@ -84,9 +84,9 @@
 
         <div class="footer">
           <div class="footer-info">
-            共 {{ list.length }} 个素材
+            {{ t('material.count', list.length) }}
           </div>
-          <button class="btn btn-close" @click="handleClose">关闭</button>
+          <button class="btn btn-close" @click="handleClose">{{ t('common.close') }}</button>
         </div>
       </div>
     </div>
@@ -107,6 +107,7 @@ import service from '@/utils/request'
 import importOutObj from '@/utils/importOutObj'
 import ImportModelConfirm from './ImportModelConfirm.vue'
 import PublishModelModal from './PublishModelModal.vue'
+import { t } from '@/i18n'
 
 interface MaterialItem {
   id: string
@@ -207,7 +208,7 @@ async function fetchList() {
 }
 
 async function handleDelete(item: MaterialItem) {
-  if (!confirm(`确定要删除「${item.name}」吗？`)) {
+  if (!confirm(t('material.deleteConfirm', item.name))) {
     return
   }
   deletingId.value = item.id
@@ -217,13 +218,13 @@ async function handleDelete(item: MaterialItem) {
     emit('refresh')
   } catch (error) {
     console.error('删除失败:', error)
-    alert('删除失败，请重试')
+    alert(t('material.deleteFailed'))
   } finally {
     deletingId.value = null
   }
 }
 async function handle3DDelete(item: hunyuanItem) {
-  if (!confirm(`确定要删除「${item.name}」吗？`)) {
+  if (!confirm(t('material.deleteConfirm', item.name))) {
     return
   }
   deleting3DId.value = item.id
@@ -234,7 +235,7 @@ async function handle3DDelete(item: hunyuanItem) {
     emit('refresh')
   } catch (error) {
     console.error('删除失败:', error)
-    alert('删除失败，请重试')
+    alert(t('material.deleteFailed'))
   } finally {
     deleting3DId.value = null
   }

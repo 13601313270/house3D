@@ -8,9 +8,9 @@
             'sprite-type': item.type === 'sprite',
             'line-type': item.type === 'polyline',
             'polygon-type': item.type === 'polygon'
-          }" @click="selectSprite(item)" :title="item.name">
+          }" @click="selectSprite(item)" :title="tLabel(item.name)">
             <span>{{ item.icon }}</span>
-            <span class="element-name">{{ item.name }}</span>
+            <span class="element-name">{{ tLabel(item.name) }}</span>
           </button>
         </div>
       </div>
@@ -25,7 +25,7 @@
           <div
             v-if="textureWorld.isDrawing && (textureWorld.currentTool === 'polyline' || textureWorld.currentTool === 'polygon')"
             class="hint">
-            {{ textureWorld.currentTool === 'polygon' ? '点击画布添加顶点，双击完成绘制（至少3点），按Esc取消' : '点击画布添加点，双击完成绘制（至少2点），按Esc取消'
+            {{ textureWorld.currentTool === 'polygon' ? t('gtexture.hintPolygon') : t('gtexture.hintPolyline')
             }}
           </div>
         </div>
@@ -37,13 +37,13 @@
           <span class="drag-handle">
             <img src="@/assets/move2.svg" alt="move" @mousedown.prevent />
           </span>
-          <div class="title">属性</div>
+          <div class="title">{{ t('gtexture.props') }}</div>
           <div class="close-btn"></div>
         </div>
         <div class="panel-content">
           <div class="property-list">
             <div class="property-item" v-for="item in editParams" :key="item.id">
-              <label v-if="'label' in item">{{ item.label }}</label>
+              <label v-if="'label' in item">{{ tLabel(item.label) }}</label>
               <div v-if="item.dataType === 'string'" class="textContainer">
                 <input type="text" class="textInput" v-model="item.value" @input="render" />
               </div>
@@ -63,24 +63,24 @@
                 <input type="color" v-model="item.value" @input="render" />
               </div>
               <div v-else-if="item.dataType === 'boolean'">
-                {{ item.value ? '是' : '否' }}
+                {{ item.value ? t('common.yes') : t('common.no') }}
                 <input type="checkbox" v-model="item.value" @change="render" />
               </div>
             </div>
           </div>
           <div class="bottomTools">
             <div class="layer-controls">
-              <button class="layer-btn" @click="bringForward" title="上移一层">⬆️ 上移</button>
-              <button class="layer-btn" @click="sendBackward" title="下移一层">⬇️ 下移</button>
+              <button class="layer-btn" @click="bringForward" :title="t('gtexture.moveUp')">⬆️ {{ t('gtexture.moveUp') }}</button>
+              <button class="layer-btn" @click="sendBackward" :title="t('gtexture.moveDown')">⬇️ {{ t('gtexture.moveDown') }}</button>
             </div>
-            <button class="delete-btn" @click="deleteElement">删除元素</button>
+            <button class="delete-btn" @click="deleteElement">{{ t('gtexture.deleteElement') }}</button>
           </div>
         </div>
       </div>
 
       <div class="actions">
         <div class="background-color-picker">
-          <label>背景</label>
+          <label>{{ t('gtexture.bg') }}</label>
           <input type="color" v-model="backgroundColor" @input="updateBackgroundColor" />
         </div>
         <!-- <div class="btnGroup">
@@ -88,7 +88,7 @@
         </div> -->
         <div class="dropdown">
           <div class="dropdown-btn" @click="saveData(1)">
-            保存(1X)
+            {{ t('gtexture.saveScale', 1) }}
           </div>
           <div class="dropdown-content-container">
             <div class="dropdown-icon-container">
@@ -98,13 +98,13 @@
             </div>
             <div class="dropdown-content">
               <button v-for="scale in [2, 3, 4, 5, 6, 7, 8, 9, 10]" :key="scale" @click="saveData(scale)">
-                保存({{ scale }}X)
+                {{ t('gtexture.saveScale', scale) }}
               </button>
             </div>
           </div>
         </div>
-        <button class="action-btn" @click="clearCanvas">清空</button>
-        <button class="action-btn" @click="emit('close')">返回</button>
+        <button class="action-btn" @click="clearCanvas">{{ t('gtexture.clear') }}</button>
+        <button class="action-btn" @click="emit('close')">{{ t('gtexture.back') }}</button>
         <!-- <div class="panel-close-btn" @click="emit('close')">
         <img src="@/assets/close.svg" alt="close" />
       </div> -->
@@ -124,6 +124,7 @@ import { PolylineElement, PolylineElementData } from './types/polylineElement'
 import { PolygonElement } from './types/polygonElement'
 import { IconDataType } from './types/elementDefinition'
 import EnumTypeEdit from '@/views/enumTypeEdit.vue'
+import { t, tLabel } from '@/i18n'
 
 const props = defineProps<{
   width?: number

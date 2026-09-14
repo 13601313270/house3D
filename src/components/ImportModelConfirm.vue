@@ -3,43 +3,43 @@
     <div v-if="visible" class="import-model-confirm" @click.self="handleCancel">
       <div class="import-model-confirm-inner">
         <div class="header">
-          <div class="title">模型导入确认</div>
+          <div class="title">{{ t('import.title') }}</div>
           <button class="close-btn" @click="handleCancel">×</button>
         </div>
 
         <div class="body">
           <div class="preview-section">
             <div class="preview-container" ref="previewContainerRef"></div>
-            <div class="preview-tips">左键拖动旋转视角 · 滚轮缩放</div>
+            <div class="preview-tips">{{ t('import.tips') }}</div>
           </div>
 
           <div class="info-section">
-            <div class="info-title">模型信息</div>
+            <div class="info-title">{{ t('import.info') }}</div>
             <div class="info-list">
               <div class="info-item">
-                <span class="label">文件名：</span>
+                <span class="label">{{ t('import.fileName') }}</span>
                 <span class="value">{{ fileName }}</span>
               </div>
               <div class="info-item">
-                <span class="label">文件类型：</span>
+                <span class="label">{{ t('import.fileType') }}</span>
                 <span class="value file-type">{{ fileType?.toUpperCase() }}</span>
               </div>
               <div class="info-item" v-if="file">
-                <span class="label">文件大小：</span>
+                <span class="label">{{ t('import.fileSize') }}</span>
                 <span class="value">{{ formattedFileSize(file.size) }}</span>
               </div>
               <div class="info-item">
-                <span class="label">缩放比例：</span>
+                <span class="label">{{ t('import.scale') }}</span>
                 <span class="value highlight">{{ scaleFactor?.toFixed(4) }}</span>
               </div>
               <div class="info-item" v-if="modelSize">
-                <span class="label">模型尺寸：</span>
+                <span class="label">{{ t('import.modelSize') }}</span>
                 <span class="value">
                   {{ modelSize.x.toFixed(2) }} × {{ modelSize.y.toFixed(2) }} × {{ modelSize.z.toFixed(2) }}
                 </span>
               </div>
               <div class="info-item" v-if="meshCount !== null">
-                <span class="label">网格数量：</span>
+                <span class="label">{{ t('import.meshCount') }}</span>
                 <span class="value">{{ meshCount }}</span>
               </div>
             </div>
@@ -50,11 +50,11 @@
           <div style="display: flex;">
             <div class="checkbox-label" :style="{ display: defaultAddToLibrary ? 'none' : '' }">
               <input type="checkbox" v-model="addToMaterialLibrary" class="custom-checkbox" />
-              <span class="checkbox-text">添加到个人素材库</span>
+              <span class="checkbox-text">{{ t('import.addToLibrary') }}</span>
             </div>
             <div v-if="mySpaceInfo && addToMaterialLibrary" class="space-info">
               <div class="space-info-header">
-                <span class="space-info-label">存储空间</span>
+                <span class="space-info-label">{{ t('material.storage') }}</span>
                 <div class="space-progress-bar">
                   <div class="space-progress-fill" :style="{ width: spaceUsagePercent + '%' }"></div>
                 </div>
@@ -63,17 +63,17 @@
               <div class="space-info-items">
                 <div class="space-info-item space-used">
                   <span class="item-dot"></span>
-                  <span class="item-label">已用</span>
+                  <span class="item-label">{{ t('material.used') }}</span>
                   <span class="item-value">{{ formattedFileSize(mySpaceInfo?.usedSpace * 1024) }}</span>
                 </div>
                 <div class="space-info-item space-total">
                   <span class="item-dot"></span>
-                  <span class="item-label">总计</span>
+                  <span class="item-label">{{ t('material.total') }}</span>
                   <span class="item-value">{{ formattedFileSize(mySpaceInfo?.totalSize * 1024) }}</span>
                 </div>
                 <div class="space-info-item space-free">
                   <span class="item-dot"></span>
-                  <span class="item-label">可用</span>
+                  <span class="item-label">{{ t('material.free') }}</span>
                   <span class="item-value">{{ formattedFileSize(mySpaceInfo?.freeSpace * 1024 || 0) }}</span>
                 </div>
               </div>
@@ -81,7 +81,7 @@
           </div>
 
           <div class="footer-btns">
-            <button class="btn btn-cancel" @click="handleCancel">取消</button>
+            <button class="btn btn-cancel" @click="handleCancel">{{ t('common.cancel') }}</button>
             <button class="btn btn-confirm" :class="{ loading: confirmLoading }" :disabled="confirmLoading"
               @click="handleConfirm">{{ confirmButtonText }}</button>
           </div>
@@ -97,6 +97,7 @@ import * as THREE from 'three'
 import service from '@/utils/request';
 import OSS from 'ali-oss';
 import message from '@/utils/message';
+import { t } from '@/i18n';
 
 const props = defineProps<{
   visible: boolean
@@ -123,8 +124,8 @@ const meshCount = ref<number | null>(null)
 let previewImgFile: File | null = null
 
 const confirmButtonText = computed(() => {
-  if (!confirmLoading.value) return '确认导入'
-  return addToMaterialLibrary.value ? '正在上传到个人素材库' : '确认导入中'
+  if (!confirmLoading.value) return t('import.confirm')
+  return addToMaterialLibrary.value ? t('import.uploading') : t('import.importing')
 })
 
 let scene: THREE.Scene | null = null
@@ -218,7 +219,7 @@ const handleConfirm = async () => {
       console.log('mySpaceResponse', mySpaceResponse.data)
       if (mySpaceResponse.data.freeSpace < 0) {
         const { freeSpace, usedSpace, totalSize } = mySpaceResponse.data
-        message.error(`个人素材库空间不足，当前空间${formattedFileSize(freeSpace * 1000)}，已用空间${formattedFileSize(usedSpace * 1000)}，总空间${formattedFileSize(totalSize * 1000)}`)
+        message.error(t('import.spaceInsufficient', formattedFileSize(freeSpace * 1000), formattedFileSize(usedSpace * 1000), formattedFileSize(totalSize * 1000)))
         return;
       }
       const respnse = await service.get('/video/materialLibrary/getUploadKey');

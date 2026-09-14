@@ -1,7 +1,7 @@
 <template>
   <div class="login-modal-overlay" @click.self="handleClose">
     <div class="login-modal">
-      <button class="close-btn" @click="handleClose" aria-label="关闭">
+      <button class="close-btn" @click="handleClose" :aria-label="t('login.close')">
         <svg width="13" height="13" viewBox="0 0 18 18" fill="none">
           <path d="M3 3 L15 15 M15 3 L3 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
         </svg>
@@ -12,26 +12,26 @@
         <div class="login-brand">
           <img src="/favicon256.png" class="brand-icon" />
         </div>
-        <h2 class="login-title">登录</h2>
-        <p class="login-subtitle">完成登录后，你的场景将自动保存。</p>
+        <h2 class="login-title">{{ t('login.title') }}</h2>
+        <p class="login-subtitle">{{ t('login.subtitle') }}</p>
 
         <div class="login-form">
           <div class="form-item">
-            <label for="email">邮箱</label>
+            <label for="email">{{ t('login.email') }}</label>
             <input type="email" id="email" v-model="email" placeholder="your@email.com" />
           </div>
           <div class="form-item">
-            <label for="password">密码</label>
-            <input type="password" id="password" v-model="password" placeholder="请输入密码" />
-            <button class="forgot-link" @click="toggleForgotPassword">忘记密码？</button>
+            <label for="password">{{ t('login.password') }}</label>
+            <input type="password" id="password" v-model="password" :placeholder="t('login.passwordPlaceholder')" />
+            <button class="forgot-link" @click="toggleForgotPassword">{{ t('login.forgot') }}</button>
           </div>
           <div class="error-message" v-if="errorMsg">{{ errorMsg }}</div>
-          <button class="btn-primary" @click="handleLogin">登录并保存</button>
+          <button class="btn-primary" @click="handleLogin">{{ t('login.submit') }}</button>
         </div>
 
         <div class="login-switch">
-          <span>还没有账户？</span>
-          <button class="switch-btn" @click="goRegister">注册</button>
+          <span>{{ t('login.noAccount') }}</span>
+          <button class="switch-btn" @click="goRegister">{{ t('login.signup') }}</button>
         </div>
       </div>
 
@@ -40,38 +40,38 @@
         <div class="login-brand">
           <img src="/favicon256.png" class="brand-icon" />
         </div>
-        <h2 class="login-title">注册账号</h2>
-        <p class="login-subtitle">注册后，你的场景将自动保存。</p>
+        <h2 class="login-title">{{ t('register.title') }}</h2>
+        <p class="login-subtitle">{{ t('register.subtitle') }}</p>
 
         <div class="login-form">
           <div class="form-item">
-            <label for="reg-email">邮箱</label>
+            <label for="reg-email">{{ t('login.email') }}</label>
             <input type="email" id="reg-email" v-model="email" placeholder="your@email.com" />
           </div>
           <div class="form-item">
-            <label for="reg-password">密码</label>
-            <input type="password" id="reg-password" v-model="password" placeholder="请输入密码（至少6位）" />
+            <label for="reg-password">{{ t('login.password') }}</label>
+            <input type="password" id="reg-password" v-model="password" :placeholder="t('register.passwordPlaceholder')" />
           </div>
           <div class="form-item">
-            <label for="reg-confirmPassword">确认密码</label>
-            <input type="password" id="reg-confirmPassword" v-model="confirmPassword" placeholder="请再次输入密码" />
+            <label for="reg-confirmPassword">{{ t('register.confirmPassword') }}</label>
+            <input type="password" id="reg-confirmPassword" v-model="confirmPassword" :placeholder="t('register.confirmPlaceholder')" />
           </div>
           <div class="form-item">
-            <label for="reg-captcha">验证码</label>
+            <label for="reg-captcha">{{ t('register.captcha') }}</label>
             <div class="captcha-container">
-              <input type="text" id="reg-captcha" v-model="captcha" placeholder="请输入6位验证码" />
+              <input type="text" id="reg-captcha" v-model="captcha" :placeholder="t('register.captchaPlaceholder6')" />
               <button class="captcha-btn" :disabled="!canSendCaptcha || countdown > 0" @click="sendRegisterCaptcha">
-                {{ countdown > 0 ? `${countdown}秒后重发` : '发送验证码' }}
+                {{ countdown > 0 ? `${countdown}${t('register.resendIn')}` : t('register.sendCode') }}
               </button>
             </div>
           </div>
           <div class="error-message" v-if="errorMsg">{{ errorMsg }}</div>
-          <button class="btn-primary" @click="handleRegister">注册</button>
+          <button class="btn-primary" @click="handleRegister">{{ t('register.submit') }}</button>
         </div>
 
         <div class="login-switch">
-          <span>已有账号？</span>
-          <button class="switch-btn" @click="backToLogin">立即登录</button>
+          <span>{{ t('register.haveAccount') }}</span>
+          <button class="switch-btn" @click="backToLogin">{{ t('register.loginNow') }}</button>
         </div>
       </div>
 
@@ -80,39 +80,39 @@
         <div class="login-brand">
           <img src="/favicon256.png" class="brand-icon" />
         </div>
-        <h2 class="login-title">重置密码</h2>
-        <p class="login-subtitle">通过邮箱验证码重置你的登录密码。</p>
+        <h2 class="login-title">{{ t('forgot.title') }}</h2>
+        <p class="login-subtitle">{{ t('forgot.subtitle') }}</p>
 
         <div class="login-form">
           <div class="form-item">
-            <label for="reset-email">邮箱</label>
+            <label for="reset-email">{{ t('login.email') }}</label>
             <input type="email" id="reset-email" v-model="email" placeholder="your@email.com" />
           </div>
           <div class="form-item">
-            <label for="reset-password">新密码</label>
-            <input type="password" id="reset-password" v-model="password" placeholder="请输入新密码（至少6位）" />
+            <label for="reset-password">{{ t('forgot.newPassword') }}</label>
+            <input type="password" id="reset-password" v-model="password" :placeholder="t('forgot.newPasswordPlaceholder')" />
           </div>
           <div class="form-item">
-            <label for="reset-confirmPassword">确认密码</label>
-            <input type="password" id="reset-confirmPassword" v-model="confirmPassword" placeholder="请再次输入密码" />
+            <label for="reset-confirmPassword">{{ t('register.confirmPassword') }}</label>
+            <input type="password" id="reset-confirmPassword" v-model="confirmPassword" :placeholder="t('register.confirmPlaceholder')" />
           </div>
           <div class="form-item">
-            <label for="reset-captcha">验证码</label>
+            <label for="reset-captcha">{{ t('register.captcha') }}</label>
             <div class="captcha-container">
-              <input type="text" id="reset-captcha" v-model="captcha" placeholder="请输入8位验证码" />
+              <input type="text" id="reset-captcha" v-model="captcha" :placeholder="t('register.captchaPlaceholder8')" />
               <button class="captcha-btn" :disabled="!canSendCaptcha || countdown > 0"
                 @click="sendResetPasswordCaptcha">
-                {{ countdown > 0 ? `${countdown}秒后重发` : '发送验证码' }}
+                {{ countdown > 0 ? `${countdown}${t('register.resendIn')}` : t('register.sendCode') }}
               </button>
             </div>
           </div>
           <div class="error-message" v-if="errorMsg">{{ errorMsg }}</div>
-          <button class="btn-primary" @click="handleResetPassword">重置密码</button>
+          <button class="btn-primary" @click="handleResetPassword">{{ t('forgot.submit') }}</button>
         </div>
 
         <div class="login-switch">
-          <span>想起密码了？</span>
-          <button class="switch-btn" @click="backToLogin">立即登录</button>
+          <span>{{ t('forgot.remember') }}</span>
+          <button class="switch-btn" @click="backToLogin">{{ t('register.loginNow') }}</button>
         </div>
       </div>
     </div>
@@ -122,6 +122,7 @@
 <script lang="ts" setup>
 import axios from 'axios';
 import { ref, computed } from 'vue'
+import { t } from '@/i18n'
 
 const emit = defineEmits<{
   (e: 'close'): void
@@ -144,11 +145,11 @@ const validateEmail = (emailStr: string): boolean => {
 
 const validateConfirmPassword = (): boolean => {
   if (!confirmPassword.value) {
-    errorMsg.value = '请确认密码'
+    errorMsg.value = t('form.confirmPassword')
     return false
   }
   if (password.value !== confirmPassword.value) {
-    errorMsg.value = '两次输入的密码不一致'
+    errorMsg.value = t('form.passwordMismatch')
     return false
   }
   return true
@@ -156,11 +157,11 @@ const validateConfirmPassword = (): boolean => {
 
 const validateCaptcha = (length: number): boolean => {
   if (!captcha.value) {
-    errorMsg.value = '请输入验证码'
+    errorMsg.value = t('form.enterCaptcha')
     return false
   }
   if (captcha.value.length !== length) {
-    errorMsg.value = `验证码必须是${length}位数字`
+    errorMsg.value = `${t('form.captchaLength')}${length}${t('form.captchaDigits')}`
     return false
   }
   return true
@@ -214,7 +215,7 @@ const startCountdown = () => {
 
 const sendRegisterCaptcha = async () => {
   if (!canSendCaptcha.value) {
-    errorMsg.value = '请输入有效的邮箱地址'
+    errorMsg.value = t('form.validEmail')
     return
   }
 
@@ -237,7 +238,7 @@ const sendRegisterCaptcha = async () => {
 
 const sendResetPasswordCaptcha = async () => {
   if (!canSendCaptcha.value) {
-    errorMsg.value = '请输入有效的邮箱地址'
+    errorMsg.value = t('form.validEmail')
     return
   }
 
@@ -260,19 +261,19 @@ const sendResetPasswordCaptcha = async () => {
 
 const handleRegister = async () => {
   if (!email.value.trim()) {
-    errorMsg.value = '请输入邮箱'
+    errorMsg.value = t('form.enterEmail')
     return
   }
   if (!validateEmail(email.value)) {
-    errorMsg.value = '请输入有效的邮箱地址'
+    errorMsg.value = t('form.validEmail')
     return
   }
   if (!password.value) {
-    errorMsg.value = '请输入密码'
+    errorMsg.value = t('form.enterPassword')
     return
   }
   if (password.value.length < 6) {
-    errorMsg.value = '密码长度至少为6位'
+    errorMsg.value = t('form.passwordMin')
     return
   }
   if (!validateConfirmPassword()) return
@@ -300,19 +301,19 @@ const handleRegister = async () => {
 
 const handleResetPassword = async () => {
   if (!email.value.trim()) {
-    errorMsg.value = '请输入邮箱'
+    errorMsg.value = t('form.enterEmail')
     return
   }
   if (!validateEmail(email.value)) {
-    errorMsg.value = '请输入有效的邮箱地址'
+    errorMsg.value = t('form.validEmail')
     return
   }
   if (!password.value) {
-    errorMsg.value = '请输入密码'
+    errorMsg.value = t('form.enterPassword')
     return
   }
   if (password.value.length < 6) {
-    errorMsg.value = '密码长度至少为6位'
+    errorMsg.value = t('form.passwordMin')
     return
   }
   if (!validateConfirmPassword()) return
@@ -341,19 +342,19 @@ const handleResetPassword = async () => {
 
 const handleLogin = async () => {
   if (!email.value.trim()) {
-    errorMsg.value = '请输入邮箱'
+    errorMsg.value = t('form.enterEmail')
     return
   }
   if (!validateEmail(email.value)) {
-    errorMsg.value = '请输入有效的邮箱地址'
+    errorMsg.value = t('form.validEmail')
     return
   }
   if (!password.value) {
-    errorMsg.value = '请输入密码'
+    errorMsg.value = t('form.enterPassword')
     return
   }
   if (password.value.length < 6) {
-    errorMsg.value = '密码长度至少为6位'
+    errorMsg.value = t('form.passwordMin')
     return
   }
   errorMsg.value = ''

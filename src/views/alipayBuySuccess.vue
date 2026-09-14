@@ -2,24 +2,24 @@
   <div class="buySuccess">
     <div v-if="status === 'loading'" class="loadingState">
       <div class="spinner"></div>
-      <div class="loadingText">正在验证支付状态...</div>
+      <div class="loadingText">{{ t('payResult.verifying') }}</div>
     </div>
     <div v-else-if="status === 'success'" class="successState">
       <div class="successIcon"></div>
-      <div class="successTitle">购买成功</div>
-      <div class="successDesc">您的订单已成功支付，感谢您的支持！</div>
+      <div class="successTitle">{{ t('payResult.successTitle') }}</div>
+      <div class="successDesc">{{ t('payResult.successDesc') }}</div>
       <div class="orderInfo">
-        <span class="label">订单号：</span>
+        <span class="label">{{ t('payResult.orderNo') }}</span>
         <span class="value">{{ outTradeNo }}</span>
       </div>
-      <button class="backButton" @click="closePage">关闭页面</button>
+      <button class="backButton" @click="closePage">{{ t('payResult.closePage') }}</button>
     </div>
     <div v-else-if="status === 'failure'" class="failureState">
       <div class="failureIcon"></div>
-      <div class="failureTitle">支付验证失败</div>
+      <div class="failureTitle">{{ t('payResult.failureTitle') }}</div>
       <div class="failureDesc">{{ errorMsg }}</div>
-      <button class="retryButton" @click="checkPayment">重新验证</button>
-      <button class="backButton" @click="closePage">关闭页面</button>
+      <button class="retryButton" @click="checkPayment">{{ t('payResult.retry') }}</button>
+      <button class="backButton" @click="closePage">{{ t('payResult.closePage') }}</button>
     </div>
   </div>
 </template>
@@ -27,6 +27,7 @@
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import service from '@/utils/request'
+import { t } from '@/i18n'
 
 type Status = 'loading' | 'success' | 'failure'
 
@@ -57,7 +58,7 @@ const checkPayment = async () => {
 
   if (!outTradeNo.value) {
     status.value = 'failure'
-    errorMsg.value = '缺少订单号参数'
+    errorMsg.value = t('payResult.missingOrderNo')
     return
   }
 
@@ -72,11 +73,11 @@ const checkPayment = async () => {
       status.value = 'success'
     } else {
       status.value = 'failure'
-      errorMsg.value = data?.msg || '支付状态验证失败'
+      errorMsg.value = data?.msg || t('payResult.verifyFailed')
     }
   } catch (error: any) {
     status.value = 'failure'
-    errorMsg.value = error?.response?.data?.message || '网络请求失败，请稍后重试'
+    errorMsg.value = error?.response?.data?.message || t('payResult.networkError')
   }
 }
 

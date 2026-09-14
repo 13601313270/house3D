@@ -3,13 +3,13 @@
     <div class="addButtonWrapper" v-if="showAddGuide">
       <button class="addButton addButtonGuide" type="button"
         @mouseenter="isMouseInCate1 = true, activeObjTypeId = undefined">
-        添加
+        {{ t('sidebar.add') }}
       </button>
       <div class="guideBubble" @click.stop>
         <div class="guideBubbleDecor guideBubbleDecor1"></div>
         <div class="guideBubbleDecor guideBubbleDecor2"></div>
         <div class="guideBubbleArrow"></div>
-        <button class="guideBubbleClose" type="button" @click.stop="dismissAddGuide()" title="关闭引导">×</button>
+        <button class="guideBubbleClose" type="button" @click.stop="dismissAddGuide()" :title="t('guide.close')">×</button>
         <div class="guideBubbleContent">
           <div class="guideBubbleIcon">
             <svg viewBox="0 0 24 24" width="28" height="28" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -20,8 +20,8 @@
             </svg>
           </div>
           <div class="guideBubbleTextBlock">
-            <div class="guideBubbleTitle">添加模型到场景中</div>
-            <div class="guideBubbleDesc">点击左侧「添加」按钮，<br />从分类列表中选择一个模型开始创作</div>
+            <div class="guideBubbleTitle">{{ t('guide.addModelTitle') }}</div>
+            <div class="guideBubbleDesc">{{ t('guide.addModelDesc') }}</div>
           </div>
         </div>
         <div class="guideBubbleFooter">
@@ -31,7 +31,7 @@
             <span class="guideBubbleStepDot"></span> -->
           </div>
           <button class="guideBubbleNextBtn" type="button" @click.stop="dismissAddGuide()">
-            知道了
+            {{ t('guide.gotIt') }}
             <svg viewBox="0 0 20 20" width="14" height="14" fill="currentColor">
               <path
                 d="M7.05 4.05a.75.75 0 011.06 0l5.25 5.25a.75.75 0 010 1.06l-5.25 5.25a.75.75 0 11-1.06-1.06L11.69 10 7.05 5.36a.75.75 0 010-1.06z" />
@@ -41,26 +41,26 @@
       </div>
     </div>
     <button v-else class="addButton" type="button" @mouseenter="isMouseInCate1 = true, activeObjTypeId = undefined">
-      添加
+      {{ t('sidebar.add') }}
     </button>
     <div class="list insertObjTypeSelect" @mouseenter="isMouseInCate1 = true" v-show="isMouseInCate1 || isMouseInCate2">
       <template v-if="lastChooseOutFile">
         <div class="childItem" @click="changeCurrentToolToOutFile(lastChooseOutFile), isMouseInCate1 = false"
           @mouseenter="activeObjTypeId = undefined">
-          最近使用：{{ lastChooseOutFile.name }}
+          {{ t('sidebar.recent') }}{{ lastChooseOutFile.name }}
         </div>
         <div class="splitLine"></div>
       </template>
       <div v-for="groupItem in allFileKeysGroup.filter(item => item.id !== 'other')" :key="groupItem.id"
         class="typeItemContent" :class="{ active: activeObjTypeId === groupItem.id }">
-        <div class="typeName" @mouseenter="mouseenterGroup(groupItem.id)">{{ groupItem.name }}</div>
+        <div class="typeName" @mouseenter="mouseenterGroup(groupItem.id)">{{ tCategoryName(groupItem.id, groupItem.name) }}</div>
         <div class="childItemList"
           v-if="activeObjTypeId === groupItem.id && groupItem.child && groupItem.child.length > 0">
           <div v-for="item2 in groupItem.child" class="childItem" :key="item2"
             @click="changeCurrentTool(item2), isMouseInCate1 = false">
             <img v-if="allPluginByKey[item2].previewImg" :src="allPluginByKey[item2].previewImg" alt="" class="icon"
               :style="{ width: groupItem.id === 'camera' ? '88px' : '44px' }" />
-            <div class="name">{{ allPluginByKey[item2].name }}</div>
+            <div class="name">{{ tPluginName(item2, allPluginByKey[item2].name) }}</div>
           </div>
         </div>
       </div>
@@ -68,11 +68,11 @@
         v-for="value in (allFileKeysGroup.find(item => item.id === 'other') || { child: [] }).child.filter(item => !['outFile', 'outFileInWall', 'importFile'].includes(item))"
         :key="value" :class="{ active: currentTool === value }"
         @click="changeCurrentTool(value), isMouseInCate1 = false" @mouseenter="mouseenterOtherGroup(value)">
-        {{ allPluginByKey[value]?.name }}
+        {{ tPluginName(value, allPluginByKey[value]?.name) }}
       </div>
       <div class="splitLine"></div>
       <div class="typeItemContent" :class="{ active: activeObjTypeId === 'mineObjs' }">
-        <div class="typeName" @mouseenter="mouseEnterMineObjs($event)">个人素材库</div>
+        <div class="typeName" @mouseenter="mouseEnterMineObjs($event)">{{ tCategoryName('mineObjs', t('sidebar.myAssets')) }}</div>
       </div>
       <div class="splitLine"></div>
       <div>
@@ -91,14 +91,14 @@
       <div class="childItem help" v-if="activeObjTypeId === 'mineObjs'" @click="showMineObjsModal()">
         <div>
           <img class="icon" src="@/assets/materialLibrary.png" />
-          <div>管理素材库</div>
+          <div>{{ t('sidebar.manageAssets') }}</div>
           <!-- <div class="desc">（24小时内添加）</div> -->
         </div>
       </div>
       <div v-else class="childItem help" @click="showHelpModal()">
         <div>
-          <div>联系售后添加</div>
-          <div class="desc">（24小时内添加）</div>
+          <div>{{ t('sidebar.contactSupport') }}</div>
+          <div class="desc">{{ t('sidebar.within24h') }}</div>
         </div>
       </div>
       <div v-for="item2 in activePluginChildList" :key="'plugin-' + item2.key" class="childItem"
@@ -106,7 +106,7 @@
         <div class="previewImg">
           <img v-if="item2.previewImg" :src="item2.previewImg" alt="" />
         </div>
-        <div class="name">{{ item2.name }}</div>
+        <div class="name">{{ tPluginName(item2.key, item2.name) }}</div>
       </div>
       <!-- <div>--2--{{ activeObjChildList.length }}</div> -->
       <div v-for="item2 in activeObjChildList" class="childItem" :key="'obj-' + item2.id"
@@ -124,18 +124,18 @@
           </div>
           <div class="name">11{{ item2.name }}</div>
           <div class="userUpTip">
-            <span>用户上传</span>
+            <span>{{ t('sidebar.userUpload') }}</span>
             <template v-if="item2.price > 0">
-              <img style="margin: 0 2px;" src="money.png" alt="" /><span>{{ item2.price }}积分</span>
+              <img style="margin: 0 2px;" src="money.png" alt="" /><span>{{ item2.price }}{{ t('user.credits') }}</span>
             </template>
-            <span v-else>(免费)</span>
+            <span v-else>{{ t('sidebar.free') }}</span>
           </div>
         </div>
       </template>
     </div>
     <div class="defaultValueModal" v-if="showDefaultValueModal" @click.self="showDefaultValueModal = false">
       <div class="modalContent">
-        <div class="modalTitle">初始化方案</div>
+        <div class="modalTitle">{{ t('sidebar.initScheme') }}</div>
         <div class="defaultValueList">
           <div v-for="(item, index) in currentDefaultValues" :key="index" class="defaultValueItem"
             @click="createObjWithDefaultValue(currentToolType, item)">
@@ -173,6 +173,7 @@ import message from '@/utils/message';
 import request from '@/utils/request';
 import { useStore } from 'vuex';
 import { Store } from '@/store/index.js';
+import { t, tCategoryName, tPluginName } from '@/i18n';
 
 const store = useStore<Store>()
 defineProps<{
@@ -331,7 +332,7 @@ async function changeCurrentToolToImportFile(item: activeObjChildItem) {
     })
   } catch (error) {
     console.error('文件下载失败:', error)
-    alert('文件下载失败，请重试')
+    alert(t('file.downloadFailed'))
   } finally {
     loading.value = false
   }
@@ -341,7 +342,7 @@ async function chooseOtherUserObj(item: otherUserObjItem) {
   console.log('checkCanUseData', checkCanUseData);
   if (checkCanUseData.result === false) {
     if (checkCanUseData.code === 1) {
-      const isBuy = confirm('是否购买该模型？需要消耗' + item.price + '积分')
+      const isBuy = confirm(t('file.buyModelConfirm') + item.price + t('file.buyModelCredits'))
       if (!isBuy) {
         return
       }
@@ -349,7 +350,7 @@ async function chooseOtherUserObj(item: otherUserObjItem) {
         price: item.price,
       })
       if (buyResult.result) {
-        alert('购买成功')
+        alert(t('file.buySuccess'))
         // 刷新积分数量
         request.get('/video/user/info').then(res => {
           console.log(res)
@@ -358,7 +359,7 @@ async function chooseOtherUserObj(item: otherUserObjItem) {
           }
         })
       } else {
-        message.error(buyResult.msg || '购买失败')
+        message.error(buyResult.msg || t('file.buyFailed'))
         return;
       }
     } else {
@@ -386,7 +387,7 @@ async function chooseOtherUserObj(item: otherUserObjItem) {
       })
     } catch (error) {
       console.error('文件下载失败:', error)
-      alert('文件下载失败，请重试')
+      alert(t('file.downloadFailed'))
     } finally {
       loading.value = false
     }
@@ -592,7 +593,7 @@ async function refreshMineObjList() {
   position: absolute;
   background: white;
   top: 100%;
-  width: 160px;
+  width: 180px;
   left: 0;
   // background: white;
   border: 1px solid #d9d9d9;

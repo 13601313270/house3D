@@ -1,19 +1,19 @@
 <template>
   <div class="aiPic">
     <div class="header">
-      <button class="cancel-btn" @click="handleClose">返回工作台</button>
-      <div class="title">AI渲染</div>
+      <button class="cancel-btn" @click="handleClose">{{ t('aipic.back') }}</button>
+      <div class="title">{{ t('aipic.title') }}</div>
       <div style="flex: 1;"></div>
       <div class="userInfo" v-if="store.state.main.userInfo">
         <img src="money.png" />
-        <span>{{ store.state.main.userInfo.money }}积分</span>
+        <span>{{ t('aipic.credits', store.state.main.userInfo.money) }}</span>
       </div>
       <button class="close-btn" @click="handleClose">&times;</button>
     </div>
 
     <div class="content">
       <div class="image-section">
-        <div class="section-title">参考图片（最多3张）</div>
+        <div class="section-title">{{ t('aipic.refImages') }}</div>
         <div class="image-list">
           <div class="image-item">
             <img v-if="initialImage" :src="initialImage" alt="" class="preview-img" />
@@ -22,19 +22,19 @@
                 <path d="M12 5v14M5 12h14" stroke-linecap="round" />
               </svg>
             </div>
-            <span class="imgIndex">图1</span>
+            <span class="imgIndex">{{ t('aipic.imageNo', 1) }}</span>
           </div>
           <div v-for="(image, index) in images" :key="index" class="image-item" :class="{ 'empty': !image }"
             @click="handleImageClick(index)">
             <div v-if="image" style="height: 100%;">
               <img :src="image" alt="" class="preview-img" />
-              <span class="imgIndex">{{ `图${index + 2}` }}</span>
+              <span class="imgIndex">{{ t('aipic.imageNo', index + 2) }}</span>
             </div>
             <div v-else class="upload-hint">
               <svg class="plus-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M12 5v14M5 12h14" stroke-linecap="round" />
               </svg>
-              <span class="imgIndex">{{ `图${index + 2}` }}</span>
+              <span class="imgIndex">{{ t('aipic.imageNo', index + 2) }}</span>
             </div>
             <button v-if="image" class="delete-btn" @click.stop="handleDeleteImage(index)">
               <img src="@/assets/close.svg" alt="删除" />
@@ -45,17 +45,17 @@
       </div>
 
       <div class="prompt-section">
-        <div class="section-title">提示词</div>
-        <textarea v-model="prompt" class="prompt-input" placeholder="请输入描述图片内容的提示词..." rows="4"></textarea>
+        <div class="section-title">{{ t('aipic.prompt') }}</div>
+        <textarea v-model="prompt" class="prompt-input" :placeholder="t('aipic.promptPlaceholder')" rows="4"></textarea>
       </div>
       <div class="templates-section">
-        <div class="section-title">提示词模板</div>
+        <div class="section-title">{{ t('aipic.templates') }}</div>
         <div class="templates-list">
           <div v-for="(template, index) in promptTemplates" :key="index" class="template-item"
             @click="applyTemplate(template)">
             <img :src="template.image" :alt="template.name" class="template-image" />
             <div class="template-info">
-              <div class="template-name">{{ template.name }}</div>
+              <div class="template-name">{{ tTemplate(template.name) }}</div>
               <!-- <div class="template-prompt">{{ template.prompt }}</div> -->
             </div>
           </div>
@@ -64,17 +64,17 @@
 
       <div class="action-section">
         <div class="generate-btn" :disabled="isGenerating || !initialImage || !prompt" @click="handleGenerate">
-          <div v-if="isGenerating" class="loading-text">生成中...</div>
+          <div v-if="isGenerating" class="loading-text">{{ t('aipic.generating') }}</div>
           <div v-else style="display: flex; align-items: center;">
-            <span>生成图片&nbsp;（</span>
+            <span>{{ t('aipic.generate') }}</span>
             <img src="money.png" />
-            <span>6积分）</span>
+            <span>{{ t('aipic.cost') }}</span>
           </div>
         </div>
       </div>
 
       <div v-if="generatedImage" class="result-section">
-        <div class="section-title">生成结果</div>
+        <div class="section-title">{{ t('aipic.result') }}</div>
         <div class="result-container">
           <img :src="generatedImage" alt="生成的图片" class="result-img" />
           <button class="download-btn" @click="handleDownload">
@@ -83,7 +83,7 @@
               <polyline points="7 10 12 15 17 10" stroke-linecap="round" stroke-linejoin="round" />
               <line x1="12" y1="15" x2="12" y2="3" stroke-linecap="round" />
             </svg>
-            下载
+            {{ t('aipic.download') }}
           </button>
         </div>
       </div>
@@ -98,6 +98,24 @@ import { Store } from '@/store';
 import message from '@/utils/message';
 import request from '@/utils/request';
 import { startLoading, stopLoading } from '@/utils/loadingIcon';
+import { t, lang } from '@/i18n';
+
+// 模板名称翻译：以中文名为 key 映射到 i18n key
+const templateNameKeys: Record<string, string> = {
+  '超真实': 'aipic.template.realistic',
+  '吉卜力风': 'aipic.template.ghibli',
+  '动漫': 'aipic.template.anime',
+  'Pixar 3D': 'aipic.template.pixar',
+  '游戏CG': 'aipic.template.gamecg',
+  '油画': 'aipic.template.oil',
+  '国风': 'aipic.template.chinese',
+  '儿童绘本': 'aipic.template.storybook',
+}
+function tTemplate(name: string): string {
+  if (lang.value === 'zh') return name
+  const key = templateNameKeys[name]
+  return key ? t(key) : name
+}
 
 type qwenImageEditRes = {
   output: {
@@ -228,7 +246,7 @@ const handleDeleteImage = (index: number) => {
 const handleGenerate = async () => {
   if (!props.initialImage || isGenerating.value) return
   if (!prompt.value.trim()) {
-    alert('请输入提示词')
+    alert(t('aipic.enterPrompt'))
     return
   }
 
@@ -257,7 +275,7 @@ const handleGenerate = async () => {
     if (response.status === 200) {
       if (response.data.output) {
         generatedImage.value = response.data.output.choices[0].message.content[0].image
-        message.success('生成图片成功', {
+        message.success(t('aipic.success'), {
           duration: 6000,
         })
         request.get('/video/user/info').then(res => {
@@ -268,13 +286,13 @@ const handleGenerate = async () => {
         })
       } else {
         // @ts-ignore
-        message.error(response.data.statusText || '生成图片失败', {
+        message.error(response.data.statusText || t('aipic.fail'), {
           duration: 10000,
         })
         return
       }
     } else {
-      message.error(response.statusText || '生成失败')
+      message.error(response.statusText || t('aipic.fail'))
     }
   } catch (error: any) {
     console.error('生成图片失败-------:', error)
@@ -283,7 +301,7 @@ const handleGenerate = async () => {
       return
     } else {
       console.error('生成图片失败:', error.response)
-      alert('生成图片失败，请重试')
+      alert(t('aipic.retryLater'))
     }
   } finally {
     isGenerating.value = false

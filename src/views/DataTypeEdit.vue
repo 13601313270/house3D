@@ -24,13 +24,13 @@
           <div class="imgOuting">
             <img src="../assets/Empty.png" alt="noMaterial" class="img" style="width: 50px;background-color: white;" />
           </div>
-          <div class="name">无</div>
+          <div class="name">{{ t('common.none') }}</div>
         </div>
         <div v-for="item2 in allMaterial.filter(item2 => modelValue === item2.id)" :key="item2.id" class="materialItem">
           <div class="imgOuting">
             <img :src="item2.img" alt="material" class="img" />
           </div>
-          <div class="name">{{ item2.name }}</div>
+          <div class="name">{{ tLabel(item2.name) }}</div>
         </div>
       </div>
     </div>
@@ -54,20 +54,20 @@
     </div>
     <div class="stitchImage" v-else-if="item.dataType === 'stitchImage'">
       <img v-if="modelValue.viewImg" :src="modelValue.viewImg" class="previewImg" alt="stitchImage" />
-      <div v-else class="empty">无纹理</div>
-      <button class="editBtn" @click="groundTextureEditorShow = true, groundTextureEditorPropId = item.id">编辑纹理</button>
+      <div v-else class="empty">{{ t('common.noTexture') }}</div>
+      <button class="editBtn" @click="groundTextureEditorShow = true, groundTextureEditorPropId = item.id">{{ t('common.editTexture') }}</button>
     </div>
     <div class="allMaterialPanel" v-if="allMaterialShow && allMaterialShowPropId"
       @click.self="allMaterialShow = false, allMaterialShowPropId = undefined">
       <div class="allMaterialPanelInner">
-        <div class="title">所有材质</div>
+        <div class="title">{{ t('common.allMaterials') }}</div>
         <div class="list">
           <div class="materialItem" @click="updateEditPropInputNumberInfo(null), allMaterialShow = false">
             <div class="imgOuting">
               <img src="../assets/Empty.png" alt="noMaterial" class="img"
                 style="width: 50px;background-color: white;" />
             </div>
-            <div class="name">无</div>
+            <div class="name">{{ t('common.none') }}</div>
           </div>
           <div v-for="item2 in allMaterial" :key="item2.id" class="materialItem"
             :class="{ active: modelValue === item2.id }"
@@ -75,7 +75,7 @@
             <div class="imgOuting">
               <img :src="item2.img" alt="material" class="img" />
             </div>
-            <div class="name">{{ item2.name }}</div>
+            <div class="name">{{ tLabel(item2.name) }}</div>
           </div>
         </div>
       </div>
@@ -95,6 +95,7 @@ import GroundTextureEditor from '@/components/GroundTextureEditor/index.vue'
 import AngleEdit from '@/components/angleEdit.vue'
 import ChildrenEdit from '@/components/childrenEdit.vue';
 import { loadImage } from '@/utils/imageCache'
+import { t, tLabel } from '@/i18n'
 
 defineProps<{
   item: editItem,

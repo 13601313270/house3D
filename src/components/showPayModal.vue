@@ -2,33 +2,33 @@
   <teleport to="#teleport">
     <div class="showPayModal" @click.self="closeModal">
       <div class="showPayModalInner">
-        <div class="title">-</div>
+        <div class="title">{{ t('pay.title') }}</div>
         <div v-if="checkStatus === 'checking'" class="checkingState">
           <div class="spinner"></div>
-          <div class="checkingText">正在验证支付状态...</div>
+          <div class="checkingText">{{ t('pay.checking') }}</div>
         </div>
         <div v-else-if="checkStatus === 'unpaid'" class="unpaidState">
           <div class="unpaidIcon"></div>
-          <div class="unpaidText">支付未完成</div>
-          <button class="retryButton" @click="checkPaymentStatus">重新验证</button>
-          <button class="cancelButton" @click="closeModal">取消</button>
+          <div class="unpaidText">{{ t('pay.unpaid') }}</div>
+          <button class="retryButton" @click="checkPaymentStatus">{{ t('pay.retry') }}</button>
+          <button class="cancelButton" @click="closeModal">{{ t('pay.cancel') }}</button>
         </div>
         <div v-else>
           <div class="amountSection">
-            <div class="sectionTitle">选择金额</div>
+            <div class="sectionTitle">{{ t('pay.selectAmount') }}</div>
             <div class="amountList">
               <div v-for="amount in amounts" :key="amount" class="amountItem"
                 :class="{ active: selectedAmount === amount }" @click="selectedAmount = amount">
                 <div class="amountText">¥ {{ amount }}</div>
                 <div class="coinInfo">
                   <img src="/money.png" class="coinIcon" />
-                  <span class="coinText">{{ amount * 10 }}积分</span>
+                  <span class="coinText">{{ amount * 10 }}{{ t('pay.credits') }}</span>
                 </div>
               </div>
             </div>
           </div>
           <div class="paySection">
-            <div class="sectionTitle">支付方式</div>
+            <div class="sectionTitle">{{ t('pay.payMethod') }}</div>
             <div class="payList">
               <div class="payItem" :class="{ active: selectedPay === 'alipay' }" @click="handlePay('alipay')">
                 <div class="payIcon">
@@ -50,6 +50,7 @@ import message from '@/utils/message';
 import request from '@/utils/request';
 import { onUnmounted, ref } from 'vue'
 import { useStore } from 'vuex';
+import { t } from '@/i18n';
 
 const store = useStore<Store>()
 
@@ -93,7 +94,7 @@ const checkPaymentStatus = async () => {
     console.log('checkPaymentStatus data', data)
 
     if (data && data.status && data.isPay) {
-      message.success('支付成功！')
+      message.success(t('pay.success'))
       emit('paySuccess')
     } else {
       checkStatus.value = 'unpaid'

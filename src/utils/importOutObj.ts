@@ -1,26 +1,27 @@
 import * as THREE from 'three'
 import processUploadedFile from './processUploadedFile'
 import { sleep } from './sleep'
+import { t } from '@/i18n'
 
 async function importOutObj(file: File, callback: (object: THREE.Group | THREE.Mesh, file: File, type: string, scaleFactor: number, position: THREE.Vector3) => Promise<void>) {
   const fileName = file.name.toLowerCase()
 
   // 检查文件类型
   if (!fileName.endsWith('.fbx') && !fileName.endsWith('.obj') && !fileName.endsWith('.glb') && !fileName.endsWith('.zip')) {
-    alert('请上传 FBX、OBJ 或 GLB 格式的文件')
+    alert(t('file.formatUnsupported'))
     return
   }
 
   // 检查文件大小
   if (file.size === 0) {
-    alert(`文件 "${file.name}" 大小为 0 字节，请检查文件是否损坏或为空`)
+    alert(t('file.emptyFile', file.name))
     return
   }
 
   // 检查文件大小限制
   const maxSize = 300
   if (file.size > maxSize * 1024 * 1024) {
-    alert(`文件 "${file.name}" 太大（${(file.size / 1024 / 1024).toFixed(2)} MB），请上传小于 ${maxSize}MB 的文件`)
+    alert(t('file.tooLarge', file.name, (file.size / 1024 / 1024).toFixed(2), String(maxSize)))
     return
   }
 
@@ -84,7 +85,7 @@ async function importOutObj(file: File, callback: (object: THREE.Group | THREE.M
     })
   } catch (error) {
     console.error('文件处理失败:', error)
-    alert('文件处理失败，请重试')
+    alert(t('file.processFailed'))
   }
 }
 export default importOutObj

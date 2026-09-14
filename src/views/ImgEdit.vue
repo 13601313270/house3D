@@ -13,13 +13,13 @@
     </div>
     <div class="imgEditContainer">
       <select class="typeSelect" v-model="typeSelect" @change="changeTypeSelect">
-        <option :value="1">网址</option>
-        <option :value="2">选择文件</option>
+        <option :value="1">{{ t('imgEdit.url') }}</option>
+        <option :value="2">{{ t('imgEdit.file') }}</option>
       </select>
       <input class="urlInput" v-if="typeSelect === 1" :value="modelValue" @change="updateEditPropInputInfo($event)"
-        type="text" placeholder="请输入网址" />
+        type="text" :placeholder="t('imgEdit.urlPlaceholder')" />
       <div v-else class="fileInput" @click="fileInput!.click()">
-        上传文件
+        {{ t('imgEdit.upload') }}
       </div>
       <input style="display: none;" ref="fileInput" type="file" accept="image/*" @change="handleFileChange" />
     </div>
@@ -29,6 +29,7 @@
 import { computed, onMounted, ref } from 'vue'
 import { editItem } from '@/utils/editItem';
 import { importImgFileHead, ImportImgType } from '@/entities/allObjs';
+import { t } from '@/i18n';
 
 const typeSelect = ref(1)
 const fileInput = ref<HTMLInputElement>()

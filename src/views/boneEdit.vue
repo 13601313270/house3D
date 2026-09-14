@@ -3,17 +3,17 @@
     <div class="topPanel">
       <div class="postList">
         <div v-for="item in allDemoList.slice(0, 6)" :key="item.file" class="item" @click="playAnimation(item)">
-          <div class="name">{{ item.name }}</div>
+          <div class="name">{{ tLabel(item.name) }}</div>
           <img :src="item.img" alt="animation" />
         </div>
       </div>
       <div class="postList">
         <div v-for="item in allDemoList.slice(6, 11)" :key="item.file" class="item" @click="playAnimation(item)">
-          <div class="name">{{ item.name }}</div>
+          <div class="name">{{ tLabel(item.name) }}</div>
           <img :src="item.img" alt="animation" />
         </div>
         <div class="moreBtn" @click="showModelPanel">
-          更多
+          {{ t('bone.more') }}
         </div>
       </div>
     </div>
@@ -35,58 +35,58 @@
         </div>
         <div class="optionsSection">
           <div class="optionGroup">
-            <div class="optionGroupTitle">导出内容</div>
+            <div class="optionGroupTitle">{{ t('bone.exportContent') }}</div>
             <div class="optionRow">
               <label class="radioOption" :class="{ active: exportContent === 'currentFrame' }">
                 <input type="radio" v-model="exportContent" value="currentFrame" hidden />
                 <span class="radioDot"></span>
-                <span>当前帧</span>
+                <span>{{ t('bone.currentFrame') }}</span>
               </label>
               <label class="radioOption" v-if="editMode === 'animation'"
                 :class="{ active: exportContent === 'wholeAnimation' }">
                 <input type="radio" v-model="exportContent" value="wholeAnimation" hidden />
                 <span class="radioDot"></span>
-                <span>整个动画</span>
+                <span>{{ t('bone.wholeAnimation') }}</span>
               </label>
             </div>
           </div>
           <div class="optionGroup">
-            <div class="optionGroupTitle">应用范围</div>
+            <div class="optionGroupTitle">{{ t('bone.applyScope') }}</div>
             <div class="optionRow">
               <label class="radioOption" :class="{ active: applyScope === 'fullBody' }">
                 <input type="radio" v-model="applyScope" value="fullBody" hidden />
                 <span class="radioDot"></span>
-                <span>全身</span>
+                <span>{{ t('bone.fullBody') }}</span>
               </label>
               <label class="radioOption" :class="{ active: applyScope === 'upperBody' }">
                 <input type="radio" v-model="applyScope" value="upperBody" hidden />
                 <span class="radioDot"></span>
-                <span>上半身</span>
+                <span>{{ t('bone.upperBody') }}</span>
               </label>
               <label class="radioOption" :class="{ active: applyScope === 'lowerBody' }">
                 <input type="radio" v-model="applyScope" value="lowerBody" hidden />
                 <span class="radioDot"></span>
-                <span>下半身</span>
+                <span>{{ t('bone.lowerBody') }}</span>
               </label>
               <label class="radioOption" :class="{ active: applyScope === 'head' }">
                 <input type="radio" v-model="applyScope" value="head" hidden />
                 <span class="radioDot"></span>
-                <span>头部</span>
+                <span>{{ t('bone.head') }}</span>
               </label>
               <label class="radioOption" :class="{ active: applyScope === 'leftArm' }">
                 <input type="radio" v-model="applyScope" value="leftArm" hidden />
                 <span class="radioDot"></span>
-                <span>左臂</span>
+                <span>{{ t('bone.leftArm') }}</span>
               </label>
               <label class="radioOption" :class="{ active: applyScope === 'rightArm' }">
                 <input type="radio" v-model="applyScope" value="rightArm" hidden />
                 <span class="radioDot"></span>
-                <span>右臂</span>
+                <span>{{ t('bone.rightArm') }}</span>
               </label>
             </div>
           </div>
         </div>
-        <div class="applyBtn" @click="handleApply">应用</div>
+        <div class="applyBtn" @click="handleApply">{{ t('bone.apply') }}</div>
       </div>
       <div v-if="loading" class="loading">
         <img src="../assets/loading_white.svg" alt="loading" />
@@ -137,13 +137,13 @@
   <div v-if="showModal" class="modal-overlay" @click.self="showModal = false">
     <div class="modal-content">
       <div class="modal-header">
-        <span class="modal-title">所有动画</span>
+        <span class="modal-title">{{ t('bone.allAnimations') }}</span>
         <span class="modal-close" @click="showModal = false">×</span>
       </div>
       <div class="modal-body">
         <div v-for="item in allDemoList" :key="item.file" class="modal-item" @click="handleModalItemClick(item)">
           <img :src="item.img" alt="animation" />
-          <span class="modal-item-name">{{ item.name }}</span>
+          <span class="modal-item-name">{{ tLabel(item.name) }}</span>
         </div>
       </div>
     </div>
@@ -165,6 +165,7 @@ import allPeopleAnimate, { AnimationItem } from '@/utils/allPeopleAnimate'
 import { ApplyScope, getBoneFilter } from '@/utils/peopleBones'
 import { EditMode, Store } from '@/store'
 import { useStore } from 'vuex'
+import { t, tLabel } from '@/i18n'
 
 const store = useStore<Store>()
 
@@ -615,7 +616,7 @@ function playAnimation(item: AnimationItem) {
   ]).then(() => {
     loading.value = false
   }).catch(() => {
-    message.error('播放动画失败')
+    message.error(t('bone.playFailed'))
     loading.value = false
   })
 }

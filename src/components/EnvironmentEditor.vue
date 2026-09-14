@@ -1,16 +1,16 @@
 <template>
-  <EditPanel title="环境设置">
+  <EditPanel :title="t('env.title')">
     <div class="content">
       <div class="configItemList" v-if="environmentValue">
         <div class="configItem" v-for="item in editPropConfigInfo" :key="item.id">
           <div class="label title" v-if="item.dataType === 'title'">
-            {{ item.label }}
+            {{ tLabel(item.label) }}
           </div>
           <div class="label" v-else-if="'label' in item">
-            {{ item.label }}
+            {{ tLabel(item.label) }}
           </div>
           <div v-if="item.dataType === 'button'" class="edit">
-            <button class="actionButton" @click="item.value">{{ item.label }}</button>
+            <button class="actionButton" @click="item.value">{{ tLabel(item.label) }}</button>
           </div>
           <DataTypeEdit v-else-if="item.dataType !== 'title'" :item="item"
             :modelValue="environmentValue[item.id]" :record="environmentValue" @update:modelValue="handleUpdate(item.id, $event)" />
@@ -25,6 +25,7 @@ import EditPanel from './editPanel.vue'
 import DataTypeEdit from '@/views/DataTypeEdit.vue'
 import { editItem } from '@/utils/editItem';
 import { EnvironmentConfig } from '@/world/world.js';
+import { t, tLabel } from '@/i18n';
 
 const environmentValue = ref<{
   [key in string]: number | string | boolean

@@ -4,24 +4,24 @@
     <!-- 头部控制栏：左侧标题+时间显示，右侧控制按钮（停止/播放/倍速/缩放） -->
     <div class="timeline-header">
       <div class="header-left">
-        <span class="title">时间轴</span>
+        <span class="title">{{ t('timeline.title') }}</span>
         <span class="time-display">{{ formatTime(currentTime) }} / {{ formatTime(effectiveDuration) }}</span>
       </div>
       <div class="header-right">
         <div class="control-btn" @click="stop">⏹</div>
         <div class="control-btn" @click="togglePlay">{{ isPlaying ? '⏸' : '▶' }}</div>
         <div class="control-btn" :class="{ recording: isRecording }" @click="recordVideoPlay">
-          <span class="rec-icon" :class="isRecording ? 'stop' : 'record'"></span>{{ isRecording ? '停止' : '录制' }}
+          <span class="rec-icon" :class="isRecording ? 'stop' : 'record'"></span>{{ isRecording ? t('timeline.stop') : t('timeline.record') }}
         </div>
         <input type="range" class="speed-control" v-model="playbackSpeed" min="0.1" max="3" step="0.1" />
-        <span class="speed-label">{{ playbackSpeed }}倍速</span>
+        <span class="speed-label">{{ playbackSpeed }}{{ t('timeline.speed') }}</span>
         <div class="control-btn" @click="zoomIn">+</div>
         <div class="control-btn" @click="zoomOut">−</div>
         <span class="speed-label">{{ Math.round(zoomLevel * 100) }}%</span>
       </div>
     </div>
 
-    <div class="timeline-ruler-leftPanel">对象</div>
+    <div class="timeline-ruler-leftPanel">{{ t('timeline.object') }}</div>
     <!-- 时间标尺：显示主/次刻度，宽度随缩放级别变化，与内容宽度保持一致 -->
     <div class="timeline-ruler" :style="{ marginLeft: (scrollLeft * -1 + moreLeft + 4) + 'px' }" ref="timelineRuler"
       @scroll.prevent.stop>
@@ -45,13 +45,13 @@
               class="timeline-row camera">
               <div class="track-header-bar">
                 <!-- <img class="typeImg"> -->
-                <span class="clip-name">激活摄像机</span>
+                <span class="clip-name">{{ t('timeline.activeCamera') }}</span>
               </div>
             </div>
             <div v-for="(segment, rowIndex) in rowsByIndex" :key="`time-row-${rowIndex}`" class="timeline-row">
               <div class="track-header-bar" @click="toggleFold(segment)">
                 <img class="typeImg" v-if="segment.typeImg" :src="segment.typeImg" alt="">
-                <span class="clip-name">{{ segment.typeName }}</span>
+                <span class="clip-name">{{ tSegmentName(segment) }}</span>
                 <img class="location" src="@/assets/location.svg" @click.stop.prevent="findObjInMap(segment)" />
                 <div style="flex-grow: 1;"></div>
                 <img class="fold" :class="{ rotated: segment.clip.isFold }" src="@/assets/fold.svg"
@@ -76,7 +76,7 @@
               class="timeline-row camera">
               <div class="head">
                 <div class="activeCameraPanel" v-for="item in activeCameraIndexTimeListDataModify()"
-                  :style="{ width: item.width, left: item.left }"><span class="bold">{{ item.index + 1 }}</span>号摄像机
+                  :style="{ width: item.width, left: item.left }"><span class="bold">{{ t('timeline.cameraNo', item.index + 1) }}</span>
                 </div>
               </div>
             </div>
@@ -143,7 +143,7 @@
               <span class="locked-big-icon">
                 <img src="@/assets/lock.svg" />
               </span>
-              <span class="locked-message">升级VIP解锁更长时长</span>
+              <span class="locked-message">{{ t('timeline.upgradeVip') }}</span>
             </div>
           </div>
         </div>
@@ -170,6 +170,7 @@ import evaluateTrack from '@/utils/evaluateTrack';
 import getPeopleAnimateOneTime from '@/utils/getPeopleAnimateOneTime';
 import { handleLocation } from '@/utils/handleLocation';
 import { allPluginByKey } from '@/entities/index';
+import { t, tPluginName, tLabel } from '@/i18n';
 
 interface ClipSegment {
   clip: ObjAllColumnData
@@ -327,6 +328,11 @@ const activeCameraIndexTimeList = ref<{
   time: number,
 }[]>([])
 const rowsByIndex = ref<ClipSegment[]>([])
+
+// tSegmentName：将 clip 的对象类型名翻译到当前语言，回退到实例原始名称
+function tSegmentName(segment: ClipSegment): string {
+  return tPluginName(segment.type, segment.typeName)
+}
 
 // formatTime：秒 → "08:30"（秒:厘秒），保留两位小数用于紧凑显示
 function formatTime(time: number): string {
@@ -491,7 +497,7 @@ function toggleClipContentFrame(event: MouseEvent, segment: ClipSegment, keyTime
   })
   showContextMenu(event, [
     {
-      title: '删除节点',
+      title: t('timeline.deleteNode'),
       icon: '🗑',
       danger: true,
       callback: () => {
@@ -757,7 +763,7 @@ function stopRecordingAndExport() {
         isRecording.value = false
 
         if (recordedBlob.size < 1024) {
-          message.error('录制内容为空，请重试')
+          message.error(t('timeline.recordEmpty'))
           return
         }
 
@@ -766,10 +772,10 @@ function stopRecordingAndExport() {
         const sizeMB = (recordedBlob.size / 1024 / 1024).toFixed(2)
         console.log(`[stopRecordingAndExport] 直接导出 ${ext.toUpperCase()}，编码 =`, recorderMime, `大小 = ${sizeMB} MB`)
         downloadBlob(recordedBlob, `timeline-recording-${timestamp}.${ext}`)
-        message.success(`录制完成（${ext.toUpperCase()}），视频大小：${sizeMB} MB`)
+        message.success(t('timeline.recordDoneInfo', ext.toUpperCase(), sizeMB))
       } catch (e) {
         console.error('导出录制视频失败', e)
-        message.error('导出录制视频失败')
+        message.error(t('timeline.recordFail'))
       } finally {
         mediaRecorder = null
         recordedChunks = []
@@ -788,11 +794,11 @@ function recordVideoPlay() {
   // @ts-ignore
   const canvas: HTMLCanvasElement = window.get3DCanvas();
   if (!canvas) {
-    message.error('必须设置至少一个摄像机才可以录制')
+    message.error(t('timeline.noCamera'))
     return;
   }
   if (effectiveDuration.value <= 0) {
-    message.error('时间轴没有可录制的内容')
+    message.error(t('timeline.noRecordContent'))
     return;
   }
 
@@ -844,7 +850,7 @@ function recordVideoPlay() {
     )
   } catch (e) {
     console.error('创建 MediaRecorder 失败', e)
-    message.error('当前浏览器不支持视频录制')
+    message.error(t('timeline.browserNoRecord'))
     return
   }
 
@@ -854,7 +860,7 @@ function recordVideoPlay() {
 
   mediaRecorder.onerror = (e) => {
     console.error('MediaRecorder 出错', e)
-    message.error('录制过程出错')
+    message.error(t('timeline.recordError'))
     stopRecordingAndExport()
   }
 
@@ -927,7 +933,7 @@ function playLoop() {
       cancelAnimationFrame(animationFrameId)
       animationFrameId = null
     }
-    message.warning('升级VIP解锁更长时长播放功能')
+    message.warning(t('timeline.upgradeVipPlay'))
     return
   }
   const turnToTime = timelineState.currentTime + steppedTime
@@ -1137,7 +1143,7 @@ function getName(entityId: string, type: string) {
   if (entity) {
     const meta = entity.getDataMeta();
     const name: string = meta[type]
-    if (name) return name
+    if (name) return tLabel(name)
   }
   return type
 }

@@ -1,24 +1,24 @@
 <template>
   <div class="selectInfo" v-if="enums.find(v => v.id === modelValue)">
     <img class="img" :src="enums.find(v => v.id === modelValue)!.img" alt="" @click="showAllCornerTypePanel = true">
-    <div class="desc">{{enums.find(v => v.id === modelValue)!.name}}</div>
+    <div class="desc">{{ tLabel(enums.find(v => v.id === modelValue)!.name) }}</div>
   </div>
   <div class="selectInfo" v-else>
     <img class="img" src="../assets/Empty.png" alt="" @click="showAllCornerTypePanel = true">
-    <div class="desc">请选择类型</div>
+    <div class="desc">{{ t('common.selectType') }}</div>
   </div>
   <teleport to="#teleport" v-if="showAllCornerTypePanel">
     <div class="cornerTypePanel" @click.self="showAllCornerTypePanel = false">
       <div class="cornerTypePanelInner">
         <div class="title">
-          所有类型
+          {{ t('common.allTypes') }}
         </div>
         <slot></slot>
         <div class="list">
           <div v-for="item in enums" :key="item.id" class="item" :class="{ active: modelValue === item.id }"
             @click="change(item.id)">
             <img class="img" :src="item.img" alt="">
-            <div class="desc">{{ item.name }}</div>
+            <div class="desc">{{ tLabel(item.name) }}</div>
           </div>
         </div>
       </div>
@@ -28,6 +28,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { editItem, enumItem } from '@/utils/editItem';
+import { t, tLabel } from '@/i18n';
 
 const showAllCornerTypePanel = ref(false)
 
