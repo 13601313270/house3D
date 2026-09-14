@@ -174,7 +174,7 @@ import { t, tPluginName, tLabel } from '@/i18n';
 
 interface ClipSegment {
   clip: ObjAllColumnData
-  typeName: string,
+  // typeName: string,
   type: string,
   startTime: number
   typeImg: string,
@@ -248,7 +248,7 @@ onMounted(() => {
       rows.push({
         clip,
         type: entity?.type || '',
-        typeName: entity?.name || '',
+        // typeName: entity?.name || '',
         typeImg: plugin?.previewImg || '',
         startTime: clip.startTime,
         endTime: clip.endTime,
@@ -331,7 +331,7 @@ const rowsByIndex = ref<ClipSegment[]>([])
 
 // tSegmentName：将 clip 的对象类型名翻译到当前语言，回退到实例原始名称
 function tSegmentName(segment: ClipSegment): string {
-  return tPluginName(segment.type, segment.typeName)
+  return tPluginName(segment.type)
 }
 
 // formatTime：秒 → "08:30"（秒:厘秒），保留两位小数用于紧凑显示

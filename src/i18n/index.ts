@@ -63,7 +63,7 @@ export function toggleLang() {
  * Translate a plugin (object) display name by its key.
  * Falls back to the original name if no mapping exists.
  */
-export function tPluginName(key: string, fallback: string): string {
+export function tPluginName(key: string): string {
   const plugin = allPluginByKey[key]
   console.log('plugin', plugin)
   if (lang.value === 'zh') {
