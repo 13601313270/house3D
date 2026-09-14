@@ -277,6 +277,10 @@ const en: Record<string, string> = {
   'vip.retry': 'Retry',
   'vip.cancel': 'Cancel',
   'vip.paySuccess': 'Pro purchase successful!',
+  'vip.planTitle.monthly': 'Monthly',
+  'vip.planTitle.yearly': 'Annual',
+  'vip.priceUnit.monthly': 'mo',
+  'vip.priceUnit.yearly': 'yr',
 
   // Buy Credits / Pay modal
   'pay.title': 'Buy Credits',

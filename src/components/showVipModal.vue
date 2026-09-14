@@ -24,11 +24,11 @@
               <div class="vipItem" :class="{ active: selectedVip === item.id, recommend: item.recommend }"
                 v-for="item in vipPrices" :key="item.id" @click="selectedVip = item.id">
                 <div class="recommendTag" v-if="item.recommend">{{ t('vip.recommend') }}</div>
-                <div class="vipBadge">{{ item.title }}</div>
+                <div class="vipBadge">{{ tPlanTitle(item) }}</div>
                 <div class="vipPrice">
                   <span class="currency">¥</span>
                   <span class="amount">{{ item.price }}</span>
-                  <span class="unit">/{{ item.priceUnit }}</span>
+                  <span class="unit">/{{ tPriceUnit(item.id, item.priceUnit) }}</span>
                 </div>
                 <div class="vipDesc">{{ t('vip.daysBenefits') }}<span class="number">{{ item.date }}</span>{{ t('vip.daysBenefits2') }}</div>
                 <div class="vipGiveMoney">
@@ -73,7 +73,47 @@ import request from '@/utils/request';
 import { onMounted, onUnmounted, ref } from 'vue'
 import { useStore } from 'vuex';
 import VipBenefits from './VipBenefits.vue';
-import { t } from '@/i18n';
+import { t, lang } from '@/i18n';
+
+/** Keyword-based fallback map used when id-based lookup misses */
+const TITLE_FALLBACK_MAP: Record<string, string> = {
+  '月': 'Monthly',
+  '年': 'Annual',
+}
+const UNIT_FALLBACK_MAP: Record<string, string> = {
+  '月': 'mo',
+  '年': 'yr',
+}
+function keywordFallback(source: string, map: Record<string, string>) {
+  for (const key in map) {
+    if (source.includes(key)) return map[key]
+  }
+  return source
+}
+
+/** Translate a backend-down vip plan badge by id, then by title keyword, fallback to original */
+function tPlanTitle(item: { id: string; title: string }) {
+  const key = 'vip.planTitle.' + item.id
+  const translated = t(key)
+  if (translated !== key) return translated
+  if (lang.value !== 'zh') {
+    const fallback = keywordFallback(item.title, TITLE_FALLBACK_MAP)
+    if (fallback !== item.title) return fallback
+  }
+  return item.title
+}
+
+/** Translate a backend-down price unit by id, then by unit keyword, fallback to original */
+function tPriceUnit(id: string, unit: string) {
+  const key = 'vip.priceUnit.' + id
+  const translated = t(key)
+  if (translated !== key) return translated
+  if (lang.value !== 'zh') {
+    const fallback = keywordFallback(unit, UNIT_FALLBACK_MAP)
+    if (fallback !== unit) return fallback
+  }
+  return unit
+}
 
 const store = useStore<Store>()
 

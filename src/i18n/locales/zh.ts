@@ -277,6 +277,10 @@ const zh: Record<string, string> = {
   'vip.retry': '重新验证',
   'vip.cancel': '取消',
   'vip.paySuccess': '专业版权益购买成功！',
+  'vip.planTitle.monthly': '月卡',
+  'vip.planTitle.yearly': '年卡',
+  'vip.priceUnit.monthly': '月',
+  'vip.priceUnit.yearly': '年',
 
   // Buy Credits / Pay modal
   'pay.title': '购买积分',
