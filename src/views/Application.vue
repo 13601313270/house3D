@@ -51,10 +51,10 @@
       <div style="flex-grow: 1;"></div>
       <div class="toolbar right">
         <div class="toolbar-item">
-          <button type="button" class="lang-switch-btn" @click="toggleLang"
+          <div type="button" class="lang-switch-btn" @click="toggleLang"
             :title="lang === 'zh' ? 'Switch to English' : '切换到中文'">
             {{ lang === 'zh' ? 'EN' : '中' }}
-          </button>
+          </div>
         </div>
         <div class="toolbar-item" @mouseleave="activeToolsIndex = -1">
           <div v-if="store.state.main.userInfo">
@@ -78,7 +78,7 @@
                   <div class="vipInfo">
                     <div class="vipTitle">{{ t('user.vipTitle') }}</div>
                     <div class="vipSubtitle">{{ t('user.vipExpire') }}{{ formattedVipEndDate }}{{ t('user.vipRemaining')
-                      }}{{ vipRemainingDays }}{{ t('user.vipDays') }}</div>
+                    }}{{ vipRemainingDays }}{{ t('user.vipDays') }}</div>
                   </div>
                 </div>
               </div>
@@ -1780,6 +1780,7 @@ window.showLoginDialog = showLoginDialog;
   justify-content: space-between;
   background: #0B0D0F;
   padding-right: 8px;
+  height: 44px;
 
   .toolbar {
     display: flex;
@@ -2124,15 +2125,20 @@ button {
 
 .lang-switch-btn {
   padding: 4px 10px;
-  min-width: 40px;
+  min-width: 30px;
   font-size: 14px;
   font-weight: 600;
   color: #17181A;
-  background: #e4e6eb;
+  color: white;
+  border: solid 1px white;
+  text-align: center;
+  cursor: pointer;
+  border-radius: 4px;
+  margin-right: 4px;
 }
 
 .lang-switch-btn:hover {
-  background: #d9d9d9;
+  background: #d9d9d983;
 }
 
 .canvas-container {
