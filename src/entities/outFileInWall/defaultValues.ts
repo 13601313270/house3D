@@ -2,14 +2,12 @@ import { DefaultItem } from "../pluginType";
 import { OutFileInWallData } from "./index.d"
 
 export default function (): DefaultItem<OutFileInWallData>[] {
-  // @ts-ignore
-  const findObjInfo = window.ObjFiles[0];
   const data: OutFileInWallData = {
     wallPointId: -1,
     wallId: '',
     angle: 0,
     bottom: 0, // 不推荐使用，建议使用z轴高度
-    fileTypeId: findObjInfo.id,
+    fileTypeId: '',
     id: Date.now().toString(),
     bm: null,
     x: 0,
@@ -17,7 +15,7 @@ export default function (): DefaultItem<OutFileInWallData>[] {
     z: 40,
     color: '#0c7f25',
     isOuter: false,
-    canAngelZ: findObjInfo.canAngelZ,
+    canAngelZ: true,
   }
 
   const values: DefaultItem<OutFileInWallData>[] = [
