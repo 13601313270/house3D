@@ -30,7 +30,6 @@ const handleLoadedObject = async (object: THREE.Group | THREE.Mesh, file: File, 
   window.worldState.allImportFiles.push(customObjItem)
   const data: ImportFileData = {
     fileTypeId,
-    file,
     id: Date.now().toString(),
     x: position.x,
     y: position.y,

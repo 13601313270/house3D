@@ -3,15 +3,21 @@ import { HandelInfo } from '@/types/map2d'
 import { ImportFileData } from './index.d'
 import { editItem } from '@/utils/editItem'
 import { ModelFileEntity } from '@/types/modelFileEntity'
+import processUploadedFile from '@/utils/processUploadedFile'
 
 export class ImportFileEntity extends ModelFileEntity<ImportFileData> {
   type: string = 'importFile'
 
-  init(): Promise<void> {
+  async init(): Promise<void> {
     const { fileTypeId } = this.getData();
     const findObjInfo = window.worldState.allImportFiles.find(item => item.fileTypeId === fileTypeId)
     if (!findObjInfo) { return Promise.resolve() }
-    const mesh: THREE.Group | THREE.Mesh = findObjInfo.mesh.clone()
+    const mesh: THREE.Group | THREE.Mesh = await new Promise((resolve) => {
+      processUploadedFile(findObjInfo.file, (object: THREE.Group | THREE.Mesh) => {
+        findObjInfo.mesh = object
+        resolve(object)
+      })
+    })
     this.mesh = mesh
     return this.initBasicBoxDataAnd2DPreview()
   }

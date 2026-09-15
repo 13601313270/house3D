@@ -3,5 +3,4 @@ import { ModelFileData } from '@/types/modelFileEntity'
 
 export type ImportFileData = ModelFileData & {
   fileTypeId: string,
-  file?: File,
 }
