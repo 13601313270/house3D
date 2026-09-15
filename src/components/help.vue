@@ -56,7 +56,7 @@ const sendEmail = () => {
   .help-modal-content {
     background: white;
     border-radius: 8px;
-    width: 360px;
+    width: 380px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 
     .help-modal-header {
