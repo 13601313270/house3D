@@ -213,7 +213,7 @@
       </div>
     </div>
   </div>
-  <Login v-if="showLogin" @close="showLogin = false" @login="handleLogin" />
+  <Login v-if="showLogin" @close="handleLoginClose" @login="handleLogin" />
   <Help v-if="showHelpModal" @close="showHelpModal = false" />
   <div v-if="initWorldLoading" class="globalLoading">...</div>
   <teleport to="#teleport" v-if="insertAdding">
@@ -336,6 +336,7 @@ const timeHeight = ref(200)
 const isSplitting = ref(false)
 const isSplitTimeLine = ref(false)
 const showLogin = ref(false)
+const sceneInited = ref(false)
 const showDemos = ref(false)
 const onlyDemos = ref(false)
 const showHelpModal = ref(false)
@@ -667,7 +668,10 @@ window.get3DCanvas = () => {
 
 let scene2D: Canvas2DScene
 
-onMounted(async () => {
+let keyDownHandler: ((e: KeyboardEvent) => void) | null = null
+
+async function initScene() {
+  sceneInited.value = true
   try {
     const res = await axios.get('https://api.studying1v1.com/video/objectFileType')
     const data = res.data as Array<{
@@ -867,7 +871,7 @@ onMounted(async () => {
     }
   }
 
-  initUserInfo();
+  keyDownHandler = handleKeyDown
   window.addEventListener('mousemove', handleMouseMoveSplit)
   window.addEventListener('mouseup', handleMouseUpSplit)
   window.addEventListener('mousemove', handleMouseMoveTimeLine)
@@ -905,9 +909,20 @@ onMounted(async () => {
     canvas3DRefCenter.value?.reRender()
     canvas3DRef2.value?.reRender()
   })
+}
 
-  return () => {
-    window.removeEventListener('keydown', handleKeyDown)
+onMounted(async () => {
+  const isLoggedIn = await initUserInfo()
+  if (!isLoggedIn) {
+    showLogin.value = true
+    return
+  }
+  initScene()
+})
+
+onUnmounted(() => {
+  if (keyDownHandler) {
+    window.removeEventListener('keydown', keyDownHandler)
   }
 })
 
@@ -935,11 +950,6 @@ const triggerImportFile = () => {
 }
 
 const saveDrawing = async () => {
-  if (!store.state.main.userInfo) {
-    alert(t('scene.pleaseLogin'))
-    showLogin.value = true
-    return
-  }
   activeToolsIndex.value = -1
   await saveWorld(
     canvas2DSceneManage.list[0].panOffset,
@@ -1336,21 +1346,36 @@ const clearDrawing = () => {
   }
 }
 
-const handleLogin = (email: string, password: string) => {
+const handleLogin = async (email: string, password: string) => {
   console.log('Login attempt:', email, password)
   showLogin.value = false
-  initUserInfo();
+  const isLoggedIn = await initUserInfo()
+  if (isLoggedIn) {
+    initScene()
+  }
 }
 
-const initUserInfo = () => {
-  request.get('/video/user/info').then(res => {
+const handleLoginClose = () => {
+  if (sceneInited.value) {
+    showLogin.value = false
+  }
+  // 未登录时不允许关闭登录弹窗
+}
+
+const initUserInfo = async (): Promise<boolean> => {
+  try {
+    const res = await request.get('/video/user/info')
     console.log(res)
-    if (res.status === 200) {
+    if (res.status === 200 && res.data) {
       store.dispatch('main/setUserInfo', res.data)
+      return true
     }
-  }).catch(() => {
     store.dispatch('main/setUserInfo', null)
-  })
+    return false
+  } catch {
+    store.dispatch('main/setUserInfo', null)
+    return false
+  }
 }
 
 const dragSplitIndex = ref(0)
@@ -1543,6 +1568,8 @@ function logout() {
   if (confirm(t('scene.logoutConfirm'))) {
     store.dispatch('main/setUserInfo', null)
     localStorage.removeItem('token')
+    sceneInited.value = false
+    showLogin.value = true
   }
 }
 
