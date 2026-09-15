@@ -61,4 +61,40 @@ const handleLoadedObject = async (file: File, type: string, scaleFactor: number,
     }
   })();
 }
-export default handleLoadedObject
+
+const handleLoadedObjectByUrl = async (url: string, type: string, scaleFactor: number, position: THREE.Vector3) => {
+  const data: ImportFileData = {
+    url,
+    id: Date.now().toString(),
+    x: position.x,
+    y: position.y,
+    z: position.z,
+    angleY: 0,
+    scale: scaleFactor,
+  }
+  const importFileEntity = new ImportFileEntity(window.globalEditGroup, data)
+  if (importFileEntity) {
+    importFileEntity.init()
+    importFileEntity.reBuildBoundingBoxData()
+  }
+  if (window.globalEditGroup.insertTempObj) {
+    window.globalEditGroup.insertTempObj.beforeRemove()
+    window.globalEditGroup.insertTempObj = null
+  }
+  window.globalEditGroup.insertTempObj = importFileEntity
+  canvas2DSceneManage.renderPreview();
+  (() => {
+    if (window.globalEditGroup.insertTempObj instanceof PointEntityClass) {
+      window.scene2D.matchHandelObj = window.globalEditGroup.insertTempObj
+      window.scene2D.matchedHandelInfo = {
+        id: window.globalEditGroup.insertTempObj.getData().id, // 对象ID
+        type: window.globalEditGroup.insertTempObj.type,
+        index: 0,
+        dist: 0,
+      }
+      window.scene2D.matchHandelStartPoint = { x: 0, y: 0 }
+    }
+  })();
+}
+
+export { handleLoadedObject, handleLoadedObjectByUrl }

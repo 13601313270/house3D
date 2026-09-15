@@ -9,16 +9,31 @@ export class ImportFileEntity extends ModelFileEntity<ImportFileData> {
   type: string = 'importFile'
 
   async init(): Promise<void> {
-    const { fileTypeId } = this.getData();
-    const findObjInfo = window.worldState.allImportFiles.find(item => item.fileTypeId === fileTypeId)
-    if (!findObjInfo) { return Promise.resolve() }
-    const mesh: THREE.Group | THREE.Mesh = await new Promise((resolve) => {
-      processUploadedFile(findObjInfo.file, (object: THREE.Group | THREE.Mesh) => {
-        // findObjInfo.mesh = object
-        resolve(object)
+    const { fileTypeId, url } = this.getData();
+    if (fileTypeId) {
+      const findObjInfo = window.worldState.allImportFiles.find(item => item.fileTypeId === fileTypeId)
+      if (!findObjInfo) { return Promise.resolve() }
+      const mesh: THREE.Group | THREE.Mesh = await new Promise((resolve) => {
+        processUploadedFile(findObjInfo.file, (object: THREE.Group | THREE.Mesh) => {
+          // findObjInfo.mesh = object
+          resolve(object)
+        })
       })
-    })
-    this.mesh = mesh
+      this.mesh = mesh
+    } else if (url) {
+      const response = await fetch(url)
+      const blob = await response.blob()
+      const urlPath = new URL(url).pathname
+      const fileName = urlPath.split('/').pop() || 'model'
+      const file = new File([blob], fileName, { type: blob.type })
+
+      const mesh: THREE.Group | THREE.Mesh = await new Promise((resolve) => {
+        processUploadedFile(file, (object: THREE.Group | THREE.Mesh) => {
+          resolve(object)
+        })
+      })
+      this.mesh = mesh
+    }
     return this.initBasicBoxDataAnd2DPreview()
   }
 

@@ -315,7 +315,7 @@ import TimeLine from '@/components/timeLine.vue'
 import { TimelineData, timelineState } from '@/utils/timelineManage';
 import generateClipId from '@/utils/generateClipId';
 import ImportModelConfirm from '@/components/ImportModelConfirm.vue';
-import handleLoadedObject from '@/utils/handleLoadedObject';
+import { handleLoadedObject } from '@/utils/handleLoadedObject';
 // @ts-ignore
 import initDefaultData from '@/utils/initDefaultData.json'
 import Canvas2DScene from '@/utils/canvas2DScene';

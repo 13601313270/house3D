@@ -9,7 +9,8 @@
         <div class="guideBubbleDecor guideBubbleDecor1"></div>
         <div class="guideBubbleDecor guideBubbleDecor2"></div>
         <div class="guideBubbleArrow"></div>
-        <button class="guideBubbleClose" type="button" @click.stop="dismissAddGuide()" :title="t('guide.close')">×</button>
+        <button class="guideBubbleClose" type="button" @click.stop="dismissAddGuide()"
+          :title="t('guide.close')">×</button>
         <div class="guideBubbleContent">
           <div class="guideBubbleIcon">
             <svg viewBox="0 0 24 24" width="28" height="28" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -53,7 +54,9 @@
       </template>
       <div v-for="groupItem in allFileKeysGroup.filter(item => item.id !== 'other')" :key="groupItem.id"
         class="typeItemContent" :class="{ active: activeObjTypeId === groupItem.id }">
-        <div class="typeName" @mouseenter="mouseenterGroup(groupItem.id)">{{ tCategoryName(groupItem.id, groupItem.name) }}</div>
+        <div class="typeName" @mouseenter="mouseenterGroup(groupItem.id)">{{ tCategoryName(groupItem.id, groupItem.name)
+          }}
+        </div>
         <div class="childItemList"
           v-if="activeObjTypeId === groupItem.id && groupItem.child && groupItem.child.length > 0">
           <div v-for="item2 in groupItem.child" class="childItem" :key="item2"
@@ -72,7 +75,9 @@
       </div>
       <div class="splitLine"></div>
       <div class="typeItemContent" :class="{ active: activeObjTypeId === 'mineObjs' }">
-        <div class="typeName" @mouseenter="mouseEnterMineObjs($event)">{{ tCategoryName('mineObjs', t('sidebar.myAssets')) }}</div>
+        <div class="typeName" @mouseenter="mouseEnterMineObjs($event)">{{ tCategoryName('mineObjs',
+          t('sidebar.myAssets')) }}
+        </div>
       </div>
       <div class="splitLine"></div>
       <div>
@@ -166,7 +171,7 @@ import { OutFileData } from '@/entities/outFile/index.d'
 import { BaseEntityClass } from '@/types/baseEntity';
 import PluginType, { DefaultItem } from '@/entities/pluginType';
 import { BaseObjData } from '@/types/map2d';
-import handleLoadedObject from '@/utils/handleLoadedObject';
+import { handleLoadedObject, handleLoadedObjectByUrl } from '@/utils/handleLoadedObject';
 import importOutObj from '@/utils/importOutObj';
 import MaterialLibraryModal from './MaterialLibraryModal.vue';
 import message from '@/utils/message';
@@ -322,10 +327,13 @@ async function changeCurrentToolToImportFile(item: activeObjChildItem) {
     const urlPath = new URL(fileUrl).pathname
     const fileName = urlPath.split('/').pop() || 'model'
     const file = new File([blob], fileName, { type: blob.type })
-
+    const saveByFile = false; // 保存成文件，还是保存成url引用？
     await importOutObj(file, async (object, file, type, scaleFactor, position) => {
-      console.log('=========', type, scaleFactor, item.initScale || scaleFactor)
-      await handleLoadedObject(file, type, item.initScale || scaleFactor, position)
+      if (saveByFile) {
+        await handleLoadedObject(file, type, item.initScale || scaleFactor, position)
+      } else {
+        await handleLoadedObjectByUrl(fileUrl, type, item.initScale || scaleFactor, position)
+      }
       markGuideCompleted()
       activeObjChildList.value = []
       activePluginChildList.value = []

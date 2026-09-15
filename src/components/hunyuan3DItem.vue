@@ -19,7 +19,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import handleLoadedObject from "@/utils/handleLoadedObject";
+import { handleLoadedObject } from "@/utils/handleLoadedObject";
 import importOutObj from "@/utils/importOutObj";
 import message from "@/utils/message";
 import request from "@/utils/request";
