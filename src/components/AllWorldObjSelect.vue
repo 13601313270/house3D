@@ -15,7 +15,7 @@
           <div class="objInfo" @mouseenter="handleEnter(worldGroup, item.id)">
             <img class="icon" :src="item.icon" alt="previewImg" />
             <div class="nameInfo">
-              <span>{{ tName(item) }}</span>
+              <span>{{ tName(item.type) }}</span>
               <span class="tip" v-if="item.tip">({{ item.tip }})</span>
             </div>
             <div class="tools">
@@ -44,7 +44,7 @@
               @mouseenter="handleEnter(map.get(item.id), child.id)">
               <img class="icon" :src="child.icon" alt="previewImg" />
               <div class="nameInfo">
-                <span>{{ tName(child) }}</span>
+                <span>{{ tName(child.type) }}</span>
                 <span class="tip" v-if="child.tip">({{ child.tip }})</span>
               </div>
               <div class="tools">
@@ -85,9 +85,9 @@ import { handleEnter, handleLocation, Item } from '@/utils/handleLocation'
 import { lang, t } from '@/i18n'
 
 // 对象名翻译：若名称以该类型的默认名为前缀（如"立方体1"），替换前缀并保留后缀；自定义名称保持原样
-function tName(item: { name: string, type: string }): string {
+function tName(type: string): string {
   const safd = lang.value;
-  const plugin = allPluginByKey[item.type]
+  const plugin = allPluginByKey[type]
   if (safd === 'en') return plugin.enName
   if (safd === 'zh') return plugin.name
   return '';
@@ -112,7 +112,6 @@ function reloadObjList() {
     }
     const item: Item = {
       id,
-      name: v.name,
       type: v.type,
       isHidden: isHidden || false,
       isLocked: isLocked || false,
@@ -122,7 +121,6 @@ function reloadObjList() {
     }
     if (v instanceof GroupBaseEntity) {
       map.set(id, v)
-      item.name = v.getData().name
       item.children = v.children.map(child => {
         const { id, isLocked, isHidden, tip } = child.getData()
         let icon = allPluginByKey[child.type].previewImg || '';
@@ -131,7 +129,6 @@ function reloadObjList() {
         }
         return {
           id,
-          name: child.name,
           type: child.type,
           isHidden: isHidden || false,
           isLocked: isLocked || false,

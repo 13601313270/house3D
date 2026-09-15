@@ -6,7 +6,7 @@ import { LineEntityClass } from "@/types/lineEntity"
 
 export type Item = {
   id: string,
-  name: string,
+  // name: string,
   type: string,
   isHidden: boolean,
   isLocked: boolean,
