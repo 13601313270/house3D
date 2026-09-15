@@ -24,7 +24,7 @@ const handleLoadedObject = async (object: THREE.Group | THREE.Mesh, file: File, 
 
   const customObjItem: ImportFileType = {
     fileTypeId,
-    mesh: object,
+    // mesh: object,
     file,
   }
   window.worldState.allImportFiles.push(customObjItem)

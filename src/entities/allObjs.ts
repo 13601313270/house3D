@@ -30,7 +30,7 @@ type ObjOutputFileType = {
 
 type ImportFileType = {
   fileTypeId: string,
-  mesh: THREE.Group | THREE.Mesh,
+  // mesh: THREE.Group | THREE.Mesh,
   file: File
 }
 

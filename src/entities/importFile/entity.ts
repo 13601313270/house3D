@@ -14,7 +14,7 @@ export class ImportFileEntity extends ModelFileEntity<ImportFileData> {
     if (!findObjInfo) { return Promise.resolve() }
     const mesh: THREE.Group | THREE.Mesh = await new Promise((resolve) => {
       processUploadedFile(findObjInfo.file, (object: THREE.Group | THREE.Mesh) => {
-        findObjInfo.mesh = object
+        // findObjInfo.mesh = object
         resolve(object)
       })
     })

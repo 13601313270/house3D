@@ -1014,7 +1014,7 @@ const handleLoadProgramFileChange = async (e: Event) => {
     await processUploadedFile(file, (object: THREE.Group, file: File) => {
       const customObjItem: ImportFileType = {
         fileTypeId,
-        mesh: object,
+        // mesh: object,
         file,
       }
       window.worldState.allImportFiles.push(customObjItem)
