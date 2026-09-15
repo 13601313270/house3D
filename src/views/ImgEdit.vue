@@ -93,54 +93,60 @@ async function handleFileChange(event: Event) {
   } else {
     // @ts-ignore
     console.log('event.target.value', event.target.value)
-    // 如果不保存成文件，那么需要把文件上传上去转换成url
-    const mySpaceResponse = await service.get('/video/materialLibrary/mySpace');
-    if (mySpaceResponse.data.freeSpace < 0) {
-      const { freeSpace, usedSpace, totalSize } = mySpaceResponse.data
-      message.error(t('import.spaceInsufficient', formattedFileSize(freeSpace * 1000), formattedFileSize(usedSpace * 1000), formattedFileSize(totalSize * 1000)))
-      return;
-    }
-    const respnse = await service.get('/video/materialLibrary/getUploadKey');
-
-    if (respnse.data.result) {
-      const token: {
-        AccessKeyId: string,
-        AccessKeySecret: string,
-        SecurityToken: string,
-      } = respnse.data.data;
-      console.log(token)
-      const client = new OSS({
-        region: 'oss-cn-beijing', // 这里需要根据你的bucket实际region填写
-        accessKeyId: token.AccessKeyId,
-        accessKeySecret: token.AccessKeySecret,
-        stsToken: token.SecurityToken, // 注意这里参数名是 stsToken
-        bucket: 'video-user-obj', // 替换为你的bucket名称
-        secure: true, // 推荐使用HTTPS
-        timeout: 240000,// 120 秒
-      });
-
-      // 3. 计算文件MD5并执行上传
-      try {
-        const fileMD5 = await computeFileMD5(file)
-        const extension = getFileExtension(file.name)
-        const ossObjectName = fileMD5 + extension
-        // 使用 put 方法上传，第一个参数是存储在OSS中的对象名（MD5+扩展名），第二个参数是文件对象
-        const result = await client.put(ossObjectName, file, {
-          headers: {
-            'Content-Type': type, // 可选，设置正确的MIME类型
-          },
-        });
-        console.log('上传成功:', result);
-        if (result) {
-          const { url } = result;
-          console.log('上传成功:url', url);
-          emits('update:modelValue', url)
-        }
-      } catch (err) {
-        console.error('上传失败:', err);
+    // 如果不要保存成文件模式，那么需要把文件上传上去转换成url
+    try {
+      const mySpaceResponse = await service.get('/video/materialLibrary/mySpace');
+      if (mySpaceResponse.data.freeSpace < 0) {
+        const { freeSpace, usedSpace, totalSize } = mySpaceResponse.data
+        message.error(t('import.spaceInsufficient', formattedFileSize(freeSpace * 1000), formattedFileSize(usedSpace * 1000), formattedFileSize(totalSize * 1000)))
+        return;
       }
-    } else {
-      message.error(respnse.data.data)
+      const respnse = await service.get('/video/materialLibrary/getUploadKey');
+      if (respnse.data.result) {
+        const token: {
+          AccessKeyId: string,
+          AccessKeySecret: string,
+          SecurityToken: string,
+        } = respnse.data.data;
+        console.log(token)
+        const client = new OSS({
+          region: 'oss-cn-beijing', // 这里需要根据你的bucket实际region填写
+          accessKeyId: token.AccessKeyId,
+          accessKeySecret: token.AccessKeySecret,
+          stsToken: token.SecurityToken, // 注意这里参数名是 stsToken
+          bucket: 'video-user-obj', // 替换为你的bucket名称
+          secure: true, // 推荐使用HTTPS
+          timeout: 240000,// 120 秒
+        });
+
+        // 3. 计算文件MD5并执行上传
+        try {
+          const fileMD5 = await computeFileMD5(file)
+          const extension = getFileExtension(file.name)
+          const ossObjectName = fileMD5 + extension
+          // 使用 put 方法上传，第一个参数是存储在OSS中的对象名（MD5+扩展名），第二个参数是文件对象
+          const result = await client.put(ossObjectName, file, {
+            headers: {
+              'Content-Type': type, // 可选，设置正确的MIME类型
+            },
+          });
+          console.log('上传成功:', result);
+          if (result) {
+            const { url } = result;
+            console.log('上传成功:url', url);
+            emits('update:modelValue', url)
+          }
+        } catch (err) {
+          console.error('上传失败:', err);
+        }
+      } else {
+        message.error(respnse.data.data)
+      }
+    } catch (e) {
+      // @ts-ignore
+      if (e.response.status === 401) {
+        window.showLoginDialog()
+      }
     }
   }
 }
