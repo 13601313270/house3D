@@ -1,4 +1,5 @@
 import * as THREE from 'three'
+import md5 from 'md5';
 import { ImportFileType } from '@/entities/allObjs'
 import { ImportFileData } from '@/entities/importFile/index.d';
 import { ImportFileEntity } from '@/entities/importFile/entity';
@@ -6,8 +7,21 @@ import canvas2DSceneManage from './canvas2DSceneManage';
 import { PointEntityClass } from '@/types/pointEntity';
 
 const handleLoadedObject = async (object: THREE.Group | THREE.Mesh, file: File, type: string, scaleFactor: number, position: THREE.Vector3) => {
-  const fileTypeId = `custom_${Date.now()}.${type}`
+  const fileMd5 = await new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      // @ts-ignore
+      const arrayBuffer = e.target.result as ArrayBuffer;
+      const uint8Array = new Uint8Array(arrayBuffer);
+      const hash = md5(uint8Array);
+      resolve(hash);
+    };
+    reader.readAsArrayBuffer(file);
+  })
+
+  const fileTypeId = `${fileMd5}.${type}`
   console.log('fileTypeId', fileTypeId)
+
   const customObjItem: ImportFileType = {
     fileTypeId,
     mesh: object,
