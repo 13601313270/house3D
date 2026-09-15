@@ -19,11 +19,14 @@
   </div>
 </template>
 <script setup lang="ts">
-import { handleLoadedObject } from "@/utils/handleLoadedObject";
+import { useStore } from "vuex";
+import { handleLoadedObject, handleLoadedObjectByUrl } from "@/utils/handleLoadedObject";
 import importOutObj from "@/utils/importOutObj";
 import message from "@/utils/message";
 import request from "@/utils/request";
 import { t } from "@/i18n";
+import { Store } from "@/store";
+const store = useStore<Store>()
 const emits = defineEmits(['useFile', 'delete'])
 const props = defineProps<{
   item: {
@@ -42,7 +45,11 @@ async function useFile() {
   const blob = await response.blob();
   const file = new File([blob], fileName, { type: blob.type });
   await importOutObj(file, async (object, file, type, scaleFactor, position) => {
-    await handleLoadedObject(file, type, scaleFactor, position)
+    if (store.state.main.saveByFile) {
+      await handleLoadedObject(file, type, scaleFactor, position)
+    } else {
+      await handleLoadedObjectByUrl(url, type, scaleFactor, position)
+    }
     emits('useFile', object)
   })
 }
