@@ -6,7 +6,7 @@ import { ImportFileEntity } from '@/entities/importFile/entity';
 import canvas2DSceneManage from './canvas2DSceneManage';
 import { PointEntityClass } from '@/types/pointEntity';
 
-const handleLoadedObject = async (object: THREE.Group | THREE.Mesh, file: File, type: string, scaleFactor: number, position: THREE.Vector3) => {
+const handleLoadedObject = async (file: File, type: string, scaleFactor: number, position: THREE.Vector3) => {
   const fileMd5 = await new Promise((resolve) => {
     const reader = new FileReader();
     reader.onload = (e) => {

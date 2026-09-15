@@ -1011,14 +1011,11 @@ const handleLoadProgramFileChange = async (e: Event) => {
     const blob = await read.async('blob');
     const file = new File([blob], fileTypeId, { type: blob.type || 'application/octet-stream' })
 
-    await processUploadedFile(file, (object: THREE.Group, file: File) => {
-      const customObjItem: ImportFileType = {
-        fileTypeId,
-        // mesh: object,
-        file,
-      }
-      window.worldState.allImportFiles.push(customObjItem)
-    })
+    const customObjItem: ImportFileType = {
+      fileTypeId,
+      file,
+    }
+    window.worldState.allImportFiles.push(customObjItem)
   }
 
   if (sceneData.allImportImgs && sceneData.allImportImgs.length) {
@@ -1528,7 +1525,7 @@ async function importOutObj2(file: File) {
 const handleImportModelConfirm = () => {
   const { object, file, type, scaleFactor, position } = pendingImportData.value
   if (object && file) {
-    handleLoadedObject(object, file, type, scaleFactor, position)
+    handleLoadedObject(file, type, scaleFactor, position)
   }
 }
 

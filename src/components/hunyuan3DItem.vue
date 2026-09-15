@@ -42,7 +42,7 @@ async function useFile() {
   const blob = await response.blob();
   const file = new File([blob], fileName, { type: blob.type });
   await importOutObj(file, async (object, file, type, scaleFactor, position) => {
-    await handleLoadedObject(object, file, type, scaleFactor, position)
+    await handleLoadedObject(file, type, scaleFactor, position)
     emits('useFile', object)
   })
 }

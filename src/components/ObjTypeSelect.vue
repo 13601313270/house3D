@@ -325,7 +325,7 @@ async function changeCurrentToolToImportFile(item: activeObjChildItem) {
 
     await importOutObj(file, async (object, file, type, scaleFactor, position) => {
       console.log('=========', type, scaleFactor, item.initScale || scaleFactor)
-      await handleLoadedObject(object, file, type, item.initScale || scaleFactor, position)
+      await handleLoadedObject(file, type, item.initScale || scaleFactor, position)
       markGuideCompleted()
       activeObjChildList.value = []
       activePluginChildList.value = []
@@ -380,7 +380,7 @@ async function chooseOtherUserObj(item: otherUserObjItem) {
       const file = new File([blob], fileName, { type: blob.type })
 
       await importOutObj(file, async (object, file, type, scaleFactor, position) => {
-        await handleLoadedObject(object, file, type, info.initScale || scaleFactor, position)
+        await handleLoadedObject(file, type, info.initScale || scaleFactor, position)
         markGuideCompleted()
         activeObjChildList.value = []
         activePluginChildList.value = []
