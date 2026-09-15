@@ -80,8 +80,8 @@ export abstract class ModelFileEntity<T extends ModelFileData> extends PointCanA
   }
 
   create3DMesh(): THREE.Group {
-    const data = this.getData();
-    console.log('ddddd-createMesh', data)
+    // const data = this.getData();
+    // console.log('ddddd-createMesh', data)
     const group = new THREE.Group()
     if (!this.mesh) {
       console.error('未找到对应的文件类型:')

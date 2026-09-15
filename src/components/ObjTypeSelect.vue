@@ -60,7 +60,7 @@
             @click="changeCurrentTool(item2), isMouseInCate1 = false">
             <img v-if="allPluginByKey[item2].previewImg" :src="allPluginByKey[item2].previewImg" alt="" class="icon"
               :style="{ width: groupItem.id === 'camera' ? '88px' : '44px' }" />
-            <div class="name">{{ tPluginName(item2, allPluginByKey[item2].name) }}</div>
+            <div class="name">{{ tPluginName(item2) }}</div>
           </div>
         </div>
       </div>
@@ -68,7 +68,7 @@
         v-for="value in (allFileKeysGroup.find(item => item.id === 'other') || { child: [] }).child.filter(item => !['outFile', 'outFileInWall', 'importFile'].includes(item))"
         :key="value" :class="{ active: currentTool === value }"
         @click="changeCurrentTool(value), isMouseInCate1 = false" @mouseenter="mouseenterOtherGroup(value)">
-        {{ tPluginName(value, allPluginByKey[value]?.name) }}
+        {{ tPluginName(value) }}
       </div>
       <div class="splitLine"></div>
       <div class="typeItemContent" :class="{ active: activeObjTypeId === 'mineObjs' }">
@@ -106,7 +106,7 @@
         <div class="previewImg">
           <img v-if="item2.previewImg" :src="item2.previewImg" alt="" />
         </div>
-        <div class="name">{{ tPluginName(item2.key, item2.name) }}</div>
+        <div class="name">{{ tPluginName(item2.key) }}</div>
       </div>
       <!-- <div>--2--{{ activeObjChildList.length }}</div> -->
       <div v-for="item2 in activeObjChildList" class="childItem" :key="'obj-' + item2.id"
