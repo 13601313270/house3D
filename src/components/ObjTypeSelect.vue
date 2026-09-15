@@ -327,9 +327,8 @@ async function changeCurrentToolToImportFile(item: activeObjChildItem) {
     const urlPath = new URL(fileUrl).pathname
     const fileName = urlPath.split('/').pop() || 'model'
     const file = new File([blob], fileName, { type: blob.type })
-    const saveByFile = false; // 保存成文件，还是保存成url引用？
     await importOutObj(file, async (object, file, type, scaleFactor, position) => {
-      if (saveByFile) {
+      if (store.state.main.saveByFile) {
         await handleLoadedObject(file, type, item.initScale || scaleFactor, position)
       } else {
         await handleLoadedObjectByUrl(fileUrl, type, item.initScale || scaleFactor, position)
