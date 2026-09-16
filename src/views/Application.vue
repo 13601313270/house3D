@@ -213,9 +213,9 @@
         <div v-for="item in userScenes" :key="'user-' + item.id" class="demoItem" @click="chooseUserScene(item.id)">
           <div class="demoItemName">{{ item.name }}</div>
           <div class="demoItemTime" v-if="item.utime">最后更新：{{ formatSceneTime(item.utime) }}</div>
-          <img v-if="item.img" :src="item.img + '?x-oss-process=image/resize,m_fill,h_300,w_300'" alt="scene cover" />
+          <img v-if="item.preImg || item.img" :src="(item.preImg || item.img) + '?x-oss-process=image/resize,m_fill,h_300,w_300'" alt="scene cover" />
         </div>
-        <div class="demoSectionTitle">{{ t('welcome.myScenes') }}</div>
+        <div class="demoSectionTitle">{{ t('welcome.officialScenes') }}</div>
         <div v-for="item in allDemos" :key="item.id" class="demoItem" @click="chooseDemo(item.id)">
           <div>{{ lang === 'en' ? item.enName : item.name }}</div>
           <img :src="item.img + '?x-oss-process=image/resize,m_fill,h_300,w_300'" alt="demo cover" />
@@ -349,6 +349,7 @@ import { handleLoadedObject } from '@/utils/handleLoadedObject';
 // @ts-ignore
 import initDefaultData from '@/utils/initDefaultData.json'
 import Canvas2DScene from '@/utils/canvas2DScene';
+import OSS from 'ali-oss';
 
 const canvas2DRef = ref<HTMLCanvasElement | null>(null)
 const canvas2DActionRef = ref<HTMLCanvasElement | null>(null)
@@ -387,9 +388,10 @@ const newSceneNameInput = ref('')
 const userScenes = ref<{
   id: number,
   name: string,
-  img?: string,
-  ctime?: string,
-  utime?: string,
+  img: string,
+  ctime: string,
+  preImg: string,
+  utime: string,
 }[]>([])
 const saveLoading = ref(false)
 
@@ -1019,6 +1021,78 @@ const saveDrawingLocal = async () => {
 
 // === 云端场景管理 ===
 
+async function captureCanvasToPreImg(sceneId?: string | number | null): Promise<string | null> {
+  try {
+    const canvas3DPanel = canvas3DRefCenter.value
+    if (!canvas3DPanel) return null
+
+    // 确保渲染最新帧
+    canvas3DPanel.reRender()
+
+    const canvas = canvas3DPanel.getCanvas()
+    if (!canvas) return null
+
+    // canvas → 200x200 缩略图 → blob → file
+    const size = 200
+    const tmpCanvas = document.createElement('canvas')
+    tmpCanvas.width = size
+    tmpCanvas.height = size
+    const tmpCtx = tmpCanvas.getContext('2d')
+    if (!tmpCtx) return null
+    // 居中裁剪（cover 模式），保持长宽比填满 200x200
+    const srcW = canvas.width
+    const srcH = canvas.height
+    const scale = Math.max(size / srcW, size / srcH)
+    const dw = srcW * scale
+    const dh = srcH * scale
+    const dx = (size - dw) / 2
+    const dy = (size - dh) / 2
+    tmpCtx.drawImage(canvas, dx, dy, dw, dh)
+
+    const blob: Blob = await new Promise<Blob>((resolve, reject) => {
+      tmpCanvas.toBlob((b: Blob | null) => {
+        if (b) resolve(b); else reject(new Error('toBlob failed'))
+      }, 'image/png')
+    })
+    const file = new File([blob], `scene-preImg.png`, { type: 'image/png' })
+
+    // 获取 OSS 上传凭证
+    const resp = await request.get('/video/materialLibrary/getUploadKey')
+    if (!resp.data.result) {
+      console.error('getUploadKey failed:', resp.data.data)
+      return null
+    }
+    const token: { AccessKeyId: string; AccessKeySecret: string; SecurityToken: string } = resp.data.data
+
+    const client = new OSS({
+      region: 'oss-cn-beijing',
+      accessKeyId: token.AccessKeyId,
+      accessKeySecret: token.AccessKeySecret,
+      stsToken: token.SecurityToken,
+      bucket: 'video-user-obj',
+      secure: true,
+      timeout: 240000,
+    })
+
+    // 绑定场景 ID：update 时用固定名覆盖，create 时用临时名（仅一次）
+    const ossObjectName = sceneId
+      ? `preImg/${sceneId}.png`
+      : `preImg/new-${Date.now()}.png`
+
+    const result = await client.put(ossObjectName, file, {
+      headers: { 'Content-Type': 'image/png' },
+    })
+    if (!result) return null
+
+    const { url } = result
+    await request.post('/video/userImg/upload', { url })
+    return url
+  } catch (e) {
+    console.error('captureCanvasToPreImg error', e)
+    return null
+  }
+}
+
 async function handleNewSceneClick() {
   worldApi.clearAll()
   currentSceneId.value = null
@@ -1042,9 +1116,11 @@ async function confirmCreateScene() {
       cameraStateCenter.value,
       activeCameraIndexOfWorldState.value,
     )
+    const preImg = await captureCanvasToPreImg()
     const res = await request.post('/video/userScene/create', {
       name,
       json: JSON.stringify(data),
+      preImg: preImg || '',
     })
     if (res.status === 200 && res.data) {
       currentSceneId.value = res.data.id || res.data
@@ -1068,10 +1144,12 @@ async function updateScene() {
       cameraStateCenter.value,
       activeCameraIndexOfWorldState.value,
     )
+    const preImg = await captureCanvasToPreImg(currentSceneId.value)
     const res = await request.put('/video/userScene/update', {
       id: currentSceneId.value,
       name: currentSceneName.value,
       json: JSON.stringify(data),
+      preImg: preImg || '',
     })
     if (res.status === 200) {
       message.success(t('common.saveSuccess'))

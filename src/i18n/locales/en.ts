@@ -103,6 +103,7 @@ const en: Record<string, string> = {
   'welcome.newEmpty': 'New Empty Scene',
   'welcome.openFile': 'Open File',
   'welcome.myScenes': 'My Scenes',
+  'welcome.officialScenes': 'Official Scenes',
   'welcome.sceneNamePlaceholder': 'Enter scene name',
 
   // Export image modal

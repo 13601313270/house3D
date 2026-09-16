@@ -103,6 +103,7 @@ const zh: Record<string, string> = {
   'welcome.newEmpty': '新建空场景',
   'welcome.openFile': '加载文件',
   'welcome.myScenes': '我的场景',
+  'welcome.officialScenes': '官方场景',
   'welcome.sceneNamePlaceholder': '请输入场景名称',
 
   // Export image modal
