@@ -1,7 +1,7 @@
 const zh: Record<string, string> = {
   // Top navigation
   'nav.file': '文件',
-  'nav.examples': '示例',
+  'nav.examples': '场景库',
   'nav.help': '帮助',
   'nav.support': '支持',
 

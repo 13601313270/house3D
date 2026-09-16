@@ -14,6 +14,9 @@
             <div @click="saveDrawingLocal" class="childItem">
               {{ t('file.saveLocal') }}
             </div>
+            <div @click="onlyDemos = false, showDemos = true;" class="childItem">
+              {{ t('welcome.myScenes') }}
+            </div>
             <div @click="loadProgramFile" class="childItem">
               {{ t('file.open') }}
             </div>
@@ -213,7 +216,8 @@
         <div v-for="item in userScenes" :key="'user-' + item.id" class="demoItem" @click="chooseUserScene(item.id)">
           <div class="demoItemName">{{ item.name }}</div>
           <div class="demoItemTime" v-if="item.utime">最后更新：{{ formatSceneTime(item.utime) }}</div>
-          <img v-if="item.preImg || item.img" :src="(item.preImg || item.img) + '?x-oss-process=image/resize,m_fill,h_300,w_300'" alt="scene cover" />
+          <img v-if="item.preImg || item.img"
+            :src="(item.preImg || item.img) + '?x-oss-process=image/resize,m_fill,h_300,w_300'" alt="scene cover" />
         </div>
         <div class="demoSectionTitle">{{ t('welcome.officialScenes') }}</div>
         <div v-for="item in allDemos" :key="item.id" class="demoItem" @click="chooseDemo(item.id)">
@@ -2881,6 +2885,7 @@ button {
       overflow: hidden;
       box-sizing: border-box;
       text-align: center;
+      position: relative;
 
       .demoItemName {
         padding: 0 8px;
@@ -2891,8 +2896,13 @@ button {
 
       .demoItemTime {
         font-size: 12px;
-        color: #aaa;
+        color: #404040;
         margin-top: 2px;
+        position: absolute;
+        bottom: 0;
+        background: #ffffff73;
+        width: 100%;
+        padding: 8px 4px;
       }
 
       >img {

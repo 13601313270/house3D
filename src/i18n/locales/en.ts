@@ -1,7 +1,7 @@
 const en: Record<string, string> = {
   // Top navigation
   'nav.file': 'File',
-  'nav.examples': 'Examples',
+  'nav.examples': 'Scene Library',
   'nav.help': 'Help',
   'nav.support': 'Support',
 
