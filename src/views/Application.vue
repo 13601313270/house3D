@@ -11,6 +11,9 @@
             <div @click="saveDrawing" class="childItem">
               {{ t('file.save') }}
             </div>
+            <div @click="saveDrawingLocal" class="childItem">
+              {{ t('file.saveLocal') }}
+            </div>
             <div @click="loadProgramFile" class="childItem">
               {{ t('file.open') }}
             </div>
@@ -78,7 +81,7 @@
                   <div class="vipInfo">
                     <div class="vipTitle">{{ t('user.vipTitle') }}</div>
                     <div class="vipSubtitle">{{ t('user.vipExpire') }}{{ formattedVipEndDate }}{{ t('user.vipRemaining')
-                    }}{{ vipRemainingDays }}{{ t('user.vipDays') }}</div>
+                      }}{{ vipRemainingDays }}{{ t('user.vipDays') }}</div>
                   </div>
                 </div>
               </div>
@@ -200,7 +203,7 @@
       </div>
       <div class="demoList">
         <div v-if="demoIniting" class="loading">...</div>
-        <div class="demoItem" v-if="!onlyDemos" @click="showDemos = false">
+        <div class="demoItem" v-if="!onlyDemos" @click="showDemos = false, handleNewSceneClick()">
           <div>{{ t('welcome.newEmpty') }}</div>
         </div>
         <div class="demoItem" v-if="!onlyDemos" @click="showDemos = false, loadProgramFile()">
@@ -210,6 +213,13 @@
           <div>{{ lang === 'en' ? item.enName : item.name }}</div>
           <img :src="item.img + '?x-oss-process=image/resize,m_fill,h_300,w_300'" alt="demo cover" />
         </div>
+        <template v-if="!onlyDemos && userScenes.length > 0">
+          <div class="demoSectionTitle">{{ t('welcome.myScenes') }}</div>
+          <div v-for="item in userScenes" :key="'user-' + item.id" class="demoItem" @click="chooseUserScene(item.id)">
+            <div>{{ item.name }}</div>
+            <img v-if="item.img" :src="item.img + '?x-oss-process=image/resize,m_fill,h_300,w_300'" alt="scene cover" />
+          </div>
+        </template>
       </div>
     </div>
   </div>
@@ -265,6 +275,26 @@
       </div>
     </div>
   </div>
+  <!-- 新建场景命名覆层 -->
+  <div v-if="showNewSceneOverlay" class="newSceneModal" @click.self="showNewSceneOverlay = false">
+    <div class="newSceneModalInner">
+      <div class="title">{{ t('welcome.newEmpty') }}</div>
+      <input v-model="newSceneNameInput" type="text" class="sceneNameInput"
+        :placeholder="t('welcome.sceneNamePlaceholder')" @keyup.enter="confirmCreateScene" autofocus />
+      <div class="modalButtons">
+        <button @click="showNewSceneOverlay = false">{{ t('common.cancel') }}</button>
+        <button class="primary" @click="confirmCreateScene" :disabled="!newSceneNameInput.trim()">{{
+          t('common.confirm') }}</button>
+      </div>
+    </div>
+  </div>
+  <!-- 保存 loading -->
+  <teleport to="#teleport" v-if="saveLoading">
+    <div class="loadingContent">
+      <img class="loadingIcon" src="../assets/loading_white.svg" alt="loading" />
+      <div>{{ t('common.saving') }}</div>
+    </div>
+  </teleport>
 </template>
 
 <script lang="ts" setup>
@@ -298,7 +328,7 @@ import AllWorldObjSelect from '@/components/AllWorldObjSelect.vue'
 import message from '@/utils/message';
 import importOutObj from '@/utils/importOutObj';
 import { sleep } from '@/utils/sleep';
-import saveWorld, { fileData } from '@/utils/saveWorld';
+import { downloadWorld, buildSaveData, fileData } from '@/utils/saveWorld';
 import AiPic from '@/components/aiPic.vue'
 import ShowPayModal from '@/components/showPayModal.vue'
 import ShowGroupQrModal from '@/components/showGroupQrModal.vue'
@@ -348,6 +378,19 @@ const allDemos = ref<{
   enName: string,
 }[]>([])
 const demoIniting = ref(false)
+
+// 云端场景管理
+const currentSceneId = ref<number | null>(null)
+const currentSceneName = ref('')
+const showNewSceneOverlay = ref(false)
+const newSceneNameInput = ref('')
+const userScenes = ref<{
+  id: number,
+  name: string,
+  img?: string,
+  updateTime?: string,
+}[]>([])
+const saveLoading = ref(false)
 
 // 拖拽上传相关状态
 const isDragOver = ref(false)
@@ -690,6 +733,8 @@ async function initScene() {
         showDemos.value = true
       }
     })
+    // 加载用户云端场景列表
+    loadUserScenes()
     ObjFileTypes.value = data;
   } catch (e) {
   }
@@ -951,12 +996,139 @@ const triggerImportFile = () => {
 
 const saveDrawing = async () => {
   activeToolsIndex.value = -1
-  await saveWorld(
+  if (currentSceneId.value) {
+    // 已有云端场景，直接 update
+    await updateScene()
+  } else {
+    // 新建场景，需要先创建云端记录
+    showNewSceneOverlay.value = true
+  }
+}
+
+// 下载到本地（保留原有功能）
+const saveDrawingLocal = async () => {
+  activeToolsIndex.value = -1
+  await downloadWorld(
     canvas2DSceneManage.list[0].panOffset,
     canvas2DSceneManage.list[0].level,
     cameraStateCenter.value,
     activeCameraIndexOfWorldState.value,
   )
+}
+
+// === 云端场景管理 ===
+
+async function handleNewSceneClick() {
+  worldApi.clearAll()
+  currentSceneId.value = null
+  currentSceneName.value = ''
+  newSceneNameInput.value = ''
+  await initWorldByData(initDefaultData)
+  timelineState.timelineData = { duration: 30, clips: [], activeCameraIndexTimes: [] }
+  showNewSceneOverlay.value = true
+}
+
+async function confirmCreateScene() {
+  const name = newSceneNameInput.value.trim()
+  if (!name) return
+  showNewSceneOverlay.value = false
+  currentSceneName.value = name
+  saveLoading.value = true
+  try {
+    const data = await buildSaveData(
+      canvas2DSceneManage.list[0].panOffset,
+      canvas2DSceneManage.list[0].level,
+      cameraStateCenter.value,
+      activeCameraIndexOfWorldState.value,
+    )
+    const res = await request.post('/video/userScene/create', {
+      name,
+      json: JSON.stringify(data),
+    })
+    if (res.status === 200 && res.data) {
+      currentSceneId.value = res.data.id || res.data
+      message.success(t('common.saveSuccess'))
+      await loadUserScenes()
+    }
+  } catch (e) {
+    console.error('create scene error', e)
+    message.error(t('common.saveFail'))
+  } finally {
+    saveLoading.value = false
+  }
+}
+
+async function updateScene() {
+  saveLoading.value = true
+  try {
+    const data = await buildSaveData(
+      canvas2DSceneManage.list[0].panOffset,
+      canvas2DSceneManage.list[0].level,
+      cameraStateCenter.value,
+      activeCameraIndexOfWorldState.value,
+    )
+    const res = await request.put('/video/userScene/update', {
+      id: currentSceneId.value,
+      name: currentSceneName.value,
+      json: JSON.stringify(data),
+    })
+    if (res.status === 200) {
+      message.success(t('common.saveSuccess'))
+      await loadUserScenes()
+    }
+  } catch (e) {
+    console.error('update scene error', e)
+    message.error(t('common.saveFail'))
+  } finally {
+    saveLoading.value = false
+  }
+}
+
+async function loadUserScenes() {
+  try {
+    const res = await request.get('/video/userScene/myList')
+    if (res.status === 200 && Array.isArray(res.data)) {
+      userScenes.value = res.data
+    }
+  } catch (e) {
+    console.error('load user scenes error', e)
+  }
+}
+
+async function chooseUserScene(id: number) {
+  demoIniting.value = true
+  try {
+    const res = await request.get(`/video/userScene/detail/${id}`)
+    if (res.status === 200 && res.data) {
+      const data: {
+        id: number,
+        ctime: string,
+        json: string,
+        name: string,
+        uid: number,
+        utime: string,
+      } = res.data;
+      console.log('load user scene detail', data)
+      worldApi.clearAll()
+      activeToolsIndex.value = -1
+      currentSceneId.value = data.id
+      currentSceneName.value = data.name || ''
+
+      const sceneData = JSON.parse(data.json)
+      await initWorldByData(sceneData)
+      if (sceneData.timelineData && sceneData.timelineData.clips?.length > 0) {
+        timelineState.timelineData = sceneData.timelineData
+      } else {
+        timelineState.timelineData = { duration: 30, clips: [], activeCameraIndexTimes: [] }
+      }
+      showDemos.value = false
+    }
+  } catch (e) {
+    console.error('load user scene error', e)
+    message.error(t('common.loadFail'))
+  } finally {
+    demoIniting.value = false
+  }
 }
 
 const loadProgramFile = () => {
@@ -2645,6 +2817,96 @@ button {
   color: white;
   font-size: 36px;
   cursor: default;
+}
+
+// 新场景命名覆层
+.newSceneModal {
+  position: fixed;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: #00000094;
+  z-index: 1000;
+
+  .newSceneModalInner {
+    width: 360px;
+    max-width: 90vw;
+    border: 1px solid #d9d9d9;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    background-color: #F7F7F5;
+    padding: 24px 20px 20px;
+    box-sizing: border-box;
+
+    .title {
+      font-size: 18px;
+      color: #17181A;
+      margin-bottom: 16px;
+      text-align: center;
+      font-weight: 600;
+    }
+
+    .sceneNameInput {
+      width: 100%;
+      height: 36px;
+      padding: 0 12px;
+      border: 1px solid #d9d9d9;
+      border-radius: 6px;
+      font-size: 14px;
+      box-sizing: border-box;
+      outline: none;
+
+      &:focus {
+        border-color: #635bff;
+      }
+    }
+
+    .modalButtons {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-top: 16px;
+
+      button {
+        padding: 6px 16px;
+        border: none;
+        border-radius: 6px;
+        background: #e4e6eb;
+        cursor: pointer;
+        font-size: 14px;
+        transition: all 0.3s;
+
+        &.primary {
+          background: #635bff;
+          color: white;
+
+          &:hover:not(:disabled) {
+            opacity: 0.85;
+          }
+        }
+
+        &:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+        }
+      }
+    }
+  }
+}
+
+// demo 列表中的分组标题
+.demoSectionTitle {
+  grid-column: 1 / -1;
+  font-size: 16px;
+  font-weight: 600;
+  color: #17181A;
+  margin: 16px 0 4px;
+  padding-top: 16px;
+  border-top: 1px solid #e4e6eb;
 }
 
 .loadingContent {

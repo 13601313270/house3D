@@ -9,7 +9,13 @@ export type fileData = {
   [key in string]?: BaseObjData[]
 }
 
-async function saveWorld(
+export type SaveWorldResult = {
+  zip: JSZip
+  blob: Blob
+  json: string
+}
+
+export async function buildSaveData(
   panOffset: Point,
   zoom2DLevel: number,
   cameraStateCenter: CameraState,
@@ -24,20 +30,6 @@ async function saveWorld(
     }
     allFileObjectsByGroup[key].push(item.getOriginalData())
   })
-
-  // getAllFileObjects(): fileData {
-  //   const returnData: fileData = {};
-  //   allFileKeys.forEach((key) => {
-  //     returnData[key] = []
-  //     if (this.getTypeListEntity(key)) {
-  //       (this.getTypeListEntity(key) as PointEntityClass<any>[]).forEach((item) => {
-  //         // @ts-ignore
-  //         returnData[key].push(item.getData())
-  //       })
-  //     }
-  //   })
-  //   return returnData
-  // }
 
   console.log('allFileObjectsByGroup', allFileObjectsByGroup)
   const data: fileData & {
@@ -59,8 +51,18 @@ async function saveWorld(
     timelineData: timelineData || undefined,
   }
 
-  const zip = new JSZip();
+  return data
+}
 
+export async function saveWorld(
+  panOffset: Point,
+  zoom2DLevel: number,
+  cameraStateCenter: CameraState,
+  activeCameraIndex: number,
+): Promise<SaveWorldResult> {
+  const data = await buildSaveData(panOffset, zoom2DLevel, cameraStateCenter, activeCameraIndex)
+
+  const zip = new JSZip();
   const json = JSON.stringify(data, null, 2)
 
   // 保存 JSON 配置
@@ -89,15 +91,26 @@ async function saveWorld(
     }
   }
 
-  // 生成 ZIP
+  // 生成 ZIP blob
   const blob = await zip.generateAsync({
     type: 'blob'
   });
 
+  return { zip, blob, json }
+}
+
+export async function downloadWorld(
+  panOffset: Point,
+  zoom2DLevel: number,
+  cameraStateCenter: CameraState,
+  activeCameraIndex: number,
+) {
+  const { blob } = await saveWorld(panOffset, zoom2DLevel, cameraStateCenter, activeCameraIndex)
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
   a.href = url
   a.download = 'floor-plan.devt'
   a.click()
 }
+
 export default saveWorld

@@ -7,6 +7,7 @@ const en: Record<string, string> = {
 
   // File dropdown
   'file.save': 'Save',
+  'file.saveLocal': 'Download to Local',
   'file.open': 'Open',
   'file.clearScene': 'Clear Scene',
 
@@ -101,6 +102,8 @@ const en: Record<string, string> = {
   'welcome.title': 'Welcome to Scenelab. Choose a template to create your scene.',
   'welcome.newEmpty': 'New Empty Scene',
   'welcome.openFile': 'Open File',
+  'welcome.myScenes': 'My Scenes',
+  'welcome.sceneNamePlaceholder': 'Enter scene name',
 
   // Export image modal
   'export.title': 'Export Image',
@@ -125,6 +128,10 @@ const en: Record<string, string> = {
   'common.delete': 'Delete',
   'common.yes': 'Yes',
   'common.no': 'No',
+  'common.saveSuccess': 'Saved successfully',
+  'common.saveFail': 'Save failed',
+  'common.loadFail': 'Load failed',
+  'common.saving': 'Saving...',
 
   // Angle editor
   'angle.radian': 'Radian: ',

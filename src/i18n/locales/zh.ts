@@ -7,6 +7,7 @@ const zh: Record<string, string> = {
 
   // File dropdown
   'file.save': '保存',
+  'file.saveLocal': '下载到本地',
   'file.open': '加载',
   'file.clearScene': '清空',
 
@@ -101,6 +102,8 @@ const zh: Record<string, string> = {
   'welcome.title': '欢迎来到「摄影棚」，请选择创建场景的模板',
   'welcome.newEmpty': '新建空场景',
   'welcome.openFile': '加载文件',
+  'welcome.myScenes': '我的场景',
+  'welcome.sceneNamePlaceholder': '请输入场景名称',
 
   // Export image modal
   'export.title': '导出图片',
@@ -125,6 +128,10 @@ const zh: Record<string, string> = {
   'common.delete': '删除',
   'common.yes': '是',
   'common.no': '否',
+  'common.saveSuccess': '保存成功',
+  'common.saveFail': '保存失败',
+  'common.loadFail': '加载失败',
+  'common.saving': '保存中...',
 
   // Angle editor
   'angle.radian': '弧度：',
