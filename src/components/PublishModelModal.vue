@@ -20,7 +20,7 @@
               <div style="display: flex;align-items: center;color: #333;font-size: 14px;">
                 <input v-model="form.isPublic" :checked="form.isPublic" @change="initObjectFileTypeList"
                   class="form-input-checkbox" type="checkbox" />
-                <span>{{ form.isPublic ? t('publish.public') : t('publish.private') }}</span>
+                <!-- <span>{{ form.isPublic ? t('publish.public') : t('publish.private') }}</span> -->
               </div>
               <div class="form-tip">{{ t('publish.publicTip') }}</div>
             </div>
