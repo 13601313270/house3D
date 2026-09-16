@@ -194,6 +194,12 @@ const zh: Record<string, string> = {
   'imgEdit.file': '选择文件',
   'imgEdit.urlPlaceholder': '请输入网址',
   'imgEdit.upload': '上传文件',
+  'imgEdit.historyTitle': '选择历史图片',
+  'imgEdit.historyEmpty': '暂无历史图片',
+  'imgEdit.existingImages': '已有图片',
+  'imgEdit.more': '更多',
+  'imgEdit.deleteConfirm': '确定要删除这张图片吗？',
+  'imgEdit.deleteFailed': '删除失败，请重试',
 
   // Login / Register / Forgot password
   'login.close': '关闭',

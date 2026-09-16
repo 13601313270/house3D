@@ -194,6 +194,12 @@ const en: Record<string, string> = {
   'imgEdit.file': 'File',
   'imgEdit.urlPlaceholder': 'Enter image URL',
   'imgEdit.upload': 'Upload File',
+  'imgEdit.historyTitle': 'Choose from History',
+  'imgEdit.historyEmpty': 'No history images',
+  'imgEdit.existingImages': 'Existing Images',
+  'imgEdit.more': 'More',
+  'imgEdit.deleteConfirm': 'Delete this image?',
+  'imgEdit.deleteFailed': 'Delete failed, please try again',
 
   // Login / Register / Forgot password
   'login.close': 'Close',

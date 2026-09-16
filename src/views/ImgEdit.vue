@@ -24,6 +24,40 @@
       </div>
       <input style="display: none;" ref="fileInput" type="file" accept="image/*" @change="handleFileChange" />
     </div>
+    <div v-if="historyList.length > 0" class="historyStrip">
+      <div class="historyStripLabel">{{ t('imgEdit.existingImages') }}</div>
+      <div class="historyStripThumbs">
+        <div v-for="item in historyList.slice(0, 3)" :key="item.id" class="historyStripItem" @click="selectHistoryImg(item)">
+          <img :src="item.url" :alt="item.name" />
+        </div>
+        <div class="historyStripMore" @click="openHistory">
+          <span>+{{ Math.max(0, historyList.length - 3) }}</span>
+          <span class="moreLabel">{{ t('imgEdit.more') }}</span>
+        </div>
+      </div>
+    </div>
+    <teleport to="#teleport">
+      <div v-if="showHistory" class="history-modal" @click.self="showHistory = false">
+        <div class="history-modal-inner">
+          <div class="history-header">
+            <div class="history-title">{{ t('imgEdit.historyTitle') }}</div>
+            <button class="history-close" @click="showHistory = false">×</button>
+          </div>
+          <div class="history-body">
+            <div v-if="historyLoading" class="history-loading">...</div>
+            <div v-else-if="historyList.length === 0" class="history-empty">{{ t('imgEdit.historyEmpty') }}</div>
+            <div v-else class="history-grid">
+              <div v-for="item in historyList" :key="item.id" class="history-item">
+                <img :src="item.url" :alt="item.name" class="history-img" @click="selectHistoryImg(item)" />
+                <div class="history-delete" @click.stop="deleteHistoryImg(item)">
+                  ×
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </teleport>
   </div>
 </template>
 <script setup lang="ts">
@@ -42,6 +76,42 @@ const store = useStore<Store>()
 
 const typeSelect = ref(1)
 const fileInput = ref<HTMLInputElement>()
+const showHistory = ref(false)
+const historyLoading = ref(false)
+const historyList = ref<{ id: string; url: string; name: string }[]>([])
+
+async function fetchHistoryList() {
+  try {
+    const res = await service.get('/video/userImg/myList')
+    historyList.value = res.data || []
+  } catch (e) {
+    console.error('获取历史图片失败:', e)
+    historyList.value = []
+  }
+}
+
+async function openHistory() {
+  showHistory.value = true
+  historyLoading.value = true
+  await fetchHistoryList()
+  historyLoading.value = false
+}
+
+function selectHistoryImg(item: { url: string }) {
+  emits('update:modelValue', item.url)
+  showHistory.value = false
+}
+
+async function deleteHistoryImg(item: { id: string }) {
+  if (!confirm(t('imgEdit.deleteConfirm'))) return
+  try {
+    await service.delete('/video/userImg/delete/' + item.id)
+    await fetchHistoryList()
+  } catch (e) {
+    console.error('删除失败:', e)
+    alert(t('imgEdit.deleteFailed'))
+  }
+}
 
 onMounted(() => {
   if (props.modelValue.startsWith(importImgFileHead) || store.state.main.saveByFile) {
@@ -49,6 +119,7 @@ onMounted(() => {
   } else {
     typeSelect.value = 1
   }
+  fetchHistoryList()
 })
 
 const importFile = computed<string | null>(() => {
@@ -139,6 +210,7 @@ async function handleFileChange(event: Event) {
             })
             console.log('上传成功:url', url);
             emits('update:modelValue', url)
+            fetchHistoryList()
           }
         } catch (err) {
           console.error('上传失败:', err);
@@ -234,7 +306,6 @@ function changeTypeSelect() {
   }
 
   .fileInput {
-    padding-left: 16px;
     flex-grow: 1;
     border: solid 1px #b2b2b2;
     border-radius: 0 8px 8px 0;
@@ -244,6 +315,205 @@ function changeTypeSelect() {
     box-sizing: border-box;
     color: #666666;
     font-size: 14px;
+    padding-left: 16px;
+    cursor: pointer;
+  }
+}
+
+.historyStrip {
+  margin-top: 6px;
+  padding: 8px 10px;
+  background: #fafafa;
+  border: 1px solid #eee;
+  border-radius: 6px;
+
+  .historyStripLabel {
+    font-size: 12px;
+    color: #888;
+    margin-bottom: 6px;
+  }
+
+  .historyStripThumbs {
+    display: flex;
+    gap: 6px;
+
+    .historyStripItem {
+      width: 48px;
+      height: 48px;
+      border-radius: 4px;
+      overflow: hidden;
+      border: 1px solid #eaeaea;
+      cursor: pointer;
+
+      img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      &:hover {
+        border-color: #1890ff;
+      }
+    }
+
+    .historyStripMore {
+      width: 48px;
+      height: 48px;
+      border-radius: 4px;
+      border: 1px dashed #b2b2b2;
+      color: #999;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      line-height: 1.2;
+
+      &:hover {
+        border-color: #1890ff;
+        color: #1890ff;
+      }
+
+      .moreLabel {
+        font-size: 10px;
+        opacity: 0.8;
+      }
+    }
+  }
+}
+
+.history-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1001;
+
+  .history-modal-inner {
+    background: white;
+    border-radius: 8px;
+    width: 600px;
+    max-width: 90vw;
+    max-height: 70vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+
+    .history-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 18px;
+      border-bottom: 1px solid #eaeaea;
+
+      .history-title {
+        font-size: 16px;
+        font-weight: 600;
+        color: #2c3e50;
+      }
+
+      .history-close {
+        width: 28px;
+        height: 28px;
+        border: none;
+        background: #f5f5f5;
+        border-radius: 50%;
+        cursor: pointer;
+        font-size: 20px;
+        line-height: 28px;
+        text-align: center;
+        color: #666;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        &:hover {
+          background: #e0e0e0;
+          color: #333;
+        }
+      }
+    }
+
+    .history-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+
+      .history-loading {
+        text-align: center;
+        padding: 40px 0;
+        color: #999;
+      }
+
+      .history-empty {
+        text-align: center;
+        padding: 40px 0;
+        color: #999;
+        font-size: 14px;
+      }
+
+      .history-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 12px;
+
+        .history-item {
+          aspect-ratio: 1 / 1;
+          border: 1px solid #eaeaea;
+          border-radius: 6px;
+          overflow: hidden;
+          cursor: pointer;
+          transition: all 0.2s;
+          background: #fafafa;
+          position: relative;
+
+          &:hover {
+            border-color: #1890ff;
+            box-shadow: 0 2px 8px rgba(24, 144, 255, 0.2);
+            transform: translateY(-1px);
+
+            .history-delete {
+              opacity: 1;
+            }
+          }
+
+          .history-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+          }
+
+          .history-delete {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: rgba(0, 0, 0, 0.55);
+            color: #fff;
+            font-size: 16px;
+            line-height: 20px;
+            text-align: center;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.15s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            &:hover {
+              background: #ff4d4f;
+            }
+          }
+        }
+      }
+    }
   }
 }
 </style>
