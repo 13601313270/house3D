@@ -95,9 +95,10 @@ async function handleFileChange(event: Event) {
     console.log('event.target.value', event.target.value)
     // 如果不要保存成文件模式，那么需要把文件上传上去转换成url
     try {
+      const fileSize = file.size
       const mySpaceResponse = await service.get('/video/materialLibrary/mySpace');
-      if (mySpaceResponse.data.freeSpace < 0) {
-        const { freeSpace, usedSpace, totalSize } = mySpaceResponse.data
+      const { freeSpace, usedSpace, totalSize } = mySpaceResponse.data
+      if (freeSpace < 0 || freeSpace * 1000 < fileSize) {
         message.error(t('import.spaceInsufficient', formattedFileSize(freeSpace * 1000), formattedFileSize(usedSpace * 1000), formattedFileSize(totalSize * 1000)))
         return;
       }
@@ -124,7 +125,6 @@ async function handleFileChange(event: Event) {
           const fileMD5 = await computeFileMD5(file)
           const extension = getFileExtension(file.name)
           const ossObjectName = fileMD5 + extension
-          const fileSize = file.size
           // 使用 put 方法上传，第一个参数是存储在OSS中的对象名（MD5+扩展名），第二个参数是文件对象
           const result = await client.put(ossObjectName, file, {
             headers: {
