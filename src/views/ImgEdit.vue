@@ -124,6 +124,7 @@ async function handleFileChange(event: Event) {
           const fileMD5 = await computeFileMD5(file)
           const extension = getFileExtension(file.name)
           const ossObjectName = fileMD5 + extension
+          const fileSize = file.size
           // 使用 put 方法上传，第一个参数是存储在OSS中的对象名（MD5+扩展名），第二个参数是文件对象
           const result = await client.put(ossObjectName, file, {
             headers: {
@@ -133,6 +134,9 @@ async function handleFileChange(event: Event) {
           console.log('上传成功:', result);
           if (result) {
             const { url } = result;
+            await service.post('/video/userImg/upload', {
+              url,
+            })
             console.log('上传成功:url', url);
             emits('update:modelValue', url)
           }
