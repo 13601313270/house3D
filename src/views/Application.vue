@@ -203,23 +203,23 @@
       </div>
       <div class="demoList">
         <div v-if="demoIniting" class="loading">...</div>
-        <div class="demoItem" v-if="!onlyDemos" @click="showDemos = false, handleNewSceneClick()">
+        <div class="demoSectionTitle">{{ t('welcome.myScenes') }}</div>
+        <div class="demoItem" key="newEmpty" v-if="!onlyDemos" @click="showDemos = false, handleNewSceneClick()">
           <div>{{ t('welcome.newEmpty') }}</div>
         </div>
-        <div class="demoItem" v-if="!onlyDemos" @click="showDemos = false, loadProgramFile()">
+        <div class="demoItem" key="openFile" v-if="!onlyDemos" @click="showDemos = false, loadProgramFile()">
           <div>{{ t('welcome.openFile') }}</div>
         </div>
+        <div v-for="item in userScenes" :key="'user-' + item.id" class="demoItem" @click="chooseUserScene(item.id)">
+          <div class="demoItemName">{{ item.name }}</div>
+          <div class="demoItemTime" v-if="item.utime">最后更新：{{ formatSceneTime(item.utime) }}</div>
+          <img v-if="item.img" :src="item.img + '?x-oss-process=image/resize,m_fill,h_300,w_300'" alt="scene cover" />
+        </div>
+        <div class="demoSectionTitle">{{ t('welcome.myScenes') }}</div>
         <div v-for="item in allDemos" :key="item.id" class="demoItem" @click="chooseDemo(item.id)">
           <div>{{ lang === 'en' ? item.enName : item.name }}</div>
           <img :src="item.img + '?x-oss-process=image/resize,m_fill,h_300,w_300'" alt="demo cover" />
         </div>
-        <template v-if="!onlyDemos && userScenes.length > 0">
-          <div class="demoSectionTitle">{{ t('welcome.myScenes') }}</div>
-          <div v-for="item in userScenes" :key="'user-' + item.id" class="demoItem" @click="chooseUserScene(item.id)">
-            <div>{{ item.name }}</div>
-            <img v-if="item.img" :src="item.img + '?x-oss-process=image/resize,m_fill,h_300,w_300'" alt="scene cover" />
-          </div>
-        </template>
       </div>
     </div>
   </div>
@@ -388,7 +388,8 @@ const userScenes = ref<{
   id: number,
   name: string,
   img?: string,
-  updateTime?: string,
+  ctime?: string,
+  utime?: string,
 }[]>([])
 const saveLoading = ref(false)
 
@@ -1093,6 +1094,13 @@ async function loadUserScenes() {
   } catch (e) {
     console.error('load user scenes error', e)
   }
+}
+
+function formatSceneTime(time: string) {
+  if (!time) return ''
+  const d = new Date(time)
+  const pad = (n: number) => String(n).padStart(2, '0')
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`
 }
 
 async function chooseUserScene(id: number) {
@@ -2705,6 +2713,8 @@ button {
     padding: 16px;
     box-sizing: border-box;
     position: relative;
+    max-height: 80vh;
+    overflow: auto;
 
     .title {
       font-size: 22px;
@@ -2793,6 +2803,19 @@ button {
       overflow: hidden;
       box-sizing: border-box;
       text-align: center;
+
+      .demoItemName {
+        padding: 0 8px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .demoItemTime {
+        font-size: 12px;
+        color: #aaa;
+        margin-top: 2px;
+      }
 
       >img {
         width: 100%;
@@ -2906,7 +2929,6 @@ button {
   color: #17181A;
   margin: 16px 0 4px;
   padding-top: 16px;
-  border-top: 1px solid #e4e6eb;
 }
 
 .loadingContent {
