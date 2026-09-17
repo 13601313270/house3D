@@ -91,8 +91,13 @@ export class PeopleEntity extends ModelFileEntity<PeopleData> {
   }
 
   change3DMeshState(): void {
-    super.change3DMeshState();
     const data = this.getData();
+    const { height, angleY } = data
+    const scale = height / 180;// height的180的时候scale为1
+    this.meshGroup.position.set(data.x, data.z, data.y)
+    this.meshGroup.rotation.set(0, angleY, 0)
+    this.meshGroup.scale.set(scale, scale, scale)
+
     if (this.meshGroup?.children[0] && data.bone && data.bone?.length > 0) {
       const boneListConfig = data.bone
       if (boneListConfig && typeof boneListConfig !== 'string') {
