@@ -374,6 +374,71 @@
       color: #171717;
     }
 
+    /* ===== Reading Card ===== */
+    .reading-wrap {
+      padding: 40px 0;
+    }
+
+    .reading-card {
+      display: flex;
+      align-items: center;
+      gap: 32px;
+      background: #fff;
+      border: 1px solid #e5e5e5;
+      border-radius: 16px;
+      padding: 36px 40px;
+      transition: box-shadow 0.2s, border-color 0.2s;
+    }
+
+    .reading-card:hover {
+      border-color: #d4d4d4;
+      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.06);
+    }
+
+    .reading-badge {
+      flex-shrink: 0;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #5b5bd6;
+      background: #eef2ff;
+      padding: 6px 14px;
+      border-radius: 100px;
+    }
+
+    .reading-body {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .reading-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: #111;
+      margin-bottom: 8px;
+      line-height: 1.4;
+    }
+
+    .reading-desc {
+      font-size: 14px;
+      color: #737373;
+      line-height: 1.6;
+      margin: 0;
+    }
+
+    .reading-link {
+      flex-shrink: 0;
+      font-size: 14px;
+      font-weight: 500;
+      color: #5b5bd6;
+      white-space: nowrap;
+    }
+
+    .reading-link:hover {
+      color: #4c4cc0;
+    }
+
     /* ===== Responsive ===== */
     @media (max-width: 960px) {
       .hero-title {
@@ -447,6 +512,13 @@
 
       .nav-login {
         display: none;
+      }
+
+      .reading-card {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 14px;
+        padding: 24px;
       }
     }
   </style>
@@ -551,6 +623,20 @@
           <p class="feature-desc">用时间轴让场景动起来，生成动态素材</p>
         </div>
       </div>
+    </div>
+  </section>
+
+  <!-- Reading -->
+  <section class="reading-wrap">
+    <div class="container">
+      <a href="/intro.html" class="reading-card">
+        <span class="reading-badge">深度思考</span>
+        <div class="reading-body">
+          <div class="reading-title">场景一致性：AI 视频创作中被忽略的基础</div>
+          <p class="reading-desc">当单个 AI 镜头的画质越来越接近真实，多个镜头之间的连贯性正在成为新的挑战。我们为什么需要先构建空间，再生成镜头。</p>
+        </div>
+        <span class="reading-link">阅读全文 →</span>
+      </a>
     </div>
   </section>
 

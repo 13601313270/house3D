@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <link rel="icon" href="/favicon.ico">
+  <title>场景一致性：AI 视频创作中被忽略的基础 - 摄影棚 Samelab</title>
+  <meta name="description"
+    content="当单个 AI 镜头的画质越来越接近真实，多个镜头之间的连贯性正在成为新的挑战。本文讨论为什么场景一致性是 AI 视频创作中值得投入的基础问题，以及 Samelab 如何通过预先构建空间来解决这一问题。">
+  <meta name="keywords"
+    content="AI视频场景一致性, AI视频多镜头连贯, AI视频穿帮镜头, AI视频空间一致性, Samelab, 摄影棚, AI视频预演, 虚拟制片, AI导演系统, AI视频工作流">
+  <meta name="baidu-site-verification" content="codeva-1SPq7M6iui" />
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-5VKG2P1E8V"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-5VKG2P1E8V');
+  </script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Inter", "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      color: #171717;
+      line-height: 1.5;
+      background: #f5f5f4;
+    }
+
+    a {
+      text-decoration: none;
+      color: inherit;
+    }
+
+    /* ===== Navbar ===== */
+    .navbar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: #f5f5f4;
+      padding: 0 24px;
+    }
+
+    .navbar-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 700;
+      font-size: 16px;
+      color: #171717;
+    }
+
+    .logo img {
+      height: 32px;
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .nav-login {
+      font-size: 14px;
+      color: #525252;
+      transition: color 0.15s;
+    }
+
+    .nav-login:hover {
+      color: #171717;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 22px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      transition: all 0.15s ease;
+      white-space: nowrap;
+    }
+
+    .btn-primary {
+      background: #5b5bd6;
+      color: #fff;
+    }
+
+    .btn-primary:hover {
+      background: #4c4cc0;
+    }
+
+    /* ===== Article ===== */
+    .article-wrap {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 56px 24px 80px;
+    }
+
+    .article-card {
+      background: #fff;
+      border-radius: 16px;
+      padding: 56px 64px;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+    }
+
+    .article-header {
+      margin-bottom: 40px;
+      padding-bottom: 28px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .article-kicker {
+      display: inline-block;
+      font-size: 13px;
+      color: #5b5bd6;
+      background: #eef2ff;
+      padding: 4px 12px;
+      border-radius: 100px;
+      margin-bottom: 18px;
+      font-weight: 500;
+    }
+
+    .article-title {
+      font-size: 30px;
+      font-weight: 700;
+      line-height: 1.35;
+      color: #111;
+      margin-bottom: 14px;
+      letter-spacing: -0.01em;
+    }
+
+    .article-meta {
+      font-size: 14px;
+      color: #999;
+    }
+
+    .article-meta .dot {
+      margin: 0 8px;
+      color: #ddd;
+    }
+
+    .article-body {
+      font-size: 16px;
+      line-height: 1.9;
+      color: #2c2c2c;
+    }
+
+    .article-body p {
+      margin-bottom: 20px;
+      text-align: justify;
+    }
+
+    .article-body strong {
+      color: #111;
+      font-weight: 600;
+    }
+
+    .article-body h2 {
+      font-size: 22px;
+      font-weight: 700;
+      margin: 40px 0 20px;
+      color: #111;
+      letter-spacing: -0.01em;
+      line-height: 1.3;
+    }
+
+    .article-body h3 {
+      font-size: 18px;
+      font-weight: 600;
+      margin: 28px 0 14px;
+      color: #1a1a1a;
+    }
+
+    .article-figure {
+      margin: 28px -24px 32px;
+      text-align: center;
+    }
+
+    .article-figure img {
+      max-width: 100%;
+      border-radius: 10px;
+      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.08);
+      display: block;
+      margin: 0 auto;
+    }
+
+    .article-figure figcaption {
+      margin-top: 10px;
+      font-size: 13px;
+      color: #999;
+      text-align: center;
+    }
+
+    /* ===== CTA banner ===== */
+    .article-cta {
+      margin-top: 48px;
+      padding: 28px 32px;
+      background: linear-gradient(135deg, #eef2ff 0%, #f5f3ff 100%);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .article-cta-text {
+      font-size: 15px;
+      color: #3730a3;
+      font-weight: 500;
+    }
+
+    /* ===== Footer ===== */
+    .footer {
+      background: #0a0a0a;
+      color: #a3a3a3;
+      padding: 24px 0;
+    }
+
+    .footer-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .footer .logo {
+      color: #fff;
+    }
+
+    .footer-copy {
+      font-size: 12px;
+      color: #737373;
+    }
+
+    /* ===== Responsive ===== */
+    @media (max-width: 720px) {
+      .article-wrap {
+        padding: 24px 16px 48px;
+      }
+
+      .article-card {
+        padding: 32px 24px;
+        border-radius: 12px;
+      }
+
+      .article-title {
+        font-size: 22px;
+      }
+
+      .article-body {
+        font-size: 15px;
+      }
+
+      .article-body h2 {
+        font-size: 19px;
+      }
+
+      .article-figure {
+        margin-left: 0;
+        margin-right: 0;
+      }
+
+      .footer-inner {
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .nav-login {
+        display: none;
+      }
+    }
+  </style>
+</head>
+
+<body data-lang="zh">
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="navbar-inner">
+      <a href="/" class="logo">
+        <img src="/favicon256.png" />
+        摄影棚
+      </a>
+      <div class="nav-actions">
+        <a href="/enIndex.html" class="nav-login">EN</a>
+        <a href="/admin.html" class="btn btn-primary">开始创作</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Article -->
+  <main class="article-wrap">
+    <article class="article-card">
+      <header class="article-header">
+        <span class="article-kicker">深度思考</span>
+        <h1 class="article-title">场景一致性：AI 视频创作中被忽略的基础</h1>
+        <div class="article-meta">
+          <span>2025.10</span>
+          <span class="dot">·</span>
+          <span>AI 视频 / Samelab</span>
+        </div>
+      </header>
+
+      <div class="article-body">
+
+        <p>现在的 AI Video 工具，已经能够生成相当漂亮的单个镜头。</p>
+
+        <p>每次看到 AI 短剧的某个片段，我都会忍不住感慨：人物的神态、画面的光影、镜头的构图，甚至人物的动作，都越来越接近真实拍摄的效果。</p>
+
+        <p>但有意思的是，我在看一些 AI 短剧切片时，也经常能发现一些明显的穿帮镜头。上一秒背景里还有几个人，下一秒就消失了；刚刚还是夏天的街道，转眼间就有了秋天的景象。奇怪的是，只要剧情足够吸引人，我似乎也能忽略这些问题。</p>
+
+        <p>这让我意识到，<strong>单个镜头的画面质量和多个镜头之间的连贯性，其实是两回事</strong>。</p>
+
+        <p>一个镜头足够精彩，能够吸引观众的注意力。但当我们试图用多个镜头讲述一段完整的故事时，画面之间的关系就变得重要起来。</p>
+
+        <h2>一个厨房里的例子</h2>
+
+        <p>比如，一个女孩在厨房里做饭。</p>
+
+        <p>第一个镜头，她站在窗边切菜。阳光从左侧照进来，桌子在她身后。</p>
+
+        <p>第二个镜头，她转身走向冰箱。</p>
+
+        <p>第三个镜头，她拿起桌上的杯子，坐在餐桌旁。</p>
+
+        <p>单独看这三个镜头，可能都很漂亮。但如果第二个镜头里的冰箱跑到了窗户旁边，第三个镜头里的餐桌又换了一个方向，观众就会隐约觉得哪里不对。</p>
+
+        <p>问题并不只是画面发生了变化，而是<strong>我们对这个空间的认知被打断了</strong>。</p>
+
+        <h2>预先存在的空间</h2>
+
+        <p>看一部真实拍摄的电影时，我们通常不会刻意记住房间里每一件家具的位置。但当人物从门口走向餐桌，或者从沙发旁拿起一个杯子时，我们能够自然地理解这些动作发生在同一个空间里。</p>
+
+        <p>这是因为电影中的空间通常是<strong>预先存在的</strong>。摄影机可以从不同角度拍摄，人物可以在其中自由活动，镜头虽然变化，空间关系却相对稳定。</p>
+
+        <p>而在很多 AI 视频工作流中，情况恰好相反。</p>
+
+        <p>每次生成一个镜头，模型都需要根据提示词、参考图像等信息，重新构建一个看起来合理的画面。它可能生成一间很漂亮的厨房，却不一定知道上一镜头里窗户、餐桌和冰箱的准确位置。</p>
+
+        <p>于是，镜头之间就可能出现各种细微甚至明显的变化。</p>
+
+        <p>窗户的位置偏移了，桌椅的距离发生了变化，人物走向某个物体时，原本合理的空间关系也不再成立。</p>
+
+        <p>如果只是一个独立的画面，这些差异未必影响观感。但在连续叙事中，它们会逐渐累积，最终影响观众对整个场景的信任。</p>
+
+        <h2>场景一致性不只是背景一样</h2>
+
+        <p>所以，场景一致性并不只是让背景看起来一样。它还涉及<strong>空间布局、物体位置、人物与环境的关系，以及摄像机在这个空间里的运动</strong>。</p>
+
+        <p>这也让我开始思考：与其在每次生成镜头时反复描述一个空间，不如先把这个空间建立起来。</p>
+
+        <h2>用 Samelab 搭建一个场景</h2>
+
+        <p>最近，我们尝试用 Samelab 搭建了一个刚才描述的姑娘活动的画面。</p>
+
+        <p>我们先确定窗户、沙发、茶几、书柜等物体的位置，再通过调整摄像机的角度和距离，获得不同方向的场景视图。这样一来，多个镜头就不再完全依赖文字描述来重新构建空间，而是有了一个共同的场景基础。</p>
+
+        <h2>一个起点，而不是终点</h2>
+
+        <figure class="article-figure">
+          <img src="/intro-scene.png" alt="用 Samelab 搭建的厨房场景预览" />
+          <figcaption>在 Samelab 中预先构建的场景空间：确定物体位置，然后从不同角度生成视图</figcaption>
+        </figure>
+
+        <p>当然，这并不意味着问题已经彻底解决。</p>
+
+        <p>当我们把场景导出到其他 AI 视频工具中，模型依然可能重新绘制部分细节，人物动作也可能与空间发生偏差。但至少在场景布局和摄像机视角的控制上，我们有了一个相对明确的起点。</p>
+
+        <p>这次尝试让我越来越觉得，AI 视频创作正在面临一个值得关注的变化：<strong>当生成漂亮画面逐渐变得容易，如何组织这些画面，让它们共同构成一个可信的世界，可能会成为新的挑战</strong>。</p>
+
+        <p>毕竟，观众看一部电影，不只是看一组漂亮的画面，更是在相信一个连续发生的故事。如果真的要 AI 视频取代实拍电影，那么场景一致性问题就是个非常值得探讨和投入的事情。</p>
+
+      </div>
+
+      <!-- CTA -->
+      <div class="article-cta">
+        <span class="article-cta-text">在 Samelab 中预先构建你的场景空间</span>
+        <a href="/admin.html" class="btn btn-primary">开始创作</a>
+      </div>
+    </article>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <a class="logo">
+        <img src="/favicon256white.png" />
+        摄影棚
+      </a>
+      <span class="footer-copy">© 2026 摄影棚</span>
+    </div>
+  </footer>
+
+  <script>
+    document.querySelectorAll('a[href="/admin.html"]').forEach(function (el) {
+      el.addEventListener('click', function () {
+        localStorage.setItem('scenelab_lang', document.body.dataset.lang || 'zh');
+      });
+    });
+  </script>
+</body>
+
+</html>

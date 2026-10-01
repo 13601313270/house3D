@@ -99,7 +99,7 @@ const en: Record<string, string> = {
   'guide.close': 'Close guide',
 
   // Welcome / Template modal
-  'welcome.title': 'Welcome to Scenelab. Choose a template to create your scene.',
+  'welcome.title': 'Welcome to Samelab. Choose a template to create your scene.',
   'welcome.newEmpty': 'New Empty Scene',
   'welcome.openFile': 'Open File',
   'welcome.myScenes': 'My Scenes',
