@@ -4,7 +4,7 @@
       <div class="showGroupQrModalInner">
         <div class="title">{{ t('qr.title') }}</div>
         <div class="qrSection">
-          <img src="/84142.jpg" class="qrImage" />
+          <img :src="qrUrl" class="qrImage" />
         </div>
         <div class="tipText">{{ t('qr.tip') }}</div>
         <button class="closeButton" @click="closeModal">{{ t('qr.gotIt') }}</button>
@@ -13,11 +13,24 @@
   </teleport>
 </template>
 <script setup lang="ts">
+import { ref, onMounted } from 'vue'
+import axios from 'axios'
 import { t } from '@/i18n'
 
 const emit = defineEmits<{
   (e: 'close'): void
 }>()
+
+const qrUrl = ref('')
+
+onMounted(async () => {
+  try {
+    const { data } = await axios.get('https://api.studying1v1.com/globleConfigSingle?key=sypGroup')
+    qrUrl.value = data
+  } catch (e) {
+    console.error('Failed to load group QR code:', e)
+  }
+})
 
 const closeModal = () => {
   emit('close')
