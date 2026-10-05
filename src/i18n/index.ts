@@ -8,7 +8,7 @@ export type Lang = 'zh' | 'en'
 
 const STORAGE_KEY = 'scenelab_lang'
 
-const getInitialLang = (): Lang => {
+export const getInitialLang = (): Lang => {
   try {
     const saved = localStorage.getItem(STORAGE_KEY)
     if (saved === 'zh' || saved === 'en') return saved

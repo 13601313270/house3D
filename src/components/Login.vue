@@ -122,7 +122,7 @@
 <script lang="ts" setup>
 import axios from 'axios';
 import { ref, computed } from 'vue'
-import { t } from '@/i18n'
+import { getInitialLang, Lang, t } from '@/i18n'
 
 const emit = defineEmits<{
   (e: 'close'): void
@@ -259,6 +259,8 @@ const sendResetPasswordCaptcha = async () => {
   startCountdown()
 }
 
+const lang = ref<Lang>(getInitialLang())
+
 const handleRegister = async () => {
   if (!email.value.trim()) {
     errorMsg.value = t('form.enterEmail')
@@ -285,6 +287,7 @@ const handleRegister = async () => {
     email: email.value,
     password: md5(password.value),
     captcha: captcha.value,
+    lang: lang.value,
   })
 
   console.log('注册结果:', result)
