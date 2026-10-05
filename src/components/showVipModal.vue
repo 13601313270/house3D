@@ -138,9 +138,9 @@ onMounted(async () => {
       vipPrices.value = res.data;
       console.log('sssssss', vipPrices)
       let isFindRecommend = false;
-      Object.keys(res.data).forEach(key => {
-        if (res.data[key].recommend) {
-          selectedVip.value = key
+      res.data.forEach((item: any) => {
+        if (item.recommend) {
+          selectedVip.value = item.id
           isFindRecommend = true;
         }
       })
