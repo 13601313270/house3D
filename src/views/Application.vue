@@ -65,11 +65,13 @@
         <div class="toolbar-item" @mouseleave="activeToolsIndex = -1">
           <div v-if="store.state.main.userInfo">
             <div class="userInfo" @mouseenter="activeToolsIndex = 2">
-              <span>{{ t('user.welcome') }}{{ store.state.main.userInfo.email }}</span>
+              <span class="email">{{ store.state.main.userInfo.email }}</span>
               <span v-if="isVip" class="vipBadgeTop">{{ t('user.vip') }}</span>
-              <span>（</span>
-              <img src="money.png" />
-              <span>{{ store.state.main.userInfo.money }}{{ t('user.credits') }}）</span>
+              <div class="money">
+                <span class="tip">AI点数</span>
+                <!-- <img src="money.png" /> -->
+                <span>{{ store.state.main.userInfo.money }}</span>
+              </div>
             </div>
             <div class="list user" v-show="activeToolsIndex === 2">
               <div class="userMoney">
@@ -84,7 +86,7 @@
                   <div class="vipInfo">
                     <div class="vipTitle">{{ t('user.vipTitle') }}</div>
                     <div class="vipSubtitle">{{ t('user.vipExpire') }}{{ formattedVipEndDate }}{{ t('user.vipRemaining')
-                      }}{{ vipRemainingDays }}{{ t('user.vipDays') }}</div>
+                    }}{{ vipRemainingDays }}{{ t('user.vipDays') }}</div>
                   </div>
                 </div>
               </div>
@@ -2115,8 +2117,34 @@ window.showLoginDialog = showLoginDialog;
     display: flex;
     align-items: center;
 
-    >img {
-      height: 18px;
+    .email {
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.4);
+      white-space: nowrap;
+    }
+
+    .money {
+      display: flex;
+      align-items: center;
+      margin-left: 8px;
+      gap: 8px;
+      padding: 4px 11px;
+      background: rgba(255, 255, 255, 0.07);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 3px;
+      cursor: pointer;
+      color: rgba(255, 255, 255, 0.9);
+      font-family: inherit;
+
+      .tip {
+        font-size: 14px;
+        color: rgba(255, 255, 255, 0.4);
+        letter-spacing: 0.02em;
+      }
+
+      >img {
+        height: 18px;
+      }
     }
 
     .vipBadgeTop {

@@ -2,7 +2,20 @@
   <teleport to="#teleport">
     <div class="showPayModal" @click.self="closeModal">
       <div class="showPayModalInner">
-        <div class="title">{{ t('pay.title') }}</div>
+        <div class="header">
+          <div class="headerTexts">
+            <div class="title">{{ t('pay.title') }}</div>
+            <div class="subtitle">{{ t('pay.subtitle') }}</div>
+          </div>
+          <button class="closeBtn" @click="closeModal">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+
         <div v-if="checkStatus === 'checking'" class="checkingState">
           <div class="spinner"></div>
           <div class="checkingText">{{ t('pay.checking') }}</div>
@@ -14,31 +27,40 @@
           <button class="cancelButton" @click="closeModal">{{ t('pay.cancel') }}</button>
         </div>
         <div v-else>
-          <div class="amountSection">
-            <div class="sectionTitle">{{ t('pay.selectAmount') }}</div>
-            <div class="amountList">
-              <div v-for="amount in amounts" :key="amount" class="amountItem"
-                :class="{ active: selectedAmount === amount }" @click="selectedAmount = amount">
-                <div class="amountText">¥ {{ amount }}</div>
-                <div class="coinInfo">
-                  <img src="/money.png" class="coinIcon" />
-                  <span class="coinText">{{ amount * 10 }}{{ t('pay.credits') }}</span>
-                </div>
+          <div class="currentRow">
+            <span class="currentLabel">{{ t('pay.currentCredits') }}</span>
+            <span class="currentValue">{{ currentCredits }}</span>
+          </div>
+
+          <div class="amountList">
+            <div v-for="opt in options" :key="opt.amount" class="amountItem"
+              :class="{ active: selectedAmount === opt.amount }" @click="selectedAmount = opt.amount">
+              <div class="radio" :class="{ checked: selectedAmount === opt.amount }">
+                <div v-if="selectedAmount === opt.amount" class="radioDot"></div>
               </div>
+              <div class="itemLeft">
+                <span class="itemCredits">{{ opt.credits.toLocaleString() }}{{ t('pay.credits') }}</span>
+                <span v-if="opt.recommend" class="recommendTag">{{ t('pay.recommend') }}</span>
+              </div>
+              <div class="itemPrice">¥{{ opt.amount }}</div>
             </div>
           </div>
-          <div class="paySection">
-            <div class="sectionTitle">{{ t('pay.payMethod') }}</div>
-            <div class="payList">
-              <div class="payItem" :class="{ active: selectedPay === 'alipay' }" @click="handlePay('alipay')">
-                <div class="payIcon">
-                  <img src="https://gw.alipayobjects.com/mdn/rms_9e4c39/afts/img/A*Qys_QIJfGPgAAAAAAAAAAAAAARQnAQ"
-                    alt="支付宝" />
-                </div>
-              </div>
+
+          <div class="previewRow">
+            <div class="previewLine">
+              <span class="previewLabel">{{ t('pay.afterPurchase') }}</span>
+              <span class="previewValue plus">+{{ purchaseCredits.toLocaleString() }} {{ t('pay.credits') }}</span>
+            </div>
+            <div class="previewLine">
+              <span class="previewLabel">{{ t('pay.balance') }}</span>
+              <span class="previewValue">{{ finalCredits.toLocaleString() }} {{ t('pay.credits') }}</span>
             </div>
           </div>
-          <img src="/fa29cde1.png" class="headImg" />
+
+          <button class="buyButton" @click="handlePay('alipay')">
+            {{ t('pay.buyNow') }} · ¥{{ selectedAmount }}
+          </button>
+          <div class="footer">{{ t('pay.footer') }}</div>
         </div>
       </div>
     </div>
@@ -48,7 +70,7 @@
 import { Store } from '@/store';
 import message from '@/utils/message';
 import request from '@/utils/request';
-import { onUnmounted, ref } from 'vue'
+import { computed, onUnmounted, ref } from 'vue'
 import { useStore } from 'vuex';
 import { t } from '@/i18n';
 
@@ -59,39 +81,50 @@ const emit = defineEmits<{
   (e: 'paySuccess'): void
 }>()
 
-const amounts = [10, 50, 100, 200]
-const selectedAmount = ref(50)
-const selectedPay = ref<'alipay' | 'wechat'>('wechat')
+interface Option {
+  amount: number
+  credits: number
+  recommend?: boolean
+}
+
+const options: Option[] = [
+  { amount: 10, credits: 100 },
+  { amount: 50, credits: 500 },
+  { amount: 100, credits: 1000, recommend: true },
+]
+
+const selectedAmount = ref(100)
 const orderId = ref<number | null>(null)
 const checkStatus = ref<'idle' | 'checking' | 'unpaid'>('idle')
+
+const currentCredits = computed(() => {
+  const ui = store.state.main.userInfo as any
+  return ui?.money ?? 0
+})
+
+const purchaseCredits = computed(() => selectedAmount.value * 10)
+const finalCredits = computed(() => currentCredits.value + purchaseCredits.value)
 
 const closeModal = () => {
   emit('close')
 }
 
 const handleFocus = async () => {
-  console.log('aaa', 1)
-  console.log('aaa', 2)
   if (orderId.value) {
-    console.log('aaa', 3)
     checkPaymentStatus()
   }
 }
 
 const checkPaymentStatus = async () => {
-  console.log('aaa', 4)
   if (!orderId.value) return
-  console.log('aaa', 5)
   checkStatus.value = 'checking'
 
   try {
-    console.log('aaa', 3)
     const { data } = await request.get('/video/alipay/checkIsPay', {
       params: {
         out_trade_no: orderId.value
       }
     })
-    console.log('checkPaymentStatus data', data)
 
     if (data && data.status && data.isPay) {
       message.success(t('pay.success'))
@@ -107,11 +140,10 @@ const checkPaymentStatus = async () => {
 
 const handlePay = async (payType: 'alipay' | 'wechat') => {
   const userInfo = store.state.main.userInfo
-  if (userInfo && userInfo.id) {
+  if (userInfo && (userInfo as any).id) {
     if (payType === 'alipay') {
-      const res = await request.get('https://api.studying1v1.com/video/alipay/createOrder?uid=' + userInfo.id + '&price=' + selectedAmount.value)
+      const res = await request.get('https://api.studying1v1.com/video/alipay/createOrder?uid=' + (userInfo as any).id + '&price=' + selectedAmount.value)
       orderId.value = res.data as number;
-      console.log('orderId', orderId.value)
       window.open('https://api.studying1v1.com/video/alipay/pay?orderId=' + orderId.value, '_blank')
       checkStatus.value = 'checking'
     }
@@ -138,222 +170,230 @@ window.addEventListener('focus', handleFocus)
   justify-content: center;
 
   .showPayModalInner {
-    width: 360px;
+    width: 420px;
     background: white;
-    border-radius: 12px;
-    padding: 24px;
+    border-radius: 16px;
+    padding: 28px;
     position: relative;
-    margin-top: 80px;
 
-    .title {
-      font-size: 20px;
-      font-weight: bold;
-      text-align: center;
-      margin-bottom: 24px;
-    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 20px;
 
-    .sectionTitle {
-      font-size: 18px;
-      color: #666;
-      margin-bottom: 12px;
-    }
+      .headerTexts {
+        .title {
+          font-size: 20px;
+          font-weight: 600;
+          color: #1a1a1a;
+          margin-bottom: 4px;
+        }
 
-    .amountSection {
-      margin-bottom: 24px;
+        .subtitle {
+          font-size: 13px;
+          color: #888;
+        }
+      }
 
-      .amountList {
+      .closeBtn {
         display: flex;
-        flex-wrap: wrap;
-        gap: 12px;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+        position: absolute;
+        top: 14px;
+        right: 14px;
+        width: 26px;
+        height: 26px;
+        background: rgb(247, 247, 245);
+        border: 1px solid rgb(232, 232, 229);
+        border-radius: 3px;
+        color: rgb(104, 107, 112);
+        cursor: pointer;
+        font-family: inherit;
+        font-size: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
 
-        .amountItem {
-          width: calc(47%);
-          height: 100px;
-          padding: 10px 0;
-          text-align: center;
-          border: 2px solid #eee;
-          border-radius: 8px;
-          cursor: pointer;
-          transition: all 0.2s;
+        &:hover {
+          background: #e8e8e8;
+          color: #666;
+        }
+      }
+    }
+
+    .currentRow {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 12px;
+      background: #f7f7f8;
+      border-radius: 4px;
+      margin-bottom: 14px;
+
+      .currentLabel {
+        font-size: 14px;
+        color: #666;
+      }
+
+      .currentValue {
+        font-size: 18px;
+        font-weight: 600;
+        color: #1a1a1a;
+      }
+    }
+
+    .amountList {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 16px;
+
+      .amountItem {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 11px 14px;
+        background: rgb(255, 255, 255);
+        border: 1px solid rgb(232, 232, 229);
+        border-radius: 4px;
+        cursor: pointer;
+        font-family: inherit;
+        transition: 0.1s;
+        position: relative;
+
+        &:hover {
+          border-color: #ddd;
+        }
+
+        &.active {
+          border-color: #7c5cfc;
+          background: #f4f1ff;
+        }
+
+        .radio {
+          width: 16px;
+          height: 16px;
+          margin-right: 12px;
+          border-radius: 50%;
+          border: 2px solid rgb(216, 216, 213);
           display: flex;
-          flex-direction: column;
           align-items: center;
           justify-content: center;
-          gap: 4px;
+          flex-shrink: 0;
 
-          .amountText {
-            font-size: 24px;
-            color: #333;
-            font-weight: bold;
-          }
+          &.checked {
+            border-color: #7c5cfc;
 
-          .coinInfo {
-            display: flex;
-            align-items: center;
-            gap: 2px;
-
-            .coinIcon {
-              width: 12px;
-              height: 12px;
-            }
-
-            .coinText {
-              font-size: 16px;
-              color: #999;
-            }
-          }
-
-          &:hover {
-            border-color: #1677ff;
-
-            .amountText {
-              color: #1677ff;
-            }
-
-            .coinText {
-              color: #1677ff;
-            }
-          }
-
-          &.active {
-            border-color: #1677ff;
-            background-color: #e6f4ff;
-
-            .amountText {
-              color: #1677ff;
-            }
-
-            .coinText {
-              color: #1677ff;
+            .radioDot {
+              width: 10px;
+              height: 10px;
+              background: #7c5cfc;
+              border-radius: 50%;
             }
           }
         }
-      }
-    }
 
-    .paySection {
-      margin-bottom: 24px;
-
-      .payList {
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-
-        .payItem {
+        .itemLeft {
+          flex: 1;
           display: flex;
           align-items: center;
-          padding: 16px;
-          border: 2px solid #eee;
-          border-radius: 8px;
-          cursor: pointer;
-          transition: all 0.2s;
+          gap: 8px;
 
-          &:hover {
-            border-color: #1677ff;
+          .itemCredits {
+            font-size: 15px;
+            font-weight: 500;
+            color: #333;
           }
 
-          &.active {
-            border-color: #1677ff;
-            background-color: #e6f4ff;
+          .recommendTag {
+            font-size: 11px;
+            color: #fff;
+            background: #7c5cfc;
+            padding: 2px 6px;
+            border-radius: 4px;
+            line-height: 1.4;
           }
+        }
 
-          .payIcon {
-            width: 40px;
-            height: 40px;
-            border-radius: 8px;
-            margin-right: 12px;
+        .itemPrice {
+          font-size: 15px;
+          color: #666;
+        }
 
-            >img {
-              height: 40px;
-              object-fit: cover;
-            }
+        &.active .itemPrice {
+          color: #7c5cfc;
+          font-weight: 600;
+        }
+      }
+    }
 
-            // &.alipay {
-            //   background: linear-gradient(135deg, #1677ff 0%, #4096ff 100%);
-            //   position: relative;
+    .previewRow {
+      padding: 10px 12px;
+      background: rgb(247, 247, 245);
+      border: 1px solid rgb(232, 232, 229);
+      border-radius: 4px;
+      margin-bottom: 16px;
 
-            //   &::before {
-            //     content: '';
-            //     position: absolute;
-            //     top: 50%;
-            //     left: 50%;
-            //     transform: translate(-50%, -50%);
-            //     width: 24px;
-            //     height: 24px;
-            //     background: white;
-            //     mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='currentColor'%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z'/%3E%3C/svg%3E");
-            //     -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='currentColor'%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z'/%3E%3C/svg%3E");
-            //   }
-            // }
+      .previewLine {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
 
-            // &.wechat {
-            //   background: linear-gradient(135deg, #07c160 0%, #10b981 100%);
-            //   position: relative;
+        &+.previewLine {
+          margin-top: 6px;
+        }
 
-            //   &::before {
-            //     content: '';
-            //     position: absolute;
-            //     top: 50%;
-            //     left: 50%;
-            //     transform: translate(-50%, -50%);
-            //     width: 24px;
-            //     height: 24px;
-            //     background: white;
-            //     mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='currentColor'%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z'/%3E%3C/svg%3E");
-            //     -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='currentColor'%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z'/%3E%3C/svg%3E");
-            //   }
-            // }
-          }
+        .previewLabel {
+          font-size: 13px;
+          color: #888;
+        }
 
-          // .payName {
-          //   flex: 1;
-          //   font-size: 16px;
-          //   color: #333;
-          // }
+        .previewValue {
+          font-size: 14px;
+          font-weight: 600;
+          color: #333;
 
-          .checkIcon {
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            background-color: #1677ff;
-            position: relative;
-
-            &::before {
-              content: '';
-              position: absolute;
-              top: 6px;
-              left: 6px;
-              width: 6px;
-              height: 10px;
-              border: solid white;
-              border-width: 0 2px 2px 0;
-              transform: rotate(45deg);
-            }
+          &.plus {
+            // color: #7c5cfc;
           }
         }
       }
     }
 
-    .payButton {
+    .buyButton {
       width: 100%;
-      padding: 14px;
-      background: linear-gradient(135deg, #1677ff 0%, #4096ff 100%);
-      color: white;
-      font-size: 18px;
-      font-weight: bold;
-      border: none;
-      border-radius: 8px;
+      height: 40px;
+      background: rgb(99, 91, 255);
+      color: rgb(255, 255, 255);
+      border-width: medium;
+      border-style: none;
+      border-color: currentcolor;
+      border-image: none;
+      border-radius: 4px;
+      font-size: 13px;
+      font-weight: 600;
       cursor: pointer;
-      transition: all 0.2s;
+      font-family: inherit;
+      opacity: 1;
+      transition: opacity 0.15s;
 
       &:hover {
-        opacity: 0.9;
-        transform: translateY(-2px);
+        background: #6a4ce0;
       }
 
       &:active {
-        transform: translateY(0);
+        transform: scale(0.99);
       }
+    }
+
+    .footer {
+      font-size: 10px;
+      color: rgb(154, 157, 162);
+      text-align: center;
+      margin-top: 8px;
     }
 
     .checkingState {
@@ -366,7 +406,7 @@ window.addEventListener('focus', handleFocus)
         width: 40px;
         height: 40px;
         border: 4px solid #e0e0e0;
-        border-top-color: #1677ff;
+        border-top-color: #7c5cfc;
         border-radius: 50%;
         animation: spin 1s linear infinite;
       }
@@ -416,7 +456,7 @@ window.addEventListener('focus', handleFocus)
       .retryButton {
         width: 100%;
         padding: 12px;
-        background: linear-gradient(135deg, #1677ff 0%, #4096ff 100%);
+        background: #7c5cfc;
         color: white;
         font-size: 16px;
         font-weight: bold;
@@ -427,7 +467,7 @@ window.addEventListener('focus', handleFocus)
         transition: all 0.2s;
 
         &:hover {
-          opacity: 0.9;
+          background: #6a4ce0;
         }
       }
 
@@ -446,13 +486,6 @@ window.addEventListener('focus', handleFocus)
           background: #e8e8e8;
         }
       }
-    }
-
-    .headImg {
-      width: 250px;
-      position: absolute;
-      top: -151px;
-      left: 80px;
     }
   }
 }

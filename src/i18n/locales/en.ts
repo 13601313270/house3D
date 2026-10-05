@@ -21,7 +21,6 @@ const en: Record<string, string> = {
   'lang.en': 'English',
 
   // User menu
-  'user.welcome': 'Welcome: ',
   'user.vip': 'VIP',
   'user.credits': 'Credits',
   'user.currentCredits': 'Balance: ',
@@ -297,10 +296,15 @@ const en: Record<string, string> = {
   'vip.priceUnit.yearly': 'yr',
 
   // Buy Credits / Pay modal
-  'pay.title': 'Buy Credits',
-  'pay.selectAmount': 'Select Amount',
+  'pay.title': 'Buy AI Credits',
+  'pay.subtitle': 'For AI scene generation and other AI features.',
+  'pay.currentCredits': 'Current AI Credits',
+  'pay.recommend': 'Recommended',
+  'pay.afterPurchase': 'After Purchase',
+  'pay.balance': 'Balance',
+  'pay.buyNow': 'Buy Now',
+  'pay.footer': 'Credits never expire · One purchase, lifetime use',
   'pay.credits': ' credits',
-  'pay.payMethod': 'Payment Method',
   'pay.checking': 'Verifying payment status...',
   'pay.unpaid': 'Payment not completed',
   'pay.retry': 'Retry',

@@ -21,7 +21,6 @@ const zh: Record<string, string> = {
   'lang.en': 'English',
 
   // User menu
-  'user.welcome': '欢迎登录：',
   'user.vip': 'VIP',
   'user.credits': '积分',
   'user.currentCredits': '当前积分：',
@@ -297,10 +296,15 @@ const zh: Record<string, string> = {
   'vip.priceUnit.yearly': '年',
 
   // Buy Credits / Pay modal
-  'pay.title': '购买积分',
-  'pay.selectAmount': '选择金额',
-  'pay.credits': '积分',
-  'pay.payMethod': '支付方式',
+  'pay.title': '购买 AI 点数',
+  'pay.subtitle': '用于 AI 场景生成及其他 AI 功能。',
+  'pay.currentCredits': '当前 AI 点数',
+  'pay.recommend': '推荐',
+  'pay.afterPurchase': '购买后',
+  'pay.balance': '余额',
+  'pay.buyNow': '立即购买',
+  'pay.footer': '点数不过期 · 一次购买，持续使用',
+  'pay.credits': '点',
   'pay.checking': '正在验证支付状态...',
   'pay.unpaid': '支付未完成',
   'pay.retry': '重新验证',
