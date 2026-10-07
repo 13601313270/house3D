@@ -11,13 +11,23 @@
     content="Samelab is a 3D scene consistency tool for AI video creators. Through camera locking and spatial structure management, it maintains consistent characters and scenes across multiple shots in AI-generated videos, ideal for AI short films, storyboard design, and previsualization production.">
   <meta name="keywords"
     content="AI video tool, AI video generation tool, AI video production tool, AI video consistency, video consistency tool, AI video camera control, AI director system, AI filmmaking tool, AI storyboard tool, AI previs tool, Previs tool, 3D scene editor, virtual studio, 3D camera control, video continuity tool, AI video controllability, three.js editor, virtual production tool, AI movie making tool, AI video character consistency, AI video scene consistency, AI video how to keep consistent, AI video continuous shots">
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-5VKG2P1E8V"></script>
   <script>
+    // 本地开发环境不加载 GA，避免数据污染；始终挂空函数防止组件内 window.gtag 调用报错
     window.dataLayer = window.dataLayer || [];
-    function gtag() { dataLayer.push(arguments); }
-    gtag('js', new Date());
-
-    gtag('config', 'G-5VKG2P1E8V');
+    window.gtag = function () {
+      if (/^(localhost|127\.0\.0\.1)$/.test(location.hostname)) return;
+      window.dataLayer.push(arguments);
+    };
+    if (!/^(localhost|127\.0\.0\.1)$/.test(location.hostname)) {
+      (function () {
+        var s = document.createElement('script');
+        s.async = true;
+        s.src = 'https://www.googletagmanager.com/gtag/js?id=G-5VKG2P1E8V';
+        document.head.appendChild(s);
+      })();
+      window.gtag('js', new Date());
+      window.gtag('config', 'G-5VKG2P1E8V');
+    }
   </script>
   <style>
     * {
