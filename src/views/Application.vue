@@ -3,6 +3,7 @@
     <div class="headTools">
       <div class="toolbar">
         <img class="icon" src="/favicon256white.png" />
+        <span class="brand-name">{{ t('app.brandName') }}</span>
         <div class="toolbar-item" @mouseleave="activeToolsIndex = -1">
           <button type="button" @mouseenter="activeToolsIndex = 0">
             {{ t('nav.file') }}
@@ -68,7 +69,7 @@
               <span class="email">{{ store.state.main.userInfo.email }}</span>
               <span v-if="isVip" class="vipBadgeTop">{{ t('user.vip') }}</span>
               <div class="money">
-                <span class="tip">AI点数</span>
+                <span class="tip">{{ t('user.aiCreditsLabel') }}</span>
                 <!-- <img src="money.png" /> -->
                 <span>{{ store.state.main.userInfo.money }}</span>
               </div>
@@ -2081,6 +2082,14 @@ window.showLoginDialog = showLoginDialog;
       height: 30px;
       margin-right: 8px;
       margin-left: 8px;
+    }
+
+    .brand-name {
+      color: #F7F7F5;
+      font-size: 16px;
+      font-weight: 600;
+      margin-right: 16px;
+      white-space: nowrap;
     }
 
     .toolbar-item {

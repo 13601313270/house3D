@@ -33,6 +33,8 @@ const en: Record<string, string> = {
   'user.buyCredits': 'Buy Credits',
   'user.upgradePro': 'Upgrade to Pro',
   'user.logout': 'Log out',
+  'app.brandName': 'SceneLab',
+  'user.aiCreditsLabel': 'Credits',
   'user.login': 'Log in',
 
   // Left panel toolbar

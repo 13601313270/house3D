@@ -33,6 +33,8 @@ const zh: Record<string, string> = {
   'user.buyCredits': '购买积分',
   'user.upgradePro': '购买专业版权益',
   'user.logout': '退出',
+  'app.brandName': '摄影棚',
+  'user.aiCreditsLabel': 'AI点数',
   'user.login': '登录',
 
   // Left panel toolbar
