@@ -41,6 +41,11 @@
             </div>
           </div>
         </div>
+        <div class="toolbar-item" @click="showGroupQrModal = true">
+          <button type="button">
+            {{ t('nav.community') }}
+          </button>
+        </div>
       </div>
       <div class="editMode">
         <div>

@@ -3,6 +3,7 @@ const en: Record<string, string> = {
   'nav.file': 'File',
   'nav.examples': 'Scene Library',
   'nav.help': 'Help',
+  'nav.community': 'Community',
   'nav.support': 'Support',
 
   // File dropdown
@@ -353,6 +354,19 @@ const en: Record<string, string> = {
   'qr.title': 'Join WeChat Group to Earn Credits',
   'qr.tip': 'Scan the QR code above to add support on WeChat and get 20 credits',
   'qr.gotIt': 'Got it',
+
+  // Community modal
+  'community.title': 'Join Samelab\nCreator Community',
+  'community.desc': 'Connect with AI creators, share your work, get product updates, and talk directly with the Samelab team.',
+  'community.benefit1': 'Connect with AI creators',
+  'community.benefit2': 'Share your work and workflows',
+  'community.benefit3': 'Get product updates and early access',
+  'community.benefit4': 'Talk directly with the Samelab team',
+  'community.reward': 'Get 20 AI Credits',
+  'community.rewardDesc': ' after joining',
+  'community.qrTitle': 'Scan with WeChat to join',
+  'community.qrFooter': 'Stay in touch with the Samelab team.',
+  'community.later': 'Maybe later',
 
   // VIP benefits table
   'benefits.header': 'Features',
