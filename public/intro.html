@@ -304,6 +304,272 @@
         display: none;
       }
     }
+
+    /* ===== Community Floating Entry ===== */
+    .community-floating-entry {
+      position: fixed;
+      right: 20px;
+      bottom: 20px;
+      z-index: 150;
+      min-width: 220px;
+      padding: 12px 14px;
+      background: #ffffff;
+      color: #17181a;
+      border: 1px solid #e5e5e2;
+      border-radius: 12px;
+      cursor: pointer;
+      font-family: inherit;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: rgba(0, 0, 0, 0.08) 0px 4px 16px;
+      transition: box-shadow 0.15s, border-color 0.15s, transform 0.15s;
+    }
+
+    .community-floating-entry:hover {
+      box-shadow: rgba(0, 0, 0, 0.12) 0px 8px 24px;
+      border-color: #d0d0cc;
+      transform: translateY(-1px);
+    }
+
+    .community-floating-entry .cfe-icon {
+      width: 40px;
+      height: 40px;
+      flex-shrink: 0;
+      background: #635BFF;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .community-floating-entry .cfe-text {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      text-align: left;
+    }
+
+    .community-floating-entry .cfe-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #17181a;
+      line-height: 1.3;
+    }
+
+    .community-floating-entry .cfe-sub {
+      font-size: 12px;
+      font-weight: 500;
+      color: #635BFF;
+      line-height: 1.3;
+    }
+
+    .community-floating-entry .cfe-arrow {
+      font-size: 18px;
+      color: #a0a0a0;
+      line-height: 1;
+    }
+
+    /* ===== Community Modal ===== */
+    .community-modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(10, 10, 10, 0.4);
+      z-index: 200;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.2s ease, visibility 0.2s ease;
+    }
+
+    .community-modal-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .community-modal {
+      position: relative;
+      background: #ffffff;
+      border-radius: 8px;
+      box-shadow: rgba(0, 0, 0, 0.2) 0px 24px 60px;
+      transform: scale(0.96) translateY(8px);
+      transition: transform 0.2s ease;
+      max-width: 680px;
+      width: calc(100% - 48px);
+    }
+
+    .community-modal-overlay.active .community-modal {
+      transform: scale(1) translateY(0);
+    }
+
+    .community-modal-close {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      z-index: 2;
+      width: 26px;
+      height: 26px;
+      background: #f7f7f5;
+      border: 1px solid #e8e8e5;
+      border-radius: 3px;
+      color: #686b70;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: color 0.15s, background 0.15s;
+    }
+
+    .community-modal-close:hover {
+      color: #17181a;
+      background: #eeeeec;
+    }
+
+    .community-modal-layout {
+      display: grid;
+      grid-template-columns: minmax(0px, 1fr) 244px;
+      gap: 30px;
+      padding: 30px 32px;
+    }
+
+    .community-modal-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 4px;
+      background: rgba(99, 91, 255, 0.09);
+      border: 1px solid rgba(99, 91, 255, 0.26);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 16px;
+    }
+
+    .community-modal-title {
+      font-size: 21px;
+      font-weight: 700;
+      color: #17181a;
+      margin: 0 0 8px;
+      letter-spacing: -0.025em;
+      line-height: 1.25;
+    }
+
+    .community-modal-desc {
+      font-size: 12px;
+      color: #686b70;
+      margin: 0 0 17px;
+      line-height: 1.65;
+    }
+
+    .community-modal-benefits {
+      border-top: 1px solid #e8e8e5;
+    }
+
+    .community-modal-benefits > div {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      padding: 6px 0;
+      border-bottom: 1px solid #e8e8e5;
+      font-size: 11px;
+      color: #17181a;
+    }
+
+    .community-modal-benefits svg {
+      flex-shrink: 0;
+    }
+
+    .community-modal-reward {
+      margin-top: 16px;
+      padding: 10px 12px;
+      background: rgba(99, 91, 255, 0.09);
+      border: 1px solid rgba(99, 91, 255, 0.26);
+      border-radius: 4px;
+    }
+
+    .community-modal-reward .reward-value {
+      font-size: 12px;
+      font-weight: 600;
+      color: #635BFF;
+    }
+
+    .community-modal-reward .reward-desc {
+      font-size: 11px;
+      color: #686b70;
+    }
+
+    .community-modal-qr {
+      border-left: 1px solid #e8e8e5;
+      padding-left: 30px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .community-modal-qr-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: #17181a;
+      margin-bottom: 10px;
+    }
+
+    .community-qr {
+      width: 208px;
+      height: 208px;
+      padding: 12px;
+      background: #ffffff;
+      border: 1px solid #d8d8d5;
+      border-radius: 5px;
+      overflow: hidden;
+    }
+
+    .community-qr img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .community-modal-qr-footer {
+      font-size: 10px;
+      color: #9a9da2;
+      line-height: 1.5;
+      text-align: center;
+      margin-top: 9px;
+    }
+
+    .community-modal-later {
+      margin-top: 15px;
+      background: none;
+      border: none;
+      color: #9a9da2;
+      font-size: 10px;
+      cursor: pointer;
+      font-family: inherit;
+    }
+
+    .community-modal-later:hover {
+      color: #686b70;
+    }
+
+    @media (max-width: 640px) {
+      .community-modal-layout {
+        grid-template-columns: 1fr;
+        gap: 24px;
+        padding: 24px;
+      }
+
+      .community-modal-qr {
+        border-left: none;
+        border-top: 1px solid #e8e8e5;
+        padding-left: 0;
+        padding-top: 24px;
+      }
+    }
   </style>
 </head>
 
@@ -425,12 +691,130 @@
     </div>
   </footer>
 
+  <!-- Community Floating Entry -->
+  <button type="button" class="community-floating-entry" id="communityEntry">
+    <span class="cfe-icon" aria-hidden="true">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+        <circle cx="9" cy="8" r="3.2" fill="#fff"/>
+        <circle cx="16.5" cy="9.5" r="2.6" fill="#fff" opacity="0.85"/>
+        <path d="M3 19.5c.4-3.2 2.4-5 5.5-5 3 0 5.1 1.8 5.5 5" stroke="#fff" stroke-width="2" stroke-linecap="round" fill="none"/>
+        <path d="M14.5 16.5c.9-.8 2-1.3 3.3-1.3 2 0 3.4 1.3 3.7 3.5" stroke="#fff" stroke-width="1.8" stroke-linecap="round" fill="none" opacity="0.85"/>
+      </svg>
+    </span>
+    <span class="cfe-text">
+      <span class="cfe-title">加入我们的社区</span>
+      <span class="cfe-sub">免费获得 20 个 AI 积分</span>
+    </span>
+    <span class="cfe-arrow" aria-hidden="true">›</span>
+  </button>
+
+  <!-- Community Modal -->
+  <div class="community-modal-overlay" id="communityModal" role="dialog" aria-modal="true" aria-labelledby="communityModalTitle">
+    <div class="community-modal">
+      <button type="button" class="community-modal-close" id="communityModalClose" aria-label="关闭">×</button>
+      <div class="community-modal-layout">
+        <div class="community-modal-content">
+          <div class="community-modal-icon">
+            <svg width="19" height="19" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+              <circle cx="7" cy="7" r="2.6" stroke="#635BFF" stroke-width="1.3"></circle>
+              <circle cx="14.2" cy="8.2" r="2.1" stroke="#635BFF" stroke-width="1.2" opacity="0.72"></circle>
+              <path d="M2.8 15.8c.35-3 2-4.5 4.3-4.5 2.4 0 4.05 1.5 4.4 4.5M11.2 12.2c.8-.7 1.75-1.05 2.9-1.05 1.8 0 3.05 1.1 3.35 3.25" stroke="#635BFF" stroke-width="1.3" stroke-linecap="round"></path>
+            </svg>
+          </div>
+          <h2 class="community-modal-title" id="communityModalTitle">加入 Scenelab<br>创作者社区</h2>
+          <p class="community-modal-desc">与 AI 创作者交流、分享作品、获取产品更新，并直接与 Scenelab 团队沟通。</p>
+          <div class="community-modal-benefits">
+            <div>
+              <svg width="13" height="13" viewBox="0 0 13 13" fill="none" aria-hidden="true"><path d="M2 6.5l3 3 6-6" stroke="#635BFF" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+              <span>认识更多 AI 创作者</span>
+            </div>
+            <div>
+              <svg width="13" height="13" viewBox="0 0 13 13" fill="none" aria-hidden="true"><path d="M2 6.5l3 3 6-6" stroke="#635BFF" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+              <span>分享作品与创作流程</span>
+            </div>
+            <div>
+              <svg width="13" height="13" viewBox="0 0 13 13" fill="none" aria-hidden="true"><path d="M2 6.5l3 3 6-6" stroke="#635BFF" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+              <span>获取产品更新与抢先体验</span>
+            </div>
+            <div>
+              <svg width="13" height="13" viewBox="0 0 13 13" fill="none" aria-hidden="true"><path d="M2 6.5l3 3 6-6" stroke="#635BFF" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+              <span>直接与 Scenelab 团队交流</span>
+            </div>
+          </div>
+          <div class="community-modal-reward">
+            <span class="reward-value">+20 AI 点数</span>
+            <span class="reward-desc"> · 加入社区后获得</span>
+          </div>
+        </div>
+        <div class="community-modal-qr">
+          <div class="community-modal-qr-title">使用微信扫码加入</div>
+          <div class="community-qr">
+            <img id="communityQrImg" alt="Scenelab 创作者社区微信二维码" style="display:none">
+          </div>
+          <div class="community-modal-qr-footer">加入 Scenelab 社区<br>与我们保持联系</div>
+          <button type="button" class="community-modal-later" id="communityModalLater">以后再说</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script>
     document.querySelectorAll('a[href="/admin.html"]').forEach(function (el) {
       el.addEventListener('click', function () {
         localStorage.setItem('scenelab_lang', document.body.dataset.lang || 'zh');
       });
     });
+
+    // Community modal
+    (function () {
+      var entry = document.getElementById('communityEntry');
+      var modal = document.getElementById('communityModal');
+      var closeBtn = document.getElementById('communityModalClose');
+      var laterBtn = document.getElementById('communityModalLater');
+      if (!entry || !modal) return;
+
+      function openModal() {
+        modal.classList.add('active');
+        document.addEventListener('keydown', onKeydown);
+      }
+      function closeModal() {
+        modal.classList.remove('active');
+        document.removeEventListener('keydown', onKeydown);
+      }
+      function onKeydown(e) {
+        if (e.key === 'Escape') closeModal();
+      }
+
+      var qrImg = document.getElementById('communityQrImg');
+      var qrLoaded = false;
+
+      function loadQr() {
+        if (qrLoaded) return;
+        qrLoaded = true;
+        fetch('https://api.studying1v1.com/globleConfigSingle?key=sypGroup')
+          .then(function (res) { return res.json(); })
+          .then(function (data) {
+            if (qrImg && data) {
+              qrImg.src = data;
+              qrImg.style.display = 'block';
+            }
+          })
+          .catch(function (e) {
+            console.error('Failed to load community QR:', e);
+          });
+      }
+
+      entry.addEventListener('click', function () {
+        window.gtag('event', 'communityEntryClick');
+        loadQr();
+        openModal();
+      });
+      closeBtn && closeBtn.addEventListener('click', closeModal);
+      laterBtn && laterBtn.addEventListener('click', closeModal);
+      modal.addEventListener('click', function (e) {
+        if (e.target === modal) closeModal();
+      });
+    })();
   </script>
 </body>
 
