@@ -41,7 +41,7 @@
             </div>
           </div>
         </div>
-        <div class="toolbar-item" @click="showGroupQrModal = true">
+        <div class="toolbar-item" @click="openCommunityModal">
           <button type="button">
             {{ t('nav.community') }}
           </button>
@@ -2050,6 +2050,10 @@ function showPayModal() {
 function showVipModal() {
   window.gtag('event', 'showVipModal')
   vipModalIsShow.value = true;
+}
+function openCommunityModal() {
+  window.gtag('event', 'editorCommunityClick')
+  showGroupQrModal.value = true;
 }
 function LockObj(value: boolean) {
   menuEntity?.setData({

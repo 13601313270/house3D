@@ -1017,6 +1017,7 @@
       }
 
       entry.addEventListener('click', function () {
+        window.gtag('event', 'communityEntryClick');
         loadQr();
         openModal();
       });
