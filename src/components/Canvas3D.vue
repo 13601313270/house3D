@@ -10,7 +10,7 @@ import { CameraState, OrthographicCamera } from '@/types/camera'
 import { PointEntityClass } from '@/types/pointEntity';
 import { BaseEntityClass } from '@/types/baseEntity';
 import WorldGroup from '@/world/world';
-import { timelineState } from '@/utils/timelineManage';
+import { LineEntityClass } from '@/types/lineEntity';
 
 const props = defineProps<{
   cameraState: CameraState,//  | OrthographicCamera,
@@ -50,34 +50,41 @@ const cameraStateZ = ref<CameraState | OrthographicCamera>({
 
 function raycastObjects(list: THREE.Group[], event: MouseEvent): THREE.Object3D | null {
   if (!camera || !containerRef.value || !renderer) return null
-
-  // const rect = containerRef.value.getBoundingClientRect()
-  // const canvasRect = renderer.domElement.getBoundingClientRect()
-
-  // const scaleX = canvasRect.width / rect.width
-  // const scaleY = canvasRect.height / rect.height
-
-  // const x = ((event.clientX - rect.left) * scaleX / canvasRect.width) * 2 - 1
-  // const y = -((event.clientY - rect.top) * scaleY / canvasRect.height) * 2 + 1
   // @ts-ignore
   const x = event.offsetX / event.target!.offsetWidth * 2 - 1
   // @ts-ignore
   const y = -(event.offsetY / event.target!.offsetHeight) * 2 + 1
-
   const mouse = new THREE.Vector2(x, y)
-  // @ts-ignore
-  // window.fffff = event;
-  // console.log('hoveredObject-x', x)
-  // console.log('hoveredObject-y', y)
   mouse.set(x, y)
   raycaster.setFromCamera(mouse, camera)
-
   const intersects = raycaster.intersectObjects(list, true)
-
   if (intersects.length > 0) {
     return intersects[0].object
   }
   return null
+}
+
+// 项目坐标系：data.x→worldX(水平), data.z→worldY(垂直高度), data.y→worldZ(水平)
+// 地面是 y=0 的 XZ 平面，与摄像机角度无关
+function getGroundPlaneIntersection(event: MouseEvent): THREE.Vector3 | null {
+  if (!camera || !containerRef.value || !renderer) return null
+  // @ts-ignore
+  const x = event.offsetX / event.target!.offsetWidth * 2 - 1
+  // @ts-ignore
+  const y = -(event.offsetY / event.target!.offsetHeight) * 2 + 1
+  const mouse = new THREE.Vector2(x, y)
+  // lookAt/position.set 只更新局部 matrix，matrixWorld 需手动刷新后 setFromCamera 才能拿到正确射线方向
+  camera.updateMatrixWorld()
+  raycaster.setFromCamera(mouse, camera)
+
+  // y=0 的 XZ 水平地面，法向量 (0,1,0)
+  const groundPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0)
+  const target = new THREE.Vector3()
+  const hit = raycaster.ray.intersectPlane(groundPlane, target)
+  if (!hit) return null
+
+  // hit = (worldX, 0, worldZ)，调用处自行映射到 data.x / data.y
+  return hit
 }
 
 function updateCameraAngel() {
@@ -424,6 +431,28 @@ const initThree = () => {
         canvas1IsMouseAngel = false
         emitCameraState()
       } else if (e.button === 0) {
+        if (window.globalEditGroup.insertTempObj) {
+          const sense = window.scene2D
+          if (window.globalEditGroup.insertTempObj instanceof PointEntityClass) {
+            if (sense.insertAdding === false) {
+              sense.triggerInsertAdding(true)
+              sense.insertAdding = true
+              window.globalEditGroup.add(window.globalEditGroup.insertTempObj.type, [window.globalEditGroup.insertTempObj.getData()]).then(() => {
+                if (window.globalEditGroup.insertTempObj) {
+                  window.globalEditGroup.insertTempObj.beforeRemove()
+                  window.globalEditGroup.insertTempObj = null;
+                  setTimeout(() => {
+                    sense.triggerInsertAdding(false)
+                    sense.insertAdding = false
+                    sense.matchHandelObj = null
+                    sense.matchedHandelInfo = null
+                  }, 300)// 至少停留300毫秒，防止出现那种闪现的效果。
+                }
+              })
+            }
+          }
+          return;
+        }
         canvas1IsMouseMoveObj = false
         canvas1IsMouseMove = false
 
@@ -502,7 +531,19 @@ const initThree = () => {
         if (window.globalEditGroup.insertTempObj) {
           if (window.globalEditGroup instanceof WorldGroup) {
             // @ts-ignore
-            // const hoveredObject = raycastObjects([...allBoundingBox, ...allLastTextBox], e)
+            if (window.globalEditGroup.insertTempObj instanceof LineEntityClass) {
+            } else {
+              const intersection = getGroundPlaneIntersection(e)
+              const sense = window.scene2D
+              if (sense.matchHandelObj && intersection && sense.matchedHandelInfo) {
+                sense.matchHandelObj.setData({
+                  x: intersection.x,
+                  y: intersection.z,
+                })
+                reRender()
+              }
+              return;
+            }
           }
           return;
         }
@@ -521,11 +562,6 @@ const initThree = () => {
         const allMoveXYZBox = window.globalEditGroup.moveXYZBoxList()
         const allLastTextBox: any[] = [];
         allMoveXYZBox.forEach((item) => {
-          // @ts-ignore
-          // const entity = item.children[0].entity as BaseEntityClass<any>
-          // if (entity instanceof PointEntityClass) {
-          //   entity.all3DActionHandel.visible = false
-          // }
           allLastTextBox.push(item.children[0]);
         })
 
