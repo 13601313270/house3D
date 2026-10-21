@@ -92,7 +92,7 @@
                   <div class="vipInfo">
                     <div class="vipTitle">{{ t('user.vipTitle') }}</div>
                     <div class="vipSubtitle">{{ t('user.vipExpire') }}{{ formattedVipEndDate }}{{ t('user.vipRemaining')
-                    }}{{ vipRemainingDays }}{{ t('user.vipDays') }}</div>
+                      }}{{ vipRemainingDays }}{{ t('user.vipDays') }}</div>
                   </div>
                 </div>
               </div>
@@ -152,7 +152,7 @@
 
       <div class="split-bar" @mousedown.prevent="startSplit(1)"></div>
 
-      <div class="right-panel" :style="{ width: panel2SplitWidthPer * 100 + '%' }">
+      <div class="scene-panel" :style="{ width: panel2SplitWidthPer * 100 + '%' }">
         <div class="tools">
           <div style="flex-shrink: 0;">{{ t('panel.panorama') }}</div>
           <div style="flex-grow: 1;"></div>
@@ -170,7 +170,7 @@
       </div>
 
       <div class="split-bar" @mousedown.prevent="startSplit(2)"></div>
-      <div class="right-panel" :style="{ width: (1 - panel1SplitWidthPer - panel2SplitWidthPer) * 100 + '%' }">
+      <div class="scene-panel" :style="{ width: (1 - panel1SplitWidthPer - panel2SplitWidthPer) * 100 + '%' }">
         <div class="tools">
           <div style="flex-shrink: 0;">{{ t('panel.cameraLabel') }}</div>
           <!-- <span>{{ activeCameraIndexOfTimeline }}&{{ activeCameraIndex }}</span> -->
@@ -2539,7 +2539,8 @@ button {
   // overflow: hidden; // 不能添加overflow: hidden;不然添加弹窗向右展开二级，被隐藏
 }
 
-.right-panel {
+.scene-panel {
+  transition: width 0.1s ease;
   height: 100%;
   background: #f0f2f5;
   position: relative;
@@ -2564,20 +2565,39 @@ button {
     height: 40px;
   }
 
-  .center-panel-content {
-    // padding: 8px;
-    width: 100%;
-    flex-grow: 1;
-    overflow: hidden;
-    box-sizing: border-box;
-  }
+  .buttons {
+    display: flex;
 
-  .right-panel-content {
-    padding: 8px;
+    >button {
+      margin-left: 4px;
+      color: #17181A;
+    }
+  }
+}
+
+.center-panel-content {
+  // padding: 8px;
+  width: 100%;
+  flex-grow: 1;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.right-panel-content {
+  padding: 8px;
+  width: 100%;
+  flex-grow: 1;
+  overflow: hidden;
+  box-sizing: border-box;
+
+  .noCamera {
+    font-size: 14px;
+    color: #ff4d4f;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     width: 100%;
-    flex-grow: 1;
-    overflow: hidden;
-    box-sizing: border-box;
+    height: 100%;
   }
 }
 
@@ -2644,55 +2664,33 @@ button {
   }
 }
 
-.left-panel,
-.right-panel {
+.left-panel {
   transition: width 0.1s ease;
 }
 
-.right-panel {
-  .cameraList {
-    display: flex;
-    flex-grow: 1;
+.cameraList {
+  display: flex;
+  flex-grow: 1;
 
-    .cameraItem {
-      border: solid 1px black;
-      width: 28px;
-      height: 28px;
-      line-height: 30px;
-      text-align: center;
-      border-radius: 4px;
-      margin-left: 4px;
-      cursor: pointer;
+  .cameraItem {
+    border: solid 1px black;
+    width: 28px;
+    height: 28px;
+    line-height: 30px;
+    text-align: center;
+    border-radius: 4px;
+    margin-left: 4px;
+    cursor: pointer;
 
-      &:hover {
-        background-color: #f5f5f5;
-      }
-
-      &.active {
-        background-color: rgb(99, 91, 255);
-        border: solid 1px rgb(99, 91, 255);
-        color: white;
-      }
+    &:hover {
+      background-color: #f5f5f5;
     }
-  }
 
-  .buttons {
-    display: flex;
-
-    >button {
-      margin-left: 4px;
-      color: #17181A;
+    &.active {
+      background-color: rgb(99, 91, 255);
+      border: solid 1px rgb(99, 91, 255);
+      color: white;
     }
-  }
-
-  .noCamera {
-    font-size: 14px;
-    color: #ff4d4f;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    height: 100%;
   }
 }
 
