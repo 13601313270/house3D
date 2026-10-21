@@ -12,8 +12,11 @@ export type BoneStepItem = {
     pz: number
   }
 }
+export type PeopleModelType = 'man' | 'woman'
+
 export type PeopleData = ModelFileData & {
   height: number,// 身高
   color?: string,// 人物颜色
   bone?: Array<BoneStepItem>
+  modelType?: PeopleModelType | string, // 模型类型或 URL
 }

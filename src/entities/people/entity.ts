@@ -1,13 +1,25 @@
 import * as THREE from 'three'
 import { HandelInfo } from '@/types/map2d'
-import { BoneStepItem, PeopleData } from './index.d'
+import { BoneStepItem, PeopleData, PeopleModelType } from './index.d'
 import { editItem } from '@/utils/editItem'
 // @ts-ignore
 import { FBXLoader } from 'three/addons/loaders/FBXLoader.js';
+import { clone } from 'three/examples/jsm/utils/SkeletonUtils.js'
 import { GroupBaseEntity } from '@/types/groupBase/entity'
 import { GroupBaseData } from '@/types/groupBase'
 import { ModelFileEntity } from '@/types/modelFileEntity'
 import canvas2DSceneManage from '@/utils/canvas2DSceneManage'
+
+// 静态缓存：key=模型类型或 URL，value=已加载的 FBX 根对象
+const modelCache: Record<string, THREE.Group | THREE.Mesh | null> = {
+  man: null,
+  woman: null,
+}
+// 模型类型 → FBX 路径映射
+const modelPathMap: Record<PeopleModelType, string> = {
+  man: './ManClean.fbx',
+  woman: './WomanClean.fbx',
+}
 
 export class PeopleEntity extends ModelFileEntity<PeopleData> {
   type: string = 'people'
@@ -27,19 +39,43 @@ export class PeopleEntity extends ModelFileEntity<PeopleData> {
     if (data.scale === undefined) {
       data.scale = 1;
     }
+    if (data.modelType === undefined) {
+      data.modelType = 'man';
+    }
     super(world, data)
   }
 
-  init(): Promise<void> {
-    return new Promise((resolve) => {
+  /**
+   * 按需加载模型，带静态缓存。
+   * @param source 模型类型（'man' | 'woman'）或任意 FBX URL
+   */
+  private loadModel(source: PeopleModelType | string): Promise<THREE.Group | THREE.Mesh> {
+    const url = source in modelPathMap ? modelPathMap[source as PeopleModelType] : source
+    if (modelCache[source]) {
+      return Promise.resolve(modelCache[source]!)
+    }
+    return new Promise((resolve, reject) => {
       const loader = new FBXLoader()
-      loader.load('./ManClean.fbx', (fbxModel: THREE.Mesh) => {
-        this.mesh = fbxModel
-        this.initBasicBoxDataAnd2DPreview().then(res => {
-          resolve(res)
-        })
-      })
+      loader.load(
+        url,
+        (fbxModel: THREE.Group) => {
+          modelCache[source] = fbxModel
+          resolve(fbxModel)
+        },
+        undefined,
+        // @ts-ignore
+        (err: Error) => {
+          console.error(`加载 ${url} 失败`, err)
+          reject(err)
+        }
+      )
     })
+  }
+
+  async init(): Promise<void> {
+    const modelType = this.getData().modelType || 'man'
+    this.mesh = await this.loadModel(modelType)
+    await this.initBasicBoxDataAnd2DPreview()
   }
 
   create3DMesh(): THREE.Group {
@@ -50,18 +86,15 @@ export class PeopleEntity extends ModelFileEntity<PeopleData> {
       console.error('未找到对应的文件类型:')
       return group
     }
-    const threeObject = this.mesh
+    // 先 clone，避免修改共享缓存对象
+    const threeObject = clone(this.mesh) as THREE.Group
     const boneListConfig = data.bone || [];
     threeObject.traverse((child: any) => {
       if (child.isBone) {
-        // console.log('boneListConfig', boneListConfig)
-        // console.log(`🦴 发现骨骼: ${child.name}`);
         const findProp = boneListConfig.find((item) => item.name === child.name)
-        // console.log('boneListConfig-findProp', findProp)
         if (findProp) {
           child.rotation.set(findProp.value.x, findProp.value.y, findProp.value.z)
         }
-        // console.log(`🦴 发现骨骼-1:${child.name}: ${child.rotation.x}, ${child.rotation.y}, ${child.rotation.z}`);
       }
     });
     // 设置人物颜色
@@ -123,6 +156,16 @@ export class PeopleEntity extends ModelFileEntity<PeopleData> {
         dataType: 'title',
       },
       {
+        id: 'modelType',
+        label: '模型',
+        dataType: 'enum',
+        value: data.modelType || 'man',
+        enumList: [
+          { id: 'man', name: '男性', img: '../assets/Empty.png' },
+          { id: 'woman', name: '女性', img: '../assets/Empty.png' },
+        ],
+      },
+      {
         id: 'height',
         label: '身高',
         dataType: 'number',
@@ -167,10 +210,29 @@ export class PeopleEntity extends ModelFileEntity<PeopleData> {
   editPropConfig(snapPoint: HandelInfo, editShow: (editInfoList: editItem[], callback: (val: any) => void) => void): void {
     const data = this.getData();
     editShow(this.getEditPropConfigData(data), (val) => {
-      this.setData({
-        // ...data,
-        ...val,
-      })
+      // 切换模型：先换 mesh（有缓存则同步，无缓存则等加载完），再 setData 触发重建
+      if (val.modelType && val.modelType !== data.modelType) {
+        const targetType = val.modelType as PeopleModelType
+        const cached = modelCache[targetType]
+        const applySwitch = (targetMesh: THREE.Group | THREE.Mesh) => {
+          this.mesh = targetMesh
+          this.initBasicBoxDataAnd2DPreview().then(() => {
+            this.reBuildBoundingBoxData()
+            canvas2DSceneManage.renderPreview()
+          })
+          this.setData({ ...val })
+        }
+        if (cached) {
+          applySwitch(cached)
+        } else {
+          this.loadModel(targetType).then(applySwitch).catch((err) => {
+            console.error('模型切换失败', err)
+          })
+        }
+        return
+      }
+
+      this.setData({ ...val })
       console.log('editPropConfig', val)
       if (val.bone) {
         setTimeout(() => {
