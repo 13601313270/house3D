@@ -18,7 +18,7 @@ export interface NearestWallResult {
 }
 
 export abstract class EntityInWall<T extends ObjInWallData> extends PointEntityClass<T> {
-  getHandelList(): Array<'+x' | '-x' | '+y' | '-y' | '+z' | 'xy'> {
+  override getHandelList(): Array<'+x' | '-x' | '+y' | '-y' | '+z' | 'xy' | 'rz'> {
     return ['+z']
   }
 

@@ -11,6 +11,10 @@ import { lang } from '@/i18n'
 const movePlaneTexture = new THREE.TextureLoader().load('/icons/move.png')
 movePlaneTexture.colorSpace = THREE.SRGBColorSpace
 
+// 旋转 handle 图标纹理（弧形箭头）
+const rotateIconTexture = new THREE.TextureLoader().load('/icons/angel.png')
+rotateIconTexture.colorSpace = THREE.SRGBColorSpace
+
 export abstract class PointEntityClass<T extends PointObjData> extends BaseEntityClass<T> {
   boundingBox: THREE.Group
   all3DActionHandel!: THREE.Group
@@ -50,7 +54,7 @@ export abstract class PointEntityClass<T extends PointObjData> extends BaseEntit
     this.updateBoundingBoxState();
   }
 
-  getHandelList(): Array<'+x' | '-x' | '+y' | '-y' | '+z' | 'xy'> {
+  getHandelList(): Array<'+x' | '-x' | '+y' | '-y' | '+z' | 'xy' | 'rz'> {
     return ['+x', '-x', '+y', '-y', '+z', 'xy']
   }
 
@@ -120,7 +124,7 @@ export abstract class PointEntityClass<T extends PointObjData> extends BaseEntit
         outerGroup.add(createArrow('y', -1, 0x00ff00))
       }
       if (key === 'xy') {
-        // children[5]: x/y 平面拖动面（水平方形），拖动可在 x/y 两轴自由移动
+        // x/y 平面拖动面（水平方形），拖动可在 x/y 两轴自由移动
         const planeMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.9, side: THREE.DoubleSide, map: movePlaneTexture });
         planeMaterial.depthTest = false;
         planeMaterial.depthWrite = false;
@@ -132,6 +136,27 @@ export abstract class PointEntityClass<T extends PointObjData> extends BaseEntit
         // @ts-ignore
         planeMesh.moveType = 'xy'
         outerGroup.add(planeMesh)
+      }
+      if (key === 'rz') {
+        // 绕 z 轴（水平面）旋转 handle：和 xy 平面同高，使用 angel.png 贴图
+        const rzMaterial = new THREE.MeshBasicMaterial({
+          color: 0xffffff,
+          transparent: true,
+          opacity: 0.95,
+          side: THREE.DoubleSide,
+          map: rotateIconTexture,
+        })
+        rzMaterial.depthTest = false;
+        rzMaterial.depthWrite = false;
+        const rzMesh = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), rzMaterial);
+        rzMesh.layers.set(2)
+        rzMesh.rotation.x = -Math.PI / 2 // 平铺到水平面（朝上）
+        rzMesh.rotation.z = -Math.PI / 2 // 平铺到水平面（朝上）
+        // @ts-ignore
+        rzMesh.entity = this
+        // @ts-ignore
+        rzMesh.moveType = 'rz'
+        outerGroup.add(rzMesh)
       }
     })
 
@@ -348,10 +373,20 @@ export abstract class PointEntityClass<T extends PointObjData> extends BaseEntit
           setArrow(handelList.indexOf('-y'), ox, oy, -halfBoxZ - height / 2 + oz)
         }
         if (handelList.includes('xy')) {
-          // children[5]: x/y 平面拖动面（水平方形），平铺在盒子底部
+          // x/y 平面拖动面（水平方形），平铺在盒子底部
           const planeSide = radio * 5
           this.all3DActionHandel!.children[handelList.indexOf('xy')].scale.set(planeSide, planeSide, 1)
           this.all3DActionHandel!.children[handelList.indexOf('xy')].position.set(ox, oy - halfBoxY, oz)
+        }
+        if (handelList.includes('rz')) {
+          // 旋转 handle：和 xy 平面同高，放在盒子 +z（data.y）侧面外侧，避免遮挡 xy 平面
+          const rzSize = radio * 2.5
+          this.all3DActionHandel!.children[handelList.indexOf('rz')].scale.set(rzSize, rzSize, 1)
+          this.all3DActionHandel!.children[handelList.indexOf('rz')].position.set(
+            ox,
+            oy - halfBoxY,
+            halfBoxZ + rzSize * 0.7 + oz,
+          )
         }
       }
     } else {

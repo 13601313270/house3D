@@ -182,6 +182,11 @@ const initThree = () => {
     let camera1MouseMoveStartPos: { x: number; y: number; z: number } = { x: 0, y: 0, z: 0 };
     let canvas1HoveredObject: THREE.Object3D<THREE.Object3DEventMap> | null = null;
 
+    // 旋转 handle 拖拽状态
+    let canvas1RotateStartAngleY = 0;
+    let canvas1RotateLastAtan2: number | null = null;
+    let canvas1RotateAccumDelta = 0;
+
     let canvas1LastMouseX = 0;
     let canvas1LastMouseY = 0;
 
@@ -285,6 +290,19 @@ const initThree = () => {
               canvas1HoveredObject = moveZBoxHit
               const startPos = entity.getData()
               camera1MouseMoveStartPos = { x: startPos.x, y: startPos.y, z: startPos.z }
+              // 旋转 handle 额外记录起始角度和起始水平面投影
+              // @ts-ignore
+              if (moveZBoxHit.moveType === 'rz') {
+                // @ts-ignore
+                canvas1RotateStartAngleY = entity.getData().angleY ?? 0
+                const hit = getGroundPlaneIntersection(e)
+                if (hit) {
+                  canvas1RotateLastAtan2 = Math.atan2(hit.z - startPos.y, hit.x - startPos.x)
+                  canvas1RotateAccumDelta = 0
+                } else {
+                  canvas1RotateLastAtan2 = null
+                }
+              }
               // 重置 pending click，因为 all3DActionHandel 拖拽不属于 click 判定
               canvas1PendingClickTarget = null;
               canvas1PendingClickStartX = e.clientX;
@@ -412,9 +430,25 @@ const initThree = () => {
               } else if (moveType === 'x') {
                 const { worldX } = computeHorizontalPlaneDelta(deltaX, deltaY)
                 entity.setData({ x: camera1MouseMoveStartPos.x + worldX })
-              } else {
+              } else if (moveType === 'y') {
                 const { worldZ } = computeHorizontalPlaneDelta(deltaX, deltaY)
                 entity.setData({ y: camera1MouseMoveStartPos.y + worldZ })
+              } else if (moveType === 'rz') {
+                // 水平面旋转：atan2 角度差累加，防止 π/-π 跳变
+                const hit = getGroundPlaneIntersection(e)
+                if (hit) {
+                  const curAtan2 = Math.atan2(hit.z - camera1MouseMoveStartPos.y, hit.x - camera1MouseMoveStartPos.x)
+                  if (canvas1RotateLastAtan2 !== null) {
+                    let frameDelta = curAtan2 - canvas1RotateLastAtan2
+                    while (frameDelta > Math.PI) frameDelta -= Math.PI * 2
+                    while (frameDelta <= -Math.PI) frameDelta += Math.PI * 2
+                    canvas1RotateAccumDelta += frameDelta
+                  }
+                  canvas1RotateLastAtan2 = curAtan2
+                  entity.setData({
+                    angleY: canvas1RotateStartAngleY - canvas1RotateAccumDelta,
+                  } as any)
+                }
               }
               reRender()
             }

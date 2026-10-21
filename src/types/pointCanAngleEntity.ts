@@ -5,6 +5,10 @@ import { angelIcon, moveIcon } from '@/utils/handleImgs'
 
 // 可以旋转的点对象
 export abstract class PointCanAngleEntity<T extends PointCanAngleObjData> extends PointEntityClass<T> {
+  override getHandelList(): Array<'+x' | '-x' | '+y' | '-y' | '+z' | 'xy' | 'rz'> {
+    return ['+x', '-x', '+y', '-y', '+z', 'xy', 'rz']
+  }
+
   protected baseDrawAngelLength = 40;
 
   private _rotateDragSession: {
