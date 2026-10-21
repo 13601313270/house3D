@@ -29,7 +29,7 @@
         <div class="moveIcon">
           <img src="../assets/move2.svg" alt="move" @mousedown.prevent />
         </div>
-        <div class="title">{{ tPluginName(typeKey, allFileKeysName[typeKey]) }}</div>
+        <div class="title">{{ tPluginName(typeKey) }}</div>
         <div class="closeIcon" @mousedown.stop @click="emit('close')">
           <img @mousedown.stop.prevent src="../assets/closeWhite.svg" alt="close" />
         </div>

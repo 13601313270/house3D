@@ -55,7 +55,7 @@
       <div v-for="groupItem in allFileKeysGroup.filter(item => item.id !== 'other')" :key="groupItem.id"
         class="typeItemContent" :class="{ active: activeObjTypeId === groupItem.id }">
         <div class="typeName" @mouseenter="mouseenterGroup(groupItem.id)">{{ tCategoryName(groupItem.id, groupItem.name)
-          }}
+        }}
         </div>
         <div class="childItemList"
           v-if="activeObjTypeId === groupItem.id && groupItem.child && groupItem.child.length > 0">
@@ -148,9 +148,23 @@
             <img class="img" v-else src="../assets/Empty.png" alt="" />
             <div class="name">{{ item.name }}</div>
           </div>
+          <div v-for="(item, index) in origionDefaultValues" :key="index" class="defaultValueItem"
+            @click="createObjWithDefaultValue(currentToolType, item)">
+            <img class="img" v-if="item.img" :src="item.img" alt="" />
+            <img class="img" v-else src="../assets/Empty.png" alt="" />
+            <div class="name">{{ item.name }}</div>
+          </div>
+          <!-- {{ currentDefaultValues }}
+          {{ origionDefaultValues }} -->
+          <div v-if="currentToolType === 'people'" class="defaultValueItem" @click="showLocalAiImageToModel = true">
+            <img class="img" src="../assets/ai-wand.svg" alt="" />
+            <div class="name">{{ t('ai3d.title') }}</div>
+          </div>
         </div>
       </div>
     </div>
+    <AiImageToModel v-if="showLocalAiImageToModel" @close="showLocalAiImageToModel = false" isPeople
+      @success="initRoleList(), showLocalAiImageToModel = false" />
   </teleport>
   <MaterialLibraryModal v-model:visible="showMaterialLibraryModal" @refresh="refreshMineObjList" />
   <teleport to="#teleport">
@@ -174,6 +188,7 @@ import { BaseObjData } from '@/types/map2d';
 import { handleLoadedObject, handleLoadedObjectByUrl } from '@/utils/handleLoadedObject';
 import importOutObj from '@/utils/importOutObj';
 import MaterialLibraryModal from './MaterialLibraryModal.vue';
+import AiImageToModel from './AiImageToModel.vue';
 import message from '@/utils/message';
 import request from '@/utils/request';
 import { useStore } from 'vuex';
@@ -188,6 +203,8 @@ const emits = defineEmits<{
   (e: 'select', value: string, baseObj: BaseEntityClass<any>): void,
   (e: 'showHelpModal'): void,
 }>()
+
+const showLocalAiImageToModel = ref(false)
 
 type activeObjChildItem = {
   id: string,
@@ -235,6 +252,7 @@ const activeOtherUserObjChildList = ref<Array<otherUserObjItem>>([])
 
 const showDefaultValueModal = ref(false)
 const currentDefaultValues = ref<DefaultItem<any>[]>([])
+const origionDefaultValues = ref<DefaultItem<any>[]>([])
 const currentToolType = ref('')
 const loading = ref(false)
 const showMaterialLibraryModal = ref(false)
@@ -264,19 +282,25 @@ function markGuideCompleted() {
 async function changeCurrentTool(type: string) {
   const ClassName = fileDataKeyToClass[type];
   console.log('ClassName', ClassName)
-  let defaultValue: DefaultItem<BaseObjData>[] | Promise<DefaultItem<BaseObjData>[]> = allPluginByKey[type].defaultValues()
+  let defaultValue: DefaultItem<BaseObjData>[] | Promise<DefaultItem<BaseObjData>[]> = [];
+  defaultValue = allPluginByKey[type].defaultValues()
   if (defaultValue instanceof Promise) {
     loading.value = true
     defaultValue = await defaultValue
   }
   loading.value = false
-
   if (!ClassName) return
 
-  if (defaultValue.length > 1) {
+  if (
+    defaultValue.length > 1
+    // || type === 'people'
+  ) {
     currentDefaultValues.value = defaultValue
     currentToolType.value = type
     showDefaultValueModal.value = true
+    if (currentToolType.value === 'people') {
+      initRoleList()
+    }
   } else if (defaultValue.length === 1) {
     createObjWithDefaultValue(type, defaultValue[0])
   }
@@ -578,6 +602,27 @@ async function refreshMineObjList() {
   ])
   mineObjChildList.value = resUpload.data
 }
+async function initRoleList() {
+  const { data: res } = await request.get('/pet/getRoleList')
+  origionDefaultValues.value = res.map((v: any) => {
+    return {
+      name: "自定义角色",
+      img: v.previewImg,
+      data: {
+        id: "people_" + Math.random().toString(36).substring(2),
+        x: 0,
+        y: 0,
+        z: 0,
+        scale: 1,
+        angleY: 0,
+        color: "#DEDEDE",
+        height: 170,
+        bone: [],
+        modelType: 'https://video-user-obj.oss-cn-beijing.aliyuncs.com/1243bd8676bb2806bfea4a7d1fa4cc85.glb', // v.file,
+      }
+    }
+  });
+}
 </script>
 <style lang="less" scoped>
 .toolbar-item {
@@ -869,7 +914,7 @@ async function refreshMineObjList() {
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 2000;
+  z-index: 999;
 
   .modalContent {
     background: white;

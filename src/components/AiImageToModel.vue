@@ -30,9 +30,13 @@
                 </div>
               </div>
               <input type="file" ref="fileInputRef" accept="image/*" style="display: none" @change="handleFileChange" />
-              <button v-if="imageBase64" class="reupload-btn" @click="triggerFileInput">{{ t('ai3d.reupload') }}</button>
+              <button v-if="imageBase64" class="reupload-btn" @click="triggerFileInput">{{ t('ai3d.reupload')
+                }}</button>
             </div>
 
+            <div v-if="isSubmitting" class="procss">
+              {{ creatStep === 'create' ? '创建模型中' : '骨骼生成中' }}&nbsp;进度:{{ progress }}%
+            </div>
             <div class="action-section">
               <div class="submit-btn" :class="{ disabled: !imageBase64 || isSubmitting || isQuerying }"
                 @click="handleSubmit">
@@ -71,13 +75,18 @@ import { sleep } from '@/utils/sleep'
 import Hunyuan3DItem from './hunyuan3DItem.vue'
 import { t } from '@/i18n'
 
+const props = defineProps<{
+  isPeople?: boolean
+}>()
 const store = useStore<Store>()
 const emit = defineEmits<{
-  (e: 'close'): void
+  (e: 'close'): void,
+  (e: 'success'): void,
 }>()
 
 const fileInputRef = ref<HTMLInputElement | null>(null)
 const imageBase64 = ref('')
+const imageFile = ref<File | null>(null)
 const isSubmitting = ref(false)
 const isQuerying = ref(false)
 const currentJobId = ref<number>()
@@ -85,6 +94,8 @@ const resultPreviewImgUrl = ref('')
 const resultText = ref('')
 const resultType = ref('')
 const resultUrl = ref('')
+const creatStep = ref<'create' | 'rig'>('create')
+const progress = ref<number>(0)
 const exitList = ref<Array<{
   fileSize: number,
   id: number,
@@ -125,6 +136,8 @@ const triggerFileInput = () => {
 const MAX_IMAGE_WIDTH = 500
 
 const readFileAsBase64 = async (file: File) => {
+  imageFile.value = file
+
   const dataUrl = await new Promise<string>((resolve, reject) => {
     const reader = new FileReader()
     reader.onload = (e) => resolve(e.target?.result as string)
@@ -240,41 +253,117 @@ const handleSubmit = async () => {
 
   try {
     startLoading()
-    const response = await request.post('/video/hunyuan3D/submitHunyuanTo3DRapidJob', {
-      imageBase64: imageBase64.value,
-    }).finally(() => {
-      stopLoading()
-    })
-
-    if (response.status === 200) {
-      const data = response.data
-      console.log('=====data======')
-      console.log(data)
-      if (data.result) {
-        const jobId = data.data
-        console.log(jobId)
-        currentJobId.value = jobId
-        resultPreviewImgUrl.value = ''
-        resultType.value = ''
-        resultText.value = t('ai3d.taskSubmitted')
-        message.success(t('ai3d.submitSuccess'), { duration: 6000 })
-
-        // 刷新积分数量
-        request.get('/video/user/info').then(res => {
-          // console.log(res)
-          if (res.status === 200) {
-            store.dispatch('main/setUserInfo', res.data)
-          }
-        })
-
-        queryJobStatus(jobId)
-      } else {
-        alert(data.error);
-        // message.error(data.error)
+    if (props.isPeople) {
+      const formData = new FormData()
+      formData.append('file', imageFile.value!)
+      const { data: response } = await request.post('/pet/create3DByImg', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      }).finally(() => {
+        stopLoading()
+      })
+      console.log('response---1', response)
+      if (response.result === false) {
+        message.error(response.error)
       }
+      const taskId = response.data;
+      console.log('response---2', taskId)
+      async function animationsRig(taskId: string) {
+        console.log('response---3', taskId)
+        const { data: newTaskId } = await request.get(`/pet/animationsRig?taskId=${taskId}`)
+        console.log('response---4', newTaskId.data)
+
+        const interval2 = setInterval(async () => {
+          const taskRes = await request.get(`/pet/getTaskInfo?taskId=${newTaskId.data}`)
+          console.log('taskRes', taskRes.data)
+          const taskData: {
+            output: {
+              model_url: string,
+              rendered_image_url: string,
+            },
+            status: 'success' | "running",
+            progress: number,
+          } = taskRes.data;
+          console.log('response---4.1', taskData)
+          creatStep.value = 'rig'
+          progress.value = taskData.progress
+          if (taskData && taskData.status === 'success') {
+            clearInterval(interval2)
+            const insertData = await request.post(`/pet/createVideoRole`, {
+              file: taskData.output.model_url,
+              previewImg: taskData.output.rendered_image_url,
+            })
+            console.log('response---6', insertData)
+            message.success(t('ai3d.submitSuccess'), { duration: 6000 })
+
+            // 刷新积分数量
+            request.get('/video/user/info').then(res => {
+              // console.log(res)
+              if (res.status === 200) {
+                store.dispatch('main/setUserInfo', res.data)
+              }
+            })
+            emit('success')
+            isSubmitting.value = false
+          }
+        }, 5000)
+      }
+
+      const interval = setInterval(async () => {
+        const taskRes = await request.get(`/pet/getTaskInfo?taskId=${taskId}`)
+        console.log('taskRes', taskRes.data)
+        const taskData: {
+          output: {
+            model_url: string,
+            rendered_image_url: string,
+          },
+          status: 'success' | "running",
+          progress: number,
+        } = taskRes.data;
+        creatStep.value = 'create'
+        progress.value = taskData.progress
+        if (taskData && taskData.status === 'success') {
+          clearInterval(interval)
+          animationsRig(taskId)
+        }
+      }, 5000)
     } else {
-      alert(response.statusText || t('ai3d.submitFailed'));
-      // message.error(response.statusText || '提交失败')
+      const response = await request.post('/video/hunyuan3D/submitHunyuanTo3DRapidJob', {
+        imageBase64: imageBase64.value,
+      }).finally(() => {
+        stopLoading()
+      })
+
+      if (response.status === 200) {
+        const data = response.data
+        console.log('=====data======')
+        console.log(data)
+        if (data.result) {
+          const jobId = data.data
+          console.log(jobId)
+          currentJobId.value = jobId
+          resultPreviewImgUrl.value = ''
+          resultType.value = ''
+          resultText.value = t('ai3d.taskSubmitted')
+          message.success(t('ai3d.submitSuccess'), { duration: 6000 })
+
+          // 刷新积分数量
+          request.get('/video/user/info').then(res => {
+            // console.log(res)
+            if (res.status === 200) {
+              store.dispatch('main/setUserInfo', res.data)
+            }
+          })
+
+          queryJobStatus(jobId)
+        } else {
+          alert(data.error);
+          // message.error(data.error)
+        }
+      } else {
+        alert(response.statusText || t('ai3d.submitFailed'));
+        // message.error(response.statusText || '提交失败')
+      }
+      isSubmitting.value = false
     }
   } catch (error: any) {
     console.error('AI图生模型提交失败:', error)
@@ -286,7 +375,6 @@ const handleSubmit = async () => {
         duration: 10000,
       })
     }
-  } finally {
     isSubmitting.value = false
   }
 }
@@ -444,6 +532,12 @@ function handleDelete() {
             color: #1677ff;
           }
         }
+      }
+
+      .procss {
+        font-size: 14px;
+        color: #666;
+        margin-bottom: 10px;
       }
 
       .action-section {

@@ -4,6 +4,8 @@ import { BoneStepItem, PeopleData, PeopleModelType } from './index.d'
 import { editItem } from '@/utils/editItem'
 // @ts-ignore
 import { FBXLoader } from 'three/addons/loaders/FBXLoader.js';
+// @ts-ignore
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { clone } from 'three/examples/jsm/utils/SkeletonUtils.js'
 import { GroupBaseEntity } from '@/types/groupBase/entity'
 import { GroupBaseData } from '@/types/groupBase'
@@ -47,28 +49,51 @@ export class PeopleEntity extends ModelFileEntity<PeopleData> {
 
   /**
    * 按需加载模型，带静态缓存。
-   * @param source 模型类型（'man' | 'woman'）或任意 FBX URL
+   * 根据 URL 扩展名自动选择 FBXLoader 或 GLTFLoader。
+   * @param source 模型类型（'man' | 'woman'）或任意 FBX/GLB URL
    */
   private loadModel(source: PeopleModelType | string): Promise<THREE.Group | THREE.Mesh> {
     const url = source in modelPathMap ? modelPathMap[source as PeopleModelType] : source
     if (modelCache[source]) {
       return Promise.resolve(modelCache[source]!)
     }
+    const isGLB = /\.(glb|gltf)$/i.test(url)
     return new Promise((resolve, reject) => {
-      const loader = new FBXLoader()
-      loader.load(
-        url,
-        (fbxModel: THREE.Group) => {
-          modelCache[source] = fbxModel
-          resolve(fbxModel)
-        },
-        undefined,
-        // @ts-ignore
-        (err: Error) => {
-          console.error(`加载 ${url} 失败`, err)
-          reject(err)
-        }
-      )
+      const onError = (err: Error) => {
+        console.error(`加载 ${url} 失败`, err)
+        reject(err)
+      }
+      if (isGLB) {
+        const loader = new GLTFLoader()
+        loader.load(
+          url,
+          (gltf: any) => {
+            modelCache[source] = gltf.scene
+            console.log('aaaa-a', gltf.scene, gltf.scene.scale)
+            gltf.scene.children[0].scale.setX(180)
+            gltf.scene.children[0].scale.setY(180)
+            gltf.scene.children[0].scale.setZ(180)
+            console.log('aaaa-a', gltf.scene, gltf.scene.scale)
+            // gltf.scene.scale = 10;
+            resolve(gltf.scene)
+          },
+          undefined,
+          onError
+        )
+      } else {
+        const loader = new FBXLoader()
+        loader.load(
+          url,
+          (fbxModel: THREE.Group) => {
+            modelCache[source] = fbxModel
+            console.log('aaaa-b', fbxModel)
+            resolve(fbxModel)
+          },
+          undefined,
+          // @ts-ignore
+          onError
+        )
+      }
     })
   }
 
@@ -92,9 +117,58 @@ export class PeopleEntity extends ModelFileEntity<PeopleData> {
     threeObject.traverse((child: any) => {
       if (child.isBone) {
         const findProp = boneListConfig.find((item) => item.name === child.name)
-        if (findProp) {
-          child.rotation.set(findProp.value.x, findProp.value.y, findProp.value.z)
+        if (!findProp) { return; }
+
+        let newRX = findProp.value.x;
+        let newRY = findProp.value.y;
+        let newRZ = findProp.value.z;
+        if (findProp?.name === "mixamorigRightArm") {
+          console.log('findProp-2', child.rotation.x, findProp.value.x)
+          console.log('findProp-2', child.rotation.y, findProp.value.y)
+          console.log('findProp-2', child.rotation.z, findProp.value.z)
         }
+        if (data.modelType?.startsWith('https://')) {
+          if (findProp?.name === "mixamorigRightShoulder") {
+            newRX -= 3.14;
+            newRZ -= 0.2;
+          } else if (findProp?.name === "mixamorigRightArm") {
+            newRX += 3.0;
+            newRY -= 0.2;
+            newRZ -= 2.7;
+            newRZ *= -1
+            // newRX = child.rotation.x;
+            // newRY = child.rotation.y;
+            // newRZ = child.rotation.z;
+          } else if (findProp?.name === "mixamorigRightForeArm") {
+            // newRY = 0;
+            // newRZ += 0.5;
+            // newRZ = Math.PI / -2;
+            // newRZ = 0;
+            console.log('findProp-2222', newRZ, child.rotation.z)
+            // newRZ += 0.5;
+            // return;
+          } else if (findProp?.name === "mixamorigSpine") {
+            newRY += 1.48;
+            // newRZ += 3.14 * 3;
+          } else if (findProp?.name === "mixamorigHips") {
+            newRX += 1.4;
+            newRY -= 3.14 / 2;
+            return;
+          } else {
+            return;
+          }
+        } else {
+          if (findProp?.name === "mixamorigRightArm") {
+            // newRX = child.rotation.x;
+            // newRZ += 0.5;
+            // newRY = 0;
+            // newRZ = Math.PI / -2;
+            console.log('findProp-2222', newRZ, child.rotation.z)
+            // newRZ += 0.5;
+            // return;
+          }
+        }
+        child.rotation.set(newRX, newRY, newRZ)
       }
     });
     // 设置人物颜色
@@ -134,16 +208,16 @@ export class PeopleEntity extends ModelFileEntity<PeopleData> {
     if (this.meshGroup?.children[0] && data.bone && data.bone?.length > 0) {
       const boneListConfig = data.bone
       if (boneListConfig && typeof boneListConfig !== 'string') {
-        this.meshGroup?.children[0].traverse((child: any) => {
-          if (child.isBone) {
-            const findProp = boneListConfig.find((item) => item.name === child.name)
-            if (findProp) {
-              // console.log(`🦴 发现骨骼-1: ${child.name}`, findProp.value);
-              child.rotation.set(findProp.value.x, findProp.value.y, findProp.value.z)
-              child.position.set(findProp.value.px, findProp.value.py, findProp.value.pz)
-            }
-          }
-        })
+        // this.meshGroup?.children[0].traverse((child: any) => {
+        //   if (child.isBone) {
+        //     const findProp = boneListConfig.find((item) => item.name === child.name)
+        //     if (findProp) {
+        //       // console.log(`🦴 发现骨骼-1: ${child.name}`, findProp.value);
+        //       child.rotation.set(findProp.value.x, findProp.value.y, findProp.value.z)
+        //       child.position.set(findProp.value.px, findProp.value.py, findProp.value.pz)
+        //     }
+        //   }
+        // })
       }
     }
   }
