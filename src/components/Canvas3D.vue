@@ -1,6 +1,26 @@
 <template>
   <div class="canvas-3d-container" ref="containerRef" @mouseleave="mouseLeave">
-    <div v-if="showSizeLabel" class="size-label">{{ containerSize }}</div>
+    <div v-if="showSizeLabel" class="size-label-wrap" ref="sizeLabelWrapRef">
+      <div class="size-label interactive" @click.stop="toggleDropdown">
+        <span class="tier">{{ baseResolution }}</span>
+        <span class="sep">·</span>
+        <span class="dims">{{ containerSize }}</span>
+        <span class="chevron" :class="{ open: dropdownOpen }">▾</span>
+      </div>
+      <div v-if="dropdownOpen" class="size-dropdown">
+        <div
+          v-for="tier in RES_TIERS"
+          :key="tier"
+          class="size-option"
+          :class="{ active: tier === baseResolution }"
+          @click.stop="selectResolution(tier)"
+        >
+          <span class="opt-tier">{{ tier }}</span>
+          <span class="opt-dims">{{ tierDimsPreview(tier) }}</span>
+          <span v-if="tier === baseResolution" class="opt-check">✓</span>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -24,6 +44,44 @@ const props = defineProps<{
 
 const containerSize = ref('')
 let sizeObserver: ResizeObserver | null = null
+
+// 绘制缓冲区档位：长边像素，默认 2048
+const RES_TIERS = [512, 1024, 2048, 4096] as const
+const baseResolution = ref<typeof RES_TIERS[number]>(2048)
+
+// 下拉状态 + 点击外部关闭
+const dropdownOpen = ref(false)
+const sizeLabelWrapRef = ref<HTMLElement | null>(null)
+
+function toggleDropdown() {
+  dropdownOpen.value = !dropdownOpen.value
+}
+
+function selectResolution(tier: typeof RES_TIERS[number]) {
+  if (tier !== baseResolution.value) {
+    baseResolution.value = tier
+    resize() // 内部会 updateContainerHeight → reRender
+  }
+  dropdownOpen.value = false
+}
+
+function tierDimsPreview(tier: typeof RES_TIERS[number]) {
+  const a = props.aspectRatio
+  let w: number, h: number
+  if (a >= 1) {
+    w = tier; h = Math.round(tier / a)
+  } else {
+    h = tier; w = Math.round(tier * a)
+  }
+  return `${w}×${h}`
+}
+
+function handleClickOutside(e: MouseEvent) {
+  if (sizeLabelWrapRef.value && !sizeLabelWrapRef.value.contains(e.target as Node)) {
+    dropdownOpen.value = false
+  }
+}
+
 function updateSizeLabel() {
   // 优先取 canvas 元素自身的 width/height 属性（WebGL drawing buffer 实际像素）
   if (renderer?.domElement) {
@@ -708,9 +766,19 @@ const updateContainerHeight = (renderer: THREE.WebGLRenderer) => {
     displayWidth = containerHeight * props.aspectRatio
   }
 
-  // canvas 绘制缓冲区固定为 2048 宽（逻辑分辨率），与 CSS 显示尺寸解耦
-  const drawingWidth = 2048
-  const drawingHeight = Math.round(drawingWidth / props.aspectRatio)
+  // canvas 绘制缓冲区：以 baseResolution 为长边像素，按 aspectRatio 推短边
+  // 这样横屏(16:9)和竖屏(9:16)都能得到合理的分辨率
+  const base = baseResolution.value
+  let drawingWidth: number, drawingHeight: number
+  if (props.aspectRatio >= 1) {
+    // 横屏：长边是 width
+    drawingWidth = base
+    drawingHeight = Math.round(base / props.aspectRatio)
+  } else {
+    // 竖屏：长边是 height
+    drawingHeight = base
+    drawingWidth = Math.round(base * props.aspectRatio)
+  }
 
   let hasChangeCamera = false
   const newAspect = drawingWidth / drawingHeight
@@ -754,6 +822,8 @@ const updateContainerHeight = (renderer: THREE.WebGLRenderer) => {
     camera.updateProjectionMatrix()
   }
 
+  reRender()
+
   if (props.showSizeLabel) updateSizeLabel()
 }
 function mouseLeave() {
@@ -790,6 +860,7 @@ onMounted(() => {
     updateSizeLabel()
     sizeObserver = new ResizeObserver(updateSizeLabel)
     sizeObserver.observe(containerRef.value)
+    document.addEventListener('mousedown', handleClickOutside)
   }
 })
 
@@ -836,6 +907,7 @@ onUnmounted(() => {
   window.removeEventListener('resize', resize)
   sizeObserver?.disconnect()
   sizeObserver = null
+  document.removeEventListener('mousedown', handleClickOutside)
 
   if (renderer) {
     renderer.forceContextLoss();
@@ -905,19 +977,78 @@ function calcVerticalFovByHorizontalFov(hFov: number, aspect: number) {
   height: 100%;
   position: relative;
 
-  .size-label {
+  .size-label-wrap {
     position: absolute;
     top: 4px;
     right: 6px;
-    padding: 1px 6px;
-    font-size: 12px;
-    line-height: 18px;
-    color: #fff;
-    background: rgba(0, 0, 0, 0.55);
-    border-radius: 4px;
-    pointer-events: none;
     z-index: 10;
-    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+    .size-label {
+      padding: 1px 6px;
+      font-size: 12px;
+      line-height: 18px;
+      color: #fff;
+      background: rgba(0, 0, 0, 0.55);
+      border-radius: 4px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      user-select: none;
+
+      &.interactive {
+        pointer-events: auto;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        transition: background 0.15s;
+        &:hover { background: rgba(0, 0, 0, 0.75); }
+        .tier { color: #7ec8ff; font-weight: 600; }
+        .chevron {
+          margin-left: 4px;
+          font-size: 10px;
+          opacity: 0.7;
+          transition: transform 0.15s;
+        }
+        .chevron.open { transform: rotate(180deg); }
+      }
+
+      .sep { opacity: 0.5; margin: 0 3px; }
+    }
+
+    .size-dropdown {
+      position: absolute;
+      top: calc(100% + 3px);
+      right: 0;
+      min-width: 150px;
+      padding: 3px 0;
+      background: rgba(22, 22, 26, 0.92);
+      border-radius: 5px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+      backdrop-filter: blur(4px);
+
+      .size-option {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        padding: 4px 10px;
+        font-size: 12px;
+        line-height: 18px;
+        color: #e5e7eb;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        cursor: pointer;
+
+        &:hover { background: rgba(126, 200, 255, 0.15); }
+
+        &.active {
+          color: #7ec8ff;
+          background: rgba(126, 200, 255, 0.1);
+          .opt-tier { font-weight: 600; }
+        }
+
+        .opt-tier { width: 48px; }
+        .opt-dims { opacity: 0.55; font-size: 11px; }
+        .opt-check { opacity: 0.8; margin-left: 4px; font-size: 11px; }
+      }
+    }
   }
 
   /* background: white;
