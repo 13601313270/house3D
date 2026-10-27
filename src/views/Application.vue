@@ -188,6 +188,7 @@
           <Canvas3D v-if="allCamera.length && cameraRightState && rightPanelCamera" ref="canvas3DRef2"
             :camera="rightPanelCamera" :cameraState="cameraRightState"
             :aspectRatio="cameraRightState.aspectW / cameraRightState.aspectH" :showCamera="false"
+            :showSizeLabel="true"
             cameraType="perspective" />
           <div v-else class="noCamera">{{ t('panel.addCameraHint') }}</div>
         </div>

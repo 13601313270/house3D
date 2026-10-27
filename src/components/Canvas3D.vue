@@ -1,5 +1,6 @@
 <template>
   <div class="canvas-3d-container" ref="containerRef" @mouseleave="mouseLeave">
+    <div v-if="showSizeLabel" class="size-label">{{ containerSize }}</div>
   </div>
 </template>
 
@@ -18,7 +19,23 @@ const props = defineProps<{
   aspectRatio: number
   showCamera: boolean
   cameraType: 'perspective'// | 'orthographic'
+  showSizeLabel?: boolean
 }>()
+
+const containerSize = ref('')
+let sizeObserver: ResizeObserver | null = null
+function updateSizeLabel() {
+  // 优先取 canvas 元素自身的 width/height 属性（WebGL drawing buffer 实际像素）
+  if (renderer?.domElement) {
+    const w = renderer.domElement.width
+    const h = renderer.domElement.height
+    containerSize.value = `${w} × ${h}`
+  } else if (containerRef.value) {
+    const w = containerRef.value.clientWidth
+    const h = containerRef.value.clientHeight
+    containerSize.value = `(容器) ${w} × ${h}`
+  }
+}
 
 const emit = defineEmits<{
   (e: 'update:cameraState', value: CameraState | OrthographicCamera): void
@@ -736,6 +753,8 @@ const updateContainerHeight = (renderer: THREE.WebGLRenderer) => {
   if (hasChangeCamera) {
     camera.updateProjectionMatrix()
   }
+
+  if (props.showSizeLabel) updateSizeLabel()
 }
 function mouseLeave() {
   console.log('mouseLeave')
@@ -766,6 +785,12 @@ onMounted(() => {
     animate()
   })
   window.addEventListener('resize', resize)
+
+  if (props.showSizeLabel && containerRef.value) {
+    updateSizeLabel()
+    sizeObserver = new ResizeObserver(updateSizeLabel)
+    sizeObserver.observe(containerRef.value)
+  }
 })
 
 const exportImage = (targetWidth: number) => {
@@ -809,6 +834,8 @@ const exportImage = (targetWidth: number) => {
 
 onUnmounted(() => {
   window.removeEventListener('resize', resize)
+  sizeObserver?.disconnect()
+  sizeObserver = null
 
   if (renderer) {
     renderer.forceContextLoss();
@@ -876,6 +903,22 @@ function calcVerticalFovByHorizontalFov(hFov: number, aspect: number) {
   // overflow: hidden;
   width: 100%;
   height: 100%;
+  position: relative;
+
+  .size-label {
+    position: absolute;
+    top: 4px;
+    right: 6px;
+    padding: 1px 6px;
+    font-size: 12px;
+    line-height: 18px;
+    color: #fff;
+    background: rgba(0, 0, 0, 0.55);
+    border-radius: 4px;
+    pointer-events: none;
+    z-index: 10;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
 
   /* background: white;
   border-radius: 8px;
