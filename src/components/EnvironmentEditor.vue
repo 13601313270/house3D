@@ -113,6 +113,7 @@ function handleUpdate(key: string, value: number | string | boolean) {
         [key]: value,
       }
       window.worldApi.setEnvironMent(config)
+      window.__hasUnsavedChanges = true
     }
   }
 }

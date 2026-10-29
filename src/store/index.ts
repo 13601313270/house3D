@@ -12,6 +12,7 @@ type IState = {
   },
   editMode: EditMode,
   saveByFile: boolean,
+  hasUnsavedChanges: boolean,
 }
 
 type Store = {
@@ -24,11 +25,13 @@ const main = {
     userInfo: {},
     editMode: 'scene' as EditMode,
     saveByFile: false,
+    hasUnsavedChanges: false,
   },
   getters: {
     userInfo: (state: IState) => state.userInfo,
     editMode: (state: IState) => state.editMode,
     saveByFile: (state: IState) => state.saveByFile,
+    hasUnsavedChanges: (state: IState) => state.hasUnsavedChanges,
   },
   mutations: {
     set_user_info(state: IState, userInfo: any) {
@@ -40,6 +43,9 @@ const main = {
     set_save_by_file(state: IState, saveByFile: boolean) {
       state.saveByFile = saveByFile;
     },
+    mark_unsaved(state: IState, value: boolean) {
+      state.hasUnsavedChanges = value;
+    },
   },
   actions: {
     setUserInfo({ commit }: any, userInfo: any) {
@@ -50,6 +56,9 @@ const main = {
     },
     setSaveByFile({ commit }: any, saveByFile: boolean) {
       return commit('set_save_by_file', saveByFile);
+    },
+    markUnsaved({ commit }: any, value: boolean) {
+      return commit('mark_unsaved', value);
     },
   },
 };

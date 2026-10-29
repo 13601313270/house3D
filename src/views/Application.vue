@@ -308,6 +308,20 @@
       <div>{{ t('common.saving') }}</div>
     </div>
   </teleport>
+  <!-- 关闭前保存确认弹窗（与浏览器原生 beforeunload 提示配合） -->
+  <div v-if="showCloseConfirm" class="closeConfirmModal" @click.self="showCloseConfirm = false">
+    <div class="closeConfirmModalInner">
+      <div class="closeConfirmTitle">未保存的修改</div>
+      <div class="closeConfirmDesc">您有未保存的修改，关闭前要怎么处理？</div>
+      <div class="closeConfirmButtons">
+        <button class="btn-secondary" @click="handleCloseConfirmCancel">取消</button>
+        <button class="btn-danger" @click="handleCloseConfirmDiscard">不保存</button>
+        <button class="btn-primary" :disabled="saveLoading" @click="handleCloseConfirmSave">
+          {{ saveLoading ? '保存中...' : '保存并关闭' }}
+        </button>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script lang="ts" setup>
@@ -363,6 +377,20 @@ import { handleLoadedObject } from '@/utils/handleLoadedObject';
 import initDefaultData from '@/utils/initDefaultData.json'
 import Canvas2DScene from '@/utils/canvas2DScene';
 import OSS from 'ali-oss';
+
+// 未保存修改标记（模块级变量，beforeunload 时直接读取，绕开 Vuex 异步）
+// 同时挂到 window 上供子组件（如 EnvironmentEditor）直接访问
+let _hasUnsavedChanges = false
+Object.defineProperty(window, '__hasUnsavedChanges', {
+  get() { return _hasUnsavedChanges },
+  set(v: boolean) { _hasUnsavedChanges = v },
+  configurable: true,
+})
+// 初始化保护，加载场景期间不标记
+let _isInitializing = false
+
+// 关闭前保存确认弹窗
+const showCloseConfirm = ref(false)
 
 const canvas2DRef = ref<HTMLCanvasElement | null>(null)
 const canvas2DActionRef = ref<HTMLCanvasElement | null>(null)
@@ -731,6 +759,7 @@ let keyDownHandler: ((e: KeyboardEvent) => void) | null = null
 
 async function initScene() {
   sceneInited.value = true
+  _isInitializing = true
   try {
     const res = await axios.get('https://api.studying1v1.com/video/objectFileType')
     const data = res.data as Array<{
@@ -756,6 +785,10 @@ async function initScene() {
   }
 
   worldApi.onWorldChange((type, objList) => {
+    // 初始化阶段（加载场景时）不标记 dirty，避免一进来就提示
+    if (!_isInitializing) {
+      _hasUnsavedChanges = true
+    }
     if (['add', 'remove'].includes(type)) {
       allObjCount.value = worldApi.getAllObjectCount();
       setTimeout(reRender3D, 30)
@@ -970,7 +1003,30 @@ async function initScene() {
     canvas3DRefCenter.value?.reRender()
     canvas3DRef2.value?.reRender()
   })
+
+  // 动画数据变更也标记 dirty
+  timelineState.onChange(() => {
+    if (!_isInitializing) {
+      _hasUnsavedChanges = true
+    }
+  })
+
+  _isInitializing = false
 }
+
+// 浏览器关闭/刷新时，有未保存修改则提示
+// 1. 设 e.returnValue 触发浏览器原生提示（原生提示会暂停页面卸载，等用户选"离开/留下"）
+// 2. 同时设 Vue ref 显示自定义弹窗（但此时浏览器会先弹原生提示，等用户点"留下"后页面恢复，自定义弹窗才真正渲染出来）
+//    如果用户点"离开"，页面直接卸载，自定义弹窗来不及渲染就消失了，无副作用
+const beforeUnloadHandler = (e: BeforeUnloadEvent) => {
+  if (_hasUnsavedChanges) {
+    e.preventDefault()
+    e.returnValue = ''
+    showCloseConfirm.value = true
+    return ''
+  }
+}
+window.addEventListener('beforeunload', beforeUnloadHandler)
 
 onMounted(async () => {
   const isLoggedIn = await initUserInfo()
@@ -982,10 +1038,34 @@ onMounted(async () => {
 })
 
 onUnmounted(() => {
+  window.removeEventListener('beforeunload', beforeUnloadHandler)
   if (keyDownHandler) {
     window.removeEventListener('keydown', keyDownHandler)
   }
 })
+
+// === 关闭前保存确认弹窗的三个按钮 ===
+function handleCloseConfirmCancel() {
+  // 取消 = 我不想关了，继续编辑
+  showCloseConfirm.value = false
+}
+
+function handleCloseConfirmDiscard() {
+  // 不保存 = 扔掉修改，清掉 dirty 让下次关闭不再提示
+  _hasUnsavedChanges = false
+  showCloseConfirm.value = false
+  message.info('已放弃未保存的修改')
+}
+
+async function handleCloseConfirmSave() {
+  // 保存并关闭 = 先调 saveDrawing，保存成功后清 dirty 并尝试关闭窗口
+  showCloseConfirm.value = false
+  await saveDrawing()
+  if (!_hasUnsavedChanges) {
+    // 保存成功，尝试关闭（只有脚本打开的窗口才能 close，否则浏览器会忽略）
+    window.close()
+  }
+}
 
 const loadProgramFileInputRef = ref<HTMLInputElement | null>(null)
 
@@ -1107,12 +1187,15 @@ async function captureCanvasToPreImg(sceneId?: string | number | null): Promise<
 }
 
 async function handleNewSceneClick() {
+  _isInitializing = true
+  _hasUnsavedChanges = false
   worldApi.clearAll()
   currentSceneId.value = null
   currentSceneName.value = ''
   newSceneNameInput.value = ''
   await initWorldByData(initDefaultData)
   timelineState.timelineData = { duration: 30, clips: [], activeCameraIndexTimes: [] }
+  _isInitializing = false
   showNewSceneOverlay.value = true
 }
 
@@ -1137,6 +1220,7 @@ async function confirmCreateScene() {
     })
     if (res.status === 200 && res.data) {
       currentSceneId.value = res.data.id || res.data
+      _hasUnsavedChanges = false
       message.success(t('common.saveSuccess'))
       await loadUserScenes()
     }
@@ -1165,6 +1249,7 @@ async function updateScene() {
       preImg: preImg || '',
     })
     if (res.status === 200) {
+      _hasUnsavedChanges = false
       message.success(t('common.saveSuccess'))
       await loadUserScenes()
     }
@@ -1196,6 +1281,8 @@ function formatSceneTime(time: string) {
 
 async function chooseUserScene(id: number) {
   demoIniting.value = true
+  _isInitializing = true
+  _hasUnsavedChanges = false
   try {
     const res = await request.get(`/video/userScene/detail/${id}`)
     if (res.status === 200 && res.data) {
@@ -1227,6 +1314,7 @@ async function chooseUserScene(id: number) {
     message.error(t('common.loadFail'))
   } finally {
     demoIniting.value = false
+    _isInitializing = false
   }
 }
 
@@ -1236,6 +1324,8 @@ const loadProgramFile = () => {
 }
 
 const handleLoadProgramFileChange = async (e: Event) => {
+  _isInitializing = true
+  _hasUnsavedChanges = false
   worldApi.clearAll()
   initWorldLoading.value = true
   const input = e.target as HTMLInputElement
@@ -1327,6 +1417,7 @@ const handleLoadProgramFileChange = async (e: Event) => {
     console.error(error)
   }
   input.value = ''
+  _isInitializing = false
 }
 
 // 辅助函数：获取所有实体的 entityId -> [typeKey, index] 映射
@@ -3092,6 +3183,90 @@ button {
 
     to {
       transform: rotate(360deg);
+    }
+  }
+}
+
+// 关闭前保存确认弹窗
+.closeConfirmModal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+
+  .closeConfirmModalInner {
+    background: #fff;
+    border-radius: 8px;
+    padding: 28px 32px;
+    min-width: 360px;
+    max-width: 440px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  }
+
+  .closeConfirmTitle {
+    font-size: 17px;
+    font-weight: 600;
+    color: #303133;
+    margin-bottom: 8px;
+  }
+
+  .closeConfirmDesc {
+    font-size: 14px;
+    color: #606266;
+    line-height: 1.5;
+    margin-bottom: 24px;
+  }
+
+  .closeConfirmButtons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+
+    button {
+      padding: 8px 18px;
+      border-radius: 4px;
+      font-size: 14px;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.2s;
+
+      &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+    }
+
+    .btn-secondary {
+      background: #f4f4f5;
+      color: #606266;
+      border-color: #dcdfe6;
+
+      &:hover:not(:disabled) {
+        background: #ebedf0;
+      }
+    }
+
+    .btn-danger {
+      background: #fff;
+      color: #f56c6c;
+      border-color: #f56c6c;
+
+      &:hover:not(:disabled) {
+        background: #fef0f0;
+      }
+    }
+
+    .btn-primary {
+      background: #409eff;
+      color: #fff;
+      border-color: #409eff;
+
+      &:hover:not(:disabled) {
+        background: #66b1ff;
+      }
     }
   }
 }
