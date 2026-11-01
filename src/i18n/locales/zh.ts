@@ -3,7 +3,7 @@ const zh: Record<string, string> = {
   'nav.file': '文件',
   'nav.examples': '场景库',
   'nav.help': '帮助',
-  'nav.community': '社区',
+  'nav.community': '加入社区',
   'nav.support': '支持',
 
   // File dropdown
@@ -356,16 +356,16 @@ const zh: Record<string, string> = {
   'qr.gotIt': '我知道了',
 
   // Community modal
-  'community.title': '加入 Scenelab\n创作者社区',
-  'community.desc': '与 AI 创作者交流、分享作品、获取产品更新，并直接与 Scenelab 团队沟通。',
+  'community.title': '加入 Samelab\n创作者社区',
+  'community.desc': '与 AI 创作者交流、分享作品、获取产品更新，并直接与 Samelab 团队沟通。',
   'community.benefit1': '认识更多 AI 创作者',
   'community.benefit2': '分享作品与创作流程',
   'community.benefit3': '获取产品更新与抢先体验',
-  'community.benefit4': '直接与 Scenelab 团队交流',
+  'community.benefit4': '直接与 Samelab 团队交流',
   'community.reward': '+20 AI 点数',
   'community.rewardDesc': ' · 加入社区后获得',
   'community.qrTitle': '使用微信扫码加入',
-  'community.qrFooter': '加入 Scenelab 社区\n与我们保持联系',
+  'community.qrFooter': '加入 Samelab 社区\n与我们保持联系',
   'community.later': '以后再说',
 
   // VIP benefits table

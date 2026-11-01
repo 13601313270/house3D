@@ -3,7 +3,7 @@ const en: Record<string, string> = {
   'nav.file': 'File',
   'nav.examples': 'Scene Library',
   'nav.help': 'Help',
-  'nav.community': 'Community',
+  'nav.community': 'Join Community',
   'nav.support': 'Support',
 
   // File dropdown
@@ -34,7 +34,7 @@ const en: Record<string, string> = {
   'user.buyCredits': 'Buy Credits',
   'user.upgradePro': 'Upgrade to Pro',
   'user.logout': 'Log out',
-  'app.brandName': 'SceneLab',
+  'app.brandName': 'Samelab',
   'user.aiCreditsLabel': 'Credits',
   'user.login': 'Log in',
 
