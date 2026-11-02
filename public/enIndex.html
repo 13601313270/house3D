@@ -188,7 +188,162 @@
       display: flex;
       justify-content: center;
       gap: 16px;
-      margin-bottom: 60px;
+      margin-bottom: 48px;
+    }
+
+    /* ===== Double 11 Ad ===== */
+    .double11-ad {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      max-width: 820px;
+      margin: 0 auto 60px;
+      padding: 28px 36px;
+      background: #fff;
+      border: 1px solid #eef0ff;
+      border-radius: 16px;
+      box-shadow: 0 4px 20px rgba(91, 91, 214, 0.06), 0 1px 3px rgba(0, 0, 0, 0.03);
+      gap: 32px;
+    }
+
+    .double11-left {
+      flex: 1;
+      text-align: left;
+      min-width: 0;
+    }
+
+    .double11-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #5b5bd6;
+      margin-bottom: 14px;
+      letter-spacing: 0.02em;
+    }
+
+    .double11-badge-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #5b5bd6;
+    }
+
+    .double11-title {
+      font-size: 26px;
+      font-weight: 700;
+      color: #111;
+      line-height: 1.3;
+      margin-bottom: 10px;
+    }
+
+    .double11-desc {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 14px;
+    }
+
+    .double11-note {
+      font-size: 12px;
+      color: #999;
+    }
+
+    .double11-right {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex-shrink: 0;
+      width: 240px;
+    }
+
+    .double11-gift {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+
+    .double11-gift-card {
+      width: 68px;
+      height: 72px;
+      border-radius: 10px;
+      background: #f7f8ff;
+      border: 1px solid #e4e7ff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+
+      &.gift {
+        background: #eef0ff;
+        border-color: #d5daff;
+      }
+    }
+
+    .double11-gift-label {
+      font-size: 11px;
+      color: #888;
+      margin-bottom: 2px;
+    }
+
+    .double11-gift-card.gift .double11-gift-label {
+      color: #5b5bd6;
+      font-weight: 600;
+    }
+
+    .double11-gift-num {
+      font-size: 28px;
+      font-weight: 700;
+      color: #5b5bd6;
+      line-height: 1;
+    }
+
+    .double11-gift-card .double11-gift-unit {
+      font-size: 10px;
+      color: #888;
+      margin-top: 1px;
+    }
+
+    .double11-plus {
+      font-size: 20px;
+      font-weight: 700;
+      color: #bbb;
+    }
+
+    .double11-cta {
+      display: block;
+      width: 100%;
+      text-align: center;
+      padding: 10px 0;
+      font-size: 15px;
+      font-weight: 600;
+      border-radius: 8px;
+      text-decoration: none;
+    }
+
+    .double11-cta-note {
+      margin-top: 10px;
+      font-size: 11px;
+      color: #999;
+      text-align: center;
+      line-height: 1.5;
+    }
+
+    @media (max-width: 640px) {
+      .double11-ad {
+        flex-direction: column;
+        padding: 24px 20px;
+        gap: 20px;
+      }
+
+      .double11-left {
+        text-align: center;
+      }
+
+      .double11-right {
+        width: 100%;
+      }
     }
 
     .hero-preview {
@@ -760,6 +915,36 @@
       <div class="hero-actions">
         <a href="/admin.html" class="btn btn-primary">Start Creating</a>
         <a href="#examples" class="btn btn-secondary">Browse Examples</a>
+      </div>
+
+      <!-- Double 11 Ad -->
+      <div class="double11-ad">
+        <div class="double11-left">
+          <div class="double11-badge">
+            <span class="double11-badge-dot"></span>
+            Samelab · Double 11 Special
+          </div>
+          <div class="double11-title">Buy 1 month of Pro, get 1 month extra</div>
+          <div class="double11-desc">More time to create. More time to explore.</div>
+          <div class="double11-note">Offer ends November 30, 2026</div>
+        </div>
+        <div class="double11-right">
+          <div class="double11-gift">
+            <div class="double11-gift-card">
+              <div class="double11-gift-label">Buy</div>
+              <div class="double11-gift-num">1</div>
+              <div class="double11-gift-unit">month</div>
+            </div>
+            <span class="double11-plus">+</span>
+            <div class="double11-gift-card gift">
+              <div class="double11-gift-label">Bonus</div>
+              <div class="double11-gift-num">1</div>
+              <div class="double11-gift-unit">month</div>
+            </div>
+          </div>
+          <a href="/admin.html" class="btn btn-primary double11-cta">Upgrade to Pro →</a>
+          <div class="double11-cta-note">After verification, we'll extend your Pro membership by 1 month within 24 hours.</div>
+        </div>
       </div>
 
       <!-- Preview -->
