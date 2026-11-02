@@ -46,6 +46,11 @@
                     <polyline points="20 6 9 17 4 12"></polyline>
                   </svg>
                 </div>
+                <div v-if="item.id === 'monthly'" class="double11-monthly-bonus">
+                  <div class="bonus-tag">摄影棚 · 双十一特别活动</div>
+                  <div class="bonus-title">购买1个月 Pro，额外赠送1个月</div>
+                  <div class="bonus-note">活动截止 2026.11.30</div>
+                </div>
               </div>
             </div>
           </div>
@@ -228,7 +233,7 @@ window.addEventListener('focus', handleFocus)
   justify-content: center;
 
   .showVipModalInner {
-    width: 500px;
+    width: 700px;
     background: white;
     border-radius: 12px;
     padding: 24px;
@@ -384,6 +389,36 @@ window.addEventListener('focus', handleFocus)
             padding: 2px 6px;
             border-radius: 4px;
             margin-top: 4px;
+          }
+
+          .double11-monthly-bonus {
+            margin-top: 10px;
+            padding: 11px 12px;
+            width: 100%;
+            border: 1px solid #e8e4ff;
+            border-radius: 8px;
+            text-align: left;
+            background: linear-gradient(180deg, #f6f4ff 0%, #faf9ff 100%);
+
+            .bonus-tag {
+              font-size: 10px;
+              color: #5b5bd6;
+              font-weight: 600;
+              margin-bottom: 4px;
+            }
+
+            .bonus-title {
+              font-size: 12px;
+              color: #222;
+              font-weight: 700;
+              line-height: 1.5;
+              margin-bottom: 3px;
+            }
+
+            .bonus-note {
+              font-size: 10px;
+              color: #888;
+            }
           }
 
           .checkMark {
