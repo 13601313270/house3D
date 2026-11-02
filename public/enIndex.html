@@ -942,7 +942,7 @@
               <div class="double11-gift-unit">month</div>
             </div>
           </div>
-          <a href="/admin.html" class="btn btn-primary double11-cta">Upgrade to Pro →</a>
+          <button type="button" class="btn btn-primary double11-cta">Upgrade to Pro →</button>
           <div class="double11-cta-note">After verification, we'll extend your Pro membership by 1 month within 24 hours.</div>
         </div>
       </div>
@@ -1155,6 +1155,9 @@
 
   <!-- Vue CLI injected: APP -->
   <!-- <%= htmlWebpackPlugin.options.title %> -->
+  <!-- Vue modal mount points -->
+  <div id="teleport"></div>
+  <div id="homeLoginMount"></div>
   <script>
     document.querySelectorAll('a[href="/admin.html"]').forEach(function (el) {
       el.addEventListener('click', function (e) {

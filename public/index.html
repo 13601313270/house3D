@@ -1016,7 +1016,7 @@
               <div class="double11-gift-unit">个月</div>
             </div>
           </div>
-          <a href="/admin.html" class="btn btn-primary double11-cta">立即升级 Pro →</a>
+          <button type="button" class="btn btn-primary double11-cta">立即升级 Pro →</button>
           <div class="double11-cta-note">订单核实后，我们将在 24 小时内为您的账号额外延长 1 个月 Pro 会员有效期。</div>
         </div>
       </div>
@@ -1243,6 +1243,9 @@
 
   <!-- Vue CLI injected: APP -->
   <!-- <%= htmlWebpackPlugin.options.title %> -->
+  <!-- Vue 弹窗挂载点 -->
+  <div id="teleport"></div>
+  <div id="homeLoginMount"></div>
   <script>
     document.querySelectorAll('a[href="/admin.html"]').forEach(function (el) {
       el.addEventListener('click', function (e) {

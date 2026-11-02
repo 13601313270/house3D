@@ -77,10 +77,16 @@ module.exports = defineConfig({
       template: 'public/index.html', // 使用的 HTML 模板
       filename: 'index.html',        // 打包后生成的文件名
     },
-    // 新增一个 admin 页面
+    // 英文首页 —— 和 index 共用同一个 Vue 入口，只是模板不同
+    en: {
+      entry: 'src/welcome.ts',
+      template: 'public/enIndex.html',
+      filename: 'enIndex.html',
+    },
+    // admin 编辑台
     admin: {
       entry: 'src/main.ts',
-      template: 'public/admin.html', // 使用自定义的 admin.html 模板
+      template: 'public/admin.html',
       filename: 'admin.html',
     }
   }
