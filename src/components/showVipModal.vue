@@ -16,6 +16,12 @@
         </div>
         <div v-else>
           <div class="vipSection">
+            <div class="sectionTitle">{{ t('vip.benefits') }}</div>
+            <div>
+              <vip-benefits />
+            </div>
+          </div>
+          <div class="vipSection">
             <div class="sectionTitle">
               <span>{{ t('vip.choosePlan') }}</span>
               <span class="desc">{{ t('vip.priceLocked') }}</span>
@@ -41,12 +47,6 @@
                   </svg>
                 </div>
               </div>
-            </div>
-          </div>
-          <div class="vipSection">
-            <div class="sectionTitle">{{ t('vip.benefits') }}</div>
-            <div>
-              <vip-benefits />
             </div>
           </div>
           <div class="paySection">

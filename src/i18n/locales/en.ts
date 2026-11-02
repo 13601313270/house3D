@@ -375,9 +375,12 @@ const en: Record<string, string> = {
   'benefits.giftCredits': 'Bonus Credits',
   'benefits.giftCreditsVip': 'Credit bonus',
   'benefits.animation': 'Animation & Timeline',
-  'benefits.notSupported': 'Not supported',
-  'benefits.supported': 'Supported',
+  'benefits.notSupported': 'Free (10s)',
+  'benefits.supported': 'Unlimited',
   'benefits.storage': 'Cloud Storage',
+  'benefits.hdExport': 'HD Image Export',
+  'benefits.hdExportNormal': 'Standard',
+  'benefits.hdExportVip': 'HD',
 
   // Material library (My Assets)
   'material.title': 'My Assets',

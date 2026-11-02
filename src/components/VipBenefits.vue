@@ -65,17 +65,17 @@ const benefits = computed(() => [
     name: t('benefits.storage'),
     normal: '300MB',
     vip: '50GB',
-  }
+  },
   // {
   //   name: '新功能优先体验',
   //   normal: '无',
   //   vip: '有',
   // },
-  // {
-  //   name: '高清图片导出',
-  //   normal: '普通画质',
-  //   vip: '高清',
-  // },
+  {
+    name: t('benefits.hdExport'),
+    normal: t('benefits.hdExportNormal'),
+    vip: t('benefits.hdExportVip'),
+  },
   // {
   //   name: '去除图片水印',
   //   normal: '',
@@ -209,6 +209,7 @@ const benefits = computed(() => [
 
 .normal-value {
   color: #777777;
+  border-left: solid 1px #f0f0f0;
 }
 
 .vip-value {

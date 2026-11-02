@@ -375,9 +375,12 @@ const zh: Record<string, string> = {
   'benefits.giftCredits': '赠送积分',
   'benefits.giftCreditsVip': '积分赠送',
   'benefits.animation': '动画编辑与时间轴功能',
-  'benefits.notSupported': '不支持',
-  'benefits.supported': '支持',
+  'benefits.notSupported': '免费10秒',
+  'benefits.supported': '不限时长',
   'benefits.storage': '云存储空间',
+  'benefits.hdExport': '高清图片导出',
+  'benefits.hdExportNormal': '普通画质',
+  'benefits.hdExportVip': '高清',
 
   // Material library (My Assets)
   'material.title': '个人素材库管理',

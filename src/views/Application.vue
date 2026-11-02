@@ -80,35 +80,54 @@
               </div>
             </div>
             <div class="list user" v-show="activeToolsIndex === 2">
-              <div class="userMoney">
-                <div class="userMoneyInner">
-                  <span>{{ t('user.currentCredits') }}{{ store.state.main.userInfo.money }}</span>
-                  <img src="money.png" />
+              <!-- 账户区 -->
+              <div class="accSection">
+                <div class="accLabel">ACCOUNT</div>
+                <div class="accEmail">{{ store.state.main.userInfo.email }}</div>
+              </div>
+
+              <!-- 分割线 -->
+              <div class="divider"></div>
+
+              <!-- AI 点数区 -->
+              <div class="creditsSection">
+                <div class="creditsRow">
+                  <span class="creditsLabel">{{ t('user.aiCreditsLabel') }}</span>
+                  <span class="creditsBuy" @click="showPayModal">{{ t('user.buyCredits') }}</span>
+                </div>
+                <div class="creditsNumber">
+                  <span class="num">{{ store.state.main.userInfo.money }}</span>
+                  <span class="unit">点</span>
                 </div>
               </div>
-              <div class="userVip" v-if="isVip">
-                <div class="userVipInner">
-                  <div class="vipCrown">👑</div>
-                  <div class="vipInfo">
-                    <div class="vipTitle">{{ t('user.vipTitle') }}</div>
-                    <div class="vipSubtitle">{{ t('user.vipExpire') }}{{ formattedVipEndDate }}{{ t('user.vipRemaining')
-                      }}{{ vipRemainingDays }}{{ t('user.vipDays') }}</div>
+
+              <!-- 升级 Pro 卡片 -->
+              <div class="vipCard" @click="showVipModal">
+                <div class="vipCardLeft">
+                  <div class="vipCardTitle">{{ t('user.upgradePro') }}</div>
+                  <div class="vipCardSub">
+                    <template v-if="isVip">
+                      {{ t('user.vipExpire') }}{{ formattedVipEndDate }}{{ t('user.vipRemaining') }}{{ vipRemainingDays }}{{ t('user.vipDays') }}
+                    </template>
+                    <template v-else>创始用户价</template>
                   </div>
                 </div>
+                <div class="vipCardRight">
+                  <div class="vipCardPrice">¥36</div>
+                  <div class="vipCardUnit">/月</div>
+                </div>
               </div>
-              <div class="addGroupAddMoney" v-if="!store.state.main.userInfo.getJoinGroupMoney"
+
+              <!-- 加群送积分 -->
+              <div class="groupPromo" v-if="!store.state.main.userInfo.getJoinGroupMoney"
                 @click="showGroupQrModal = true">
                 <img src="money.png" />
                 <div class="text">{{ t('user.joinGroup') }}<span class="price">20</span>{{ t('user.joinGroupCredits') }}
                 </div>
               </div>
-              <div @click="showPayModal" class="childItem">
-                {{ t('user.buyCredits') }}
-              </div>
-              <div class="childItem" @click="showVipModal">
-                {{ t('user.upgradePro') }}
-              </div>
-              <div @click="logout" class="childItem">
+
+              <!-- 退出登录 -->
+              <div class="logoutItem" @click="logout">
                 {{ t('user.logout') }}
               </div>
             </div>
@@ -2273,100 +2292,169 @@ window.showLoginDialog = showLoginDialog;
     }
   }
 
-  .userMoney {
-    padding: 4px 8px;
-    border-radius: 4px;
-    margin: 0 8px 8px;
-    border: 1px solid #d9d9d9;
-    border-radius: 4px;
-    box-sizing: border-box;
+  // ========== 新版下拉菜单布局 ==========
 
-    .userMoneyInner {
-      color: #333;
-      display: flex;
-      align-items: center;
+  .accSection {
+    padding: 12px 16px 6px;
+
+    .accLabel {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      color: #888;
+      text-transform: uppercase;
+    }
+
+    .accEmail {
+      margin-top: 2px;
       font-size: 14px;
-      font-weight: bold;
-
-      >img {
-        height: 18px;
-        margin-left: 8px;
-      }
+      color: #333;
     }
   }
 
-  .userVip {
-    padding: 4px 8px;
-    border-radius: 4px;
-    margin: 0 8px 8px;
-    box-sizing: border-box;
-    background: linear-gradient(135deg, #fff8e6 0%, #ffecc0 100%);
-    border: 1px solid #f0d88a;
-    border-radius: 6px;
+  .divider {
+    height: 1px;
+    margin: 4px 0;
+    background-color: #f0f0f0;
+  }
 
-    .userVipInner {
+  .creditsSection {
+    padding: 10px 16px;
+
+    .creditsRow {
       display: flex;
+      justify-content: space-between;
       align-items: center;
-      gap: 10px;
 
-      .vipCrown {
-        font-size: 24px;
-        flex-shrink: 0;
+      .creditsLabel {
+        font-size: 12px;
+        color: #888;
       }
 
-      .vipInfo {
-        display: flex;
-        flex-direction: column;
-        gap: 2px;
+      .creditsBuy {
+        font-size: 13px;
+        color: #635bff;
+        cursor: pointer;
 
-        .vipTitle {
-          font-size: 14px;
-          font-weight: bold;
-          background: linear-gradient(135deg, #e6c06b 0%, #d4a74a 100%);
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          background-clip: text;
+        &:hover {
+          text-decoration: underline;
         }
+      }
+    }
 
-        .vipSubtitle {
-          font-size: 12px;
-          color: #996600;
-        }
+    .creditsNumber {
+      margin-top: 4px;
+      display: flex;
+      align-items: baseline;
+      gap: 4px;
+
+      .num {
+        font-size: 32px;
+        font-weight: 700;
+        color: #17181a;
+        line-height: 1;
+      }
+
+      .unit {
+        font-size: 14px;
+        color: #888;
       }
     }
   }
 
-  .addGroupAddMoney {
+  .vipCard {
     display: flex;
-    flex-direction: column;
+    justify-content: space-between;
     align-items: center;
-    justify-content: center;
-    margin: 0 8px 8px;
-    color: #181818;
-    font-size: 14px;
-    border-radius: 4px;
-    padding: 8px 8px;
+    margin: 4px 10px 10px;
+    padding: 12px 14px;
+    border-radius: 8px;
+    border: 1px solid #e8e8e8;
+    background: linear-gradient(135deg, #fff8e6 0%, #ffecc0 100%);
     cursor: pointer;
+    transition: all 0.2s;
+
+    &:hover {
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      border-color: #f0d88a;
+    }
+
+    .vipCardLeft {
+      .vipCardTitle {
+        font-size: 15px;
+        font-weight: bold;
+        background: linear-gradient(135deg, #e6c06b 0%, #d4a74a 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+
+      .vipCardSub {
+        margin-top: 2px;
+        font-size: 12px;
+        color: #996600;
+      }
+    }
+
+    .vipCardRight {
+      display: flex;
+      align-items: baseline;
+
+      .vipCardPrice {
+        font-size: 18px;
+        font-weight: bold;
+        color: #17181a;
+      }
+
+      .vipCardUnit {
+        font-size: 12px;
+        color: #888;
+        margin-left: 2px;
+      }
+    }
+  }
+
+  .groupPromo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 10px 8px;
+    padding: 8px 10px;
+    border-radius: 6px;
     border: solid 1px #eff6e3;
     background-color: #f2f7ea;
+    color: #181818;
+    font-size: 13px;
+    cursor: pointer;
 
     >img {
-      height: 48px;
+      height: 24px;
     }
 
     .text {
-      margin-top: 4px;
-      font-size: 14px;
-
       .price {
-        font-size: 18px;
+        font-size: 16px;
         font-weight: bold;
         color: #44a23b;
+        margin: 0 2px;
       }
     }
 
     &:hover {
-      background-color: #f0f0f0;
+      background-color: #e6efd8;
+    }
+  }
+
+  .logoutItem {
+    padding: 10px 16px;
+    text-align: center;
+    font-size: 13px;
+    color: #e74c3c;
+    cursor: pointer;
+    border-top: 1px solid #f0f0f0;
+
+    &:hover {
+      background-color: #fdecea;
     }
   }
 }
