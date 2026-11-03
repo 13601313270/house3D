@@ -3,8 +3,13 @@ import { createApp, h, ref, onMounted, onBeforeUnmount } from 'vue'
 import Login from './components/Login.vue'
 import ShowVipModal from './components/showVipModal.vue'
 import store from './store'
+import { setLang } from './i18n'
 
-console.log('[welcome.ts] start')
+// 入口页面决定语言：enIndex.html → en，其他（index.html）→ zh
+const path = location.pathname.toLowerCase()
+setLang(path.includes('enindex') ? 'en' : 'zh')
+
+console.log('[welcome.ts] start, lang forced to:', path.includes('enindex') ? 'en' : 'zh')
 
 createApp({
   setup() {
