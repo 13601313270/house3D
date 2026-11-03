@@ -29,6 +29,10 @@ const en: Record<string, string> = {
   'user.vipExpire': 'Expires: ',
   'user.vipRemaining': ' (',
   'user.vipDays': ' days left)',
+  'user.founderPrice': 'Founding Member Price',
+  'user.vipPrice': '$9.99',
+  'user.vipPriceUnit': '/mo',
+  'user.creditsUnit': 'credits',
   'user.joinGroup': 'Join the WeChat group, get ',
   'user.joinGroupCredits': ' credits',
   'user.buyCredits': 'Buy Credits',
@@ -297,6 +301,12 @@ const en: Record<string, string> = {
   'vip.planTitle.yearly': 'Annual',
   'vip.priceUnit.monthly': 'mo',
   'vip.priceUnit.yearly': 'yr',
+
+  // Double 11 promotion
+  'double11.tag': 'Studio · Singles Day Special',
+  'double11.title': 'Buy 1 Month Pro, Get 1 Month Free',
+  'double11.date': 'Offer ends Nov 30, 2026',
+  'double11.cta': 'Upgrade to Pro →',
 
   // Buy Credits / Pay modal
   'pay.title': 'Buy AI Credits',

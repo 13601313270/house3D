@@ -105,7 +105,7 @@ const benefits = computed(() => [
   display: grid;
   grid-template-columns: 1.4fr 1fr 1fr;
 
-  min-height: 64px;
+  min-height: 54px;
 
   background: #fafafa;
   border-bottom: 1px solid #eeeeee;
@@ -170,9 +170,8 @@ const benefits = computed(() => [
 .benefit-row {
   display: grid;
   grid-template-columns: 1.4fr 1fr 1fr;
-
-  min-height: 58px;
-
+  /* min-height: 58px; */
+  min-height: 45px;
   border-bottom: 1px solid #f0f0f0;
 }
 
@@ -191,7 +190,8 @@ const benefits = computed(() => [
   align-items: flex-start;
   justify-content: center;
 
-  padding: 10px 12px 10px 22px;
+  /* padding: 10px 12px 10px 22px; */
+  padding: 0 12px 0 22px;
 }
 
 .benefit-title {

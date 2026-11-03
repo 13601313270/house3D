@@ -29,6 +29,10 @@ const zh: Record<string, string> = {
   'user.vipExpire': '到期：',
   'user.vipRemaining': '（剩',
   'user.vipDays': '天）',
+  'user.founderPrice': '创始用户价',
+  'user.vipPrice': '¥36',
+  'user.vipPriceUnit': '/月',
+  'user.creditsUnit': '点',
   'user.joinGroup': '添加微信群，获得',
   'user.joinGroupCredits': '积分',
   'user.buyCredits': '购买积分',
@@ -297,6 +301,12 @@ const zh: Record<string, string> = {
   'vip.planTitle.yearly': '年卡',
   'vip.priceUnit.monthly': '月',
   'vip.priceUnit.yearly': '年',
+
+  // 双十一活动
+  'double11.tag': '摄影棚 · 双十一特别活动',
+  'double11.title': '购买1个月 Pro，额外赠送1个月',
+  'double11.date': '活动截止至 2026 年 11 月 30 日',
+  'double11.cta': '立即升级 Pro →',
 
   // Buy Credits / Pay modal
   'pay.title': '购买 AI 点数',

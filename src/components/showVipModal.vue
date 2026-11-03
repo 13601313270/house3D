@@ -1,68 +1,72 @@
 <template>
   <teleport to="#teleport">
     <div class="showVipModal" @click.self="closeModal">
-      <div class="showVipModalInner">
-        <img class="closeBtn" src="@/assets/close.svg" @click="closeModal" />
-        <div class="title">{{ t('vip.title') }}</div>
-        <div v-if="checkStatus === 'checking'" class="checkingState">
-          <div class="spinner"></div>
-          <div class="checkingText">{{ t('vip.checking') }}</div>
-        </div>
-        <div v-else-if="checkStatus === 'unpaid'" class="unpaidState">
-          <div class="unpaidIcon"></div>
-          <div class="unpaidText">{{ t('vip.unpaid') }}</div>
-          <button class="retryButton" @click="checkPaymentStatus">{{ t('vip.retry') }}</button>
-          <button class="cancelButton" @click="closeModal">{{ t('vip.cancel') }}</button>
-        </div>
-        <div v-else>
-          <div class="vipSection">
-            <div class="sectionTitle">{{ t('vip.benefits') }}</div>
-            <div>
-              <vip-benefits />
-            </div>
+      <div class="showVipModalContent">
+        <div class="showVipModalInner">
+          <img class="closeBtn" src="@/assets/close.svg" @click="closeModal" />
+          <div class="title">{{ t('vip.title') }}</div>
+          <div v-if="checkStatus === 'checking'" class="checkingState">
+            <div class="spinner"></div>
+            <div class="checkingText">{{ t('vip.checking') }}</div>
           </div>
-          <div class="vipSection">
-            <div class="sectionTitle">
-              <span>{{ t('vip.choosePlan') }}</span>
-              <span class="desc">{{ t('vip.priceLocked') }}</span>
+          <div v-else-if="checkStatus === 'unpaid'" class="unpaidState">
+            <div class="unpaidIcon"></div>
+            <div class="unpaidText">{{ t('vip.unpaid') }}</div>
+            <button class="retryButton" @click="checkPaymentStatus">{{ t('vip.retry') }}</button>
+            <button class="cancelButton" @click="closeModal">{{ t('vip.cancel') }}</button>
+          </div>
+          <div v-else>
+            <div class="vipSection">
+              <div class="sectionTitle">{{ t('vip.benefits') }}</div>
+              <div>
+                <vip-benefits />
+              </div>
             </div>
-            <div class="vipList">
-              <div class="vipItem" :class="{ active: selectedVip === item.id, recommend: item.recommend }"
-                v-for="item in vipPrices" :key="item.id" @click="selectedVip = item.id">
-                <div class="recommendTag" v-if="item.recommend">{{ t('vip.recommend') }}</div>
-                <div class="vipBadge">{{ tPlanTitle(item) }}</div>
-                <div class="vipPrice">
-                  <span class="currency">¥</span>
-                  <span class="amount">{{ item.price }}</span>
-                  <span class="unit">/{{ tPriceUnit(item.id, item.priceUnit) }}</span>
-                </div>
-                <div class="vipDesc">{{ t('vip.daysBenefits') }}<span class="number">{{ item.date }}</span>{{ t('vip.daysBenefits2') }}</div>
-                <div class="vipGiveMoney">
-                  <img src="money.png" />
-                  <div>{{ t('vip.includes') }}<span class="number">{{ item.giveMoney }}</span>{{ t('vip.credits') }}</div>
-                </div>
-                <div class="checkMark" v-if="selectedVip === item.id">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
-                    <polyline points="20 6 9 17 4 12"></polyline>
-                  </svg>
-                </div>
-                <div v-if="item.id === 'monthly'" class="double11-monthly-bonus">
-                  <div class="bonus-tag">摄影棚 · 双十一特别活动</div>
-                  <div class="bonus-title">购买1个月 Pro，额外赠送1个月</div>
-                  <div class="bonus-note">活动截止 2026.11.30</div>
+            <div class="vipSection">
+              <div class="sectionTitle">
+                <span>{{ t('vip.choosePlan') }}</span>
+                <span class="desc">{{ t('vip.priceLocked') }}</span>
+              </div>
+              <div class="vipList">
+                <div class="vipItem" :class="{ active: selectedVip === item.id, recommend: item.recommend }"
+                  v-for="item in vipPrices" :key="item.id" @click="selectedVip = item.id">
+                  <div class="recommendTag" v-if="item.recommend">{{ t('vip.recommend') }}</div>
+                  <div class="vipBadge">{{ tPlanTitle(item) }}</div>
+                  <div class="vipPrice">
+                    <span class="currency">¥</span>
+                    <span class="amount">{{ item.price }}</span>
+                    <span class="unit">/{{ tPriceUnit(item.id, item.priceUnit) }}</span>
+                  </div>
+                  <div class="vipDesc">{{ t('vip.daysBenefits') }}<span class="number">{{ item.date }}</span>{{
+                    t('vip.daysBenefits2') }}</div>
+                  <div class="vipGiveMoney">
+                    <img src="money.png" />
+                    <div>{{ t('vip.includes') }}<span class="number">{{ item.giveMoney }}</span>{{ t('vip.credits') }}
+                    </div>
+                  </div>
+                  <div class="checkMark" v-if="selectedVip === item.id">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                      <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                  </div>
+                  <div v-if="item.id === 'monthly'" class="double11-monthly-bonus">
+                    <div class="bonus-tag">摄影棚 · 双十一特别活动</div>
+                    <div class="bonus-title">购买1个月 Pro，额外赠送1个月</div>
+                    <div class="bonus-note">活动截止 2026.11.30</div>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-          <div class="paySection">
-            <div class="sectionTitle">{{ t('vip.payMethod') }}</div>
-            <div class="payList">
-              <div class="payItem" :class="{ active: selectedPay === 'alipay' }" @click="handlePay('alipay')">
-                <div class="payIcon">
-                  <img src="https://gw.alipayobjects.com/mdn/rms_9e4c39/afts/img/A*Qys_QIJfGPgAAAAAAAAAAAAAARQnAQ"
-                    alt="支付宝" />
+            <div class="paySection">
+              <div class="sectionTitle">{{ t('vip.payMethod') }}</div>
+              <div class="payList">
+                <div class="payItem" :class="{ active: selectedPay === 'alipay' }" @click="handlePay('alipay')">
+                  <div class="payIcon">
+                    <img src="https://gw.alipayobjects.com/mdn/rms_9e4c39/afts/img/A*Qys_QIJfGPgAAAAAAAAAAAAAARQnAQ"
+                      alt="支付宝" />
+                  </div>
+                  <div class="payName"></div>
                 </div>
-                <div class="payName"></div>
               </div>
             </div>
           </div>
@@ -232,6 +236,17 @@ window.addEventListener('focus', handleFocus)
   align-items: center;
   justify-content: center;
 
+  .showVipModalContent {
+    max-height: 100vh;
+    overflow: auto;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
+
+    &::-webkit-scrollbar {
+      display: none; /* Chrome, Safari and Opera */
+    }
+  }
+
   .showVipModalInner {
     width: 700px;
     background: white;
@@ -239,6 +254,7 @@ window.addEventListener('focus', handleFocus)
     padding: 24px;
     position: relative;
     margin-top: 20px;
+    margin-bottom: 20px;
 
     .closeBtn {
       position: absolute;
@@ -395,6 +411,7 @@ window.addEventListener('focus', handleFocus)
             margin-top: 10px;
             padding: 11px 12px;
             width: 100%;
+            box-sizing: border-box;
             border: 1px solid #e8e4ff;
             border-radius: 8px;
             text-align: left;
@@ -470,8 +487,8 @@ window.addEventListener('focus', handleFocus)
           }
 
           &.active {
-            border-color: #1677ff;
-            background-color: #e6f4ff;
+            // border-color: #1677ff;
+            // background-color: #e6f4ff;
           }
 
           .payIcon {

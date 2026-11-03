@@ -54,8 +54,7 @@
               {{ t('editMode.scene') }}
             </button>
             <button :class="{ active: editMode === 'animation' }" @click="setEditMode('animation')">
-              {{ t('editMode.animation') }}<span
-                style="margin-left: 8px;font-size: 10px;color: rgb(99, 91, 255);font-weight: bold;">NEW</span>
+              {{ t('editMode.animation') }}
             </button>
           </div>
         </div>
@@ -97,7 +96,7 @@
                 </div>
                 <div class="creditsNumber">
                   <span class="num">{{ store.state.main.userInfo.money }}</span>
-                  <span class="unit">点</span>
+                  <span class="unit">{{ t('user.creditsUnit') }}</span>
                 </div>
               </div>
 
@@ -107,14 +106,15 @@
                   <div class="vipCardTitle">{{ t('user.upgradePro') }}</div>
                   <div class="vipCardSub">
                     <template v-if="isVip">
-                      {{ t('user.vipExpire') }}{{ formattedVipEndDate }}{{ t('user.vipRemaining') }}{{ vipRemainingDays }}{{ t('user.vipDays') }}
+                      {{ t('user.vipExpire') }}{{ formattedVipEndDate }}{{ t('user.vipRemaining') }}{{ vipRemainingDays
+                      }}{{ t('user.vipDays') }}
                     </template>
-                    <template v-else>创始用户价</template>
+                    <template v-else>{{ t('user.founderPrice') }}</template>
                   </div>
                 </div>
                 <div class="vipCardRight">
-                  <div class="vipCardPrice">¥36</div>
-                  <div class="vipCardUnit">/月</div>
+                  <div class="vipCardPrice">{{ t('user.vipPrice') }}</div>
+                  <div class="vipCardUnit">{{ t('user.vipPriceUnit') }}</div>
                 </div>
               </div>
 
@@ -137,6 +137,12 @@
           </button>
         </div>
       </div>
+    </div>
+    <div class="double11-top-banner">
+      <span class="banner-tag">{{ t('double11.tag') }}</span>
+      <span class="banner-title">{{ t('double11.title') }}</span>
+      <span class="banner-date">{{ t('double11.date') }}</span>
+      <span class="banner-cta" @click="showVipModal">{{ t('double11.cta') }}</span>
     </div>
     <div class="map2d-container" @dragover.prevent="onDragOver" @dragleave="onDragLeave" @drop.prevent="onDrop">
       <div class="left-panel" :style="{ width: panel1SplitWidthPer * 100 + '%' }">
@@ -206,8 +212,7 @@
         <div class="right-panel-content">
           <Canvas3D v-if="allCamera.length && cameraRightState && rightPanelCamera" ref="canvas3DRef2"
             :camera="rightPanelCamera" :cameraState="cameraRightState"
-            :aspectRatio="cameraRightState.aspectW / cameraRightState.aspectH" :showCamera="false"
-            :showSizeLabel="true"
+            :aspectRatio="cameraRightState.aspectW / cameraRightState.aspectH" :showCamera="false" :showSizeLabel="true"
             cameraType="perspective" />
           <div v-else class="noCamera">{{ t('panel.addCameraHint') }}</div>
         </div>
@@ -2459,6 +2464,51 @@ window.showLoginDialog = showLoginDialog;
   }
 }
 
+.double11-top-banner {
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #F7F7F5;
+  padding: 0 20px;
+  border-bottom: 1px solid #E8E8E5;
+  font-size: 13px;
+  gap: 14px;
+  flex-wrap: nowrap;
+
+  .banner-tag {
+    color: #5b5bd6;
+    font-weight: 600;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .banner-title {
+    color: #222;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  .banner-date {
+    color: #999;
+    font-size: 12px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .banner-cta {
+    color: #5b5bd6;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    flex-shrink: 0;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
 .map2d-container {
   display: flex;
   width: 100vw;
@@ -2716,7 +2766,18 @@ button {
   flex-direction: column;
   align-items: center;
   box-sizing: border-box;
+
   // overflow: hidden; // 不能添加overflow: hidden;不然添加弹窗向右展开二级，被隐藏
+  .toolbar {
+    overflow-x: auto;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
 }
 
 .scene-panel {
