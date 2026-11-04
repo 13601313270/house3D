@@ -2190,6 +2190,7 @@ function showPayModal() {
 }
 function showVipModal() {
   window.gtag('event', 'showVipModal')
+  window.gtag('event', 'double11CtaClickAdmin')
   vipModalIsShow.value = true;
 }
 function openCommunityModal() {

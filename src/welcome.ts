@@ -63,6 +63,7 @@ createApp({
       ctas.forEach(el => {
         el.addEventListener('click', () => {
           console.log('[welcome.ts] CTA click, hasToken:', hasToken())
+          window.gtag('event', 'double11CtaClick')
           if (hasToken()) {
             // 预加载 userInfo 到 store（供 ShowVipModal 内部 handlePay 使用）
             import('./utils/request').then(async ({ default: request }) => {
