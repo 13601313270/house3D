@@ -35,12 +35,15 @@ const zh: Record<string, string> = {
   'user.creditsUnit': '点',
   'user.joinGroup': '添加微信群，获得',
   'user.joinGroupCredits': '积分',
-  'user.buyCredits': '购买积分',
+  'user.buyCredits': '购买 AI 点数',
   'user.upgradePro': '购买专业版权益',
   'user.logout': '退出',
   'app.brandName': '摄影棚',
   'user.aiCreditsLabel': 'AI点数',
   'user.login': '登录',
+  'user.account': '账户',
+  'user.freeVersion': '免费版',
+  'user.proVersion': '专业版',
 
   // Left panel toolbar
   'panel.layout': '布局图',

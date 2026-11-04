@@ -81,8 +81,15 @@
             <div class="list user" v-show="activeToolsIndex === 2">
               <!-- 账户区 -->
               <div class="accSection">
-                <div class="accLabel">ACCOUNT</div>
-                <div class="accEmail">{{ store.state.main.userInfo.email }}</div>
+                <div class="userIcon">{{ (store.state.main.userInfo.email || '').charAt(0).toUpperCase() }}</div>
+                <div>
+                  <div class="accLabel">{{ t('user.account') }}</div>
+                  <div class="accEmail">{{ store.state.main.userInfo.email }}</div>
+                </div>
+                <div style="flex-grow: 1;"></div>
+                <div class="accountType" :class="{ 'vip': isVip }">{{ isVip ? t('user.proVersion') :
+                  t('user.freeVersion')
+                }}</div>
               </div>
 
               <!-- 分割线 -->
@@ -90,15 +97,20 @@
 
               <!-- AI 点数区 -->
               <div class="creditsSection">
-                <div class="creditsRow">
-                  <span class="creditsLabel">{{ t('user.aiCreditsLabel') }}</span>
-                  <span class="creditsBuy" @click="showPayModal">{{ t('user.buyCredits') }}</span>
+                <div class="left">
+                  <div class="creditsRow">
+                    <span class="creditsLabel">{{ t('user.aiCreditsLabel') }}</span>
+                  </div>
+                  <div class="creditsNumber">
+                    <span class="num">{{ store.state.main.userInfo.money }}</span>
+                    <span class="unit">{{ t('user.creditsUnit') }}</span>
+                  </div>
                 </div>
-                <div class="creditsNumber">
-                  <span class="num">{{ store.state.main.userInfo.money }}</span>
-                  <span class="unit">{{ t('user.creditsUnit') }}</span>
-                </div>
+                <div class="creditsBuy" @click="showPayModal">{{ t('user.buyCredits') }}</div>
               </div>
+
+              <!-- 分割线 -->
+              <div class="divider"></div>
 
               <!-- 升级 Pro 卡片 -->
               <div class="vipCard" @click="showVipModal">
@@ -115,14 +127,6 @@
                 <div class="vipCardRight">
                   <div class="vipCardPrice">{{ t('user.vipPrice') }}</div>
                   <div class="vipCardUnit">{{ t('user.vipPriceUnit') }}</div>
-                </div>
-              </div>
-
-              <!-- 加群送积分 -->
-              <div class="groupPromo" v-if="!store.state.main.userInfo.getJoinGroupMoney"
-                @click="showGroupQrModal = true">
-                <img src="money.png" />
-                <div class="text">{{ t('user.joinGroup') }}<span class="price">20</span>{{ t('user.joinGroupCredits') }}
                 </div>
               </div>
 
@@ -2302,7 +2306,24 @@ window.showLoginDialog = showLoginDialog;
   // ========== 新版下拉菜单布局 ==========
 
   .accSection {
-    padding: 12px 16px 6px;
+    padding: 12px 16px;
+    display: flex;
+    gap: 11px;
+    align-items: center;
+
+    .userIcon {
+      color: #635bff;
+      background: #635bff1a;
+      border: 1px solid #635bff38;
+      border-radius: 5px;
+      flex-shrink: 0;
+      place-items: center;
+      width: 36px;
+      height: 36px;
+      font-size: 13px;
+      font-weight: 700;
+      display: grid;
+    }
 
     .accLabel {
       font-size: 10px;
@@ -2315,18 +2336,42 @@ window.showLoginDialog = showLoginDialog;
     .accEmail {
       margin-top: 2px;
       font-size: 14px;
-      color: #333;
+      font-weight: bold;
+      color: #0b0d0f;
+    }
+
+    .accountType {
+      color: #555960;
+      background: #f0f0ee;
+      border: 1px solid #d8d8d5;
+      border-radius: 3px;
+      padding: 3px 7px;
+      font-size: 9px;
+      font-weight: 700;
+
+      &.vip {
+        color: #635bff;
+        background: #635bff1a;
+        border: 1px solid #635bff40;
+      }
     }
   }
 
   .divider {
     height: 1px;
-    margin: 4px 0;
     background-color: #f0f0f0;
   }
 
   .creditsSection {
     padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    width: 100%;
+    box-sizing: border-box;
+
+    .left {
+      flex-grow: 1;
+    }
 
     .creditsRow {
       display: flex;
@@ -2334,18 +2379,9 @@ window.showLoginDialog = showLoginDialog;
       align-items: center;
 
       .creditsLabel {
-        font-size: 12px;
-        color: #888;
-      }
-
-      .creditsBuy {
-        font-size: 13px;
-        color: #635bff;
-        cursor: pointer;
-
-        &:hover {
-          text-decoration: underline;
-        }
+        color: #686b70;
+        font-size: 9px;
+        font-weight: 600;
       }
     }
 
@@ -2367,17 +2403,35 @@ window.showLoginDialog = showLoginDialog;
         color: #888;
       }
     }
+
+    .creditsBuy {
+      color: #635bff;
+      cursor: pointer;
+      color: #635bff;
+      height: 30px;
+      font: inherit;
+      cursor: pointer;
+      background: #635bff12;
+      border: 1px solid #635bff38;
+      border-radius: 3px;
+      padding: 0 10px;
+      font-size: 11px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
   }
 
   .vipCard {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin: 4px 10px 10px;
+    margin: 12px;
     padding: 12px 14px;
     border-radius: 8px;
     border: 1px solid #e8e8e8;
-    background: linear-gradient(135deg, #fff8e6 0%, #ffecc0 100%);
+    background: #635bff;
     cursor: pointer;
     transition: all 0.2s;
 
@@ -2388,18 +2442,15 @@ window.showLoginDialog = showLoginDialog;
 
     .vipCardLeft {
       .vipCardTitle {
-        font-size: 15px;
+        font-size: 12px;
         font-weight: bold;
-        background: linear-gradient(135deg, #e6c06b 0%, #d4a74a 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
+        color: white;
       }
 
       .vipCardSub {
         margin-top: 2px;
-        font-size: 12px;
-        color: #996600;
+        font-size: 10px;
+        color: #ffffffb8;
       }
     }
 
@@ -2410,52 +2461,21 @@ window.showLoginDialog = showLoginDialog;
       .vipCardPrice {
         font-size: 18px;
         font-weight: bold;
-        color: #17181a;
+        color: white;
       }
 
       .vipCardUnit {
         font-size: 12px;
-        color: #888;
+        color: white;
         margin-left: 2px;
       }
     }
   }
 
-  .groupPromo {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin: 0 10px 8px;
-    padding: 8px 10px;
-    border-radius: 6px;
-    border: solid 1px #eff6e3;
-    background-color: #f2f7ea;
-    color: #181818;
-    font-size: 13px;
-    cursor: pointer;
-
-    >img {
-      height: 24px;
-    }
-
-    .text {
-      .price {
-        font-size: 16px;
-        font-weight: bold;
-        color: #44a23b;
-        margin: 0 2px;
-      }
-    }
-
-    &:hover {
-      background-color: #e6efd8;
-    }
-  }
-
   .logoutItem {
     padding: 10px 16px;
-    text-align: center;
     font-size: 13px;
+    background-color: #f7f7f5;
     color: #e74c3c;
     cursor: pointer;
     border-top: 1px solid #f0f0f0;
@@ -2579,7 +2599,9 @@ window.showLoginDialog = showLoginDialog;
       max-height: 80vh;
 
       &.user {
-        width: 240px;
+        width: 300px;
+        padding: 0;
+        overflow: hidden;
       }
 
       // overflow: auto;

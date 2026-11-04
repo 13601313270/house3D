@@ -35,12 +35,15 @@ const en: Record<string, string> = {
   'user.creditsUnit': 'credits',
   'user.joinGroup': 'Join the WeChat group, get ',
   'user.joinGroupCredits': ' credits',
-  'user.buyCredits': 'Buy Credits',
+  'user.buyCredits': 'Buy AI Credits',
   'user.upgradePro': 'Upgrade to Pro',
   'user.logout': 'Log out',
   'app.brandName': 'Samelab',
   'user.aiCreditsLabel': 'Credits',
   'user.login': 'Log in',
+  'user.account': 'Account',
+  'user.freeVersion': 'Free',
+  'user.proVersion': 'Pro',
 
   // Left panel toolbar
   'panel.layout': 'Layout',
