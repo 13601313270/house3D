@@ -138,11 +138,12 @@
         </div>
       </div>
     </div>
-    <div class="double11-top-banner">
+    <div v-if="showDouble11Banner" class="double11-top-banner">
       <span class="banner-tag">{{ t('double11.tag') }}</span>
       <span class="banner-title">{{ t('double11.title') }}</span>
       <span class="banner-date">{{ t('double11.date') }}</span>
       <span class="banner-cta" @click="showVipModal">{{ t('double11.cta') }}</span>
+      <span class="banner-close" @click="showDouble11Banner = false">×</span>
     </div>
     <div class="map2d-container" @dragover.prevent="onDragOver" @dragleave="onDragLeave" @drop.prevent="onDrop">
       <div class="left-panel" :style="{ width: panel1SplitWidthPer * 100 + '%' }">
@@ -432,6 +433,7 @@ const timeHeight = ref(200)
 const isSplitting = ref(false)
 const isSplitTimeLine = ref(false)
 const showLogin = ref(false)
+const showDouble11Banner = ref(true)
 const sceneInited = ref(false)
 const showDemos = ref(false)
 const onlyDemos = ref(false)
@@ -2475,6 +2477,7 @@ window.showLoginDialog = showLoginDialog;
   font-size: 13px;
   gap: 14px;
   flex-wrap: nowrap;
+  position: relative;
 
   .banner-tag {
     color: #5b5bd6;
@@ -2505,6 +2508,29 @@ window.showLoginDialog = showLoginDialog;
 
     &:hover {
       text-decoration: underline;
+    }
+  }
+
+  .banner-close {
+    position: absolute;
+    top: 0;
+    right: 0;
+    // margin-left: auto;
+    width: 35px;
+    height: 35px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #999;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 4px;
+    flex-shrink: 0;
+    line-height: 1;
+
+    &:hover {
+      color: #333;
+      background: rgba(0, 0, 0, 0.06);
     }
   }
 }

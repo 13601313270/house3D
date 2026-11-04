@@ -407,6 +407,7 @@ const handleDownload = () => {
     flex-direction: column;
     align-items: center;
     overflow: auto;
+    box-sizing: border-box;
 
     .section-title {
       font-size: 16px;
