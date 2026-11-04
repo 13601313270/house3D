@@ -380,6 +380,9 @@ const zh: Record<string, string> = {
   'community.qrTitle': '使用微信扫码加入',
   'community.qrFooter': '加入 Samelab 社区\n与我们保持联系',
   'community.later': '以后再说',
+  'community.bubbleTitle': '摄影棚社区',
+  'community.bubbleDesc': '认识其他 AI 创作者，分享作品，并帮助我们决定下一步做什么。',
+  'community.bubbleReward': '加入可得 20 AI 点数',
 
   // VIP benefits table
   'benefits.header': '权益',

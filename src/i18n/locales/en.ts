@@ -380,6 +380,9 @@ const en: Record<string, string> = {
   'community.qrTitle': 'Scan with WeChat to join',
   'community.qrFooter': 'Stay in touch with the Samelab team.',
   'community.later': 'Maybe later',
+  'community.bubbleTitle': 'Samelab Community',
+  'community.bubbleDesc': 'Connect with other AI creators, share your work, and help shape what we build next.',
+  'community.bubbleReward': '+20 AI Credits for joining',
 
   // VIP benefits table
   'benefits.header': 'Features',

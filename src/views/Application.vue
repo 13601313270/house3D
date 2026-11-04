@@ -54,7 +54,8 @@
               {{ t('editMode.scene') }}
             </button>
             <button :class="{ active: editMode === 'animation' }" @click="setEditMode('animation')">
-              {{ t('editMode.animation') }}
+              {{ t('editMode.animation') }}<span
+                style="margin-left: 8px;font-size: 10px;color: rgb(99, 91, 255);font-weight: bold;">NEW</span>
             </button>
           </div>
         </div>
@@ -148,6 +149,20 @@
       <span class="banner-date">{{ t('double11.date') }}</span>
       <span class="banner-cta" @click="showVipModal">{{ t('double11.cta') }}</span>
       <span class="banner-close" @click="showDouble11Banner = false">×</span>
+    </div>
+    <div v-if="showCommunityBubble" class="community-bubble animate-fade-in">
+      <button class="community-bubble-close" @click="showCommunityBubble = false" aria-label="关闭">×</button>
+      <div class="community-bubble-header">
+        <svg width="15" height="15" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+          <circle cx="7" cy="7" r="2.6" stroke="#635BFF" stroke-width="1.3"></circle>
+          <circle cx="14.2" cy="8.2" r="2.1" stroke="#635BFF" stroke-width="1.2" opacity="0.72"></circle>
+          <path d="M2.8 15.8c.35-3 2-4.5 4.3-4.5 2.4 0 4.05 1.5 4.4 4.5M11.2 12.2c.8-.7 1.75-1.05 2.9-1.05 1.8 0 3.05 1.1 3.35 3.25" stroke="#635BFF" stroke-width="1.3" stroke-linecap="round"></path>
+        </svg>
+        <span class="community-bubble-title">{{ t('community.bubbleTitle') }}</span>
+      </div>
+      <div class="community-bubble-desc">{{ t('community.bubbleDesc') }}</div>
+      <button class="community-bubble-cta" @click="showCommunityBubble = false, openCommunityModal()">{{ t('nav.community') }} →</button>
+      <span class="community-bubble-reward">{{ t('community.bubbleReward') }}</span>
     </div>
     <div class="map2d-container" @dragover.prevent="onDragOver" @dragleave="onDragLeave" @drop.prevent="onDrop">
       <div class="left-panel" :style="{ width: panel1SplitWidthPer * 100 + '%' }">
@@ -438,6 +453,7 @@ const isSplitting = ref(false)
 const isSplitTimeLine = ref(false)
 const showLogin = ref(false)
 const showDouble11Banner = ref(true)
+const showCommunityBubble = ref(false)
 const sceneInited = ref(false)
 const showDemos = ref(false)
 const onlyDemos = ref(false)
@@ -1744,6 +1760,9 @@ const handleLogin = async (email: string, password: string) => {
   const isLoggedIn = await initUserInfo()
   if (isLoggedIn) {
     initScene()
+    if (!store.state.main.userInfo.getJoinGroupMoney) {
+      showCommunityBubble.value = true
+    }
   }
 }
 
@@ -2552,6 +2571,93 @@ window.showLoginDialog = showLoginDialog;
       color: #333;
       background: rgba(0, 0, 0, 0.06);
     }
+  }
+}
+
+.community-bubble {
+  position: fixed;
+  right: 18px;
+  top: 94px;
+  z-index: 160;
+  width: 268px;
+  padding: 13px 14px;
+  background: rgb(255, 255, 255);
+  border: 1px solid rgb(232, 232, 229);
+  border-radius: 5px;
+  box-shadow: rgba(0, 0, 0, 0.08) 0px 8px 24px;
+
+  .community-bubble-close {
+    position: absolute;
+    top: 7px;
+    right: 8px;
+    border: none;
+    background: none;
+    color: rgb(154, 157, 162);
+    cursor: pointer;
+    font-size: 14px;
+    padding: 0;
+    line-height: 1;
+
+    &:hover {
+      color: rgb(80, 82, 88);
+    }
+  }
+
+  .community-bubble-header {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    margin-bottom: 6px;
+  }
+
+  .community-bubble-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: rgb(23, 24, 26);
+  }
+
+  .community-bubble-desc {
+    font-size: 10px;
+    line-height: 1.55;
+    color: rgb(104, 107, 112);
+    padding-right: 8px;
+  }
+
+  .community-bubble-cta {
+    margin-top: 8px;
+    padding: 0;
+    border: none;
+    background: none;
+    color: rgb(99, 91, 255);
+    font-size: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  .community-bubble-reward {
+    margin-left: 8px;
+    font-size: 9px;
+    color: rgb(154, 157, 162);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
